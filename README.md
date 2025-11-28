@@ -1,6 +1,6 @@
 # Events Platform - React + TypeScript
 
-A modern events discovery platform built with React, TypeScript, and Supabase, featuring advanced hashtag functionality, real-time search, and comprehensive admin management.
+A modern events discovery platform built with React, TypeScript, and Supabase, featuring advanced hashtag functionality, real-time search, and comprehensive admin management system.
 
 ## 🚀 Features
 

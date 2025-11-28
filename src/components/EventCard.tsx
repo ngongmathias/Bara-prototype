@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Calendar, Clock, MapPin, Hash, User, Share2, Bookmark, Heart } from 'lucide-react';
+import { Calendar, Clock, MapPin, Hash, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { VerificationIcon, VerificationStatus } from '@/components/ui/verification-badge';
 
@@ -40,10 +39,6 @@ export const EventCard = ({
   onViewEvent,
   onLocationClick,
 }: EventCardProps) => {
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [showShareMenu, setShowShareMenu] = useState(false);
-
   const handleViewEvent = (e: React.MouseEvent) => {
     e.preventDefault();
     if (onViewEvent) {
@@ -61,57 +56,6 @@ export const EventCard = ({
     }
   };
 
-  const handleBookmark = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsBookmarked(!isBookmarked);
-    // Store in localStorage
-    const bookmarks = JSON.parse(localStorage.getItem('bookmarkedEvents') || '[]');
-    if (!isBookmarked) {
-      bookmarks.push(id);
-    } else {
-      const index = bookmarks.indexOf(id);
-      if (index > -1) bookmarks.splice(index, 1);
-    }
-    localStorage.setItem('bookmarkedEvents', JSON.stringify(bookmarks));
-  };
-
-  const handleLike = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsLiked(!isLiked);
-  };
-
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowShareMenu(!showShareMenu);
-  };
-
-  const shareToSocial = (platform: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const eventUrl = `${window.location.origin}/events/${id}`;
-    const text = `Check out this event: ${title}`;
-    
-    let shareUrl = '';
-    switch (platform) {
-      case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(eventUrl)}`;
-        break;
-      case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(eventUrl)}`;
-        break;
-      case 'whatsapp':
-        shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + eventUrl)}`;
-        break;
-      case 'linkedin':
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(eventUrl)}`;
-        break;
-    }
-    
-    if (shareUrl) {
-      window.open(shareUrl, '_blank', 'width=600,height=400');
-    }
-    setShowShareMenu(false);
-  };
-
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
       <div className="h-48 bg-gray-200 overflow-hidden relative">
@@ -127,60 +71,6 @@ export const EventCard = ({
             </span>
           </div>
         )}
-        {/* Action buttons */}
-        <div className="absolute top-3 right-3 flex gap-2">
-          <button
-            onClick={handleBookmark}
-            className="bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
-            title={isBookmarked ? "Remove bookmark" : "Bookmark event"}
-          >
-            <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-orange-500 text-orange-500' : 'text-gray-700'}`} />
-          </button>
-          <button
-            onClick={handleLike}
-            className="bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
-            title={isLiked ? "Unlike" : "Like event"}
-          >
-            <Heart className={`w-4 h-4 ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
-          </button>
-          <div className="relative">
-            <button
-              onClick={handleShare}
-              className="bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
-              title="Share event"
-            >
-              <Share2 className="w-4 h-4 text-gray-700" />
-            </button>
-            {showShareMenu && (
-              <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-xl p-2 z-10 min-w-[140px]">
-                <button
-                  onClick={(e) => shareToSocial('facebook', e)}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm"
-                >
-                  Facebook
-                </button>
-                <button
-                  onClick={(e) => shareToSocial('twitter', e)}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm"
-                >
-                  Twitter
-                </button>
-                <button
-                  onClick={(e) => shareToSocial('whatsapp', e)}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm"
-                >
-                  WhatsApp
-                </button>
-                <button
-                  onClick={(e) => shareToSocial('linkedin', e)}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm"
-                >
-                  LinkedIn
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
       <div className="p-4">
         <h3 className="text-lg font-semibold text-gray-800 mb-3 line-clamp-2 h-14">
