@@ -347,7 +347,7 @@ export const HeroSection = () => {
         {/* Content Overlay */}
         <div className="relative z-10 flex flex-col items-center justify-center h-full px-3 sm:px-4 md:px-6 lg:px-8">
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-comfortaa font-bold text-white text-center mb-4 sm:mb-6 md:mb-8 px-2 leading-tight">
-            {t('homepage.hero.title')}<sup className="text-xs sm:text-sm md:text-base">℠</sup>
+            {t('homepage.hero.title')}<sup className="text-xs sm:text-sm md:text-base">℠</sup> - TEST
           </h1>
           
           {/* Search Form */}
