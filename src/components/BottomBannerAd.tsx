@@ -263,7 +263,7 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
                     <img
                       src={bannerToShow.banner_image_url}
                       alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
-                      className="w-full h-[250px] md:h-[200px] object-cover"
+                      className="w-full h-auto max-h-[180px] md:h-[200px] md:max-h-none object-contain md:object-cover bg-gradient-to-r from-purple-50 to-pink-50"
                     />
                   </div>
                 </a>
@@ -277,7 +277,7 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
                     <img
                       src={bannerToShow.banner_image_url}
                       alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
-                      className="w-full h-[120px] md:h-[200px] object-cover"
+                      className="w-full h-auto max-h-[180px] md:h-[200px] md:max-h-none object-contain md:object-cover bg-gradient-to-r from-purple-50 to-pink-50"
                     />
                   </div>
                 </div>
