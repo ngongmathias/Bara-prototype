@@ -59,27 +59,27 @@ export default function PopupAd({
 
   return (
     <Dialog open={open} onOpenChange={(o) => (o ? setOpen(true) : handleClose())}>
-      <DialogContent className="max-w-[95vw] sm:max-w-2xl p-0 overflow-hidden w-full mx-4">
+      <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-lg p-0 overflow-hidden">
         <DialogTitle className="sr-only">Advertisement</DialogTitle>
-        <div className="relative w-full">
+        <div className="relative w-full bg-white rounded-lg">
           {linkUrl ? (
             <a href={linkUrl} target="_blank" rel="noopener noreferrer" onClick={handleClose}>
               <img 
                 src={imageUrl} 
                 alt="Advertisement" 
-                className="w-full h-auto block max-h-[70vh] object-contain" 
+                className="w-full h-auto block max-h-[65vh] object-contain rounded-lg" 
               />
             </a>
           ) : (
             <img 
               src={imageUrl} 
               alt="Advertisement" 
-              className="w-full h-auto block max-h-[70vh] object-contain" 
+              className="w-full h-auto block max-h-[65vh] object-contain rounded-lg" 
             />
           )}
           <button
             onClick={handleClose}
-            className="absolute top-2 right-2 bg-black/80 hover:bg-black text-white text-xs sm:text-sm px-3 py-1.5 rounded shadow-lg z-10"
+            className="absolute top-2 right-2 bg-black/80 hover:bg-black text-white text-xs sm:text-sm px-3 py-1.5 rounded-md shadow-lg z-10"
           >
             {closeLabel}
           </button>
