@@ -327,4 +327,21 @@ All colors MUST be HSL.
     opacity: 0;
     transition: max-height 300ms ease-in, opacity 300ms ease-in;
   }
+
+  /* Fix mobile layout issues - prevent body scroll and horizontal overflow */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Prevent layout shift when dialog/modal opens */
+  body[data-scroll-locked] {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+  }
+
+  /* Ensure dialogs don't cause horizontal scroll on mobile */
+  [role="dialog"] {
+    max-width: 100vw !important;
+  }
 }
