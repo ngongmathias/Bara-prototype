@@ -59,7 +59,7 @@ export default function PopupAd({
 
   return (
     <Dialog open={open} onOpenChange={(o) => (o ? setOpen(true) : handleClose())}>
-      <DialogContent className="max-w-[85vw] sm:max-w-sm md:max-w-md p-0 overflow-hidden">
+      <DialogContent className="max-w-[85vw] p-0 overflow-hidden">
         <DialogTitle className="sr-only">Advertisement</DialogTitle>
         <div className="relative w-full flex items-center justify-center bg-white rounded-lg">
           {linkUrl ? (
