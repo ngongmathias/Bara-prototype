@@ -3,12 +3,13 @@
 ## 📐 Image Dimensions & Specifications
 
 ### 1. **Popup Ads** (DbPopupAd / PopupAd)
-- **Recommended Size**: 600px × 800px (Portrait)
-- **Aspect Ratio**: 3:4
+- **Recommended Size**: 1280px × 720px (Landscape) ✅ VERIFIED
+- **Aspect Ratio**: 16:9 (Widescreen)
 - **Format**: JPG or PNG
 - **Max File Size**: 500KB
 - **Display**: Full-width in dialog, responsive
 - **Location**: Homepage, Listings pages
+- **Reference**: Based on sample.jpg dimensions
 
 ### 2. **Banner Ads** (BannerAd)
 - **Desktop Size**: 1200px × 200px (Landscape)
@@ -146,15 +147,18 @@ VALUES ('Summer Sale 2025', 'https://url-to-image.jpg', 'https://company.com', t
 
 ### For AI Image Generation (DALL-E, Midjourney, etc.)
 
-#### Popup Ad Prompts:
+#### Popup Ad Prompts (16:9 Landscape):
 1. **Business Services**:
-   "Professional business advertisement, modern office setting, diverse professionals shaking hands, clean corporate aesthetic, blue and white color scheme, 3:4 aspect ratio, high quality"
+   "Professional business advertisement, modern office setting, diverse professionals shaking hands, clean corporate aesthetic, blue and white color scheme, 16:9 widescreen format, high quality, 1280x720"
 
 2. **Local Restaurant**:
-   "Appetizing food photography, elegant restaurant setting, diverse cuisine, warm inviting atmosphere, professional food styling, 3:4 portrait format"
+   "Appetizing food photography, elegant restaurant setting, diverse cuisine, warm inviting atmosphere, professional food styling, 16:9 landscape format, 1280x720"
 
 3. **Events & Entertainment**:
-   "Vibrant community event poster, diverse people enjoying festival, colorful and energetic, modern design, 3:4 aspect ratio"
+   "Vibrant community event poster, diverse people enjoying festival, colorful and energetic, modern design, 16:9 widescreen aspect ratio, 1280x720"
+
+4. **Tourism & Travel** (Like sample.jpg):
+   "Beautiful African landscape, adventure tourism, scenic natural environment, vibrant colors, cinematic lighting, 16:9 widescreen format, professional photography, 1280x720"
 
 #### Banner Ad Prompts:
 1. **Business Banner**:
