@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { EventCard } from "@/components/EventCard";
+import { EventsCalendarView } from "@/components/EventsCalendarView";
 import { FullscreenMapModal } from "@/components/FullscreenMapModal";
 import { InteractiveEventsMap } from "@/components/InteractiveEventsMap";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, ChevronLeft, ChevronRight, MapPin, Calendar, Clock, ArrowLeft, CalendarDays, ArrowUpDown, X, Hash, Maximize2 } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight, MapPin, Calendar, Clock, ArrowLeft, CalendarDays, ArrowUpDown, X, Hash, Maximize2, Grid, List } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from 'react-router-dom';
 import { useEvents, useEventCategories } from '@/hooks/useEvents';
@@ -28,6 +29,7 @@ export const EventsPage = () => {
   const [mapModalOpen, setMapModalOpen] = useState(false);
   const [mapEvents, setMapEvents] = useState<any[]>([]);
   const [selectedEventForMap, setSelectedEventForMap] = useState<string | undefined>();
+  const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid');
 
   // Use real data from database
   const { events, loading, searchEvents } = useEvents();
@@ -83,6 +85,16 @@ export const EventsPage = () => {
 
   const handleBackToList = () => {
     setSelectedEvent(null);
+  };
+
+  // Get similar events based on category
+  const getSimilarEvents = (event: DatabaseEvent) => {
+    return events
+      .filter(e => 
+        e.id !== event.id && 
+        (e.category === event.category || e.category_name === event.category_name)
+      )
+      .slice(0, 3);
   };
 
   const handleLocationClick = async (eventId: string, city?: string) => {
@@ -415,10 +427,34 @@ export const EventsPage = () => {
               </div>
             )}
             
-            <div className="pt-6">
-              <Button className="w-full bg-brand-blue hover:bg-brand-blue-hover text-white font-semibold py-4 px-6 rounded-lg text-lg">
-              Get Tickets
-            </Button>
+            <div className="pt-6 space-y-3">
+              {event.registration_url ? (
+                <a 
+                  href={event.registration_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 px-6 rounded-lg text-lg">
+                    Get Tickets / Register
+                  </Button>
+                </a>
+              ) : (
+                <Button 
+                  className="w-full bg-gray-400 text-white font-semibold py-4 px-6 rounded-lg text-lg cursor-not-allowed"
+                  disabled
+                >
+                  Registration Not Available
+                </Button>
+              )}
+              <Button 
+                onClick={handleBackToList}
+                variant="outline"
+                className="w-full border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-4 px-6 rounded-lg text-lg"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Back to All Events
+              </Button>
           </div>
         </div>
       </div>
@@ -496,9 +532,38 @@ export const EventsPage = () => {
       </div>
     </div>
 
-    {/* Reopen container for other content if needed */}
-    <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden" style={{ marginTop: 0 }}>
-    </div>
+    {/* Similar Events Section */}
+    {getSimilarEvents(event).length > 0 && (
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <h3 className="text-2xl font-bold text-gray-900 mb-6">Similar Events You Might Like</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {getSimilarEvents(event).map((similarEvent) => (
+            <div key={similarEvent.id} className="cursor-pointer" onClick={() => handleViewEvent(similarEvent)}>
+              <EventCard
+                id={similarEvent.id}
+                title={similarEvent.title}
+                date={new Date(similarEvent.start_date).toLocaleDateString()}
+                time={`${new Date(similarEvent.start_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(similarEvent.end_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                location={similarEvent.city_name ? `${similarEvent.city_name}, ${similarEvent.country_name}` : similarEvent.venue_address || ''}
+                imageUrl={similarEvent.event_image_url || ''}
+                category={similarEvent.category_name || similarEvent.category}
+                hashtags={similarEvent.tags || []}
+                latitude={similarEvent.latitude}
+                longitude={similarEvent.longitude}
+                city={similarEvent.city_name}
+                onViewEvent={(id) => {
+                  const eventToView = events.find(e => e.id === id);
+                  if (eventToView) {
+                    handleViewEvent(eventToView);
+                  }
+                }}
+                onLocationClick={handleLocationClick}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
 
         {isLightboxVisible && (
           <div 
@@ -677,15 +742,49 @@ export const EventsPage = () => {
         </div>
         ) : currentEvents.length > 0 ? (
           <>
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {sortedEvents.length} Events Found
-              </h2>
-              <p className="text-gray-600">
-                Showing {startIndex + 1}-{Math.min(startIndex + eventsPerPage, sortedEvents.length)} of {sortedEvents.length} events
-              </p>
+            <div className="mb-8 flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  {sortedEvents.length} Events Found
+                </h2>
+                <p className="text-gray-600">
+                  {viewMode === 'grid' 
+                    ? `Showing ${startIndex + 1}-${Math.min(startIndex + eventsPerPage, sortedEvents.length)} of ${sortedEvents.length} events`
+                    : `Viewing ${sortedEvents.length} events in calendar`
+                  }
+                </p>
+              </div>
+              {/* View Mode Toggle */}
+              <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${
+                    viewMode === 'grid' 
+                      ? 'bg-white text-orange-600 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  title="Grid view"
+                >
+                  <Grid className="w-4 h-4" />
+                  Grid
+                </button>
+                <button
+                  onClick={() => setViewMode('calendar')}
+                  className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${
+                    viewMode === 'calendar' 
+                      ? 'bg-white text-orange-600 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  title="Calendar view"
+                >
+                  <CalendarDays className="w-4 h-4" />
+                  Calendar
+                </button>
+              </div>
       </div>
 
+            {viewMode === 'grid' ? (
+              <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentEvents.map((event) => (
                   <div key={event.id} onClick={() => handleViewEvent(event)} className="cursor-pointer">
@@ -748,6 +847,14 @@ export const EventsPage = () => {
                   </Button>
                 </div>
               )}
+              </>
+            ) : (
+              /* Calendar View */
+              <EventsCalendarView 
+                events={sortedEvents}
+                onEventClick={handleViewEvent}
+              />
+            )}
             </>
           ) : (
             <div className="text-center py-12">

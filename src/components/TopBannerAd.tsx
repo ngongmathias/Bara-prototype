@@ -263,7 +263,8 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
                     <img
                       src={bannerToShow.banner_image_url}
                       alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
-                      className="w-full h-auto max-h-[180px] md:h-[200px] md:max-h-none object-contain md:object-cover bg-gradient-to-r from-blue-50 to-indigo-50"
+                      className="w-full h-[120px] sm:h-[140px] md:h-[160px] lg:h-[180px] object-cover rounded-lg"
+                      style={{ objectPosition: 'center' }}
                     />
                   </div>
                 </a>
@@ -277,7 +278,8 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
                     <img
                       src={bannerToShow.banner_image_url}
                       alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
-                      className="w-full h-auto max-h-[180px] md:h-[200px] md:max-h-none object-contain md:object-cover bg-gradient-to-r from-blue-50 to-indigo-50"
+                      className="w-full h-[120px] sm:h-[140px] md:h-[160px] lg:h-[180px] object-cover rounded-lg"
+                      style={{ objectPosition: 'center' }}
                     />
                   </div>
                 </div>
