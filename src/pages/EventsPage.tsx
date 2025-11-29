@@ -585,10 +585,14 @@ export const EventsPage = () => {
       {/* Hero Section with background slideshow */}
       <HeroSlideshow />
 
-      {/* Filters Section - Moved beneath hero */}
-      <div className="bg-gray-100 py-8">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      {/* Split Layout: Filters Sidebar + Events Grid */}
+      <div className="flex flex-col md:flex-row h-[calc(100vh-200px)]">
+        {/* Left Sidebar - Filters (scrollable independently) */}
+        <div className="w-full md:w-80 bg-white border-r border-gray-200 overflow-y-auto">
+          <div className="p-6 space-y-6 sticky top-0 bg-white z-10 border-b border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900">Filters</h2>
+          </div>
+          <div className="p-6 space-y-6">
                 {/* Search */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Search</label>
@@ -668,8 +672,9 @@ export const EventsPage = () => {
             </div>
           </div>
 
-      {/* Events Grid */}
-      <div className="container mx-auto px-4 py-12">
+        {/* Right Side - Events Grid (scrollable independently) */}
+        <div className="flex-1 overflow-y-auto bg-gray-50">
+          <div className="p-6">
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto mb-4"></div>
@@ -773,7 +778,9 @@ export const EventsPage = () => {
             )}
             </div>
           )}
+          </div>
         </div>
+      </div>
       
       <Footer />
       
