@@ -606,31 +606,32 @@ export const EventsPage = () => {
                 </div>
               </div>
 
-              {/* Categories - Full List like Sinc (NO nested scroller) */}
+              {/* Categories - Pill Buttons like Sinc */}
               <div className="space-y-4">
                 <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Category</label>
-                <div className="space-y-2">
-                  <label className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
-                    <input
-                      type="radio"
-                      name="category"
-                      checked={selectedCategory === 'all'}
-                      onChange={() => setSelectedCategory('all')}
-                      className="w-4 h-4 text-orange-500 focus:ring-orange-500"
-                    />
-                    <span className="text-base text-gray-700">All Categories</span>
-                  </label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setSelectedCategory('all')}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      selectedCategory === 'all'
+                        ? 'bg-orange-500 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    All Categories
+                  </button>
                   {categories.map((category) => (
-                    <label key={category.id} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
-                      <input
-                        type="radio"
-                        name="category"
-                        checked={selectedCategory === category.slug}
-                        onChange={() => setSelectedCategory(category.slug)}
-                        className="w-4 h-4 text-orange-500 focus:ring-orange-500"
-                      />
-                      <span className="text-base text-gray-700">{category.name}</span>
-                    </label>
+                    <button
+                      key={category.id}
+                      onClick={() => setSelectedCategory(category.slug)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        selectedCategory === category.slug
+                          ? 'bg-orange-500 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {category.name}
+                    </button>
                   ))}
                 </div>
               </div>
@@ -662,17 +663,22 @@ export const EventsPage = () => {
                 </div>
               </div>
 
-              {/* Organizers - Full List */}
+              {/* Organizers - Grid with Profile Pictures like Sinc */}
               <div className="space-y-4">
                 <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Organizers</label>
-                <div className="space-y-2">
-                  {[...new Set(events.map(e => e.organizer_name).filter(Boolean))].slice(0, 25).map((organizer, idx) => (
-                    <label key={idx} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <div className="grid grid-cols-2 gap-3">
+                  {[...new Set(events.map(e => e.organizer_name).filter(Boolean))].slice(0, 20).map((organizer, idx) => (
+                    <label key={idx} className="flex items-start space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
                       <input
                         type="checkbox"
-                        className="w-4 h-4 text-orange-500 focus:ring-orange-500 rounded"
+                        className="w-4 h-4 mt-1 text-orange-500 focus:ring-orange-500 rounded"
                       />
-                      <span className="text-base text-gray-700">{organizer}</span>
+                      <div className="flex flex-col items-center flex-1">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg mb-1">
+                          {organizer.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="text-xs text-gray-700 text-center line-clamp-2">{organizer}</span>
+                      </div>
                     </label>
                   ))}
                 </div>
@@ -731,41 +737,97 @@ export const EventsPage = () => {
         </div>
         ) : currentEvents.length > 0 ? (
           <>
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {sortedEvents.length} Events Found
-              </h2>
-              <p className="text-gray-600">
-                Showing {startIndex + 1}-{Math.min(startIndex + eventsPerPage, sortedEvents.length)} of {sortedEvents.length} events
-              </p>
-      </div>
+            {/* Active Events Section */}
+            {(() => {
+              const now = new Date();
+              const activeEvents = currentEvents.filter(e => new Date(e.end_date) >= now);
+              const pastEvents = currentEvents.filter(e => new Date(e.end_date) < now);
+              
+              return (
+                <>
+                  {activeEvents.length > 0 && (
+                    <div className="mb-12">
+                      <div className="mb-6">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                          Active Events
+                        </h2>
+                        <p className="text-gray-600">
+                          {activeEvents.length} upcoming and ongoing events
+                        </p>
+                      </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {currentEvents.map((event) => (
-                  <div key={event.id} onClick={() => handleViewEvent(event)} className="cursor-pointer">
-                    <EventCard
-                      id={event.id}
-                      title={event.title}
-                      date={new Date(event.start_date).toLocaleDateString()}
-                      time={`${new Date(event.start_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(event.end_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
-                      location={event.city_name ? `${event.city_name}, ${event.country_name}` : event.venue_address || ''}
-                      imageUrl={event.event_image_url || ''}
-                      category={event.category_name || event.category}
-                      hashtags={event.tags || []}
-                      latitude={event.latitude}
-                      longitude={event.longitude}
-                      city={event.city_name}
-                      onViewEvent={(id) => {
-                        const eventToView = events.find(e => e.id === id);
-                        if (eventToView) {
-                          handleViewEvent(eventToView);
-                        }
-                      }}
-                      onLocationClick={handleLocationClick}
-                    />
-                  </div>
-                ))}
-              </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {activeEvents.map((event) => (
+                          <div key={event.id} onClick={() => handleViewEvent(event)} className="cursor-pointer">
+                            <EventCard
+                              id={event.id}
+                              title={event.title}
+                              date={new Date(event.start_date).toLocaleDateString()}
+                              time={`${new Date(event.start_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(event.end_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                              location={event.city_name ? `${event.city_name}, ${event.country_name}` : event.venue_address || ''}
+                              imageUrl={event.event_image_url || ''}
+                              category={event.category_name || event.category}
+                              hashtags={event.tags || []}
+                              latitude={event.latitude}
+                              longitude={event.longitude}
+                              city={event.city_name}
+                              onViewEvent={(id) => {
+                                const eventToView = events.find(e => e.id === id);
+                                if (eventToView) {
+                                  handleViewEvent(eventToView);
+                                }
+                              }}
+                              onLocationClick={handleLocationClick}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Past Events Section */}
+                  {pastEvents.length > 0 && (
+                    <div className="mb-12">
+                      <div className="mb-6">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                          Past Events
+                        </h2>
+                        <p className="text-gray-600">
+                          {pastEvents.length} past events
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {pastEvents.map((event) => (
+                          <div key={event.id} onClick={() => handleViewEvent(event)} className="cursor-pointer">
+                            <EventCard
+                              id={event.id}
+                              title={event.title}
+                              date={new Date(event.start_date).toLocaleDateString()}
+                              time={`${new Date(event.start_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(event.end_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                              location={event.city_name ? `${event.city_name}, ${event.country_name}` : event.venue_address || ''}
+                              imageUrl={event.event_image_url || ''}
+                              category={event.category_name || event.category}
+                              hashtags={event.tags || []}
+                              latitude={event.latitude}
+                              longitude={event.longitude}
+                              city={event.city_name}
+                              onViewEvent={(id) => {
+                                const eventToView = events.find(e => e.id === id);
+                                if (eventToView) {
+                                  handleViewEvent(eventToView);
+                                }
+                              }}
+                              onLocationClick={handleLocationClick}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
               {/* Pagination */}
               {totalPages > 1 && (
