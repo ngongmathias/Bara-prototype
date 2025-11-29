@@ -601,6 +601,60 @@ export const EventsPage = () => {
             </div>
           </div>
         )}
+
+        {/* Similar Events Recommendations */}
+        {(() => {
+          const similarEvents = events
+            .filter(e => 
+              e.id !== event.id && 
+              (e.category === event.category || e.category_name === event.category_name)
+            )
+            .slice(0, 3);
+          
+          if (similarEvents.length === 0) return null;
+          
+          return (
+            <div className="mt-12 pt-8 border-t border-gray-200">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Similar Events</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {similarEvents.map((similarEvent) => (
+                  <div
+                    key={similarEvent.id}
+                    onClick={() => {
+                      setSelectedEvent(similarEvent);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="cursor-pointer group"
+                  >
+                    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                      <img
+                        src={similarEvent.event_image_url || 'https://via.placeholder.com/400x300?text=Event'}
+                        alt={similarEvent.title}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="p-4">
+                        <Badge variant="secondary" className="mb-2 text-xs">
+                          {similarEvent.category_name || similarEvent.category}
+                        </Badge>
+                        <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-brand-blue transition-colors">
+                          {similarEvent.title}
+                        </h4>
+                        <p className="text-sm text-gray-600 flex items-center">
+                          <Calendar className="w-4 h-4 mr-1" />
+                          {new Date(similarEvent.start_date).toLocaleDateString()}
+                        </p>
+                        <p className="text-sm text-gray-600 flex items-center mt-1">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          {similarEvent.city_name || similarEvent.venue_name}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
   </div>
 );
   };

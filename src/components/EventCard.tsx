@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Calendar, Clock, MapPin, Hash, User, Share2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calendar, Clock, MapPin, Hash, User, Share2, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { VerificationIcon, VerificationStatus } from '@/components/ui/verification-badge';
 
@@ -41,6 +41,30 @@ export const EventCard = ({
   onLocationClick,
 }: EventCardProps) => {
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
+  // Check if event is saved on mount
+  useEffect(() => {
+    const savedEvents = JSON.parse(localStorage.getItem('savedEvents') || '[]');
+    setIsSaved(savedEvents.includes(id));
+  }, [id]);
+
+  const toggleSave = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const savedEvents = JSON.parse(localStorage.getItem('savedEvents') || '[]');
+    
+    if (isSaved) {
+      // Remove from saved
+      const updated = savedEvents.filter((eventId: string) => eventId !== id);
+      localStorage.setItem('savedEvents', JSON.stringify(updated));
+      setIsSaved(false);
+    } else {
+      // Add to saved
+      savedEvents.push(id);
+      localStorage.setItem('savedEvents', JSON.stringify(savedEvents));
+      setIsSaved(true);
+    }
+  };
 
   const handleViewEvent = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -106,8 +130,19 @@ export const EventCard = ({
             </span>
           </div>
         )}
-        {/* Share Button */}
-        <div className="absolute top-3 right-3">
+        {/* Save & Share Buttons */}
+        <div className="absolute top-3 right-3 flex gap-2">
+          {/* Save/Bookmark Button */}
+          <button
+            onClick={toggleSave}
+            className="bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
+            title={isSaved ? "Remove from saved" : "Save event"}
+          >
+            <Heart 
+              className={`w-4 h-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} 
+            />
+          </button>
+          {/* Share Button */}
           <button
             onClick={handleShare}
             className="bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
