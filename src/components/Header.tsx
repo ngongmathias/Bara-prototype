@@ -156,7 +156,7 @@ export const Header = () => {
   return (
     <header className="bg-background border-b border-border relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Single Row Layout */}
+        {/* Desktop & Mobile Layout - v2.0 */}
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
