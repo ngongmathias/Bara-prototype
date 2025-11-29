@@ -7,7 +7,7 @@ import { InteractiveEventsMap } from "@/components/InteractiveEventsMap";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, ChevronLeft, ChevronRight, MapPin, Calendar, Clock, ArrowLeft, CalendarDays, ArrowUpDown, X, Hash, Maximize2 } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight, MapPin, Calendar, Clock, ArrowLeft, CalendarDays, ArrowUpDown, X, Hash, Maximize2, LayoutGrid } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from 'react-router-dom';
 import { useEvents, useEventCategories } from '@/hooks/useEvents';
@@ -28,6 +28,7 @@ export const EventsPage = () => {
   const [mapModalOpen, setMapModalOpen] = useState(false);
   const [mapEvents, setMapEvents] = useState<any[]>([]);
   const [selectedEventForMap, setSelectedEventForMap] = useState<string | undefined>();
+  const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid');
 
   // Use real data from database
   const { events, loading, searchEvents } = useEvents();
@@ -830,6 +831,36 @@ export const EventsPage = () => {
         </div>
         ) : sortedEvents.length > 0 ? (
           <>
+            {/* View Toggle */}
+            <div className="flex justify-end mb-6">
+              <div className="flex gap-2 bg-white rounded-lg p-1 shadow-sm">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-orange-500 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                  Grid
+                </button>
+                <button
+                  onClick={() => setViewMode('calendar')}
+                  className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${
+                    viewMode === 'calendar'
+                      ? 'bg-orange-500 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <CalendarDays className="w-4 h-4" />
+                  Calendar
+                </button>
+              </div>
+            </div>
+
+            {viewMode === 'grid' ? (
+              <>
             {/* Active Events Section */}
             {activeEvents.length > 0 && (
                     <div className="mb-12">
@@ -972,6 +1003,79 @@ export const EventsPage = () => {
             )}
             </div>
           )}
+              </>
+            ) : (
+              /* Calendar View */
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Calendar View</h2>
+                <div className="grid grid-cols-7 gap-2">
+                  {/* Calendar implementation - showing events by date */}
+                  {(() => {
+                    const today = new Date();
+                    const currentMonth = today.getMonth();
+                    const currentYear = today.getFullYear();
+                    const firstDay = new Date(currentYear, currentMonth, 1);
+                    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+                    const daysInMonth = lastDay.getDate();
+                    const startingDayOfWeek = firstDay.getDay();
+                    
+                    const days = [];
+                    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                    
+                    // Day headers
+                    dayNames.forEach(day => {
+                      days.push(
+                        <div key={`header-${day}`} className="text-center font-semibold text-gray-700 py-2">
+                          {day}
+                        </div>
+                      );
+                    });
+                    
+                    // Empty cells before first day
+                    for (let i = 0; i < startingDayOfWeek; i++) {
+                      days.push(<div key={`empty-${i}`} className="p-2"></div>);
+                    }
+                    
+                    // Days of month
+                    for (let day = 1; day <= daysInMonth; day++) {
+                      const date = new Date(currentYear, currentMonth, day);
+                      const dateStr = date.toISOString().split('T')[0];
+                      const dayEvents = sortedEvents.filter(e => 
+                        e.start_date.startsWith(dateStr)
+                      );
+                      
+                      days.push(
+                        <div
+                          key={day}
+                          className={`p-2 min-h-[100px] border rounded-lg ${
+                            day === today.getDate() && currentMonth === today.getMonth()
+                              ? 'bg-orange-50 border-orange-500'
+                              : 'border-gray-200'
+                          }`}
+                        >
+                          <div className="font-semibold text-sm text-gray-700 mb-1">{day}</div>
+                          {dayEvents.slice(0, 2).map(event => (
+                            <div
+                              key={event.id}
+                              onClick={() => handleViewEvent(event)}
+                              className="text-xs bg-brand-blue text-white p-1 rounded mb-1 cursor-pointer hover:bg-brand-blue/80 truncate"
+                              title={event.title}
+                            >
+                              {event.title}
+                            </div>
+                          ))}
+                          {dayEvents.length > 2 && (
+                            <div className="text-xs text-gray-500">+{dayEvents.length - 2} more</div>
+                          )}
+                        </div>
+                      );
+                    }
+                    
+                    return days;
+                  })()}
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>
