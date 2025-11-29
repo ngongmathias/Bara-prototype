@@ -65,17 +65,25 @@ export const EventsPage = () => {
                            tag.toLowerCase().includes(searchQuery.toLowerCase().replace('#', ''))
                          ));
     
-    // Check both category slug and category_name for matching
-    // Convert category_name to slug format: lowercase, replace spaces/special chars with hyphens
+    // Check both category slug and category field (which contains display name)
+    // Convert event.category (display name) to slug format
+    const eventCategorySlug = event.category 
+      ? event.category.toLowerCase()
+          .replace(/\s*&\s*/g, '-and-') // Replace " & " with "-and-"
+          .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
+          .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+      : '';
+    
+    // Also check category_name if it exists
     const categoryNameSlug = event.category_name 
       ? event.category_name.toLowerCase()
-          .replace(/&/g, '') // Remove ampersands
+          .replace(/\s*&\s*/g, '-and-') // Replace " & " with "-and-"
           .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
           .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
       : '';
     
     const matchesCategory = selectedCategory === 'all' || 
-                           event.category === selectedCategory ||
+                           eventCategorySlug === selectedCategory ||
                            categoryNameSlug === selectedCategory;
     
     const matchesStartDate = !startDate || new Date(event.start_date) >= new Date(startDate);
