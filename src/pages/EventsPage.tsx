@@ -680,9 +680,9 @@ export const EventsPage = () => {
       <HeroSlideshow />
 
       {/* Split Layout: Filters Sidebar + Events Grid - Sinc Style */}
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-200px)]">
+      <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Left Sidebar - Filters (scrolls independently) */}
-        <aside className="w-full lg:w-96 bg-white border-r border-gray-200 overflow-y-auto scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+        <aside className="w-full lg:w-96 bg-white border-r border-gray-200 lg:sticky lg:top-0 lg:h-screen overflow-y-auto scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
           <div className="p-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">Filters</h2>
             <div className="space-y-6">
@@ -821,8 +821,8 @@ export const EventsPage = () => {
           </div>
         </aside>
 
-        {/* Right Side - Events Grid (scrolls independently) */}
-        <main className="flex-1 bg-gray-50 overflow-y-auto">
+        {/* Right Side - Events Grid */}
+        <main className="flex-1 bg-gray-50">
           <div className="container mx-auto px-6 py-8">
         {loading ? (
           <div className="text-center py-12">
