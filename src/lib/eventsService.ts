@@ -330,52 +330,51 @@ export class EventsService {
         totalCount = data?.length || 0;
       }
 
-      // Get related data separately to avoid foreign key issues
+      // Get related data in batches to avoid N+1 queries
       const events: Event[] = [];
       
-      for (const event of data || []) {
-        let countryData = null;
-        let cityData = null;
-        let categoryData = null;
+      if (data && data.length > 0) {
+        // Get unique IDs
+        const countryIds = [...new Set(data.map(e => e.country_id).filter(Boolean))];
+        const cityIds = [...new Set(data.map(e => e.city_id).filter(Boolean))];
+        const categorySlugs = [...new Set(data.map(e => e.category).filter(Boolean))];
 
-        if (event.country_id) {
-          const { data: country } = await supabase
-            .from('countries')
-            .select('name, code')
-            .eq('id', event.country_id)
-            .single();
-          countryData = country;
+        // Batch fetch all related data
+        const [countriesResult, citiesResult, categoriesResult] = await Promise.all([
+          countryIds.length > 0 
+            ? supabase.from('countries').select('id, name, code').in('id', countryIds)
+            : Promise.resolve({ data: [] }),
+          cityIds.length > 0
+            ? supabase.from('cities').select('id, name, latitude, longitude').in('id', cityIds)
+            : Promise.resolve({ data: [] }),
+          categorySlugs.length > 0
+            ? supabase.from('event_categories').select('slug, name, icon, color').in('slug', categorySlugs)
+            : Promise.resolve({ data: [] })
+        ]);
+
+        // Create lookup maps
+        const countriesMap = new Map((countriesResult.data || []).map(c => [c.id, c]));
+        const citiesMap = new Map((citiesResult.data || []).map(c => [c.id, c]));
+        const categoriesMap = new Map((categoriesResult.data || []).map(c => [c.slug, c]));
+
+        // Map events with related data
+        for (const event of data) {
+          const country = countriesMap.get(event.country_id);
+          const city = citiesMap.get(event.city_id);
+          const category = categoriesMap.get(event.category);
+
+          events.push({
+            ...event,
+            country_name: country?.name,
+            country_code: country?.code,
+            city_name: city?.name,
+            city_latitude: city?.latitude,
+            city_longitude: city?.longitude,
+            category_name: category?.name,
+            category_icon: category?.icon,
+            category_color: category?.color,
+          });
         }
-
-        if (event.city_id) {
-          const { data: city } = await supabase
-            .from('cities')
-            .select('name, latitude, longitude')
-            .eq('id', event.city_id)
-            .single();
-          cityData = city;
-        }
-
-        if (event.category) {
-          const { data: category } = await supabase
-            .from('event_categories')
-            .select('name, icon, color')
-            .eq('slug', event.category)
-            .single();
-          categoryData = category;
-        }
-
-        events.push({
-          ...event,
-          country_name: countryData?.name,
-          country_code: countryData?.code,
-          city_name: cityData?.name,
-          city_latitude: cityData?.latitude,
-          city_longitude: cityData?.longitude,
-          category_name: categoryData?.name,
-          category_icon: categoryData?.icon,
-          category_color: categoryData?.color,
-        });
       }
 
       return {
