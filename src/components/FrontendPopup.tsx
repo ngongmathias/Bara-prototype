@@ -130,9 +130,9 @@ export default function FrontendPopup({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => isOpen ? setOpen(true) : handleClose()}>
-      <DialogContent className="max-w-[85vw] p-0 overflow-hidden bg-transparent border-none shadow-none">
+      <DialogContent className="max-w-[85vw] p-0 overflow-hidden bg-transparent border-none shadow-none w-auto">
         <DialogTitle className="sr-only">Advertisement</DialogTitle>
-        <div className="relative bg-white rounded-lg shadow-2xl max-h-[50vh] overflow-hidden">
+        <div className="relative bg-white rounded-lg shadow-2xl max-h-[50vh] overflow-hidden w-auto inline-block">
           {/* Popup Image */}
           <div 
             className="relative cursor-pointer"
@@ -141,7 +141,7 @@ export default function FrontendPopup({
             <img 
               src={currentPopup?.image_url} 
               alt={currentPopup?.name || "Advertisement"} 
-              className="w-full h-auto block rounded-t-lg max-h-[50vh] object-contain"
+              className="h-auto block rounded-t-lg max-h-[50vh] object-contain w-auto max-w-full"
               onError={(e) => {
                 console.error('❌ Popup image failed to load:', currentPopup?.image_url);
                 e.currentTarget.src = '/placeholder.svg';
