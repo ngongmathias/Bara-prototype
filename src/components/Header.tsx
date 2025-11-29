@@ -554,7 +554,7 @@ export const Header = () => {
               {/* Mobile Menu Content */}
               <div className="flex-1 overflow-y-auto p-4 space-y-6">
                 {/* User Profile Section - AT TOP */}
-                {isSignedIn && (
+                {isSignedIn ? (
                   <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
                     <div className="flex items-center space-x-3">
                       <img
@@ -571,6 +571,22 @@ export const Header = () => {
                         </p>
                       </div>
                     </div>
+                  </div>
+                ) : (
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-4 text-white">
+                    <p className="text-lg font-bold mb-2">Welcome to BARA!</p>
+                    <p className="text-sm mb-3 opacity-90">Sign in to access your dashboard and personalized features</p>
+                    <Button 
+                      variant="secondary" 
+                      className="w-full bg-white text-blue-600 hover:bg-gray-100 font-semibold"
+                      onClick={() => {
+                        navigate('/user/sign-in');
+                        closeMobileMenu();
+                      }}
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      Sign In
+                    </Button>
                   </div>
                 )}
 
