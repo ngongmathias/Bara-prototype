@@ -606,11 +606,11 @@ export const EventsPage = () => {
                 </div>
               </div>
 
-              {/* Categories - Checkbox List like Sinc */}
+              {/* Categories - Full List like Sinc (NO nested scroller) */}
               <div className="space-y-4">
-                <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Categories</label>
-                <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
-                  <label className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Category</label>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
                     <input
                       type="radio"
                       name="category"
@@ -621,7 +621,7 @@ export const EventsPage = () => {
                     <span className="text-base text-gray-700">All Categories</span>
                   </label>
                   {categories.map((category) => (
-                    <label key={category.id} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                    <label key={category.id} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
                       <input
                         type="radio"
                         name="category"
@@ -662,12 +662,12 @@ export const EventsPage = () => {
                 </div>
               </div>
 
-              {/* Organizers - Like Sinc */}
+              {/* Organizers - Full List like Sinc (NO nested scroller) */}
               <div className="space-y-4">
                 <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Organizers</label>
-                <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
-                  {[...new Set(events.map(e => e.organizer_name).filter(Boolean))].slice(0, 20).map((organizer, idx) => (
-                    <label key={idx} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                <div className="space-y-2">
+                  {[...new Set(events.map(e => e.organizer_name).filter(Boolean))].slice(0, 30).map((organizer, idx) => (
+                    <label key={idx} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
                       <input
                         type="checkbox"
                         className="w-4 h-4 text-orange-500 focus:ring-orange-500 rounded"
