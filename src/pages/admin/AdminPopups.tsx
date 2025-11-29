@@ -122,6 +122,38 @@ export default function AdminPopups() {
       // Handle image upload if a new file is selected
       if (file) {
         console.log('📤 Uploading new image...');
+        
+        // Validate image dimensions
+        const img = document.createElement('img');
+        const imageObjectUrl = URL.createObjectURL(file);
+        
+        await new Promise((resolve, reject) => {
+          img.onload = () => {
+            const width = img.width;
+            const height = img.height;
+            const aspectRatio = width / height;
+            
+            // Recommended: 1280x720 (16:9 ratio)
+            // Accept 1:1 to 21:9 ratio, min 600px on shortest side
+            const minDimension = Math.min(width, height);
+            if (minDimension < 600) {
+              reject(new Error(`Image is too small. Minimum dimension is 600px. Your image is ${width}x${height}px.`));
+              return;
+            }
+            
+            // Warn if not 16:9 but allow it
+            if (aspectRatio < 0.5 || aspectRatio > 2.5) {
+              console.warn(`⚠️ Image aspect ratio is ${aspectRatio.toFixed(2)}:1. Recommended: 16:9 (1280x720px)`);
+            }
+            
+            resolve(true);
+          };
+          img.onerror = () => reject(new Error('Failed to load image'));
+          img.src = imageObjectUrl;
+        });
+        
+        URL.revokeObjectURL(imageObjectUrl);
+        
         const ext = file.name.split('.').pop();
         const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
         
@@ -522,6 +554,15 @@ export default function AdminPopups() {
 
               <div>
                 <Label htmlFor="image">Image *</Label>
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-3">
+                  <p className="text-sm font-semibold text-blue-900 mb-1">📐 Required Dimensions:</p>
+                  <ul className="text-xs text-blue-800 space-y-1">
+                    <li>• <strong>Recommended:</strong> 1280 x 720 pixels (16:9 ratio)</li>
+                    <li>• <strong>Minimum:</strong> 600px on shortest side</li>
+                    <li>• <strong>Aspect ratio:</strong> Any (1:1 square, 16:9 landscape, 9:16 portrait)</li>
+                    <li>• <strong>File size:</strong> Less than 3MB</li>
+                  </ul>
+                </div>
                 <div className="flex items-center gap-3">
                   <input 
                     id="image"

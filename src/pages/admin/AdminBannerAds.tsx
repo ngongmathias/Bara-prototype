@@ -168,6 +168,36 @@ export const AdminBannerAds = () => {
 
     setUploading(true);
     try {
+      // Validate image dimensions
+      const img = new Image();
+      const imageUrl = URL.createObjectURL(file);
+      
+      await new Promise((resolve, reject) => {
+        img.onload = () => {
+          const width = img.width;
+          const height = img.height;
+          const aspectRatio = width / height;
+          
+          // Recommended: 1200x200 (6:1 ratio)
+          // Accept 5:1 to 7:1 ratio, min width 800px
+          if (width < 800) {
+            reject(new Error(`Image width must be at least 800px. Your image is ${width}px wide.`));
+            return;
+          }
+          
+          if (aspectRatio < 5 || aspectRatio > 7) {
+            reject(new Error(`Banner ads should have a 6:1 aspect ratio (width:height). Recommended: 1200x200px. Your image is ${width}x${height}px (${aspectRatio.toFixed(1)}:1 ratio).`));
+            return;
+          }
+          
+          resolve(true);
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = imageUrl;
+      });
+      
+      URL.revokeObjectURL(imageUrl);
+
       // Upload image to Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
@@ -194,7 +224,7 @@ export const AdminBannerAds = () => {
       console.error('Error uploading image:', error);
       toast({
         title: 'Error',
-        description: 'Failed to upload image',
+        description: error.message || 'Failed to upload image',
         variant: 'destructive'
       });
       setUploading(false);
@@ -456,6 +486,15 @@ export const AdminBannerAds = () => {
                   <div className="col-span-2">
                     <Label htmlFor="image">Banner Image</Label>
                     <div className="space-y-2">
+                      <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-2">
+                        <p className="text-sm font-semibold text-blue-900 mb-1">📐 Required Dimensions:</p>
+                        <ul className="text-xs text-blue-800 space-y-1">
+                          <li>• <strong>Recommended:</strong> 1200 x 200 pixels (6:1 ratio)</li>
+                          <li>• <strong>Minimum width:</strong> 800px</li>
+                          <li>• <strong>Aspect ratio:</strong> 5:1 to 7:1 (width:height)</li>
+                          <li>• <strong>File size:</strong> Less than 2MB</li>
+                        </ul>
+                      </div>
                       <Input
                         type="file"
                         accept="image/*"
