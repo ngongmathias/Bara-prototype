@@ -63,18 +63,18 @@ export default function PopupAd({
         <DialogTitle className="sr-only">Advertisement</DialogTitle>
         <div className="relative w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg">
           {linkUrl ? (
-            <a href={linkUrl} target="_blank" rel="noopener noreferrer" onClick={handleClose} className="block w-full h-full">
+            <a href={linkUrl} target="_blank" rel="noopener noreferrer" onClick={handleClose} className="flex items-center justify-center w-full h-full">
               <img 
                 src={imageUrl} 
                 alt="Advertisement" 
-                className="w-full h-full object-contain rounded-lg" 
+                className="max-w-full max-h-full object-contain rounded-lg" 
               />
             </a>
           ) : (
             <img 
               src={imageUrl} 
               alt="Advertisement" 
-              className="w-full h-full object-contain rounded-lg" 
+              className="max-w-full max-h-full object-contain rounded-lg" 
             />
           )}
           <button

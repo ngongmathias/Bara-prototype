@@ -141,7 +141,7 @@ export default function FrontendPopup({
             <img 
               src={currentPopup?.image_url} 
               alt={currentPopup?.name || "Advertisement"} 
-              className="w-full h-full object-contain"
+              className="max-w-full max-h-full object-contain"
               onError={(e) => {
                 console.error('❌ Popup image failed to load:', currentPopup?.image_url);
                 e.currentTarget.src = '/placeholder.svg';
