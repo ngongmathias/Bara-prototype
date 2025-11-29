@@ -50,7 +50,10 @@ export const EventsPage = () => {
                            tag.toLowerCase().includes(searchQuery.toLowerCase().replace('#', ''))
                          ));
     
-    const matchesCategory = selectedCategory === 'all' || event.category === selectedCategory;
+    // Check both category slug and category_name for matching
+    const matchesCategory = selectedCategory === 'all' || 
+                           event.category === selectedCategory ||
+                           (event.category_name && event.category_name.toLowerCase().replace(/\s+/g, '-') === selectedCategory);
     
     const matchesStartDate = !startDate || new Date(event.start_date) >= new Date(startDate);
     const matchesEndDate = !endDate || new Date(event.end_date) <= new Date(endDate);
