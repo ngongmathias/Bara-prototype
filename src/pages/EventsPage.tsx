@@ -29,9 +29,10 @@ export const EventsPage = () => {
   const [mapEvents, setMapEvents] = useState<any[]>([]);
   const [selectedEventForMap, setSelectedEventForMap] = useState<string | undefined>();
   const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid');
+  const [showFilters, setShowFilters] = useState(false); // Mobile filters collapsed by default
 
   // Use real data from database
-  const { events, loading, searchEvents } = useEvents();
+  const { events, loading, searchEvents} = useEvents();
   const { categories } = useEventCategories();
   const { selectedCountry } = useCountrySelection();
 
@@ -683,9 +684,21 @@ export const EventsPage = () => {
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Left Sidebar - Filters (scrolls independently) */}
         <aside className="w-full lg:w-96 bg-white border-r border-gray-200 lg:sticky lg:top-0 lg:h-screen overflow-y-auto scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
-          <div className="p-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">Filters</h2>
-            <div className="space-y-6">
+          <div className="p-4 lg:p-8">
+            {/* Mobile: Collapsible Filters Button */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="lg:hidden w-full flex items-center justify-between p-4 bg-orange-50 rounded-lg mb-4 hover:bg-orange-100 transition-colors"
+            >
+              <span className="text-lg font-bold text-gray-900">Filters & Search</span>
+              <Filter className={`w-5 h-5 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {/* Desktop: Always show title */}
+            <h2 className="hidden lg:block text-3xl font-bold text-gray-900 mb-8">Filters</h2>
+            
+            {/* Filters Content - Collapsible on mobile, always visible on desktop */}
+            <div className={`space-y-6 ${showFilters ? 'block' : 'hidden lg:block'}`}>
               {/* Search */}
               <div className="space-y-4">
                 <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Search Events</label>

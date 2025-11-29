@@ -524,8 +524,8 @@ export const Header = () => {
           </Button>
         </div>
 
-        {/* Second Row - Navigation Links (only when space is limited - high zoom) */}
-        <div className="hidden md:flex max-[1999px]:flex items-center justify-center space-x-3 pb-4 border-t border-gray-100 pt-4">
+        {/* Second Row - Navigation Links (mobile/tablet scrollable, hidden on large desktop) */}
+        <div className="flex md:hidden items-center justify-start space-x-2 pb-3 border-t border-gray-100 pt-3 overflow-x-auto px-4 scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
           <Link to="/" onClick={scrollToTop}>
             <Button variant="ghost" className="font-roboto">
               <List className="w-4 h-4 mr-1" />
