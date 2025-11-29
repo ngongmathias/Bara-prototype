@@ -155,11 +155,11 @@ export const Header = () => {
 
   return (
     <header className="bg-background border-b border-border relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4">
-        {/* Single Row Layout (Default - when there's enough space) */}
-        <div className="flex items-center justify-between h-20 min-[2000px]:flex">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Single Row Layout */}
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <div className="flex items-center flex-shrink-0 mr-8">
+          <div className="flex items-center flex-shrink-0">
             <Link to="/" onClick={scrollToTop}>
               <div className="flex items-center py-4">
                 <img src="/bara-3.png" className="h-12 w-auto" alt="Logo picture" />
@@ -171,21 +171,21 @@ export const Header = () => {
           {/* Desktop Navigation - Single Row (only when space allows) */}
           <div className="hidden lg:flex items-center space-x-2 flex-1 justify-center">
             <Link to="/" onClick={scrollToTop}>
-              <Button variant="ghost" className="font-roboto text-base">
+              <Button variant="ghost" size="lg" className="font-roboto text-base font-medium px-4">
                 <List className="w-5 h-5 mr-2" />
                 {t('navigation.listings')}
               </Button>
             </Link>
             
             <Link to="/marketplace" onClick={scrollToTop}>
-              <Button variant="ghost" className="font-roboto text-base">
+              <Button variant="ghost" size="lg" className="font-roboto text-base font-medium px-4">
                 <ShoppingBag className="w-5 h-5 mr-2" />
                 {t('navigation.marketplace')}
               </Button>
             </Link>
             
             <Link to="/events" onClick={scrollToTop}>
-              <Button variant="ghost" className="font-roboto text-base">
+              <Button variant="ghost" size="lg" className="font-roboto text-base font-medium px-4">
                 <Calendar className="w-5 h-5 mr-2" />
                 {t('navigation.events')}
               </Button>
