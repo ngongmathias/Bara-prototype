@@ -585,95 +585,118 @@ export const EventsPage = () => {
       {/* Hero Section with background slideshow */}
       <HeroSlideshow />
 
-      {/* Split Layout: Filters Sidebar + Events Grid */}
-      <div className="flex flex-col md:flex-row h-[calc(100vh-200px)]">
+      {/* Split Layout: Filters Sidebar + Events Grid - Sinc Style */}
+      <div className="flex flex-col lg:flex-row">
         {/* Left Sidebar - Filters (scrollable independently) */}
-        <div className="w-full md:w-80 bg-white border-r border-gray-200 overflow-y-auto">
-          <div className="p-6 space-y-6 sticky top-0 bg-white z-10 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900">Filters</h2>
-          </div>
-          <div className="p-6 space-y-6">
-                {/* Search */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Search</label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                  placeholder="Search events, venues, organizers, or #hashtags"
-                      value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                    />
-                  </div>
+        <aside className="w-full lg:w-80 bg-white border-r border-gray-200 lg:h-screen lg:sticky lg:top-0 overflow-y-auto">
+          <div className="p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Filters</h2>
+            <div className="space-y-6">
+              {/* Search */}
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Search Events</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    placeholder="Search by name, venue, or hashtag..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                  />
                 </div>
+              </div>
 
-                {/* Category */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Category</label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
-                      <SelectValue placeholder="All Categories" />
-                    </SelectTrigger>
-                    <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.slug}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              {/* Category */}
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Category</label>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.slug}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* From Date */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">From Date</label>
+              {/* Date Range */}
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Date Range</label>
+                <div className="space-y-3">
                   <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <Input
                       type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="pl-9"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="pl-10 h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                      placeholder="From date"
                     />
                   </div>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="pl-10 h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                      placeholder="To date"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Sort By */}
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Sort By</label>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                    <ArrowUpDown className="h-5 w-5 mr-2" />
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date">Date (Earliest First)</SelectItem>
+                    <SelectItem value="title">Title (A-Z)</SelectItem>
+                    <SelectItem value="location">Location (A-Z)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Clear Filters Button */}
+              {(searchQuery || selectedCategory !== 'all' || startDate || endDate) && (
+                <Button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedCategory('all');
+                    setStartDate('');
+                    setEndDate('');
+                  }}
+                  variant="outline"
+                  className="w-full h-11 border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Clear All Filters
+                </Button>
+              )}
+
+              {/* Results Count */}
+              <div className="pt-4 border-t border-gray-200">
+                <p className="text-sm text-gray-600">
+                  <span className="font-semibold text-gray-900">{sortedEvents.length}</span> events found
+                </p>
+              </div>
             </div>
-
-            {/* To Date */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">To Date</label>
-                  <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="pl-9"
-                    />
-                  </div>
-                </div>
-
-            {/* Sort By */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Sort By</label>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
-                  <ArrowUpDown className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                  <SelectItem value="date">Date</SelectItem>
-                  <SelectItem value="title">Title</SelectItem>
-                  <SelectItem value="location">Location</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
           </div>
-        </div>
+        </aside>
 
         {/* Right Side - Events Grid (scrollable independently) */}
-        <div className="flex-1 overflow-y-auto bg-gray-50">
-          <div className="p-6">
+        <main className="flex-1 bg-gray-50 min-h-screen">
+          <div className="container mx-auto px-6 py-8">
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto mb-4"></div>
@@ -778,7 +801,7 @@ export const EventsPage = () => {
             </div>
           )}
           </div>
-        </div>
+        </main>
       </div>
       
       <Footer />
