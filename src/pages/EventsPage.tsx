@@ -587,8 +587,8 @@ export const EventsPage = () => {
 
       {/* Split Layout: Filters Sidebar + Events Grid - Sinc Style */}
       <div className="flex flex-col lg:flex-row">
-        {/* Left Sidebar - Filters (scrollable independently) */}
-        <aside className="w-full lg:w-96 bg-white border-r border-gray-200 lg:h-screen lg:sticky lg:top-0 overflow-y-auto scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+        {/* Left Sidebar - Filters (scrolls with page, not independently) */}
+        <aside className="w-full lg:w-96 bg-white border-r border-gray-200 scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
           <div className="p-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">Filters</h2>
             <div className="space-y-6">
@@ -721,8 +721,8 @@ export const EventsPage = () => {
           </div>
         </aside>
 
-        {/* Right Side - Events Grid (scrollable independently) */}
-        <main className="flex-1 bg-gray-50 min-h-screen">
+        {/* Right Side - Events Grid (scrolls with page, not independently) */}
+        <main className="flex-1 bg-gray-50">
           <div className="container mx-auto px-6 py-8">
         {loading ? (
           <div className="text-center py-12">
