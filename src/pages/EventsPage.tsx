@@ -586,9 +586,9 @@ export const EventsPage = () => {
       <HeroSlideshow />
 
       {/* Split Layout: Filters Sidebar + Events Grid - Sinc Style */}
-      <div className="flex flex-col lg:flex-row">
-        {/* Left Sidebar - Filters (scrolls with page, not independently) */}
-        <aside className="w-full lg:w-96 bg-white border-r border-gray-200 scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-200px)]">
+        {/* Left Sidebar - Filters (scrolls independently) */}
+        <aside className="w-full lg:w-96 bg-white border-r border-gray-200 overflow-y-auto scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
           <div className="p-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">Filters</h2>
             <div className="space-y-6">
@@ -662,11 +662,11 @@ export const EventsPage = () => {
                 </div>
               </div>
 
-              {/* Organizers - Full List like Sinc (NO nested scroller) */}
+              {/* Organizers - Full List */}
               <div className="space-y-4">
                 <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Organizers</label>
                 <div className="space-y-2">
-                  {[...new Set(events.map(e => e.organizer_name).filter(Boolean))].slice(0, 30).map((organizer, idx) => (
+                  {[...new Set(events.map(e => e.organizer_name).filter(Boolean))].slice(0, 25).map((organizer, idx) => (
                     <label key={idx} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
                       <input
                         type="checkbox"
@@ -721,8 +721,8 @@ export const EventsPage = () => {
           </div>
         </aside>
 
-        {/* Right Side - Events Grid (scrolls with page, not independently) */}
-        <main className="flex-1 bg-gray-50">
+        {/* Right Side - Events Grid (scrolls independently) */}
+        <main className="flex-1 bg-gray-50 overflow-y-auto">
           <div className="container mx-auto px-6 py-8">
         {loading ? (
           <div className="text-center py-12">
