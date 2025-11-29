@@ -829,7 +829,7 @@ export const EventsPage = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto mb-4"></div>
             <p className="text-gray-600">Loading events...</p>
         </div>
-        ) : sortedEvents.length > 0 ? (
+        ) : (
           <>
             {/* View Toggle */}
             <div className="flex justify-end mb-6">
@@ -860,6 +860,8 @@ export const EventsPage = () => {
             </div>
 
             {viewMode === 'grid' ? (
+              <>
+              {sortedEvents.length > 0 ? (
               <>
             {/* Active Events Section */}
             {activeEvents.length > 0 && (
@@ -1003,9 +1005,9 @@ export const EventsPage = () => {
             )}
             </div>
           )}
-              </>
-            ) : (
-              /* Calendar View */
+          </>
+        ) : (
+          /* Calendar View */
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Calendar View</h2>
                 <div className="grid grid-cols-7 gap-2">
@@ -1079,7 +1081,9 @@ export const EventsPage = () => {
                 </div>
               </div>
             )}
-          </div>
+          </>
+        )}
+        </div>
         </main>
       </div>
       
