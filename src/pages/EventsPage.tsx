@@ -1040,9 +1040,12 @@ export const EventsPage = () => {
                     for (let day = 1; day <= daysInMonth; day++) {
                       const date = new Date(currentYear, currentMonth, day);
                       const dateStr = date.toISOString().split('T')[0];
-                      const dayEvents = sortedEvents.filter(e => 
-                        e.start_date.startsWith(dateStr)
-                      );
+                      const dayEvents = sortedEvents.filter(e => {
+                        const eventDateStr = typeof e.start_date === 'string' 
+                          ? e.start_date.split('T')[0]
+                          : new Date(e.start_date).toISOString().split('T')[0];
+                        return eventDateStr === dateStr;
+                      });
                       
                       days.push(
                         <div
