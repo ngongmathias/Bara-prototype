@@ -169,7 +169,7 @@ export const Header = () => {
           </div>
 
           {/* Desktop Navigation - Single Row (only when space allows) */}
-          <div className="hidden min-[2000px]:flex items-center space-x-3 flex-1 justify-center">
+          <div className="hidden lg:flex items-center space-x-2 flex-1 justify-center">
             <Link to="/" onClick={scrollToTop}>
               <Button variant="ghost" className="font-roboto text-base">
                 <List className="w-5 h-5 mr-2" />
@@ -785,6 +785,16 @@ export const Header = () => {
                   )}
                 </div>
 
+                {/* Language Selector */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
+                    Language
+                  </h3>
+                  <div className="pl-2">
+                    <LanguageSelector />
+                  </div>
+                </div>
+
                 {/* Countries Section */}
                 <div className="space-y-3">
                   <button
@@ -831,16 +841,6 @@ export const Header = () => {
                   </div>
                 </div>
 
-
-                {/* Language Selector */}
-                <div className="space-y-3">
-                  <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
-                    Language
-                  </h3>
-                  <div className="pl-4">
-                    <LanguageSelector />
-                  </div>
-                </div>
               </div>
 
               {/* Mobile Menu Footer */}
