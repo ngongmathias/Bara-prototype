@@ -155,59 +155,59 @@ export const Header = () => {
 
   return (
     <header className="bg-background border-b border-border relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Desktop & Mobile Layout - v2.0 */}
-        <div className="flex items-center justify-between h-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6">
+        {/* Desktop & Mobile Layout - v2.1 Compact */}
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
             <Link to="/" onClick={scrollToTop}>
-              <div className="flex items-center py-4">
-                <img src="/bara-3.png" className="h-12 w-auto" alt="Logo picture" />
-                <img src="/bara-1-removebg-preview.png" className="h-12 w-auto ml-2" alt="Logo picture" />
+              <div className="flex items-center py-2">
+                <img src="/bara-3.png" className="h-9 w-auto" alt="Logo picture" />
+                <img src="/bara-1-removebg-preview.png" className="h-9 w-auto ml-1" alt="Logo picture" />
               </div>
             </Link>
           </div>
 
           {/* Desktop Navigation - Left aligned */}
-          <nav className="hidden lg:flex items-center space-x-1 flex-1">
+          <nav className="hidden lg:flex items-center space-x-1 flex-1 ml-4">
             <Link to="/" onClick={scrollToTop}>
-              <Button variant="ghost" size="lg" className="font-roboto text-base font-medium px-4">
-                <List className="w-5 h-5 mr-2" />
+              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9">
+                <List className="w-4 h-4 mr-1.5" />
                 {t('navigation.listings')}
               </Button>
             </Link>
             
             <Link to="/marketplace" onClick={scrollToTop}>
-              <Button variant="ghost" size="lg" className="font-roboto text-base font-medium px-4">
-                <ShoppingBag className="w-5 h-5 mr-2" />
+              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9">
+                <ShoppingBag className="w-4 h-4 mr-1.5" />
                 {t('navigation.marketplace')}
               </Button>
             </Link>
             
             <Link to="/events" onClick={scrollToTop}>
-              <Button variant="ghost" size="lg" className="font-roboto text-base font-medium px-4">
-                <Calendar className="w-5 h-5 mr-2" />
+              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9">
+                <Calendar className="w-4 h-4 mr-1.5" />
                 {t('navigation.events')}
               </Button>
             </Link>
 
             <Link to="/advertise" onClick={scrollToTop}>
-              <Button variant="ghost" size="lg" className="font-roboto text-base font-medium px-4">
-                <Building className="w-5 h-5 mr-2" />
+              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9">
+                <Building className="w-4 h-4 mr-1.5" />
                 {t('navigation.advertise')}
               </Button>
             </Link>
           </nav>
 
           {/* Desktop Right Side - User, Country, Language */}
-          <div className="hidden lg:flex items-center space-x-3">
+          <div className="hidden lg:flex items-center space-x-2">
             {/* Country Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="font-roboto">
-                  <Globe className="w-4 h-4 mr-2" />
-                  {selectedCountry ? selectedCountry.name : t('navigation.searchByCountry')}
-                  <ChevronDown className="w-4 h-4 ml-1" />
+                <Button variant="outline" size="sm" className="font-roboto text-xs h-8 px-2">
+                  <Globe className="w-3.5 h-3.5 mr-1" />
+                  {selectedCountry ? selectedCountry.code : 'Country'}
+                  <ChevronDown className="w-3 h-3 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-64" align="end">
