@@ -39,12 +39,22 @@ export const EventsPage = () => {
     searchEvents({ limit: 100, country_id: selectedCountry?.id });
   }, [searchEvents, selectedCountry]);
 
+  // Debug logging - show what we're filtering
+  useEffect(() => {
+    if (selectedCategory !== 'all') {
+      console.log('=== CATEGORY FILTER DEBUG ===');
+      console.log('Selected category:', selectedCategory);
+      console.log('Total events:', events.length);
+      console.log('Sample event categories:', events.slice(0, 5).map(e => ({
+        title: e.title,
+        category: e.category,
+        category_name: e.category_name
+      })));
+    }
+  }, [selectedCategory, events]);
+
   // Filter events based on search and filters
   const filteredEvents = events.filter(event => {
-    // Debug logging for category filtering
-    if (selectedCategory !== 'all' && event.category_name) {
-      console.log('Event:', event.title, '| category:', event.category, '| category_name:', event.category_name, '| selected:', selectedCategory);
-    }
     
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (event.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
