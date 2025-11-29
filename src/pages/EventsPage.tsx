@@ -106,7 +106,12 @@ export const EventsPage = () => {
     }
   });
 
-  // Pagination
+  // Split into Active and Past events BEFORE pagination
+  const now = new Date();
+  const activeEvents = sortedEvents.filter(e => new Date(e.end_date) >= now);
+  const pastEvents = sortedEvents.filter(e => new Date(e.end_date) < now);
+
+  // Pagination (for display purposes, but we'll show all active and past separately)
   const totalPages = Math.ceil(sortedEvents.length / eventsPerPage);
   const startIndex = (currentPage - 1) * eventsPerPage;
   const currentEvents = sortedEvents.slice(startIndex, startIndex + eventsPerPage);
@@ -769,17 +774,10 @@ export const EventsPage = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto mb-4"></div>
             <p className="text-gray-600">Loading events...</p>
         </div>
-        ) : currentEvents.length > 0 ? (
+        ) : sortedEvents.length > 0 ? (
           <>
             {/* Active Events Section */}
-            {(() => {
-              const now = new Date();
-              const activeEvents = currentEvents.filter(e => new Date(e.end_date) >= now);
-              const pastEvents = currentEvents.filter(e => new Date(e.end_date) < now);
-              
-              return (
-                <>
-                  {activeEvents.length > 0 && (
+            {activeEvents.length > 0 && (
                     <div className="mb-12">
                       <div className="mb-6">
                         <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -859,9 +857,6 @@ export const EventsPage = () => {
                       </div>
                     </div>
                   )}
-                </>
-              );
-            })()}
 
               {/* Pagination */}
               {totalPages > 1 && (
