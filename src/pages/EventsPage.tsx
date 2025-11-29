@@ -41,6 +41,11 @@ export const EventsPage = () => {
 
   // Filter events based on search and filters
   const filteredEvents = events.filter(event => {
+    // Debug logging for category filtering
+    if (selectedCategory !== 'all' && event.category_name) {
+      console.log('Event:', event.title, '| category:', event.category, '| category_name:', event.category_name, '| selected:', selectedCategory);
+    }
+    
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (event.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (event.venue_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -51,9 +56,17 @@ export const EventsPage = () => {
                          ));
     
     // Check both category slug and category_name for matching
+    // Convert category_name to slug format: lowercase, replace spaces/special chars with hyphens
+    const categoryNameSlug = event.category_name 
+      ? event.category_name.toLowerCase()
+          .replace(/&/g, '') // Remove ampersands
+          .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
+          .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+      : '';
+    
     const matchesCategory = selectedCategory === 'all' || 
                            event.category === selectedCategory ||
-                           (event.category_name && event.category_name.toLowerCase().replace(/\s+/g, '-') === selectedCategory);
+                           categoryNameSlug === selectedCategory;
     
     const matchesStartDate = !startDate || new Date(event.start_date) >= new Date(startDate);
     const matchesEndDate = !endDate || new Date(event.end_date) <= new Date(endDate);
