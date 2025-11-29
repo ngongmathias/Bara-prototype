@@ -168,8 +168,8 @@ export const Header = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation - Single Row (only when space allows) */}
-          <div className="hidden lg:flex items-center space-x-2 flex-1 justify-center">
+          {/* Desktop Navigation - Left aligned */}
+          <nav className="hidden lg:flex items-center space-x-1 flex-1">
             <Link to="/" onClick={scrollToTop}>
               <Button variant="ghost" size="lg" className="font-roboto text-base font-medium px-4">
                 <List className="w-5 h-5 mr-2" />
@@ -191,17 +191,86 @@ export const Header = () => {
               </Button>
             </Link>
 
-            {/* Users Menu - Show dropdown when signed in, link when not signed in */}
+            <Link to="/advertise" onClick={scrollToTop}>
+              <Button variant="ghost" size="lg" className="font-roboto text-base font-medium px-4">
+                <Building className="w-5 h-5 mr-2" />
+                {t('navigation.advertise')}
+              </Button>
+            </Link>
+          </nav>
+
+          {/* Desktop Right Side - User, Country, Language */}
+          <div className="hidden lg:flex items-center space-x-3">
+            {/* Country Selector */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="font-roboto">
+                  <Globe className="w-4 h-4 mr-2" />
+                  {selectedCountry ? selectedCountry.name : t('navigation.searchByCountry')}
+                  <ChevronDown className="w-4 h-4 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-64" align="end">
+                {loading ? (
+                  <div className="text-center py-4">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yp-blue mx-auto"></div>
+                  </div>
+                ) : (
+                  <div className="max-h-80 overflow-y-auto">
+                    {countries.map((country) => (
+                      <DropdownMenuItem
+                        key={country.id}
+                        onClick={() => handleCountrySelect(country)}
+                      >
+                        {country.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Language Selector */}
+            <LanguageSelector />
+
+            {/* User Profile */}
             {isSignedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="font-roboto text-base">
-                    <User className="w-5 h-5 mr-2" />
-                    {user?.fullName || user?.firstName || 'User'}
-                    <ChevronDown className="w-4 h-4 ml-1" />
+                  <Button 
+                    variant="outline" 
+                    className="h-10 w-10 p-0 rounded-full border-2 border-blue-500"
+                  >
+                    {user?.imageUrl ? (
+                      <img 
+                        src={user.imageUrl} 
+                        alt={user.fullName || 'User'} 
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-5 w-5 text-blue-600" />
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-48">
+                <DropdownMenuContent className="w-56" align="end">
+                  <div className="flex items-center gap-3 p-3 border-b">
+                    {user?.imageUrl ? (
+                      <img 
+                        src={user.imageUrl} 
+                        alt={user.fullName || 'User'} 
+                        className="h-10 w-10 rounded-full"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <User className="h-5 w-5 text-blue-600" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{user?.fullName || 'User'}</p>
+                      <p className="text-xs text-gray-500 truncate">{user?.primaryEmailAddress?.emailAddress}</p>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/users/dashboard')}>
                     <User className="w-4 h-4 mr-2" />
                     Dashboard
@@ -215,165 +284,22 @@ export const Header = () => {
                     Profile
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()}>
+                  <DropdownMenuItem onClick={() => signOut()} className="text-red-600">
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <UserNavLink />
-            )}
-
-            <Link to="/advertise" onClick={scrollToTop}>
-              <Button variant="ghost" className="font-roboto">
-              <Building className="w-4 h-4 mr-1" />
-              {t('navigation.advertise')}
-              </Button>
-            </Link>
-            
-            <Link to="/writeareview" onClick={scrollToTop}>
-              <Button variant="ghost" className="font-roboto">
-                <Crown className="w-4 h-4 mr-1" />
-                {t('navigation.writeReview')}
-              </Button>
-            </Link>
-
-            {/* Admin Link */}
-            <AdminNavLink />
-
-            {/* Search by Country Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="default" className="font-roboto">
-                  {selectedCountry ? formatCountryDisplay(selectedCountry as Country) : t('navigation.searchByCountry')}
-                  <ChevronDown className="w-4 h-4 ml-1 transition-transform duration-200" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                className="w-64 border border-border shadow-lg animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
-                sideOffset={8}
+              <Button 
+                variant="default" 
+                onClick={() => navigate('/user/sign-in')}
+                className="font-roboto"
               >
-                {loading ? (
-                  <div className="text-center py-4">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yp-blue mx-auto"></div>
-                    <p className="text-xs mt-1">{t('common.loading')}</p>
-                  </div>
-                ) : (
-                  <div className="max-h-80 overflow-y-auto">
-                    {countries.map((country) => (
-                      <DropdownMenuItem
-                        key={country.id}
-                        onClick={() => handleCountrySelect(country)}
-                        className="dropdown-menu-item-override font-roboto button cursor-pointer"
-                      >
-                        <span>{formatCountryDisplay(country)}</span>
-                      </DropdownMenuItem>
-                    ))}
-                  </div>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Language Selector */}
-            <LanguageSelector />
-
-            {/* Authentication Section */}
-            <div className="flex items-center ml-4">
-              {isSignedIn ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="h-10 w-10 p-0 rounded-full border-2 border-blue-500 bg-white hover:bg-blue-50 transition-colors"
-                    >
-                      {user?.imageUrl ? (
-                        <img 
-                          src={user.imageUrl} 
-                          alt={user.fullName || 'User'} 
-                          className="h-8 w-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <User className="h-5 w-5 text-blue-600" />
-                      )}
-                </Button>
-              </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 shadow-lg rounded-lg border border-gray-200" align="end" forceMount>
-                    <div className="flex items-center gap-3 p-3 border-b border-gray-100">
-                      <div className="flex-shrink-0">
-                        {user?.imageUrl ? (
-                          <img 
-                            src={user.imageUrl} 
-                            alt={user.fullName || 'User'} 
-                            className="h-10 w-10 rounded-full object-cover border-2 border-blue-100"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <User className="h-5 w-5 text-blue-600" />
-                          </div>
-                        )}
-                    </div>
-                      <div className="flex-1 min-w-0">
-                        {user?.fullName && (
-                          <p className="text-sm font-medium text-gray-900 truncate">{user.fullName}</p>
-                        )}
-                        {user?.primaryEmailAddress?.emailAddress && (
-                          <p className="text-xs text-gray-500 truncate">
-                            {user.primaryEmailAddress.emailAddress}
-                          </p>
-                        )}
-                    </div>
-                </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={() => navigate('/user/settings')}
-                      className="px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer"
-                    >
-                      <Settings className="mr-3 h-4 w-4 text-gray-500" />
-                      <span>{t('navigation.profile')}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-gray-100" />
-                    <DropdownMenuItem 
-                      onClick={() => signOut()}
-                      className="px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 cursor-pointer"
-                    >
-                      <LogOut className="mr-3 h-4 w-4" />
-                      <span>{t('navigation.logout')}</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-10 rounded-full border-2 border-blue-500 bg-white hover:bg-blue-50 transition-colors"
-                    >
-                      {user?.imageUrl ? (
-                        <img 
-                          src={user.imageUrl} 
-                          alt={user.fullName || 'User'} 
-                          className="h-8 w-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <User className="h-5 w-5 text-blue-600" />
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-48" align="end">
-                    <DropdownMenuItem onClick={() => navigate('/user/sign-in')}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>{t('navigation.login')}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/user/sign-up')}>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>{t('navigation.signup')}</span>
-                    </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-              )}
-            </div>
+                <User className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+            )}
           </div>
 
           {/* Right Side Actions for Two-Row Layout (only when space is limited) */}
@@ -627,6 +553,45 @@ export const Header = () => {
 
               {/* Mobile Menu Content */}
               <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                {/* User Profile Section - AT TOP */}
+                {isSignedIn && (
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
+                    <div className="flex items-center space-x-3">
+                      <img
+                        className="h-12 w-12 rounded-full object-cover border-2 border-blue-300"
+                        src={user?.imageUrl || '/default-avatar.png'}
+                        alt={user?.fullName || 'User avatar'}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-base font-bold text-gray-900 truncate">
+                          {user?.fullName || 'User'}
+                        </p>
+                        <p className="text-xs text-gray-600 truncate">
+                          {user?.primaryEmailAddress?.emailAddress}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Language & Country - PROMINENT */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
+                    <p className="text-xs font-semibold text-gray-500 mb-2">LANGUAGE</p>
+                    <LanguageSelector />
+                  </div>
+                  <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
+                    <p className="text-xs font-semibold text-gray-500 mb-2">COUNTRY</p>
+                    <button
+                      onClick={toggleCountriesExpanded}
+                      className="w-full text-left text-sm font-medium text-gray-900 hover:text-blue-600"
+                    >
+                      {selectedCountry ? selectedCountry.name : 'Select'}
+                      <ChevronRight className={`w-4 h-4 inline ml-1 transition-transform ${countriesExpanded ? 'rotate-90' : ''}`} />
+                    </button>
+                  </div>
+                </div>
+
                 {/* Navigation Links */}
                 <div className="space-y-3">
                   <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
