@@ -130,9 +130,9 @@ export default function FrontendPopup({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => isOpen ? setOpen(true) : handleClose()}>
-      <DialogContent className="max-w-[90vw] sm:max-w-[600px] md:max-w-[800px] max-h-[80vh] w-auto h-auto p-0 overflow-hidden">
+      <DialogContent className="max-w-[90vw] sm:max-w-[600px] md:max-w-[800px] max-h-[80vh] w-auto h-auto p-0 overflow-hidden rounded-xl">
         <DialogTitle className="sr-only">Advertisement</DialogTitle>
-        <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg flex flex-col p-2 sm:p-4">
+        <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl flex flex-col p-2 sm:p-4">
           {/* Popup Image */}
           <div 
             className="relative cursor-pointer flex items-center justify-center"

@@ -59,9 +59,9 @@ export default function PopupAd({
 
   return (
     <Dialog open={open} onOpenChange={(o) => (o ? setOpen(true) : handleClose())}>
-      <DialogContent className="max-w-[90vw] sm:max-w-[600px] md:max-w-[800px] max-h-[80vh] w-auto h-auto p-0 overflow-hidden">
+      <DialogContent className="max-w-[90vw] sm:max-w-[600px] md:max-w-[800px] max-h-[80vh] w-auto h-auto p-0 overflow-hidden rounded-xl">
         <DialogTitle className="sr-only">Advertisement</DialogTitle>
-        <div className="relative flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-2 sm:p-4">
+        <div className="relative flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-2 sm:p-4">
           {linkUrl ? (
             <a href={linkUrl} target="_blank" rel="noopener noreferrer" onClick={handleClose} className="flex items-center justify-center">
               <img 

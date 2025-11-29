@@ -171,22 +171,22 @@ export const Header = () => {
           {/* Desktop Navigation - Single Row (only when space allows) */}
           <div className="hidden min-[2000px]:flex items-center space-x-3 flex-1 justify-center">
             <Link to="/" onClick={scrollToTop}>
-              <Button variant="ghost" className="font-roboto">
-                <List className="w-4 h-4 mr-1" />
+              <Button variant="ghost" className="font-roboto text-base">
+                <List className="w-5 h-5 mr-2" />
                 {t('navigation.listings')}
               </Button>
             </Link>
             
             <Link to="/marketplace" onClick={scrollToTop}>
-              <Button variant="ghost" className="font-roboto">
-                <ShoppingBag className="w-4 h-4 mr-1" />
+              <Button variant="ghost" className="font-roboto text-base">
+                <ShoppingBag className="w-5 h-5 mr-2" />
                 {t('navigation.marketplace')}
               </Button>
             </Link>
             
             <Link to="/events" onClick={scrollToTop}>
-              <Button variant="ghost" className="font-roboto">
-                <Calendar className="w-4 h-4 mr-1" />
+              <Button variant="ghost" className="font-roboto text-base">
+                <Calendar className="w-5 h-5 mr-2" />
                 {t('navigation.events')}
               </Button>
             </Link>
@@ -195,8 +195,8 @@ export const Header = () => {
             {isSignedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="font-roboto">
-                    <User className="w-4 h-4 mr-1" />
+                  <Button variant="ghost" className="font-roboto text-base">
+                    <User className="w-5 h-5 mr-2" />
                     {user?.fullName || user?.firstName || 'User'}
                     <ChevronDown className="w-4 h-4 ml-1" />
                   </Button>
