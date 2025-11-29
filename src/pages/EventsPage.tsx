@@ -588,74 +588,101 @@ export const EventsPage = () => {
       {/* Split Layout: Filters Sidebar + Events Grid - Sinc Style */}
       <div className="flex flex-col lg:flex-row">
         {/* Left Sidebar - Filters (scrollable independently) */}
-        <aside className="w-full lg:w-80 bg-white border-r border-gray-200 lg:h-screen lg:sticky lg:top-0 overflow-y-auto">
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Filters</h2>
+        <aside className="w-full lg:w-96 bg-white border-r border-gray-200 lg:h-screen lg:sticky lg:top-0 overflow-y-auto">
+          <div className="p-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">Filters</h2>
             <div className="space-y-6">
               {/* Search */}
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Search Events</label>
+              <div className="space-y-4">
+                <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Search Events</label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
                     placeholder="Search by name, venue, or hashtag..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                    className="pl-12 h-12 text-base border-gray-300 focus:border-orange-500 focus:ring-orange-500"
                   />
                 </div>
               </div>
 
-              {/* Category */}
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Category</label>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.slug}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Categories - Checkbox List like Sinc */}
+              <div className="space-y-4">
+                <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Categories</label>
+                <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+                  <label className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                    <input
+                      type="radio"
+                      name="category"
+                      checked={selectedCategory === 'all'}
+                      onChange={() => setSelectedCategory('all')}
+                      className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-base text-gray-700">All Categories</span>
+                  </label>
+                  {categories.map((category) => (
+                    <label key={category.id} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                      <input
+                        type="radio"
+                        name="category"
+                        checked={selectedCategory === category.slug}
+                        onChange={() => setSelectedCategory(category.slug)}
+                        className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                      />
+                      <span className="text-base text-gray-700">{category.name}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
               {/* Date Range */}
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Date Range</label>
+              <div className="space-y-4">
+                <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Date Range</label>
                 <div className="space-y-3">
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <Input
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="pl-10 h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                      className="pl-12 h-12 text-base border-gray-300 focus:border-orange-500 focus:ring-orange-500"
                       placeholder="From date"
                     />
                   </div>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <Input
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="pl-10 h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                      className="pl-12 h-12 text-base border-gray-300 focus:border-orange-500 focus:ring-orange-500"
                       placeholder="To date"
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Organizers - Like Sinc */}
+              <div className="space-y-4">
+                <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Organizers</label>
+                <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                  {[...new Set(events.map(e => e.organizer_name).filter(Boolean))].slice(0, 20).map((organizer, idx) => (
+                    <label key={idx} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-orange-500 focus:ring-orange-500 rounded"
+                      />
+                      <span className="text-base text-gray-700">{organizer}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               {/* Sort By */}
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Sort By</label>
+              <div className="space-y-4">
+                <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Sort By</label>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                  <SelectTrigger className="h-12 text-base border-gray-300 focus:border-orange-500 focus:ring-orange-500">
                     <ArrowUpDown className="h-5 w-5 mr-2" />
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
@@ -677,17 +704,17 @@ export const EventsPage = () => {
                     setEndDate('');
                   }}
                   variant="outline"
-                  className="w-full h-11 border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600"
+                  className="w-full h-12 text-base border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600"
                 >
-                  <X className="w-4 h-4 mr-2" />
+                  <X className="w-5 h-5 mr-2" />
                   Clear All Filters
                 </Button>
               )}
 
               {/* Results Count */}
-              <div className="pt-4 border-t border-gray-200">
-                <p className="text-sm text-gray-600">
-                  <span className="font-semibold text-gray-900">{sortedEvents.length}</span> events found
+              <div className="pt-6 border-t border-gray-200">
+                <p className="text-base text-gray-600">
+                  <span className="font-bold text-gray-900 text-lg">{sortedEvents.length}</span> events found
                 </p>
               </div>
             </div>
