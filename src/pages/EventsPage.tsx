@@ -30,6 +30,7 @@ export const EventsPage = () => {
   const [selectedEventForMap, setSelectedEventForMap] = useState<string | undefined>();
   const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid');
   const [showFilters, setShowFilters] = useState(false); // Mobile filters collapsed by default
+  const [timeFilter, setTimeFilter] = useState<'all' | 'active' | 'happening' | 'today' | 'tomorrow' | 'weekend'>('all');
 
   // Use real data from database
   const { events, loading, searchEvents} = useEvents();
@@ -108,10 +109,50 @@ export const EventsPage = () => {
     }
   });
 
+  // Apply time-based filter
+  const timeFilteredEvents = sortedEvents.filter(event => {
+    if (timeFilter === 'all') return true;
+    
+    const now = new Date();
+    const eventStart = new Date(event.start_date);
+    const eventEnd = new Date(event.end_date);
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const dayAfterTomorrow = new Date(tomorrow);
+    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
+    
+    switch (timeFilter) {
+      case 'active':
+        // Events that haven't ended yet (upcoming or ongoing)
+        return eventEnd >= now;
+      case 'happening':
+        // Events happening right now
+        return eventStart <= now && eventEnd >= now;
+      case 'today':
+        // Events starting today
+        return eventStart >= today && eventStart < tomorrow;
+      case 'tomorrow':
+        // Events starting tomorrow
+        return eventStart >= tomorrow && eventStart < dayAfterTomorrow;
+      case 'weekend':
+        // Events happening on the upcoming weekend (Saturday or Sunday)
+        const dayOfWeek = eventStart.getDay();
+        const daysUntilSaturday = (6 - now.getDay() + 7) % 7;
+        const nextSaturday = new Date(today);
+        nextSaturday.setDate(nextSaturday.getDate() + daysUntilSaturday);
+        const nextMonday = new Date(nextSaturday);
+        nextMonday.setDate(nextMonday.getDate() + 2);
+        return eventStart >= nextSaturday && eventStart < nextMonday;
+      default:
+        return true;
+    }
+  });
+
   // Split into Active and Past events BEFORE pagination
   const now = new Date();
-  const activeEvents = sortedEvents.filter(e => new Date(e.end_date) >= now);
-  const pastEvents = sortedEvents.filter(e => new Date(e.end_date) < now);
+  const activeEvents = timeFilteredEvents.filter(e => new Date(e.end_date) >= now);
+  const pastEvents = timeFilteredEvents.filter(e => new Date(e.end_date) < now);
 
   // Pagination (for display purposes, but we'll show all active and past separately)
   const totalPages = Math.ceil(sortedEvents.length / eventsPerPage);
@@ -837,6 +878,95 @@ export const EventsPage = () => {
         {/* Right Side - Events Grid */}
         <main className="flex-1 bg-gray-50">
           <div className="container mx-auto px-6 py-8">
+            {/* Top Bar: Time Filters + Create Event + Reset Filters */}
+            <div className="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              {/* Time-based Filters - Sinc Style */}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setTimeFilter('all')}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                    timeFilter === 'all'
+                      ? 'bg-orange-500 text-white shadow-lg'
+                      : 'bg-gray-800 text-white hover:bg-gray-700'
+                  }`}
+                >
+                  All Events
+                </button>
+                <button
+                  onClick={() => setTimeFilter('active')}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                    timeFilter === 'active'
+                      ? 'bg-orange-500 text-white shadow-lg'
+                      : 'bg-gray-800 text-white hover:bg-gray-700'
+                  }`}
+                >
+                  Active
+                </button>
+                <button
+                  onClick={() => setTimeFilter('happening')}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                    timeFilter === 'happening'
+                      ? 'bg-orange-500 text-white shadow-lg'
+                      : 'bg-gray-800 text-white hover:bg-gray-700'
+                  }`}
+                >
+                  Happening
+                </button>
+                <button
+                  onClick={() => setTimeFilter('today')}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                    timeFilter === 'today'
+                      ? 'bg-orange-500 text-white shadow-lg'
+                      : 'bg-gray-800 text-white hover:bg-gray-700'
+                  }`}
+                >
+                  Today
+                </button>
+                <button
+                  onClick={() => setTimeFilter('tomorrow')}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                    timeFilter === 'tomorrow'
+                      ? 'bg-orange-500 text-white shadow-lg'
+                      : 'bg-gray-800 text-white hover:bg-gray-700'
+                  }`}
+                >
+                  Tomorrow
+                </button>
+                <button
+                  onClick={() => setTimeFilter('weekend')}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                    timeFilter === 'weekend'
+                      ? 'bg-orange-500 text-white shadow-lg'
+                      : 'bg-gray-800 text-white hover:bg-gray-700'
+                  }`}
+                >
+                  Weekend
+                </button>
+              </div>
+
+              {/* Right Side: Create Event + Reset Filters */}
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedCategory('all');
+                    setStartDate('');
+                    setEndDate('');
+                    setTimeFilter('all');
+                  }}
+                  variant="outline"
+                  className="px-6 py-2.5 h-auto text-sm font-semibold border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600 transition-all"
+                >
+                  Reset Filters
+                </Button>
+                <Button
+                  onClick={() => navigate('/users/dashboard/events/create')}
+                  className="px-6 py-2.5 h-auto text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white shadow-lg transition-all"
+                >
+                  Create Event
+                </Button>
+              </div>
+            </div>
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto mb-4"></div>
@@ -888,7 +1018,7 @@ export const EventsPage = () => {
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                         {activeEvents.map((event) => (
                           <div key={event.id} onClick={() => handleViewEvent(event)} className="cursor-pointer">
                             <EventCard
@@ -929,7 +1059,7 @@ export const EventsPage = () => {
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                         {pastEvents.map((event) => (
                           <div key={event.id} onClick={() => handleViewEvent(event)} className="cursor-pointer">
                             <EventCard
