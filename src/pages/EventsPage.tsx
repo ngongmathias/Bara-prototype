@@ -722,9 +722,9 @@ export const EventsPage = () => {
       <HeroSlideshow />
 
       {/* Split Layout: Filters Sidebar + Events Grid - Sinc Style */}
-      <div className="flex flex-col lg:flex-row min-h-screen">
-        {/* Left Sidebar - Filters (scrolls independently) */}
-        <aside className="w-full lg:w-96 bg-white border-r border-gray-200 lg:sticky lg:top-0 lg:h-screen overflow-y-auto scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+      <div className="flex flex-col lg:flex-row">
+        {/* Left Sidebar - Filters (scrolls with page, not sticky) */}
+        <aside className="w-full lg:w-96 bg-white border-r border-gray-200">
           <div className="p-4 lg:p-8">
             {/* Mobile: Collapsible Filters Button */}
             <button
