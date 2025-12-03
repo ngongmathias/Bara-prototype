@@ -4,7 +4,6 @@ import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { HeroSection } from "@/components/HeroSection";
 import { CategoryGrid } from "@/components/CategoryGrid";
 import { BusinessSection } from "@/components/BusinessSection";
-import { QASection } from "@/components/QASection";
 import FrontendPopup from "@/components/FrontendPopup";
 
 import Footer from "@/components/Footer";
@@ -22,7 +21,6 @@ const Index = () => {
       <HeroSection />
       <CategoryGrid />
       <BusinessSection />
-      <QASection />
       <BottomBannerAd />
       <Footer />
     </div>
