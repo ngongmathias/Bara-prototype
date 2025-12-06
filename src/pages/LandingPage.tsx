@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MatrixRain } from '@/components/landing/MatrixRain';
-import { AfricaParticles } from '@/components/landing/AfricaParticles';
+import { BaraParticleText } from '@/components/landing/BaraParticleText';
+import { AfricaMapLogo, BLettermarkLogo, BaraTextLogo } from '@/components/landing/BaraLogo';
+import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { 
   Globe, 
   Store, 
@@ -84,10 +86,10 @@ const miniApps: MiniApp[] = [
 
 export const LandingPage = () => {
   const navigate = useNavigate();
+  const { selectedCountry, setSelectedCountry } = useCountrySelection();
   const [countries, setCountries] = useState<Country[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
 
   useEffect(() => {
     fetchCountries();
@@ -113,9 +115,16 @@ export const LandingPage = () => {
   );
 
   const handleCountrySelect = (country: Country) => {
-    setSelectedCountry(country);
+    // Save to global context (persists across pages)
+    setSelectedCountry({
+      id: country.id,
+      name: country.name,
+      code: country.code,
+      flag_emoji: country.flag_emoji
+    });
     setIsDropdownOpen(false);
-    navigate(`/countries/${country.code.toLowerCase()}`);
+    // Navigate to listings page filtered by this country
+    navigate('/listings');
   };
 
   const handleMiniAppClick = (path: string) => {
@@ -126,24 +135,42 @@ export const LandingPage = () => {
     <div className="relative min-h-screen bg-black overflow-hidden">
       {/* Background Effects */}
       <MatrixRain />
-      <AfricaParticles />
+      <BaraParticleText />
 
       {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
-        {/* Logo and Tagline */}
+      <div className="relative z-10 min-h-screen flex flex-col lg:flex-row items-center justify-between px-4 py-12 gap-12">
+        {/* Left Side - BARA Logos */}
         <motion.div
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1 }}
+          className="flex flex-col items-center lg:items-start gap-8 lg:w-1/3"
         >
-          <h1 className="text-6xl md:text-8xl font-bold text-white mb-4 tracking-wider">
-            BARA
-          </h1>
-          <p className="text-2xl md:text-3xl text-gold-400 font-light tracking-widest">
-            WE ARE TOGETHER
-          </p>
+          {/* Africa Map Logo */}
+          <motion.div
+            animate={{ rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <AfricaMapLogo className="w-32 h-32 md:w-40 md:h-40" />
+          </motion.div>
+
+          {/* X Symbol */}
+          <div className="text-gold-400 text-4xl font-bold">×</div>
+
+          {/* B Lettermark Logo */}
+          <motion.div
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <BLettermarkLogo className="w-40 h-40 md:w-48 md:h-48" />
+          </motion.div>
+
+          {/* BARA Text */}
+          <BaraTextLogo className="text-white text-center lg:text-left" />
         </motion.div>
+
+        {/* Center - Country Dropdown */}
+        <div className="flex-1 flex flex-col items-center justify-center gap-8 lg:w-1/3">
 
         {/* Big Country Dropdown */}
         <motion.div
@@ -217,15 +244,16 @@ export const LandingPage = () => {
             )}
           </div>
         </motion.div>
+        </div>
 
-        {/* Mini-App Dashboard Grid */}
+        {/* Right Side - Mini-App Dashboard Grid */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="w-full max-w-6xl"
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, delay: 0.4 }}
+          className="lg:w-1/3"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 gap-4">
             {miniApps.map((app, index) => {
               const Icon = app.icon;
               return (
@@ -237,18 +265,18 @@ export const LandingPage = () => {
                   whileHover={{ scale: 1.05, y: -5 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleMiniAppClick(app.path)}
-                  className="group relative bg-white/10 backdrop-blur-md border-2 border-white/20 rounded-2xl p-8 hover:border-gold-400/50 transition-all duration-300 overflow-hidden"
+                  className="group relative bg-white/10 backdrop-blur-md border-2 border-white/20 rounded-xl p-6 hover:border-gold-400/50 transition-all duration-300 overflow-hidden"
                 >
                   {/* Gradient Background */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${app.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
                   
                   {/* Content */}
                   <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="mb-4 p-4 bg-white/10 rounded-xl group-hover:bg-white/20 transition-colors duration-300">
-                      <Icon className="w-12 h-12 text-gold-400" />
+                    <div className="mb-2 p-3 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors duration-300">
+                      <Icon className="w-8 h-8 text-gold-400" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">{app.title}</h3>
-                    <p className="text-sm text-gray-300">{app.description}</p>
+                    <h3 className="text-sm font-bold text-white mb-1">{app.title}</h3>
+                    <p className="text-xs text-gray-300">{app.description}</p>
                   </div>
 
                   {/* Hover Effect Border */}
@@ -259,16 +287,6 @@ export const LandingPage = () => {
               );
             })}
           </div>
-        </motion.div>
-
-        {/* Footer Text */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1 }}
-          className="mt-16 text-center text-gray-400 text-sm"
-        >
-          <p>Connecting Africa, One Community at a Time</p>
         </motion.div>
       </div>
     </div>
