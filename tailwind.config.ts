@@ -35,6 +35,13 @@ export default {
 				'brand-blue': 'hsl(var(--yp-blue))',
 				'brand-blue-hover': 'hsl(var(--yp-blue-hover))',
 				
+				// Gold Colors for Landing Page
+				'gold': {
+					'400': '#FFD700',
+					'500': '#FFC700',
+					'600': '#FFB700',
+				},
+				
 				// Neutral Colors
 				'dark': 'hsl(var(--yp-dark))',
 				'gray-dark': 'hsl(var(--yp-gray-dark))',
