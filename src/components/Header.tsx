@@ -315,27 +315,31 @@ export const Header = () => {
         </div>
 
         {/* Second Row - Navigation Links (mobile/tablet scrollable, hidden on large desktop) */}
-        <div className="flex md:hidden items-center justify-start space-x-2 pb-3 border-t border-gray-100 pt-3 overflow-x-auto px-4 scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
-          <Link to="/" onClick={scrollToTop}>
-            <Button variant="ghost" className="font-roboto">
-              <List className="w-4 h-4 mr-1" />
-              {t('navigation.listings')}
-            </Button>
-          </Link>
+        <div className="relative md:hidden border-t border-gray-100">
+          {/* Gradient fade indicator on right to show more content */}
+          <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none z-10"></div>
           
-          <Link to="/marketplace" onClick={scrollToTop}>
-            <Button variant="ghost" className="font-roboto">
-              <ShoppingBag className="w-4 h-4 mr-1" />
-              {t('navigation.marketplace')}
-            </Button>
-          </Link>
-          
-          <Link to="/events" onClick={scrollToTop}>
-            <Button variant="ghost" className="font-roboto">
-              <Calendar className="w-4 h-4 mr-1" />
-              {t('navigation.events')}
-            </Button>
-          </Link>
+          <div className="flex items-center justify-start space-x-2 pb-3 pt-3 overflow-x-auto px-4 scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+            <Link to="/" onClick={scrollToTop}>
+              <Button variant="ghost" className="font-roboto">
+                <List className="w-4 h-4 mr-1" />
+                {t('navigation.listings')}
+              </Button>
+            </Link>
+            
+            <Link to="/marketplace" onClick={scrollToTop}>
+              <Button variant="ghost" className="font-roboto">
+                <ShoppingBag className="w-4 h-4 mr-1" />
+                {t('navigation.marketplace')}
+              </Button>
+            </Link>
+            
+            <Link to="/events" onClick={scrollToTop}>
+              <Button variant="ghost" className="font-roboto">
+                <Calendar className="w-4 h-4 mr-1" />
+                {t('navigation.events')}
+              </Button>
+            </Link>
 
           {/* Users Menu - Show dropdown when signed in, link when not signed in */}
           {isSignedIn ? (
@@ -387,6 +391,7 @@ export const Header = () => {
 
           {/* Admin Link */}
           <AdminNavLink />
+          </div>
         </div>
       </div>
 
