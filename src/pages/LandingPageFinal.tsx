@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { InteractiveBaraLogo } from '@/components/landing/InteractiveBaraLogo';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { 
   Globe, 
@@ -127,58 +128,13 @@ export const LandingPageFinal = () => {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-8 py-16 gap-12">
         
-        {/* Logo Section */}
+        {/* Interactive Logo Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="flex flex-col items-center gap-6"
         >
-          {/* Top Row: Africa × B */}
-          <div className="flex items-center gap-8">
-            {/* Africa Map */}
-            <motion.div
-              whileHover={{ scale: 1.08, rotate: 2 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <img 
-                src="/images/africa-map.png" 
-                alt="Africa Map Logo"
-                className="w-28 h-auto drop-shadow-xl"
-              />
-            </motion.div>
-
-            {/* × Symbol - Static, clean */}
-            <div className="text-black text-5xl font-light">×</div>
-
-            {/* B Lettermark */}
-            <motion.div
-              whileHover={{ scale: 1.08, rotate: -2 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <img 
-                src="/images/b-lettermark.png" 
-                alt="B Lettermark Logo"
-                className="w-28 h-auto drop-shadow-xl"
-              />
-            </motion.div>
-          </div>
-
-          {/* BARA Text */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <img 
-              src="/images/bara-text.png" 
-              alt="BARA Logo"
-              className="w-80 h-auto drop-shadow-lg"
-            />
-            <p className="text-center text-xs text-gray-500 tracking-[0.3em] uppercase mt-2">
-              We Are Together
-            </p>
-          </motion.div>
+          <InteractiveBaraLogo />
         </motion.div>
 
         {/* Country Dropdown - Clean & Modern */}
