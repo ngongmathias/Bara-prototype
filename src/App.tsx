@@ -30,6 +30,7 @@ import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { AdminCities } from "./pages/admin/AdminCities";
 import { AdminCountries } from "./pages/admin/AdminCountries";
 import { AdminCountryInfo } from "./pages/admin/AdminCountryInfo";
+import { AdminGlobalAfrica } from "./pages/admin/AdminGlobalAfrica";
 import { AdminBusinesses } from "./pages/admin/AdminBusinesses";
 import { AdminEventsEnhanced as AdminEvents } from "./pages/admin/AdminEventsEnhanced";
 import { AdminReviews } from "./pages/admin/AdminReviews";
@@ -204,6 +205,11 @@ const AppRoutes = () => {
       <Route path="/admin/country-info" element={
         <AdminAuthGuard>
           <AdminCountryInfo />
+        </AdminAuthGuard>
+      } />
+      <Route path="/admin/global-africa" element={
+        <AdminAuthGuard>
+          <AdminGlobalAfrica />
         </AdminAuthGuard>
       } />
       <Route path="/admin/businesses" element={

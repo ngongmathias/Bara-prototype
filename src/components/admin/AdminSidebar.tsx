@@ -57,6 +57,12 @@ const adminMenuItems = [
     description: "Manage country information"
   },
   {
+    title: "Global Africa",
+    icon: Globe,
+    path: "/admin/global-africa",
+    description: "Manage diaspora communities"
+  },
+  {
     title: "Categories",
     icon: FolderOpen,
     path: "/admin/categories",
