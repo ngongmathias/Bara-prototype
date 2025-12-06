@@ -60,9 +60,15 @@ Based on `bara landing.jpg` mockup:
 #### 3. Content Sections to Include
 
 ##### Hero Section (Full Screen)
-- **Left Side:** Large BARA logo with Africa map + "B" + "BARA" text
+- **Top:** Large BARA logo with Africa map + "B" + "BARA" text
 - **Tagline:** "WE ARE TOGETHER" prominently displayed
-- **Center/Right:** Login/Sign Up card OR navigation grid
+- **CENTER (BIG):** Large country dropdown selector - "Choose Your Country"
+  - Prominent placement in middle of screen
+  - Large, animated dropdown
+  - Search functionality
+  - Flag emojis for each country
+  - Smooth animations on selection
+- **Below Dropdown:** Mini-app dashboard grid (WeChat style)
 - **Background:** Animated cityscape or subtle animations
 - **Scroll indicator:** Animated arrow/icon to show more content below
 
@@ -77,39 +83,40 @@ Based on `bara landing.jpg` mockup:
   - Section on landing page
   - Separate dedicated area
 
-##### Platform Navigation Grid (Inspired by mockup)
-Six main sections displayed as clickable cards/tiles:
+##### Mini-App Dashboard Grid (WeChat Style)
+Six main "mini-apps" displayed as clickable cards/tiles below the country selector:
 
-1. **BARA GLOBAL**
-   - Global platform overview
-   - International reach
-   - Link to global section
+**IMPORTANT:** All mini-apps must be prefixed with "BARA" in their names
 
-2. **BARA LISTINGS** (Business Listings)
+1. **BARA Advertise**
+   - Advertising opportunities
+   - Banner ads, sponsored content
+   - Link to `/advertise`
+
+2. **BARA Countries**
+   - Browse African countries
+   - Country information pages
+   - Link to `/countries`
+
+3. **BARA Listings** (Business Listings)
    - Browse businesses
    - Search functionality
-   - Link to `/listings` or `/business-listings`
+   - Link to `/listings`
 
-3. **BARA EVENTS**
+4. **BARA Events**
    - Upcoming events
-   - Event calendar
+   - Ticketing, live streaming
    - Link to `/events`
 
-4. **BARA MARKETPLACE**
+5. **BARA Marketplace**
    - Shop products/services
-   - Browse categories
+   - Dubizzle-style UI
    - Link to `/marketplace`
 
-5. **BARA COMMUNITIES**
+6. **BARA Communities**
    - Local communities
    - Join groups
    - Link to `/communities`
-
-6. **BARA NEWS**
-   - Latest updates
-   - RSS feeds
-   - Blog/news section
-   - Link to `/news`
 
 **Design for Grid:**
 - Clean, minimalist cards
