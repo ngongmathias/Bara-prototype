@@ -27,8 +27,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { db } from "@/lib/supabase";
 
 import { FeaturedBusinesses } from "@/components/FeaturedBusinesses";
-
-import FrontendPopup from "@/components/FrontendPopup";
 import {
 
   DropdownMenu,
@@ -922,13 +920,6 @@ export const ListingsPage = () => {
     <div className="min-h-screen bg-background font-roboto">
 
       <Header />
-
-       <FrontendPopup 
-         intervalSeconds={15}
-         firstDelaySeconds={3}
-         closeLabel="Close"
-       />
-      
 
       {/* Search Header */}
 

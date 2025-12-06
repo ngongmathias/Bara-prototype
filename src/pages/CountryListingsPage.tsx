@@ -10,7 +10,6 @@ import { Business, BusinessService } from "@/lib/businessService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { db } from "@/lib/supabase";
 import { FeaturedBusinesses } from "@/components/FeaturedBusinesses";
-import DbPopupAd from "@/components/DbPopupAd";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -448,8 +447,6 @@ export const CountryListingsPage = () => {
 
   return (
     <div className="min-h-screen bg-background font-roboto">
-      <DbPopupAd />
-      
       {/* Search Header */}
       <div className="bg-yp-yellow py-4">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
