@@ -92,7 +92,7 @@ export const AdminGlobalAfrica: React.FC = () => {
 
   const fetchEntries = async () => {
     try {
-      const { data, error } = await db.from('global_africa')
+      const { data, error } = await db.global_africa()
         .select('id, name, code, flag_emoji, display_order, is_active')
         .order('display_order', { ascending: true });
 
@@ -106,7 +106,7 @@ export const AdminGlobalAfrica: React.FC = () => {
 
   const fetchEntriesInfo = async () => {
     try {
-      const { data, error } = await db.from('global_africa_info')
+      const { data, error } = await db.global_africa_info()
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -179,14 +179,14 @@ export const AdminGlobalAfrica: React.FC = () => {
   const handleSave = async () => {
     try {
       if (editingInfo) {
-        const { error } = await db.from('global_africa_info')
+        const { error } = await db.global_africa_info()
           .update(formData)
           .eq('id', editingInfo.id);
 
         if (error) throw error;
         toast.success('Global Africa information updated successfully');
       } else {
-        const { error } = await db.from('global_africa_info')
+        const { error } = await db.global_africa_info()
           .insert([formData]);
 
         if (error) throw error;
@@ -208,7 +208,7 @@ export const AdminGlobalAfrica: React.FC = () => {
     }
 
     try {
-      const { error } = await db.from('global_africa_info')
+      const { error } = await db.global_africa_info()
         .delete()
         .eq('id', info.id);
 
