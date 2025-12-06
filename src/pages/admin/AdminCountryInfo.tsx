@@ -72,6 +72,8 @@ interface CountryInfo {
   national_holidays: any[] | null;
   flag_url: string | null;
   coat_of_arms_url: string | null;
+  leader_image_url: string | null;
+  monument_image_url: string | null;
   national_anthem_url: string | null;
   climate: string | null;
   natural_resources: string | null;
@@ -93,6 +95,7 @@ export const AdminCountryInfo: React.FC = () => {
   const [formData, setFormData] = useState<Partial<CountryInfo>>({});
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImageType, setUploadingImageType] = useState<'coat_of_arms' | 'flag' | 'leader' | 'monument' | null>(null);
 
   useEffect(() => {
     fetchCountries();
@@ -144,7 +147,7 @@ export const AdminCountryInfo: React.FC = () => {
     setIsDialogOpen(true);
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, imageType: 'coat_of_arms' | 'flag' | 'leader' | 'monument') => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -161,16 +164,32 @@ export const AdminCountryInfo: React.FC = () => {
     }
 
     setUploadingImage(true);
+    setUploadingImageType(imageType);
     try {
-      const imageUrl = await uploadImage(file, 'country-coat-of-arms', 'images');
-      setFormData({ ...formData, coat_of_arms_url: imageUrl });
-      setImagePreview(imageUrl);
-      toast.success('Image uploaded successfully');
+      const folderMap = {
+        coat_of_arms: 'country-coat-of-arms',
+        flag: 'country-flags',
+        leader: 'country-leaders',
+        monument: 'country-monuments'
+      };
+      
+      const imageUrl = await uploadImage(file, folderMap[imageType], 'images');
+      
+      const fieldMap = {
+        coat_of_arms: 'coat_of_arms_url',
+        flag: 'flag_url',
+        leader: 'leader_image_url',
+        monument: 'monument_image_url'
+      };
+      
+      setFormData({ ...formData, [fieldMap[imageType]]: imageUrl });
+      toast.success(`${imageType.replace('_', ' ')} uploaded successfully`);
     } catch (error) {
       console.error('Error uploading image:', error);
       toast.error('Failed to upload image');
     } finally {
       setUploadingImage(false);
+      setUploadingImageType(null);
     }
   };
 
@@ -496,6 +515,14 @@ export const AdminCountryInfo: React.FC = () => {
                               <p className="text-sm text-gray-600 mt-1">{info.largest_city || 'Not provided'}</p>
                             </div>
                             <div>
+                              <Label className="text-sm font-medium text-gray-700">Largest City Population</Label>
+                              <p className="text-sm text-gray-600 mt-1">{info.largest_city_population?.toLocaleString() || 'Not provided'}</p>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium text-gray-700">Capital Population</Label>
+                              <p className="text-sm text-gray-600 mt-1">{info.capital_population?.toLocaleString() || 'Not provided'}</p>
+                            </div>
+                            <div>
                               <Label className="text-sm font-medium text-gray-700">HDI Score</Label>
                               <p className="text-sm text-gray-600 mt-1">{info.hdi_score || 'Not provided'}</p>
                             </div>
@@ -750,27 +777,53 @@ export const AdminCountryInfo: React.FC = () => {
                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Geographic Information</h3>
                 
                 <div>
-                  <Label htmlFor="latitude">Latitude</Label>
+                  <Label htmlFor="coordinates_combined">Coordinates (Combined Format)</Label>
                   <Input
-                    id="latitude"
-                    type="number"
-                    step="any"
-                    value={formData.latitude || ''}
-                    onChange={(e) => setFormData({...formData, latitude: parseFloat(e.target.value) || null})}
-                    placeholder="Latitude coordinate"
+                    id="coordinates_combined"
+                    value={
+                      formData.latitude && formData.longitude
+                        ? `${Math.abs(formData.latitude)}° ${formData.latitude >= 0 ? 'N' : 'S'}, ${Math.abs(formData.longitude)}° ${formData.longitude >= 0 ? 'E' : 'W'}`
+                        : ''
+                    }
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Parse format like "1.9403° S, 29.8739° E"
+                      const match = value.match(/([0-9.]+)°?\s*([NS]),?\s*([0-9.]+)°?\s*([EW])/i);
+                      if (match) {
+                        const lat = parseFloat(match[1]) * (match[2].toUpperCase() === 'S' ? -1 : 1);
+                        const lon = parseFloat(match[3]) * (match[4].toUpperCase() === 'W' ? -1 : 1);
+                        setFormData({...formData, latitude: lat, longitude: lon});
+                      }
+                    }}
+                    placeholder="e.g., 1.9403° S, 29.8739° E"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Format: [number]° N/S, [number]° E/W</p>
                 </div>
 
-                <div>
-                  <Label htmlFor="longitude">Longitude</Label>
-                  <Input
-                    id="longitude"
-                    type="number"
-                    step="any"
-                    value={formData.longitude || ''}
-                    onChange={(e) => setFormData({...formData, longitude: parseFloat(e.target.value) || null})}
-                    placeholder="Longitude coordinate"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="latitude">Latitude (Decimal)</Label>
+                    <Input
+                      id="latitude"
+                      type="number"
+                      step="any"
+                      value={formData.latitude || ''}
+                      onChange={(e) => setFormData({...formData, latitude: parseFloat(e.target.value) || null})}
+                      placeholder="e.g., -1.9403"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="longitude">Longitude (Decimal)</Label>
+                    <Input
+                      id="longitude"
+                      type="number"
+                      step="any"
+                      value={formData.longitude || ''}
+                      onChange={(e) => setFormData({...formData, longitude: parseFloat(e.target.value) || null})}
+                      placeholder="e.g., 29.8739"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -817,6 +870,28 @@ export const AdminCountryInfo: React.FC = () => {
                     value={formData.largest_city || ''}
                     onChange={(e) => setFormData({...formData, largest_city: e.target.value})}
                     placeholder="Largest city by population"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="largest_city_population">Largest City Population</Label>
+                  <Input
+                    id="largest_city_population"
+                    type="number"
+                    value={formData.largest_city_population || ''}
+                    onChange={(e) => setFormData({...formData, largest_city_population: parseInt(e.target.value) || null})}
+                    placeholder="Population of largest city"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="capital_population">Capital Population</Label>
+                  <Input
+                    id="capital_population"
+                    type="number"
+                    value={formData.capital_population || ''}
+                    onChange={(e) => setFormData({...formData, capital_population: parseInt(e.target.value) || null})}
+                    placeholder="Population of capital city"
                   />
                 </div>
 
@@ -896,70 +971,190 @@ export const AdminCountryInfo: React.FC = () => {
               </div>
 
               {/* Visual Assets */}
-              <div className="space-y-4">
+              <div className="space-y-6 md:col-span-2">
                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Visual Assets</h3>
                 
-                <div>
-                  <Label htmlFor="coat_of_arms">Coat of Arms (Optional)</Label>
-                  <div className="space-y-4">
-                    {imagePreview && (
-                      <div className="relative">
-                        <img 
-                          src={imagePreview} 
-                          alt="Coat of arms preview"
-                          className="w-32 h-32 object-contain border border-gray-300 rounded-lg"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setImagePreview(null);
-                            setFormData({...formData, coat_of_arms_url: ''});
-                          }}
-                          className="absolute -top-2 -right-2 bg-white border-red-300 text-red-600 hover:bg-red-50"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center space-x-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Flag */}
+                  <div>
+                    <Label htmlFor="flag_image">Flag</Label>
+                    <div className="space-y-2">
+                      {formData.flag_url && (
+                        <div className="relative">
+                          <img 
+                            src={formData.flag_url} 
+                            alt="Flag preview"
+                            className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFormData({...formData, flag_url: null})}
+                            className="absolute -top-2 -right-2 bg-white border-red-300 text-red-600 hover:bg-red-50"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        id="flag_image"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, 'flag')}
+                        className="hidden"
+                        disabled={uploadingImage}
+                      />
+                      <label
+                        htmlFor="flag_image"
+                        className="flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 w-full"
+                      >
+                        {uploadingImage && uploadingImageType === 'flag' ? (
+                          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Upload className="w-4 h-4" />
+                        )}
+                        <span className="text-sm">Upload Flag</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Coat of Arms */}
+                  <div>
+                    <Label htmlFor="coat_of_arms">Coat of Arms</Label>
+                    <div className="space-y-2">
+                      {formData.coat_of_arms_url && (
+                        <div className="relative">
+                          <img 
+                            src={formData.coat_of_arms_url} 
+                            alt="Coat of arms preview"
+                            className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFormData({...formData, coat_of_arms_url: null})}
+                            className="absolute -top-2 -right-2 bg-white border-red-300 text-red-600 hover:bg-red-50"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
                       <input
                         type="file"
                         id="coat_of_arms"
                         accept="image/*"
-                        onChange={handleImageUpload}
+                        onChange={(e) => handleImageUpload(e, 'coat_of_arms')}
                         className="hidden"
                         disabled={uploadingImage}
                       />
                       <label
                         htmlFor="coat_of_arms"
-                        className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-50"
+                        className="flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 w-full"
                       >
-                        {uploadingImage ? (
+                        {uploadingImage && uploadingImageType === 'coat_of_arms' ? (
                           <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <Upload className="w-4 h-4" />
                         )}
-                        <span className="text-sm">
-                          {uploadingImage ? 'Uploading...' : 'Upload Coat of Arms'}
-                        </span>
+                        <span className="text-sm">Upload Coat of Arms</span>
                       </label>
-                      
-                      {!imagePreview && (
-                        <div className="flex items-center space-x-2 text-sm text-gray-500">
-                          <ImageIcon className="w-4 h-4" />
-                          <span>No image selected</span>
+                    </div>
+                  </div>
+
+                  {/* President/Leader Photo */}
+                  <div>
+                    <Label htmlFor="leader_image">President/Leader Photo</Label>
+                    <div className="space-y-2">
+                      {formData.leader_image_url && (
+                        <div className="relative">
+                          <img 
+                            src={formData.leader_image_url} 
+                            alt="Leader preview"
+                            className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFormData({...formData, leader_image_url: null})}
+                            className="absolute -top-2 -right-2 bg-white border-red-300 text-red-600 hover:bg-red-50"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
                         </div>
                       )}
+                      <input
+                        type="file"
+                        id="leader_image"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, 'leader')}
+                        className="hidden"
+                        disabled={uploadingImage}
+                      />
+                      <label
+                        htmlFor="leader_image"
+                        className="flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 w-full"
+                      >
+                        {uploadingImage && uploadingImageType === 'leader' ? (
+                          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Upload className="w-4 h-4" />
+                        )}
+                        <span className="text-sm">Upload Leader Photo</span>
+                      </label>
                     </div>
-                    
-                    <p className="text-xs text-gray-500">
-                      Supported formats: JPG, PNG, GIF. Max size: 5MB
-                    </p>
+                  </div>
+
+                  {/* Monument/Landmark Photo */}
+                  <div>
+                    <Label htmlFor="monument_image">Monument/Landmark Photo</Label>
+                    <div className="space-y-2">
+                      {formData.monument_image_url && (
+                        <div className="relative">
+                          <img 
+                            src={formData.monument_image_url} 
+                            alt="Monument preview"
+                            className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFormData({...formData, monument_image_url: null})}
+                            className="absolute -top-2 -right-2 bg-white border-red-300 text-red-600 hover:bg-red-50"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        id="monument_image"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, 'monument')}
+                        className="hidden"
+                        disabled={uploadingImage}
+                      />
+                      <label
+                        htmlFor="monument_image"
+                        className="flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 w-full"
+                      >
+                        {uploadingImage && uploadingImageType === 'monument' ? (
+                          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Upload className="w-4 h-4" />
+                        )}
+                        <span className="text-sm">Upload Monument Photo</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
+                
+                <p className="text-xs text-gray-500">
+                  Supported formats: JPG, PNG, GIF. Max size: 5MB per image
+                </p>
               </div>
             </div>
 
