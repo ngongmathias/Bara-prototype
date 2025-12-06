@@ -484,21 +484,60 @@ export const AdminGlobalAfrica: React.FC = () => {
           })}
         </div>
 
-        {filteredInfo.length === 0 && (
+        {/* Entries Without Information */}
+        {(() => {
+          const entriesWithoutInfo = entries.filter(entry => 
+            !entriesInfo.some(info => info.global_africa_id === entry.id)
+          );
+          
+          if (entriesWithoutInfo.length > 0) {
+            return (
+              <>
+                <div className="border-t pt-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                    Entries Without Information ({entriesWithoutInfo.length})
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {entriesWithoutInfo.map((entry) => (
+                      <Card key={entry.id} className="border-dashed">
+                        <CardContent className="pt-6">
+                          <div className="text-center space-y-4">
+                            <span className="text-5xl">{entry.flag_emoji}</span>
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-900">{entry.name}</h3>
+                              <p className="text-sm text-gray-500">Code: {entry.code}</p>
+                            </div>
+                            <Button 
+                              onClick={() => {
+                                setEditingInfo(null);
+                                setFormData({ global_africa_id: entry.id });
+                                setIsDialogOpen(true);
+                              }}
+                              className="w-full bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add Information
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </>
+            );
+          }
+          return null;
+        })()}
+
+        {filteredInfo.length === 0 && entriesInfo.length > 0 && (
           <Card>
             <CardContent className="p-12 text-center">
               <Globe className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No information found</h3>
               <p className="text-gray-600 mb-4">
-                {searchTerm || selectedEntry 
-                  ? 'Try adjusting your search criteria' 
-                  : 'No Global Africa information has been added yet'
-                }
+                Try adjusting your search criteria
               </p>
-              <Button onClick={handleCreateNew} className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Information
-              </Button>
             </CardContent>
           </Card>
         )}
