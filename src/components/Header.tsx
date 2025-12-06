@@ -19,6 +19,7 @@ import {
   ChevronDown,
   Shield,
   ChevronRight,
+  ChevronLeft,
   MapPin
 } from 'lucide-react';
 import {
@@ -75,6 +76,9 @@ export const Header = () => {
   const { selectedCountry, setSelectedCountry } = useCountrySelection();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileMenuClosing, setMobileMenuClosing] = useState(false);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -151,6 +155,26 @@ export const Header = () => {
 
   const toggleCountriesExpanded = () => {
     setCountriesExpanded(!countriesExpanded);
+  };
+
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setShowLeftArrow(scrollLeft > 10);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -316,10 +340,37 @@ export const Header = () => {
 
         {/* Second Row - Navigation Links (mobile/tablet scrollable, hidden on large desktop) */}
         <div className="relative md:hidden border-t border-gray-100">
+          {/* Subtle Left Arrow */}
+          {showLeftArrow && (
+            <button
+              onClick={scrollLeft}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white p-1 rounded-full shadow-sm"
+              aria-label="Scroll left"
+            >
+              <ChevronLeft className="w-4 h-4 text-gray-600" />
+            </button>
+          )}
+          
           {/* Gradient fade indicator on right to show more content */}
           <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none z-10"></div>
           
-          <div className="flex items-center justify-start space-x-2 pb-3 pt-3 overflow-x-auto px-4 scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+          {/* Subtle Right Arrow */}
+          {showRightArrow && (
+            <button
+              onClick={scrollRight}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white p-1 rounded-full shadow-sm"
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="w-4 h-4 text-gray-600" />
+            </button>
+          )}
+          
+          <div 
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="flex items-center justify-start space-x-2 pb-3 pt-3 overflow-x-auto px-4 scrollbar-hide" 
+            style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}
+          >
             <Link to="/" onClick={scrollToTop}>
               <Button variant="ghost" className="font-roboto">
                 <List className="w-4 h-4 mr-1" />
