@@ -10,7 +10,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 // Test Supabase connection early
 import "@/lib/testSupabase";
-import { LandingPageV2 as LandingPage } from "./pages/LandingPageV2";
+import { LandingPageV3 as LandingPage } from "./pages/LandingPageV3";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { ListingsPage } from "./pages/ListingsPage";
