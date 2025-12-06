@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExactBaraLogo } from '@/components/landing/ExactBaraLogo';
+import { RealBaraLogo } from '@/components/landing/RealBaraLogo';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { 
   Globe, 
@@ -134,7 +134,7 @@ export const LandingPageV3 = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <ExactBaraLogo />
+          <RealBaraLogo />
         </motion.div>
 
         {/* Country Dropdown - Middle */}
