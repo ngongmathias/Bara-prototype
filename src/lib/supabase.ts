@@ -181,6 +181,10 @@ export const getAdminDb = () => {
     // Country info operations
     country_info: () => adminSupabase.from('country_info'),
     
+    // Global Africa operations
+    global_africa: () => adminSupabase.from('global_africa'),
+    global_africa_info: () => adminSupabase.from('global_africa_info'),
+    
     // Slideshow images operations
     slideshow_images: () => adminSupabase.from('slideshow_images'),
     
@@ -431,6 +435,10 @@ export const db = {
   
   // Country info operations
   country_info: () => supabase.from('country_info'),
+  
+  // Global Africa operations
+  global_africa: () => supabase.from('global_africa'),
+  global_africa_info: () => supabase.from('global_africa_info'),
   
   // Slideshow images operations
   slideshow_images: () => supabase.from('slideshow_images'),
