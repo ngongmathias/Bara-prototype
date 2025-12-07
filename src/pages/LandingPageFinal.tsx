@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DancingBaraLogo } from '@/components/landing/DancingBaraLogo';
 import { MatrixRain } from '@/components/landing/MatrixRain';
+import { RSSFeeds } from '@/components/landing/RSSFeeds';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
@@ -116,7 +117,7 @@ export const LandingPageFinal = () => {
       flag_emoji: country.flag_emoji
     });
     setIsDropdownOpen(false);
-    navigate('/listings');
+    // Stay on landing page - don't navigate
   };
 
   const handleMiniAppClick = (path: string) => {
@@ -276,10 +277,23 @@ export const LandingPageFinal = () => {
           </div>
         </motion.div>
 
+        {/* RSS Feeds - Updates based on selected country */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="w-full max-w-6xl mt-8"
+        >
+          <RSSFeeds 
+            countryName={selectedCountry?.name} 
+            countryCode={selectedCountry?.code}
+          />
+        </motion.div>
+
       </div>
 
       {/* Footer */}
-      <div className="relative z-20">
+      <div className="relative z-20 mt-16">
         <Footer />
       </div>
     </div>
