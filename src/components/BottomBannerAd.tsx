@@ -235,12 +235,12 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
 
   return (
     <div 
-      className={`w-full bg-gradient-to-r from-purple-50 to-pink-100 border-t border-gray-200 px-[15px] py-[15px] ${className}`}
+      className={`w-full bg-gradient-to-r from-purple-50 to-pink-100 border-t border-gray-200 py-4 flex justify-center ${className}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="w-full">
-        {/* Full width banner image */}
+      <div className="w-full max-w-[728px] px-4">
+        {/* Centered banner image - 728x90 leaderboard */}
         <div className="w-full relative">
             {bannerToShow ? (
               targetUrl ? (
@@ -263,7 +263,7 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
                     <img
                       src={bannerToShow.banner_image_url}
                       alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
-                      className="w-full h-auto max-h-[200px] object-contain bg-gradient-to-r from-purple-50 to-pink-50"
+                      className="w-full h-[90px] object-cover bg-gradient-to-r from-purple-50 to-pink-50"
                     />
                   </div>
                 </a>
@@ -277,7 +277,7 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
                     <img
                       src={bannerToShow.banner_image_url}
                       alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
-                      className="w-full h-auto max-h-[200px] object-contain bg-gradient-to-r from-purple-50 to-pink-50"
+                      className="w-full h-[90px] object-cover bg-gradient-to-r from-purple-50 to-pink-50"
                     />
                   </div>
                 </div>

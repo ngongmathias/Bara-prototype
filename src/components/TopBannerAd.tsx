@@ -235,12 +235,12 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
 
   return (
     <div 
-      className={`w-full bg-gradient-to-r from-blue-50 to-indigo-100 border-b border-gray-200 px-[15px] py-[15px] ${className}`}
+      className={`w-full bg-gradient-to-r from-blue-50 to-indigo-100 border-b border-gray-200 py-4 flex justify-center ${className}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="w-full">
-        {/* Full width banner image */}
+      <div className="w-full max-w-[728px] px-4">
+        {/* Centered banner image - 728x90 leaderboard */}
         <div className="w-full relative">
             {bannerToShow ? (
               targetUrl ? (
