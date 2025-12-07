@@ -124,12 +124,12 @@ export const LandingPageFinal = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-black">
+    <div className="relative min-h-screen bg-white">
       {/* Matrix Rain Background - Full Page */}
       <MatrixRain />
       
-      {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/50 pointer-events-none" />
+      {/* Subtle white overlay to lighten the rain */}
+      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
 
       {/* Header */}
       <div className="relative z-20">
@@ -148,19 +148,23 @@ export const LandingPageFinal = () => {
           <DancingBaraLogo />
         </motion.div>
 
-        {/* Country Dropdown - Clean & Modern */}
+        {/* Country Dropdown - VERY VISIBLE */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="w-full max-w-lg"
+          className="w-full max-w-2xl"
         >
+          <div className="text-center mb-4">
+            <h2 className="text-3xl font-bold text-black mb-2">Choose Your Country</h2>
+            <p className="text-gray-600">Select your location to explore businesses and events</p>
+          </div>
           <div className="relative">
             <motion.button
-              whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0,0,0,0.15)" }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.03, boxShadow: "0 25px 50px rgba(0,0,0,0.2)" }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full bg-black hover:bg-gray-900 text-white font-semibold py-5 px-8 rounded-2xl shadow-xl flex items-center justify-between transition-all duration-300"
+              className="w-full bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-black text-white font-bold py-7 px-10 rounded-2xl shadow-2xl flex items-center justify-between transition-all duration-300 border-2 border-black"
             >
               <span className="flex items-center gap-4 text-lg">
                 {selectedCountry ? (
