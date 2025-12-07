@@ -24,6 +24,7 @@ import { CategoriesPage } from "./pages/CategoriesPage";
 import { CityDetailPage } from "./pages/CityDetailPage";
 import { CountryDetailPage } from "./pages/CountryDetailPage";
 import { CountryListingsPage } from "./pages/CountryListingsPage";
+import { CountriesPage } from "./pages/CountriesPage";
 import { AskQuestionPage } from "./pages/AskQuestionPage";
 import { SignInPage } from "./pages/SignInPage";
 import { SignUpPage } from "./pages/SignUpPage";
@@ -104,6 +105,11 @@ const AppRoutes = () => {
       <Route path="/:city/:category" element={<ListingsPage />} />
       <Route path="/:city/:category/:businessId" element={<BusinessDetailPage />} />
       <Route path="/cities/:citySlug" element={<CityDetailPage />} />
+      <Route path="/countries" element={
+        <MainLayout>
+          <CountriesPage />
+        </MainLayout>
+      } />
       <Route path="/countries/:countrySlug/listings" element={
         <MainLayout>
           <CountryListingsPage />
