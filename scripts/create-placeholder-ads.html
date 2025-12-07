@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BARA Ad Placeholders Generator</title>
+    <title>BARA Ad Generator - Fake Company Ads</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,17 +11,36 @@
             background: #f3f4f6;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         h1 {
             color: #1f2937;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #374151;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 10px;
+        }
+        .info {
+            background: #dbeafe;
+            padding: 15px;
+            border-radius: 6px;
             margin-bottom: 30px;
+            color: #1e40af;
+        }
+        .ad-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
         }
         .ad-preview {
             background: white;
             padding: 20px;
-            margin-bottom: 30px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
@@ -29,11 +48,14 @@
             font-weight: bold;
             margin-bottom: 10px;
             color: #374151;
+            font-size: 16px;
         }
         canvas {
             border: 1px solid #e5e7eb;
             display: block;
             margin: 10px 0;
+            max-width: 100%;
+            height: auto;
         }
         button {
             background: #2563eb;
@@ -44,121 +66,155 @@
             cursor: pointer;
             font-size: 14px;
             margin-top: 10px;
+            width: 100%;
         }
         button:hover {
             background: #1d4ed8;
-        }
-        .info {
-            background: #dbeafe;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            color: #1e40af;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎨 BARA Ad Placeholder Generator</h1>
-        
+        <h1>🎨 BARA Ad Generator</h1>
         <div class="info">
-            <strong>Instructions:</strong> Click the download buttons below to save professional placeholder ads for your banner positions.
+            <strong>Instructions:</strong> Click any download button to save the ad as a PNG file. Then upload it to your admin panel!
         </div>
 
-        <div class="ad-preview">
-            <div class="ad-title">Leaderboard Banner (728 × 90px)</div>
-            <canvas id="leaderboard" width="728" height="90"></canvas>
-            <button onclick="downloadLeaderboard()">Download Leaderboard (728×90)</button>
+        <h2>📱 Leaderboard Banners (728 × 90px)</h2>
+        <div class="ad-grid">
+            <div class="ad-preview">
+                <div class="ad-title">Placeholder Ad</div>
+                <canvas id="placeholder-728" width="728" height="90"></canvas>
+                <button onclick="download('placeholder-728', 'bara-placeholder-728x90.png')">Download Placeholder</button>
+            </div>
+
+            <div class="ad-preview">
+                <div class="ad-title">BK Bank</div>
+                <canvas id="bk-728" width="728" height="90"></canvas>
+                <button onclick="download('bk-728', 'bk-bank-728x90.png')">Download BK Bank</button>
+            </div>
+
+            <div class="ad-preview">
+                <div class="ad-title">MTN</div>
+                <canvas id="mtn-728" width="728" height="90"></canvas>
+                <button onclick="download('mtn-728', 'mtn-728x90.png')">Download MTN</button>
+            </div>
+
+            <div class="ad-preview">
+                <div class="ad-title">Equity Bank</div>
+                <canvas id="equity-728" width="728" height="90"></canvas>
+                <button onclick="download('equity-728', 'equity-bank-728x90.png')">Download Equity Bank</button>
+            </div>
+
+            <div class="ad-preview">
+                <div class="ad-title">Safaricom</div>
+                <canvas id="safaricom-728" width="728" height="90"></canvas>
+                <button onclick="download('safaricom-728', 'safaricom-728x90.png')">Download Safaricom</button>
+            </div>
+
+            <div class="ad-preview">
+                <div class="ad-title">Ethiopian Airlines</div>
+                <canvas id="ethiopian-728" width="728" height="90"></canvas>
+                <button onclick="download('ethiopian-728', 'ethiopian-airlines-728x90.png')">Download Ethiopian Airlines</button>
+            </div>
         </div>
 
-        <div class="ad-preview">
-            <div class="ad-title">Medium Rectangle (300 × 250px)</div>
-            <canvas id="rectangle" width="300" height="250"></canvas>
-            <button onclick="downloadRectangle()">Download Rectangle (300×250)</button>
+        <h2>📊 Sidebar Rectangles (300 × 250px)</h2>
+        <div class="ad-grid">
+            <div class="ad-preview">
+                <div class="ad-title">Placeholder Ad</div>
+                <canvas id="placeholder-300" width="300" height="250"></canvas>
+                <button onclick="download('placeholder-300', 'bara-placeholder-300x250.png')">Download Placeholder</button>
+            </div>
+
+            <div class="ad-preview">
+                <div class="ad-title">BK Bank</div>
+                <canvas id="bk-300" width="300" height="250"></canvas>
+                <button onclick="download('bk-300', 'bk-bank-300x250.png')">Download BK Bank</button>
+            </div>
+
+            <div class="ad-preview">
+                <div class="ad-title">MTN</div>
+                <canvas id="mtn-300" width="300" height="250"></canvas>
+                <button onclick="download('mtn-300', 'mtn-300x250.png')">Download MTN</button>
+            </div>
+
+            <div class="ad-preview">
+                <div class="ad-title">Safaricom</div>
+                <canvas id="safaricom-300" width="300" height="250"></canvas>
+                <button onclick="download('safaricom-300', 'safaricom-300x250.png')">Download Safaricom</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Leaderboard 728x90
-        function drawLeaderboard() {
-            const canvas = document.getElementById('leaderboard');
-            const ctx = canvas.getContext('2d');
-            
-            // Gradient background - Blue to Purple
+        // Universal download function
+        function download(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // ===== PLACEHOLDER ADS =====
+        function drawPlaceholder728() {
+            const ctx = document.getElementById('placeholder-728').getContext('2d');
             const gradient = ctx.createLinearGradient(0, 0, 728, 0);
             gradient.addColorStop(0, '#1d4ed8');
             gradient.addColorStop(1, '#a855f7');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, 728, 90);
             
-            // Main text - Your Ad Here
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 28px Arial';
             ctx.textAlign = 'center';
             ctx.fillText('Your Ad Here', 364, 38);
             
-            // Subtext - 728 × 90 Leaderboard Banner
             ctx.globalAlpha = 0.9;
-            ctx.fillStyle = '#ffffff';
             ctx.font = '13px Arial';
             ctx.fillText('728 × 90 Leaderboard Banner', 364, 60);
             ctx.globalAlpha = 1.0;
             
-            // CTA - Contact email in yellow/gold
             ctx.fillStyle = '#fbbf24';
             ctx.font = '12px Arial';
             ctx.fillText('Contact us to advertise: advertise@baraafrika.com', 364, 78);
         }
 
-        // Medium Rectangle 300x250
-        function drawRectangle() {
-            const canvas = document.getElementById('rectangle');
-            const ctx = canvas.getContext('2d');
-            
-            // Gradient background
+        function drawPlaceholder300() {
+            const ctx = document.getElementById('placeholder-300').getContext('2d');
             const gradient = ctx.createLinearGradient(0, 0, 0, 250);
             gradient.addColorStop(0, '#059669');
             gradient.addColorStop(1, '#0891b2');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, 300, 250);
             
-            // Border
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(1, 1, 298, 248);
-            
-            // Icon circle background
             ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
             ctx.beginPath();
             ctx.arc(150, 80, 35, 0, 2 * Math.PI);
             ctx.fill();
             
-            // Icon circle border
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.arc(150, 80, 25, 0, 2 * Math.PI);
             ctx.stroke();
             
-            // AD text in circle
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 30px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('AD', 150, 80);
             
-            // Main text
             ctx.font = 'bold 20px Arial';
             ctx.textBaseline = 'alphabetic';
             ctx.fillText('Your Ad Here', 150, 145);
             
-            // Size info
             ctx.fillStyle = '#d1fae5';
             ctx.font = '14px Arial';
             ctx.fillText('300 × 250', 150, 170);
             ctx.fillText('Medium Rectangle', 150, 188);
             
-            // CTA
             ctx.fillStyle = '#fbbf24';
             ctx.font = '11px Arial';
             ctx.fillText('Advertise with BARA', 150, 215);
@@ -168,27 +224,310 @@
             ctx.fillText('advertise@baraafrika.com', 150, 232);
         }
 
-        // Download functions
-        function downloadLeaderboard() {
-            const canvas = document.getElementById('leaderboard');
-            const link = document.createElement('a');
-            link.download = 'bara-placeholder-leaderboard-728x90.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+        // ===== BK BANK =====
+        function drawBK728() {
+            const ctx = document.getElementById('bk-728').getContext('2d');
+            ctx.fillStyle = '#003d7a';
+            ctx.fillRect(0, 0, 728, 90);
+            
+            ctx.fillStyle = '#fdb913';
+            ctx.fillRect(0, 0, 728, 4);
+            
+            ctx.fillStyle = '#fdb913';
+            ctx.fillRect(20, 20, 50, 50);
+            ctx.fillStyle = '#003d7a';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('BK', 45, 55);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 22px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Banking Made Simple', 90, 35);
+            
+            ctx.fillStyle = '#fdb913';
+            ctx.font = '14px Arial';
+            ctx.fillText('Open your account today • Mobile Banking • Loans • Savings', 90, 58);
+            
+            ctx.fillStyle = '#fdb913';
+            ctx.fillRect(600, 25, 110, 40);
+            ctx.fillStyle = '#003d7a';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Learn More', 655, 51);
         }
 
-        function downloadRectangle() {
-            const canvas = document.getElementById('rectangle');
-            const link = document.createElement('a');
-            link.download = 'bara-placeholder-rectangle-300x250.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+        function drawBK300() {
+            const ctx = document.getElementById('bk-300').getContext('2d');
+            ctx.fillStyle = '#003d7a';
+            ctx.fillRect(0, 0, 300, 250);
+            
+            ctx.fillStyle = '#fdb913';
+            ctx.fillRect(0, 0, 300, 5);
+            
+            ctx.fillStyle = '#fdb913';
+            ctx.fillRect(100, 30, 100, 100);
+            ctx.fillStyle = '#003d7a';
+            ctx.font = 'bold 56px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('BK', 150, 95);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('Banking Made', 150, 160);
+            ctx.fillText('Simple', 150, 185);
+            
+            ctx.fillStyle = '#fdb913';
+            ctx.font = '11px Arial';
+            ctx.fillText('Mobile Banking • Loans • Savings', 150, 208);
+            
+            ctx.fillStyle = '#fdb913';
+            ctx.fillRect(75, 215, 150, 30);
+            ctx.fillStyle = '#003d7a';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Open Account', 150, 235);
         }
 
-        // Draw on load
+        // ===== MTN =====
+        function drawMTN728() {
+            const ctx = document.getElementById('mtn-728').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 728, 0);
+            gradient.addColorStop(0, '#ffcb05');
+            gradient.addColorStop(1, '#fdb913');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 728, 90);
+            
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(60, 45, 30, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#ffcb05';
+            ctx.font = 'bold 28px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('MTN', 60, 57);
+            
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Stay Connected Everywhere', 110, 38);
+            
+            ctx.font = '14px Arial';
+            ctx.fillText('Get 5GB Data + Unlimited Calls | Special Offer This Month', 110, 62);
+            
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(600, 25, 110, 40);
+            ctx.fillStyle = '#ffcb05';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Get Offer', 655, 51);
+        }
+
+        function drawMTN300() {
+            const ctx = document.getElementById('mtn-300').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+            gradient.addColorStop(0, '#ffcb05');
+            gradient.addColorStop(1, '#fdb913');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 300, 250);
+            
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(150, 70, 45, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#ffcb05';
+            ctx.font = 'bold 38px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('MTN', 150, 85);
+            
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 22px Arial';
+            ctx.fillText('Stay Connected', 150, 145);
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('Everywhere', 150, 170);
+            
+            ctx.font = '13px Arial';
+            ctx.fillText('5GB Data + Unlimited Calls', 150, 195);
+            
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(75, 210, 150, 30);
+            ctx.fillStyle = '#ffcb05';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Get Offer Now', 150, 230);
+        }
+
+        // ===== EQUITY BANK =====
+        function drawEquity728() {
+            const ctx = document.getElementById('equity-728').getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 728, 90);
+            
+            ctx.fillStyle = '#ed1c24';
+            ctx.fillRect(0, 0, 728, 6);
+            
+            ctx.fillStyle = '#ed1c24';
+            ctx.fillRect(20, 20, 55, 50);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('EQUITY', 47.5, 52);
+            
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 22px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Your Financial Partner for Growth', 95, 35);
+            
+            ctx.fillStyle = '#666666';
+            ctx.font = '13px Arial';
+            ctx.fillText('Business Loans • Personal Banking • Investment Solutions • Mobile Money', 95, 58);
+            
+            ctx.fillStyle = '#ed1c24';
+            ctx.fillRect(590, 25, 120, 40);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Apply Now', 650, 51);
+        }
+
+        // ===== SAFARICOM =====
+        function drawSafaricom728() {
+            const ctx = document.getElementById('safaricom-728').getContext('2d');
+            ctx.fillStyle = '#00a651';
+            ctx.fillRect(0, 0, 728, 90);
+            
+            ctx.fillStyle = 'rgba(0, 140, 68, 0.3)';
+            ctx.beginPath();
+            ctx.arc(680, 45, 60, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = 'rgba(0, 140, 68, 0.2)';
+            ctx.beginPath();
+            ctx.arc(700, 20, 40, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(50, 45, 28, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#00a651';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('S', 50, 54);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('M-PESA: Send Money Instantly', 95, 35);
+            
+            ctx.font = '14px Arial';
+            ctx.fillText('Fast • Secure • Convenient | Download the App Today', 95, 60);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(580, 25, 130, 40);
+            ctx.fillStyle = '#00a651';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Download App', 645, 51);
+        }
+
+        function drawSafaricom300() {
+            const ctx = document.getElementById('safaricom-300').getContext('2d');
+            ctx.fillStyle = '#00a651';
+            ctx.fillRect(0, 0, 300, 250);
+            
+            ctx.fillStyle = 'rgba(0, 140, 68, 0.2)';
+            ctx.beginPath();
+            ctx.arc(250, 200, 80, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = 'rgba(0, 140, 68, 0.15)';
+            ctx.beginPath();
+            ctx.arc(50, 50, 60, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(150, 60, 40, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#00a651';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('S', 150, 72);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('M-PESA', 150, 130);
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('Send Money', 150, 155);
+            ctx.fillText('Instantly', 150, 178);
+            
+            ctx.font = '12px Arial';
+            ctx.fillText('Fast • Secure • Convenient', 150, 200);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(75, 215, 150, 30);
+            ctx.fillStyle = '#00a651';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Download App', 150, 235);
+        }
+
+        // ===== ETHIOPIAN AIRLINES =====
+        function drawEthiopian728() {
+            const ctx = document.getElementById('ethiopian-728').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 728, 0);
+            gradient.addColorStop(0, '#006747');
+            gradient.addColorStop(1, '#009639');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 728, 90);
+            
+            ctx.fillStyle = '#da121a';
+            ctx.fillRect(0, 42, 728, 6);
+            
+            ctx.fillStyle = '#fcdd09';
+            ctx.fillRect(0, 48, 728, 6);
+            
+            ctx.fillStyle = '#fcdd09';
+            ctx.beginPath();
+            ctx.arc(50, 45, 25, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#006747';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('✈', 50, 54);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 22px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Fly to 130+ Destinations Worldwide', 95, 30);
+            
+            ctx.fillStyle = '#fcdd09';
+            ctx.font = '13px Arial';
+            ctx.fillText('Ethiopian Airlines • Africa\'s Largest Network • Book Now & Save 20%', 95, 70);
+            
+            ctx.fillStyle = '#fcdd09';
+            ctx.fillRect(590, 20, 120, 35);
+            ctx.fillStyle = '#006747';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Book Flight', 650, 43);
+        }
+
+        // Draw all on load
         window.onload = function() {
-            drawLeaderboard();
-            drawRectangle();
+            drawPlaceholder728();
+            drawPlaceholder300();
+            drawBK728();
+            drawBK300();
+            drawMTN728();
+            drawMTN300();
+            drawEquity728();
+            drawSafaricom728();
+            drawSafaricom300();
+            drawEthiopian728();
         };
     </script>
 </body>
