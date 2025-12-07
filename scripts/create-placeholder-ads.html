@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BARA Ad Placeholders Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f3f4f6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #1f2937;
+            margin-bottom: 30px;
+        }
+        .ad-preview {
+            background: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .ad-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #374151;
+        }
+        canvas {
+            border: 1px solid #e5e7eb;
+            display: block;
+            margin: 10px 0;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .info {
+            background: #dbeafe;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 BARA Ad Placeholder Generator</h1>
+        
+        <div class="info">
+            <strong>Instructions:</strong> Click the download buttons below to save professional placeholder ads for your banner positions.
+        </div>
+
+        <div class="ad-preview">
+            <div class="ad-title">Leaderboard Banner (728 × 90px)</div>
+            <canvas id="leaderboard" width="728" height="90"></canvas>
+            <button onclick="downloadLeaderboard()">Download Leaderboard (728×90)</button>
+        </div>
+
+        <div class="ad-preview">
+            <div class="ad-title">Medium Rectangle (300 × 250px)</div>
+            <canvas id="rectangle" width="300" height="250"></canvas>
+            <button onclick="downloadRectangle()">Download Rectangle (300×250)</button>
+        </div>
+    </div>
+
+    <script>
+        // Leaderboard 728x90
+        function drawLeaderboard() {
+            const canvas = document.getElementById('leaderboard');
+            const ctx = canvas.getContext('2d');
+            
+            // Gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 728, 0);
+            gradient.addColorStop(0, '#1e40af');
+            gradient.addColorStop(1, '#7c3aed');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 728, 90);
+            
+            // Border
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(1, 1, 726, 88);
+            
+            // Main text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Your Ad Here', 364, 35);
+            
+            // Subtext
+            ctx.fillStyle = '#e0e7ff';
+            ctx.font = '14px Arial';
+            ctx.fillText('728 × 90 Leaderboard Banner', 364, 58);
+            
+            // CTA
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = '12px Arial';
+            ctx.fillText('Contact us to advertise: advertise@baraafrika.com', 364, 78);
+        }
+
+        // Medium Rectangle 300x250
+        function drawRectangle() {
+            const canvas = document.getElementById('rectangle');
+            const ctx = canvas.getContext('2d');
+            
+            // Gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+            gradient.addColorStop(0, '#059669');
+            gradient.addColorStop(1, '#0891b2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 300, 250);
+            
+            // Border
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(1, 1, 298, 248);
+            
+            // Icon circle background
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.beginPath();
+            ctx.arc(150, 80, 35, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Icon circle border
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(150, 80, 25, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // AD text in circle
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 30px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('AD', 150, 80);
+            
+            // Main text
+            ctx.font = 'bold 20px Arial';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillText('Your Ad Here', 150, 145);
+            
+            // Size info
+            ctx.fillStyle = '#d1fae5';
+            ctx.font = '14px Arial';
+            ctx.fillText('300 × 250', 150, 170);
+            ctx.fillText('Medium Rectangle', 150, 188);
+            
+            // CTA
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = '11px Arial';
+            ctx.fillText('Advertise with BARA', 150, 215);
+            
+            ctx.fillStyle = '#fef3c7';
+            ctx.font = '10px Arial';
+            ctx.fillText('advertise@baraafrika.com', 150, 232);
+        }
+
+        // Download functions
+        function downloadLeaderboard() {
+            const canvas = document.getElementById('leaderboard');
+            const link = document.createElement('a');
+            link.download = 'bara-placeholder-leaderboard-728x90.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function downloadRectangle() {
+            const canvas = document.getElementById('rectangle');
+            const link = document.createElement('a');
+            link.download = 'bara-placeholder-rectangle-300x250.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Draw on load
+        window.onload = function() {
+            drawLeaderboard();
+            drawRectangle();
+        };
+    </script>
+</body>
+</html>
