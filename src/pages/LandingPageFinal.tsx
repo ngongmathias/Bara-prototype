@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { InteractiveBaraLogo } from '@/components/landing/InteractiveBaraLogo';
+import { GlitchAssemblyLogo } from '@/components/landing/GlitchAssemblyLogo';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { 
   Globe, 
@@ -134,7 +134,7 @@ export const LandingPageFinal = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <InteractiveBaraLogo />
+          <GlitchAssemblyLogo />
         </motion.div>
 
         {/* Country Dropdown - Clean & Modern */}
