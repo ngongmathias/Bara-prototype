@@ -10,16 +10,20 @@ export const DancingBaraLogo = () => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* All logos together in one card with rotation on hover */}
+      {/* All logos together in one card with elegant hover effect */}
       <motion.div 
-        className="bg-white/95 backdrop-blur-sm rounded-3xl px-12 py-8 shadow-2xl"
+        className="bg-white/95 backdrop-blur-sm rounded-3xl px-12 py-8 transition-all duration-300"
         animate={{
-          rotateY: isHovered ? 360 : 0,
-          scale: isHovered ? 1.05 : 1,
+          scale: isHovered ? 1.08 : 1,
         }}
         transition={{
-          duration: 0.8,
-          ease: "easeInOut"
+          duration: 0.3,
+          ease: [0.4, 0, 0.2, 1] // Smooth easing curve
+        }}
+        style={{
+          boxShadow: isHovered 
+            ? '0 25px 50px -12px rgba(59, 130, 246, 0.25), 0 0 40px rgba(59, 130, 246, 0.15)' 
+            : '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
         }}
       >
         {/* Top Row: Africa × B - Subtle Professional Motion */}
