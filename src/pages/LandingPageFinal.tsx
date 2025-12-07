@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DancingBaraLogo } from '@/components/landing/DancingBaraLogo';
+import { MatrixRain } from '@/components/landing/MatrixRain';
+import { Header } from '@/components/Header';
+import Footer from '@/components/Footer';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { 
   Globe, 
@@ -121,9 +124,17 @@ export const LandingPageFinal = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-white">
-      {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100" />
+    <div className="relative min-h-screen bg-black">
+      {/* Matrix Rain Background - Full Page */}
+      <MatrixRain />
+      
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/50 pointer-events-none" />
+
+      {/* Header */}
+      <div className="relative z-20">
+        <Header />
+      </div>
 
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-8 py-16 gap-12">
@@ -261,6 +272,11 @@ export const LandingPageFinal = () => {
           </div>
         </motion.div>
 
+      </div>
+
+      {/* Footer */}
+      <div className="relative z-20">
+        <Footer />
       </div>
     </div>
   );
