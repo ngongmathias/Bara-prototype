@@ -84,30 +84,27 @@
             const canvas = document.getElementById('leaderboard');
             const ctx = canvas.getContext('2d');
             
-            // Gradient background
+            // Gradient background - Blue to Purple
             const gradient = ctx.createLinearGradient(0, 0, 728, 0);
-            gradient.addColorStop(0, '#1e40af');
-            gradient.addColorStop(1, '#7c3aed');
+            gradient.addColorStop(0, '#1d4ed8');
+            gradient.addColorStop(1, '#a855f7');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, 728, 90);
             
-            // Border
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(1, 1, 726, 88);
-            
-            // Main text
+            // Main text - Your Ad Here
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 24px Arial';
+            ctx.font = 'bold 28px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('Your Ad Here', 364, 35);
+            ctx.fillText('Your Ad Here', 364, 38);
             
-            // Subtext
-            ctx.fillStyle = '#e0e7ff';
-            ctx.font = '14px Arial';
-            ctx.fillText('728 × 90 Leaderboard Banner', 364, 58);
+            // Subtext - 728 × 90 Leaderboard Banner
+            ctx.globalAlpha = 0.9;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '13px Arial';
+            ctx.fillText('728 × 90 Leaderboard Banner', 364, 60);
+            ctx.globalAlpha = 1.0;
             
-            // CTA
+            // CTA - Contact email in yellow/gold
             ctx.fillStyle = '#fbbf24';
             ctx.font = '12px Arial';
             ctx.fillText('Contact us to advertise: advertise@baraafrika.com', 364, 78);
