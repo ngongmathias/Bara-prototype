@@ -1,0 +1,37 @@
+<svg width="728" height="90" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="ethGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#006747;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#009639;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="728" height="90" fill="url(#ethGrad)"/>
+  
+  <!-- Red stripe -->
+  <rect x="0" y="42" width="728" height="6" fill="#da121a"/>
+  
+  <!-- Yellow stripe -->
+  <rect x="0" y="48" width="728" height="6" fill="#fcdd09"/>
+  
+  <!-- Logo/Icon area -->
+  <circle cx="50" cy="45" r="25" fill="#fcdd09"/>
+  <text x="50" y="54" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#006747" text-anchor="middle">
+    ✈
+  </text>
+  
+  <!-- Main message -->
+  <text x="95" y="30" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#ffffff">
+    Fly to 130+ Destinations Worldwide
+  </text>
+  <text x="95" y="70" font-family="Arial, sans-serif" font-size="13" fill="#fcdd09">
+    Ethiopian Airlines • Africa's Largest Network • Book Now & Save 20%
+  </text>
+  
+  <!-- CTA -->
+  <rect x="590" y="20" width="120" height="35" rx="18" fill="#fcdd09"/>
+  <text x="650" y="43" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#006747" text-anchor="middle">
+    Book Flight
+  </text>
+</svg>

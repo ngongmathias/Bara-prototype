@@ -1,0 +1,28 @@
+<svg width="728" height="90" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="728" height="90" fill="#00a651"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="680" cy="45" r="60" fill="#008c44" opacity="0.3"/>
+  <circle cx="700" cy="20" r="40" fill="#008c44" opacity="0.2"/>
+  
+  <!-- Logo area -->
+  <circle cx="50" cy="45" r="28" fill="#ffffff"/>
+  <text x="50" y="54" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#00a651" text-anchor="middle">
+    S
+  </text>
+  
+  <!-- Main message -->
+  <text x="95" y="35" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#ffffff">
+    M-PESA: Send Money Instantly
+  </text>
+  <text x="95" y="60" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">
+    Fast • Secure • Convenient | Download the App Today
+  </text>
+  
+  <!-- CTA -->
+  <rect x="580" y="25" width="130" height="40" rx="20" fill="#ffffff"/>
+  <text x="645" y="51" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00a651" text-anchor="middle">
+    Download App
+  </text>
+</svg>
