@@ -194,7 +194,7 @@ export const Header = () => {
 
           {/* Desktop Navigation - Left aligned */}
           <nav className="hidden lg:flex items-center space-x-1 flex-1 ml-4">
-            <Link to="/" onClick={scrollToTop}>
+            <Link to="/listings" onClick={scrollToTop}>
               <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9">
                 <List className="w-4 h-4 mr-1.5" />
                 {t('navigation.listings')}
@@ -371,7 +371,7 @@ export const Header = () => {
             className="flex items-center justify-start space-x-2 pb-3 pt-3 overflow-x-auto px-4 scrollbar-hide" 
             style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}
           >
-            <Link to="/" onClick={scrollToTop}>
+            <Link to="/listings" onClick={scrollToTop}>
               <Button variant="ghost" className="font-roboto">
                 <List className="w-4 h-4 mr-1" />
                 {t('navigation.listings')}
@@ -533,7 +533,7 @@ export const Header = () => {
                   <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
                     Navigation
                   </h3>
-                  <Link to="/" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
+                  <Link to="/listings" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
                     <Button variant="ghost" className="w-full justify-start font-roboto h-12">
                       <List className="w-5 h-5 mr-3" />
                       {t('navigation.listings')}

@@ -248,7 +248,7 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
                   href={targetUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block overflow-hidden rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
+                  className="block overflow-hidden hover:opacity-95 transition-opacity cursor-pointer"
                   aria-label={`Visit ${bannerToShow.company_name} - ${bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}`}
                   onClick={(e) => {
                     console.log('Top banner clicked, navigating to:', targetUrl);
@@ -268,7 +268,7 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
                   </div>
                 </a>
               ) : (
-                <div className="overflow-hidden rounded-lg">
+                <div className="overflow-hidden">
                   <div 
                     className={`transition-all duration-600 ease-in-out ${
                       isTransitioning ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
