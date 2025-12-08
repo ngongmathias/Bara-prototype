@@ -198,15 +198,15 @@ export const EventCard = ({
         </h3>
         <div className="space-y-2 text-sm text-gray-600">
           <div className="flex items-center">
-            <Calendar className="w-4 h-4 mr-2 text-orange-500" />
+            <Calendar className="w-4 h-4 mr-2 text-black" />
             <span>{date} • {time}</span>
           </div>
           <div className="flex items-center">
-            <MapPin className="w-4 h-4 mr-2 text-orange-500 flex-shrink-0" />
+            <MapPin className="w-4 h-4 mr-2 text-black flex-shrink-0" />
             {latitude && longitude && onLocationClick ? (
               <button
                 onClick={handleLocationClick}
-                className="line-clamp-1 text-left hover:text-orange-500 hover:underline transition-colors"
+                className="line-clamp-1 text-left hover:text-gray-700 hover:underline transition-colors"
                 title="Click to view on map"
               >
                 {location}
@@ -260,7 +260,7 @@ export const EventCard = ({
         <div className="mt-4">
           <button
             onClick={handleViewEvent}
-            className="w-full text-center bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-300"
+            className="w-full text-center bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md transition-colors duration-300"
           >
             View Event
           </button>

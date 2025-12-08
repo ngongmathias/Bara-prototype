@@ -729,7 +729,7 @@ export const EventsPage = () => {
             {/* Mobile: Collapsible Filters Button */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden w-full flex items-center justify-between p-4 bg-orange-50 rounded-lg mb-4 hover:bg-orange-100 transition-colors"
+              className="lg:hidden w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg mb-4 hover:bg-gray-100 transition-colors"
             >
               <span className="text-lg font-bold text-gray-900">Filters & Search</span>
               <Filter className={`w-5 h-5 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
@@ -749,7 +749,7 @@ export const EventsPage = () => {
                     placeholder="Search by name, venue, or hashtag..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-12 h-12 text-base border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                    className="pl-12 h-12 text-base border-gray-300 focus:border-black focus:ring-black"
                   />
                 </div>
               </div>
@@ -762,7 +762,7 @@ export const EventsPage = () => {
                     onClick={() => setSelectedCategory('all')}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                       selectedCategory === 'all'
-                        ? 'bg-orange-500 text-white shadow-md'
+                        ? 'bg-black text-white shadow-md'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -774,7 +774,7 @@ export const EventsPage = () => {
                       onClick={() => setSelectedCategory(category.slug)}
                       className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                         selectedCategory === category.slug
-                          ? 'bg-orange-500 text-white shadow-md'
+                          ? 'bg-black text-white shadow-md'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -794,7 +794,7 @@ export const EventsPage = () => {
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="pl-12 h-12 text-base border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                      className="pl-12 h-12 text-base border-gray-300 focus:border-black focus:ring-black"
                       placeholder="From date"
                     />
                   </div>
@@ -804,7 +804,7 @@ export const EventsPage = () => {
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="pl-12 h-12 text-base border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                      className="pl-12 h-12 text-base border-gray-300 focus:border-black focus:ring-black"
                       placeholder="To date"
                     />
                   </div>
@@ -819,10 +819,10 @@ export const EventsPage = () => {
                     <label key={idx} className="flex items-start space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
                       <input
                         type="checkbox"
-                        className="w-4 h-4 mt-1 text-orange-500 focus:ring-orange-500 rounded"
+                        className="w-4 h-4 mt-1 text-black focus:ring-black rounded"
                       />
                       <div className="flex flex-col items-center flex-1">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg mb-1">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-700 to-black flex items-center justify-center text-white font-bold text-lg mb-1">
                           {organizer.charAt(0).toUpperCase()}
                         </div>
                         <span className="text-xs text-gray-700 text-center line-clamp-2">{organizer}</span>
@@ -836,7 +836,7 @@ export const EventsPage = () => {
               <div className="space-y-4">
                 <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Sort By</label>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="h-12 text-base border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                  <SelectTrigger className="h-12 text-base border-gray-300 focus:border-black focus:ring-black">
                     <ArrowUpDown className="h-5 w-5 mr-2" />
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
@@ -858,7 +858,7 @@ export const EventsPage = () => {
                     setEndDate('');
                   }}
                   variant="outline"
-                  className="w-full h-12 text-base border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600"
+                  className="w-full h-12 text-base border-2 border-gray-300 hover:border-black hover:text-black"
                 >
                   <X className="w-5 h-5 mr-2" />
                   Clear All Filters
@@ -886,7 +886,7 @@ export const EventsPage = () => {
                   onClick={() => setTimeFilter('all')}
                   className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
                     timeFilter === 'all'
-                      ? 'bg-orange-500 text-white shadow-lg'
+                      ? 'bg-black text-white shadow-lg'
                       : 'bg-gray-800 text-white hover:bg-gray-700'
                   }`}
                 >
@@ -896,7 +896,7 @@ export const EventsPage = () => {
                   onClick={() => setTimeFilter('active')}
                   className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
                     timeFilter === 'active'
-                      ? 'bg-orange-500 text-white shadow-lg'
+                      ? 'bg-black text-white shadow-lg'
                       : 'bg-gray-800 text-white hover:bg-gray-700'
                   }`}
                 >
@@ -906,7 +906,7 @@ export const EventsPage = () => {
                   onClick={() => setTimeFilter('happening')}
                   className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
                     timeFilter === 'happening'
-                      ? 'bg-orange-500 text-white shadow-lg'
+                      ? 'bg-black text-white shadow-lg'
                       : 'bg-gray-800 text-white hover:bg-gray-700'
                   }`}
                 >
@@ -916,7 +916,7 @@ export const EventsPage = () => {
                   onClick={() => setTimeFilter('today')}
                   className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
                     timeFilter === 'today'
-                      ? 'bg-orange-500 text-white shadow-lg'
+                      ? 'bg-black text-white shadow-lg'
                       : 'bg-gray-800 text-white hover:bg-gray-700'
                   }`}
                 >
@@ -926,7 +926,7 @@ export const EventsPage = () => {
                   onClick={() => setTimeFilter('tomorrow')}
                   className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
                     timeFilter === 'tomorrow'
-                      ? 'bg-orange-500 text-white shadow-lg'
+                      ? 'bg-black text-white shadow-lg'
                       : 'bg-gray-800 text-white hover:bg-gray-700'
                   }`}
                 >
@@ -936,7 +936,7 @@ export const EventsPage = () => {
                   onClick={() => setTimeFilter('weekend')}
                   className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
                     timeFilter === 'weekend'
-                      ? 'bg-orange-500 text-white shadow-lg'
+                      ? 'bg-black text-white shadow-lg'
                       : 'bg-gray-800 text-white hover:bg-gray-700'
                   }`}
                 >
@@ -955,13 +955,13 @@ export const EventsPage = () => {
                     setTimeFilter('all');
                   }}
                   variant="outline"
-                  className="px-6 py-2.5 h-auto text-sm font-semibold border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600 transition-all"
+                  className="px-6 py-2.5 h-auto text-sm font-semibold border-2 border-gray-300 hover:border-black hover:text-black transition-all"
                 >
                   Reset Filters
                 </Button>
                 <Button
                   onClick={() => navigate('/users/dashboard/events/create')}
-                  className="px-6 py-2.5 h-auto text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white shadow-lg transition-all"
+                  className="px-6 py-2.5 h-auto text-sm font-semibold bg-black hover:bg-gray-800 text-white shadow-lg transition-all"
                 >
                   Create Event
                 </Button>
