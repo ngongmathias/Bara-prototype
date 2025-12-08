@@ -325,33 +325,20 @@ export const HeroSection = () => {
   };
 
   return (
-    <section className="relative">
-      {/* Hero Image Background */}
-      <div
-        className="relative h-[100vh] sm:h-[65vh] md:h-[80vh] lg:h-[80vh] bg-cover bg-center bg-no-repeat transition-background duration-700"
-           style={{ 
-          backgroundImage: slidesLoading ? 'none' : `url(${heroSlides[currentSlide]})`,
-             filter: 'brightness(1.2)'
-        }}
-      >
-        {slidesLoading && (
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <div className="text-white text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-              <p className="text-lg">Loading slideshow...</p>
-            </div>
-          </div>
-        )}
-        <div className="absolute inset-0 bg-[#202124] bg-opacity-30"></div>
-        
-        {/* Content Overlay */}
+    <section className="relative bg-white border-b border-gray-200">
+      {/* Clean hero container without photographic background */}
+      <div className="relative h-[70vh] sm:h-[60vh] md:h-[60vh] lg:h-[60vh] flex items-center justify-center overflow-hidden">
+        {/* Subtle monochrome gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100" />
+
+        {/* Content */}
         <div className="relative z-10 flex flex-col items-center justify-center h-full px-3 sm:px-4 md:px-6 lg:px-8">
-          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-comfortaa font-bold text-white text-center mb-4 sm:mb-6 md:mb-8 px-2 leading-tight">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-comfortaa font-bold text-black text-center mb-4 sm:mb-6 md:mb-8 px-2 leading-tight">
             {t('homepage.hero.title')}<sup className="text-xs sm:text-sm md:text-base">℠</sup>
           </h1>
-          
+
           {/* Search Form */}
-          <div className="w-full max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-3xl bg-white rounded-xl shadow-xl p-4 sm:p-5 md:p-6">
+          <div className="w-full max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-3xl bg-white rounded-xl shadow-xl p-4 sm:p-5 md:p-6 border border-gray-200">
             <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:gap-3 md:gap-4">
               {/* Business Search Input */}
               <div className="flex-1 relative search-container min-w-0 bg-white rounded-lg overflow-hidden">
@@ -502,9 +489,9 @@ export const HeroSection = () => {
               </div>
               
               {/* Search Button */}
-              <Button 
+              <Button
                 onClick={handleSearch}
-                className="bg-[#4285F4] hover:bg-[#3367D6] text-white px-4 py-2 rounded-r-lg font-roboto font-medium transition-all duration-300 flex items-center justify-center min-w-[100px] touch-manipulation h-11 sm:h-12 text-sm sm:text-base"
+                className="bg-black hover:bg-gray-900 text-white px-4 py-2 rounded-lg font-roboto font-medium transition-all duration-300 flex items-center justify-center min-w-[100px] touch-manipulation h-11 sm:h-12 text-sm sm:text-base"
               >
                 {t('homepage.hero.searchButton')}
               </Button>
