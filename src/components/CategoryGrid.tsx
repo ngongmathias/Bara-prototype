@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { db } from "@/lib/supabase";
@@ -221,7 +221,7 @@ export const CategoryGrid = () => {
             <h2 className="text-2xl font-comfortaa font-bold text-[#202124] text-center mb-8">
               {t('homepage.categories.title')}
             </h2>
-            <div className="bg-[#F8F9FA] border border-[#E8EAED] rounded-lg p-6">
+            <div className="bg-gray-100 border border-[#E8EAED] rounded-lg p-6">
               <p className="text-[#202124] font-roboto">
                 No categories found. Please check your database connection.
               </p>
@@ -244,16 +244,11 @@ export const CategoryGrid = () => {
   return (
     <section className="py-8 sm:py-10 md:py-12 bg-background">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-comfortaa font-bold text-yp-dark text-center mb-6 sm:mb-8 px-2">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-comfortaa font-bold text-black text-center mb-6 sm:mb-8 px-2">
           {t('homepage.categories.title')}
         </h2>
         
-        {/* Debug info - remove in production */}
-        <div className="text-center mb-4 text-xs sm:text-sm text-gray-500">
-          Showing {visibleCategories.length} of {categories.length} categories
-        </div>
-        
-        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
+                <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
           {visibleCategories.map((category, index) => {
             const IconComponent = iconMap[category.slug] || Home;
             // Use the category name directly if translation is not available
@@ -270,10 +265,10 @@ export const CategoryGrid = () => {
               >
                 <button 
                   onClick={() => handleCategoryClick(category.slug)}
-                  className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 lg:w-24 lg:h-24 mx-auto mb-2 md:mb-3 bg-white border-2 border-[#E8EAED] rounded-2xl flex items-center justify-center hover:border-[#4285F4] hover:bg-white transition-all duration-300 group touch-manipulation shadow-sm hover:shadow-md"
+                  className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 lg:w-24 lg:h-24 mx-auto mb-2 md:mb-3 bg-white border border-gray-200 rounded-2xl flex items-center justify-center hover:border-black hover:bg-white transition-all duration-300 group touch-manipulation shadow-sm hover:shadow-md"
                 >
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-[#F8F9FA] rounded-full flex items-center justify-center group-hover:bg-[#E8F0FE] transition-colors duration-300">
-                    <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-[#4285F4] transition-colors duration-300" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gray-200 transition-colors duration-300">
+                    <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-black transition-colors duration-300" />
                   </div>
                 </button>
                 <h3 className="font-roboto font-medium text-xs sm:text-sm md:text-sm text-[#202124] mb-2 transition-colors duration-300 px-1 leading-tight">
@@ -289,21 +284,21 @@ export const CategoryGrid = () => {
               <button 
                 onClick={toggleCategories}
                 disabled={isExpanding}
-                className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 lg:w-24 lg:h-24 mx-auto mb-2 md:mb-3 bg-[#4285F4] rounded-2xl flex items-center justify-center hover:bg-[#3367D6] transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 lg:w-24 lg:h-24 mx-auto mb-2 md:mb-3 bg-white border border-gray-200 rounded-2xl flex items-center justify-center hover:border-black transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
               >
                 {isExpanding ? (
-                  <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 border-b-2 border-black"></div>
                 ) : showAll ? (
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-white rounded-full flex items-center justify-center group-hover:bg-[#E8F0FE] transition-colors duration-300">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-white rounded-full flex items-center justify-center group-hover:bg-gray-200 transition-colors duration-300">
                     <ChevronUp className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-[#202124] group-hover:scale-105 transition-transform duration-300" />
                   </div>
                 ) : (
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-[#F8F9FA] rounded-full flex items-center justify-center group-hover:bg-[#E8F0FE] transition-colors duration-300">
-                    <MoreHorizontal className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-[#4285F4] group-hover:scale-105 transition-transform duration-300" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gray-200 transition-colors duration-300">
+                    <MoreHorizontal className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-black group-hover:scale-105 transition-transform duration-300" />
                   </div>
                 )}
             </button>
-              <h3 className="font-roboto font-medium text-xs sm:text-sm md:text-base text-yp-dark mb-2 transition-colors duration-300 px-1 leading-tight">
+              <h3 className="font-roboto font-medium text-xs sm:text-sm md:text-base text-black mb-2 transition-colors duration-300 px-1 leading-tight">
                 {showAll ? t('homepage.categories.viewLess') : t('homepage.categories.viewMore')}
             </h3>
           </div>
@@ -314,7 +309,7 @@ export const CategoryGrid = () => {
         <div className="text-center mt-6 sm:mt-8">
           <button
             onClick={handleViewAllCategories}
-            className="inline-flex items-center px-5 sm:px-6 md:px-8 py-2.5 sm:py-3.5 bg-[#4285F4] hover:bg-[#3367D6] text-white font-roboto font-medium rounded-lg transition-all duration-300 text-sm sm:text-base touch-manipulation shadow-sm hover:shadow-md"
+            className="inline-flex items-center px-5 sm:px-6 md:px-8 py-2.5 sm:py-3.5 bg-white border border-gray-200 hover:border-black text-white font-roboto font-medium rounded-lg transition-all duration-300 text-sm sm:text-base touch-manipulation shadow-sm hover:shadow-md"
           >
             <span>{t('homepage.categories.viewAllCategories')}</span>
             <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4 ml-2 rotate-90 transition-transform duration-300 group-hover:translate-x-1" />
