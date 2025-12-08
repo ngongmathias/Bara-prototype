@@ -44,8 +44,8 @@ const miniApps: MiniApp[] = [
   },
   {
     id: 'countries',
-    title: 'BARA Countries',
-    description: 'Explore African nations',
+    title: 'BARA GLOBAL',
+    description: 'Explore Global Africa',
     icon: Globe,
     path: '/countries',
   },
