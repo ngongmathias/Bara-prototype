@@ -1,14 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Newspaper, ExternalLink, RefreshCw } from 'lucide-react';
-
-interface RSSFeedItem {
-  title: string;
-  link: string;
-  description: string;
-  pubDate: string;
-  source: string;
-}
+import { getRSSFeeds, refreshRSSFeeds, RSSFeedItem } from '@/lib/rssService';
 
 interface RSSFeedsProps {
   countryName?: string;
@@ -18,6 +11,7 @@ interface RSSFeedsProps {
 export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
   const [feeds, setFeeds] = useState<RSSFeedItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchFeeds();
@@ -26,50 +20,47 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
   const fetchFeeds = async () => {
     setLoading(true);
     
-    // Simulate RSS feed fetching with mock data
-    // In production, you'd fetch from actual RSS feeds or a backend API
-    setTimeout(() => {
-      const mockFeeds: RSSFeedItem[] = [
-        {
-          title: `${countryName || 'Africa'}: Economic Growth Reaches New Heights`,
-          link: '#',
-          description: `Latest economic indicators show strong growth across ${countryName || 'African nations'} with increased investment in technology and infrastructure.`,
-          pubDate: new Date().toISOString(),
-          source: 'Africa Business News',
-        },
-        {
-          title: `${countryName || 'African'} Tech Startups Attract Record Funding`,
-          link: '#',
-          description: `Venture capital firms invest heavily in ${countryName || 'African'} technology companies, signaling confidence in the region's innovation ecosystem.`,
-          pubDate: new Date(Date.now() - 3600000).toISOString(),
-          source: 'Tech Africa',
-        },
-        {
-          title: `Cultural Festival Celebrates ${countryName || 'African'} Heritage`,
-          link: '#',
-          description: `Annual cultural celebration brings together communities to showcase ${countryName || 'African'} traditions, music, and cuisine.`,
-          pubDate: new Date(Date.now() - 7200000).toISOString(),
-          source: 'Culture Today',
-        },
-        {
-          title: `${countryName || 'African'} Tourism Industry Shows Strong Recovery`,
-          link: '#',
-          description: `Travel and tourism sector in ${countryName || 'Africa'} rebounds with increased visitor numbers and new hospitality developments.`,
-          pubDate: new Date(Date.now() - 10800000).toISOString(),
-          source: 'Travel Weekly',
-        },
-        {
-          title: `Education Initiatives Transform ${countryName || 'African'} Schools`,
-          link: '#',
-          description: `New educational programs and digital learning platforms expand access to quality education across ${countryName || 'the region'}.`,
-          pubDate: new Date(Date.now() - 14400000).toISOString(),
-          source: 'Education Africa',
-        },
-      ];
+    try {
+      // Fetch cached RSS feeds from database
+      const cachedFeeds = await getRSSFeeds({
+        countryCode: countryCode,
+        limit: 6,
+      });
       
-      setFeeds(mockFeeds);
+      if (cachedFeeds.length > 0) {
+        setFeeds(cachedFeeds);
+        setLoading(false);
+      } else {
+        // If no cached feeds, try to refresh
+        await handleRefresh();
+      }
+    } catch (error) {
+      console.error('Error fetching RSS feeds:', error);
       setLoading(false);
-    }, 1000);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    
+    try {
+      // Refresh feeds from sources
+      const result = await refreshRSSFeeds();
+      
+      if (result.success) {
+        // Fetch updated feeds
+        const updatedFeeds = await getRSSFeeds({
+          countryCode: countryCode,
+          limit: 6,
+        });
+        setFeeds(updatedFeeds);
+      }
+    } catch (error) {
+      console.error('Error refreshing RSS feeds:', error);
+    } finally {
+      setRefreshing(false);
+      setLoading(false);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -95,11 +86,12 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
         <motion.button
           whileHover={{ scale: 1.05, rotate: 180 }}
           whileTap={{ scale: 0.95 }}
-          onClick={fetchFeeds}
-          className="p-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-          disabled={loading}
+          onClick={handleRefresh}
+          className="p-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={loading || refreshing}
+          title="Refresh news from sources"
         >
-          <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-5 h-5 ${(loading || refreshing) ? 'animate-spin' : ''}`} />
         </motion.button>
       </div>
 
