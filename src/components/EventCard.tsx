@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, Hash, User, Share2, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { VerificationIcon, VerificationStatus } from '@/components/ui/verification-badge';
+import { EventTimingBadge } from '@/components/EventTimingBadge';
 
 interface EventCardProps {
   id: string;
@@ -15,6 +16,8 @@ interface EventCardProps {
   latitude?: number;
   longitude?: number;
   city?: string;
+  startDate?: string; // ISO date string for timing badge
+  endDate?: string; // ISO date string for timing badge
   createdBy?: {
     name: string;
     email: string;
@@ -36,6 +39,8 @@ export const EventCard = ({
   latitude,
   longitude,
   city,
+  startDate,
+  endDate,
   createdBy,
   onViewEvent,
   onLocationClick,
@@ -123,8 +128,15 @@ export const EventCard = ({
           alt={title}
           className="w-full h-full object-cover"
         />
-        {category && (
+        {/* Timing Badge - Top Left */}
+        {startDate && (
           <div className="absolute top-3 left-3">
+            <EventTimingBadge startDate={startDate} endDate={endDate} />
+          </div>
+        )}
+        {/* Category Badge - Below Timing Badge */}
+        {category && (
+          <div className="absolute top-14 left-3">
             <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full">
               {category}
             </span>

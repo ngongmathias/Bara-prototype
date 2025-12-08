@@ -1033,6 +1033,8 @@ export const EventsPage = () => {
                               latitude={event.latitude}
                               longitude={event.longitude}
                               city={event.city_name}
+                              startDate={event.start_date}
+                              endDate={event.end_date}
                               onViewEvent={(id) => {
                                 const eventToView = events.find(e => e.id === id);
                                 if (eventToView) {
@@ -1074,6 +1076,8 @@ export const EventsPage = () => {
                               latitude={event.latitude}
                               longitude={event.longitude}
                               city={event.city_name}
+                              startDate={event.start_date}
+                              endDate={event.end_date}
                               onViewEvent={(id) => {
                                 const eventToView = events.find(e => e.id === id);
                                 if (eventToView) {
