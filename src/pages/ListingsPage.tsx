@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -771,7 +771,7 @@ export const ListingsPage = () => {
 
         {/* Search Header Skeleton */}
 
-        <div className="bg-yp-yellow py-4">
+        <div className="bg-gradient-to-br from-gray-50 via-white to-gray-100 py-4">
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -883,7 +883,7 @@ export const ListingsPage = () => {
 
             </div>
 
-            <h2 className="text-2xl font-comfortaa font-bold text-yp-dark mb-4">
+            <h2 className="text-2xl font-comfortaa font-bold text-black mb-4">
 
               Error Loading Businesses
 
@@ -895,7 +895,7 @@ export const ListingsPage = () => {
 
             </p>
 
-            <Button onClick={() => window.location.reload()} className="bg-yp-blue">
+            <Button onClick={() => window.location.reload()} className="bg-black">
 
               Try Again
 
@@ -923,7 +923,7 @@ export const ListingsPage = () => {
 
       {/* Search Header */}
 
-      <div className="bg-yp-yellow py-4">
+      <div className="bg-gradient-to-br from-gray-50 via-white to-gray-100 py-4">
 
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
 
@@ -941,7 +941,7 @@ export const ListingsPage = () => {
 
                 onChange={(e) => setSearchTerm(e.target.value)}
 
-                className="w-full font-roboto bg-white border-gray-300 text-sm sm:text-base"
+                className="w-full font-roboto bg-white border-gray-300 text-sm sm:text-base focus:border-black focus:ring-black"
 
                 onKeyPress={(e) => {
 
@@ -967,7 +967,7 @@ export const ListingsPage = () => {
 
       {/* Filters */}
 
-      <div className="bg-white border-b border-gray-200 py-3">
+      <div className="bg-white  py-3">
 
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
 
@@ -1265,7 +1265,7 @@ export const ListingsPage = () => {
 
                   {!business.is_sponsored_ad && (
 
-                    <div className="absolute -top-2 -left-2 w-8 h-8 bg-yp-blue text-white rounded-full flex items-center justify-center text-sm font-bold font-roboto shadow-md">
+                    <div className="absolute -top-2 -left-2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-sm font-bold font-roboto shadow-md">
 
                       {displayNumber}
 
@@ -1285,7 +1285,7 @@ export const ListingsPage = () => {
 
                       <div className="flex flex-col sm:flex-row sm:items-start mb-2 space-y-2 sm:space-y-0">
 
-                        <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-yp-dark font-comfortaa mr-2 break-words">
+                        <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-black font-comfortaa mr-2 break-words">
 
                           {business.name}
 
@@ -1295,7 +1295,7 @@ export const ListingsPage = () => {
 
                         {business.is_premium && (
 
-                          <Badge variant="default" className="bg-yp-blue text-white text-xs">
+                          <Badge variant="default" className="bg-black text-white text-xs">
 
                                 {t('listings.premium')}
 
@@ -1307,7 +1307,7 @@ export const ListingsPage = () => {
 
                           <Badge variant="secondary" className="text-xs">
 
-                                ✓ {t('listings.verified')}
+                                âœ“ {t('listings.verified')}
 
                               </Badge>
 
@@ -1315,7 +1315,7 @@ export const ListingsPage = () => {
 
                             {business.has_coupons && (
 
-                              <Badge variant="outline" className="text-xs border-orange-200 text-orange-700 bg-orange-50">
+                              <Badge variant="outline" className="text-xs border-gray-300 text-gray-800 bg-gray-100">
 
                                 {t('listings.coupons')}
 
@@ -1325,7 +1325,7 @@ export const ListingsPage = () => {
 
                             {business.accepts_orders_online && (
 
-                              <Badge variant="outline" className="text-xs border-green-200 text-green-700 bg-green-50">
+                              <Badge variant="outline" className="text-xs border-gray-300 text-gray-800 bg-gray-100">
 
                                 {t('listings.orderOnline')}
 
@@ -1335,7 +1335,7 @@ export const ListingsPage = () => {
 
                             {business.is_kid_friendly && (
 
-                              <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">
+                              <Badge variant="outline" className="text-xs border-gray-300 text-gray-800 bg-gray-100">
 
                                 {t('listings.kidFriendly')}
 
@@ -1429,7 +1429,7 @@ export const ListingsPage = () => {
 
                               href={`tel:${business.phone}`} 
 
-                              className="text-yp-blue hover:underline break-all"
+                              className="text-black hover:underline break-all"
 
                               onClick={(e) => e.stopPropagation()}
 
@@ -1453,7 +1453,7 @@ export const ListingsPage = () => {
 
                               href={`https://${business.website}`} 
 
-                              className="text-yp-blue hover:underline break-all"
+                              className="text-black hover:underline break-all"
 
                               target="_blank"
 
@@ -1627,7 +1627,7 @@ export const ListingsPage = () => {
 
                           size="sm" 
 
-                          className="bg-yp-blue text-white font-roboto w-full text-xs sm:text-sm"
+                          className="bg-black text-white font-roboto w-full text-xs sm:text-sm"
 
                           onClick={(e) => e.stopPropagation()}
 
@@ -1671,7 +1671,7 @@ export const ListingsPage = () => {
 
                 {totalPages > 1 && (
 
-                  <span className="ml-2">• Page {currentPage} of {totalPages}</span>
+                  <span className="ml-2">â€¢ Page {currentPage} of {totalPages}</span>
 
                 )}
 
@@ -1954,4 +1954,5 @@ export const ListingsPage = () => {
   );
 
 };
+
 
