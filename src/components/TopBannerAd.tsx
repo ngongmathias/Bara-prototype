@@ -263,7 +263,7 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
                     <img
                       src={bannerToShow.banner_image_url}
                       alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
-                      className="w-full h-[90px] object-cover bg-gradient-to-r from-blue-50 to-indigo-50"
+                      className="w-full h-[90px] object-cover bg-white"
                     />
                   </div>
                 </a>
@@ -277,13 +277,13 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
                     <img
                       src={bannerToShow.banner_image_url}
                       alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
-                      className="w-full h-[90px] object-cover bg-gradient-to-r from-blue-50 to-indigo-50"
+                      className="w-full h-[90px] object-cover bg-white"
                     />
                   </div>
                 </div>
               )
             ) : (
-              <div className="w-full h-[120px] md:h-[150px] bg-gradient-to-br from-blue-500/20 to-indigo-600/20 rounded-lg flex items-center justify-center text-center px-4">
+              <div className="w-full h-[120px] md:h-[150px] bg-white border border-gray-200 rounded-lg flex items-center justify-center text-center px-4">
                 <div>
                   <span className="text-gray-700 font-semibold text-lg">{t('bannerAd.placeholder.title')}</span>
                   <span className="block text-gray-600 text-sm mt-2">{t('bannerAd.placeholder.subtitle')}</span>
