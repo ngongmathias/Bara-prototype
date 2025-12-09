@@ -156,6 +156,17 @@ export const InteractiveGlobe = ({ countries, onCountryClick, selectedCountry }:
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Generate stars once
+    const stars: { x: number; y: number; size: number; brightness: number }[] = [];
+    for (let i = 0; i < 100; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 1.5 + 0.5,
+        brightness: Math.random() * 0.5 + 0.3
+      });
+    }
+
     const draw = () => {
       const width = canvas.width;
       const height = canvas.height;
@@ -163,73 +174,95 @@ export const InteractiveGlobe = ({ countries, onCountryClick, selectedCountry }:
       const centerY = height / 2;
       const radius = Math.min(width, height) / 2 - 40;
 
-      // Clear canvas
-      ctx.clearRect(0, 0, width, height);
+      // Clear canvas with dark space background
+      const spaceGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, width);
+      spaceGradient.addColorStop(0, '#1a1a2e');
+      spaceGradient.addColorStop(0.5, '#16213e');
+      spaceGradient.addColorStop(1, '#0f0f1a');
+      ctx.fillStyle = spaceGradient;
+      ctx.fillRect(0, 0, width, height);
 
-      // Draw outer glow
-      const outerGlow = ctx.createRadialGradient(centerX, centerY, radius * 0.8, centerX, centerY, radius * 1.3);
-      outerGlow.addColorStop(0, 'rgba(100, 180, 255, 0)');
-      outerGlow.addColorStop(0.5, 'rgba(100, 180, 255, 0.1)');
-      outerGlow.addColorStop(1, 'rgba(100, 180, 255, 0)');
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius * 1.3, 0, Math.PI * 2);
-      ctx.fillStyle = outerGlow;
-      ctx.fill();
+      // Draw twinkling stars
+      const time = Date.now() * 0.001;
+      stars.forEach(star => {
+        const twinkle = Math.sin(time * 2 + star.x) * 0.3 + 0.7;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness * twinkle})`;
+        ctx.fill();
+      });
 
-      // Draw globe base with ocean gradient
+      // Draw atmospheric glow (multiple layers)
+      for (let i = 5; i >= 1; i--) {
+        const glowRadius = radius + i * 8;
+        const glowGradient = ctx.createRadialGradient(centerX, centerY, radius, centerX, centerY, glowRadius);
+        glowGradient.addColorStop(0, `rgba(100, 200, 255, ${0.15 / i})`);
+        glowGradient.addColorStop(1, 'rgba(100, 200, 255, 0)');
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, glowRadius, 0, Math.PI * 2);
+        ctx.fillStyle = glowGradient;
+        ctx.fill();
+      }
+
+      // Draw globe base with deep ocean gradient
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
       const oceanGradient = ctx.createRadialGradient(
-        centerX - radius * 0.3,
-        centerY - radius * 0.3,
+        centerX - radius * 0.4,
+        centerY - radius * 0.4,
         0,
-        centerX,
-        centerY,
-        radius
+        centerX + radius * 0.2,
+        centerY + radius * 0.2,
+        radius * 1.2
       );
-      oceanGradient.addColorStop(0, '#e8f4fc');
-      oceanGradient.addColorStop(0.3, '#d4ebf7');
-      oceanGradient.addColorStop(0.7, '#b8ddf0');
-      oceanGradient.addColorStop(1, '#9acfea');
+      oceanGradient.addColorStop(0, '#4a9eda');
+      oceanGradient.addColorStop(0.3, '#2d7ab8');
+      oceanGradient.addColorStop(0.6, '#1e5a8a');
+      oceanGradient.addColorStop(1, '#0d3a5c');
       ctx.fillStyle = oceanGradient;
       ctx.fill();
 
-      // Draw globe outline with glow
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(100, 180, 255, 0.5)';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(50, 130, 200, 0.8)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Draw latitude lines (grid)
+      // Add ocean texture/waves
       ctx.save();
-      ctx.globalAlpha = 0.15;
-      for (let lat = -60; lat <= 60; lat += 20) {
+      ctx.globalAlpha = 0.1;
+      for (let i = 0; i < 8; i++) {
+        const waveY = centerY - radius * 0.8 + i * radius * 0.2;
         ctx.beginPath();
-        const y = centerY - (lat / 90) * radius * 0.95;
-        const latRadius = Math.cos((lat * Math.PI) / 180) * radius * 0.95;
-        ctx.ellipse(centerX, y, latRadius, latRadius * 0.25, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = '#4a90c2';
-        ctx.lineWidth = 0.5;
+        ctx.moveTo(centerX - radius, waveY);
+        for (let x = -radius; x <= radius; x += 10) {
+          const distFromCenter = Math.sqrt(radius * radius - x * x);
+          if (!isNaN(distFromCenter)) {
+            const wave = Math.sin((x + time * 20 + i * 30) * 0.05) * 3;
+            ctx.lineTo(centerX + x, waveY + wave);
+          }
+        }
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
         ctx.stroke();
       }
       ctx.restore();
 
-      // Draw longitude lines
+      // Draw latitude lines (grid) with glow
       ctx.save();
-      ctx.globalAlpha = 0.1;
-      for (let lng = 0; lng < 180; lng += 20) {
+      for (let lat = -60; lat <= 60; lat += 30) {
+        ctx.beginPath();
+        const y = centerY - (lat / 90) * radius * 0.95;
+        const latRadius = Math.cos((lat * Math.PI) / 180) * radius * 0.95;
+        ctx.ellipse(centerX, y, latRadius, latRadius * 0.3, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(100, 200, 255, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Draw longitude lines with glow
+      ctx.save();
+      for (let lng = 0; lng < 180; lng += 30) {
         ctx.beginPath();
         const angle = ((lng + rotation.y * (180 / Math.PI)) * Math.PI) / 180;
         ctx.ellipse(centerX, centerY, radius * 0.95 * Math.abs(Math.sin(angle)), radius * 0.95, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = '#4a90c2';
-        ctx.lineWidth = 0.5;
+        ctx.strokeStyle = 'rgba(100, 200, 255, 0.15)';
+        ctx.lineWidth = 1;
         ctx.stroke();
       }
       ctx.restore();
@@ -247,10 +280,12 @@ export const InteractiveGlobe = ({ countries, onCountryClick, selectedCountry }:
       
       ctx.beginPath();
       let firstPoint = true;
+      let visiblePoints = 0;
       africaPoints.forEach(point => {
-        const pos3d = latLngTo3D(point.lat, point.lng, radius * 0.98);
+        const pos3d = latLngTo3D(point.lat, point.lng, radius * 0.99);
         const rotated = rotatePoint(pos3d, rotation.x, rotation.y);
-        if (rotated.z > -radius * 0.3) {
+        if (rotated.z > -radius * 0.2) {
+          visiblePoints++;
           const screenX = centerX + rotated.x;
           const screenY = centerY - rotated.y;
           if (firstPoint) {
@@ -261,18 +296,49 @@ export const InteractiveGlobe = ({ countries, onCountryClick, selectedCountry }:
           }
         }
       });
-      ctx.closePath();
       
-      // Fill Africa with land color
-      const landGradient = ctx.createLinearGradient(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
-      landGradient.addColorStop(0, '#c8d9c0');
-      landGradient.addColorStop(0.5, '#a8c898');
-      landGradient.addColorStop(1, '#90b880');
-      ctx.fillStyle = landGradient;
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(80, 120, 60, 0.4)';
-      ctx.lineWidth = 1;
+      if (visiblePoints > 5) {
+        ctx.closePath();
+        // Fill Africa with land gradient
+        const landGradient = ctx.createLinearGradient(
+          centerX - radius * 0.5, centerY - radius * 0.5,
+          centerX + radius * 0.5, centerY + radius * 0.5
+        );
+        landGradient.addColorStop(0, '#8bc34a');
+        landGradient.addColorStop(0.3, '#689f38');
+        landGradient.addColorStop(0.6, '#558b2f');
+        landGradient.addColorStop(1, '#33691e');
+        ctx.fillStyle = landGradient;
+        ctx.fill();
+        
+        // Add subtle border glow
+        ctx.shadowColor = 'rgba(139, 195, 74, 0.5)';
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = 'rgba(139, 195, 74, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+
+      // Draw globe rim highlight
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(150, 220, 255, 0.4)';
+      ctx.lineWidth = 2;
       ctx.stroke();
+
+      // Add specular highlight
+      const highlightGradient = ctx.createRadialGradient(
+        centerX - radius * 0.4, centerY - radius * 0.4, 0,
+        centerX - radius * 0.4, centerY - radius * 0.4, radius * 0.6
+      );
+      highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+      highlightGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)');
+      highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.fillStyle = highlightGradient;
+      ctx.fill();
 
       // Sort country points by z-depth for proper rendering
       const sortedPoints = countryPoints

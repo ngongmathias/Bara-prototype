@@ -34,9 +34,10 @@ export const CountriesPage = () => {
   const fetchCountries = async () => {
     try {
       console.log('Fetching countries from Supabase...');
+      // Note: 'slug' column doesn't exist - we'll generate it from name
       const { data, error } = await supabase
         .from('countries')
-        .select('id, name, code, slug, flag_url, flag_emoji, description, population, capital')
+        .select('id, name, code, flag_url, flag_emoji, description, population, capital')
         .order('name', { ascending: true });
 
       if (error) {
@@ -45,8 +46,13 @@ export const CountriesPage = () => {
       }
       
       if (data && data.length > 0) {
-        console.log(`✅ Loaded ${data.length} countries from database`);
-        setCountries(data);
+        // Generate slug from name since the column doesn't exist
+        const countriesWithSlug = data.map(country => ({
+          ...country,
+          slug: country.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+        }));
+        console.log(`✅ Loaded ${countriesWithSlug.length} countries from database`);
+        setCountries(countriesWithSlug);
       } else {
         console.log('No countries returned from database');
       }
