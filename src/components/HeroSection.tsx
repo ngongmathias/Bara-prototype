@@ -325,11 +325,10 @@ export const HeroSection = () => {
   };
 
   return (
-    <section className="relative bg-white border-b border-gray-200">
+    <section className="relative">
       {/* Clean hero container without photographic background */}
       <div className="relative h-[70vh] sm:h-[60vh] md:h-[60vh] lg:h-[60vh] flex items-center justify-center overflow-hidden">
-        {/* Subtle monochrome gradient overlay for depth */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100" />
+        {/* No background - transparent to show MatrixRain */}
 
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center justify-center h-full px-3 sm:px-4 md:px-6 lg:px-8">

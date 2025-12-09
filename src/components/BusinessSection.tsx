@@ -13,7 +13,7 @@ export const BusinessSection = () => {
   };
 
   return (
-    <section className="py-6 sm:py-8 md:py-16 bg-[#F8F9FA]">
+    <section className="py-6 sm:py-8 md:py-16">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
           {/* Left Side - Image */}
