@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
+import { MatrixRain } from "@/components/landing/MatrixRain";
+import { TopBannerAd } from "@/components/TopBannerAd";
+import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -187,11 +190,25 @@ const MarketplacePage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 font-roboto">
-      <Header />
+    <div className="relative min-h-screen bg-white font-roboto">
+      {/* Matrix Rain Background */}
+      <MatrixRain />
+      
+      {/* White overlay */}
+      <div className="absolute inset-0 bg-white/80 pointer-events-none" />
+
+      {/* Header */}
+      <div className="relative z-20">
+        <Header />
+      </div>
+
+      {/* Top Banner Ad */}
+      <div className="relative z-10">
+        <TopBannerAd />
+      </div>
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-brand-blue to-blue-600 text-white py-12">
+      <section className="relative z-10 bg-gradient-to-r from-brand-blue to-blue-600 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-5xl font-bold mb-4">
@@ -270,7 +287,7 @@ const MarketplacePage = () => {
       </section>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Filters and View Options */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
@@ -391,6 +408,11 @@ const MarketplacePage = () => {
 
       </main>
       
+      {/* Bottom Banner Ad */}
+      <div className="relative z-10">
+        <BottomBannerAd />
+      </div>
+
       <Footer />
     </div>
   );

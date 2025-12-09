@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
+import { MatrixRain } from "@/components/landing/MatrixRain";
+import { TopBannerAd } from "@/components/TopBannerAd";
+import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { EventCard } from "@/components/EventCard";
 import { FullscreenMapModal } from "@/components/FullscreenMapModal";
 import { InteractiveEventsMap } from "@/components/InteractiveEventsMap";
@@ -715,14 +718,30 @@ export const EventsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className="relative min-h-screen bg-white">
+      {/* Matrix Rain Background */}
+      <MatrixRain />
+      
+      {/* White overlay */}
+      <div className="absolute inset-0 bg-white/80 pointer-events-none" />
+
+      {/* Header */}
+      <div className="relative z-20">
+        <Header />
+      </div>
+
+      {/* Top Banner Ad */}
+      <div className="relative z-10">
+        <TopBannerAd />
+      </div>
       
       {/* Hero Section with background slideshow */}
-      <HeroSlideshow />
+      <div className="relative z-10">
+        <HeroSlideshow />
+      </div>
 
       {/* Split Layout: Filters Sidebar + Events Grid - Sinc Style */}
-      <div className="flex flex-col lg:flex-row">
+      <div className="relative z-10 flex flex-col lg:flex-row">
         {/* Left Sidebar - Filters (scrolls with page, not sticky) */}
         <aside className="w-full lg:w-96 bg-white border-r border-gray-200">
           <div className="p-4 lg:p-8">
@@ -1234,6 +1253,11 @@ export const EventsPage = () => {
         </main>
       </div>
       
+      {/* Bottom Banner Ad */}
+      <div className="relative z-10">
+        <BottomBannerAd />
+      </div>
+
       <Footer />
       
       {/* Fullscreen Map Modal */}
