@@ -7,7 +7,7 @@
 
 **Baseline Set for Immediate Rollout:**
 - ✓ PageHeaderCard (unified search/filters/sort/count card)
-- ✓ FallingLettersOverlay (global canvas animation)
+- ✓ MatrixRain (green code rain effect globally behind all pages)
 - ✓ Banner ads restyled (monochrome)
 - Micro-interactions system (150–200ms transitions, black focus rings, hover lifts)
 - Skeleton shimmers (monochrome loading states)
@@ -26,8 +26,8 @@
 ## Completed ✓
 - [x] Remove orange highlights and colored hero bars from homepage
 - [x] Create `PageHeaderCard` shared component (title, search, filters, sort, results count)
-- [x] Create `FallingLettersOverlay` global animation component
-- [x] Mount `FallingLettersOverlay` globally with ultra-low density (0.012, opacity 0.08)
+- [x] Create `MatrixRain` global animation component (green code rain effect)
+- [x] Mount `MatrixRain` globally behind all pages with white overlay (60% opacity)
 - [x] Restyle banner ads to monochrome (TopBannerAd, BottomBannerAd)
 - [x] Restyle ListingsPage with PageHeaderCard integration
 - [x] Restyle MarketplacePage to monochrome with header card
@@ -80,10 +80,11 @@
   - Show during loading states
   - Monochrome only (white/gray)
 
-#### Falling Letters Overlay (Global)
+#### MatrixRain (Global Background)
 - [x] Component created and mounted globally
-- [ ] Add per-page density/opacity controls
-  - Default: low density (0.012), low opacity (0.08)
+- [x] White overlay (60% opacity) to lighten the effect
+- [ ] Add per-page opacity controls (optional)
+  - Default: 60% white overlay
   - Allow override per route if needed
   - Ensure respects `prefers-reduced-motion`
 
@@ -223,8 +224,8 @@
   - Refine font weights and sizes
 
 - [ ] **Performance and Accessibility**
-  - `prefers-reduced-motion` respected globally (already done for FallingLettersOverlay)
-  - Canvas pooling for falling letters (smooth FPS on mobile)
+  - `prefers-reduced-motion` respected globally (already done for MatrixRain)
+  - Canvas optimization for MatrixRain (smooth FPS on mobile)
   - High-contrast focus states (black rings)
   - ARIA labeling improved across interactive elements
 

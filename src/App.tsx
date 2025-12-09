@@ -9,7 +9,7 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { FallingLettersOverlay } from "./components/visual/FallingLettersOverlay";
+import { MatrixRain } from "./components/landing/MatrixRain";
 // Test Supabase connection early
 import "@/lib/testSupabase";
 import { LandingPageFinal as LandingPage } from "./pages/LandingPageFinal";
@@ -90,8 +90,10 @@ const AppRoutes = () => {
     <>
       <ScrollToTop />
       
-      <FallingLettersOverlay density={0.012} opacity={0.08} zIndex={0} />
-<Routes>
+      <MatrixRain />
+      <div className="absolute inset-0 bg-white/60 pointer-events-none" style={{ zIndex: 0 }} />
+      
+      <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/listings" element={<Index />} />
         <Route path="/business-listings" element={<Index />} />
