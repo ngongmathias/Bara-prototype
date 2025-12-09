@@ -235,7 +235,7 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
 
   return (
     <div 
-      className={`w-full bg-gradient-to-r from-purple-50 to-pink-100 border-t border-gray-200 py-4 flex justify-center ${className}`}
+      className={`w-full bg-white border-t border-gray-200 py-4 flex justify-center ${className}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >

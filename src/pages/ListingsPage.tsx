@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Building2 } from "lucide-react";
 import { db } from "@/lib/supabase";
 import { motion } from "framer-motion";
+import { MatrixRain } from "@/components/landing/MatrixRain";
+import { TopBannerAd } from "@/components/TopBannerAd";
+import { BottomBannerAd } from "@/components/BottomBannerAd";
 
 interface Category {
   id: string;
@@ -59,11 +62,25 @@ const ListingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white font-roboto">
-      <Header />
+    <div className="relative min-h-screen bg-white font-roboto">
+      {/* Matrix Rain Background - Full Page */}
+      <MatrixRain />
+      
+      {/* Subtle white overlay to lighten the rain */}
+      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
+
+      {/* Header */}
+      <div className="relative z-20">
+        <Header />
+      </div>
+
+      {/* Top Banner Ad */}
+      <div className="relative z-10">
+        <TopBannerAd />
+      </div>
       
       {/* All content in one continuous white background */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         {/* Hero Title - NO BACKGROUND */}
         <motion.div
@@ -188,6 +205,11 @@ const ListingsPage = () => {
             </Button>
           </div>
         </motion.div>
+      </div>
+
+      {/* Bottom Banner Ad */}
+      <div className="relative z-10">
+        <BottomBannerAd />
       </div>
 
       <Footer />
