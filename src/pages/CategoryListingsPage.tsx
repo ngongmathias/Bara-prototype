@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Building2, MapPin, Star, ArrowLeft, Search, Grid, List } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Building2, MapPin, Star, ArrowLeft, Search, Grid, List, Phone, Globe, Crown, Users, Sparkles, Tag } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { MatrixRain } from "@/components/landing/MatrixRain";
@@ -23,6 +24,13 @@ interface Business {
   phone: string | null;
   website: string | null;
   logo_url: string | null;
+  images: string[] | null;
+  is_premium: boolean;
+  is_verified: boolean;
+  is_sponsored_ad: boolean;
+  has_coupons: boolean;
+  is_kid_friendly: boolean;
+  accepts_orders_online: boolean;
   category: { name: string; slug: string } | null;
   city: { name: string } | null;
   country: { name: string; code: string } | null;
@@ -54,11 +62,12 @@ const CategoryListingsPage = () => {
           setCurrentCategory(catData || null);
 
           if (catData) {
-            // Fetch businesses for this category
+            // Fetch businesses for this category - sponsored first, then premium, then rest
             const { data: bizData, error } = await supabase
               .from('businesses')
               .select(`
-                id, name, description, address, phone, website, logo_url,
+                id, name, description, address, phone, website, logo_url, images,
+                is_premium, is_verified, is_sponsored_ad, has_coupons, is_kid_friendly, accepts_orders_online,
                 category:categories(name, slug),
                 city:cities(name),
                 country:countries(name, code),
@@ -66,6 +75,8 @@ const CategoryListingsPage = () => {
               `)
               .eq('category_id', catData.id)
               .eq('status', 'active')
+              .order('is_sponsored_ad', { ascending: false })
+              .order('is_premium', { ascending: false })
               .order('name', { ascending: true });
 
             if (!error) {
@@ -207,60 +218,129 @@ const CategoryListingsPage = () => {
               ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
               : "space-y-4 mt-8"
             }>
-              {filteredBusinesses.map((business, index) => (
-                <motion.div
-                  key={business.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  onClick={() => handleBusinessClick(business)}
-                  className={`bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl overflow-hidden hover:border-black hover:shadow-lg transition-all cursor-pointer group ${
-                    viewMode === 'list' ? 'flex' : ''
-                  }`}
-                >
-                  {/* Logo */}
-                  <div className={`bg-gray-100 flex items-center justify-center ${
-                    viewMode === 'list' ? 'w-32 h-32 flex-shrink-0' : 'h-40'
-                  }`}>
-                    {business.logo_url ? (
-                      <img src={business.logo_url} alt={business.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <Building2 className="w-12 h-12 text-gray-300" />
-                    )}
-                  </div>
-                  
-                  {/* Content */}
-                  <div className="p-4 flex-1">
-                    <h3 className="font-bold text-lg text-black group-hover:underline">{business.name}</h3>
-                    
-                    {business.reviews && business.reviews.length > 0 && (
-                      <div className="flex items-center gap-1 mt-1">
-                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                        <span className="text-sm font-medium">{getAverageRating(business.reviews).toFixed(1)}</span>
-                        <span className="text-sm text-gray-400">({business.reviews.length})</span>
+              {filteredBusinesses.map((business, index) => {
+                const businessImage = business.images?.[0] || business.logo_url;
+                
+                return (
+                  <motion.div
+                    key={business.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: Math.min(index * 0.05, 0.3) }}
+                    onClick={() => handleBusinessClick(business)}
+                    className={`bg-white/90 backdrop-blur-sm border rounded-xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group relative ${
+                      business.is_sponsored_ad 
+                        ? 'border-yellow-400 ring-2 ring-yellow-200' 
+                        : business.is_premium 
+                          ? 'border-blue-400 ring-1 ring-blue-100' 
+                          : 'border-gray-200 hover:border-black'
+                    } ${viewMode === 'list' ? 'flex' : ''}`}
+                  >
+                    {/* Sponsored/Premium Badge */}
+                    {business.is_sponsored_ad && (
+                      <div className="absolute top-2 right-2 z-10">
+                        <Badge className="bg-yellow-500 text-white text-xs">
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          Sponsored
+                        </Badge>
                       </div>
                     )}
                     
-                    {business.description && (
-                      <p className="text-sm text-gray-500 mt-2 line-clamp-2">{business.description}</p>
-                    )}
-                    
-                    <div className="mt-3 space-y-1">
-                      {business.address && (
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <MapPin className="w-3 h-3" />
-                          <span className="truncate">{business.address}</span>
-                        </div>
+                    {/* Image */}
+                    <div className={`bg-gray-100 flex items-center justify-center relative ${
+                      viewMode === 'list' ? 'w-40 h-40 flex-shrink-0' : 'h-48'
+                    }`}>
+                      {businessImage ? (
+                        <img src={businessImage} alt={business.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Building2 className="w-16 h-16 text-gray-300" />
                       )}
-                      {business.city && business.country && (
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <span>{business.city.name}, {business.country.name}</span>
+                      
+                      {/* Premium crown overlay */}
+                      {business.is_premium && !business.is_sponsored_ad && (
+                        <div className="absolute top-2 left-2">
+                          <Badge className="bg-blue-600 text-white text-xs">
+                            <Crown className="w-3 h-3 mr-1" />
+                            Premium
+                          </Badge>
                         </div>
                       )}
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+                    
+                    {/* Content */}
+                    <div className="p-4 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-bold text-lg text-black group-hover:underline line-clamp-1">{business.name}</h3>
+                        {business.is_verified && (
+                          <Badge variant="secondary" className="text-xs flex-shrink-0">✓ Verified</Badge>
+                        )}
+                      </div>
+                      
+                      {/* Badges Row */}
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {business.has_coupons && (
+                          <Badge variant="outline" className="text-xs border-orange-200 text-orange-700 bg-orange-50">
+                            <Tag className="w-3 h-3 mr-1" />
+                            Coupons
+                          </Badge>
+                        )}
+                        {business.is_kid_friendly && (
+                          <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">
+                            <Users className="w-3 h-3 mr-1" />
+                            Kid Friendly
+                          </Badge>
+                        )}
+                        {business.accepts_orders_online && (
+                          <Badge variant="outline" className="text-xs border-green-200 text-green-700 bg-green-50">
+                            <Globe className="w-3 h-3 mr-1" />
+                            Order Online
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {/* Rating */}
+                      {business.reviews && business.reviews.length > 0 && (
+                        <div className="flex items-center gap-1 mt-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star 
+                                key={i} 
+                                className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm font-medium">{getAverageRating(business.reviews).toFixed(1)}</span>
+                          <span className="text-sm text-gray-400">({business.reviews.length})</span>
+                        </div>
+                      )}
+                      
+                      {business.description && (
+                        <p className="text-sm text-gray-500 mt-2 line-clamp-2">{business.description}</p>
+                      )}
+                      
+                      <div className="mt-3 space-y-1">
+                        {business.address && (
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <MapPin className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{business.address}</span>
+                          </div>
+                        )}
+                        {business.phone && (
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <Phone className="w-3 h-3 flex-shrink-0" />
+                            <span>{business.phone}</span>
+                          </div>
+                        )}
+                        {business.city && business.country && (
+                          <div className="flex items-center gap-2 text-sm text-gray-400">
+                            <span>{business.city.name}, {business.country.name}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
 
