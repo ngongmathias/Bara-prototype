@@ -747,7 +747,7 @@ export const Header = () => {
               {/* Mobile Menu Footer */}
               <div className="p-4 border-t border-gray-200">
                 <div className="text-xs text-gray-500 font-roboto text-center">
-                  BARA App - Conect with Local Businesses
+                  BARA App - Connect with Local Businesses ✨
                 </div>
               </div>
             </div>
