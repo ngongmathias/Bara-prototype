@@ -4,12 +4,13 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { MapPin, Phone, Globe, Crown, Search, Building2, Users, Award, ChevronDown, UtensilsCrossed, Wine, Coffee, Car, Home, Scale, Bed, Plane, Building, Scissors, BookOpen, Film, Stethoscope, User, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, Zap, Wrench, Heart, Dumbbell, Laptop, Shield, Calculator, Megaphone, Briefcase, Camera, Calendar, Music, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, Phone, Globe, Crown, Search, Building2, Users, Award, ChevronDown, UtensilsCrossed, Wine, Coffee, Car, Home, Scale, Bed, Plane, Building, Scissors, BookOpen, Film, Stethoscope, User, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, Zap, Wrench, Heart, Dumbbell, Laptop, Shield, Calculator, Megaphone, Briefcase, Camera, Calendar, Music, Sparkles, ChevronLeft, ChevronRight, Grid, List, Map } from "lucide-react";
 import { useBusinesses } from "@/hooks/useBusinesses";
 import { Business, BusinessService } from "@/lib/businessService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { db } from "@/lib/supabase";
 import { FeaturedBusinesses } from "@/components/FeaturedBusinesses";
+import { CityMapLeaflet } from "@/components/CityMapLeaflet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -186,6 +187,7 @@ export const CountryListingsPage = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [country, setCountry] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
 
   // State for pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -349,6 +351,17 @@ export const CountryListingsPage = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentPageBusinesses = sortedBusinesses.slice(startIndex, endIndex);
+
+  // Get businesses with valid coordinates for map view
+  const businessesWithCoords = sortedBusinesses.filter(b => b.latitude && b.longitude);
+  
+  // Calculate map center from businesses or use country default
+  const mapCenter = businessesWithCoords.length > 0
+    ? {
+        lat: businessesWithCoords.reduce((sum, b) => sum + (b.latitude || 0), 0) / businessesWithCoords.length,
+        lng: businessesWithCoords.reduce((sum, b) => sum + (b.longitude || 0), 0) / businessesWithCoords.length
+      }
+    : { lat: 0, lng: 20 }; // Default to Africa center
 
   // Calculate the display number for each business (considering pagination)
   const getDisplayNumber = (businessIndex: number) => {
@@ -600,6 +613,31 @@ export const CountryListingsPage = () => {
               <span className="text-xs sm:text-sm text-gray-600 font-roboto">
                 {sortedBusinesses.length} {t('listings.businessesFound')}
               </span>
+              
+              {/* View Toggle */}
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+                  title="Grid View"
+                >
+                  <Grid className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+                  title="List View"
+                >
+                  <List className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('map')}
+                  className={`p-2 rounded-md transition-colors ${viewMode === 'map' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+                  title="Map View"
+                >
+                  <Map className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -633,8 +671,72 @@ export const CountryListingsPage = () => {
                   {t('listings.clearFilters')}
                 </Button>
               </div>
+            ) : viewMode === 'map' ? (
+              /* Map View */
+              <div>
+                {businessesWithCoords.length > 0 ? (
+                  <div className="rounded-xl overflow-hidden border border-gray-200">
+                    <CityMapLeaflet
+                      cityName={country?.name || 'Businesses'}
+                      latitude={mapCenter.lat}
+                      longitude={mapCenter.lng}
+                      businesses={businessesWithCoords.map(b => ({
+                        id: b.id,
+                        name: b.name,
+                        latitude: b.latitude!,
+                        longitude: b.longitude!,
+                        address: b.address || '',
+                        category: b.category?.name || '',
+                        is_premium: b.is_premium,
+                        is_verified: b.is_verified
+                      }))}
+                      height="500px"
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center py-20 bg-gray-50 rounded-xl border border-gray-200">
+                    <Map className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">No locations available</h3>
+                    <p className="text-gray-400">Businesses in this country don't have location data yet</p>
+                  </div>
+                )}
+                
+                {/* Business list below map */}
+                <div className="mt-6 space-y-3">
+                  <h3 className="font-semibold text-gray-700">{sortedBusinesses.length} Results</h3>
+                  {sortedBusinesses.slice(0, 5).map((business) => (
+                    <div
+                      key={business.id}
+                      onClick={() => handleBusinessClick(business)}
+                      className="flex items-center gap-4 p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                    >
+                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        {business.logo_url ? (
+                          <img src={business.logo_url} alt={business.name} className="w-full h-full object-cover rounded-lg" />
+                        ) : (
+                          <Building2 className="w-6 h-6 text-gray-300" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-900 truncate">{business.name}</h4>
+                        <p className="text-sm text-gray-500 truncate">{business.address}</p>
+                      </div>
+                      {business.is_premium && <Badge className="bg-blue-600 text-white text-xs">Premium</Badge>}
+                    </div>
+                  ))}
+                  {sortedBusinesses.length > 5 && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setViewMode('list')}
+                    >
+                      View all {sortedBusinesses.length} results
+                    </Button>
+                  )}
+                </div>
+              </div>
             ) : (
-              <div className="space-y-6">
+              <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-6"}>
                 {currentPageBusinesses.map((business, index) => {
                   const avgRating = getAverageRating(business);
                   const reviewCount = getReviewCount(business);
