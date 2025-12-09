@@ -3,12 +3,19 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, MapPin, Star, ArrowLeft, Search, Grid, List, Phone, Globe, Crown, Users, Sparkles, Tag } from "lucide-react";
+import { Building2, MapPin, Star, ArrowLeft, Search, Grid, List, Phone, Globe, Crown, Users, Sparkles, Tag, Map, ChevronDown } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { MatrixRain } from "@/components/landing/MatrixRain";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
+import { CityMapLeaflet } from "@/components/CityMapLeaflet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Category {
   id: string;
@@ -25,6 +32,8 @@ interface Business {
   website: string | null;
   logo_url: string | null;
   images: string[] | null;
+  latitude: number | null;
+  longitude: number | null;
   is_premium: boolean;
   is_verified: boolean;
   is_sponsored_ad: boolean;
@@ -37,6 +46,9 @@ interface Business {
   reviews: { rating: number }[];
 }
 
+type FilterType = 'all' | 'order-online' | 'kid-friendly' | 'coupons' | 'verified';
+type SortType = 'default' | 'highest-rated' | 'most-reviewed' | 'newest';
+
 const CategoryListingsPage = () => {
   const navigate = useNavigate();
   const { categorySlug } = useParams<{ categorySlug: string }>();
@@ -44,8 +56,10 @@ const CategoryListingsPage = () => {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [sortBy, setSortBy] = useState<SortType>('default');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,6 +81,7 @@ const CategoryListingsPage = () => {
               .from('businesses')
               .select(`
                 id, name, description, address, phone, website, logo_url, images,
+                latitude, longitude,
                 is_premium, is_verified, is_sponsored_ad, has_coupons, is_kid_friendly, accepts_orders_online,
                 category:categories(name, slug),
                 city:cities(name),
@@ -105,10 +120,47 @@ const CategoryListingsPage = () => {
     return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
   };
 
-  const filteredBusinesses = businesses.filter(biz =>
-    biz.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    biz.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Apply filters and sorting
+  const filteredBusinesses = businesses
+    .filter(biz => {
+      // Search filter
+      const matchesSearch = biz.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        biz.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Feature filters
+      if (activeFilter === 'order-online' && !biz.accepts_orders_online) return false;
+      if (activeFilter === 'kid-friendly' && !biz.is_kid_friendly) return false;
+      if (activeFilter === 'coupons' && !biz.has_coupons) return false;
+      if (activeFilter === 'verified' && !biz.is_verified) return false;
+      
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'highest-rated':
+          return getAverageRating(b.reviews) - getAverageRating(a.reviews);
+        case 'most-reviewed':
+          return (b.reviews?.length || 0) - (a.reviews?.length || 0);
+        case 'newest':
+          return 0; // Would need created_at field
+        default:
+          // Default: sponsored first, then premium
+          if (a.is_sponsored_ad !== b.is_sponsored_ad) return a.is_sponsored_ad ? -1 : 1;
+          if (a.is_premium !== b.is_premium) return a.is_premium ? -1 : 1;
+          return a.name.localeCompare(b.name);
+      }
+    });
+
+  // Get businesses with valid coordinates for map view
+  const businessesWithCoords = filteredBusinesses.filter(b => b.latitude && b.longitude);
+  
+  // Calculate map center from businesses
+  const mapCenter = businessesWithCoords.length > 0
+    ? {
+        lat: businessesWithCoords.reduce((sum, b) => sum + (b.latitude || 0), 0) / businessesWithCoords.length,
+        lng: businessesWithCoords.reduce((sum, b) => sum + (b.longitude || 0), 0) / businessesWithCoords.length
+      }
+    : { lat: 0, lng: 0 };
 
   if (!currentCategory && !loading) {
     return (
@@ -176,17 +228,73 @@ const CategoryListingsPage = () => {
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+                    title="Grid View"
                   >
                     <Grid className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
                     className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+                    title="List View"
                   >
                     <List className="w-4 h-4" />
                   </button>
+                  <button
+                    onClick={() => setViewMode('map')}
+                    className={`p-2 rounded-md transition-colors ${viewMode === 'map' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+                    title="Map View"
+                  >
+                    <Map className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
+            </div>
+          </motion.div>
+
+          {/* Filter Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-6 flex flex-wrap items-center gap-3"
+          >
+            {/* Filter Buttons */}
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: 'all', label: 'All' },
+                { key: 'order-online', label: 'Order Online' },
+                { key: 'kid-friendly', label: 'Kid Friendly' },
+                { key: 'coupons', label: 'Coupons' },
+                { key: 'verified', label: 'Verified' },
+              ].map(filter => (
+                <Button
+                  key={filter.key}
+                  variant={activeFilter === filter.key ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setActiveFilter(filter.key as FilterType)}
+                  className={`rounded-full ${activeFilter === filter.key ? 'bg-black text-white' : 'bg-white hover:bg-gray-100'}`}
+                >
+                  {filter.label}
+                </Button>
+              ))}
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="ml-auto">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="rounded-full">
+                    Sort: {sortBy === 'default' ? 'Default' : sortBy === 'highest-rated' ? 'Highest Rated' : sortBy === 'most-reviewed' ? 'Most Reviewed' : 'Newest'}
+                    <ChevronDown className="w-4 h-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setSortBy('default')}>Default</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('highest-rated')}>Highest Rated</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('most-reviewed')}>Most Reviewed</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('newest')}>Newest</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </motion.div>
 
@@ -213,6 +321,70 @@ const CategoryListingsPage = () => {
                 Add Your Business
               </Button>
             </motion.div>
+          ) : viewMode === 'map' ? (
+            /* Map View */
+            <div className="mt-8">
+              {businessesWithCoords.length > 0 ? (
+                <div className="rounded-xl overflow-hidden border border-gray-200">
+                  <CityMapLeaflet
+                    cityName={currentCategory?.name || 'Businesses'}
+                    latitude={mapCenter.lat}
+                    longitude={mapCenter.lng}
+                    businesses={businessesWithCoords.map(b => ({
+                      id: b.id,
+                      name: b.name,
+                      latitude: b.latitude!,
+                      longitude: b.longitude!,
+                      address: b.address || '',
+                      category: b.category?.name || '',
+                      is_premium: b.is_premium,
+                      is_verified: b.is_verified
+                    }))}
+                    height="500px"
+                  />
+                </div>
+              ) : (
+                <div className="text-center py-20 bg-gray-50 rounded-xl border border-gray-200">
+                  <Map className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-600 mb-2">No locations available</h3>
+                  <p className="text-gray-400">Businesses in this category don't have location data yet</p>
+                </div>
+              )}
+              
+              {/* Business list below map */}
+              <div className="mt-6 space-y-3">
+                <h3 className="font-semibold text-gray-700">{filteredBusinesses.length} Results</h3>
+                {filteredBusinesses.slice(0, 5).map((business) => (
+                  <div
+                    key={business.id}
+                    onClick={() => handleBusinessClick(business)}
+                    className="flex items-center gap-4 p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                  >
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      {business.logo_url ? (
+                        <img src={business.logo_url} alt={business.name} className="w-full h-full object-cover rounded-lg" />
+                      ) : (
+                        <Building2 className="w-6 h-6 text-gray-300" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-black truncate">{business.name}</h4>
+                      <p className="text-sm text-gray-500 truncate">{business.address}</p>
+                    </div>
+                    {business.is_premium && <Badge className="bg-blue-600 text-white text-xs">Premium</Badge>}
+                  </div>
+                ))}
+                {filteredBusinesses.length > 5 && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setViewMode('list')}
+                  >
+                    View all {filteredBusinesses.length} results
+                  </Button>
+                )}
+              </div>
+            </div>
           ) : (
             <div className={viewMode === 'grid' 
               ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"

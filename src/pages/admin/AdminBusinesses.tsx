@@ -72,6 +72,10 @@ interface Business {
   services: any | null;
   images: string[] | null;
   logo_url: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  order_online_url: string | null;
+  website_visible: boolean;
   status: 'pending' | 'active' | 'suspended';
   is_premium: boolean;
   is_verified: boolean;
@@ -119,6 +123,10 @@ const businessFormSchema = z.object({
   country_id: z.string().min(1, "Country is required"),
   hours_of_operation: z.any().optional(),
   services: z.any().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  order_online_url: z.string().url("Invalid URL").optional().or(z.literal("")),
+  website_visible: z.boolean().default(true),
   is_premium: z.boolean().default(false),
   is_verified: z.boolean().default(false),
   has_coupons: z.boolean().default(false),
@@ -176,6 +184,10 @@ export const AdminBusinesses = () => {
       category_id: "",
       city_id: "",
       country_id: "",
+      latitude: null,
+      longitude: null,
+      order_online_url: "",
+      website_visible: true,
       is_premium: false,
       is_verified: false,
       has_coupons: false,
@@ -574,6 +586,10 @@ export const AdminBusinesses = () => {
       country_id: business.country_id,
       hours_of_operation: business.hours_of_operation,
       services: business.services,
+      latitude: business.latitude,
+      longitude: business.longitude,
+      order_online_url: business.order_online_url || "",
+      website_visible: business.website_visible ?? true,
       is_premium: business.is_premium,
       is_verified: business.is_verified,
       has_coupons: business.has_coupons,
@@ -1187,6 +1203,47 @@ export const AdminBusinesses = () => {
                     className="font-roboto"
                   />
                 </div>
+                <div>
+                  <Label htmlFor="order_online_url" className="font-roboto">Order Online URL</Label>
+                  <Input
+                    id="order_online_url"
+                    type="url"
+                    placeholder="https://order.example.com"
+                    {...form.register("order_online_url")}
+                    className="font-roboto"
+                  />
+                  {form.formState.errors.order_online_url && (
+                    <p className="text-sm text-red-600 mt-1">{form.formState.errors.order_online_url.message}</p>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="latitude" className="font-roboto">Latitude</Label>
+                    <Input
+                      id="latitude"
+                      type="number"
+                      step="any"
+                      placeholder="-90 to 90"
+                      onChange={(e) => form.setValue("latitude", e.target.value ? parseFloat(e.target.value) : null)}
+                      value={form.watch("latitude") ?? ""}
+                      className="font-roboto"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">For map view</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="longitude" className="font-roboto">Longitude</Label>
+                    <Input
+                      id="longitude"
+                      type="number"
+                      step="any"
+                      placeholder="-180 to 180"
+                      onChange={(e) => form.setValue("longitude", e.target.value ? parseFloat(e.target.value) : null)}
+                      value={form.watch("longitude") ?? ""}
+                      className="font-roboto"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">For map view</p>
+                  </div>
+                </div>
               </div>
               <div className="space-y-4">
                 <div>
@@ -1335,6 +1392,19 @@ export const AdminBusinesses = () => {
                     <Label htmlFor="is_sponsored_ad" className="font-roboto">
                       <span className={`${form.watch("is_sponsored_ad") ? 'text-green-700' : 'text-red-700'}`}>
                         Sponsored Ad
+                      </span>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="website_visible"
+                      checked={form.watch("website_visible") ?? true}
+                      onCheckedChange={(checked) => form.setValue("website_visible", checked)}
+                      className={`${form.watch("website_visible") ? 'bg-green-600' : 'bg-red-600'}`}
+                    />
+                    <Label htmlFor="website_visible" className="font-roboto">
+                      <span className={`${form.watch("website_visible") ? 'text-green-700' : 'text-red-700'}`}>
+                        Show Website Link
                       </span>
                     </Label>
                   </div>
@@ -1502,6 +1572,47 @@ export const AdminBusinesses = () => {
                     className="font-roboto"
                   />
                 </div>
+                <div>
+                  <Label htmlFor="edit-order_online_url" className="font-roboto">Order Online URL</Label>
+                  <Input
+                    id="edit-order_online_url"
+                    type="url"
+                    placeholder="https://order.example.com"
+                    {...form.register("order_online_url")}
+                    className="font-roboto"
+                  />
+                  {form.formState.errors.order_online_url && (
+                    <p className="text-sm text-red-600 mt-1">{form.formState.errors.order_online_url.message}</p>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-latitude" className="font-roboto">Latitude</Label>
+                    <Input
+                      id="edit-latitude"
+                      type="number"
+                      step="any"
+                      placeholder="-90 to 90"
+                      onChange={(e) => form.setValue("latitude", e.target.value ? parseFloat(e.target.value) : null)}
+                      value={form.watch("latitude") ?? ""}
+                      className="font-roboto"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">For map view</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-longitude" className="font-roboto">Longitude</Label>
+                    <Input
+                      id="edit-longitude"
+                      type="number"
+                      step="any"
+                      placeholder="-180 to 180"
+                      onChange={(e) => form.setValue("longitude", e.target.value ? parseFloat(e.target.value) : null)}
+                      value={form.watch("longitude") ?? ""}
+                      className="font-roboto"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">For map view</p>
+                  </div>
+                </div>
               </div>
               <div className="space-y-4">
                 <div>
@@ -1650,6 +1761,19 @@ export const AdminBusinesses = () => {
                     <Label htmlFor="edit-is_sponsored_ad" className="font-roboto">
                       <span className={`${form.watch("is_sponsored_ad") ? 'text-green-700' : 'text-red-700'}`}>
                         Sponsored Ad
+                      </span>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="edit-website_visible"
+                      checked={form.watch("website_visible") ?? true}
+                      onCheckedChange={(checked) => form.setValue("website_visible", checked)}
+                      className={`${form.watch("website_visible") ? 'bg-green-600' : 'bg-red-600'}`}
+                    />
+                    <Label htmlFor="edit-website_visible" className="font-roboto">
+                      <span className={`${form.watch("website_visible") ? 'text-green-700' : 'text-red-700'}`}>
+                        Show Website Link
                       </span>
                     </Label>
                   </div>
