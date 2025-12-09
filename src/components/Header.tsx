@@ -178,7 +178,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="bg-background border-b border-border relative">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6">
         {/* Desktop & Mobile Layout - v2.1 Compact */}
         <div className="flex items-center justify-between h-16">
