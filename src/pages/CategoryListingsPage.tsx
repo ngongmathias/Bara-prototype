@@ -259,17 +259,6 @@ const CategoryListingsPage = () => {
             transition={{ delay: 0.1 }}
             className="mb-6 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4"
           >
-            {/* Map View Button - Prominent like YP */}
-            <Button
-              variant={viewMode === 'map' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('map')}
-              className={viewMode === 'map' ? 'bg-blue-600 text-white' : ''}
-            >
-              <Map className="w-4 h-4 mr-2" />
-              Map View
-            </Button>
-
             {/* Filter Buttons */}
             <div className="flex flex-wrap gap-2">
               {[
@@ -412,7 +401,7 @@ const CategoryListingsPage = () => {
                         <div
                           key={business.id}
                           className={`border-b border-gray-200 py-4 ${
-                            business.is_sponsored_ad ? 'bg-yellow-50' : ''
+                            business.is_sponsored_ad ? 'bg-blue-50' : ''
                           }`}
                         >
                           <div className="flex gap-4">
@@ -444,7 +433,7 @@ const CategoryListingsPage = () => {
                                   {business.name}
                                 </h3>
                                 {business.is_sponsored_ad && (
-                                  <Badge className="bg-yellow-500 text-white text-xs ml-2">Ad</Badge>
+                                  <Badge className="bg-blue-600 text-white text-xs ml-2">Ad</Badge>
                                 )}
                               </div>
                               
@@ -494,7 +483,7 @@ const CategoryListingsPage = () => {
                                     {[...Array(5)].map((_, i) => (
                                       <Star 
                                         key={i} 
-                                        className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
+                                        className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-orange-500 fill-current' : 'text-gray-300'}`} 
                                       />
                                     ))}
                                   </div>
@@ -553,7 +542,7 @@ const CategoryListingsPage = () => {
                           onClick={() => handleBusinessClick(business)}
                           className={`bg-white border rounded-xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group relative ${
                             business.is_sponsored_ad 
-                              ? 'border-yellow-400 ring-2 ring-yellow-200' 
+                              ? 'border-blue-400 ring-2 ring-blue-200' 
                               : business.is_premium 
                                 ? 'border-blue-400 ring-1 ring-blue-100' 
                                 : 'border-gray-200 hover:border-black'
@@ -561,7 +550,7 @@ const CategoryListingsPage = () => {
                         >
                           {business.is_sponsored_ad && (
                             <div className="absolute top-2 right-2 z-10">
-                              <Badge className="bg-yellow-500 text-white text-xs">Ad</Badge>
+                              <Badge className="bg-blue-600 text-white text-xs">Ad</Badge>
                             </div>
                           )}
                           

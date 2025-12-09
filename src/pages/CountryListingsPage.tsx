@@ -522,17 +522,6 @@ export const CountryListingsPage = () => {
       <div className="bg-white border-b border-gray-200 py-3">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-3 lg:space-y-0 lg:space-x-4">
-            {/* Map View Button - Prominent like YP */}
-            <Button
-              variant={viewMode === 'map' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('map')}
-              className={`font-roboto ${viewMode === 'map' ? 'bg-blue-600 text-white' : ''}`}
-            >
-              <Map className="w-4 h-4 mr-2" />
-              Map View
-            </Button>
-
             <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
               <Button 
                 variant={selectedFilters.length === 0 ? 'default' : 'outline'} 
@@ -764,7 +753,7 @@ export const CountryListingsPage = () => {
                           <div
                             key={business.id}
                             className={`border-b border-gray-200 py-4 ${
-                              business.is_sponsored_ad ? 'bg-yellow-50' : ''
+                              business.is_sponsored_ad ? 'bg-blue-50' : ''
                             }`}
                           >
                             <div className="flex gap-4">
@@ -796,7 +785,7 @@ export const CountryListingsPage = () => {
                                     {business.name}
                                   </h3>
                                   {business.is_sponsored_ad && (
-                                    <Badge className="bg-yellow-500 text-white text-xs ml-2">Ad</Badge>
+                                    <Badge className="bg-blue-600 text-white text-xs ml-2">Ad</Badge>
                                   )}
                                 </div>
                                 
@@ -846,7 +835,7 @@ export const CountryListingsPage = () => {
                                       {[...Array(5)].map((_, i) => (
                                         <Crown 
                                           key={i} 
-                                          className={`w-4 h-4 ${i < Math.floor(avgRating) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
+                                          className={`w-4 h-4 ${i < Math.floor(avgRating) ? 'text-orange-500 fill-current' : 'text-gray-300'}`} 
                                         />
                                       ))}
                                     </div>
@@ -899,7 +888,7 @@ export const CountryListingsPage = () => {
                           >
                             {business.is_sponsored_ad && (
                               <div className="absolute top-2 right-2 z-10">
-                                <Badge className="bg-yellow-500 text-white text-xs">Ad</Badge>
+                                <Badge className="bg-blue-600 text-white text-xs">Ad</Badge>
                               </div>
                             )}
                             
