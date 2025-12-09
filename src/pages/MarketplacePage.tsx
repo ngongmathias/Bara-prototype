@@ -114,6 +114,30 @@ const MarketplacePage = () => {
       inStock: false,
       tag: 'Limited Stock'
     },
+    {
+      id: 7,
+      name: 'Laptop Stand Aluminum',
+      price: 45.99,
+      originalPrice: null,
+      image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500&h=500&fit=crop',
+      rating: 4.4,
+      reviews: 92,
+      discount: null,
+      inStock: true,
+      tag: null
+    },
+    {
+      id: 8,
+      name: 'Wireless Mouse',
+      price: 29.99,
+      originalPrice: 49.99,
+      image: 'https://images.unsplash.com/photo-1527814050087-3793815479db?w=500&h=500&fit=crop',
+      rating: 4.1,
+      reviews: 134,
+      discount: 40,
+      inStock: true,
+      tag: null
+    },
   ];
 
   const ProductCard = ({ product }: { product: typeof featuredProducts[0] }) => (
@@ -125,17 +149,12 @@ const MarketplacePage = () => {
           className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
         />
         {product.discount && (
-          <Badge className="absolute top-3 left-3 bg-red-500 text-white">
+          <Badge className="absolute top-3 left-3 bg-black text-white">
             -{product.discount}%
           </Badge>
         )}
-        {product.tag && (
-          <Badge className="absolute top-3 right-3 bg-brand-blue text-white">
-            {product.tag}
-          </Badge>
-        )}
         <button className="absolute top-3 right-3 p-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-          <Heart className="w-5 h-5 text-gray-600 hover:text-red-500" />
+          <Heart className="w-5 h-5 text-gray-600 hover:text-black" />
         </button>
       </div>
       

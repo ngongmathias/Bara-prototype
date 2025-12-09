@@ -30,11 +30,11 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 15%;
 
-    --primary: 0 70% 100%;
-    --primary-foreground: 0 0% 15%;
+    --primary: 0 0% 0%; /* Black for buttons */
+    --primary-foreground: 0 0% 100%; /* White text */
 
-    --secondary: 217 89% 61%; /* Google Blue */
-    --secondary-foreground: 0 0% 15%;
+    --secondary: 0 0% 15%; /* Dark gray */
+    --secondary-foreground: 0 0% 100%; /* White text */
 
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
