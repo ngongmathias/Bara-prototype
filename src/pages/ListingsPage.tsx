@@ -918,7 +918,7 @@ export const ListingsPage = () => {
 
   return (
 
-    <div className="min-h-screen bg-background font-roboto">
+    <div className="min-h-screen bg-white font-roboto">
       <Header />
 
       <PageHeaderCard

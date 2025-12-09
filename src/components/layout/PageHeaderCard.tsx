@@ -41,7 +41,7 @@ export const PageHeaderCard: React.FC<PageHeaderCardProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pt-6">
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 sm:p-6 md:p-7">
         {title && (
           <div className="mb-3 sm:mb-4 flex items-center justify-between">
