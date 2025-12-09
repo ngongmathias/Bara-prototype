@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
-import Footer from "@/components/Footer";
 import { MatrixRain } from "@/components/landing/MatrixRain";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -566,14 +564,13 @@ export const CountryDetailPage: React.FC = () => {
   }
 
   return (
-    <>
-      <Header />
-      <div className="relative min-h-screen bg-white">
-        <MatrixRain />
-        <div className="absolute inset-0 bg-white/80 pointer-events-none" />
-        <div className="relative z-10">
+    <div className="relative min-h-screen bg-white">
+      <MatrixRain />
+      {/* Match landing page MatrixRain visibility */}
+      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
+      <div className="relative z-10">
       <div className="py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center space-x-4 mb-4">
             <Button 
               variant="ghost" 
@@ -600,6 +597,13 @@ export const CountryDetailPage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Country Overview */}
+          {(country.wikipedia_description || country.description) && (
+            <div className="mt-4 max-w-3xl text-base leading-relaxed text-gray-700">
+              <p>{country.wikipedia_description || country.description}</p>
+            </div>
+          )}
           
           {/* Sponsored Banner Section */}
             {sponsoredBanners.length > 0 && (
@@ -1013,9 +1017,7 @@ export const CountryDetailPage: React.FC = () => {
           </div>
         )}
       </div>
-      </div>
-      </div>
-      <Footer />
-    </>
+    </div>
+  </div>
   );
 };

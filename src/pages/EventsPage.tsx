@@ -722,8 +722,8 @@ export const EventsPage = () => {
       {/* Matrix Rain Background */}
       <MatrixRain />
       
-      {/* White overlay */}
-      <div className="absolute inset-0 bg-white/80 pointer-events-none" />
+      {/* White overlay - match LandingPageFinal visibility */}
+      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
 
       {/* Header */}
       <div className="relative z-20">

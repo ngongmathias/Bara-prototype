@@ -66,8 +66,8 @@ const ListingsPage = () => {
       {/* Matrix Rain Background - Full Page */}
       <MatrixRain />
       
-      {/* Subtle white overlay to lighten the rain - REDUCED to show more MatrixRain */}
-      <div className="absolute inset-0 bg-white/80 pointer-events-none" />
+      {/* Subtle white overlay to lighten the rain - match LandingPageFinal */}
+      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
 
       {/* Header */}
       <div className="relative z-20">

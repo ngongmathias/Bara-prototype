@@ -5,8 +5,6 @@ import { Globe, MapPin, Users, TrendingUp, Search } from 'lucide-react';
 import { db } from '@/lib/supabase';
 import { Input } from '@/components/ui/input';
 import { MatrixRain } from "@/components/landing/MatrixRain";
-import { Header } from "@/components/Header";
-import Footer from "@/components/Footer";
 
 interface Country {
   id: string;
@@ -58,12 +56,11 @@ export const CountriesPage = () => {
   };
 
   return (
-    <>
-      <Header />
-      <div className="relative min-h-screen bg-white">
-        <MatrixRain />
-        <div className="absolute inset-0 bg-white/80 pointer-events-none" />
-        <div className="relative z-10">
+    <div className="relative min-h-screen bg-white">
+      <MatrixRain />
+      {/* Match landing page MatrixRain visibility */}
+      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
+      <div className="relative z-10">
         {/* Title Section */}
         <div className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -98,6 +95,11 @@ export const CountriesPage = () => {
                 placeholder="Search countries by name or code..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && filteredCountries.length > 0) {
+                    navigate(`/countries/${filteredCountries[0].slug}`);
+                  }
+                }}
                 className="pl-12 pr-4 py-6 text-lg rounded-xl border-2 border-gray-200 focus:border-black"
               />
             </div>
@@ -213,8 +215,6 @@ export const CountriesPage = () => {
         )}
       </div>
       </div>
-      </div>
-      <Footer />
-    </>
+    </div>
   );
 };

@@ -28,8 +28,8 @@ const AdvertisePage = () => {
       <div className="relative min-h-screen bg-white">
         {/* Matrix Rain Background */}
         <MatrixRain />
-        {/* White overlay for readability */}
-        <div className="absolute inset-0 bg-white/80 pointer-events-none" />
+        {/* White overlay for readability - match LandingPageFinal visibility */}
+        <div className="absolute inset-0 bg-white/60 pointer-events-none" />
 
         {/* Title & Stats */}
         <section className="relative z-10 py-16">
