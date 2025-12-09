@@ -87,30 +87,65 @@ const YourPage = () => {
 ---
 
 ## Completed ✓
+
+### Phase 0 - Foundation (DONE)
 - [x] Remove orange highlights and colored hero bars from homepage
 - [x] Create `PageHeaderCard` shared component (title, search, filters, sort, results count)
 - [x] Create `MatrixRain` animation component (green code rain effect)
-- [x] Mount `MatrixRain` INSIDE each page component (not globally) with white overlay (60% opacity)
-- [x] Restyle banner ads to pure white backgrounds (TopBannerAd, BottomBannerAd)
-- [x] Complete rebuild of ListingsPage with uniform white background
-  - Removed old Index.tsx with stacked components (HeroSection, CategoryGrid, BusinessSection)
-  - Created clean ListingsPage with: Search/Explore/Connect/Grow, search bar, categories, manage listing CTA
-  - Applied MatrixRain pattern from LandingPage
-- [x] Fix uniform background issue (removed global MatrixRain, applied per-page)
 - [x] Add SPA rewrite rules (vercel.json)
 - [x] Add safe dev fallback for missing Supabase env vars
 - [x] Proper file naming: LandingPageFinal.tsx is homepage, ListingsPage.tsx is /listings (not Index)
 
+### ListingsPage Complete Redesign (DONE - Dec 9, 2025)
+- [x] **Complete rebuild of ListingsPage with uniform white background**
+  - Removed old Index.tsx with stacked components (HeroSection, CategoryGrid, BusinessSection)
+  - Created clean ListingsPage with: Search/Explore/Connect/Grow, search bar, categories, manage listing CTA
+  - Applied MatrixRain pattern from LandingPage (MatrixRain inside page, not global)
+  - White overlay at 80% opacity for clean white appearance
+  
+- [x] **Banner Ads Integration**
+  - Removed ALL gradient backgrounds from TopBannerAd and BottomBannerAd
+  - Removed white backgrounds and borders from banner containers
+  - Banner ads now blend seamlessly with MatrixRain background
+  - No visual separators between banner area and page content
+  
+- [x] **Sticky Navigation**
+  - Header now sticky at top (sticky top-0 z-50)
+  - White background with subtle shadow
+  - Stays above all content when scrolling
+
+- [x] **Uniform Background Pattern Documented**
+  - Created comprehensive guide in REDESIGN_ROADMAP.md
+  - Code pattern for all pages with MatrixRain + white overlay
+  - 7 key rules for maintaining uniform backgrounds
+  - Ready to apply to EventsPage, MarketplacePage, etc.
+
 ---
 
-## Phase 0 (Current) - Global Tokens + Components
-**Goal:** Build foundation system for all pages
+## 🎯 What's Next - Phase 1: Apply to Other Pages
 
-### In Progress
-- [ ] Insert PageHeaderCard at top of /listings (title+search only), non-destructive
-  - Status: Testing deployment visibility
+### Immediate Priority (Apply Uniform Background Pattern)
+Using the pattern from ListingsPage, apply to:
 
-### Pending - High-Impact, Low-Noise Enhancements
+1. **EventsPage** (`/events`)
+   - [ ] Add MatrixRain + 80% white overlay
+   - [ ] Remove any colored backgrounds
+   - [ ] Add TopBannerAd and BottomBannerAd (no borders/backgrounds)
+   - [ ] Ensure seamless integration
+
+2. **MarketplacePage** (`/marketplace`)
+   - [ ] Add MatrixRain + 80% white overlay
+   - [ ] Remove any colored backgrounds
+   - [ ] Add TopBannerAd and BottomBannerAd (no borders/backgrounds)
+   - [ ] Ensure seamless integration
+
+3. **Other Key Pages**
+   - [ ] AboutUsPage
+   - [ ] ContactUsPage
+   - [ ] CategoriesPage
+   - [ ] BusinessDetailPage
+
+### Phase 1 - High-Impact Enhancements (After Pages Are Uniform)
 
 #### Unified PageHeaderCard
 - [ ] Refine PageHeaderCard component
