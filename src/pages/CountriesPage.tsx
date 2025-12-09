@@ -24,6 +24,7 @@ export const CountriesPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -104,9 +105,19 @@ export const CountriesPage = () => {
                       type="text"
                       placeholder="Search countries, capitals..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onFocus={() => setIsSearchFocused(true)}
-                      onBlur={() => setIsSearchFocused(false)}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setShowDropdown(true);
+                      }}
+                      onFocus={() => {
+                        setIsSearchFocused(true);
+                        if (searchQuery) setShowDropdown(true);
+                      }}
+                      onBlur={() => {
+                        setIsSearchFocused(false);
+                        // Delay hiding dropdown to allow click
+                        setTimeout(() => setShowDropdown(false), 200);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && filteredCountries.length > 0) {
                           navigate(`/countries/${filteredCountries[0].slug}`);
@@ -129,7 +140,7 @@ export const CountriesPage = () => {
 
                   {/* Search Results Dropdown */}
                   <AnimatePresence>
-                    {searchQuery && filteredCountries.length > 0 && (
+                    {showDropdown && searchQuery && filteredCountries.length > 0 && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}

@@ -189,11 +189,20 @@ export const CountryDetailPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                {/* Flag & Name */}
-                <div className="flex items-center gap-4 mb-6">
-                  {country.flag_emoji && (
-                    <span className="text-6xl">{country.flag_emoji}</span>
-                  )}
+                {/* Flag, Coat of Arms & Name */}
+                <div className="flex items-start gap-6 mb-6">
+                  <div className="flex items-center gap-4">
+                    {country.flag_emoji && (
+                      <span className="text-6xl">{country.flag_emoji}</span>
+                    )}
+                    {country.coat_of_arms_url && (
+                      <img
+                        src={country.coat_of_arms_url}
+                        alt={`${country.name} Coat of Arms`}
+                        className="w-16 h-16 object-contain opacity-80"
+                      />
+                    )}
+                  </div>
                   <div>
                     <h1 className="text-5xl lg:text-6xl font-black text-black tracking-tight">
                       {country.name}
@@ -510,22 +519,6 @@ export const CountryDetailPage: React.FC = () => {
                 </div>
               </motion.div>
 
-              {/* Coat of Arms */}
-              {country.coat_of_arms_url && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="text-center"
-                >
-                  <img
-                    src={country.coat_of_arms_url}
-                    alt={`${country.name} Coat of Arms`}
-                    className="w-32 h-32 object-contain mx-auto opacity-60"
-                  />
-                  <p className="text-xs text-gray-400 mt-2">Coat of Arms</p>
-                </motion.div>
-              )}
             </div>
           </div>
         </div>
