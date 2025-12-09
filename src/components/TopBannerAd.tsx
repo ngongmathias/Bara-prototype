@@ -235,7 +235,7 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
 
   return (
     <div 
-      className={`w-full bg-white border-b border-gray-200 py-4 flex justify-center ${className}`}
+      className={`w-full py-4 flex justify-center ${className}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
