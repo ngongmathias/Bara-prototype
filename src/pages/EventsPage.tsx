@@ -323,7 +323,7 @@ export const EventsPage = () => {
     <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
     <button 
       onClick={onBack}
-      className="flex items-center text-brand-blue hover:text-brand-blue/80 mb-6 transition-colors"
+      className="flex items-center text-black hover:opacity-80 mb-6 transition-colors"
     >
       <ArrowLeft className="w-5 h-5 mr-2" />
       Back to Events
@@ -345,7 +345,7 @@ export const EventsPage = () => {
                       key={`${img}-${idx}`}
                       src={img}
                       alt="thumbnail"
-                      className={`h-12 w-16 object-cover rounded-md border cursor-pointer ${idx === currentImageIndex ? 'ring-2 ring-brand-blue' : 'border-white/70'}`}
+                      className={`h-12 w-16 object-cover rounded-md border cursor-pointer ${idx === currentImageIndex ? 'ring-2 ring-black' : 'border-white/70'}`}
                       onClick={() => { setCurrentImageIndex(idx); openLightboxAt(idx); }}
                     />
                   ))}
@@ -355,7 +355,7 @@ export const EventsPage = () => {
       </div>
         <div className="p-8 md:w-1/2">
           <div className="flex items-center mb-4">
-            <Badge variant="secondary" className="bg-brand-blue/10 text-brand-blue border-brand-blue/20">
+            <Badge variant="secondary" className="bg-black/10 text-black border-black/20">
               {event.category_name || event.category}
             </Badge>
           </div>
@@ -381,7 +381,7 @@ export const EventsPage = () => {
           
           <div className="space-y-6">
           <div className="flex items-start">
-              <Calendar className="h-6 w-6 text-brand-blue mr-3 mt-1 flex-shrink-0" />
+              <Calendar className="h-6 w-6 text-black mr-3 mt-1 flex-shrink-0" />
             <div>
                 <p className="text-lg text-gray-700 font-medium">
                   {new Date(event.start_date).toLocaleDateString('en-US', { 
@@ -394,12 +394,12 @@ export const EventsPage = () => {
                 <p className="text-gray-600">
                   {new Date(event.start_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {new Date(event.end_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                 </p>
-                <p className="text-sm text-brand-blue mt-1 cursor-pointer hover:underline">Add to calendar</p>
+                <p className="text-sm text-black mt-1 cursor-pointer hover:underline">Add to calendar</p>
             </div>
           </div>
           
           <div className="flex items-start">
-              <MapPin className="h-6 w-6 text-brand-blue mr-3 mt-1 flex-shrink-0" />
+              <MapPin className="h-6 w-6 text-black mr-3 mt-1 flex-shrink-0" />
             <div>
                 <p className="text-lg text-gray-700 font-medium">{event.venue_name}</p>
                 <p className="text-gray-600">{event.venue_address}</p>
@@ -419,7 +419,7 @@ export const EventsPage = () => {
                       href={mapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-brand-blue mt-1 inline-block hover:underline"
+                      className="text-sm text-black mt-1 inline-block hover:underline"
                     >
                       Get directions
                     </a>
@@ -459,7 +459,7 @@ export const EventsPage = () => {
                 {event.website_url && (
               <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wide">Website</p>
-                    <a href={event.website_url} className="text-brand-blue hover:underline font-medium" target="_blank" rel="noopener noreferrer">
+                    <a href={event.website_url} className="text-black hover:underline font-medium" target="_blank" rel="noopener noreferrer">
                   Visit website
                 </a>
               </div>
@@ -501,7 +501,7 @@ export const EventsPage = () => {
             )}
             
             <div className="pt-6">
-              <Button className="w-full bg-brand-blue hover:bg-brand-blue-hover text-white font-semibold py-4 px-6 rounded-lg text-lg">
+              <Button className="w-full text-white font-semibold py-4 px-6 rounded-lg text-lg">
               Get Tickets
             </Button>
           </div>
@@ -571,8 +571,8 @@ export const EventsPage = () => {
         
         <div className="mt-4 flex items-center justify-between">
           <p className="text-sm text-gray-600">
-            <Maximize2 className="w-4 h-4 inline mr-1 text-brand-blue" /> 
-            Click <strong className="text-brand-blue">"Expand Map"</strong> button to view in fullscreen mode
+            <Maximize2 className="w-4 h-4 inline mr-1 text-black" /> 
+            Click <strong className="text-black">"Expand Map"</strong> button to view in fullscreen mode
           </p>
           <p className="text-sm text-gray-500">
             Total events on map: <strong>{getAllEventsForMap(event).length}</strong>
@@ -682,7 +682,7 @@ export const EventsPage = () => {
                         <Badge variant="secondary" className="mb-2 text-xs">
                           {similarEvent.category_name || similarEvent.category}
                         </Badge>
-                        <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-brand-blue transition-colors">
+                        <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-black transition-colors">
                           {similarEvent.title}
                         </h4>
                         <p className="text-sm text-gray-600 flex items-center">
@@ -990,7 +990,7 @@ export const EventsPage = () => {
             </div>
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
             <p className="text-gray-600">Loading events...</p>
         </div>
         ) : (
@@ -1231,7 +1231,7 @@ export const EventsPage = () => {
                             <div
                               key={event.id}
                               onClick={() => handleViewEvent(event)}
-                              className="text-xs bg-brand-blue text-white p-1 rounded mb-1 cursor-pointer hover:bg-brand-blue/80 truncate"
+                              className="text-xs bg-black text-white p-1 rounded mb-1 cursor-pointer hover:bg-black/80 truncate"
                               title={event.title}
                             >
                               {event.title}

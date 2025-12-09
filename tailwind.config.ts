@@ -32,8 +32,20 @@ export default {
 				// Brand Colors
 				'brand-yellow': 'hsl(var(--yp-yellow))',
 				'brand-yellow-hover': 'hsl(var(--yp-yellow-hover))',
-				'brand-blue': 'hsl(var(--yp-blue))',
-				'brand-blue-hover': 'hsl(var(--yp-blue-hover))',
+				'brand-blue': 'hsl(var(--primary))',
+				'brand-blue-hover': 'hsl(0 0% 15%)',
+				blue: {
+					50: '#FAFAFA',
+					100: '#F5F5F5',
+					200: '#E5E5E5',
+					300: '#D4D4D4',
+					400: '#A3A3A3',
+					500: '#737373',
+					600: '#000000',
+					700: '#000000',
+					800: '#000000',
+					900: '#000000',
+				},
 				
 				// Gold Colors for Landing Page
 				'gold': {
@@ -54,14 +66,12 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--yp-blue))',
-					foreground: 'hsl(var(--yp-white))',
-					hover: 'hsl(var(--yp-blue-hover))'
+					DEFAULT: 'hsl(var(--primary))',
+					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
-					DEFAULT: 'hsl(var(--yp-yellow))',
-					foreground: 'hsl(var(--yp-dark))',
-					hover: 'hsl(var(--yp-yellow-hover))'
+					DEFAULT: 'hsl(var(--secondary))',
+					foreground: 'hsl(var(--secondary-foreground))'
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',

@@ -24,7 +24,7 @@ export const SignInPage = () => {
             afterSignInUrl="/admin"
             appearance={{
               elements: {
-                formButtonPrimary: 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200',
+                formButtonPrimary: 'bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200',
                 card: 'bg-white shadow-lg border border-gray-200 rounded-lg p-6',
                 headerTitle: 'text-xl font-semibold text-gray-900',
                 headerSubtitle: 'text-sm text-gray-600',
