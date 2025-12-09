@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Users, ArrowRight, Search, X } from 'lucide-react';
-import { db } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { MatrixRain } from "@/components/landing/MatrixRain";
 import { InteractiveGlobe } from "@/components/InteractiveGlobe";
 
@@ -33,21 +33,25 @@ export const CountriesPage = () => {
 
   const fetchCountries = async () => {
     try {
-      const { data, error } = await db.countries()
+      console.log('Fetching countries from Supabase...');
+      const { data, error } = await supabase
+        .from('countries')
         .select('id, name, code, slug, flag_url, flag_emoji, description, population, capital')
         .order('name', { ascending: true });
 
       if (error) {
-        console.error('Error fetching countries:', error);
+        console.error('Error fetching countries:', error.message, error.details, error.hint);
         // Don't throw, just log - we have fallback in globe
       }
       
       if (data && data.length > 0) {
-        console.log(`Loaded ${data.length} countries`);
+        console.log(`✅ Loaded ${data.length} countries from database`);
         setCountries(data);
+      } else {
+        console.log('No countries returned from database');
       }
     } catch (error) {
-      console.error('Error fetching countries:', error);
+      console.error('Exception fetching countries:', error);
     } finally {
       setLoading(false);
     }

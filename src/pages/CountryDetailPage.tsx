@@ -192,20 +192,21 @@ export const CountryDetailPage: React.FC = () => {
                 {/* Flag, Coat of Arms & Name */}
                 <div className="flex items-start gap-6 mb-6">
                   <div className="flex items-center gap-4">
-                    {/* Show flag image or emoji */}
-                    {country.flag_url ? (
-                      <img
-                        src={country.flag_url}
-                        alt={`${country.name} flag`}
-                        className="w-20 h-14 object-cover rounded shadow-sm"
-                      />
-                    ) : country.flag_emoji && country.flag_emoji.length <= 4 ? (
-                      <span className="text-6xl">{country.flag_emoji}</span>
-                    ) : (
-                      <div className="w-20 h-14 bg-gray-200 rounded flex items-center justify-center">
-                        <span className="text-2xl font-bold text-gray-500">{country.code}</span>
-                      </div>
-                    )}
+                    {/* Show flag using flagcdn.com API */}
+                    <img
+                      src={`https://flagcdn.com/w160/${country.code.toLowerCase()}.png`}
+                      alt={`${country.name} flag`}
+                      className="w-24 h-16 object-cover rounded shadow-md border border-gray-200"
+                      onError={(e) => {
+                        // Fallback to country code if flag fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                    <div className="w-24 h-16 bg-gray-100 rounded flex items-center justify-center hidden">
+                      <span className="text-2xl font-bold text-gray-400">{country.code}</span>
+                    </div>
                     {country.coat_of_arms_url && (
                       <img
                         src={country.coat_of_arms_url}

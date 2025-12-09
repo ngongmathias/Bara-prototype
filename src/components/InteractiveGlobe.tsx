@@ -166,49 +166,20 @@ export const InteractiveGlobe = ({ countries, onCountryClick, selectedCountry }:
       // Clear canvas
       ctx.clearRect(0, 0, width, height);
 
-      // Draw globe outline
+      // Draw outer glow
+      const outerGlow = ctx.createRadialGradient(centerX, centerY, radius * 0.8, centerX, centerY, radius * 1.3);
+      outerGlow.addColorStop(0, 'rgba(100, 180, 255, 0)');
+      outerGlow.addColorStop(0.5, 'rgba(100, 180, 255, 0.1)');
+      outerGlow.addColorStop(1, 'rgba(100, 180, 255, 0)');
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius * 1.3, 0, Math.PI * 2);
+      ctx.fillStyle = outerGlow;
+      ctx.fill();
+
+      // Draw globe base with ocean gradient
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Draw latitude lines
-      for (let lat = -60; lat <= 60; lat += 30) {
-        ctx.beginPath();
-        const y = centerY - (lat / 90) * radius;
-        const latRadius = Math.cos((lat * Math.PI) / 180) * radius;
-        
-        // Only draw if visible (simplified)
-        ctx.ellipse(centerX, y, latRadius, latRadius * 0.3 * Math.abs(Math.cos(rotation.x)), 0, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-
-      // Draw longitude lines
-      for (let lng = 0; lng < 360; lng += 30) {
-        ctx.beginPath();
-        const angle = ((lng + rotation.y * (180 / Math.PI)) * Math.PI) / 180;
-        
-        ctx.ellipse(
-          centerX,
-          centerY,
-          radius * Math.abs(Math.sin(angle)),
-          radius,
-          0,
-          0,
-          Math.PI * 2
-        );
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-
-      // Draw Africa outline (simplified)
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      const gradient = ctx.createRadialGradient(
+      const oceanGradient = ctx.createRadialGradient(
         centerX - radius * 0.3,
         centerY - radius * 0.3,
         0,
@@ -216,11 +187,92 @@ export const InteractiveGlobe = ({ countries, onCountryClick, selectedCountry }:
         centerY,
         radius
       );
-      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-      gradient.addColorStop(0.5, 'rgba(240, 240, 240, 0.7)');
-      gradient.addColorStop(1, 'rgba(200, 200, 200, 0.5)');
-      ctx.fillStyle = gradient;
+      oceanGradient.addColorStop(0, '#e8f4fc');
+      oceanGradient.addColorStop(0.3, '#d4ebf7');
+      oceanGradient.addColorStop(0.7, '#b8ddf0');
+      oceanGradient.addColorStop(1, '#9acfea');
+      ctx.fillStyle = oceanGradient;
       ctx.fill();
+
+      // Draw globe outline with glow
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(100, 180, 255, 0.5)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(50, 130, 200, 0.8)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Draw latitude lines (grid)
+      ctx.save();
+      ctx.globalAlpha = 0.15;
+      for (let lat = -60; lat <= 60; lat += 20) {
+        ctx.beginPath();
+        const y = centerY - (lat / 90) * radius * 0.95;
+        const latRadius = Math.cos((lat * Math.PI) / 180) * radius * 0.95;
+        ctx.ellipse(centerX, y, latRadius, latRadius * 0.25, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = '#4a90c2';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Draw longitude lines
+      ctx.save();
+      ctx.globalAlpha = 0.1;
+      for (let lng = 0; lng < 180; lng += 20) {
+        ctx.beginPath();
+        const angle = ((lng + rotation.y * (180 / Math.PI)) * Math.PI) / 180;
+        ctx.ellipse(centerX, centerY, radius * 0.95 * Math.abs(Math.sin(angle)), radius * 0.95, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = '#4a90c2';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Draw simplified Africa continent shape
+      const africaPoints = [
+        { lat: 37, lng: -10 }, { lat: 36, lng: 10 }, { lat: 32, lng: 32 },
+        { lat: 30, lng: 32 }, { lat: 22, lng: 36 }, { lat: 12, lng: 44 },
+        { lat: 2, lng: 51 }, { lat: -12, lng: 50 }, { lat: -26, lng: 33 },
+        { lat: -35, lng: 20 }, { lat: -34, lng: 18 }, { lat: -30, lng: 17 },
+        { lat: -18, lng: 12 }, { lat: -6, lng: 12 }, { lat: 4, lng: 10 },
+        { lat: 5, lng: -5 }, { lat: 10, lng: -15 }, { lat: 15, lng: -17 },
+        { lat: 21, lng: -17 }, { lat: 28, lng: -13 }, { lat: 35, lng: -6 },
+      ];
+      
+      ctx.beginPath();
+      let firstPoint = true;
+      africaPoints.forEach(point => {
+        const pos3d = latLngTo3D(point.lat, point.lng, radius * 0.98);
+        const rotated = rotatePoint(pos3d, rotation.x, rotation.y);
+        if (rotated.z > -radius * 0.3) {
+          const screenX = centerX + rotated.x;
+          const screenY = centerY - rotated.y;
+          if (firstPoint) {
+            ctx.moveTo(screenX, screenY);
+            firstPoint = false;
+          } else {
+            ctx.lineTo(screenX, screenY);
+          }
+        }
+      });
+      ctx.closePath();
+      
+      // Fill Africa with land color
+      const landGradient = ctx.createLinearGradient(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
+      landGradient.addColorStop(0, '#c8d9c0');
+      landGradient.addColorStop(0.5, '#a8c898');
+      landGradient.addColorStop(1, '#90b880');
+      ctx.fillStyle = landGradient;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(80, 120, 60, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
 
       // Sort country points by z-depth for proper rendering
       const sortedPoints = countryPoints
