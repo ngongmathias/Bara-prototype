@@ -13,7 +13,7 @@ import { MatrixRain } from "./components/landing/MatrixRain";
 // Test Supabase connection early
 import "@/lib/testSupabase";
 import { LandingPageFinal as LandingPage } from "./pages/LandingPageFinal";
-import Index from "./pages/Index";
+import ListingsPage from "./pages/ListingsPage";
 import NotFound from "./pages/NotFound";
 import { WriteReviewPage } from "./pages/WriteReviewPage";
 import { ClaimListingPage } from "./pages/ClaimListingPage";
@@ -94,8 +94,8 @@ const AppRoutes = () => {
       
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/listings" element={<Index />} />
-        <Route path="/business-listings" element={<Index />} />
+        <Route path="/listings" element={<ListingsPage />} />
+        <Route path="/business-listings" element={<ListingsPage />} />
       <Route path="/writeareview" element={<WriteReviewPage />} />
       <Route path="/write-review/:businessId" element={<WriteReviewPage />} />
       <Route path="/claim-listing" element={<ClaimListingPage />} />
@@ -105,9 +105,9 @@ const AppRoutes = () => {
       <Route path="/faq" element={<FaqPage />} />
       <Route path="/ask-question" element={<AskQuestionPage />} />
       <Route path="/categories" element={<CategoriesPage />} />
-      <Route path="/category/:categorySlug" element={<Index />} />
-      <Route path="/:city/search" element={<Index />} />
-      <Route path="/:city/:category" element={<Index />} />
+      <Route path="/category/:categorySlug" element={<ListingsPage />} />
+      <Route path="/:city/search" element={<ListingsPage />} />
+      <Route path="/:city/:category" element={<ListingsPage />} />
       <Route path="/:city/:category/:businessId" element={<BusinessDetailPage />} />
       <Route path="/cities/:citySlug" element={<CityDetailPage />} />
       <Route path="/countries" element={

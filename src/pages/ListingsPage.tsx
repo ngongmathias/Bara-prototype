@@ -15,7 +15,7 @@ interface Category {
   slug: string;
 }
 
-const Index = () => {
+const ListingsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   
@@ -195,4 +195,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default ListingsPage;
