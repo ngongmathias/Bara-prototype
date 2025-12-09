@@ -75,6 +75,25 @@ const AFRICAN_COORDINATES: Record<string, { lat: number; lng: number }> = {
   'zimbabwe': { lat: -19.0154, lng: 29.1549 },
 };
 
+// Default African countries to show on globe even if data isn't loaded
+const DEFAULT_COUNTRIES: Country[] = [
+  { id: '1', name: 'Nigeria', code: 'NG', slug: 'nigeria' },
+  { id: '2', name: 'Kenya', code: 'KE', slug: 'kenya' },
+  { id: '3', name: 'Ghana', code: 'GH', slug: 'ghana' },
+  { id: '4', name: 'South Africa', code: 'ZA', slug: 'south-africa' },
+  { id: '5', name: 'Egypt', code: 'EG', slug: 'egypt' },
+  { id: '6', name: 'Ethiopia', code: 'ET', slug: 'ethiopia' },
+  { id: '7', name: 'Tanzania', code: 'TZ', slug: 'tanzania' },
+  { id: '8', name: 'Rwanda', code: 'RW', slug: 'rwanda' },
+  { id: '9', name: 'Uganda', code: 'UG', slug: 'uganda' },
+  { id: '10', name: 'Morocco', code: 'MA', slug: 'morocco' },
+  { id: '11', name: 'Algeria', code: 'DZ', slug: 'algeria' },
+  { id: '12', name: 'Tunisia', code: 'TN', slug: 'tunisia' },
+  { id: '13', name: 'Senegal', code: 'SN', slug: 'senegal' },
+  { id: '14', name: 'Cameroon', code: 'CM', slug: 'cameroon' },
+  { id: '15', name: 'Zimbabwe', code: 'ZW', slug: 'zimbabwe' },
+];
+
 export const InteractiveGlobe = ({ countries, onCountryClick, selectedCountry }: InteractiveGlobeProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
@@ -83,6 +102,9 @@ export const InteractiveGlobe = ({ countries, onCountryClick, selectedCountry }:
   const [hoveredCountry, setHoveredCountry] = useState<Country | null>(null);
   const animationRef = useRef<number>();
   const autoRotateRef = useRef(true);
+
+  // Use provided countries or fallback to defaults
+  const displayCountries = countries.length > 0 ? countries : DEFAULT_COUNTRIES;
 
   // Get coordinates for a country
   const getCountryCoords = (country: Country) => {
@@ -117,7 +139,7 @@ export const InteractiveGlobe = ({ countries, onCountryClick, selectedCountry }:
 
   // Country points with their 3D positions
   const countryPoints = useMemo(() => {
-    return countries.map(country => {
+    return displayCountries.map(country => {
       const coords = getCountryCoords(country);
       return {
         country,
@@ -125,7 +147,7 @@ export const InteractiveGlobe = ({ countries, onCountryClick, selectedCountry }:
         position: latLngTo3D(coords.lat, coords.lng, 120),
       };
     });
-  }, [countries]);
+  }, [displayCountries]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
