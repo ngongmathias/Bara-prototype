@@ -65,7 +65,7 @@ export const CityDetailPage: React.FC = () => {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list'); // Default to list like YP
   const [selectedCategory, setSelectedCategory] = useState("");
 
   useEffect(() => {
