@@ -9,7 +9,6 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { MatrixRain } from "./components/landing/MatrixRain";
 // Test Supabase connection early
 import "@/lib/testSupabase";
 import { LandingPageFinal as LandingPage } from "./pages/LandingPageFinal";
@@ -88,9 +87,6 @@ const AppRoutes = () => {
   return (
     <>
       <ScrollToTop />
-      
-      <MatrixRain />
-      <div className="absolute inset-0 bg-white/60 pointer-events-none" style={{ zIndex: 0 }} />
       
       <Routes>
         <Route path="/" element={<LandingPage />} />
