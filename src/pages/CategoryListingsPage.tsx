@@ -56,7 +56,7 @@ const CategoryListingsPage = () => {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('list'); // Default to list like YP
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('default');
@@ -252,41 +252,51 @@ const CategoryListingsPage = () => {
             </div>
           </motion.div>
 
-          {/* Filter Bar */}
+          {/* YP-Style Filter Bar */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mb-6 flex flex-wrap items-center gap-3"
+            className="mb-6 flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4"
           >
+            {/* Map View Button - Prominent like YP */}
+            <Button
+              variant={viewMode === 'map' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('map')}
+              className={viewMode === 'map' ? 'bg-blue-600 text-white' : ''}
+            >
+              <Map className="w-4 h-4 mr-2" />
+              Map View
+            </Button>
+
             {/* Filter Buttons */}
             <div className="flex flex-wrap gap-2">
               {[
-                { key: 'all', label: 'All' },
+                { key: 'all', label: 'All', icon: '≡' },
                 { key: 'order-online', label: 'Order Online' },
                 { key: 'kid-friendly', label: 'Kid Friendly' },
                 { key: 'coupons', label: 'Coupons' },
-                { key: 'verified', label: 'Verified' },
               ].map(filter => (
                 <Button
                   key={filter.key}
                   variant={activeFilter === filter.key ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setActiveFilter(filter.key as FilterType)}
-                  className={`rounded-full ${activeFilter === filter.key ? 'bg-black text-white' : 'bg-white hover:bg-gray-100'}`}
+                  className={activeFilter === filter.key ? 'bg-gray-800 text-white' : ''}
                 >
                   {filter.label}
                 </Button>
               ))}
             </div>
 
-            {/* Sort Dropdown */}
-            <div className="ml-auto">
+            {/* Sort Dropdown - Right aligned like YP */}
+            <div className="ml-auto flex items-center gap-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="rounded-full">
-                    Sort: {sortBy === 'default' ? 'Default' : sortBy === 'highest-rated' ? 'Highest Rated' : sortBy === 'most-reviewed' ? 'Most Reviewed' : 'Newest'}
-                    <ChevronDown className="w-4 h-4 ml-2" />
+                  <Button variant="ghost" size="sm" className="text-gray-600">
+                    Sort: <span className="font-semibold ml-1">{sortBy === 'default' ? 'Default' : sortBy === 'highest-rated' ? 'Highest Rated' : sortBy === 'most-reviewed' ? 'Most Reviewed' : 'Newest'}</span>
+                    <ChevronDown className="w-4 h-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -387,133 +397,290 @@ const CategoryListingsPage = () => {
               </div>
             </div>
           ) : (
-            <div className={viewMode === 'grid' 
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
-              : "space-y-4 mt-8"
-            }>
-              {filteredBusinesses.map((business, index) => {
-                const businessImage = business.images?.[0] || business.logo_url;
-                
-                return (
-                  <motion.div
-                    key={business.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(index * 0.05, 0.3) }}
-                    onClick={() => handleBusinessClick(business)}
-                    className={`bg-white/90 backdrop-blur-sm border rounded-xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group relative ${
-                      business.is_sponsored_ad 
-                        ? 'border-yellow-400 ring-2 ring-yellow-200' 
-                        : business.is_premium 
-                          ? 'border-blue-400 ring-1 ring-blue-100' 
-                          : 'border-gray-200 hover:border-black'
-                    } ${viewMode === 'list' ? 'flex' : ''}`}
-                  >
-                    {/* Sponsored/Premium Badge */}
-                    {business.is_sponsored_ad && (
-                      <div className="absolute top-2 right-2 z-10">
-                        <Badge className="bg-yellow-500 text-white text-xs">
-                          <Sparkles className="w-3 h-3 mr-1" />
-                          Sponsored
-                        </Badge>
-                      </div>
-                    )}
-                    
-                    {/* Image */}
-                    <div className={`bg-gray-100 flex items-center justify-center relative ${
-                      viewMode === 'list' ? 'w-40 h-40 flex-shrink-0' : 'h-48'
-                    }`}>
-                      {businessImage ? (
-                        <img src={businessImage} alt={business.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <Building2 className="w-16 h-16 text-gray-300" />
-                      )}
+            /* YP-Style List/Grid View */
+            <div className="flex gap-8 mt-6">
+              {/* Main Content Area */}
+              <div className="flex-1">
+                {viewMode === 'list' ? (
+                  /* YP-Style List View */
+                  <div className="space-y-0 border-t border-gray-200">
+                    {filteredBusinesses.map((business, index) => {
+                      const businessImage = business.images?.[0] || business.logo_url;
+                      const listingNumber = index + 1;
                       
-                      {/* Premium crown overlay */}
-                      {business.is_premium && !business.is_sponsored_ad && (
-                        <div className="absolute top-2 left-2">
-                          <Badge className="bg-blue-600 text-white text-xs">
-                            <Crown className="w-3 h-3 mr-1" />
-                            Premium
-                          </Badge>
+                      return (
+                        <div
+                          key={business.id}
+                          className={`border-b border-gray-200 py-4 ${
+                            business.is_sponsored_ad ? 'bg-yellow-50' : ''
+                          }`}
+                        >
+                          <div className="flex gap-4">
+                            {/* Image */}
+                            <div 
+                              className="w-28 h-28 flex-shrink-0 bg-gray-100 rounded overflow-hidden cursor-pointer"
+                              onClick={() => handleBusinessClick(business)}
+                            >
+                              {businessImage ? (
+                                <img src={businessImage} alt={business.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Building2 className="w-12 h-12 text-gray-300" />
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Middle: Business Info */}
+                            <div className="flex-1 min-w-0">
+                              {/* Business Name */}
+                              <div className="flex items-start gap-2">
+                                {!business.is_sponsored_ad && (
+                                  <span className="text-gray-500 font-medium">{listingNumber}.</span>
+                                )}
+                                <h3 
+                                  className="text-blue-600 hover:underline font-semibold cursor-pointer text-lg"
+                                  onClick={() => handleBusinessClick(business)}
+                                >
+                                  {business.name}
+                                </h3>
+                                {business.is_sponsored_ad && (
+                                  <Badge className="bg-yellow-500 text-white text-xs ml-2">Ad</Badge>
+                                )}
+                              </div>
+                              
+                              {/* Category Tags */}
+                              <p className="text-sm text-gray-600 mt-1">
+                                {business.category?.name}
+                                {business.has_coupons && ', Coupons Available'}
+                                {business.is_kid_friendly && ', Kid Friendly'}
+                              </p>
+                              
+                              {/* Action Links - YP Style */}
+                              <div className="flex items-center gap-3 mt-2 text-sm">
+                                {business.website && (
+                                  <a 
+                                    href={`https://${business.website}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    Website
+                                  </a>
+                                )}
+                                {business.address && (
+                                  <a 
+                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    Directions
+                                  </a>
+                                )}
+                                <span 
+                                  className="text-blue-600 hover:underline cursor-pointer"
+                                  onClick={() => handleBusinessClick(business)}
+                                >
+                                  More Info
+                                </span>
+                              </div>
+                              
+                              {/* Rating */}
+                              {business.reviews && business.reviews.length > 0 && (
+                                <div className="flex items-center gap-1 mt-2">
+                                  <div className="flex">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star 
+                                        key={i} 
+                                        className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className="text-sm text-gray-600">({business.reviews.length})</span>
+                                </div>
+                              )}
+                              
+                              {/* Description snippet */}
+                              {business.description && (
+                                <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                                  "{business.description}"
+                                </p>
+                              )}
+                            </div>
+                            
+                            {/* Right Side: Phone & Address */}
+                            <div className="text-right flex-shrink-0 w-48">
+                              {business.phone && (
+                                <a 
+                                  href={`tel:${business.phone}`}
+                                  className="text-lg font-semibold text-green-700 hover:underline block"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {business.phone}
+                                </a>
+                              )}
+                              {business.address && (
+                                <p className="text-sm text-gray-600 mt-1">{business.address}</p>
+                              )}
+                              {business.city && (
+                                <p className="text-sm text-gray-500">{business.city.name}</p>
+                              )}
+                              {business.is_verified && (
+                                <Badge variant="outline" className="mt-2 text-xs border-green-500 text-green-600">
+                                  ✓ Verified
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="p-4 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-bold text-lg text-black group-hover:underline line-clamp-1">{business.name}</h3>
-                        {business.is_verified && (
-                          <Badge variant="secondary" className="text-xs flex-shrink-0">✓ Verified</Badge>
-                        )}
-                      </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* Grid View */
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredBusinesses.map((business, index) => {
+                      const businessImage = business.images?.[0] || business.logo_url;
                       
-                      {/* Badges Row */}
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {business.has_coupons && (
-                          <Badge variant="outline" className="text-xs border-orange-200 text-orange-700 bg-orange-50">
-                            <Tag className="w-3 h-3 mr-1" />
-                            Coupons
-                          </Badge>
-                        )}
-                        {business.is_kid_friendly && (
-                          <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">
-                            <Users className="w-3 h-3 mr-1" />
-                            Kid Friendly
-                          </Badge>
-                        )}
-                        {business.accepts_orders_online && (
-                          <Badge variant="outline" className="text-xs border-green-200 text-green-700 bg-green-50">
-                            <Globe className="w-3 h-3 mr-1" />
-                            Order Online
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      {/* Rating */}
-                      {business.reviews && business.reviews.length > 0 && (
-                        <div className="flex items-center gap-1 mt-2">
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <Star 
-                                key={i} 
-                                className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
-                              />
-                            ))}
+                      return (
+                        <motion.div
+                          key={business.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: Math.min(index * 0.05, 0.3) }}
+                          onClick={() => handleBusinessClick(business)}
+                          className={`bg-white border rounded-xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group relative ${
+                            business.is_sponsored_ad 
+                              ? 'border-yellow-400 ring-2 ring-yellow-200' 
+                              : business.is_premium 
+                                ? 'border-blue-400 ring-1 ring-blue-100' 
+                                : 'border-gray-200 hover:border-black'
+                          }`}
+                        >
+                          {business.is_sponsored_ad && (
+                            <div className="absolute top-2 right-2 z-10">
+                              <Badge className="bg-yellow-500 text-white text-xs">Ad</Badge>
+                            </div>
+                          )}
+                          
+                          <div className="bg-gray-100 h-48 flex items-center justify-center relative">
+                            {businessImage ? (
+                              <img src={businessImage} alt={business.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <Building2 className="w-16 h-16 text-gray-300" />
+                            )}
+                            {business.is_premium && !business.is_sponsored_ad && (
+                              <div className="absolute top-2 left-2">
+                                <Badge className="bg-blue-600 text-white text-xs">Premium</Badge>
+                              </div>
+                            )}
                           </div>
-                          <span className="text-sm font-medium">{getAverageRating(business.reviews).toFixed(1)}</span>
-                          <span className="text-sm text-gray-400">({business.reviews.length})</span>
+                          
+                          <div className="p-4">
+                            <div className="flex items-start justify-between gap-2">
+                              <h3 className="font-bold text-lg text-black group-hover:underline line-clamp-1">{business.name}</h3>
+                              {business.is_verified && (
+                                <Badge variant="secondary" className="text-xs flex-shrink-0">✓ Verified</Badge>
+                              )}
+                            </div>
+                            
+                            {business.reviews && business.reviews.length > 0 && (
+                              <div className="flex items-center gap-1 mt-2">
+                                <div className="flex">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star 
+                                      key={i} 
+                                      className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-sm text-gray-400">({business.reviews.length})</span>
+                              </div>
+                            )}
+                            
+                            {business.description && (
+                              <p className="text-sm text-gray-500 mt-2 line-clamp-2">{business.description}</p>
+                            )}
+                            
+                            <div className="mt-3 space-y-1">
+                              {business.address && (
+                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                  <MapPin className="w-3 h-3" />
+                                  <span className="truncate">{business.address}</span>
+                                </div>
+                              )}
+                              {business.phone && (
+                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                  <Phone className="w-3 h-3" />
+                                  <span>{business.phone}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              
+              {/* Right Sidebar - YP Style */}
+              {viewMode === 'list' && (
+                <div className="w-72 flex-shrink-0 hidden lg:block">
+                  {/* Popular in Category */}
+                  <div className="border border-gray-200 rounded-lg p-4 mb-4">
+                    <h3 className="font-semibold text-gray-800 mb-3">Popular {currentCategory?.name}</h3>
+                    <div className="space-y-2">
+                      {filteredBusinesses.slice(0, 3).map((biz) => (
+                        <div 
+                          key={biz.id}
+                          className="text-sm text-blue-600 hover:underline cursor-pointer"
+                          onClick={() => handleBusinessClick(biz)}
+                        >
+                          {biz.name}
                         </div>
-                      )}
-                      
-                      {business.description && (
-                        <p className="text-sm text-gray-500 mt-2 line-clamp-2">{business.description}</p>
-                      )}
-                      
-                      <div className="mt-3 space-y-1">
-                        {business.address && (
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <MapPin className="w-3 h-3 flex-shrink-0" />
-                            <span className="truncate">{business.address}</span>
-                          </div>
-                        )}
-                        {business.phone && (
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <Phone className="w-3 h-3 flex-shrink-0" />
-                            <span>{business.phone}</span>
-                          </div>
-                        )}
-                        {business.city && business.country && (
-                          <div className="flex items-center gap-2 text-sm text-gray-400">
-                            <span>{business.city.name}, {business.country.name}</span>
-                          </div>
-                        )}
-                      </div>
+                      ))}
                     </div>
-                  </motion.div>
-                );
-              })}
+                  </div>
+                  
+                  {/* Manage Listing CTA */}
+                  <div className="border border-gray-200 rounded-lg p-4 mb-4 text-center">
+                    <h3 className="font-semibold text-gray-800 mb-2">Manage your</h3>
+                    <p className="text-2xl font-bold text-green-600 mb-2">free listing</p>
+                    <p className="text-sm text-gray-600 mb-4">Update your business information in a few steps.</p>
+                    <Button 
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => navigate('/claim-listing')}
+                    >
+                      Claim Your Listing
+                    </Button>
+                  </div>
+                  
+                  {/* Featured Businesses */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-800 mb-3">Featured {currentCategory?.name}</h3>
+                    <div className="space-y-3">
+                      {filteredBusinesses.filter(b => b.is_premium).slice(0, 3).map((biz) => (
+                        <div 
+                          key={biz.id}
+                          className="cursor-pointer hover:bg-gray-50 p-2 rounded -mx-2"
+                          onClick={() => handleBusinessClick(biz)}
+                        >
+                          <p className="text-sm font-medium text-blue-600 hover:underline">{biz.name}</p>
+                          {biz.phone && (
+                            <p className="text-xs text-gray-600">{biz.phone}</p>
+                          )}
+                          {biz.address && (
+                            <p className="text-xs text-gray-500 truncate">{biz.address}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
