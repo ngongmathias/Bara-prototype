@@ -15,7 +15,7 @@ import "@/lib/testSupabase";
 import { LandingPageFinal as LandingPage } from "./pages/LandingPageFinal";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import { ListingsPage } from "./pages/ListingsPage";
+import ListingsPageNew from "./pages/ListingsPageNew";
 import { WriteReviewPage } from "./pages/WriteReviewPage";
 import { ClaimListingPage } from "./pages/ClaimListingPage";
 import  AdvertisePage from "./pages/AdvertisePage";
@@ -106,9 +106,9 @@ const AppRoutes = () => {
       <Route path="/faq" element={<FaqPage />} />
       <Route path="/ask-question" element={<AskQuestionPage />} />
       <Route path="/categories" element={<CategoriesPage />} />
-      <Route path="/category/:categorySlug" element={<ListingsPage />} />
-      <Route path="/:city/search" element={<ListingsPage />} />
-      <Route path="/:city/:category" element={<ListingsPage />} />
+      <Route path="/category/:categorySlug" element={<ListingsPageNew />} />
+      <Route path="/:city/search" element={<ListingsPageNew />} />
+      <Route path="/:city/:category" element={<ListingsPageNew />} />
       <Route path="/:city/:category/:businessId" element={<BusinessDetailPage />} />
       <Route path="/cities/:citySlug" element={<CityDetailPage />} />
       <Route path="/countries" element={
