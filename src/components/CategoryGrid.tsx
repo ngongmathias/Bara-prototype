@@ -201,7 +201,7 @@ export const CategoryGrid = () => {
 
   if (loading) {
     return (
-      <section className="py-12 bg-background">
+      <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4285F4] mx-auto"></div>
@@ -215,7 +215,7 @@ export const CategoryGrid = () => {
   // Handle case where no categories are loaded
   if (categories.length === 0) {
     return (
-      <section className="py-12 bg-background">
+      <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-2xl font-comfortaa font-bold text-[#202124] text-center mb-8">
@@ -242,7 +242,7 @@ export const CategoryGrid = () => {
   console.log('Categories data:', categories.map(c => ({ slug: c.slug, name: c.name })));
 
   return (
-    <section className="py-8 sm:py-10 md:py-12 bg-background">
+    <section className="py-8 sm:py-10 md:py-12">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-comfortaa font-bold text-black text-center mb-6 sm:mb-8 px-2">
           {t('homepage.categories.title')}
