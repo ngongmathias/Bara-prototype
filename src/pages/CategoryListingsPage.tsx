@@ -80,9 +80,7 @@ const CategoryListingsPage = () => {
             const { data: bizData, error } = await supabase
               .from('businesses')
               .select(`
-                id, name, description, address, phone, website, logo_url, images,
-                latitude, longitude,
-                is_premium, is_verified, is_sponsored_ad, has_coupons, is_kid_friendly, accepts_orders_online,
+                *,
                 category:categories(name, slug),
                 city:cities(name),
                 country:countries(name, code),
@@ -94,7 +92,10 @@ const CategoryListingsPage = () => {
               .order('is_premium', { ascending: false })
               .order('name', { ascending: true });
 
-            if (!error) {
+            if (error) {
+              console.error("Error fetching businesses:", error);
+            } else {
+              console.log("Fetched businesses:", bizData?.length, bizData);
               setBusinesses(bizData || []);
             }
           }

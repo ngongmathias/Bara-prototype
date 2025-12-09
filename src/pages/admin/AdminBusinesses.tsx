@@ -133,7 +133,7 @@ const businessFormSchema = z.object({
   accepts_orders_online: z.boolean().default(false),
   is_kid_friendly: z.boolean().default(false),
   is_sponsored_ad: z.boolean().default(false),
-  status: z.enum(['pending', 'active', 'suspended']).default('pending')
+  status: z.enum(['pending', 'active', 'suspended']).default('active')
 });
 
 type BusinessFormData = z.infer<typeof businessFormSchema>;
@@ -194,7 +194,7 @@ export const AdminBusinesses = () => {
       accepts_orders_online: false,
       is_kid_friendly: false,
       is_sponsored_ad: false,
-      status: "pending"
+      status: "active"
     }
   });
 
