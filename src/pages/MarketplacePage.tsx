@@ -206,89 +206,28 @@ const MarketplacePage = () => {
       <div className="relative z-10">
         <TopBannerAd />
       </div>
-      
-      {/* Hero Section */}
-      <section className="relative z-10 bg-gradient-to-r from-brand-blue to-blue-600 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-5xl font-bold mb-4">
-              🛍️ Welcome to Our Marketplace
-            </h1>
-            <p className="text-xl mb-8 text-blue-100">
-              Discover amazing products from trusted sellers worldwide
-            </p>
-            
-            {/* Search Bar */}
-            <div className="max-w-3xl mx-auto">
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <Input 
-                    placeholder="Search for products, brands, or categories..."
-                    className="pl-10 h-12 text-gray-900"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <Button size="lg" className="bg-white text-brand-blue hover:bg-gray-100">
-                  Search
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Bar */}
-      <section className="bg-white border-b border-gray-200 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Truck className="w-6 h-6 text-brand-blue" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Free Shipping</h3>
-                <p className="text-sm text-gray-600">On orders over $50</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <Shield className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Secure Payment</h3>
-                <p className="text-sm text-gray-600">100% secure transactions</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-yellow-100 rounded-lg">
-                <Package className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Easy Returns</h3>
-                <p className="text-sm text-gray-600">30-day return policy</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <Star className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Top Quality</h3>
-                <p className="text-sm text-gray-600">Verified products</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
+        {/* Title and Search */}
+        <div className="text-center mb-12">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-comfortaa font-bold text-black mb-6">
+            Marketplace
+          </h1>
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input 
+                placeholder="Search for products..."
+                className="pl-12 h-14 text-base border-gray-300 focus:border-black focus:ring-black rounded-xl shadow-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Filters and View Options */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div className="flex items-center gap-4 flex-wrap">

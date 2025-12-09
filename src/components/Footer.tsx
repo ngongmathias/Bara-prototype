@@ -68,7 +68,7 @@ const Footer = () => {
   }, [toast]);
 
   return (
-    <footer className="bg-white text-gray-900 border-t border-gray-200">
+    <footer className="relative z-10 bg-white text-gray-900 border-t border-gray-200">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
         {/* Responsive Grid Layout */}
