@@ -3,10 +3,11 @@ import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone, Globe, Crown, Clock, Building, ChevronRight, Camera, Users, ArrowLeft, Award, CheckCircle, Map } from "lucide-react";
+import { MapPin, Phone, Globe, Crown, Clock, Building, ChevronRight, Camera, Users, ArrowLeft, Award, CheckCircle, Map, Navigation, ExternalLink } from "lucide-react";
 import { useBusinessById } from "@/hooks/useBusinesses";
 import { Business } from "@/lib/businessService";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UltraSimpleMap } from "@/components/UltraSimpleMap";
 
 export const BusinessDetailPage = () => {
   const { city, category, categorySlug, businessId } = useParams();
@@ -382,6 +383,26 @@ export const BusinessDetailPage = () => {
               </div>
             </div>
 
+            {/* Location Map */}
+            {business.latitude && business.longitude && (
+              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                <h3 className="text-lg font-semibold text-yp-dark mb-4">Location</h3>
+                <div className="rounded-lg overflow-hidden border border-gray-200 mb-3" style={{ height: '200px' }}>
+                  <UltraSimpleMap
+                    cityName={business.name}
+                    latitude={business.latitude}
+                    longitude={business.longitude}
+                  />
+                </div>
+                {business.address && (
+                  <p className="text-sm text-gray-600 flex items-start gap-2">
+                    <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    {business.address}
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Business Hours */}
             {business.hours_of_operation && (
               <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
@@ -398,7 +419,7 @@ export const BusinessDetailPage = () => {
                     ))
                   )}
                 </div>
-                </div>
+              </div>
             )}
 
             {/* Actions */}
@@ -416,19 +437,52 @@ export const BusinessDetailPage = () => {
                   rel="noopener noreferrer"
                 >
                   <Button variant="outline" className="w-full">
+                    <Globe className="w-4 h-4 mr-2" />
                     Visit Website
                   </Button>
                 </a>
               )}
+
+              {business.order_online_url && (
+                <a 
+                  href={business.order_online_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="outline" className="w-full">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Order Online
+                  </Button>
+                </a>
+              )}
               
-              <Button variant="outline" className="w-full">
-                <Map className="w-4 h-4 mr-2" />
-                Get Directions
-                </Button>
-              </div>
+              {(business.latitude && business.longitude) ? (
+                <a 
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${business.latitude},${business.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="outline" className="w-full">
+                    <Navigation className="w-4 h-4 mr-2" />
+                    Get Directions
+                  </Button>
+                </a>
+              ) : business.address ? (
+                <a 
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="outline" className="w-full">
+                    <Navigation className="w-4 h-4 mr-2" />
+                    Get Directions
+                  </Button>
+                </a>
+              ) : null}
             </div>
           </div>
         </div>
+      </div>
       
       <Footer />
     </div>
