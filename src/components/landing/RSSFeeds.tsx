@@ -15,24 +15,36 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
 
   useEffect(() => {
     fetchFeeds();
+    
+    // Set a timeout to stop loading after 10 seconds
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 10000);
+    
+    return () => clearTimeout(timeout);
   }, [countryName, countryCode]);
 
   const fetchFeeds = async () => {
     setLoading(true);
     
     try {
-      // Fetch cached RSS feeds from database
-      const cachedFeeds = await getRSSFeeds({
-        countryCode: countryCode,
-        limit: 6,
-      });
+      // Fetch cached RSS feeds from database with timeout
+      const cachedFeeds = await Promise.race([
+        getRSSFeeds({
+          countryCode: countryCode,
+          limit: 6,
+        }),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 8000)
+        )
+      ]).catch(() => [] as RSSFeedItem[]);
       
       if (cachedFeeds.length > 0) {
         setFeeds(cachedFeeds);
         setLoading(false);
       } else {
-        // If no cached feeds, try to refresh
-        await handleRefresh();
+        // No cached feeds - just stop loading, don't try to refresh automatically
+        setLoading(false);
       }
     } catch (error) {
       console.error('Error fetching RSS feeds:', error);
@@ -44,8 +56,13 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
     setRefreshing(true);
     
     try {
-      // Refresh feeds from sources
-      const result = await refreshRSSFeeds();
+      // Refresh feeds from sources with timeout
+      const result = await Promise.race([
+        refreshRSSFeeds(),
+        new Promise<{ success: false }>((resolve) => 
+          setTimeout(() => resolve({ success: false }), 15000)
+        )
+      ]);
       
       if (result.success) {
         // Fetch updated feeds

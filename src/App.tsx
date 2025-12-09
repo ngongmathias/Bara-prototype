@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import "@/lib/testSupabase";
 import { LandingPageFinal as LandingPage } from "./pages/LandingPageFinal";
 import ListingsPage from "./pages/ListingsPage";
+import CategoryListingsPage from "./pages/CategoryListingsPage";
 import NotFound from "./pages/NotFound";
 import { WriteReviewPage } from "./pages/WriteReviewPage";
 import { ClaimListingPage } from "./pages/ClaimListingPage";
@@ -101,7 +102,7 @@ const AppRoutes = () => {
       <Route path="/faq" element={<FaqPage />} />
       <Route path="/ask-question" element={<AskQuestionPage />} />
       <Route path="/categories" element={<CategoriesPage />} />
-      <Route path="/category/:categorySlug" element={<ListingsPage />} />
+      <Route path="/category/:categorySlug" element={<CategoryListingsPage />} />
       <Route path="/:city/search" element={<ListingsPage />} />
       <Route path="/:city/:category" element={<ListingsPage />} />
       <Route path="/:city/:category/:businessId" element={<BusinessDetailPage />} />
