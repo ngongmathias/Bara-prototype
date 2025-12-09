@@ -5,6 +5,69 @@
 
 **Rollout Strategy:** Small, shippable commits pushed incrementally to production. Confirm visibility on live Vercel site after each push before proceeding.
 
+---
+
+## 🎯 CRITICAL: Uniform White Background Pattern (Apply to ALL Pages)
+
+**Problem Solved:** Pages were showing gray/white color shifts due to global MatrixRain overlay and component backgrounds stacking.
+
+**Solution Pattern (Copy from LandingPage.tsx and ListingsPage.tsx):**
+
+```tsx
+const YourPage = () => {
+  return (
+    <div className="relative min-h-screen bg-white font-roboto">
+      {/* 1. MatrixRain Background - INSIDE page component, not global */}
+      <MatrixRain />
+      
+      {/* 2. Subtle white overlay to lighten the rain */}
+      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
+
+      {/* 3. Header - z-20 */}
+      <div className="relative z-20">
+        <Header />
+      </div>
+
+      {/* 4. Top Banner Ad - z-10, WHITE background */}
+      <div className="relative z-10">
+        <TopBannerAd />
+      </div>
+      
+      {/* 5. Main Content - z-10, NO separate component backgrounds */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Your page content here */}
+        {/* All cards/sections should be bg-white with border-gray-200 */}
+      </div>
+
+      {/* 6. Bottom Banner Ad - z-10, WHITE background */}
+      <div className="relative z-10">
+        <BottomBannerAd />
+      </div>
+
+      {/* 7. Footer */}
+      <Footer />
+    </div>
+  );
+};
+```
+
+**Key Rules:**
+1. ✅ MatrixRain INSIDE each page component (not in App.tsx globally)
+2. ✅ White overlay at 60% opacity (`bg-white/60`)
+3. ✅ All banner ads must have `bg-white` (NOT gradients)
+4. ✅ All content cards use `bg-white border border-gray-200`
+5. ✅ NO `bg-background`, `bg-gray-*`, or gradient backgrounds on sections
+6. ✅ Proper z-index: Header (z-20), Content/Ads (z-10)
+7. ❌ NEVER stack components with different backgrounds
+
+**Files Updated:**
+- ✅ `ListingsPage.tsx` - Reference implementation
+- ✅ `TopBannerAd.tsx` - Changed from blue gradient to `bg-white`
+- ✅ `BottomBannerAd.tsx` - Changed from purple gradient to `bg-white`
+- ⏳ Apply to: EventsPage, MarketplacePage, all other pages
+
+---
+
 **Baseline Set for Immediate Rollout:**
 - ✓ PageHeaderCard (unified search/filters/sort/count card)
 - ✓ MatrixRain (green code rain effect globally behind all pages)
@@ -26,14 +89,17 @@
 ## Completed ✓
 - [x] Remove orange highlights and colored hero bars from homepage
 - [x] Create `PageHeaderCard` shared component (title, search, filters, sort, results count)
-- [x] Create `MatrixRain` global animation component (green code rain effect)
-- [x] Mount `MatrixRain` globally behind all pages with white overlay (60% opacity)
-- [x] Restyle banner ads to monochrome (TopBannerAd, BottomBannerAd)
-- [x] Restyle ListingsPage with PageHeaderCard integration
-- [x] Restyle MarketplacePage to monochrome with header card
-- [x] Restyle EventsPage to black/white theme
+- [x] Create `MatrixRain` animation component (green code rain effect)
+- [x] Mount `MatrixRain` INSIDE each page component (not globally) with white overlay (60% opacity)
+- [x] Restyle banner ads to pure white backgrounds (TopBannerAd, BottomBannerAd)
+- [x] Complete rebuild of ListingsPage with uniform white background
+  - Removed old Index.tsx with stacked components (HeroSection, CategoryGrid, BusinessSection)
+  - Created clean ListingsPage with: Search/Explore/Connect/Grow, search bar, categories, manage listing CTA
+  - Applied MatrixRain pattern from LandingPage
+- [x] Fix uniform background issue (removed global MatrixRain, applied per-page)
 - [x] Add SPA rewrite rules (vercel.json)
 - [x] Add safe dev fallback for missing Supabase env vars
+- [x] Proper file naming: LandingPageFinal.tsx is homepage, ListingsPage.tsx is /listings (not Index)
 
 ---
 
