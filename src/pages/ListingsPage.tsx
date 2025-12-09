@@ -931,57 +931,9 @@ export const ListingsPage = () => {
         hideFilters
       />
 
-      <div className="bg-gradient-to-br from-gray-50 via-white to-gray-100 py-4">
-
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-
-            <div className="flex-1 min-w-0">
-
-              <Input
-
-                type="text"
-
-                placeholder={`Search ${categoryName}...`}
-
-                value={searchTerm}
-
-                onChange={(e) => setSearchTerm(e.target.value)}
-
-                className="w-full font-roboto bg-white border-gray-300 text-sm sm:text-base focus:border-black focus:ring-black"
-
-                onKeyPress={(e) => {
-
-                  if (e.key === 'Enter') {
-
-                    handleSearch();
-
-                  }
-
-                }}
-
-              />
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-
-      {/* Filters */}
-
-      <div className="bg-white  py-3">
-
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-
-          <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-3 lg:space-y-0 lg:space-x-4">
-
-            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+      {/* Filters - Clean, no background */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pt-6 pb-4">
+        <div className="flex flex-wrap items-center gap-2">
 
               <Button 
 
@@ -1090,83 +1042,7 @@ export const ListingsPage = () => {
                 <span className="sm:hidden">{t('listings.verified')}</span>
 
               </Button>
-
-            </div>
-
-            
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full lg:w-auto lg:ml-auto">
-
-              <div className="flex items-center space-x-2">
-
-                <span className="text-xs sm:text-sm text-gray-600 font-roboto">{t('listings.sort')}</span>
-
-                <DropdownMenu>
-
-                  <DropdownMenuTrigger asChild>
-
-                    <Button variant="outline" size="sm" className="font-roboto text-xs sm:text-sm">
-
-                      <span className="font-semibold truncate">
-
-                        {sortBy === 'default' ? t('listings.default') : 
-
-                         sortBy === 'distance' ? t('listings.distance') : 
-
-                         sortBy === 'rating' ? t('listings.rating') : t('listings.nameAZ')}
-
-                      </span>
-
-                      <ChevronDown className="w-4 h-4 ml-1 flex-shrink-0" />
-
-                    </Button>
-
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent className="w-full sm:w-auto">
-
-                    <DropdownMenuItem onClick={() => setSortBy('default')}>
-
-                      <span className="font-semibold">{t('listings.default')}</span>
-
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem onClick={() => setSortBy('distance')}>
-
-                      <span className="font-semibold">{t('listings.distance')}</span>
-
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem onClick={() => setSortBy('rating')}>
-
-                      <span className="font-semibold">{t('listings.rating')}</span>
-
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem onClick={() => setSortBy('name')}>
-
-                      <span className="font-semibold">{t('listings.nameAZ')}</span>
-
-                    </DropdownMenuItem>
-
-                  </DropdownMenuContent>
-
-                </DropdownMenu>
-
-              </div>
-
-              <span className="text-xs sm:text-sm text-gray-600 font-roboto">
-
-                {sortedBusinesses.length} {t('listings.businessesFound')}
-
-              </span>
-
-            </div>
-
-          </div>
-
         </div>
-
       </div>
 
 
