@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Globe, MapPin, Users, TrendingUp, Search } from 'lucide-react';
 import { db } from '@/lib/supabase';
 import { Input } from '@/components/ui/input';
+import { MatrixRain } from "@/components/landing/MatrixRain";
 
 interface Country {
   id: string;
@@ -55,7 +56,10 @@ export const CountriesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="relative min-h-screen bg-white">
+      <MatrixRain />
+      <div className="absolute inset-0 bg-white/80 pointer-events-none" />
+      <div className="relative z-10">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -66,7 +70,7 @@ export const CountriesPage = () => {
             className="text-center"
           >
             <div className="flex items-center justify-center mb-4">
-              <Globe className="w-12 h-12 text-blue-600 mr-3" />
+              <Globe className="w-12 h-12 text-black mr-3" />
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
                 BARA Countries
               </h1>
@@ -90,7 +94,7 @@ export const CountriesPage = () => {
                 placeholder="Search countries by name or code..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 py-6 text-lg rounded-xl border-2 border-gray-200 focus:border-blue-500"
+                className="pl-12 pr-4 py-6 text-lg rounded-xl border-2 border-gray-200 focus:border-black"
               />
             </div>
           </motion.div>
@@ -125,7 +129,7 @@ export const CountriesPage = () => {
                 transition={{ delay: index * 0.05 }}
                 whileHover={{ scale: 1.03, y: -4 }}
                 onClick={() => navigate(`/countries/${country.slug}`)}
-                className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-blue-500"
+                className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-black"
               >
                 {/* Flag */}
                 <div className="flex items-center justify-between mb-4">
@@ -139,8 +143,8 @@ export const CountriesPage = () => {
                         className="w-16 h-12 object-cover rounded shadow-sm"
                       />
                     ) : (
-                      <div className="w-16 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded flex items-center justify-center">
-                        <Globe className="w-8 h-8 text-white" />
+                      <div className="w-16 h-12 bg-gray-200 rounded flex items-center justify-center">
+                        <Globe className="w-8 h-8 text-gray-600" />
                       </div>
                     )}
                   </div>
@@ -158,13 +162,13 @@ export const CountriesPage = () => {
                 <div className="space-y-2 text-sm text-gray-600">
                   {country.capital && (
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-blue-500" />
+                      <MapPin className="w-4 h-4 text-black" />
                       <span>Capital: {country.capital}</span>
                     </div>
                   )}
                   {country.population && (
                     <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-green-500" />
+                      <Users className="w-4 h-4 text-black" />
                       <span>Population: {formatPopulation(country.population)}</span>
                     </div>
                   )}
@@ -179,7 +183,7 @@ export const CountriesPage = () => {
 
                 {/* View Button */}
                 <div className="mt-4 pt-4 border-t border-gray-100">
-                  <div className="flex items-center justify-between text-blue-600 font-semibold">
+                  <div className="flex items-center justify-between text-black font-semibold">
                     <span className="text-sm">Explore {country.name}</span>
                     <TrendingUp className="w-4 h-4" />
                   </div>
@@ -198,11 +202,12 @@ export const CountriesPage = () => {
             className="mt-12 text-center"
           >
             <p className="text-gray-600">
-              Showing <span className="font-bold text-blue-600">{filteredCountries.length}</span> of{' '}
+              Showing <span className="font-bold text-black">{filteredCountries.length}</span> of{' '}
               <span className="font-bold">{countries.length}</span> countries
             </p>
           </motion.div>
         )}
+      </div>
       </div>
     </div>
   );

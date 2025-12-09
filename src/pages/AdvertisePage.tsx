@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import {Link} from 'react-router-dom';
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
+import { MatrixRain } from "@/components/landing/MatrixRain";
 import { 
   Target, 
   Users, 
@@ -24,41 +25,38 @@ const AdvertisePage = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gray-50">
-        {/* Hero Section */}
-        <section className="bg-brand-blue text-white py-20">
+      <div className="relative min-h-screen bg-white">
+        {/* Matrix Rain Background */}
+        <MatrixRain />
+        {/* White overlay for readability */}
+        <div className="absolute inset-0 bg-white/80 pointer-events-none" />
+
+        {/* Title */}
+        <section className="relative z-10 py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 font-comfortaa">
+            <h1 className="text-4xl md:text-5xl font-bold font-comfortaa text-black mb-4">
               {t('advertise.hero.title')}
             </h1>
-            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto font-roboto">
+            <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto font-roboto">
               {t('advertise.hero.subtitle')}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-brand-yellow text-dark hover:bg-brand-yellow-hover font-roboto">
-                {t('advertise.hero.getStarted')}
-              </Button>
-              <Button size="lg" variant="outline" className="bg-transparent border-2 border-white text-white hover:bg-white/10 font-roboto">
-                {t('advertise.hero.learnMore')}
-              </Button>
-            </div>
           </div>
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 bg-white">
+        <section className="relative z-10 py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               <div className="space-y-4">
-                <div className="text-4xl font-bold text-brand-blue">100K+</div>
+                <div className="text-4xl font-bold text-black">100K+</div>
                 <p className="text-gray-600 font-roboto">{t('advertise.stats.monthlyVisitors')}</p>
               </div>
               <div className="space-y-4">
-                <div className="text-4xl font-bold text-brand-blue">1K+</div>
+                <div className="text-4xl font-bold text-black">1K+</div>
                 <p className="text-gray-600 font-roboto">{t('advertise.stats.businesses')}</p>
               </div>
               <div className="space-y-4">
-                <div className="text-4xl font-bold text-brand-blue">95%</div>
+                <div className="text-4xl font-bold text-black">95%</div>
                 <p className="text-gray-600 font-roboto">{t('advertise.stats.satisfaction')}</p>
               </div>
             </div>
@@ -66,7 +64,7 @@ const AdvertisePage = () => {
         </section>
 
         {/* Services Section */}
-        <section className="py-16 bg-gray-50">
+        <section className="relative z-10 py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 font-comfortaa">
@@ -81,7 +79,7 @@ const AdvertisePage = () => {
               {/* Premium Listing */}
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <Star className="w-8 h-8 text-white" />
                   </div>
                   <CardTitle className="text-xl font-comfortaa">{t('advertise.services.premium.title')}</CardTitle>
@@ -92,20 +90,20 @@ const AdvertisePage = () => {
                 <CardContent className="space-y-4">
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="w-4 h-4 text-black mr-2" />
                       {t('advertise.services.premium.feature1')}
                     </li>
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="w-4 h-4 text-black mr-2" />
                       {t('advertise.services.premium.feature2')}
                     </li>
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="w-4 h-4 text-black mr-2" />
                       {t('advertise.services.premium.feature3')}
                     </li>
                   </ul>
                   
-                    <Button className="w-full bg-brand-blue hover:bg-brand-blue/90 font-roboto">
+                    <Button className="w-full font-roboto">
                       <Link to="/claim-listing"> 
                         {t('advertise.services.premium.cta')}
                       </Link>
@@ -116,7 +114,7 @@ const AdvertisePage = () => {
               {/* Targeted Advertising */}
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <Target className="w-8 h-8 text-white" />
                   </div>
                   <CardTitle className="text-xl font-comfortaa">{t('advertise.services.targeted.title')}</CardTitle>
@@ -127,19 +125,19 @@ const AdvertisePage = () => {
                 <CardContent className="space-y-4">
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="w-4 h-4 text-black mr-2" />
                       {t('advertise.services.targeted.feature1')}
                     </li>
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="w-4 h-4 text-black mr-2" />
                       {t('advertise.services.targeted.feature2')}
                     </li>
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="w-4 h-4 text-black mr-2" />
                       {t('advertise.services.targeted.feature3')}
                     </li>
                   </ul>
-                  <Button className="w-full bg-green-600 hover:bg-green-700 font-roboto">
+                  <Button className="w-full font-roboto">
                     <Link to="/claim-listing"> 
                       {t('advertise.services.targeted.cta')}
                     </Link>
@@ -150,7 +148,7 @@ const AdvertisePage = () => {
               {/* Analytics & Insights */}
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <BarChart3 className="w-8 h-8 text-white" />
                   </div>
                   <CardTitle className="text-xl font-comfortaa">{t('advertise.services.analytics.title')}</CardTitle>
@@ -161,19 +159,19 @@ const AdvertisePage = () => {
                 <CardContent className="space-y-4">
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="w-4 h-4 text-black mr-2" />
                       {t('advertise.services.analytics.feature1')}
                     </li>
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="w-4 h-4 text-black mr-2" />
                       {t('advertise.services.analytics.feature2')}
                     </li>
                     <li className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <CheckCircle className="w-4 h-4 text-black mr-2" />
                       {t('advertise.services.analytics.feature3')}
                     </li>
                   </ul>
-                  <Button className="w-full bg-purple-600 hover:bg-purple-700 font-roboto">
+                  <Button className="w-full font-roboto">
                     <Link to="/user/settings"> 
                       {t('advertise.services.analytics.cta')}
                     </Link>
@@ -185,7 +183,7 @@ const AdvertisePage = () => {
         </section>
 
         {/* Why Choose Us Section */}
-        <section className="py-16 bg-white">
+        <section className="relative z-10 py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 font-comfortaa">
@@ -198,7 +196,7 @@ const AdvertisePage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto">
                   <Users className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold font-comfortaa">{t('advertise.whyChoose.reach.title')}</h3>
@@ -206,7 +204,7 @@ const AdvertisePage = () => {
               </div>
 
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto">
                   <TrendingUp className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold font-comfortaa">{t('advertise.whyChoose.growth.title')}</h3>
@@ -214,7 +212,7 @@ const AdvertisePage = () => {
               </div>
 
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto">
                   <Globe className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold font-comfortaa">{t('advertise.whyChoose.local.title')}</h3>
@@ -222,7 +220,7 @@ const AdvertisePage = () => {
               </div>
 
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto">
                   <Eye className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold font-comfortaa">{t('advertise.whyChoose.visibility.title')}</h3>
@@ -233,7 +231,7 @@ const AdvertisePage = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 bg-brand-blue text-white">
+        <section className="relative z-10 py-16 bg-white text-black">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-6 font-comfortaa">
               {t('advertise.cta.title')}
@@ -242,10 +240,10 @@ const AdvertisePage = () => {
               {t('advertise.cta.description')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-brand-yellow text-dark hover:bg-brand-yellow-hover font-roboto">
+              <Button size="lg" className="font-roboto">
                 {t('advertise.cta.primaryButton')}
               </Button>
-              <Button size="lg" variant="outline" className="bg-transparent border-2 border-brand-blue text-brand-blue hover:bg-brand-blue/10 font-roboto">
+              <Button size="lg" variant="outline" className="bg-transparent border-2 border-black text-black hover:bg-gray-100 font-roboto">
                 {t('advertise.cta.secondaryButton')}
               </Button>
             </div>
@@ -253,7 +251,7 @@ const AdvertisePage = () => {
         </section>
 
         {/* Contact Section */}
-        <section className="py-16 bg-gray-50">
+        <section className="relative z-10 py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 font-comfortaa">
@@ -266,7 +264,7 @@ const AdvertisePage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto">
                   <Phone className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold font-comfortaa">{t('advertise.contact.phone.title')}</h3>
@@ -275,7 +273,7 @@ const AdvertisePage = () => {
               </div>
 
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto">
                   <Mail className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold font-comfortaa">{t('advertise.contact.email.title')}</h3>
@@ -284,7 +282,7 @@ const AdvertisePage = () => {
               </div>
 
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto">
                   <MapPin className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold font-comfortaa">{t('advertise.contact.location.title')}</h3>

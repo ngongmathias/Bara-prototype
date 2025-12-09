@@ -44,32 +44,21 @@ const AboutUsPage = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gray-50">
-        {/* Hero Section */}
-        <section className="relative h-[50vh] sm:h-[55vh] md:h-[90vh]">
-          {/* Slideshow background */}
-          <img
-            src={encodeURI(aboutSlides[currentSlide])}
-            alt="About slideshow"
-            className="absolute inset-0 w-full h-full object-cover"
-            loading="eager"
-          />
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/35" />
-
-          {/* Content */}
-          <div className="relative z-10 h-full flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 font-comfortaa text-white">
+      <div className="min-h-screen bg-white">
+        {/* Hero Section (monochrome) */}
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 font-comfortaa text-black">
               {t('about.hero.title')}
             </h1>
-            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto font-roboto text-white">
+            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto font-roboto text-gray-700">
               {t('about.hero.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-brand-yellow text-dark hover:bg-brand-yellow-hover font-roboto">
+              <Button size="lg" className="font-roboto">
                 {t('about.hero.learnMore')}
               </Button>
-              <Button size="lg" className="bg-brand-yellow text-dark hover:bg-brand-yellow-hover font-roboto">
+              <Button size="lg" variant="outline" className="font-roboto">
                 {t('about.hero.contactUs')}
               </Button>
             </div>
@@ -113,23 +102,23 @@ const AboutUsPage = () => {
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
               <div className="space-y-4">
-                <div className="text-4xl font-bold text-brand-blue">100K+</div>
+                <div className="text-4xl font-bold text-black">100K+</div>
                 <p className="text-gray-600 font-roboto">{t('about.stats.users')}</p>
               </div>
               <div className="space-y-4">
-                <div className="text-4xl font-bold text-brand-blue">5K+</div>
+                <div className="text-4xl font-bold text-black">5K+</div>
                 <p className="text-gray-600 font-roboto">{t('about.stats.businesses')}</p>
               </div>
               <div className="space-y-4">
-                <div className="text-4xl font-bold text-brand-blue">50+</div>
+                <div className="text-4xl font-bold text-black">50+</div>
                 <p className="text-gray-600 font-roboto">{t('about.stats.cities')}</p>
               </div>
               <div className="space-y-4">
-                <div className="text-4xl font-bold text-brand-blue">98%</div>
+                <div className="text-4xl font-bold text-black">98%</div>
                 <p className="text-gray-600 font-roboto">{t('about.stats.satisfaction')}</p>
               </div>
             </div>
@@ -151,7 +140,7 @@ const AboutUsPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <Heart className="w-8 h-8 text-white" />
                   </div>
                   <CardTitle className="text-xl font-comfortaa">{t('about.values.trust.title')}</CardTitle>
@@ -163,7 +152,7 @@ const AboutUsPage = () => {
 
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <Shield className="w-8 h-8 text-white" />
                   </div>
                   <CardTitle className="text-xl font-comfortaa">{t('about.values.quality.title')}</CardTitle>
@@ -175,7 +164,7 @@ const AboutUsPage = () => {
 
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <Lightbulb className="w-8 h-8 text-white" />
                   </div>
                   <CardTitle className="text-xl font-comfortaa">{t('about.values.innovation.title')}</CardTitle>
@@ -187,7 +176,7 @@ const AboutUsPage = () => {
 
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <Users className="w-8 h-8 text-white" />
                   </div>
                   <CardTitle className="text-xl font-comfortaa">{t('about.values.community.title')}</CardTitle>
@@ -199,7 +188,7 @@ const AboutUsPage = () => {
 
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <Zap className="w-8 h-8 text-white" />
                   </div>
                   <CardTitle className="text-xl font-comfortaa">{t('about.values.excellence.title')}</CardTitle>
@@ -211,7 +200,7 @@ const AboutUsPage = () => {
 
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <TrendingUp className="w-8 h-8 text-white" />
                   </div>
                   <CardTitle className="text-xl font-comfortaa">{t('about.values.growth.title')}</CardTitle>
@@ -225,7 +214,7 @@ const AboutUsPage = () => {
         </section>
 
         {/* Team Section */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 font-comfortaa">
@@ -239,7 +228,7 @@ const AboutUsPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <Card className="text-center hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
-                  <div className="w-24 h-24 bg-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <Users className="w-12 h-12 text-white" />
                   </div>
                   <CardTitle className="text-lg font-comfortaa">{t('about.team.leadership.title')}</CardTitle>
@@ -251,7 +240,7 @@ const AboutUsPage = () => {
 
               <Card className="text-center hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
-                  <div className="w-24 h-24 bg-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <Target className="w-12 h-12 text-white" />
                   </div>
                   <CardTitle className="text-lg font-comfortaa">{t('about.team.development.title')}</CardTitle>
@@ -263,7 +252,7 @@ const AboutUsPage = () => {
 
               <Card className="text-center hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
-                  <div className="w-24 h-24 bg-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <Star className="w-12 h-12 text-white" />
                   </div>
                   <CardTitle className="text-lg font-comfortaa">{t('about.team.support.title')}</CardTitle>
