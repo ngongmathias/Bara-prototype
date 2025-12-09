@@ -5,6 +5,7 @@ import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom"
 import { useTranslation } from "react-i18next";
 
 import { Header } from "@/components/Header";
+import { PageHeaderCard } from "@/components/layout/PageHeaderCard";
 
 import Footer from "@/components/Footer";
 
@@ -918,10 +919,17 @@ export const ListingsPage = () => {
   return (
 
     <div className="min-h-screen bg-background font-roboto">
-
       <Header />
 
-      {/* Search Header */}
+      <PageHeaderCard
+        title={categoryName}
+        placeholder={`Search ${categoryName}...`}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onSearch={handleSearch}
+        resultsCount={sortedBusinesses.length}
+        hideFilters
+      />
 
       <div className="bg-gradient-to-br from-gray-50 via-white to-gray-100 py-4">
 
@@ -1954,5 +1962,8 @@ export const ListingsPage = () => {
   );
 
 };
+
+
+
 
 
