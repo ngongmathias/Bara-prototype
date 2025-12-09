@@ -14,12 +14,7 @@ import {
   Filter, 
   Grid3x3, 
   List, 
-  Star,
-  TrendingUp,
-  Package,
-  Truck,
-  Shield,
-  ArrowRight
+  Star
 } from "lucide-react";
 import {
   Select,
@@ -152,7 +147,7 @@ const MarketplacePage = () => {
             {[...Array(5)].map((_, i) => (
               <Star 
                 key={i} 
-                className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-black text-black' : 'text-gray-300'}`}
               />
             ))}
           </div>
@@ -167,7 +162,7 @@ const MarketplacePage = () => {
         </div>
         
         {product.inStock ? (
-          <Badge variant="outline" className="mb-3 text-green-600 border-green-600">
+          <Badge variant="outline" className="mb-3 text-black border-black">
             In Stock
           </Badge>
         ) : (
@@ -274,7 +269,7 @@ const MarketplacePage = () => {
             <Button variant="outline" className="relative ml-4">
               <ShoppingCart className="w-5 h-5" />
               {cartItemsCount > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-red-500">
+                <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-black">
                   {cartItemsCount}
                 </Badge>
               )}
@@ -282,17 +277,9 @@ const MarketplacePage = () => {
           </div>
         </div>
 
-        {/* Featured Products Grid */}
+        {/* Products Grid */}
         <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Featured Products</h2>
-              <p className="text-gray-600">Hand-picked items just for you</p>
-            </div>
-            <Button variant="link" className="text-brand-blue">
-              View All <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
+          <h2 className="text-2xl font-bold text-black mb-6">Products</h2>
           
           <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'} gap-6`}>
             {featuredProducts.map((product) => (
@@ -301,49 +288,6 @@ const MarketplacePage = () => {
           </div>
         </div>
 
-        {/* Trending Now Section */}
-        <div className="mb-12 bg-white rounded-xl p-8 shadow-md">
-          <div className="flex items-center gap-3 mb-6">
-            <TrendingUp className="w-8 h-8 text-brand-blue" />
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Trending Now</h2>
-              <p className="text-gray-600">Most popular products this week</p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {categories.slice(1, 7).map((cat) => (
-              <Button 
-                key={cat.id} 
-                variant="outline" 
-                className="h-auto py-4 flex flex-col items-center gap-2"
-              >
-                <div className="w-12 h-12 bg-gradient-to-br from-brand-blue to-blue-600 rounded-full flex items-center justify-center">
-                  <Package className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-sm font-medium">{cat.name}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Call to Action */}
-        <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-8 md:p-12 text-white text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Become a Seller Today!
-          </h2>
-          <p className="text-lg mb-6 text-purple-100">
-            Start selling your products to millions of customers worldwide
-          </p>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100">
-              Start Selling
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-              Learn More
-            </Button>
-          </div>
-        </div>
 
       </main>
       
