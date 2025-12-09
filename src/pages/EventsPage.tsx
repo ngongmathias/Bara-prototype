@@ -897,7 +897,7 @@ export const EventsPage = () => {
         </aside>
 
         {/* Right Side - Events Grid */}
-        <main className="flex-1 bg-gray-50">
+        <main className="flex-1">
           <div className="container mx-auto px-6 py-8">
             {/* Top Bar: Time Filters + Create Event + Reset Filters */}
             <div className="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
