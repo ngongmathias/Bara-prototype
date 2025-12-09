@@ -187,7 +187,7 @@ export const CountryListingsPage = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [country, setCountry] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('list'); // Default to list like YP
 
   // State for pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -518,13 +518,24 @@ export const CountryListingsPage = () => {
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filters - YP Style */}
       <div className="bg-white border-b border-gray-200 py-3">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-3 lg:space-y-0 lg:space-x-4">
+            {/* Map View Button - Prominent like YP */}
+            <Button
+              variant={viewMode === 'map' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('map')}
+              className={`font-roboto ${viewMode === 'map' ? 'bg-blue-600 text-white' : ''}`}
+            >
+              <Map className="w-4 h-4 mr-2" />
+              Map View
+            </Button>
+
             <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
               <Button 
-                variant={selectedFilters.includes('all') ? 'default' : 'outline'} 
+                variant={selectedFilters.length === 0 ? 'default' : 'outline'} 
                 size="sm" 
                 onClick={() => setSelectedFilters([])}
                 className="font-roboto text-xs sm:text-sm"
@@ -736,196 +747,274 @@ export const CountryListingsPage = () => {
                 </div>
               </div>
             ) : (
-              <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-6"}>
-                {currentPageBusinesses.map((business, index) => {
-                  const avgRating = getAverageRating(business);
-                  const reviewCount = getReviewCount(business);
-                  const categoryAmenities = getCategoryAmenities(business.category?.slug || '');
-                  
-                  // Calculate the display number (excluding sponsored ads from numbering)
-                  const displayNumber = getDisplayNumber(index);
-                  
-                  return (
-                    <div 
-                      key={business.id} 
-                      className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer relative"
-                      onClick={() => handleBusinessClick(business)}
-                    >
-                      {/* Business Number Badge - Only show for non-sponsored ads */}
-                      {!business.is_sponsored_ad && (
-                        <div className="absolute -top-2 -left-2 w-8 h-8 bg-yp-blue text-white rounded-full flex items-center justify-center text-sm font-bold font-roboto shadow-md">
-                          {displayNumber}
-                        </div>
-                      )}
-                      
-                      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start space-y-4 lg:space-y-0">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-start mb-2 space-y-2 sm:space-y-0">
-                            <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-yp-dark font-comfortaa mr-2 break-words">
-                              {business.name}
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-1 sm:gap-2">  
-                              {business.is_premium && (
-                                <Badge variant="default" className="bg-yp-blue text-white text-xs">
-                                  {t('listings.premium')}
-                                </Badge>
-                              )}
-                              {business.is_verified && (
-                                <Badge variant="secondary" className="text-xs">
-                                  ✓ {t('listings.verified')}
-                                </Badge>
-                              )}
-                              {business.has_coupons && (
-                                <Badge variant="outline" className="text-xs border-orange-200 text-orange-700 bg-orange-50">
-                                  {t('listings.coupons')}
-                                </Badge>
-                              )}
-                              {business.accepts_orders_online && (
-                                <Badge variant="outline" className="text-xs border-green-200 text-green-700 bg-green-50">
-                                  {t('listings.orderOnline')}
-                                </Badge>
-                              )}
-                              {business.is_kid_friendly && (
-                                <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">
-                                  {t('listings.kidFriendly')}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <p className="text-gray-600 font-roboto mb-2 text-sm">
-                            {business.category?.name || 'Business'}
-                          </p>
-                          
-                          {/* Rating */}
-                          {reviewCount > 0 && (
-                            <div className="flex items-center mb-3">
-                              <div className="flex items-center">
-                                {[...Array(5)].map((_, i) => (
-                                  <Crown
-                                    key={i}
-                                    className={`w-4 h-4 ${
-                                      i < Math.floor(avgRating)
-                                        ? 'text-yellow-400 fill-current'
-                                        : 'text-gray-300'
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                              <span className="ml-2 text-xs sm:text-sm text-gray-600 font-roboto">
-                                {avgRating.toFixed(1)} ({reviewCount} reviews)
-                              </span>
-                            </div>
-                          )}
-                          
-                          {/* Business details */}
-                          <div className="space-y-1 text-xs sm:text-sm text-gray-600 font-roboto">
-                            {business.address && (
-                              <div className="flex items-start">
-                                <MapPin className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
-                                <span className="break-words">{business.address}</span>
-                              </div>
-                            )}
-                            {business.phone && (
-                              <div className="flex items-center">
-                                <Phone className="w-4 h-4 mr-2 flex-shrink-0" />
-                                <a 
-                                  href={`tel:${business.phone}`} 
-                                  className="text-yp-blue hover:underline break-all"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {business.phone}
-                                </a>
-                              </div>
-                            )}
-                            {business.website && business.website_visible && (
-                              <div className="flex items-start">
-                                <Globe className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
-                                <a 
-                                  href={`https://${business.website}`} 
-                                  className="text-yp-blue hover:underline break-all"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {business.website}
-                                </a>
-                              </div>
-                            )}
-
-                            {/* Category Amenities */}
-                            {categoryAmenities.length > 0 && (
-                              <div className="flex flex-col sm:flex-row sm:items-center mb-3 space-y-1 py-2 sm:space-y-0">
-                                <span className="text-xs sm:text-sm font-medium text-gray-700 mr-2">Amenities:</span>
-                                <div className="flex items-center gap-2">
-                                  {categoryAmenities.map((amenity, idx) => {
-                                    const IconComponent = amenity.icon;
-                                    return (
-                                      <div key={idx} className="flex items-center gap-1 text-gray-600">
-                                        <IconComponent className="w-4 h-4" />
-                                        <span className="text-xs">{amenity.label}</span>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
-
-                            {business.description && (
-                              <p className="text-gray-700 mt-2 line-clamp-2 break-words text-sm">
-                                "{business.description}"
-                              </p>
-                            )}
-                            
-                            {/* Order Online Button and Sponsored Ad Badge */}
-                            {(business.accepts_orders_online && business.order_online_url) || business.is_sponsored_ad ? (
-                              <div className="flex items-center mt-3 w-full">
-                                {/* Order Online Button - Only show if business accepts orders and has order URL */}
-                                {business.accepts_orders_online && business.order_online_url && (
-                                  <a
-                                    href={business.order_online_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="inline-block"
-                                  >
-                                    <Button
-                                      size="sm"
-                                      className="bg-yellow-500 hover:bg-yellow-400 text-white font-roboto h-8 px-3 flex items-center gap-2 text-xs sm:text-sm"
-                                    >
-                                      <Globe className="w-4 h-4" />
-                                      Order Online
-                                    </Button>
-                                  </a>
-                                )}
-                                
-                                {/* Sponsored Ad Badge - Positioned to the right */}
-                                {business.is_sponsored_ad && (
-                                  <div className="ml-auto bg-gray-200 text-gray-600 text-xs px-3 py-1.5 rounded-full font-medium shadow-sm">
-                                    Sponsored Ad
+              /* YP-Style List/Grid View with Sidebar */
+              <div className="flex gap-8">
+                {/* Main Content Area */}
+                <div className="flex-1">
+                  {viewMode === 'list' ? (
+                    /* YP-Style List View */
+                    <div className="space-y-0 border-t border-gray-200">
+                      {currentPageBusinesses.map((business, index) => {
+                        const avgRating = getAverageRating(business);
+                        const reviewCount = getReviewCount(business);
+                        const businessImage = business.images?.[0] || business.logo_url;
+                        const listingNumber = getDisplayNumber(index);
+                        
+                        return (
+                          <div
+                            key={business.id}
+                            className={`border-b border-gray-200 py-4 ${
+                              business.is_sponsored_ad ? 'bg-yellow-50' : ''
+                            }`}
+                          >
+                            <div className="flex gap-4">
+                              {/* Image */}
+                              <div 
+                                className="w-28 h-28 flex-shrink-0 bg-gray-100 rounded overflow-hidden cursor-pointer"
+                                onClick={() => handleBusinessClick(business)}
+                              >
+                                {businessImage ? (
+                                  <img src={businessImage} alt={business.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Building2 className="w-12 h-12 text-gray-300" />
                                   </div>
                                 )}
                               </div>
-                            ) : null}
+                              
+                              {/* Middle: Business Info */}
+                              <div className="flex-1 min-w-0">
+                                {/* Business Name */}
+                                <div className="flex items-start gap-2">
+                                  {!business.is_sponsored_ad && (
+                                    <span className="text-gray-500 font-medium">{listingNumber}.</span>
+                                  )}
+                                  <h3 
+                                    className="text-blue-600 hover:underline font-semibold cursor-pointer text-lg"
+                                    onClick={() => handleBusinessClick(business)}
+                                  >
+                                    {business.name}
+                                  </h3>
+                                  {business.is_sponsored_ad && (
+                                    <Badge className="bg-yellow-500 text-white text-xs ml-2">Ad</Badge>
+                                  )}
+                                </div>
+                                
+                                {/* Category Tags */}
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {business.category?.name}
+                                  {business.has_coupons && ', Coupons Available'}
+                                  {business.is_kid_friendly && ', Kid Friendly'}
+                                </p>
+                                
+                                {/* Action Links - YP Style */}
+                                <div className="flex items-center gap-3 mt-2 text-sm">
+                                  {business.website && (
+                                    <a 
+                                      href={`https://${business.website}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:underline"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      Website
+                                    </a>
+                                  )}
+                                  {business.address && (
+                                    <a 
+                                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:underline"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      Directions
+                                    </a>
+                                  )}
+                                  <span 
+                                    className="text-blue-600 hover:underline cursor-pointer"
+                                    onClick={() => handleBusinessClick(business)}
+                                  >
+                                    More Info
+                                  </span>
+                                </div>
+                                
+                                {/* Rating */}
+                                {reviewCount > 0 && (
+                                  <div className="flex items-center gap-1 mt-2">
+                                    <div className="flex">
+                                      {[...Array(5)].map((_, i) => (
+                                        <Crown 
+                                          key={i} 
+                                          className={`w-4 h-4 ${i < Math.floor(avgRating) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
+                                        />
+                                      ))}
+                                    </div>
+                                    <span className="text-sm text-gray-600">({reviewCount})</span>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Right Side: Phone & Address */}
+                              <div className="text-right flex-shrink-0 w-48">
+                                {business.phone && (
+                                  <a 
+                                    href={`tel:${business.phone}`}
+                                    className="text-lg font-semibold text-green-700 hover:underline block"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {business.phone}
+                                  </a>
+                                )}
+                                {business.address && (
+                                  <p className="text-sm text-gray-600 mt-1">{business.address}</p>
+                                )}
+                                {business.city && (
+                                  <p className="text-sm text-gray-500">{business.city.name}</p>
+                                )}
+                                {business.is_verified && (
+                                  <Badge variant="outline" className="mt-2 text-xs border-green-500 text-green-600">
+                                    ✓ Verified
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          
-                        </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    /* Grid View */
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {currentPageBusinesses.map((business, index) => {
+                        const avgRating = getAverageRating(business);
+                        const reviewCount = getReviewCount(business);
+                        const businessImage = business.images?.[0] || business.logo_url;
                         
-                        <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full lg:w-auto">
-                          <Link to={`/write-review/${business.id}`} className="w-full sm:w-auto">
-                            <Button 
-                              size="sm" 
-                              className="bg-yp-blue text-white font-roboto w-full text-xs sm:text-sm"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {t('listings.writeReview')}
-                            </Button>
-                          </Link>
-                        </div>
+                        return (
+                          <div 
+                            key={business.id} 
+                            className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer"
+                            onClick={() => handleBusinessClick(business)}
+                          >
+                            {business.is_sponsored_ad && (
+                              <div className="absolute top-2 right-2 z-10">
+                                <Badge className="bg-yellow-500 text-white text-xs">Ad</Badge>
+                              </div>
+                            )}
+                            
+                            <div className="bg-gray-100 h-48 flex items-center justify-center relative">
+                              {businessImage ? (
+                                <img src={businessImage} alt={business.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <Building2 className="w-16 h-16 text-gray-300" />
+                              )}
+                              {business.is_premium && !business.is_sponsored_ad && (
+                                <div className="absolute top-2 left-2">
+                                  <Badge className="bg-blue-600 text-white text-xs">Premium</Badge>
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className="p-4">
+                              <div className="flex items-start justify-between gap-2">
+                                <h3 className="font-bold text-lg text-black line-clamp-1">{business.name}</h3>
+                                {business.is_verified && (
+                                  <Badge variant="secondary" className="text-xs flex-shrink-0">✓ Verified</Badge>
+                                )}
+                              </div>
+                              
+                              {reviewCount > 0 && (
+                                <div className="flex items-center gap-1 mt-2">
+                                  <div className="flex">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Crown 
+                                        key={i} 
+                                        className={`w-4 h-4 ${i < Math.floor(avgRating) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className="text-sm text-gray-400">({reviewCount})</span>
+                                </div>
+                              )}
+                              
+                              <div className="mt-3 space-y-1">
+                                {business.address && (
+                                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                                    <MapPin className="w-3 h-3" />
+                                    <span className="truncate">{business.address}</span>
+                                  </div>
+                                )}
+                                {business.phone && (
+                                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                                    <Phone className="w-3 h-3" />
+                                    <span>{business.phone}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Right Sidebar - YP Style (only in list view) */}
+                {viewMode === 'list' && (
+                  <div className="w-72 flex-shrink-0 hidden lg:block">
+                    {/* Popular in Country */}
+                    <div className="border border-gray-200 rounded-lg p-4 mb-4">
+                      <h3 className="font-semibold text-gray-800 mb-3">Popular in {country?.name}</h3>
+                      <div className="space-y-2">
+                        {sortedBusinesses.slice(0, 3).map((biz) => (
+                          <div 
+                            key={biz.id}
+                            className="text-sm text-blue-600 hover:underline cursor-pointer"
+                            onClick={() => handleBusinessClick(biz)}
+                          >
+                            {biz.name}
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  );
-                })}
+                    
+                    {/* Manage Listing CTA */}
+                    <div className="border border-gray-200 rounded-lg p-4 mb-4 text-center">
+                      <h3 className="font-semibold text-gray-800 mb-2">Manage your</h3>
+                      <p className="text-2xl font-bold text-green-600 mb-2">free listing</p>
+                      <p className="text-sm text-gray-600 mb-4">Update your business information in a few steps.</p>
+                      <Button 
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => navigate('/claim-listing')}
+                      >
+                        Claim Your Listing
+                      </Button>
+                    </div>
+                    
+                    {/* Featured Businesses */}
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <h3 className="font-semibold text-gray-800 mb-3">Featured Businesses</h3>
+                      <div className="space-y-3">
+                        {sortedBusinesses.filter(b => b.is_premium).slice(0, 3).map((biz) => (
+                          <div 
+                            key={biz.id}
+                            className="cursor-pointer hover:bg-gray-50 p-2 rounded -mx-2"
+                            onClick={() => handleBusinessClick(biz)}
+                          >
+                            <p className="text-sm font-medium text-blue-600 hover:underline">{biz.name}</p>
+                            {biz.phone && (
+                              <p className="text-xs text-gray-600">{biz.phone}</p>
+                            )}
+                            {biz.address && (
+                              <p className="text-xs text-gray-500 truncate">{biz.address}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
