@@ -1,15 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { FaSearch, FaBuilding, FaUserTie, FaInfoCircle, FaGlobeAfrica, FaStar, FaMobileAlt, FaLock, FaEdit, FaCheckCircle } from 'react-icons/fa';
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { Header } from "@/components/Header";
-import Footer from "@/components/Footer";
+import { ArrowLeft, HelpCircle, Briefcase } from "lucide-react";
+import { MatrixRain } from "@/components/landing/MatrixRain";
 
 const FaqPage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const generalFAQs = Array.from({ length: 10 }).map((_, i) => ({
     question: t(`faq.general.items.${i}.q`),
@@ -21,114 +20,135 @@ const FaqPage = () => {
     answer: t(`faq.business.items.${i}.a`),
   }));
 
-  const navigate = useNavigate();
-
   return (
-    <div className="min-h-screen bg-yp-gray-light flex flex-col">
-      <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
-        <div className="max-w-5xl mx-auto">
-          <Button
-            variant="ghost"
+    <div className="relative min-h-screen bg-white">
+      <MatrixRain />
+      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
+      
+      <div className="relative z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          {/* Back Button */}
+          <motion.button
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
             onClick={() => navigate(-1)}
-            className="mb-6 flex items-center gap-2 text-yp-blue hover:bg-yp-blue/10"
+            className="flex items-center gap-2 text-gray-500 hover:text-black transition-colors mb-8 group"
           >
-            <ArrowLeft className="w-4 h-4" />
-            {t('common.back') || 'Back'}
-          </Button>
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('faq.title')}</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">{t('faq.subtitle')}</p>
-        </div>
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm font-medium">Back</span>
+          </motion.button>
 
-        {/* Main Content */}
-        <div className="space-y-12">
-          {/* General Questions Section */}
-          <section className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6">
-              <div className="flex items-center space-x-3">
-                <FaInfoCircle className="text-white text-2xl" />
-                <h2 className="text-2xl font-bold text-white">{t('faq.general.title')}</h2>
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-16"
+          >
+            <h1 className="text-5xl md:text-6xl font-black text-black tracking-tight mb-4">
+              FAQ
+            </h1>
+            <p className="text-lg text-gray-500 max-w-xl">
+              {t('faq.subtitle') || 'Find answers to commonly asked questions about BARA'}
+            </p>
+          </motion.div>
+
+          {/* Main Content */}
+          <div className="space-y-16">
+            {/* General Questions Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+                  <HelpCircle className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-black">{t('faq.general.title') || 'General Questions'}</h2>
+                  <p className="text-sm text-gray-500">{t('faq.general.subtitle')}</p>
+                </div>
               </div>
-              <p className="text-blue-100 mt-2">{t('faq.general.subtitle')}</p>
-            </div>
-            
-            <div className="p-6">
-              <Accordion type="single" collapsible className="space-y-4">
+              
+              <Accordion type="single" collapsible className="space-y-3">
                 {generalFAQs.map((faq, index) => (
                   <AccordionItem 
                     key={`general-${index}`}
                     value={`general-${index}`}
-                    className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                    className="border border-gray-200 rounded-xl overflow-hidden hover:border-black transition-colors bg-white/70 backdrop-blur-sm"
                   >
-                    <AccordionTrigger className="px-4 py-3 text-left hover:bg-gray-50 font-medium text-gray-800">
+                    <AccordionTrigger className="px-5 py-4 text-left hover:no-underline font-medium text-black">
                       {faq.question}
                     </AccordionTrigger>
-                    <AccordionContent className="px-4 py-3 bg-gray-50 text-gray-600">
+                    <AccordionContent className="px-5 py-4 text-gray-600 border-t border-gray-100">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>
                 ))}
               </Accordion>
-            </div>
-          </section>
+            </motion.section>
 
-          {/* For Business Owners Section */}
-          <section className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-6">
-              <div className="flex items-center space-x-3">
-                <FaUserTie className="text-white text-2xl" />
-                <h2 className="text-2xl font-bold text-white">{t('faq.business.title')}</h2>
+            {/* For Business Owners Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                  <Briefcase className="w-5 h-5 text-black" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-black">{t('faq.business.title') || 'For Business Owners'}</h2>
+                  <p className="text-sm text-gray-500">{t('faq.business.subtitle')}</p>
+                </div>
               </div>
-              <p className="text-yellow-100 mt-2">{t('faq.business.subtitle')}</p>
-            </div>
-            
-            <div className="p-6">
-              <Accordion type="single" collapsible className="space-y-4">
+              
+              <Accordion type="single" collapsible className="space-y-3">
                 {businessFAQs.map((faq, index) => (
                   <AccordionItem 
                     key={`business-${index}`}
                     value={`business-${index}`}
-                    className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                    className="border border-gray-200 rounded-xl overflow-hidden hover:border-black transition-colors bg-white/70 backdrop-blur-sm"
                   >
-                    <AccordionTrigger className="px-4 py-3 text-left hover:bg-gray-50 font-medium text-gray-800">
+                    <AccordionTrigger className="px-5 py-4 text-left hover:no-underline font-medium text-black">
                       {faq.question}
                     </AccordionTrigger>
-                    <AccordionContent className="px-4 py-3 bg-gray-50 text-gray-600">
+                    <AccordionContent className="px-5 py-4 text-gray-600 border-t border-gray-100">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>
                 ))}
               </Accordion>
-            </div>
-          </section>
+            </motion.section>
 
-          {/* CTA Section */}
-          <div className="text-center mt-8 p-8 bg-white rounded-xl shadow-md">
-            <div className="max-w-2xl mx-auto">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('faq.cta.title')}</h3>
-              <p className="text-gray-600 mb-6">{t('faq.cta.subtitle')}</p>
+            {/* CTA Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center p-8 border border-gray-200 rounded-2xl bg-white/70 backdrop-blur-sm"
+            >
+              <h3 className="text-2xl font-bold text-black mb-4">{t('faq.cta.title') || 'Still have questions?'}</h3>
+              <p className="text-gray-500 mb-6">{t('faq.cta.subtitle') || 'We\'re here to help'}</p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Link 
                   to="/contact-us" 
-                  className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-colors"
                 >
-                  {t('faq.cta.contact')}
+                  {t('faq.cta.contact') || 'Contact Us'}
                 </Link>
                 <Link 
-                  to="/for-business" 
-                  className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  to="/advertise" 
+                  className="px-6 py-3 border border-gray-200 text-black font-medium rounded-xl hover:border-black transition-colors"
                 >
-                  {t('faq.cta.business')}
+                  {t('faq.cta.business') || 'For Business'}
                 </Link>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
-        </div>
-      </main>
-      <Footer />
+      </div>
     </div>
   );
 };
