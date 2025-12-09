@@ -1,4 +1,4 @@
-﻿import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -8,8 +8,8 @@ import { useAuthLogging } from "@/hooks/useAuthLogging";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-`r`nimport { FallingLettersOverlay } from "./components/visual/FallingLettersOverlay";// Test Supabase connection early
-import "@/lib/testSupabase";
+
+import { FallingLettersOverlay } from "./components/visual/FallingLettersOverlay";\r\n// Test Supabase connection early\r\nimport "@/lib/testSupabase";
 import { LandingPageFinal as LandingPage } from "./pages/LandingPageFinal";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -87,7 +87,9 @@ const AppRoutes = () => {
   return (
     <>
       <ScrollToTop />
-      `r`n      <FallingLettersOverlay density={0.004} opacity={0.05} zIndex={0} />`r`n<Routes>
+      
+      <FallingLettersOverlay density={0.004} opacity={0.05} zIndex={0} />
+<Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/listings" element={<Index />} />
         <Route path="/business-listings" element={<Index />} />
@@ -314,4 +316,8 @@ const App = () => (
 );
 
 export default App;
+
+
+
+
 
