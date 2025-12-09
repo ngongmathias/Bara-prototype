@@ -649,318 +649,196 @@ export const CountryDetailPage: React.FC = () => {
             </div>
           )}
 
-          {/* Complete Country Information Display */}
+          {/* Complete Country Information Display - Elegant Flowing Layout */}
           {countryInfo && (
-            <div className="mt-6 space-y-6">
-              {/* Basic Information Section */}
-              <Card className="bg-white border-gray-200 shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-xl text-gray-900 flex items-center">
-                    <Globe className="w-6 h-6 mr-2 text-black" />
-                    Basic Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Country Code</Label>
-                      <p className="text-lg font-semibold text-gray-900">{country.code || '-'}</p>
-                      </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Capital</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.capital || '-'}</p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Currency</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.currency || '-'}</p>
-                      </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Language</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.language || '-'}</p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Population</Label>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {countryInfo.population ? countryInfo.population.toLocaleString() : '-'}
-                        </p>
-                      </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Area (km²)</Label>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {countryInfo.area_sq_km ? countryInfo.area_sq_km.toLocaleString() : '-'}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-              {/* Government & Leadership Section */}
-              <Card className="bg-white border-gray-200 shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-xl text-gray-900 flex items-center">
-                    <User className="w-6 h-6 mr-2 text-black" />
-                    Government & Leadership
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">President/Leader</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.president_name || '-'}</p>
-                        </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Government Type</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.government_type || '-'}</p>
-                      </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Formation Date</Label>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {countryInfo.formation_date ? new Date(countryInfo.formation_date).toLocaleDateString() : '-'}
-                        </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-              {/* Economic Information Section */}
-              <Card className="bg-white border-gray-200 shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-xl text-gray-900 flex items-center">
-                    <DollarSign className="w-6 h-6 mr-2 text-black" />
-                    Economic Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">GDP (USD)</Label>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {countryInfo.gdp_usd ? `$${(countryInfo.gdp_usd / 1000000000).toFixed(1)}B` : '-'}
-                        </p>
-                      </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">GDP Per Capita</Label>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {countryInfo.gdp_per_capita ? `$${countryInfo.gdp_per_capita.toLocaleString()}` : '-'}
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Currency Code</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.currency_code || '-'}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-              {/* Geographic Information Section */}
-              <Card className="bg-white border-gray-200 shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-xl text-gray-900 flex items-center">
-                    <MapPin className="w-6 h-6 mr-2 text-black" />
-                    Geographic Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Coordinates</Label>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {countryInfo.latitude && countryInfo.longitude 
-                          ? `${countryInfo.latitude}, ${countryInfo.longitude}` 
-                          : '-'
-                        }
-                        </p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Timezone</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.timezone || '-'}</p>
-                  </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Calling Code</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.calling_code || '-'}</p>
-                        </div>
-                      </div>
-                </CardContent>
-              </Card>
-
-              {/* Demographics Section */}
-              <Card className="bg-white border-gray-200 shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-xl text-gray-900 flex items-center">
-                    <Users className="w-6 h-6 mr-2 text-black" />
-                    Demographics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Average Age</Label>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {countryInfo.average_age ? `${countryInfo.average_age} years` : '-'}
-                      </p>
-                        </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Largest City</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.largest_city || '-'}</p>
-                      </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Largest City Population</Label>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {countryInfo.largest_city_population ? countryInfo.largest_city_population.toLocaleString() : '-'}
-                      </p>
-                  </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Capital Population</Label>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {countryInfo.capital_population ? countryInfo.capital_population.toLocaleString() : '-'}
-                      </p>
-              </div>
-                   </div>
-                 </CardContent>
-               </Card>
-
-              {/* Development Indicators Section */}
-              <Card className="bg-white border-gray-200 shadow-md">
-                <CardHeader>
-                      <CardTitle className="text-xl text-gray-900 flex items-center">
-                    <Star className="w-6 h-6 mr-2 text-black" />
-                    Development Indicators
-                      </CardTitle>
-                     </CardHeader>
-                     <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">HDI Score</Label>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {countryInfo.hdi_score ? countryInfo.hdi_score.toFixed(3) : '-'}
-                      </p>
-                        </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Literacy Rate</Label>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {countryInfo.literacy_rate ? `${countryInfo.literacy_rate}%` : '-'}
-                        </p>
-                      </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Life Expectancy</Label>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {countryInfo.life_expectancy ? `${countryInfo.life_expectancy} years` : '-'}
-                      </p>
-                    </div>
-                      </div>
-                     </CardContent>
-                   </Card>
-
+            <div className="mt-8 bg-white/60 backdrop-blur-sm rounded-lg p-8 space-y-12">
               
+              {/* Essential Facts - Prominent Display */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pb-8 border-b border-gray-200">
+                <div className="text-center">
+                  <p className="text-sm uppercase tracking-wide text-gray-500 mb-1">Code</p>
+                  <p className="text-2xl font-bold text-black">{country.code || '-'}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm uppercase tracking-wide text-gray-500 mb-1">Capital</p>
+                  <p className="text-2xl font-bold text-black">{countryInfo.capital || '-'}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm uppercase tracking-wide text-gray-500 mb-1">Population</p>
+                  <p className="text-2xl font-bold text-black">
+                    {countryInfo.population ? (countryInfo.population / 1000000).toFixed(1) + 'M' : '-'}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm uppercase tracking-wide text-gray-500 mb-1">Area</p>
+                  <p className="text-2xl font-bold text-black">
+                    {countryInfo.area_sq_km ? (countryInfo.area_sq_km / 1000).toFixed(0) + 'K km²' : '-'}
+                  </p>
+                </div>
+              </div>
 
-              {/* Additional Information Section */}
-              <Card className="bg-white border-gray-200 shadow-md">
-                     <CardHeader>
-                  <CardTitle className="text-xl text-gray-900 flex items-center">
-                    <FileText className="w-6 h-6 mr-2 text-black" />
-                    Additional Information
-                      </CardTitle>
-                     </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Climate</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.climate || '-'}</p>
-                 </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Natural Resources</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.natural_resources || '-'}</p>
-             </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Main Industries</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.main_industries || '-'}</p>
+              {/* Detailed Information - Flowing Grid */}
+              <div className="grid md:grid-cols-2 gap-x-12 gap-y-8">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-3">Language & Currency</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                        <span className="text-sm text-gray-600">Language</span>
+                        <span className="text-base font-medium text-black">{countryInfo.language || '-'}</span>
                       </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Tourism Attractions</Label>
-                      <p className="text-lg font-semibold text-gray-900">{countryInfo.tourism_attractions || '-'}</p>
+                      <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                        <span className="text-sm text-gray-600">Currency</span>
+                        <span className="text-base font-medium text-black">{countryInfo.currency || '-'}</span>
                       </div>
+                      <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                        <span className="text-sm text-gray-600">Currency Code</span>
+                        <span className="text-base font-medium text-black">{countryInfo.currency_code || '-'}</span>
                       </div>
-                </CardContent>
-              </Card>
+                      <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                        <span className="text-sm text-gray-600">Calling Code</span>
+                        <span className="text-base font-medium text-black">{countryInfo.calling_code || '-'}</span>
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Visual Assets Section */}
-              {(countryInfo.flag_url || countryInfo.coat_of_arms_url || countryInfo.national_anthem_url) && (
-                <Card className="bg-white border-gray-200 shadow-md">
-                <CardHeader>
-                    <CardTitle className="text-xl text-gray-900 flex items-center">
-                      <Landmark className="w-6 h-6 mr-2 text-black" />
-                      Visual Assets
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {countryInfo.flag_url && (
-                        <div className="text-center">
-                          <Label className="text-sm font-medium text-gray-700 mb-2 block">Flag</Label>
-                          <img 
-                            src={countryInfo.flag_url} 
-                            alt={`${country.name} flag`}
-                            className="w-24 h-16 object-cover rounded-lg shadow-md mx-auto"
-                          />
+                  {countryInfo.president_name && (
+                    <div>
+                      <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-3">Leadership</h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                          <span className="text-sm text-gray-600">Leader</span>
+                          <span className="text-base font-medium text-black">{countryInfo.president_name}</span>
+                        </div>
+                        {countryInfo.government_type && (
+                          <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                            <span className="text-sm text-gray-600">Government</span>
+                            <span className="text-base font-medium text-black">{countryInfo.government_type}</span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                      {countryInfo.coat_of_arms_url && (
-                        <div className="text-center">
-                          <Label className="text-sm font-medium text-gray-700 mb-2 block">Coat of Arms</Label>
-                          <div className="relative w-32 h-32 mx-auto">
-                            {coatOfArmsLoading && (
-                              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg border border-gray-200">
-                                <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  )}
+
+                  {(countryInfo.gdp_usd || countryInfo.gdp_per_capita) && (
+                    <div>
+                      <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-3">Economy</h3>
+                      <div className="space-y-3">
+                        {countryInfo.gdp_usd && (
+                          <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                            <span className="text-sm text-gray-600">GDP</span>
+                            <span className="text-base font-medium text-black">
+                              ${(countryInfo.gdp_usd / 1000000000).toFixed(1)}B
+                            </span>
+                          </div>
+                        )}
+                        {countryInfo.gdp_per_capita && (
+                          <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                            <span className="text-sm text-gray-600">GDP Per Capita</span>
+                            <span className="text-base font-medium text-black">
+                              ${countryInfo.gdp_per_capita.toLocaleString()}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                            <img 
-                              src={countryInfo.coat_of_arms_url} 
-                              alt={`${country.name} coat of arms`}
-                              className={`w-full h-full object-contain rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-200 ${coatOfArmsLoading ? 'opacity-0' : 'opacity-100'}`}
-                              onLoadStart={() => setCoatOfArmsLoading(true)}
-                              loading="lazy"
-                            />
-                            <div className="fallback-content hidden w-full h-full flex items-center justify-center bg-gray-100 rounded-lg border border-gray-200">
-                              <div className="text-center">
-                                <Landmark className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                                <p className="text-xs text-gray-500">Coat of Arms</p>
-                                <p className="text-xs text-gray-400">Image unavailable</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-6">
+                  {(countryInfo.largest_city || countryInfo.timezone) && (
+                    <div>
+                      <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-3">Geography</h3>
+                      <div className="space-y-3">
+                        {countryInfo.largest_city && (
+                          <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                            <span className="text-sm text-gray-600">Largest City</span>
+                            <span className="text-base font-medium text-black">{countryInfo.largest_city}</span>
+                          </div>
+                        )}
+                        {countryInfo.timezone && (
+                          <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                            <span className="text-sm text-gray-600">Timezone</span>
+                            <span className="text-base font-medium text-black">{countryInfo.timezone}</span>
+                          </div>
+                        )}
+                        {countryInfo.climate && (
+                          <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                            <span className="text-sm text-gray-600">Climate</span>
+                            <span className="text-base font-medium text-black">{countryInfo.climate}</span>
+                          </div>
+                        )}
                       </div>
+                    </div>
+                  )}
+
+                  {(countryInfo.hdi_score || countryInfo.literacy_rate || countryInfo.life_expectancy) && (
+                    <div>
+                      <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-3">Development</h3>
+                      <div className="space-y-3">
+                        {countryInfo.hdi_score && (
+                          <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                            <span className="text-sm text-gray-600">HDI Score</span>
+                            <span className="text-base font-medium text-black">{countryInfo.hdi_score.toFixed(3)}</span>
+                          </div>
+                        )}
+                        {countryInfo.literacy_rate && (
+                          <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                            <span className="text-sm text-gray-600">Literacy Rate</span>
+                            <span className="text-base font-medium text-black">{countryInfo.literacy_rate}%</span>
+                          </div>
+                        )}
+                        {countryInfo.life_expectancy && (
+                          <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                            <span className="text-sm text-gray-600">Life Expectancy</span>
+                            <span className="text-base font-medium text-black">{countryInfo.life_expectancy} years</span>
+                          </div>
+                        )}
+                        {countryInfo.average_age && (
+                          <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
+                            <span className="text-sm text-gray-600">Average Age</span>
+                            <span className="text-base font-medium text-black">{countryInfo.average_age} years</span>
+                          </div>
+                        )}
                       </div>
+                    </div>
+                  )}
+
+                  {(countryInfo.natural_resources || countryInfo.main_industries) && (
+                    <div>
+                      <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-3">Resources & Industry</h3>
+                      <div className="space-y-3">
+                        {countryInfo.natural_resources && (
+                          <div className="border-b border-gray-100 pb-2">
+                            <span className="text-sm text-gray-600 block mb-1">Natural Resources</span>
+                            <span className="text-base font-medium text-black">{countryInfo.natural_resources}</span>
+                          </div>
+                        )}
+                        {countryInfo.main_industries && (
+                          <div className="border-b border-gray-100 pb-2">
+                            <span className="text-sm text-gray-600 block mb-1">Main Industries</span>
+                            <span className="text-base font-medium text-black">{countryInfo.main_industries}</span>
+                          </div>
+                        )}
                       </div>
-                      </div>
-                    )}
-                      {countryInfo.national_anthem_url && (
-                        <div className="text-center">
-                          <Label className="text-sm font-medium text-gray-700 mb-2 block">National Anthem</Label>
-                          <a 
-                            href={countryInfo.national_anthem_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center w-24 h-24 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                          >
-                            <span className="text-2xl">🎵</span>
-                          </a>
-                      </div>
-                    )} 
-                      </div>
-                  </CardContent>
-                </Card>
-                    )}
-                      </div>
-                    )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* No Country Information Available */}
           {!countryInfo && !countryInfoLoading && (
-            <Card className="mt-6">
-              <CardContent className="p-12 text-center">
-                <Globe className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No detailed information available</h3>
-                <p className="text-gray-600">
-                  Detailed information for {country.name} has not been added yet.
-                </p>
-                </CardContent>
-              </Card>
+            <div className="mt-8 bg-white/60 backdrop-blur-sm rounded-lg p-12 text-center">
+              <Globe className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No detailed information available</h3>
+              <p className="text-gray-600">
+                Detailed information for {country.name} has not been added yet.
+              </p>
+            </div>
           )}
 
 

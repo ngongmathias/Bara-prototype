@@ -5,6 +5,8 @@ import { Globe, MapPin, Users, TrendingUp, Search } from 'lucide-react';
 import { db } from '@/lib/supabase';
 import { Input } from '@/components/ui/input';
 import { MatrixRain } from "@/components/landing/MatrixRain";
+import { Header } from "@/components/Header";
+import Footer from "@/components/Footer";
 
 interface Country {
   id: string;
@@ -56,12 +58,14 @@ export const CountriesPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-white">
-      <MatrixRain />
-      <div className="absolute inset-0 bg-white/80 pointer-events-none" />
-      <div className="relative z-10">
-      {/* Header */}
-      <div className="py-12">
+    <>
+      <Header />
+      <div className="relative min-h-screen bg-white">
+        <MatrixRain />
+        <div className="absolute inset-0 bg-white/80 pointer-events-none" />
+        <div className="relative z-10">
+        {/* Title Section */}
+        <div className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -209,6 +213,8 @@ export const CountriesPage = () => {
         )}
       </div>
       </div>
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 };
