@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
+import { MatrixRain } from "@/components/landing/MatrixRain";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -550,11 +551,11 @@ export const CountryDetailPage: React.FC = () => {
 
   if (!country) {
     return (
-      <div className="min-h-screen bg-yp-gray-light">
+      <div className="min-h-screen bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-yp-dark mb-4">Country Not Found</h1>
-            <Button onClick={() => navigate('/')} className="bg-brand-blue">
+            <h1 className="text-2xl font-bold text-black mb-4">Country Not Found</h1>
+            <Button onClick={() => navigate('/')} className="bg-black text-white">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
             </Button>
@@ -565,8 +566,13 @@ export const CountryDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-yp-gray-light">
-      <div className="bg-white border-b border-gray-200">
+    <>
+      <Header />
+      <div className="relative min-h-screen bg-white">
+        <MatrixRain />
+        <div className="absolute inset-0 bg-white/80 pointer-events-none" />
+        <div className="relative z-10">
+      <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center space-x-4 mb-4">
             <Button 
@@ -585,10 +591,10 @@ export const CountryDetailPage: React.FC = () => {
                 />
               )}
               <div>
-                <h1 className="text-3xl font-bold text-yp-dark font-comfortaa">
+                <h1 className="text-3xl font-bold text-black font-comfortaa">
                   {formatCountryName(countrySlug)}
                 </h1>
-                                 <p className="text-yp-gray-dark">
+                                 <p className="text-gray-600">
                    {country.capital && country.capital !== 'Territory' && ` • Capital: ${country.capital}`}
                  </p>
               </div>
@@ -598,14 +604,14 @@ export const CountryDetailPage: React.FC = () => {
           {/* Sponsored Banner Section */}
             {sponsoredBanners.length > 0 && (
             <div className="mt-6">
-              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-lg">
+              <Card className="bg-white border-gray-200 shadow-md">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2">
-                      <Building className="w-5 h-5 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-800">Sponsored by</span>
+                      <Building className="w-5 h-5 text-black" />
+                      <span className="text-sm font-medium text-gray-800">Sponsored by</span>
                     </div>
-                    <Badge variant="outline" className="text-blue-600 border-blue-300">
+                    <Badge variant="outline" className="text-gray-600 border-gray-300">
                       Advertisement
                     </Badge>
                   </div>
@@ -647,10 +653,10 @@ export const CountryDetailPage: React.FC = () => {
           {countryInfo && (
             <div className="mt-6 space-y-6">
               {/* Basic Information Section */}
-              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-lg">
+              <Card className="bg-white border-gray-200 shadow-md">
                 <CardHeader>
-                  <CardTitle className="text-xl text-gray-800 flex items-center">
-                    <Globe className="w-6 h-6 mr-2 text-blue-600" />
+                  <CardTitle className="text-xl text-gray-900 flex items-center">
+                    <Globe className="w-6 h-6 mr-2 text-black" />
                     Basic Information
                   </CardTitle>
                 </CardHeader>
@@ -689,10 +695,10 @@ export const CountryDetailPage: React.FC = () => {
                 </Card>
 
               {/* Government & Leadership Section */}
-              <Card className="bg-gradient-to-r from-red-50 to-pink-50 border-red-200 shadow-lg">
+              <Card className="bg-white border-gray-200 shadow-md">
                 <CardHeader>
-                  <CardTitle className="text-xl text-gray-800 flex items-center">
-                    <User className="w-6 h-6 mr-2 text-red-600" />
+                  <CardTitle className="text-xl text-gray-900 flex items-center">
+                    <User className="w-6 h-6 mr-2 text-black" />
                     Government & Leadership
                   </CardTitle>
                 </CardHeader>
@@ -717,10 +723,10 @@ export const CountryDetailPage: React.FC = () => {
                   </Card>
 
               {/* Economic Information Section */}
-              <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-lg">
+              <Card className="bg-white border-gray-200 shadow-md">
                 <CardHeader>
-                  <CardTitle className="text-xl text-gray-800 flex items-center">
-                    <DollarSign className="w-6 h-6 mr-2 text-green-600" />
+                  <CardTitle className="text-xl text-gray-900 flex items-center">
+                    <DollarSign className="w-6 h-6 mr-2 text-black" />
                     Economic Information
                   </CardTitle>
                 </CardHeader>
@@ -747,10 +753,10 @@ export const CountryDetailPage: React.FC = () => {
                 </Card>
 
               {/* Geographic Information Section */}
-              <Card className="bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200 shadow-lg">
+              <Card className="bg-white border-gray-200 shadow-md">
                 <CardHeader>
-                  <CardTitle className="text-xl text-gray-800 flex items-center">
-                    <MapPin className="w-6 h-6 mr-2 text-purple-600" />
+                  <CardTitle className="text-xl text-gray-900 flex items-center">
+                    <MapPin className="w-6 h-6 mr-2 text-black" />
                     Geographic Information
                   </CardTitle>
                 </CardHeader>
@@ -778,10 +784,10 @@ export const CountryDetailPage: React.FC = () => {
               </Card>
 
               {/* Demographics Section */}
-              <Card className="bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200 shadow-lg">
+              <Card className="bg-white border-gray-200 shadow-md">
                 <CardHeader>
-                  <CardTitle className="text-xl text-gray-800 flex items-center">
-                    <Users className="w-6 h-6 mr-2 text-orange-600" />
+                  <CardTitle className="text-xl text-gray-900 flex items-center">
+                    <Users className="w-6 h-6 mr-2 text-black" />
                     Demographics
                   </CardTitle>
                 </CardHeader>
@@ -814,10 +820,10 @@ export const CountryDetailPage: React.FC = () => {
                </Card>
 
               {/* Development Indicators Section */}
-              <Card className="bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200 shadow-lg">
+              <Card className="bg-white border-gray-200 shadow-md">
                 <CardHeader>
-                      <CardTitle className="text-xl text-gray-800 flex items-center">
-                    <Star className="w-6 h-6 mr-2 text-teal-600" />
+                      <CardTitle className="text-xl text-gray-900 flex items-center">
+                    <Star className="w-6 h-6 mr-2 text-black" />
                     Development Indicators
                       </CardTitle>
                      </CardHeader>
@@ -848,10 +854,10 @@ export const CountryDetailPage: React.FC = () => {
               
 
               {/* Additional Information Section */}
-              <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200 shadow-lg">
+              <Card className="bg-white border-gray-200 shadow-md">
                      <CardHeader>
-                  <CardTitle className="text-xl text-gray-800 flex items-center">
-                    <FileText className="w-6 h-6 mr-2 text-indigo-600" />
+                  <CardTitle className="text-xl text-gray-900 flex items-center">
+                    <FileText className="w-6 h-6 mr-2 text-black" />
                     Additional Information
                       </CardTitle>
                      </CardHeader>
@@ -879,10 +885,10 @@ export const CountryDetailPage: React.FC = () => {
 
               {/* Visual Assets Section */}
               {(countryInfo.flag_url || countryInfo.coat_of_arms_url || countryInfo.national_anthem_url) && (
-                <Card className="bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200 shadow-lg">
+                <Card className="bg-white border-gray-200 shadow-md">
                 <CardHeader>
-                    <CardTitle className="text-xl text-gray-800 flex items-center">
-                      <Landmark className="w-6 h-6 mr-2 text-amber-600" />
+                    <CardTitle className="text-xl text-gray-900 flex items-center">
+                      <Landmark className="w-6 h-6 mr-2 text-black" />
                       Visual Assets
                   </CardTitle>
                 </CardHeader>
@@ -904,7 +910,7 @@ export const CountryDetailPage: React.FC = () => {
                           <div className="relative w-32 h-32 mx-auto">
                             {coatOfArmsLoading && (
                               <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg border border-gray-200">
-                                <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                       </div>
                     )}
                             <img 
@@ -931,7 +937,7 @@ export const CountryDetailPage: React.FC = () => {
                             href={countryInfo.national_anthem_url} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center w-24 h-24 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors"
+                            className="inline-flex items-center justify-center w-24 h-24 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                           >
                             <span className="text-2xl">🎵</span>
                           </a>
@@ -962,9 +968,9 @@ export const CountryDetailPage: React.FC = () => {
       </div>
 
              {/* Map Section */}
-       <div className="bg-white border-b border-gray-200">
+       <div className="py-8">
          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-           <h2 className="text-2xl font-bold text-yp-dark mb-6">Map View</h2>
+           <h2 className="text-2xl font-bold text-black mb-6">Map View</h2>
            <UltraSimpleMap 
              countryData={{
               name: country.name,
@@ -991,7 +997,7 @@ export const CountryDetailPage: React.FC = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-black focus:border-transparent"
               >
                 <option value="">All Categories</option>
                 {Array.from(new Set(businesses.map(b => b.category?.name).filter((name): name is string => !!name))).map((categoryName) => (
@@ -1041,7 +1047,7 @@ export const CountryDetailPage: React.FC = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         {business.logo_url ? (
                           <img 
                             src={business.logo_url} 
@@ -1049,11 +1055,11 @@ export const CountryDetailPage: React.FC = () => {
                             className="w-8 h-8 rounded object-cover"
                           />
                         ) : (
-                          <Building className="w-6 h-6 text-blue-600" />
+                          <Building className="w-6 h-6 text-black" />
                         )}
                       </div>
                       <div className="min-w-0">
-                        <CardTitle className="text-lg font-semibold text-yp-dark truncate">
+                        <CardTitle className="text-lg font-semibold text-black truncate">
                           {business.name}
                         </CardTitle>
                         <div className="flex items-center space-x-2 mt-1">
@@ -1098,7 +1104,7 @@ export const CountryDetailPage: React.FC = () => {
                   
                   {business.reviews && business.reviews.length > 0 && (
                     <div className="flex items-center space-x-2 mb-4">
-                      <Crown className="w-4 h-4 text-yellow-500 fill-current" />
+                      <Star className="w-4 h-4 text-black fill-current" />
                       <span className="text-sm font-medium text-gray-900">
                         {getAverageRating(business).toFixed(1)}
                       </span>
@@ -1118,7 +1124,7 @@ export const CountryDetailPage: React.FC = () => {
                       </Button>
                     </Link>
                     <Link to={`/write-review/${business.id}`}>
-                      <Button size="sm" className="bg-brand-blue text-white text-sm">
+                      <Button size="sm" className="bg-black text-white text-sm">
                         Review
                       </Button>
                     </Link>
@@ -1129,6 +1135,9 @@ export const CountryDetailPage: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+      </div>
+      <Footer />
+    </>
   );
 };
