@@ -192,8 +192,19 @@ export const CountryDetailPage: React.FC = () => {
                 {/* Flag, Coat of Arms & Name */}
                 <div className="flex items-start gap-6 mb-6">
                   <div className="flex items-center gap-4">
-                    {country.flag_emoji && (
+                    {/* Show flag image or emoji */}
+                    {country.flag_url ? (
+                      <img
+                        src={country.flag_url}
+                        alt={`${country.name} flag`}
+                        className="w-20 h-14 object-cover rounded shadow-sm"
+                      />
+                    ) : country.flag_emoji && country.flag_emoji.length <= 4 ? (
                       <span className="text-6xl">{country.flag_emoji}</span>
+                    ) : (
+                      <div className="w-20 h-14 bg-gray-200 rounded flex items-center justify-center">
+                        <span className="text-2xl font-bold text-gray-500">{country.code}</span>
+                      </div>
                     )}
                     {country.coat_of_arms_url && (
                       <img

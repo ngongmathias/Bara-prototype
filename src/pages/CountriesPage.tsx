@@ -37,8 +37,15 @@ export const CountriesPage = () => {
         .select('id, name, code, slug, flag_url, flag_emoji, description, population, capital')
         .order('name', { ascending: true });
 
-      if (error) throw error;
-      setCountries(data || []);
+      if (error) {
+        console.error('Error fetching countries:', error);
+        // Don't throw, just log - we have fallback in globe
+      }
+      
+      if (data && data.length > 0) {
+        console.log(`Loaded ${data.length} countries`);
+        setCountries(data);
+      }
     } catch (error) {
       console.error('Error fetching countries:', error);
     } finally {

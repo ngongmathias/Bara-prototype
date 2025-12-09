@@ -231,41 +231,101 @@ export const InteractiveGlobe = ({ countries, onCountryClick, selectedCountry }:
         .filter(cp => cp.visible)
         .sort((a, b) => a.rotated.z - b.rotated.z);
 
-      // Draw country points
+      // Draw glowing connection lines between nearby countries
+      ctx.save();
+      sortedPoints.forEach((point1, i) => {
+        sortedPoints.slice(i + 1).forEach(point2 => {
+          const dx = point1.rotated.x - point2.rotated.x;
+          const dy = point1.rotated.y - point2.rotated.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          // Only connect nearby countries
+          if (dist < 80 && dist > 20) {
+            const avgDepth = ((point1.rotated.z + point2.rotated.z) / 2 + radius) / (radius * 2);
+            const lineOpacity = avgDepth * 0.3 * (1 - dist / 80);
+            
+            const x1 = centerX + point1.rotated.x;
+            const y1 = centerY - point1.rotated.y;
+            const x2 = centerX + point2.rotated.x;
+            const y2 = centerY - point2.rotated.y;
+            
+            // Glowing line effect
+            const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+            gradient.addColorStop(0, `rgba(100, 150, 255, ${lineOpacity})`);
+            gradient.addColorStop(0.5, `rgba(150, 200, 255, ${lineOpacity * 1.5})`);
+            gradient.addColorStop(1, `rgba(100, 150, 255, ${lineOpacity})`);
+            
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
+        });
+      });
+      ctx.restore();
+
+      // Draw country points with glow effect
       sortedPoints.forEach(({ country, rotated }) => {
         const screenX = centerX + rotated.x;
         const screenY = centerY - rotated.y;
         
         // Size based on depth
         const depthFactor = (rotated.z + radius) / (radius * 2);
-        const pointSize = 4 + depthFactor * 8;
-        const opacity = 0.4 + depthFactor * 0.6;
+        const pointSize = 5 + depthFactor * 7;
+        const opacity = 0.5 + depthFactor * 0.5;
 
         const isHovered = hoveredCountry?.id === country.id;
         const isSelected = selectedCountry?.id === country.id;
 
+        // Draw outer glow for all points
+        const glowGradient = ctx.createRadialGradient(
+          screenX, screenY, 0,
+          screenX, screenY, pointSize + 10
+        );
+        glowGradient.addColorStop(0, `rgba(100, 180, 255, ${opacity * 0.4})`);
+        glowGradient.addColorStop(0.5, `rgba(100, 150, 255, ${opacity * 0.15})`);
+        glowGradient.addColorStop(1, 'rgba(100, 150, 255, 0)');
+        
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, pointSize + 10, 0, Math.PI * 2);
+        ctx.fillStyle = glowGradient;
+        ctx.fill();
+
         // Draw glow for hovered/selected
         if (isHovered || isSelected) {
           ctx.beginPath();
-          ctx.arc(screenX, screenY, pointSize + 8, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(0, 0, 0, ${opacity * 0.2})`;
+          ctx.arc(screenX, screenY, pointSize + 12, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(50, 150, 255, ${opacity * 0.4})`;
           ctx.fill();
         }
 
-        // Draw point
+        // Draw point with gradient
+        const pointGradient = ctx.createRadialGradient(
+          screenX - pointSize * 0.3, screenY - pointSize * 0.3, 0,
+          screenX, screenY, pointSize
+        );
+        pointGradient.addColorStop(0, isHovered || isSelected ? '#4da6ff' : '#6bb3ff');
+        pointGradient.addColorStop(1, isHovered || isSelected ? '#0066cc' : '#3388dd');
+        
         ctx.beginPath();
         ctx.arc(screenX, screenY, pointSize, 0, Math.PI * 2);
-        ctx.fillStyle = isHovered || isSelected 
-          ? `rgba(0, 0, 0, ${opacity})` 
-          : `rgba(50, 50, 50, ${opacity * 0.8})`;
+        ctx.fillStyle = pointGradient;
+        ctx.fill();
+        
+        // Add white highlight
+        ctx.beginPath();
+        ctx.arc(screenX - pointSize * 0.25, screenY - pointSize * 0.25, pointSize * 0.3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.6})`;
         ctx.fill();
 
         // Draw country code label for visible points
-        if (depthFactor > 0.5) {
-          ctx.font = `${isHovered ? 'bold ' : ''}${10 + depthFactor * 4}px system-ui`;
-          ctx.fillStyle = `rgba(0, 0, 0, ${opacity})`;
+        if (depthFactor > 0.4) {
+          ctx.font = `${isHovered ? 'bold ' : ''}${9 + depthFactor * 3}px system-ui`;
+          ctx.fillStyle = `rgba(0, 0, 0, ${opacity * 0.9})`;
           ctx.textAlign = 'center';
-          ctx.fillText(country.code, screenX, screenY - pointSize - 6);
+          ctx.fillText(country.code, screenX, screenY - pointSize - 8);
         }
       });
 
