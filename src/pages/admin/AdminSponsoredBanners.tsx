@@ -23,7 +23,8 @@ import {
   DollarSign,
   Mail,
   Phone,
-  Plus
+  Plus,
+  HelpCircle
 } from 'lucide-react';
 import { useSponsoredBanners } from '@/hooks/useSponsoredBanners';
 import { useToast } from '@/hooks/use-toast';
@@ -77,6 +78,7 @@ export const AdminSponsoredBanners: React.FC = () => {
     recent_clicks: number;
   }>>({});
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+  const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchBanners(true); // Admin mode
@@ -336,6 +338,14 @@ export const AdminSponsoredBanners: React.FC = () => {
             <div className="text-sm text-gray-500">
               {filteredBanners.length} banner{filteredBanners.length !== 1 ? 's' : ''}
             </div>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsHelpDialogOpen(true)}
+              title="Ad System Guide"
+            >
+              <HelpCircle className="w-4 h-4 mr-2" />
+              Help
+            </Button>
             <Button 
               onClick={fetchBannerAnalytics} 
               variant="outline" 
@@ -940,6 +950,189 @@ export const AdminSponsoredBanners: React.FC = () => {
                   {adding ? 'Saving...' : 'Save Banner'}
                 </Button>
               </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Help Dialog */}
+        <Dialog open={isHelpDialogOpen} onOpenChange={setIsHelpDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-comfortaa">Sponsored Banners Ad System Guide</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6 font-roboto text-sm">
+              {/* Overview */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  🎯 System Overview
+                </h3>
+                <p className="text-gray-700">
+                  Sponsored banners allow you to display <strong>country-specific ads</strong> across the platform. 
+                  Advertisers pay to promote tourism, businesses, or services on targeted pages.
+                </p>
+              </div>
+
+              {/* Country Targeting */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  🌍 Country Targeting
+                </h3>
+                <p className="text-gray-700 mb-2"><strong>What does "Country" mean?</strong></p>
+                <p className="text-gray-700 mb-3">
+                  Each ad is linked to a specific country (e.g., Rwanda, Kenya). This allows targeted campaigns 
+                  like "Visit Rwanda" to show specifically on Rwanda-related pages.
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                  <p className="text-sm text-blue-900">
+                    <strong>💡 Example:</strong> A "Visit Rwanda" ad with country = Rwanda will show on 
+                    <code className="mx-1 px-1 bg-blue-100">/countries/rwanda</code> page when 
+                    "Show on Country Detail" is enabled.
+                  </p>
+                </div>
+              </div>
+
+              {/* Display Positions */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  📍 Display Positions (Toggle Switches)
+                </h3>
+                <div className="space-y-3">
+                  <div className="border-l-4 border-blue-500 pl-3">
+                    <p className="font-semibold text-gray-900">Display on Top</p>
+                    <p className="text-gray-600 text-sm">Shows in TopBannerAd at the top of Listings, Categories, Events, and Marketplace pages.</p>
+                  </div>
+                  <div className="border-l-4 border-green-500 pl-3">
+                    <p className="font-semibold text-gray-900">Display on Bottom</p>
+                    <p className="text-gray-600 text-sm">Shows in BottomBannerAd at the bottom of the same pages.</p>
+                  </div>
+                  <div className="border-l-4 border-purple-500 pl-3">
+                    <p className="font-semibold text-gray-900">Show on Country Detail</p>
+                    <p className="text-gray-600 text-sm">Shows on country-specific pages like <code>/countries/rwanda</code></p>
+                  </div>
+                </div>
+                <div className="bg-amber-50 border border-amber-200 rounded p-3 mt-3">
+                  <p className="text-sm text-amber-900">
+                    <strong>⚡ Pro Tip:</strong> You can enable ALL THREE positions for maximum exposure!
+                  </p>
+                </div>
+              </div>
+
+              {/* Multiple Ads */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  🔄 Multiple Ads with Same Country
+                </h3>
+                <p className="text-gray-700 mb-2"><strong>What happens if multiple ads target the same country?</strong></p>
+                <p className="text-gray-700 mb-3">
+                  They all show in a <strong>rotating slideshow</strong> (5 seconds each ad).
+                </p>
+                <div className="bg-gray-50 border border-gray-200 rounded p-3">
+                  <p className="text-sm text-gray-800 mb-2"><strong>Example Scenario:</strong></p>
+                  <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                    <li>Ad A: Rwanda + Display on Top = ✅</li>
+                    <li>Ad B: Rwanda + Display on Top = ✅</li>
+                    <li>Ad C: Rwanda + Display on Top = ✅</li>
+                  </ul>
+                  <p className="text-sm text-gray-800 mt-2">
+                    <strong>Result:</strong> All 3 ads rotate every 5 seconds in the TopBannerAd component with smooth transitions.
+                  </p>
+                </div>
+              </div>
+
+              {/* Ad Order */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  📊 Ad Order & Priority
+                </h3>
+                <p className="text-gray-700 mb-3">Ads are displayed in this order:</p>
+                <ol className="text-gray-700 space-y-2 list-decimal list-inside">
+                  <li><strong>Newest First:</strong> Ordered by <code>created_at DESC</code></li>
+                  <li><strong>Active Status:</strong> Must have <code>is_active = true</code></li>
+                  <li><strong>Paid Priority:</strong> Prefers <code>payment_status = 'paid'</code></li>
+                  <li><strong>Approved Status:</strong> Prefers <code>status = 'active'</code> or <code>'approved'</code></li>
+                </ol>
+              </div>
+
+              {/* Status Fields */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  🎓 Status Fields Explained
+                </h3>
+                <div className="space-y-2">
+                  <div>
+                    <p className="font-semibold text-gray-900">Payment Status</p>
+                    <p className="text-gray-600 text-sm">
+                      <code className="bg-gray-100 px-1">pending</code> | 
+                      <code className="bg-green-100 px-1 mx-1">paid</code> | 
+                      <code className="bg-red-100 px-1">failed</code> | 
+                      <code className="bg-gray-100 px-1 ml-1">refunded</code>
+                    </p>
+                    <p className="text-gray-600 text-xs mt-1">Tracks advertiser payment. Mark as "paid" after receiving payment.</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Status</p>
+                    <p className="text-gray-600 text-sm">
+                      <code className="bg-gray-100 px-1">pending</code> | 
+                      <code className="bg-blue-100 px-1 mx-1">approved</code> | 
+                      <code className="bg-green-100 px-1">active</code> | 
+                      <code className="bg-red-100 px-1 ml-1">rejected</code>
+                    </p>
+                    <p className="text-gray-600 text-xs mt-1">Approval workflow. Review ad → Approve → Activate.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image Specs */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  🎨 Black & White Ad Design Specs
+                </h3>
+                <div className="bg-gray-50 border border-gray-200 rounded p-3">
+                  <p className="text-sm font-semibold text-gray-900 mb-2">Required Dimensions:</p>
+                  <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                    <li><strong>Leaderboard (Top/Bottom):</strong> 728x90px</li>
+                    <li><strong>Country Page Banner:</strong> 1200x132px</li>
+                    <li><strong>File Size:</strong> Under 200-300KB</li>
+                    <li><strong>Format:</strong> JPG or PNG</li>
+                  </ul>
+                  <p className="text-sm text-gray-700 mt-3"><strong>Design Style:</strong></p>
+                  <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+                    <li>✅ Black text on white background (or light gray)</li>
+                    <li>✅ Clean typography, lots of whitespace</li>
+                    <li>✅ Simple icons or minimal graphics</li>
+                    <li>❌ NO colorful graphics or busy designs</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Troubleshooting */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  🔧 Troubleshooting
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <p className="font-semibold text-gray-900">Ad not showing?</p>
+                    <ul className="text-gray-600 list-disc list-inside ml-4">
+                      <li>Check <code>is_active = true</code></li>
+                      <li>Verify position toggles are enabled</li>
+                      <li>Confirm <code>payment_status = 'paid'</code></li>
+                      <li>Check image URL is valid</li>
+                      <li>Clear browser cache</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setIsHelpDialogOpen(false)}>
+                Close
+              </Button>
+              <Button onClick={() => window.open('/AD_SYSTEM_GUIDE.md', '_blank')} className="bg-blue-600 hover:bg-blue-700">
+                View Full Guide
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

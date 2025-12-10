@@ -532,7 +532,7 @@ const CategoryListingsPage = () => {
                                 <div className="flex items-center gap-1 mt-2">
                                   <div className="flex">
                                     {[...Array(5)].map((_, i) => (
-                                      <Star 
+                                      <Crown 
                                         key={i} 
                                         className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-orange-500 fill-current' : 'text-gray-300'}`} 
                                       />
@@ -648,7 +648,7 @@ const CategoryListingsPage = () => {
                               <div className="flex items-center gap-1 mt-2">
                                 <div className="flex">
                                   {[...Array(5)].map((_, i) => (
-                                    <Star 
+                                    <Crown 
                                       key={i} 
                                       className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
                                     />
