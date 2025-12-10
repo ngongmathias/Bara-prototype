@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useTranslation } from 'react-i18next';
+import { useCountrySelection } from '@/context/CountrySelectionContext';
 
 interface BottomBannerAdProps {
   className?: string;
@@ -12,12 +13,15 @@ interface SponsoredBannerRow {
   banner_alt_text: string | null;
   company_website: string | null;
   company_name?: string;
+  country_ids?: string[];  // Array of targeted country IDs
 }
 
 let bottomBannerAdInstanceCounter = 0;
 
 export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }) => {
   const { t } = useTranslation();
+  const { selectedCountry } = useCountrySelection();
+  const [allBanners, setAllBanners] = useState<SponsoredBannerRow[]>([]);
   const [banners, setBanners] = useState<SponsoredBannerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
@@ -52,20 +56,21 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
     }
   };
 
+  // Fetch all banners with their targeted countries
   useEffect(() => {
     const fetchLatestActive = async () => {
       setLoading(true);
       try {
-        // 1) Primary: only active banners with display_on_bottom = true
+        // Fetch active banners with display_on_bottom = true
         let { data, error }: any = await supabase
           .from('sponsored_banners')
           .select('*')
           .eq('is_active', true)
           .eq('display_on_bottom', true)
           .order('created_at', { ascending: false })
-          .limit(10); // Increased limit for slideshow
+          .limit(10);
 
-        // 2) If none or schema issues, try approved status
+        // Fallback strategies if no data
         if ((error && error.code === 'PGRST204') || !data || data.length === 0) {
           const res1 = await supabase
             .from('sponsored_banners')
@@ -78,7 +83,6 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
           error = res1.error;
         }
 
-        // 3) If still none, try paid banners
         if ((!data || data.length === 0) && !error) {
           const res2 = await supabase
             .from('sponsored_banners')
@@ -93,24 +97,66 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
 
         if (error) throw error;
 
-        const rows: SponsoredBannerRow[] = (data || []).map((b: any) => ({
-          id: b.id,
-          banner_image_url: b.banner_image_url,
-          banner_alt_text: b.banner_alt_text || null,
-          company_website: b.company_website || null,
-          company_name: b.company_name || null,
-        }))
-        .filter((b: SponsoredBannerRow) => !!b.banner_image_url);
-        setBanners(rows);
+        // For each banner, fetch its targeted countries from junction table
+        const bannersWithCountries = await Promise.all(
+          (data || []).map(async (b: any) => {
+            const { data: countries } = await supabase
+              .from('sponsored_banner_countries')
+              .select('country_id')
+              .eq('banner_id', b.id);
+            
+            return {
+              id: b.id,
+              banner_image_url: b.banner_image_url,
+              banner_alt_text: b.banner_alt_text || null,
+              company_website: b.company_website || null,
+              company_name: b.company_name || null,
+              country_ids: countries?.map(c => c.country_id) || [],
+            };
+          })
+        );
+
+        const rows: SponsoredBannerRow[] = bannersWithCountries
+          .filter((b: SponsoredBannerRow) => !!b.banner_image_url);
+        
+        setAllBanners(rows);
       } catch (err) {
         console.error('Error fetching bottom banners for BottomBannerAd:', err);
-        setBanners([]);
+        setAllBanners([]);
       } finally {
         setLoading(false);
       }
     };
     fetchLatestActive();
   }, []);
+
+  // Filter banners based on selected country
+  useEffect(() => {
+    if (!selectedCountry) {
+      // No country selected - show all banners
+      setBanners(allBanners);
+      return;
+    }
+
+    // Filter banners that target the selected country
+    const countrySpecificBanners = allBanners.filter(banner => 
+      banner.country_ids && banner.country_ids.includes(selectedCountry.id)
+    );
+
+    if (countrySpecificBanners.length > 0) {
+      // Show country-specific ads
+      setBanners(countrySpecificBanners);
+      console.log(`Showing ${countrySpecificBanners.length} bottom ads for ${selectedCountry.name}`);
+    } else {
+      // Fallback: show all banners if no country-specific ads exist
+      console.log(`No bottom ads for ${selectedCountry.name}, showing all ${allBanners.length} ads`);
+      setBanners(allBanners);
+    }
+
+    // Reset slideshow when banners change
+    setCurrentBannerIndex(0);
+    setProgress(0);
+  }, [selectedCountry, allBanners]);
 
   // Slideshow effect
   useEffect(() => {
