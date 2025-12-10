@@ -284,7 +284,7 @@ export const CountryDetailPage: React.FC = () => {
 
         {/* Sponsored Banner */}
         {sponsoredBanners.length > 0 && (
-          <div className="border-b border-gray-100 bg-gray-50/50">
+          <div className="bg-gray-50/50">
             <div className="max-w-6xl mx-auto px-6 py-6">
               {sponsoredBanners.map((banner) => (
                 <a
