@@ -458,7 +458,9 @@ export const AdminBusinesses = () => {
     
     try {
       // Handle image uploads for editing
-      let finalImages = selectedBusiness.images || [];
+      // uploadedImages contains both existing URLs and new preview URLs
+      // Filter to keep only existing database URLs (not blob: URLs)
+      let finalImages = uploadedImages.filter(url => !url.startsWith('blob:'));
       let finalLogoUrl = selectedBusiness.logo_url;
 
       // Upload new images if any
