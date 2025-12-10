@@ -849,7 +849,7 @@ export const CountryListingsPage = () => {
                                 {business.phone && (
                                   <a 
                                     href={`tel:${business.phone}`}
-                                    className="text-lg font-semibold text-green-700 hover:underline block"
+                                    className="text-xl font-bold text-black hover:text-gray-700 block border-b-2 border-black pb-1"
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     {business.phone}
@@ -862,7 +862,7 @@ export const CountryListingsPage = () => {
                                   <p className="text-sm text-gray-500">{business.city.name}</p>
                                 )}
                                 {business.is_verified && (
-                                  <Badge variant="outline" className="mt-2 text-xs border-green-500 text-green-600">
+                                  <Badge variant="outline" className="mt-2 text-xs border-gray-800 text-gray-800">
                                     ✓ Verified
                                   </Badge>
                                 )}
@@ -971,10 +971,10 @@ export const CountryListingsPage = () => {
                     {/* Manage Listing CTA */}
                     <div className="border border-gray-200 rounded-lg p-4 mb-4 text-center">
                       <h3 className="font-semibold text-gray-800 mb-2">Manage your</h3>
-                      <p className="text-2xl font-bold text-green-600 mb-2">free listing</p>
+                      <p className="text-2xl font-black text-black mb-2 underline decoration-2">FREE LISTING</p>
                       <p className="text-sm text-gray-600 mb-4">Update your business information in a few steps.</p>
                       <Button 
-                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                        className="w-full bg-black hover:bg-gray-800 text-white"
                         onClick={() => navigate('/claim-listing')}
                       >
                         Claim Your Listing
