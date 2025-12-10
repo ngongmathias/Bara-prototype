@@ -42,7 +42,8 @@ import {
   ChevronRight,
   Image as ImageIcon,
   Upload,
-  X
+  X,
+  HelpCircle
 } from "lucide-react";
 import { getAdminDb } from "@/lib/supabase";
 import { uploadImage, deleteImage } from "@/lib/storage";
@@ -159,6 +160,7 @@ export const AdminBusinesses = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState<Business | null>(null);
   
   // Pagination
@@ -751,55 +753,6 @@ export const AdminBusinesses = () => {
 
   return (
     <AdminLayout title="Businesses Management" subtitle="Manage business listings and verifications">
-      {/* Quick Help Guide */}
-      <Card className="mb-6 border-blue-200 bg-blue-50/50">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-blue-600" />
-              <CardTitle className="text-lg font-comfortaa text-blue-900">Quick Admin Guide</CardTitle>
-            </div>
-            <a 
-              href="/ADMIN_GUIDE.md" 
-              target="_blank"
-              className="text-sm text-blue-600 hover:underline font-roboto"
-            >
-              View Full Guide →
-            </a>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm font-roboto">
-            <div className="space-y-2">
-              <h4 className="font-semibold text-gray-900">📍 Listings URLs</h4>
-              <p className="text-gray-700">Businesses appear at:</p>
-              <code className="text-xs bg-white px-2 py-1 rounded border block">
-                /listings/category/{'{category}'}
-              </code>
-              <p className="text-xs text-gray-600">Example: /listings/category/restaurant</p>
-            </div>
-            <div className="space-y-2">
-              <h4 className="font-semibold text-gray-900">🗺️ Map View</h4>
-              <p className="text-gray-700">For businesses to show on map:</p>
-              <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
-                <li>Add <strong>Latitude</strong> (-90 to 90)</li>
-                <li>Add <strong>Longitude</strong> (-180 to 180)</li>
-                <li>Use Google Maps to find coordinates</li>
-              </ul>
-            </div>
-            <div className="space-y-2">
-              <h4 className="font-semibold text-gray-900">✨ Key Fields</h4>
-              <ul className="text-xs text-gray-600 space-y-1">
-                <li><strong>Phone</strong>: Shows in GREEN prominently</li>
-                <li><strong>Premium</strong>: Featured in sidebar</li>
-                <li><strong>Sponsored</strong>: Blue background + top placement</li>
-                <li><strong>Status</strong>: Must be "Active" to show</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
@@ -808,6 +761,15 @@ export const AdminBusinesses = () => {
         </div>
         
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsHelpDialogOpen(true)}
+            className="font-roboto"
+            title="Admin Guide"
+          >
+            <HelpCircle className="w-4 h-4 mr-2" />
+            Help
+          </Button>
           <Button 
             variant="outline" 
             onClick={exportToPDF}
@@ -2084,6 +2046,149 @@ export const AdminBusinesses = () => {
                 Edit Business
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Help Dialog */}
+      <Dialog open={isHelpDialogOpen} onOpenChange={setIsHelpDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-comfortaa text-2xl">Business Management Guide</DialogTitle>
+            <DialogDescription className="font-roboto">
+              Quick reference guide for managing business listings
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 font-roboto">
+            {/* URLs Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                📍 Listings URLs
+              </h3>
+              <p className="text-sm text-gray-700 mb-2">Businesses appear at:</p>
+              <code className="block text-sm bg-gray-100 px-3 py-2 rounded border">
+                https://www.baraafrika.com/listings/category/{'{category}'}
+              </code>
+              <p className="text-xs text-gray-600 mt-2">Example: /listings/category/restaurant</p>
+            </div>
+
+            {/* Map View Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                🗺️ Map View Setup
+              </h3>
+              <p className="text-sm text-gray-700 mb-2">For businesses to appear on map:</p>
+              <ul className="text-sm text-gray-700 space-y-2 list-disc list-inside">
+                <li>Add <strong>Latitude</strong> (range: -90 to 90)</li>
+                <li>Add <strong>Longitude</strong> (range: -180 to 180)</li>
+              </ul>
+              <div className="mt-3 p-3 bg-blue-50 rounded border border-blue-200">
+                <p className="text-sm font-semibold text-blue-900 mb-1">💡 How to get coordinates:</p>
+                <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                  <li>Find business on Google Maps</li>
+                  <li>Right-click location → "What's here?"</li>
+                  <li>Copy coordinates (e.g., -1.286389, 36.817223)</li>
+                  <li>First number = Latitude, Second = Longitude</li>
+                </ol>
+              </div>
+            </div>
+
+            {/* Key Fields Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                ✨ Key Fields & Display
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-start gap-2">
+                  <span className="font-semibold min-w-24">Phone:</span>
+                  <span className="text-gray-700">Shows in <span className="text-green-600 font-semibold">GREEN</span>, prominently displayed on right side</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="font-semibold min-w-24">Premium:</span>
+                  <span className="text-gray-700">Featured in sidebar, blue badge</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="font-semibold min-w-24">Sponsored:</span>
+                  <span className="text-gray-700">Blue background + top placement + "Ad" badge</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="font-semibold min-w-24">Status:</span>
+                  <span className="text-gray-700">Must be <strong className="text-green-600">"Active"</strong> to show publicly</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Status Management */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                🎯 Status Management
+              </h3>
+              <div className="space-y-2">
+                <div className="p-2 bg-green-50 rounded border border-green-200">
+                  <p className="text-sm"><strong className="text-green-700">Active:</strong> Business is live and visible to users ✅</p>
+                </div>
+                <div className="p-2 bg-yellow-50 rounded border border-yellow-200">
+                  <p className="text-sm"><strong className="text-yellow-700">Pending:</strong> Awaiting review/approval ⏳</p>
+                </div>
+                <div className="p-2 bg-red-50 rounded border border-red-200">
+                  <p className="text-sm"><strong className="text-red-700">Suspended:</strong> Hidden from public view ❌</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Image Guidelines */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                📸 Image Guidelines
+              </h3>
+              <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                <li><strong>Logo:</strong> Square format, 500x500px minimum</li>
+                <li><strong>Gallery:</strong> Landscape format, 1200x800px recommended</li>
+                <li><strong>File size:</strong> Under 2MB per image</li>
+                <li><strong>Format:</strong> JPG or PNG</li>
+              </ul>
+            </div>
+
+            {/* Troubleshooting */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                🔧 Troubleshooting
+              </h3>
+              <div className="space-y-3 text-sm">
+                <div>
+                  <p className="font-semibold text-gray-900">Business not showing on website?</p>
+                  <ul className="text-gray-600 mt-1 list-disc list-inside ml-4">
+                    <li>Check status is "Active"</li>
+                    <li>Verify category and country assigned</li>
+                    <li>Clear browser cache</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">Map view not working?</p>
+                  <ul className="text-gray-600 mt-1 list-disc list-inside ml-4">
+                    <li>Add latitude and longitude coordinates</li>
+                    <li>Verify coordinates are in correct range</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsHelpDialogOpen(false)}
+              className="font-roboto"
+            >
+              Close
+            </Button>
+            <Button 
+              onClick={() => window.open('/ADMIN_GUIDE.md', '_blank')}
+              className="bg-blue-600 hover:bg-blue-700 font-roboto"
+            >
+              View Full Guide
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
