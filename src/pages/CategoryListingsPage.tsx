@@ -7,7 +7,8 @@ import { Building2, MapPin, Star, ArrowLeft, Search, Grid, List, Phone, Globe, C
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { MatrixRain } from "@/components/landing/MatrixRain";
-// Banner ads removed from category pages per user request
+import { Header } from "@/components/Header";
+import Footer from "@/components/Footer";
 import { CityMapLeaflet } from "@/components/CityMapLeaflet";
 import {
   DropdownMenu,
@@ -234,6 +235,11 @@ const CategoryListingsPage = () => {
     <div className="relative min-h-screen bg-white">
       <MatrixRain />
       <div className="absolute inset-0 bg-white/60 pointer-events-none" />
+      
+      {/* Header */}
+      <div className="relative z-20">
+        <Header />
+      </div>
       
       <div className="relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -743,6 +749,9 @@ const CategoryListingsPage = () => {
           {/* Bottom banner removed from category pages */}
         </div>
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
