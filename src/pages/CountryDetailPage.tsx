@@ -74,7 +74,14 @@ export const CountryDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const { banners: allSponsoredBanners, incrementBannerClick, incrementBannerView } = useSponsoredBanners();
-  const sponsoredBanners = allSponsoredBanners.filter(banner => banner.show_on_country_detail);
+  // Fix: Properly filter country page ads by active status, payment, and country match
+  const sponsoredBanners = allSponsoredBanners.filter(banner => 
+    banner.show_on_country_detail && 
+    banner.is_active === true &&
+    banner.payment_status === 'paid' &&
+    banner.status === 'active' &&
+    banner.country_id === country?.id
+  );
   const { countryInfo } = useCountryInfo(country?.id || null);
 
   useEffect(() => {
