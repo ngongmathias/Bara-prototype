@@ -67,7 +67,6 @@ export const AdminSponsoredBanners: React.FC = () => {
     payment_amount: 25 as number | undefined,
     display_on_top: true,
     display_on_bottom: false,
-    show_on_country_detail: false,
   });
 
   // Analytics state
@@ -970,10 +969,8 @@ export const AdminSponsoredBanners: React.FC = () => {
                 </div>
                 <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
                   <p className="text-xs text-blue-900">
-                    💡 <strong>Tip:</strong> For country-specific tourism ads (e.g., "Visit Rwanda"), enable <strong>ONLY</strong> "Display on Top" 
-                    and keep Bottom OFF. Use wider dimensions: 1200x132px for better fit.
-                    💡 <strong>Tip:</strong> For country-specific tourism ads (e.g., "Visit Rwanda"), enable <strong>ONLY</strong> "Show on Country Page" 
-                    and keep Top/Bottom OFF. Use wider dimensions: 1200x132px for better fit.
+                    💡 <strong>Tip:</strong> For maximum visibility, enable both "Display on Top" and "Display on Bottom". 
+                    For country-specific tourism ads (e.g., "Visit Rwanda"), you can target specific countries using the multi-country selector above.
                   </p>
                 </div>
               </div>
@@ -1029,7 +1026,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                       
                       toast({ title: 'Banner Added', description: `Sponsored banner created for ${newForm.country_ids.length} ${newForm.country_ids.length === 1 ? 'country' : 'countries'}.` });
                       setShowAddDialog(false);
-                      setNewForm({ company_name: '', company_website: '', banner_alt_text: '', country_ids: [], payment_status: 'paid', status: 'pending', payment_amount: 25, display_on_top: true, display_on_bottom: false, show_on_country_detail: false });
+                      setNewForm({ company_name: '', company_website: '', banner_alt_text: '', country_ids: [], payment_status: 'paid', status: 'pending', payment_amount: 25, display_on_top: true, display_on_bottom: false });
                       setNewBannerImage(null);
                       setNewBannerImageUrl('');
                       fetchBanners(true);
