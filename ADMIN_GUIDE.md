@@ -51,7 +51,7 @@ The BARA AFRICA admin panel allows you to manage all business listings that appe
 | **Business Name** | Displayed as main title | "Safari Restaurant" | Required, appears in blue on listings |
 | **Description** | Brief business overview | "Authentic African cuisine..." | Shows below business name |
 | **Address** | Physical location | "123 Uhuru Ave, Nairobi" | Displayed on right side of listing |
-| **Phone** | Contact number | "+254 712 345 678" | **Shows in GREEN, prominently displayed** |
+| **Phone** | Contact number | "+254 712 345 678" | **Shows in BOLD BLACK with underline, right side** |
 | **Email** | Business email | "info@safari.com" | For contact purposes |
 | **Website** | Company website | "safari-restaurant.com" | Don't include "https://" |
 | **WhatsApp** | WhatsApp number | "+254712345678" | For WhatsApp contact |
@@ -229,7 +229,7 @@ These create the colored badges you see on listings:
 - **Horizontal cards** with image on left (128x128px)
 - **Numbered listings** (1., 2., 3...) excluding ads
 - **Blue clickable names** with underline on hover
-- **Green phone numbers** on right side
+- **Bold black phone numbers with underline** on right side
 - **Action links**: Website | Directions | More Info
 - **Star ratings** in orange
 - **Amenity icons** based on category
