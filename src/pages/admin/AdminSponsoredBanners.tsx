@@ -61,7 +61,7 @@ export const AdminSponsoredBanners: React.FC = () => {
     company_name: '',
     company_website: '',
     banner_alt_text: '',
-    country_id: '',
+    country_ids: [] as string[],  // Changed to array for multi-country support
     payment_status: 'paid' as 'pending' | 'paid' | 'failed' | 'refunded',
     status: 'pending' as 'pending' | 'approved' | 'rejected' | 'active' | 'inactive',
     payment_amount: 25 as number | undefined,
@@ -80,6 +80,9 @@ export const AdminSponsoredBanners: React.FC = () => {
   }>>({});
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
+  
+  // Store banner countries (banner_id -> array of country objects)
+  const [bannerCountries, setBannerCountries] = useState<Record<string, Array<{id: string; name: string; flag_url?: string}>>>({});
 
   useEffect(() => {
     fetchBanners(true); // Admin mode
@@ -89,8 +92,38 @@ export const AdminSponsoredBanners: React.FC = () => {
   useEffect(() => {
     if (banners.length > 0) {
       fetchBannerAnalytics();
+      fetchBannerCountries();
     }
   }, [banners]);
+  
+  // Fetch targeted countries for each banner from junction table
+  const fetchBannerCountries = async () => {
+    try {
+      const countriesMap: Record<string, Array<{id: string; name: string; flag_url?: string}>> = {};
+      
+      for (const banner of banners) {
+        const { data, error } = await supabase
+          .from('sponsored_banner_countries')
+          .select(`
+            country_id,
+            countries!inner(id, name, flag_url)
+          `)
+          .eq('banner_id', banner.id);
+        
+        if (!error && data) {
+          countriesMap[banner.id] = data.map((item: any) => ({
+            id: item.countries.id,
+            name: item.countries.name,
+            flag_url: item.countries.flag_url
+          }));
+        }
+      }
+      
+      setBannerCountries(countriesMap);
+    } catch (error) {
+      console.error('Error fetching banner countries:', error);
+    }
+  };
 
   const fetchBannerAnalytics = async () => {
     setLoadingAnalytics(true);
@@ -469,15 +502,26 @@ export const AdminSponsoredBanners: React.FC = () => {
                         </TableCell>
                         
                         <TableCell>
-                          <div className="flex items-center space-x-2">
-                            {banner.country_flag_url && (
-                              <img 
-                                src={banner.country_flag_url} 
-                                alt={banner.country_name}
-                                className="w-4 h-3"
-                              />
+                          <div className="flex flex-wrap gap-1">
+                            {bannerCountries[banner.id] && bannerCountries[banner.id].length > 0 ? (
+                              bannerCountries[banner.id].map((country) => (
+                                <div key={country.id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded text-xs">
+                                  {country.flag_url && <img src={country.flag_url} alt={country.name} className="w-4 h-3" />}
+                                  <span>{country.name}</span>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="flex items-center space-x-2">
+                                {banner.country_flag_url && (
+                                  <img 
+                                    src={banner.country_flag_url} 
+                                    alt={banner.country_name}
+                                    className="w-4 h-3"
+                                  />
+                                )}
+                                <span className="text-xs">{banner.country_name || 'N/A'}</span>
+                              </div>
                             )}
-                            <span>{banner.country_name}</span>
                           </div>
                         </TableCell>
                         
@@ -752,25 +796,50 @@ export const AdminSponsoredBanners: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Select Country *</label>
-                <Select
-                  value={newForm.country_id}
-                  onValueChange={(value) => setNewForm((p) => ({ ...p, country_id: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countries.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        <div className="flex items-center space-x-2">
-                          {c.flag_url && (<img src={c.flag_url} alt={c.name} className="w-4 h-3" />)}
-                          <span>{c.name}</span>
+                <label className="block text-sm font-medium mb-2">Target Countries *</label>
+                <p className="text-xs text-gray-500 mb-2">Select one or more countries where this ad should display</p>
+                <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
+                  {countries.map((c) => (
+                    <label key={c.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={newForm.country_ids.includes(c.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setNewForm((p) => ({ ...p, country_ids: [...p.country_ids, c.id] }));
+                          } else {
+                            setNewForm((p) => ({ ...p, country_ids: p.country_ids.filter(id => id !== c.id) }));
+                          }
+                        }}
+                        className="rounded border-gray-300"
+                      />
+                      <div className="flex items-center space-x-2">
+                        {c.flag_url && (<img src={c.flag_url} alt={c.name} className="w-5 h-4" />)}
+                        <span className="text-sm">{c.name}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                {newForm.country_ids.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {newForm.country_ids.map(countryId => {
+                      const country = countries.find(c => c.id === countryId);
+                      return country ? (
+                        <div key={countryId} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
+                          {country.flag_url && <img src={country.flag_url} alt={country.name} className="w-4 h-3" />}
+                          <span>{country.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => setNewForm((p) => ({ ...p, country_ids: p.country_ids.filter(id => id !== countryId) }))}
+                            className="ml-1 text-blue-700 hover:text-blue-900"
+                          >
+                            ×
+                          </button>
                         </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      ) : null;
+                    })}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -925,8 +994,8 @@ export const AdminSponsoredBanners: React.FC = () => {
                 <Button variant="outline" onClick={() => setShowAddDialog(false)} disabled={adding}>Cancel</Button>
                 <Button
                   onClick={async () => {
-                    if (!newForm.company_name || !newForm.company_website || !newForm.country_id) {
-                      toast({ title: 'Missing Fields', description: 'Company, website, and country are required.', variant: 'destructive' });
+                    if (!newForm.company_name || !newForm.company_website || newForm.country_ids.length === 0) {
+                      toast({ title: 'Missing Fields', description: 'Company, website, and at least one country are required.', variant: 'destructive' });
                       return;
                     }
                     if (!newBannerImage) {
@@ -936,8 +1005,10 @@ export const AdminSponsoredBanners: React.FC = () => {
                     try {
                       setAdding(true);
                       const bannerImageUrl = await uploadImage(newBannerImage, 'sponsored-banners', 'banners');
+                      
+                      // Create banner with first country (backward compatibility)
                       const payload: any = {
-                        country_id: newForm.country_id,
+                        country_id: newForm.country_ids[0],  // Use first country for backward compatibility
                         company_name: newForm.company_name,
                         company_website: newForm.company_website,
                         banner_image_url: bannerImageUrl,
@@ -949,10 +1020,29 @@ export const AdminSponsoredBanners: React.FC = () => {
                       };
                       if (typeof newForm.payment_amount === 'number') payload.payment_amount = newForm.payment_amount;
                       if (newForm.status) payload.status = newForm.status;
-                      await createBanner(payload);
-                      toast({ title: 'Banner Added', description: 'Sponsored banner has been created.' });
+                      
+                      const createdBanner = await createBanner(payload);
+                      
+                      // Insert all selected countries into junction table
+                      if (createdBanner) {
+                        const { error: junctionError } = await supabase
+                          .from('sponsored_banner_countries')
+                          .insert(
+                            newForm.country_ids.map(countryId => ({
+                              banner_id: createdBanner.id,
+                              country_id: countryId
+                            }))
+                          );
+                        
+                        if (junctionError) {
+                          console.error('Error inserting banner countries:', junctionError);
+                          toast({ title: 'Warning', description: 'Banner created but country associations may be incomplete.', variant: 'destructive' });
+                        }
+                      }
+                      
+                      toast({ title: 'Banner Added', description: `Sponsored banner created for ${newForm.country_ids.length} ${newForm.country_ids.length === 1 ? 'country' : 'countries'}.` });
                       setShowAddDialog(false);
-                      setNewForm({ company_name: '', company_website: '', banner_alt_text: '', country_id: '', payment_status: 'paid', status: 'pending', payment_amount: 25, display_on_top: true, display_on_bottom: false, show_on_country_detail: false });
+                      setNewForm({ company_name: '', company_website: '', banner_alt_text: '', country_ids: [], payment_status: 'paid', status: 'pending', payment_amount: 25, display_on_top: true, display_on_bottom: false, show_on_country_detail: false });
                       setNewBannerImage(null);
                       setNewBannerImageUrl('');
                       fetchBanners(true);
