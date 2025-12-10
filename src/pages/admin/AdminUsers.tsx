@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -45,7 +46,8 @@ import {
   Phone,
   MapPin,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  HelpCircle
 } from 'lucide-react';
 
 export const AdminUsers = () => {
@@ -59,6 +61,7 @@ export const AdminUsers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('users');
   const [userType, setUserType] = useState<'all' | 'admin' | 'database'>('all');
+  const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -297,7 +300,6 @@ export const AdminUsers = () => {
 
         </div>
 
-        {/* Header Actions */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
           <div className="flex items-center space-x-2">
             <Users className="w-6 h-6 text-blue-600" />
@@ -307,6 +309,14 @@ export const AdminUsers = () => {
           </div>
           
           <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsHelpDialogOpen(true)}
+            >
+              <HelpCircle className="w-4 h-4 mr-2" />
+              Help
+            </Button>
             <Button variant="outline" size="sm" onClick={handleRefresh}>
               <RefreshCw className="w-4 h-4 mr-2" />
               {t('admin.common.refresh')}
@@ -651,6 +661,56 @@ export const AdminUsers = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <Dialog open={isHelpDialogOpen} onOpenChange={setIsHelpDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-comfortaa text-2xl">Users Management Guide</DialogTitle>
+            <DialogDescription className="font-roboto">
+              Manage admin users, database users, and activity logs from this page.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 font-roboto text-sm text-gray-700">
+            <div>
+              <p className="font-semibold mb-1">Users tab</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Search users by email or name using the search box.</li>
+                <li>Filter between All, Admin, and Database users using the filter dropdown.</li>
+                <li>Sort by email or created date by clicking the table headers.</li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-semibold mb-1">Activity logs tab</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Review key actions taken in the admin area per user and resource.</li>
+                <li>Use the same search box to narrow logs by user email or keywords.</li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-semibold mb-1">Exports & printing</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Use <span className="font-semibold">Print</span> to generate a printer-friendly report.</li>
+                <li>Use <span className="font-semibold">Export CSV</span> to download a CSV of the current user view.</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsHelpDialogOpen(false)}
+              className="font-roboto"
+            >
+              Close
+            </Button>
+            <Button
+              onClick={() => window.open('/ADMIN_GUIDE.md', '_blank')}
+              className="bg-blue-600 hover:bg-blue-700 font-roboto"
+            >
+              View Full Admin Guide
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };

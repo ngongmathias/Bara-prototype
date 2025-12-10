@@ -38,7 +38,7 @@ import { AdminBusinesses } from "./pages/admin/AdminBusinesses";
 import { AdminEventsEnhanced as AdminEvents } from "./pages/admin/AdminEventsEnhanced";
 import { AdminReviews } from "./pages/admin/AdminReviews";
 import { AdminSponsoredAds } from "./pages/admin/AdminSponsoredAds";
-import { AdminReports } from "./pages/admin/AdminReports";
+import { AdminReports } from "./pages/admin/AdminReportsNew";
 import { AdminCategories } from "./pages/admin/AdminCategories";
 import { AdminUsers } from "./pages/admin/AdminUsers";
 import { AdminSettings } from "./pages/admin/AdminSettings";

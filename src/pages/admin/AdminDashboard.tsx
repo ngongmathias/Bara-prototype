@@ -32,6 +32,11 @@ import {
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { FinancialKPIs } from "@/components/admin/dashboard/FinancialKPIs";
+import { RevenueChart } from "@/components/admin/dashboard/RevenueChart";
+import { BusinessGrowthChart } from "@/components/admin/dashboard/BusinessGrowthChart";
+import { UserAcquisitionChart } from "@/components/admin/dashboard/UserAcquisitionChart";
+import { ReviewDistributionChart } from "@/components/admin/dashboard/ReviewDistributionChart";
 
 interface DashboardStats {
   totalUsers: number;
@@ -408,6 +413,25 @@ export const AdminDashboard = () => {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Financial KPIs */}
+      <div className="mb-8">
+        <h3 className="text-lg font-comfortaa font-semibold text-yp-dark mb-4">Financial Overview</h3>
+        <FinancialKPIs />
+      </div>
+
+      {/* Charts Section */}
+      <div className="mb-8">
+        <h3 className="text-lg font-comfortaa font-semibold text-yp-dark mb-4">Analytics & Trends</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <RevenueChart />
+          <BusinessGrowthChart />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <UserAcquisitionChart />
+          <ReviewDistributionChart />
+        </div>
       </div>
 
       {/* Detailed Metrics Grid */}

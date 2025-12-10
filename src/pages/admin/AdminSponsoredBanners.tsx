@@ -24,7 +24,8 @@ import {
   Mail,
   Phone,
   Plus,
-  HelpCircle
+  HelpCircle,
+  Download
 } from 'lucide-react';
 import { useSponsoredBanners } from '@/hooks/useSponsoredBanners';
 import { useToast } from '@/hooks/use-toast';
@@ -169,6 +170,73 @@ export const AdminSponsoredBanners: React.FC = () => {
     
     return matchesSearch && matchesStatus;
   });
+
+  const exportToCSV = () => {
+    const data = filteredBanners;
+
+    if (!data.length) {
+      toast({
+        title: 'No data',
+        description: 'There are no sponsored banners to export',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const headers = [
+      'ID',
+      'Company Name',
+      'Company Website',
+      'Contact Name',
+      'Contact Email',
+      'Contact Phone',
+      'Country',
+      'Payment Status',
+      'Payment Amount',
+      'Status',
+      'Is Active',
+      'Display Top',
+      'Display Bottom',
+      'Total Views',
+      'Total Clicks',
+      'CTR (%)',
+      'Created At',
+    ];
+
+    const rows = data.map((banner) => [
+      banner.id,
+      `"${(banner.company_name || '').replace(/"/g, '""')}"`,
+      banner.company_website || '',
+      banner.contact_name || '',
+      banner.contact_email || '',
+      banner.contact_phone || '',
+      `"${(banner.country_name || '').replace(/"/g, '""')}"`,
+      banner.payment_status || '',
+      String(banner.payment_amount ?? 0),
+      banner.status || '',
+      banner.is_active ? 'Yes' : 'No',
+      banner.display_on_top ? 'Yes' : 'No',
+      banner.display_on_bottom ? 'Yes' : 'No',
+      String(banner.view_count ?? 0),
+      String(banner.click_count ?? 0),
+      banner.view_count && banner.view_count > 0
+        ? (((banner.click_count || 0) / banner.view_count) * 100).toFixed(2)
+        : '0',
+      new Date(banner.created_at).toISOString(),
+    ].join(','));
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `sponsored_banners_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleStatusChange = async (bannerId: string, newStatus: string) => {
     try {
@@ -378,6 +446,14 @@ export const AdminSponsoredBanners: React.FC = () => {
             >
               <HelpCircle className="w-4 h-4 mr-2" />
               Help
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={exportToCSV}
+              className="flex justify-center items-center"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export CSV
             </Button>
             <Button 
               onClick={fetchBannerAnalytics} 

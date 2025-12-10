@@ -30,7 +30,8 @@ import {
   MapPin, 
   Globe,
   Eye,
-  MoreHorizontal
+  MoreHorizontal,
+  Download
 } from "lucide-react";
 import { getAdminDb } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -376,6 +377,47 @@ export const AdminCities = () => {
     city.country_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const exportToCSV = () => {
+    const data = filteredCities;
+
+    if (!data.length) {
+      toast({
+        title: "No data",
+        description: "There are no cities to export",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const headers = [
+      'ID',
+      'Name',
+      'Country',
+      'Is Active',
+      'Created At'
+    ];
+
+    const rows = data.map((city) => [
+      city.id,
+      `"${(city.name || '').replace(/"/g, '""')}"`,
+      `"${(city.country_name || '').replace(/"/g, '""')}"`,
+      city.is_active ? 'Active' : 'Inactive',
+      new Date(city.created_at).toISOString()
+    ].join(','));
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `cities_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) {
     return (
       <AdminLayout title="Cities Management" subtitle="Manage cities and locations">
@@ -395,57 +437,67 @@ export const AdminCities = () => {
           <p className="text-gray-600 font-roboto">Manage cities across all countries</p>
         </div>
         
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-yellow-900 hover:bg-blue-600">
-            <Plus className="w-4 h-4 mr-2" />
-            Add City
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={exportToCSV}
+            className="font-roboto flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
           </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="font-comfortaa">Add New City</DialogTitle>
-              <DialogDescription className="font-roboto">
-                Create a new city entry for your platform.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="city-name" className="font-roboto">City Name</Label>
-                <Input
-                  id="city-name"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Enter city name"
-                  className="font-roboto"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="country" className="font-roboto">Country</Label>
-                <Select value={formData.country_id} onValueChange={(value) => setFormData(prev => ({ ...prev, country_id: value }))}>
-                  <SelectTrigger className="font-roboto">
-                    <SelectValue placeholder="Select a country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countries.map((country) => (
-                      <SelectItem key={country.id} value={country.id} className="font-roboto">
-                        {country.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="font-roboto" disabled={isSubmitting}>
-                Cancel
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-yellow-900 hover:bg-blue-600">
+                <Plus className="w-4 h-4 mr-2" />
+                Add City
               </Button>
-              <Button onClick={handleAddCity} className="font-roboto bg-yellow-900 hover:bg-blue-600" disabled={isSubmitting}>
-                {isSubmitting ? "Adding..." : "Add City"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="font-comfortaa">Add New City</DialogTitle>
+                <DialogDescription className="font-roboto">
+                  Create a new city entry for your platform.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="city-name" className="font-roboto">City Name</Label>
+                  <Input
+                    id="city-name"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Enter city name"
+                    className="font-roboto"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="country" className="font-roboto">Country</Label>
+                  <Select value={formData.country_id} onValueChange={(value) => setFormData(prev => ({ ...prev, country_id: value }))}>
+                    <SelectTrigger className="font-roboto">
+                      <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((country) => (
+                        <SelectItem key={country.id} value={country.id} className="font-roboto">
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="font-roboto" disabled={isSubmitting}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddCity} className="font-roboto bg-yellow-900 hover:bg-blue-600" disabled={isSubmitting}>
+                  {isSubmitting ? "Adding..." : "Add City"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Search and Filters */}

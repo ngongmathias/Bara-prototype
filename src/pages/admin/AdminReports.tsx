@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Select,
   SelectContent,
@@ -12,25 +15,25 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { 
-  Search, 
+  FileText,
   Download,
-  ChevronLeft,
-  ChevronRight,
-  Calendar,
-  User,
-  Activity,
-  AlertTriangle,
-  Info,
-  Shield,
-  Clock,
+  Building2,
+  Users,
+  MessageSquare,
+  Calendar as CalendarIcon,
+  DollarSign,
+  Target,
+  BarChart3,
+  FileSpreadsheet,
+  FileJson,
   Filter,
-  RefreshCw
+  Settings,
+  Eye
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from 'react-i18next';
-import { supabase } from '@/lib/supabase';
-import { UserLogService, UserLog } from '@/lib/userLogService';
+import { getAdminDb } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import * as XLSX from 'xlsx';
 
 interface SystemStats {
   totalUsers: number;

@@ -389,6 +389,62 @@ export const AdminBusinesses = () => {
     return allWordsFound && matchesStatus && matchesCategory;
   });
 
+  // CSV Export
+  const exportToCSV = () => {
+    const data = filteredBusinesses;
+
+    if (!data.length) {
+      toast({
+        title: "No data",
+        description: "There are no businesses to export",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const headers = [
+      'ID',
+      'Name',
+      'Category',
+      'City',
+      'Country',
+      'Phone',
+      'Email',
+      'Website',
+      'Status',
+      'Premium',
+      'Verified',
+      'Created At'
+    ];
+
+    const rows = data.map((business) => [
+      business.id,
+      `"${(business.name || '').replace(/"/g, '""')}"`,
+      `"${(business.category_name || '').replace(/"/g, '""')}"`,
+      `"${(business.city_name || '').replace(/"/g, '""')}"`,
+      `"${(business.country_name || '').replace(/"/g, '""')}"`,
+      business.phone || '',
+      business.email || '',
+      business.website || '',
+      business.status,
+      business.is_premium ? 'Yes' : 'No',
+      business.is_verified ? 'Yes' : 'No',
+      new Date(business.created_at).toISOString()
+    ].join(','));
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `businesses_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Pagination
   const totalPages = Math.ceil(filteredBusinesses.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -751,6 +807,14 @@ export const AdminBusinesses = () => {
           </Button>
           <Button 
             variant="outline" 
+            onClick={exportToCSV}
+            className="font-roboto"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
+          <Button 
+            variant="outline" 
             onClick={exportToPDF}
             className="font-roboto"
           >
@@ -777,10 +841,11 @@ export const AdminBusinesses = () => {
                 placeholder="Search businesses by name, description, address, phone, email, website, city, country, category..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`hover:opacity-80 text-white px-3 py-1 rounded text-sm font-roboto font-medium transition-opacity duration-300 ${
+                className={`pl-10 text-sm font-roboto text-gray-900 ${
                   searchTerm ? 'ring-2 ring-yp-blue/20 border-yp-blue' : ''
                 }`}
               />
+
               {isSearching && (
                 <div className="absolute right-10 top-1/2 transform -translate-y-1/2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yp-blue"></div>
