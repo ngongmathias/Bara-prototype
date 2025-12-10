@@ -40,6 +40,14 @@ interface CountryInfo {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  // Country Page Advertisement fields
+  ad_image_url?: string | null;
+  ad_company_name?: string | null;
+  ad_company_website?: string | null;
+  ad_tagline?: string | null;
+  ad_is_active?: boolean;
+  ad_click_count?: number;
+  ad_view_count?: number;
 }
 
 export const useCountryInfo = (countryId: string | null) => {

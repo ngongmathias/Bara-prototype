@@ -465,6 +465,68 @@ export const CountryDetailPage: React.FC = () => {
 
             {/* Sidebar */}
             <div className="space-y-8">
+              {/* Country Page Advertisement */}
+              {countryInfo?.ad_is_active && countryInfo?.ad_image_url && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  className="group"
+                >
+                  <a
+                    href={countryInfo.ad_company_website || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={async () => {
+                      // Track click
+                      if (countryInfo.id) {
+                        try {
+                          await (db as any).country_info()
+                            .update({ ad_click_count: (countryInfo.ad_click_count || 0) + 1 })
+                            .eq('id', countryInfo.id);
+                        } catch (error) {
+                          console.error('Error tracking ad click:', error);
+                        }
+                      }
+                    }}
+                    className="block rounded-2xl overflow-hidden border-2 border-gray-200 hover:border-black transition-all shadow-sm hover:shadow-lg"
+                  >
+                    <div className="relative">
+                      <span className="absolute top-2 right-2 text-[10px] text-white bg-black/60 px-2 py-1 rounded uppercase tracking-wider">
+                        Sponsored
+                      </span>
+                      <img
+                        src={countryInfo.ad_image_url}
+                        alt={countryInfo.ad_company_name || 'Advertisement'}
+                        className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
+                        onLoad={async () => {
+                          // Track view (only once)
+                          if (countryInfo.id) {
+                            try {
+                              await (db as any).country_info()
+                                .update({ ad_view_count: (countryInfo.ad_view_count || 0) + 1 })
+                                .eq('id', countryInfo.id);
+                            } catch (error) {
+                              console.error('Error tracking ad view:', error);
+                            }
+                          }
+                        }}
+                      />
+                      {(countryInfo.ad_company_name || countryInfo.ad_tagline) && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                          {countryInfo.ad_company_name && (
+                            <p className="text-white font-bold text-sm">{countryInfo.ad_company_name}</p>
+                          )}
+                          {countryInfo.ad_tagline && (
+                            <p className="text-white/90 text-xs mt-1">{countryInfo.ad_tagline}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </a>
+                </motion.div>
+              )}
+
               {/* Leadership */}
               {countryInfo?.president_name && (
                 <motion.div
