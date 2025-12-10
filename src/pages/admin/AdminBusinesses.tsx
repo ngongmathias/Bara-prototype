@@ -1863,7 +1863,7 @@ export const AdminBusinesses = () => {
               <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)} className="font-roboto">
                 Cancel
               </Button>
-              <Button type="submit" className="bg-yp-blue hover:bg-blue-600 font-roboto">
+              <Button type="submit" className="bg-black hover:bg-gray-800 text-white font-roboto">
                 Update Business
               </Button>
             </DialogFooter>

@@ -32,13 +32,9 @@ export const BusinessDetailPage = () => {
   const cityName = formatTitle(city || '');
   const categoryName = formatTitle(actualCategorySlug || '');
   
-  // Handle back navigation
+  // Handle back navigation - always go to category listings page
   const handleBackClick = () => {
-    if (city) {
-      navigate(`/${city}/${actualCategorySlug}`);
-    } else {
-      navigate(`/listings/category/${actualCategorySlug}`);
-    }
+    navigate(`/listings/category/${actualCategorySlug}`);
   };
 
   // Calculate average rating
