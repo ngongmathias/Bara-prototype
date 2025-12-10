@@ -763,6 +763,64 @@ export const AdminCountries = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Help Dialog */}
+      <Dialog open={isHelpDialogOpen} onOpenChange={setIsHelpDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-comfortaa font-bold">Countries Management Guide</DialogTitle>
+            <DialogDescription>Learn how to manage countries on your platform</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 pt-4">
+            <section>
+              <h3 className="text-lg font-semibold mb-2">Overview</h3>
+              <p className="text-gray-600">Manage all countries available on your platform. Countries are the top-level geographic organization for cities and businesses.</p>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-semibold mb-2">Adding a Country</h3>
+              <ol className="list-decimal list-inside space-y-2 text-gray-600">
+                <li>Click the "Add Country" button</li>
+                <li>Enter the country name (e.g., "Rwanda")</li>
+                <li>Enter the 2-letter ISO country code (e.g., "RW")</li>
+                <li>Optionally add a flag emoji (e.g., 🇷🇼)</li>
+                <li>Click "Add Country" to save</li>
+              </ol>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-semibold mb-2">Editing a Country</h3>
+              <ul className="list-disc list-inside space-y-2 text-gray-600">
+                <li>Click the pencil icon on any country card</li>
+                <li>Update the fields as needed</li>
+                <li>Click "Update Country" to save changes</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-semibold mb-2">Deleting a Country</h3>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-red-800 font-semibold mb-2">⚠️ Warning</p>
+                <p className="text-red-700 text-sm">Deleting a country will also delete all associated cities and businesses. This action cannot be undone!</p>
+              </div>
+              <ul className="list-disc list-inside space-y-2 text-gray-600 mt-3">
+                <li>Click the trash icon on the country card</li>
+                <li>Confirm the deletion when prompted</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-semibold mb-2">What's Next?</h3>
+              <p className="text-gray-600 mb-2">After adding countries, you should:</p>
+              <ol className="list-decimal list-inside space-y-2 text-gray-600">
+                <li>Go to "Country Info" to add detailed information (description, capital, economy, etc.)</li>
+                <li>Add cities under "Cities Management"</li>
+                <li>Businesses can then be assigned to cities within countries</li>
+              </ol>
+            </section>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };

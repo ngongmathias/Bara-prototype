@@ -180,7 +180,7 @@ export const AdminCountryInfo: React.FC = () => {
         flag: 'country-flags',
         leader: 'country-leaders',
         monument: 'country-monuments',
-        country_ad: 'country-page-ads'
+        country_ad: 'country-leaders'  // Reuse existing bucket temporarily
       };
       
       const imageUrl = await uploadImage(file, folderMap[imageType], 'images');
