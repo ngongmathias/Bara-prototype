@@ -160,7 +160,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/categories" className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
+                <Link to="/listings/categories" className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
                   {t('footer.categories')}
                 </Link>
               </li>

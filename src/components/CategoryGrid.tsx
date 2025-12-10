@@ -167,11 +167,11 @@ export const CategoryGrid = () => {
   }, []);
 
   const handleCategoryClick = (categorySlug: string) => {
-    navigate(`/category/${categorySlug}`);
+    navigate(`/listings/category/${categorySlug}`);
   };
 
   const handleViewAllCategories = () => {
-    navigate('/categories');
+    navigate('/listings/categories');
   };
 
   const toggleCategories = async () => {

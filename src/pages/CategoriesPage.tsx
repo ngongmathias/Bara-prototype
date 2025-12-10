@@ -103,7 +103,7 @@ export const CategoriesPage = () => {
   }, [searchTerm, categories, t]);
 
   const handleCategoryClick = (categorySlug: string) => {
-    navigate(`/category/${categorySlug}`);
+    navigate(`/listings/category/${categorySlug}`);
   };
 
   const handleBackClick = () => {

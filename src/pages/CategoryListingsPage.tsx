@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, MapPin, Star, ArrowLeft, Search, Grid, List, Phone, Globe, Crown, Users, Sparkles, Tag, Map, ChevronDown } from "lucide-react";
+import { Building2, MapPin, Star, ArrowLeft, Search, Grid, List, Phone, Globe, Crown, Users, Sparkles, Tag, Map, ChevronDown, UtensilsCrossed, Wine, Coffee, Car, Home, Scale, Bed, Plane, Building, Scissors, BookOpen, Film, Stethoscope, User, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, Zap, Wrench, Heart, Dumbbell, Laptop, Shield, Calculator, Megaphone, Briefcase, Camera, Calendar, Music } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { MatrixRain } from "@/components/landing/MatrixRain";
@@ -16,6 +16,57 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+// Category-specific amenities mapping  
+const getCategoryAmenities = (categorySlug: string) => {
+  const amenitiesMap: { [key: string]: { icon: any; label: string }[] } = {
+    'restaurants': [
+      { icon: UtensilsCrossed, label: 'Food' },
+      { icon: Wine, label: 'Drinks' }
+    ],
+    'cafes': [
+      { icon: Coffee, label: 'Coffee' },
+      { icon: Wine, label: 'Beverages' }
+    ],
+    'hotels': [
+      { icon: Bed, label: 'Accommodation' },
+      { icon: Wrench, label: 'Services' }
+    ],
+    'hospitals': [
+      { icon: Stethoscope, label: 'Medical' },
+      { icon: Heart, label: 'Healthcare' }
+    ],
+    'auto-repair': [
+      { icon: Car, label: 'Automotive' },
+      { icon: Wrench, label: 'Repair' }
+    ],
+    'real-estate': [
+      { icon: Home, label: 'Properties' },
+      { icon: Building, label: 'Real Estate' }
+    ],
+    'lawyers': [
+      { icon: Scale, label: 'Legal' },
+      { icon: Building, label: 'Services' }
+    ],
+    'schools': [
+      { icon: GraduationCap, label: 'Education' },
+      { icon: Book, label: 'Learning' }
+    ],
+    'gyms-fitness': [
+      { icon: Dumbbell, label: 'Fitness' },
+      { icon: Heart, label: 'Health' }
+    ],
+    'beauty-salons': [
+      { icon: Scissors, label: 'Beauty' },
+      { icon: Heart, label: 'Wellness' }
+    ]
+  };
+  
+  return amenitiesMap[categorySlug] || [
+    { icon: Building, label: 'Services' },
+    { icon: Heart, label: 'Support' }
+  ];
+};
 
 interface Category {
   id: string;
@@ -171,7 +222,7 @@ const CategoryListingsPage = () => {
         <div className="relative z-10 flex items-center justify-center min-h-screen">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-600 mb-4">Category not found</h1>
-            <Button onClick={() => navigate('/categories')} className="bg-black hover:bg-gray-800">
+            <Button onClick={() => navigate('/listings/categories')} className="bg-black hover:bg-gray-800">
               Browse Categories
             </Button>
           </div>
@@ -194,7 +245,7 @@ const CategoryListingsPage = () => {
             className="mb-8"
           >
             <button
-              onClick={() => navigate('/categories')}
+              onClick={() => navigate('/listings/categories')}
               className="flex items-center gap-2 text-gray-500 hover:text-black transition-colors mb-6 group"
             >
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -497,6 +548,24 @@ const CategoryListingsPage = () => {
                                   "{business.description}"
                                 </p>
                               )}
+                              
+                              {/* Category Amenities - YP Style */}
+                              {(() => {
+                                const amenities = getCategoryAmenities(categorySlug || '');
+                                return amenities.length > 0 && (
+                                  <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
+                                    {amenities.map((amenity, idx) => {
+                                      const IconComponent = amenity.icon;
+                                      return (
+                                        <div key={idx} className="flex items-center gap-1">
+                                          <IconComponent className="w-3 h-3" />
+                                          <span>{amenity.label}</span>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                );
+                              })()}
                             </div>
                             
                             {/* Right Side: Phone & Address */}

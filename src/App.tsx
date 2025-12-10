@@ -101,8 +101,8 @@ const AppRoutes = () => {
       <Route path="/contact-us" element={<ContactUsPage />} />
       <Route path="/faq" element={<FaqPage />} />
       <Route path="/ask-question" element={<AskQuestionPage />} />
-      <Route path="/categories" element={<CategoriesPage />} />
-      <Route path="/category/:categorySlug" element={<CategoryListingsPage />} />
+      <Route path="/listings/categories" element={<CategoriesPage />} />
+      <Route path="/listings/category/:categorySlug" element={<CategoryListingsPage />} />
       <Route path="/:city/search" element={<ListingsPage />} />
       <Route path="/:city/:category" element={<ListingsPage />} />
       <Route path="/:city/:category/:businessId" element={<BusinessDetailPage />} />

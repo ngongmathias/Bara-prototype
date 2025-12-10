@@ -37,7 +37,7 @@ export const BusinessDetailPage = () => {
     if (city) {
       navigate(`/${city}/${actualCategorySlug}`);
     } else {
-      navigate(`/category/${actualCategorySlug}`);
+      navigate(`/listings/category/${actualCategorySlug}`);
     }
   };
 

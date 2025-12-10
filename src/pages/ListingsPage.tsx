@@ -49,12 +49,12 @@ const ListingsPage = () => {
 
   const handleSearch = () => {
     if (searchTerm || location) {
-      navigate(`/category/all?search=${searchTerm}&location=${location}`);
+      navigate(`/listings/category/all?search=${searchTerm}&location=${location}`);
     }
   };
 
   const handleCategoryClick = (categorySlug: string) => {
-    navigate(`/category/${categorySlug}`);
+    navigate(`/listings/category/${categorySlug}`);
   };
 
   const handleManageListing = () => {
@@ -174,7 +174,7 @@ const ListingsPage = () => {
             <div className="text-center mt-8">
               <Button
                 variant="outline"
-                onClick={() => navigate("/categories")}
+                onClick={() => navigate("/listings/categories")}
                 className="rounded-full px-8 bg-white hover:bg-gray-50"
               >
                 View All Categories
