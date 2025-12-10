@@ -946,44 +946,32 @@ export const AdminSponsoredBanners: React.FC = () => {
               </div>
 
               {/* Banner Positioning Controls */}
-              <div>
-                <h4 className="font-medium mb-3">Banner Positioning</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="flex items-center space-x-3">
-                    <Switch
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium mb-2">Display Options</h3>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
                       checked={newForm.display_on_top}
-                      onCheckedChange={(checked) => setNewForm((p) => ({ ...p, display_on_top: checked }))}
+                      onChange={(e) => setNewForm((p) => ({ ...p, display_on_top: e.target.checked }))}
+                      className="rounded border-gray-300"
                     />
-                    <div>
-                      <label className="text-sm font-medium">Display on Top</label>
-                      <p className="text-xs text-gray-500">Show on listings/events pages (top)</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <Switch
+                    <span className="text-sm">Display on Top of Pages</span>
+                  </label>
+                  <label className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
                       checked={newForm.display_on_bottom}
-                      onCheckedChange={(checked) => setNewForm((p) => ({ ...p, display_on_bottom: checked }))}
+                      onChange={(e) => setNewForm((p) => ({ ...p, display_on_bottom: e.target.checked }))}
+                      className="rounded border-gray-300"
                     />
-                    <div>
-                      <label className="text-sm font-medium">Display on Bottom</label>
-                      <p className="text-xs text-gray-500">Show on listings/events pages (bottom)</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-3">
-                    <Switch
-                      checked={newForm.show_on_country_detail}
-                      onCheckedChange={(checked) => setNewForm((p) => ({ ...p, show_on_country_detail: checked }))}
-                    />
-                    <div>
-                      <label className="text-sm font-medium">Show on Country Page</label>
-                      <p className="text-xs text-gray-500">Show on /countries/rwanda pages</p>
-                    </div>
-                  </div>
+                    <span className="text-sm">Display on Bottom of Pages</span>
+                  </label>
                 </div>
                 <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
                   <p className="text-xs text-blue-900">
+                    💡 <strong>Tip:</strong> For country-specific tourism ads (e.g., "Visit Rwanda"), enable <strong>ONLY</strong> "Display on Top" 
+                    and keep Bottom OFF. Use wider dimensions: 1200x132px for better fit.
                     💡 <strong>Tip:</strong> For country-specific tourism ads (e.g., "Visit Rwanda"), enable <strong>ONLY</strong> "Show on Country Page" 
                     and keep Top/Bottom OFF. Use wider dimensions: 1200x132px for better fit.
                   </p>
@@ -1016,7 +1004,6 @@ export const AdminSponsoredBanners: React.FC = () => {
                         payment_status: newForm.payment_status,
                         display_on_top: newForm.display_on_top,
                         display_on_bottom: newForm.display_on_bottom,
-                        show_on_country_detail: newForm.show_on_country_detail,
                       };
                       if (typeof newForm.payment_amount === 'number') payload.payment_amount = newForm.payment_amount;
                       if (newForm.status) payload.status = newForm.status;
