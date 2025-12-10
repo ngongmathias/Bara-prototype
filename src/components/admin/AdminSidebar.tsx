@@ -129,18 +129,12 @@ const adminMenuItems = [
     path: "/admin/users",
     description: "Manage user accounts"
   },
-  // {
-  //   title: "Analytics",
-  //   icon: BarChart3,
-  //   path: "/admin/analytics",
-  //   description: "Business insights and reports"
-  // },
-  // {
-  //   title: "Reports",
-  //   icon: FileText,
-  //   path: "/admin/reports",
-  //   description: "System reports and logs"
-  // },
+  {
+    title: "Reports & Exports",
+    icon: FileText,
+    path: "/admin/reports",
+    description: "Generate and export data reports"
+  },
   {
     title: "Settings",
     icon: Settings,
