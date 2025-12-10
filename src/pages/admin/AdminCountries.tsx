@@ -23,7 +23,8 @@ import {
   Globe, 
   MapPin,
   Users,
-  Building2
+  Building2,
+  HelpCircle
 } from "lucide-react";
 import { getAdminDb } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -55,6 +56,7 @@ export const AdminCountries = () => {
     flag_emoji: "",
     is_active: true
   });
+  const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchCountries();
@@ -405,25 +407,177 @@ export const AdminCountries = () => {
           <p className="text-gray-600 font-roboto">Manage countries and their regions</p>
         </div>
         
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-yellow-900 hover:bg-blue-600">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Country
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setIsHelpDialogOpen(true)} className="flex items-center gap-2">
+            <HelpCircle className="w-4 h-4" />
+            Help
+          </Button>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-yellow-900 hover:bg-blue-600">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Country
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="font-comfortaa">Add New Country</DialogTitle>
+                <DialogDescription className="font-roboto">
+                  Create a new country entry for your platform.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="country-name" className="font-roboto">Country Name</Label>
+                  <Input
+                    id="country-name"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Enter country name"
+                    className="font-roboto"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="country-code" className="font-roboto">Country Code</Label>
+                  <Input
+                    id="country-code"
+                    value={formData.code}
+                    onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
+                    placeholder="e.g., RW, KE, UG"
+                    className="font-roboto"
+                    maxLength={2}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="flag-emoji" className="font-roboto">Flag Emoji (Optional)</Label>
+                  <Input
+                    id="flag-emoji"
+                    value={formData.flag_emoji}
+                    onChange={(e) => setFormData(prev => ({ ...prev, flag_emoji: e.target.value }))}
+                    placeholder="🇷🇼 🇰🇪 🇺🇬"
+                    className="font-roboto"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="font-roboto" disabled={isSubmitting}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddCountry} className="font-roboto bg-yellow-900 hover:bg-blue-600" disabled={isSubmitting}>
+                  {isSubmitting ? "Adding..." : "Add Country"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Search and Filters */}
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search countries..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 font-roboto"
+                />
+              </div>
+              <Badge variant="secondary" className="self-center">
+                {filteredCountries.length} countries
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Countries Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCountries.map((country) => (
+            <Card key={country.id} className="hover:shadow-lg transition-shadow duration-200">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl">{country.flag_emoji || "🌍"}</div>
+                    <div>
+                      <CardTitle className="text-lg font-comfortaa">{country.name}</CardTitle>
+                      <div className="flex items-center space-x-1 mt-1">
+                        <Globe className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm font-roboto text-gray-600">{country.code}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openEditDialog(country)}
+                      className="p-1 h-8 w-8"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteCountry(country.id)}
+                      className="p-1 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="grid grid-cols-2 gap-4 mb-3">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <MapPin className="w-4 h-4" />
+                    <span className="font-roboto">{country.city_count || 0} cities</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <Building2 className="w-4 h-4" />
+                    <span className="font-roboto">{country.business_count || 0} businesses</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-sm text-gray-500 font-roboto">
+                  <span>Added: {new Date(country.created_at).toLocaleDateString()}</span>
+                  <Badge variant={country.is_active ? "default" : "secondary"}>
+                    {country.is_active ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* No Results */}
+        {filteredCountries.length === 0 && searchTerm && (
+          <Card className="text-center py-12">
+            <CardContent>
+              <Globe className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-comfortaa font-semibold text-gray-900 mb-2">
+                No countries found
+              </h3>
+              <p className="text-gray-600 font-roboto">
+                Try adjusting your search terms or add a new country.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Edit Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="font-comfortaa">Add New Country</DialogTitle>
+              <DialogTitle className="font-comfortaa">Edit Country</DialogTitle>
               <DialogDescription className="font-roboto">
-                Create a new country entry for your platform.
+                Update country information.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="country-name" className="font-roboto">Country Name</Label>
+                <Label htmlFor="edit-country-name" className="font-roboto">Country Name</Label>
                 <Input
-                  id="country-name"
+                  id="edit-country-name"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Enter country name"
