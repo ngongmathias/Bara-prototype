@@ -751,6 +751,55 @@ export const AdminBusinesses = () => {
 
   return (
     <AdminLayout title="Businesses Management" subtitle="Manage business listings and verifications">
+      {/* Quick Help Guide */}
+      <Card className="mb-6 border-blue-200 bg-blue-50/50">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-blue-600" />
+              <CardTitle className="text-lg font-comfortaa text-blue-900">Quick Admin Guide</CardTitle>
+            </div>
+            <a 
+              href="/ADMIN_GUIDE.md" 
+              target="_blank"
+              className="text-sm text-blue-600 hover:underline font-roboto"
+            >
+              View Full Guide →
+            </a>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm font-roboto">
+            <div className="space-y-2">
+              <h4 className="font-semibold text-gray-900">📍 Listings URLs</h4>
+              <p className="text-gray-700">Businesses appear at:</p>
+              <code className="text-xs bg-white px-2 py-1 rounded border block">
+                /listings/category/{'{category}'}
+              </code>
+              <p className="text-xs text-gray-600">Example: /listings/category/restaurant</p>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold text-gray-900">🗺️ Map View</h4>
+              <p className="text-gray-700">For businesses to show on map:</p>
+              <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                <li>Add <strong>Latitude</strong> (-90 to 90)</li>
+                <li>Add <strong>Longitude</strong> (-180 to 180)</li>
+                <li>Use Google Maps to find coordinates</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold text-gray-900">✨ Key Fields</h4>
+              <ul className="text-xs text-gray-600 space-y-1">
+                <li><strong>Phone</strong>: Shows in GREEN prominently</li>
+                <li><strong>Premium</strong>: Featured in sidebar</li>
+                <li><strong>Sponsored</strong>: Blue background + top placement</li>
+                <li><strong>Status</strong>: Must be "Active" to show</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
