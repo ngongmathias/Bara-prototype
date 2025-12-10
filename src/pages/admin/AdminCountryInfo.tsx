@@ -27,7 +27,8 @@ import {
   X,
   Trash2,
   Upload,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ExternalLink
 } from 'lucide-react';
 import { db } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -82,6 +83,14 @@ interface CountryInfo {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  // Country Page Advertisement fields
+  ad_image_url?: string | null;
+  ad_company_name?: string | null;
+  ad_company_website?: string | null;
+  ad_tagline?: string | null;
+  ad_is_active?: boolean;
+  ad_click_count?: number;
+  ad_view_count?: number;
 }
 
 export const AdminCountryInfo: React.FC = () => {
@@ -95,7 +104,7 @@ export const AdminCountryInfo: React.FC = () => {
   const [formData, setFormData] = useState<Partial<CountryInfo>>({});
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [uploadingImageType, setUploadingImageType] = useState<'coat_of_arms' | 'flag' | 'leader' | 'monument' | null>(null);
+  const [uploadingImageType, setUploadingImageType] = useState<'coat_of_arms' | 'flag' | 'leader' | 'monument' | 'country_ad' | null>(null);
 
   useEffect(() => {
     fetchCountries();
@@ -147,7 +156,7 @@ export const AdminCountryInfo: React.FC = () => {
     setIsDialogOpen(true);
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, imageType: 'coat_of_arms' | 'flag' | 'leader' | 'monument') => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, imageType: 'coat_of_arms' | 'flag' | 'leader' | 'monument' | 'country_ad') => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -170,7 +179,8 @@ export const AdminCountryInfo: React.FC = () => {
         coat_of_arms: 'country-coat-of-arms',
         flag: 'country-flags',
         leader: 'country-leaders',
-        monument: 'country-monuments'
+        monument: 'country-monuments',
+        country_ad: 'country-page-ads'
       };
       
       const imageUrl = await uploadImage(file, folderMap[imageType], 'images');
@@ -179,7 +189,8 @@ export const AdminCountryInfo: React.FC = () => {
         coat_of_arms: 'coat_of_arms_url',
         flag: 'flag_url',
         leader: 'leader_image_url',
-        monument: 'monument_image_url'
+        monument: 'monument_image_url',
+        country_ad: 'ad_image_url'
       };
       
       setFormData({ ...formData, [fieldMap[imageType]]: imageUrl });
@@ -1155,6 +1166,137 @@ export const AdminCountryInfo: React.FC = () => {
                 <p className="text-xs text-gray-500">
                   Supported formats: JPG, PNG, GIF. Max size: 5MB per image
                 </p>
+              </div>
+
+              {/* Country Page Advertisement Section */}
+              <div className="space-y-4 border-t pt-6 mt-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <Building className="w-5 h-5" />
+                    Country Page Advertisement
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">Active</span>
+                    <input
+                      type="checkbox"
+                      checked={formData.ad_is_active || false}
+                      onChange={(e) => setFormData({...formData, ad_is_active: e.target.checked})}
+                      className="rounded border-gray-300"
+                    />
+                  </div>
+                </div>
+                
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-900">
+                    <strong>💡 Country Page Ad:</strong> This ad will appear on the country detail page (e.g., /countries/rwanda). 
+                    Recommended size: <strong>600x600px (square)</strong> for better visual impact. Great for tourism boards, 
+                    investment opportunities, or national campaigns.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="ad_company_name">Company/Organization Name</Label>
+                    <Input
+                      id="ad_company_name"
+                      value={formData.ad_company_name || ''}
+                      onChange={(e) => setFormData({...formData, ad_company_name: e.target.value})}
+                      placeholder="e.g., Rwanda Development Board"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ad_company_website">Website URL</Label>
+                    <Input
+                      id="ad_company_website"
+                      type="url"
+                      value={formData.ad_company_website || ''}
+                      onChange={(e) => setFormData({...formData, ad_company_website: e.target.value})}
+                      placeholder="https://visitrwanda.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="ad_tagline">Tagline (Optional)</Label>
+                  <Input
+                    id="ad_tagline"
+                    value={formData.ad_tagline || ''}
+                    onChange={(e) => setFormData({...formData, ad_tagline: e.target.value})}
+                    placeholder="e.g., Remarkable Rwanda - Land of a Thousand Hills"
+                    maxLength={100}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Max 100 characters</p>
+                </div>
+
+                <div>
+                  <Label htmlFor="ad_image">Advertisement Image</Label>
+                  <div className="space-y-2">
+                    {formData.ad_image_url && (
+                      <div className="relative">
+                        <img 
+                          src={formData.ad_image_url} 
+                          alt="Ad preview"
+                          className="w-full max-w-md h-48 object-contain border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 p-2"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setFormData({...formData, ad_image_url: null})}
+                          className="absolute -top-2 -right-2 bg-white border-red-300 text-red-600 hover:bg-red-50"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      id="ad_image"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, 'country_ad')}
+                      className="hidden"
+                      disabled={uploadingImage}
+                    />
+                    <label
+                      htmlFor="ad_image"
+                      className="flex items-center justify-center space-x-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 w-full"
+                    >
+                      {uploadingImage && uploadingImageType === 'country_ad' ? (
+                        <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Upload className="w-5 h-5 text-gray-600" />
+                      )}
+                      <span className="text-sm font-medium text-gray-700">
+                        {formData.ad_image_url ? 'Change Advertisement Image' : 'Upload Advertisement Image (600x600px recommended)'}
+                      </span>
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Recommended: 600x600px square format. Max size: 5MB. Formats: JPG, PNG, WebP
+                  </p>
+                </div>
+
+                {(formData.ad_click_count || formData.ad_view_count) && (
+                  <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-600">Total Views</p>
+                      <p className="text-2xl font-bold text-gray-900">{formData.ad_view_count || 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600">Total Clicks</p>
+                      <p className="text-2xl font-bold text-gray-900">{formData.ad_click_count || 0}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-xs text-gray-600">Click-Through Rate (CTR)</p>
+                      <p className="text-xl font-semibold text-green-600">
+                        {formData.ad_view_count && formData.ad_view_count > 0 
+                          ? ((formData.ad_click_count || 0) / formData.ad_view_count * 100).toFixed(2) 
+                          : '0.00'}%
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
