@@ -407,23 +407,12 @@ export const AdminBusinesses = () => {
         const uploadPromises = imageFiles.map(file => 
           uploadImage(file, 'business-images', 'businesses')
         );
-        const uploadResults = await Promise.all(uploadPromises);
-        
-        for (const result of uploadResults) {
-          if (result.error) {
-            throw new Error(`Image upload failed: ${result.error}`);
-          }
-          uploadedImageUrls.push(result.url);
-        }
+        uploadedImageUrls = await Promise.all(uploadPromises);
       }
 
       // Upload logo
       if (logoFile) {
-        const logoResult = await uploadImage(logoFile, 'business-logos', 'logos');
-        if (logoResult.error) {
-          throw new Error(`Logo upload failed: ${logoResult.error}`);
-        }
-        uploadedLogoUrl = logoResult.url;
+        uploadedLogoUrl = await uploadImage(logoFile, 'business-logos', 'logos');
       }
 
       const businessData = {
@@ -477,15 +466,7 @@ export const AdminBusinesses = () => {
         const uploadPromises = imageFiles.map(file => 
           uploadImage(file, 'business-images', 'businesses')
         );
-        const uploadResults = await Promise.all(uploadPromises);
-        
-        const newImageUrls: string[] = [];
-        for (const result of uploadResults) {
-          if (result.error) {
-            throw new Error(`Image upload failed: ${result.error}`);
-          }
-          newImageUrls.push(result.url);
-        }
+        const newImageUrls = await Promise.all(uploadPromises);
         
         // Combine existing images with new ones
         finalImages = [...finalImages, ...newImageUrls];
@@ -493,11 +474,7 @@ export const AdminBusinesses = () => {
 
       // Upload new logo if provided
       if (logoFile) {
-        const logoResult = await uploadImage(logoFile, 'business-logos', 'logos');
-        if (logoResult.error) {
-          throw new Error(`Logo upload failed: ${logoResult.error}`);
-        }
-        finalLogoUrl = logoResult.url;
+        finalLogoUrl = await uploadImage(logoFile, 'business-logos', 'logos');
       }
 
       const businessData = {
