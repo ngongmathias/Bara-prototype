@@ -7,8 +7,7 @@ import { Building2, MapPin, Star, ArrowLeft, Search, Grid, List, Phone, Globe, C
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { MatrixRain } from "@/components/landing/MatrixRain";
-import { TopBannerAd } from "@/components/TopBannerAd";
-import { BottomBannerAd } from "@/components/BottomBannerAd";
+// Banner ads removed from category pages per user request
 import { CityMapLeaflet } from "@/components/CityMapLeaflet";
 import {
   DropdownMenu,
@@ -349,8 +348,7 @@ const CategoryListingsPage = () => {
             </div>
           </motion.div>
 
-          {/* Sponsored Banner */}
-          <TopBannerAd />
+          {/* Banner ads removed from category pages */}
 
           {/* Business Listings */}
           {loading ? (
@@ -742,10 +740,7 @@ const CategoryListingsPage = () => {
             </div>
           )}
 
-          {/* Bottom Banner */}
-          <div className="mt-12">
-            <BottomBannerAd />
-          </div>
+          {/* Bottom banner removed from category pages */}
         </div>
       </div>
     </div>

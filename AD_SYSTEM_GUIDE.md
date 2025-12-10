@@ -114,6 +114,15 @@ BARA AFRICA has a sophisticated ad system that allows **country-specific adverti
 - Hover effect: image scales
 - Click tracking enabled
 
+**IMPORTANT FOR COUNTRY-ONLY ADS:**
+If you want an ad to show **ONLY** on country pages (e.g., `/countries/rwanda`) and **NOT** on listings/events pages:
+1. ✅ Enable: `show_on_country_detail = true`
+2. ❌ Disable: `display_on_top = false`
+3. ❌ Disable: `display_on_bottom = false`
+4. 📐 Use wider dimensions: **1200x132px** (better fit for country pages)
+
+**Example**: "Visit Rwanda" tourism ad should only show on `/countries/rwanda`, not on general listings pages.
+
 ---
 
 ## 🌍 Country Targeting Explained
@@ -336,14 +345,14 @@ Ads should match BARA AFRICA's **minimalist black & white theme**. NO colorful g
 
 To properly test the system, create these 5 ads:
 
-#### **Test Ad 1: Rwanda Top Banner**
+#### **Test Ad 1: Rwanda Country Page ONLY**
 ```json
 {
   "country_id": "<rwanda-uuid>",
   "company_name": "Visit Rwanda",
   "company_website": "https://visitrwanda.com",
   "banner_alt_text": "Explore Rwanda - Land of a Thousand Hills",
-  "display_on_top": true,
+  "display_on_top": false,
   "display_on_bottom": false,
   "show_on_country_detail": true,
   "is_active": true,
@@ -351,7 +360,8 @@ To properly test the system, create these 5 ads:
   "status": "active"
 }
 ```
-**Test**: Should show on `/countries/rwanda` AND top of listings pages
+**Image Size**: 1200x132px (wider for country pages)  
+**Test**: Should show **ONLY** on `/countries/rwanda`, NOT on listings/events pages
 
 ---
 
@@ -400,7 +410,7 @@ To properly test the system, create these 5 ads:
   "company_name": "Rwanda Development Board",
   "company_website": "https://rdb.rw",
   "banner_alt_text": "Invest in Rwanda",
-  "display_on_top": true,
+  "display_on_top": false,
   "display_on_bottom": false,
   "show_on_country_detail": true,
   "is_active": true,
@@ -408,7 +418,8 @@ To properly test the system, create these 5 ads:
   "status": "active"
 }
 ```
-**Test**: Should ROTATE with Test Ad 1 on Rwanda page and top banners
+**Image Size**: 1200x132px (wider for country pages)  
+**Test**: Should ROTATE with Test Ad 1 on `/countries/rwanda` page ONLY (5-second slideshow)
 
 ---
 

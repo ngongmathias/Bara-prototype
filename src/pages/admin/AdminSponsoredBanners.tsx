@@ -67,6 +67,7 @@ export const AdminSponsoredBanners: React.FC = () => {
     payment_amount: 25 as number | undefined,
     display_on_top: true,
     display_on_bottom: false,
+    show_on_country_detail: false,
   });
 
   // Analytics state
@@ -878,7 +879,7 @@ export const AdminSponsoredBanners: React.FC = () => {
               {/* Banner Positioning Controls */}
               <div>
                 <h4 className="font-medium mb-3">Banner Positioning</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="flex items-center space-x-3">
                     <Switch
                       checked={newForm.display_on_top}
@@ -886,7 +887,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                     />
                     <div>
                       <label className="text-sm font-medium">Display on Top</label>
-                      <p className="text-xs text-gray-500">Show banner at the top of the page</p>
+                      <p className="text-xs text-gray-500">Show on listings/events pages (top)</p>
                     </div>
                   </div>
                   
@@ -897,9 +898,26 @@ export const AdminSponsoredBanners: React.FC = () => {
                     />
                     <div>
                       <label className="text-sm font-medium">Display on Bottom</label>
-                      <p className="text-xs text-gray-500">Show banner at the bottom of the page</p>
+                      <p className="text-xs text-gray-500">Show on listings/events pages (bottom)</p>
                     </div>
                   </div>
+
+                  <div className="flex items-center space-x-3">
+                    <Switch
+                      checked={newForm.show_on_country_detail}
+                      onCheckedChange={(checked) => setNewForm((p) => ({ ...p, show_on_country_detail: checked }))}
+                    />
+                    <div>
+                      <label className="text-sm font-medium">Show on Country Page</label>
+                      <p className="text-xs text-gray-500">Show on /countries/rwanda pages</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                  <p className="text-xs text-blue-900">
+                    💡 <strong>Tip:</strong> For country-specific tourism ads (e.g., "Visit Rwanda"), enable <strong>ONLY</strong> "Show on Country Page" 
+                    and keep Top/Bottom OFF. Use wider dimensions: 1200x132px for better fit.
+                  </p>
                 </div>
               </div>
 
@@ -927,13 +945,14 @@ export const AdminSponsoredBanners: React.FC = () => {
                         payment_status: newForm.payment_status,
                         display_on_top: newForm.display_on_top,
                         display_on_bottom: newForm.display_on_bottom,
+                        show_on_country_detail: newForm.show_on_country_detail,
                       };
                       if (typeof newForm.payment_amount === 'number') payload.payment_amount = newForm.payment_amount;
                       if (newForm.status) payload.status = newForm.status;
                       await createBanner(payload);
                       toast({ title: 'Banner Added', description: 'Sponsored banner has been created.' });
                       setShowAddDialog(false);
-                      setNewForm({ company_name: '', company_website: '', banner_alt_text: '', country_id: '', payment_status: 'paid', status: 'pending', payment_amount: 25, display_on_top: true, display_on_bottom: false });
+                      setNewForm({ company_name: '', company_website: '', banner_alt_text: '', country_id: '', payment_status: 'paid', status: 'pending', payment_amount: 25, display_on_top: true, display_on_bottom: false, show_on_country_detail: false });
                       setNewBannerImage(null);
                       setNewBannerImageUrl('');
                       fetchBanners(true);
@@ -1130,8 +1149,11 @@ export const AdminSponsoredBanners: React.FC = () => {
               <Button variant="outline" onClick={() => setIsHelpDialogOpen(false)}>
                 Close
               </Button>
-              <Button onClick={() => window.open('/AD_SYSTEM_GUIDE.md', '_blank')} className="bg-blue-600 hover:bg-blue-700">
-                View Full Guide
+              <Button 
+                onClick={() => window.open('https://github.com/DLOADIN/Bara-Prototype/blob/main/AD_SYSTEM_GUIDE.md', '_blank')} 
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                View Full Guide on GitHub
               </Button>
             </div>
           </DialogContent>
