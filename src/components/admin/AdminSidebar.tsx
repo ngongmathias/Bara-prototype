@@ -136,6 +136,12 @@ const adminMenuItems = [
     description: "Manage admin users (Super Admin only)"
   },
   {
+    title: "RSS Feeds",
+    icon: FileText,
+    path: "/admin/rss-feeds",
+    description: "Manage news sources and feeds"
+  },
+  {
     title: "Reports & Exports",
     icon: FileText,
     path: "/admin/reports",
