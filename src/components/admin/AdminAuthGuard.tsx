@@ -44,62 +44,25 @@ export const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
 
         const userEmail = user.primaryEmailAddress?.emailAddress || '';
         
-        // Use the new bridge service to check admin status
-        // This will now automatically create admin users
+        // Check admin status from database (NO AUTO-GRANT)
         const adminStatus = await ClerkSupabaseBridge.checkAdminStatus(user.id, userEmail);
 
-        // For development: Always grant admin access to authenticated users
-        if (true) {
-          console.log('Development mode: Granting admin access to all authenticated users');
-          
-          // Try to update last login if possible
-          try {
-            await ClerkSupabaseBridge.updateLastLogin(user.id);
-          } catch (error) {
-            console.log('Could not update last login, but continuing...');
-          }
-          
-          setAdminInfo({
-            role: 'super_admin',
-            permissions: ['read', 'write', 'delete', 'admin']
-          });
-          setIsAdmin(true);
-          setIsChecking(false);
-
-          // Only show welcome message once after successful login
-          if (!hasShownWelcome) {
-            toast({
-              title: "Access Granted",
-              description: "Welcome! You have full admin privileges.",
-              variant: "default"
-            });
-            setHasShownWelcome(true);
-          }
-          
-          return;
-        }
-
-        // Fallback: Check actual admin status
+        // If user is not an admin, deny access
         if (!adminStatus.isAdmin) {
-          // Even if not in admin_users table, grant access for development
-          console.log('Development mode: Granting admin access despite not being in admin_users table');
-          
-          setAdminInfo({
-            role: 'super_admin',
-            permissions: ['read', 'write', 'delete', 'admin']
-          });
-          setIsAdmin(true);
+          console.log('Access denied: User is not in admin_users table');
+          setIsAdmin(false);
           setIsChecking(false);
-
-          // Only show welcome message once after successful login
-          if (!hasShownWelcome) {
-            toast({
-              title: "Access Granted",
-              description: "Welcome! You have full admin privileges (development mode).",
-              variant: "default"
-            });
-            setHasShownWelcome(true);
-          }
+          
+          toast({
+            title: "Access Denied",
+            description: "You don't have admin privileges. Contact a super admin for access.",
+            variant: "destructive"
+          });
+          
+          // Redirect to home after showing message
+          setTimeout(() => {
+            navigate('/');
+          }, 2000);
           
           return;
         }

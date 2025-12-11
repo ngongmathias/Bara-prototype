@@ -41,6 +41,7 @@ import { AdminSponsoredAds } from "./pages/admin/AdminSponsoredAds";
 import { AdminReports } from "./pages/admin/AdminReportsNew";
 import { AdminCategories } from "./pages/admin/AdminCategories";
 import { AdminUsers } from "./pages/admin/AdminUsers";
+import { AdminManagement } from "./pages/admin/AdminManagement";
 import { AdminSettings } from "./pages/admin/AdminSettings";
 import ContactMessagesPage from "./pages/admin/ContactMessagesPage";
 import { AdminBannerAds } from "./pages/admin/AdminBannerAds";
@@ -256,6 +257,11 @@ const AppRoutes = () => {
       <Route path="/admin/users" element={
         <AdminAuthGuard>
           <AdminUsers />
+        </AdminAuthGuard>
+      } />
+      <Route path="/admin/admin-management" element={
+        <AdminAuthGuard>
+          <AdminManagement />
         </AdminAuthGuard>
       } />
       <Route path="/admin/settings" element={

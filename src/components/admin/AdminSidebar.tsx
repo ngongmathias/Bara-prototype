@@ -130,6 +130,12 @@ const adminMenuItems = [
     description: "Manage user accounts"
   },
   {
+    title: "Admin Management",
+    icon: Shield,
+    path: "/admin/admin-management",
+    description: "Manage admin users (Super Admin only)"
+  },
+  {
     title: "Reports & Exports",
     icon: FileText,
     path: "/admin/reports",

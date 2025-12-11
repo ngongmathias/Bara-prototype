@@ -11,7 +11,7 @@ export interface ClerkUser {
 export class ClerkSupabaseBridge {
   /**
    * Check if a Clerk user has admin privileges
-   * Now automatically grants admin access to all authenticated users
+   * SECURE: Only checks database, NO auto-grant
    */
   static async checkAdminStatus(clerkUserId: string, userEmail: string): Promise<{
     isAdmin: boolean;
@@ -22,38 +22,21 @@ export class ClerkSupabaseBridge {
     try {
       console.log('Checking admin status for Clerk user:', clerkUserId);
       
-      // First, try to get existing admin user
-      let adminUser = await this.getAdminUser(clerkUserId);
+      // Get admin user from database
+      const adminUser = await this.getAdminUser(clerkUserId);
       
       if (!adminUser) {
-        // User doesn't exist in admin_users table, create them automatically
-        console.log('User not found in admin_users table, creating admin user automatically...');
-        
-        const clerkUser: ClerkUser = {
-          id: clerkUserId,
-          email: userEmail,
-          firstName: userEmail.split('@')[0], // Use email prefix as first name
-          lastName: ''
-        };
-        
-        const created = await this.upsertAdminUser(clerkUser, 'super_admin', ['read', 'write', 'delete', 'admin']);
-        
-        if (created) {
-          // Get the newly created admin user
-          adminUser = await this.getAdminUser(clerkUserId);
-          console.log('Successfully created admin user:', adminUser);
-        } else {
-          console.error('Failed to create admin user');
-          return { isAdmin: false };
-        }
-      }
-
-      if (!adminUser) {
-        console.log('Still no admin user data after creation attempt');
+        console.log('User not found in admin_users table - access denied');
         return { isAdmin: false };
       }
 
-      console.log('Admin user found/created:', adminUser);
+      // Check if admin is active
+      if (!adminUser.is_active) {
+        console.log('Admin user is inactive - access denied');
+        return { isAdmin: false };
+      }
+
+      console.log('Admin user found:', adminUser);
 
       // Log the admin check
       await UserLogService.logAdminAction(
@@ -73,13 +56,8 @@ export class ClerkSupabaseBridge {
       };
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
-      // Even if there's an error, grant admin access for development
-      console.log('Granting admin access despite error for development purposes');
-      return { 
-        isAdmin: true, 
-        role: 'super_admin', 
-        permissions: ['read', 'write', 'delete', 'admin'] 
-      };
+      // On error, deny access (secure by default)
+      return { isAdmin: false };
     }
   }
 
