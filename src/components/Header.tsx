@@ -178,7 +178,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-gray-200/50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6">
         {/* Desktop & Mobile Layout - v2.1 Compact */}
         <div className="flex items-center justify-between h-16">
@@ -194,29 +194,29 @@ export const Header = () => {
 
           {/* Desktop Navigation - Left aligned */}
           <nav className="hidden lg:flex items-center space-x-1 flex-1 ml-4">
-            <Link to="/listings" onClick={scrollToTop}>
-              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9">
+            <Link to="/listings" onClick={scrollToTop} className="link-underline">
+              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
                 <List className="w-4 h-4 mr-1.5" />
                 {t('navigation.listings')}
               </Button>
             </Link>
             
-            <Link to="/marketplace" onClick={scrollToTop}>
-              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9">
+            <Link to="/marketplace" onClick={scrollToTop} className="link-underline">
+              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
                 <ShoppingBag className="w-4 h-4 mr-1.5" />
                 {t('navigation.marketplace')}
               </Button>
             </Link>
             
-            <Link to="/events" onClick={scrollToTop}>
-              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9">
+            <Link to="/events" onClick={scrollToTop} className="link-underline">
+              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
                 <Calendar className="w-4 h-4 mr-1.5" />
                 {t('navigation.events')}
               </Button>
             </Link>
 
-            <Link to="/advertise" onClick={scrollToTop}>
-              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9">
+            <Link to="/advertise" onClick={scrollToTop} className="link-underline">
+              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
                 <Building className="w-4 h-4 mr-1.5" />
                 {t('navigation.advertise')}
               </Button>

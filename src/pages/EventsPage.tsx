@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { EventCard } from "@/components/EventCard";
+import { ScrollReveal, SkeletonCard } from "@/components/animations";
 import { FullscreenMapModal } from "@/components/FullscreenMapModal";
 import { InteractiveEventsMap } from "@/components/InteractiveEventsMap";
 import { Input } from "@/components/ui/input";
@@ -1034,8 +1036,15 @@ export const EventsPage = () => {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {activeEvents.map((event) => (
-                          <div key={event.id} onClick={() => handleViewEvent(event)} className="cursor-pointer">
+                        {activeEvents.map((event, index) => (
+                          <motion.div
+                            key={event.id}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.05, duration: 0.3 }}
+                            onClick={() => handleViewEvent(event)}
+                            className="cursor-pointer"
+                          >
                             <EventCard
                               id={event.id}
                               title={event.title}
@@ -1058,7 +1067,7 @@ export const EventsPage = () => {
                               }}
                               onLocationClick={handleLocationClick}
                             />
-                          </div>
+                          </motion.div>
                         ))}
                       </div>
                     </div>
@@ -1077,8 +1086,15 @@ export const EventsPage = () => {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {pastEvents.map((event) => (
-                          <div key={event.id} onClick={() => handleViewEvent(event)} className="cursor-pointer">
+                        {pastEvents.map((event, index) => (
+                          <motion.div
+                            key={event.id}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.05, duration: 0.3 }}
+                            onClick={() => handleViewEvent(event)}
+                            className="cursor-pointer"
+                          >
                             <EventCard
                               id={event.id}
                               title={event.title}
@@ -1101,7 +1117,7 @@ export const EventsPage = () => {
                               }}
                               onLocationClick={handleLocationClick}
                             />
-                          </div>
+                          </motion.div>
                         ))}
                       </div>
                     </div>
