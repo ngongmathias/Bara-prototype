@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MatrixRain } from '@/components/landing/MatrixRain';
 import { InteractiveLogo } from '@/components/landing/InteractiveLogo';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { 
@@ -131,9 +130,6 @@ export const LandingPageV2 = () => {
 
   return (
     <div className="relative min-h-screen bg-black overflow-hidden">
-      {/* Simple Matrix Rain Background */}
-      <MatrixRain />
-
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center px-8 py-16">
         <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-16 items-center">

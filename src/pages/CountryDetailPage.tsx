@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MatrixRain } from "@/components/landing/MatrixRain";
 import { Button } from "@/components/ui/button";
 import { UltraSimpleMap } from "@/components/UltraSimpleMap";
 import { 
@@ -170,8 +169,6 @@ export const CountryDetailPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-white">
-      <MatrixRain />
-      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
       
       <div className="relative z-10">
         {/* Hero Section - Full Width */}

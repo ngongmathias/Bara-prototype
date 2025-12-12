@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ArrowLeft, HelpCircle, Briefcase } from "lucide-react";
-import { MatrixRain } from "@/components/landing/MatrixRain";
 
 const FaqPage = () => {
   const { t } = useTranslation();
@@ -22,8 +21,6 @@ const FaqPage = () => {
 
   return (
     <div className="relative min-h-screen bg-white">
-      <MatrixRain />
-      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
       
       <div className="relative z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

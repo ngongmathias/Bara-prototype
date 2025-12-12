@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
-import { MatrixRain } from "@/components/landing/MatrixRain";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { Button } from "@/components/ui/button";
@@ -265,11 +264,6 @@ const MarketplacePage = () => {
 
   return (
     <div className="relative min-h-screen bg-white font-roboto">
-      {/* Matrix Rain Background */}
-      <MatrixRain />
-      
-      {/* White overlay - match LandingPageFinal visibility */}
-      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
 
       {/* Header */}
       <div className="relative z-20">

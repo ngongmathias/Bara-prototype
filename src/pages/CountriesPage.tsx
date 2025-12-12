@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Users, ArrowRight, Search, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { MatrixRain } from "@/components/landing/MatrixRain";
 import { InteractiveGlobe } from "@/components/InteractiveGlobe";
 
 interface Country {
@@ -87,8 +86,6 @@ export const CountriesPage = () => {
 
   return (
     <div className="relative min-h-screen bg-white">
-      <MatrixRain />
-      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
       
       <div className="relative z-10">
         {/* Hero Section with Globe */}

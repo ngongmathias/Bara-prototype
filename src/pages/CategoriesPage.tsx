@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { db } from "@/lib/supabase";
-import { MatrixRain } from "@/components/landing/MatrixRain";
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Users, UtensilsCrossed, Stethoscope, Wrench, HardHat, Zap, Car, Home, Scale, Bed, Plane, Building, Wine, Scissors, BookOpen, Coffee, Film, Heart, Users as UsersIcon, User, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Building2, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, CreditCard, Smartphone, ArrowLeft, Search, ArrowRight } from "lucide-react";
@@ -122,8 +121,6 @@ export const CategoriesPage = () => {
 
   return (
     <div className="relative min-h-screen bg-white">
-      <MatrixRain />
-      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
       
       {/* Header */}
       <div className="relative z-20">

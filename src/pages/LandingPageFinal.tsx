@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DancingBaraLogo } from '@/components/landing/DancingBaraLogo';
-import { MatrixRain } from '@/components/landing/MatrixRain';
 import { RSSFeeds } from '@/components/landing/RSSFeeds';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -126,12 +125,6 @@ export const LandingPageFinal = () => {
 
   return (
     <div className="relative min-h-screen bg-white">
-      {/* Matrix Rain Background - Full Page */}
-      <MatrixRain />
-      
-      {/* Subtle white overlay to lighten the rain */}
-      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
-
       {/* Header */}
       <div className="relative z-20">
         <Header />

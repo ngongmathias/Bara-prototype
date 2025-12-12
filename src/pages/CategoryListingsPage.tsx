@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, MapPin, Star, ArrowLeft, Search, Grid, List, Phone, Globe, Crown, Users, Sparkles, Tag, Map, ChevronDown, UtensilsCrossed, Wine, Coffee, Car, Home, Scale, Bed, Plane, Building, Scissors, BookOpen, Film, Stethoscope, User, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, Zap, Wrench, Heart, Dumbbell, Laptop, Shield, Calculator, Megaphone, Briefcase, Camera, Calendar, Music } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
-import { MatrixRain } from "@/components/landing/MatrixRain";
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CityMapLeaflet } from "@/components/CityMapLeaflet";
@@ -229,7 +228,6 @@ const CategoryListingsPage = () => {
   if (!currentCategory && !loading) {
     return (
       <div className="relative min-h-screen bg-white">
-        <MatrixRain />
         <div className="absolute inset-0 bg-white/60 pointer-events-none" />
         <div className="relative z-10 flex items-center justify-center min-h-screen">
           <div className="text-center">
@@ -245,9 +243,6 @@ const CategoryListingsPage = () => {
 
   return (
     <div className="relative min-h-screen bg-white">
-      <MatrixRain />
-      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
-      
       {/* Header */}
       <div className="relative z-20">
         <Header />

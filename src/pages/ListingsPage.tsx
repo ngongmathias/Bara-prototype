@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Building2 } from "lucide-react";
 import { db } from "@/lib/supabase";
 import { motion } from "framer-motion";
-import { MatrixRain } from "@/components/landing/MatrixRain";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
 
@@ -63,12 +62,6 @@ const ListingsPage = () => {
 
   return (
     <div className="relative min-h-screen bg-white font-roboto">
-      {/* Matrix Rain Background - Full Page */}
-      <MatrixRain />
-      
-      {/* Subtle white overlay to lighten the rain - match LandingPageFinal */}
-      <div className="absolute inset-0 bg-white/60 pointer-events-none" />
-
       {/* Header */}
       <div className="relative z-20">
         <Header />

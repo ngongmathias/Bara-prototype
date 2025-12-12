@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MatrixRain } from '@/components/landing/MatrixRain';
 import { BaraParticleText } from '@/components/landing/BaraParticleText';
 import { AfricaMapLogo, BLettermarkLogo, BaraTextLogo } from '@/components/landing/BaraLogo';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
@@ -134,7 +133,6 @@ export const LandingPage = () => {
   return (
     <div className="relative min-h-screen bg-black overflow-hidden">
       {/* Background Effects */}
-      <MatrixRain />
       <BaraParticleText />
 
       {/* Content */}

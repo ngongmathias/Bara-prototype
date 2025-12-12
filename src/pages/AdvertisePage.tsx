@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import {Link} from 'react-router-dom';
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
-import { MatrixRain } from "@/components/landing/MatrixRain";
 import { 
   Target, 
   Users, 
@@ -26,11 +25,6 @@ const AdvertisePage = () => {
     <>
       <Header />
       <div className="relative min-h-screen bg-white">
-        {/* Matrix Rain Background */}
-        <MatrixRain />
-        {/* White overlay for readability - match LandingPageFinal visibility */}
-        <div className="absolute inset-0 bg-white/60 pointer-events-none" />
-
         {/* Title & Stats */}
         <section className="relative z-10 py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
