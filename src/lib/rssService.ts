@@ -1,7 +1,4 @@
-import { getAdminDb } from './supabase';
-
-// Helper to get admin client (called inside functions to ensure proper initialization)
-const getSupabaseAdmin = () => getAdminDb();
+import { supabase } from './supabase';
 
 export interface RSSFeedItem {
   id?: string;
@@ -39,9 +36,8 @@ export async function getRSSFeeds(options?: {
   source?: string;
 }): Promise<RSSFeedItem[]> {
   try {
-    const adminDb = getSupabaseAdmin();
-    let query = adminDb
-      .rss_feeds()
+    let query = supabase
+      .from('rss_feeds')
       .select('*')
       .order('pub_date', { ascending: false });
 
@@ -91,9 +87,8 @@ export async function getRSSFeeds(options?: {
  */
 export async function getRSSFeedSources(): Promise<RSSFeedSource[]> {
   try {
-    const adminDb = getSupabaseAdmin();
-    const { data, error } = await adminDb
-      .rss_feed_sources()
+    const { data, error } = await supabase
+      .from('rss_feed_sources')
       .select('*')
       .eq('is_active', true)
       .order('name');
@@ -402,10 +397,9 @@ export async function refreshRSSFeeds(): Promise<{ success: boolean; itemsAdded:
       // Use smart fetch (APIs first, RSS fallback)
       const items = await smartFetchNews(source);
 
-      const adminDb = getSupabaseAdmin();
       for (const item of items) {
-        const { error } = await adminDb
-          .rss_feeds()
+        const { error } = await supabase
+          .from('rss_feeds')
           .upsert({
             title: item.title,
             link: item.link,
@@ -428,8 +422,8 @@ export async function refreshRSSFeeds(): Promise<{ success: boolean; itemsAdded:
         }
       }
 
-      await adminDb
-        .rss_feed_sources()
+      await supabase
+        .from('rss_feed_sources')
         .update({ last_fetched_at: new Date().toISOString() })
         .eq('id', source.id);
     }
