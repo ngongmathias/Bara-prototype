@@ -120,11 +120,35 @@ export async function getRSSFeedSources(): Promise<RSSFeedSource[]> {
  */
 export async function fetchAndParseRSSFeed(feedUrl: string, sourceName: string): Promise<RSSFeedItem[]> {
   try {
-    // Use a CORS proxy to fetch RSS feeds
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`;
+    // Try multiple CORS proxies for reliability
+    const proxies = [
+      `https://corsproxy.io/?${encodeURIComponent(feedUrl)}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`,
+      `https://cors-anywhere.herokuapp.com/${feedUrl}`,
+    ];
     
-    const response = await fetch(proxyUrl);
-    const xmlText = await response.text();
+    let xmlText = '';
+    let lastError: Error | null = null;
+    
+    // Try each proxy until one works
+    for (const proxyUrl of proxies) {
+      try {
+        const response = await fetch(proxyUrl);
+        if (response.ok) {
+          xmlText = await response.text();
+          break; // Success! Exit loop
+        }
+      } catch (error) {
+        lastError = error as Error;
+        console.warn(`Proxy failed for ${sourceName}, trying next...`);
+        continue;
+      }
+    }
+    
+    // If all proxies failed, throw error
+    if (!xmlText) {
+      throw lastError || new Error('All CORS proxies failed');
+    }
     
     // Parse XML
     const parser = new DOMParser();
