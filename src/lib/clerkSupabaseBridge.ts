@@ -22,8 +22,33 @@ export class ClerkSupabaseBridge {
     try {
       console.log('Checking admin status for Clerk user:', clerkUserId);
       
-      // Get admin user from database
-      const adminUser = await this.getAdminUser(clerkUserId);
+      // First, try to get admin user by Clerk user_id
+      let adminUser = await this.getAdminUser(clerkUserId);
+      
+      // If not found by user_id, check by email (for newly added admins)
+      if (!adminUser && userEmail) {
+        console.log('User not found by user_id, checking by email:', userEmail);
+        const { data, error } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('email', userEmail.toLowerCase())
+          .single();
+        
+        if (!error && data) {
+          adminUser = data;
+          
+          // Update the user_id from temporary to actual Clerk user_id
+          if (adminUser.user_id.startsWith('pending_')) {
+            console.log('Updating temporary user_id to actual Clerk user_id');
+            await supabase
+              .from('admin_users')
+              .update({ user_id: clerkUserId })
+              .eq('id', adminUser.id);
+            
+            adminUser.user_id = clerkUserId;
+          }
+        }
+      }
       
       if (!adminUser) {
         console.log('User not found in admin_users table - access denied');

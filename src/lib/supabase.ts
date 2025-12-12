@@ -189,7 +189,14 @@ export const getAdminDb = () => {
     slideshow_images: () => adminSupabase.from('slideshow_images'),
     
     // Popup ads operations
-    popup_ads: () => adminSupabase.from('popup_ads')
+    popup_ads: () => adminSupabase.from('popup_ads'),
+    
+    // Admin activity log operations
+    admin_activity_log: () => adminSupabase.from('admin_activity_log'),
+    
+    // RSS feed operations
+    rss_feed_sources: () => adminSupabase.from('rss_feed_sources'),
+    rss_feeds: () => adminSupabase.from('rss_feeds')
   };
 };
 
