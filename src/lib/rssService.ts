@@ -1,4 +1,7 @@
-import { supabase } from './supabase';
+import { getAdminDb } from './supabase';
+
+// Use admin client for RSS operations (bypasses RLS)
+const supabase = getAdminDb();
 
 export interface RSSFeedItem {
   id?: string;
