@@ -1,0 +1,286 @@
+/* ============================================
+   BARA AFRIKA - ENHANCED ANIMATIONS & EFFECTS
+   ============================================ */
+
+/* Button Hover Effects */
+.btn-hover-lift {
+  @apply transition-all duration-300 ease-out;
+  @apply hover:shadow-xl hover:-translate-y-1;
+}
+
+.btn-hover-glow {
+  @apply transition-all duration-300;
+  @apply hover:shadow-[0_0_20px_rgba(0,0,0,0.3)];
+}
+
+.btn-hover-scale {
+  @apply transition-transform duration-200 ease-out;
+  @apply hover:scale-105 active:scale-95;
+}
+
+/* Card Hover Effects */
+.card-hover-lift {
+  @apply transition-all duration-300 ease-out;
+  @apply hover:shadow-2xl hover:-translate-y-2;
+}
+
+.card-hover-glow {
+  @apply transition-all duration-300;
+  @apply hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)];
+  @apply hover:border-black;
+}
+
+/* Link Animations */
+.link-underline {
+  @apply relative;
+}
+
+.link-underline::after {
+  content: '';
+  @apply absolute bottom-0 left-0 w-0 h-0.5 bg-black;
+  @apply transition-all duration-300 ease-out;
+}
+
+.link-underline:hover::after {
+  @apply w-full;
+}
+
+/* Input Focus Effects */
+.input-focus-glow {
+  @apply transition-all duration-200;
+}
+
+.input-focus-glow:focus {
+  @apply ring-2 ring-black ring-offset-2;
+  @apply shadow-lg;
+}
+
+/* Pulse Animation */
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Shimmer Effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Bounce on Hover */
+.hover-bounce {
+  @apply transition-transform duration-200;
+}
+
+.hover-bounce:hover {
+  animation: bounce 0.5s ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Rotate on Hover */
+.hover-rotate {
+  @apply transition-transform duration-300;
+}
+
+.hover-rotate:hover {
+  @apply rotate-3;
+}
+
+/* Glow Border Animation */
+@keyframes glow-border {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.animate-glow-border {
+  animation: glow-border 2s ease-in-out infinite;
+}
+
+/* Slide In Animations */
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Fade In Up */
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Icon Hover Effects */
+.icon-hover-spin {
+  @apply transition-transform duration-300;
+}
+
+.icon-hover-spin:hover {
+  @apply rotate-12;
+}
+
+.icon-hover-bounce {
+  @apply transition-transform duration-200;
+}
+
+.icon-hover-bounce:hover {
+  animation: iconBounce 0.5s ease-in-out;
+}
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* Gradient Shift on Hover */
+.gradient-shift {
+  @apply bg-gradient-to-r from-black to-gray-800;
+  @apply transition-all duration-500;
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+}
+
+.gradient-shift:hover {
+  background-position: 100% 0%;
+}
+
+/* Shadow Layers */
+.shadow-layered {
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+  @apply transition-all duration-300;
+}
+
+.shadow-layered:hover {
+  box-shadow: 
+    0 14px 28px rgba(0, 0, 0, 0.15),
+    0 10px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* Border Glow */
+.border-glow {
+  @apply border-2 border-transparent;
+  @apply transition-all duration-300;
+}
+
+.border-glow:hover {
+  @apply border-black;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Text Glow */
+.text-glow {
+  @apply transition-all duration-300;
+}
+
+.text-glow:hover {
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Smooth Scale Group */
+.scale-group:hover .scale-child {
+  @apply scale-110;
+}
+
+.scale-child {
+  @apply transition-transform duration-300;
+}
+
+/* Ripple Effect */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.ripple:active::before {
+  width: 300px;
+  height: 300px;
+}
