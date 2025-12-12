@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Hash, User, Share2, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { VerificationIcon, VerificationStatus } from '@/components/ui/verification-badge';
@@ -121,7 +122,19 @@ export const EventCard = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+    <motion.div
+      whileHover={{ 
+        rotateY: 3,
+        rotateX: -2,
+        scale: 1.02,
+        transition: { duration: 0.3 }
+      }}
+      style={{ 
+        transformStyle: 'preserve-3d',
+        perspective: '1000px'
+      }}
+      className="bg-white rounded-lg shadow-lg overflow-hidden card-hover-lift"
+    >
       <div className="h-48 bg-gray-200 overflow-hidden relative">
         <img
           src={imageUrl || 'https://via.placeholder.com/400x300?text=Event+Image'}
@@ -258,14 +271,16 @@ export const EventCard = ({
         )}
         
         <div className="mt-4">
-          <button
+          <motion.button
             onClick={handleViewEvent}
-            className="w-full text-center bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md transition-colors duration-300"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full text-center bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md btn-hover-lift"
           >
             View Event
-          </button>
+          </motion.button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
