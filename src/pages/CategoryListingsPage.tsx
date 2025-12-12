@@ -10,6 +10,7 @@ import { MatrixRain } from "@/components/landing/MatrixRain";
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CityMapLeaflet } from "@/components/CityMapLeaflet";
+import { useCountrySelection } from "@/context/CountrySelectionContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -103,6 +104,7 @@ type SortType = 'default' | 'highest-rated' | 'most-reviewed' | 'newest';
 const CategoryListingsPage = () => {
   const navigate = useNavigate();
   const { categorySlug } = useParams<{ categorySlug: string }>();
+  const { selectedCountry } = useCountrySelection();
   
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
@@ -127,8 +129,8 @@ const CategoryListingsPage = () => {
           setCurrentCategory(catData || null);
 
           if (catData) {
-            // Fetch businesses for this category - sponsored first, then premium, then rest
-            const { data: bizData, error } = await supabase
+            // Build query for businesses - filter by country if selected
+            let query = supabase
               .from('businesses')
               .select(`
                 *,
@@ -138,15 +140,25 @@ const CategoryListingsPage = () => {
                 reviews(rating)
               `)
               .eq('category_id', catData.id)
-              .eq('status', 'active')
+              .eq('status', 'active');
+
+            // Filter by selected country
+            if (selectedCountry) {
+              query = query.eq('country_id', selectedCountry.id);
+            }
+
+            // Order by sponsored, premium, then name
+            query = query
               .order('is_sponsored_ad', { ascending: false })
               .order('is_premium', { ascending: false })
               .order('name', { ascending: true });
 
+            const { data: bizData, error } = await query;
+
             if (error) {
               console.error("Error fetching businesses:", error);
             } else {
-              console.log("Fetched businesses:", bizData?.length, bizData);
+              console.log("Fetched businesses for country:", selectedCountry?.name, bizData?.length, bizData);
               setBusinesses(bizData || []);
             }
           }
@@ -159,7 +171,7 @@ const CategoryListingsPage = () => {
     };
 
     fetchData();
-  }, [categorySlug]);
+  }, [categorySlug, selectedCountry]);
 
   const handleBusinessClick = (business: Business) => {
     const citySlug = business.city?.name?.toLowerCase().replace(/\s+/g, '-') || 'city';
