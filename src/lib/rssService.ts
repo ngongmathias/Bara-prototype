@@ -210,28 +210,169 @@ function stripHtml(html: string): string {
 /**
  * Refresh RSS feeds from all active sources and cache in database
  */
+// Check if News APIs are configured
+const hasNewsAPI = () => !!import.meta.env.VITE_NEWSAPI_KEY;
+const hasGNews = () => !!import.meta.env.VITE_GNEWS_KEY;
+const hasCurrents = () => !!import.meta.env.VITE_CURRENTS_KEY;
+
+// Fetch from News API (if configured)
+async function fetchFromNewsAPI(countryCode: string): Promise<RSSFeedItem[]> {
+  const apiKey = import.meta.env.VITE_NEWSAPI_KEY;
+  if (!apiKey) return [];
+
+  try {
+    const response = await fetch(
+      `https://newsapi.org/v2/top-headlines?country=${countryCode.toLowerCase()}&pageSize=10&apiKey=${apiKey}`
+    );
+    
+    if (!response.ok) throw new Error(`NewsAPI error: ${response.status}`);
+    const data = await response.json();
+
+    return data.articles.map((article: any) => ({
+      title: article.title,
+      link: article.url,
+      description: article.description || '',
+      pubDate: article.publishedAt,
+      source: article.source.name,
+      imageUrl: article.urlToImage,
+      author: article.author,
+      guid: article.url,
+    }));
+  } catch (error) {
+    console.error('NewsAPI error:', error);
+    return [];
+  }
+}
+
+// Fetch from GNews API (if configured)
+async function fetchFromGNews(countryCode: string): Promise<RSSFeedItem[]> {
+  const apiKey = import.meta.env.VITE_GNEWS_KEY;
+  if (!apiKey) return [];
+
+  try {
+    const response = await fetch(
+      `https://gnews.io/api/v4/top-headlines?country=${countryCode.toLowerCase()}&max=10&token=${apiKey}`
+    );
+    
+    if (!response.ok) throw new Error(`GNews error: ${response.status}`);
+    const data = await response.json();
+
+    return data.articles.map((article: any) => ({
+      title: article.title,
+      link: article.url,
+      description: article.description || '',
+      pubDate: article.publishedAt,
+      source: article.source.name,
+      imageUrl: article.image,
+      author: article.author,
+      guid: article.url,
+    }));
+  } catch (error) {
+    console.error('GNews error:', error);
+    return [];
+  }
+}
+
+// Fetch from Currents API (if configured)
+async function fetchFromCurrents(countryCode: string): Promise<RSSFeedItem[]> {
+  const apiKey = import.meta.env.VITE_CURRENTS_KEY;
+  if (!apiKey) return [];
+
+  try {
+    const response = await fetch(
+      `https://api.currentsapi.services/v1/latest-news?country=${countryCode}&language=en&apiKey=${apiKey}`
+    );
+    
+    if (!response.ok) throw new Error(`Currents error: ${response.status}`);
+    const data = await response.json();
+
+    return data.news.map((article: any) => ({
+      title: article.title,
+      link: article.url,
+      description: article.description || '',
+      pubDate: article.published,
+      source: article.author || 'Unknown',
+      imageUrl: article.image,
+      author: article.author,
+      guid: article.url,
+    }));
+  } catch (error) {
+    console.error('Currents error:', error);
+    return [];
+  }
+}
+
+// Smart fetch: Try APIs first, fallback to RSS
+async function smartFetchNews(source: RSSFeedSource): Promise<RSSFeedItem[]> {
+  // If source has a country code, try APIs first
+  if (source.countryCode) {
+    // Try NewsAPI (best quality)
+    if (hasNewsAPI()) {
+      const items = await fetchFromNewsAPI(source.countryCode);
+      if (items.length > 0) {
+        console.log(`✅ Fetched ${items.length} articles from NewsAPI for ${source.countryName}`);
+        return items;
+      }
+    }
+
+    // Try GNews (good quality, affordable)
+    if (hasGNews()) {
+      const items = await fetchFromGNews(source.countryCode);
+      if (items.length > 0) {
+        console.log(`✅ Fetched ${items.length} articles from GNews for ${source.countryName}`);
+        return items;
+      }
+    }
+
+    // Try Currents (best free tier)
+    if (hasCurrents()) {
+      const items = await fetchFromCurrents(source.countryCode);
+      if (items.length > 0) {
+        console.log(`✅ Fetched ${items.length} articles from Currents for ${source.countryName}`);
+        return items;
+      }
+    }
+  }
+
+  // Fallback to RSS (always works, free)
+  console.log(`ℹ️ Using RSS feed for ${source.name}`);
+  return await fetchAndParseRSSFeed(source.url, source.name);
+}
+
 export async function refreshRSSFeeds(): Promise<{ success: boolean; itemsAdded: number }> {
   try {
     const sources = await getRSSFeedSources();
     let totalItemsAdded = 0;
+
+    // Log which APIs are configured
+    const configuredAPIs = [];
+    if (hasNewsAPI()) configuredAPIs.push('NewsAPI');
+    if (hasGNews()) configuredAPIs.push('GNews');
+    if (hasCurrents()) configuredAPIs.push('Currents');
     
+    if (configuredAPIs.length > 0) {
+      console.log(`🔑 Configured APIs: ${configuredAPIs.join(', ')}`);
+    } else {
+      console.log(`ℹ️ No API keys configured, using RSS feeds only`);
+    }
+
     for (const source of sources) {
-      // Check if we should fetch based on interval
       if (source.lastFetchedAt) {
         const lastFetch = new Date(source.lastFetchedAt);
         const now = new Date();
         const minutesSinceLastFetch = (now.getTime() - lastFetch.getTime()) / (1000 * 60);
-        
+
         if (minutesSinceLastFetch < source.fetchIntervalMinutes) {
-          console.log(`Skipping ${source.name} - fetched ${minutesSinceLastFetch.toFixed(0)} minutes ago`);
+          console.log(`⏭️ Skipping ${source.name} - fetched ${minutesSinceLastFetch.toFixed(0)} minutes ago`);
           continue;
         }
       }
+
+      console.log(`📰 Fetching news from ${source.name}...`);
       
-      console.log(`Fetching RSS feed from ${source.name}...`);
-      const items = await fetchAndParseRSSFeed(source.url, source.name);
-      
-      // Insert items into database (ignore duplicates based on guid)
+      // Use smart fetch (APIs first, RSS fallback)
+      const items = await smartFetchNews(source);
+
       for (const item of items) {
         const { error } = await supabase
           .from('rss_feeds')
@@ -251,23 +392,22 @@ export async function refreshRSSFeeds(): Promise<{ success: boolean; itemsAdded:
             onConflict: 'guid',
             ignoreDuplicates: true,
           });
-        
+
         if (!error) {
           totalItemsAdded++;
         }
       }
-      
-      // Update last_fetched_at for this source
+
       await supabase
         .from('rss_feed_sources')
         .update({ last_fetched_at: new Date().toISOString() })
         .eq('id', source.id);
     }
-    
-    console.log(`RSS refresh complete. Added ${totalItemsAdded} new items.`);
+
+    console.log(`✅ RSS refresh complete. Added ${totalItemsAdded} new items.`);
     return { success: true, itemsAdded: totalItemsAdded };
   } catch (error) {
-    console.error('Error refreshing RSS feeds:', error);
+    console.error('❌ Error refreshing RSS feeds:', error);
     return { success: false, itemsAdded: 0 };
   }
 }
