@@ -345,6 +345,68 @@ export const CountryDetailPage: React.FC = () => {
                 </div>
               </motion.section>
 
+              {/* Economy & Development */}
+              {(countryInfo?.gdp_usd || countryInfo?.hdi_score) && (
+                <motion.section
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                >
+                  <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-6">Economy & Development</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    {countryInfo?.gdp_usd && (
+                      <div>
+                        <p className="text-4xl font-black text-black">${formatNumber(countryInfo.gdp_usd)}</p>
+                        <p className="text-sm text-gray-500 mt-1">GDP (USD)</p>
+                      </div>
+                    )}
+                    {countryInfo?.gdp_per_capita && (
+                      <div>
+                        <p className="text-4xl font-black text-black">${countryInfo.gdp_per_capita.toLocaleString()}</p>
+                        <p className="text-sm text-gray-500 mt-1">GDP Per Capita</p>
+                      </div>
+                    )}
+                    {countryInfo?.hdi_score && (
+                      <div>
+                        <p className="text-4xl font-black text-black">{countryInfo.hdi_score.toFixed(3)}</p>
+                        <p className="text-sm text-gray-500 mt-1">HDI Score</p>
+                      </div>
+                    )}
+                  </div>
+                </motion.section>
+              )}
+
+              {/* Demographics */}
+              {(countryInfo?.life_expectancy || countryInfo?.literacy_rate) && (
+                <motion.section
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                >
+                  <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-6">Demographics</h2>
+                  <div className="flex flex-wrap gap-12">
+                    {countryInfo?.life_expectancy && (
+                      <div>
+                        <p className="text-5xl font-black text-black">{countryInfo.life_expectancy}</p>
+                        <p className="text-sm text-gray-500 mt-1">Life Expectancy (years)</p>
+                      </div>
+                    )}
+                    {countryInfo?.literacy_rate && (
+                      <div>
+                        <p className="text-5xl font-black text-black">{countryInfo.literacy_rate}%</p>
+                        <p className="text-sm text-gray-500 mt-1">Literacy Rate</p>
+                      </div>
+                    )}
+                    {countryInfo?.average_age && (
+                      <div>
+                        <p className="text-5xl font-black text-black">{countryInfo.average_age}</p>
+                        <p className="text-sm text-gray-500 mt-1">Median Age</p>
+                      </div>
+                    )}
+                  </div>
+                </motion.section>
+              )}
+
               {/* Featured Landmark / Country Highlight */}
               {countryInfo?.ad_is_active && countryInfo?.ad_image_url && (
                 <motion.section
@@ -409,68 +471,6 @@ export const CountryDetailPage: React.FC = () => {
                       )}
                     </div>
                   </a>
-                </motion.section>
-              )}
-
-              {/* Economy & Development */}
-              {(countryInfo?.gdp_usd || countryInfo?.hdi_score) && (
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                >
-                  <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-6">Economy & Development</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-                    {countryInfo?.gdp_usd && (
-                      <div>
-                        <p className="text-4xl font-black text-black">${formatNumber(countryInfo.gdp_usd)}</p>
-                        <p className="text-sm text-gray-500 mt-1">GDP (USD)</p>
-                      </div>
-                    )}
-                    {countryInfo?.gdp_per_capita && (
-                      <div>
-                        <p className="text-4xl font-black text-black">${countryInfo.gdp_per_capita.toLocaleString()}</p>
-                        <p className="text-sm text-gray-500 mt-1">GDP Per Capita</p>
-                      </div>
-                    )}
-                    {countryInfo?.hdi_score && (
-                      <div>
-                        <p className="text-4xl font-black text-black">{countryInfo.hdi_score.toFixed(3)}</p>
-                        <p className="text-sm text-gray-500 mt-1">HDI Score</p>
-                      </div>
-                    )}
-                  </div>
-                </motion.section>
-              )}
-
-              {/* Demographics */}
-              {(countryInfo?.life_expectancy || countryInfo?.literacy_rate) && (
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                >
-                  <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-6">Demographics</h2>
-                  <div className="flex flex-wrap gap-12">
-                    {countryInfo?.life_expectancy && (
-                      <div>
-                        <p className="text-5xl font-black text-black">{countryInfo.life_expectancy}</p>
-                        <p className="text-sm text-gray-500 mt-1">Life Expectancy (years)</p>
-                      </div>
-                    )}
-                    {countryInfo?.literacy_rate && (
-                      <div>
-                        <p className="text-5xl font-black text-black">{countryInfo.literacy_rate}%</p>
-                        <p className="text-sm text-gray-500 mt-1">Literacy Rate</p>
-                      </div>
-                    )}
-                    {countryInfo?.average_age && (
-                      <div>
-                        <p className="text-5xl font-black text-black">{countryInfo.average_age}</p>
-                        <p className="text-sm text-gray-500 mt-1">Median Age</p>
-                      </div>
-                    )}
-                  </div>
                 </motion.section>
               )}
 
