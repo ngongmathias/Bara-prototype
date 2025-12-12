@@ -33,7 +33,6 @@ import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { AdminCities } from "./pages/admin/AdminCities";
 import { AdminCountries } from "./pages/admin/AdminCountries";
 import { AdminCountryInfo } from "./pages/admin/AdminCountryInfo";
-import { AdminGlobalAfrica } from "./pages/admin/AdminGlobalAfrica";
 import { AdminBusinesses } from "./pages/admin/AdminBusinesses";
 import { AdminEventsEnhanced as AdminEvents } from "./pages/admin/AdminEventsEnhanced";
 import { AdminReviews } from "./pages/admin/AdminReviews";
@@ -49,7 +48,6 @@ import { AdminBannerAds } from "./pages/admin/AdminBannerAds";
 import { AdminAuthGuard } from "./components/admin/AdminAuthGuard";
 import { UserAuthGuard } from "./components/users/UserAuthGuard";
 import { MapTestPage } from "./pages/MapTestPage";
-import GlobalAfricaPage from "./pages/GlobalAfricaPage";
 import FaqPage from "./pages/FaqPage";
 // import { SimpleMapTest } from "./pages/SimpleMapTest";
 import { UltraSimpleMap } from "./components/UltraSimpleMap";
@@ -157,11 +155,6 @@ const AppRoutes = () => {
       
       {/* <Route path="/googlemaps" element={<GoogleMapsTest />} /> */}
       <Route path="/map-test" element={<MapTestPage />} />
-      <Route path="/global-africa/:id?" element={
-        <MainLayout>
-          <GlobalAfricaPage />
-        </MainLayout>
-      } />
       {/* <Route path="/simple-map-test" element={<SimpleMapTest />} */}
     {/* <Route path="/callback-map-test" element={
       <div className="p-8">
@@ -218,11 +211,6 @@ const AppRoutes = () => {
       <Route path="/admin/country-info" element={
         <AdminAuthGuard>
           <AdminCountryInfo />
-        </AdminAuthGuard>
-      } />
-      <Route path="/admin/global-africa" element={
-        <AdminAuthGuard>
-          <AdminGlobalAfrica />
         </AdminAuthGuard>
       } />
       <Route path="/admin/businesses" element={

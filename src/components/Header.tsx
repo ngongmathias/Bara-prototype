@@ -686,16 +686,6 @@ export const Header = () => {
                   )}
                 </div>
 
-                {/* Language Selector */}
-                <div className="space-y-3">
-                  <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
-                    Language
-                  </h3>
-                  <div className="pl-2">
-                    <LanguageSelector />
-                  </div>
-                </div>
-
                 {/* Countries Section */}
                 <div className="space-y-3">
                   <button
