@@ -275,7 +275,7 @@ export const EventCard = ({
             onClick={handleViewEvent}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full text-center bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md btn-hover-lift"
+            className="w-full text-center bg-black text-white font-medium py-2 px-4 rounded-md btn-hover-lift transition-transform"
           >
             View Event
           </motion.button>
