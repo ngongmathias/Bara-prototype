@@ -133,6 +133,8 @@ export const EventCard = ({
         <img
           src={imageUrl || 'https://via.placeholder.com/400x300?text=Event+Image'}
           alt={title}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover"
         />
         {/* Timing Badge - Top Left */}

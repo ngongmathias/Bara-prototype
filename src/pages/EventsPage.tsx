@@ -1037,11 +1037,8 @@ export const EventsPage = () => {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {activeEvents.map((event, index) => (
-                          <motion.div
+                          <div
                             key={event.id}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: index * 0.05, duration: 0.3 }}
                             onClick={() => handleViewEvent(event)}
                             className="cursor-pointer"
                           >
@@ -1067,7 +1064,7 @@ export const EventsPage = () => {
                               }}
                               onLocationClick={handleLocationClick}
                             />
-                          </motion.div>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -1087,11 +1084,8 @@ export const EventsPage = () => {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {pastEvents.map((event, index) => (
-                          <motion.div
+                          <div
                             key={event.id}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: index * 0.05, duration: 0.3 }}
                             onClick={() => handleViewEvent(event)}
                             className="cursor-pointer"
                           >
@@ -1117,7 +1111,7 @@ export const EventsPage = () => {
                               }}
                               onLocationClick={handleLocationClick}
                             />
-                          </motion.div>
+                          </div>
                         ))}
                       </div>
                     </div>
