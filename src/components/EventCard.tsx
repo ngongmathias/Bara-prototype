@@ -124,16 +124,10 @@ export const EventCard = ({
   return (
     <motion.div
       whileHover={{ 
-        rotateY: 3,
-        rotateX: -2,
-        scale: 1.02,
-        transition: { duration: 0.3 }
+        y: -8,
+        transition: { duration: 0.2 }
       }}
-      style={{ 
-        transformStyle: 'preserve-3d',
-        perspective: '1000px'
-      }}
-      className="bg-white rounded-lg shadow-lg overflow-hidden card-hover-lift"
+      className="bg-white rounded-lg shadow-lg overflow-hidden transition-shadow hover:shadow-2xl"
     >
       <div className="h-48 bg-gray-200 overflow-hidden relative">
         <img
