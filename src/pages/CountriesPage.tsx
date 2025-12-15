@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Users, ArrowRight, Search, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { InteractiveGlobe } from "@/components/InteractiveGlobe";
 
 interface Country {
   id: string;
@@ -88,10 +87,10 @@ export const CountriesPage = () => {
     <div className="relative min-h-screen bg-white">
       
       <div className="relative z-10">
-        {/* Hero Section with Globe */}
+        {/* Hero Section */}
         <div className="py-16 lg:py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="max-w-3xl mx-auto">
               
               {/* Left: Title & Search */}
               <motion.div
@@ -203,22 +202,6 @@ export const CountriesPage = () => {
                     <p className="text-xs uppercase tracking-wider text-gray-400">Population</p>
                   </div>
                 </div>
-              </motion.div>
-
-              {/* Right: Interactive Globe */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="flex justify-center"
-              >
-                {!loading && (
-                  <InteractiveGlobe
-                    countries={countries}
-                    onCountryClick={handleCountryClick}
-                    selectedCountry={null}
-                  />
-                )}
               </motion.div>
             </div>
           </div>
