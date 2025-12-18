@@ -90,7 +90,7 @@ export const CountriesPage = () => {
         {/* Hero Section */}
         <div className="py-16 lg:py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
               
               {/* Left: Title & Search */}
               <motion.div
@@ -101,12 +101,11 @@ export const CountriesPage = () => {
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-black tracking-tight leading-none mb-6">
                   EXPLORE
                   <br />
-                  <span className="text-gray-400">AFRICA</span>
+                  <span className="font-black">GLOBAL AFRICA</span>
                 </h1>
                 
                 <p className="text-lg text-gray-600 mb-8 max-w-md leading-relaxed">
-                  Discover {countries.length} African nations. Find businesses, events, 
-                  and opportunities across the continent.
+                  Discover African nations and peoples across the globe. Connect and find businesses, events, opportunities and more!
                 </p>
 
                 {/* Search Box */}
@@ -188,20 +187,42 @@ export const CountriesPage = () => {
                 </div>
 
                 {/* Quick Stats */}
-                <div className="flex gap-8 mt-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-8">
                   <div>
-                    <p className="text-3xl font-black text-black">{countries.length}</p>
-                    <p className="text-xs uppercase tracking-wider text-gray-400">Countries</p>
-                  </div>
-                  <div>
-                    <p className="text-3xl font-black text-black">54</p>
-                    <p className="text-xs uppercase tracking-wider text-gray-400">African Nations</p>
-                  </div>
-                  <div>
-                    <p className="text-3xl font-black text-black">1.4B</p>
+                    <p className="text-2xl md:text-3xl font-black text-black">1.5B</p>
                     <p className="text-xs uppercase tracking-wider text-gray-400">Population</p>
                   </div>
+                  <div>
+                    <p className="text-2xl md:text-3xl font-black text-black">$3T</p>
+                    <p className="text-xs uppercase tracking-wider text-gray-400">GDP USD</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl md:text-3xl font-black text-black">19</p>
+                    <p className="text-xs uppercase tracking-wider text-gray-400">Median Age</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl md:text-3xl font-black text-black">60%</p>
+                    <p className="text-xs uppercase tracking-wider text-gray-400">World Arable Land</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl md:text-3xl font-black text-black">$20T</p>
+                    <p className="text-xs uppercase tracking-wider text-gray-400">Mineral Wealth</p>
+                  </div>
                 </div>
+              </motion.div>
+
+              {/* Right: Africa Map Logo */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="flex justify-center lg:justify-end"
+              >
+                <img 
+                  src="/bara-3.png" 
+                  alt="Africa Map" 
+                  className="w-full max-w-md h-auto"
+                />
               </motion.div>
             </div>
           </div>
