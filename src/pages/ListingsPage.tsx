@@ -83,7 +83,7 @@ const ListingsPage = () => {
           className="text-center mb-12"
         >
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-comfortaa font-bold text-black mb-2">
-            Search • Explore • Connect • Grow<sup className="text-lg">℠</sup>
+            Bara Listings
           </h1>
         </motion.div>
 

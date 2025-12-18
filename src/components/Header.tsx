@@ -194,6 +194,13 @@ export const Header = () => {
 
           {/* Desktop Navigation - Left aligned */}
           <nav className="hidden lg:flex items-center space-x-1 flex-1 ml-4">
+            <Link to="/events" onClick={scrollToTop} className="link-underline">
+              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
+                <Calendar className="w-4 h-4 mr-1.5" />
+                {t('navigation.events')}
+              </Button>
+            </Link>
+            
             <Link to="/listings" onClick={scrollToTop} className="link-underline">
               <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
                 <List className="w-4 h-4 mr-1.5" />
@@ -205,13 +212,6 @@ export const Header = () => {
               <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
                 <ShoppingBag className="w-4 h-4 mr-1.5" />
                 {t('navigation.marketplace')}
-              </Button>
-            </Link>
-            
-            <Link to="/events" onClick={scrollToTop} className="link-underline">
-              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
-                <Calendar className="w-4 h-4 mr-1.5" />
-                {t('navigation.events')}
               </Button>
             </Link>
 
