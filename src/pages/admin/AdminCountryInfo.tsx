@@ -385,6 +385,37 @@ export const AdminCountryInfo: React.FC = () => {
               </CardHeader>
               
               <CardContent className="space-y-3">
+                {/* Visual Assets Preview */}
+                <div className="flex gap-2 pb-3 border-b">
+                  {info.flag_url && (
+                    <div className="flex flex-col items-center">
+                      <img src={info.flag_url} alt="Flag" className="w-12 h-8 object-cover rounded border" />
+                      <span className="text-xs text-gray-500 mt-1">Flag</span>
+                    </div>
+                  )}
+                  {info.coat_of_arms_url && (
+                    <div className="flex flex-col items-center">
+                      <img src={info.coat_of_arms_url} alt="Coat of Arms" className="w-12 h-12 object-contain rounded border" />
+                      <span className="text-xs text-gray-500 mt-1">Coat</span>
+                    </div>
+                  )}
+                  {info.leader_image_url && (
+                    <div className="flex flex-col items-center">
+                      <img src={info.leader_image_url} alt="Leader" className="w-12 h-12 object-cover rounded-full border" />
+                      <span className="text-xs text-gray-500 mt-1">Leader</span>
+                    </div>
+                  )}
+                  {info.monument_image_url && (
+                    <div className="flex flex-col items-center">
+                      <img src={info.monument_image_url} alt="Monument" className="w-12 h-12 object-cover rounded border" />
+                      <span className="text-xs text-gray-500 mt-1">Monument</span>
+                    </div>
+                  )}
+                  {!info.flag_url && !info.coat_of_arms_url && !info.leader_image_url && !info.monument_image_url && (
+                    <span className="text-xs text-gray-400 italic">No images uploaded</span>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <span className="text-gray-500">Capital:</span>
@@ -419,6 +450,40 @@ export const AdminCountryInfo: React.FC = () => {
                           <span>{country?.name} - Detailed Information</span>
                         </DialogTitle>
                       </DialogHeader>
+
+                      {/* Visual Assets Section */}
+                      {(info.flag_url || info.coat_of_arms_url || info.leader_image_url || info.monument_image_url) && (
+                        <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-3">Visual Assets</h3>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {info.flag_url && (
+                              <div className="text-center">
+                                <img src={info.flag_url} alt="Flag" className="w-full h-20 object-contain rounded border bg-white mb-2" />
+                                <span className="text-xs text-gray-600">Flag</span>
+                              </div>
+                            )}
+                            {info.coat_of_arms_url && (
+                              <div className="text-center">
+                                <img src={info.coat_of_arms_url} alt="Coat of Arms" className="w-full h-20 object-contain rounded border bg-white mb-2" />
+                                <span className="text-xs text-gray-600">Coat of Arms</span>
+                              </div>
+                            )}
+                            {info.leader_image_url && (
+                              <div className="text-center">
+                                <img src={info.leader_image_url} alt="Leader" className="w-full h-20 object-cover rounded border bg-white mb-2" />
+                                <span className="text-xs text-gray-600">Leader</span>
+                              </div>
+                            )}
+                            {info.monument_image_url && (
+                              <div className="text-center">
+                                <img src={info.monument_image_url} alt="Monument" className="w-full h-20 object-cover rounded border bg-white mb-2" />
+                                <span className="text-xs text-gray-600">Monument</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Basic Information */}
                         <div className="space-y-4">
