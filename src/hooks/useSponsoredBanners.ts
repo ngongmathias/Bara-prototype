@@ -7,6 +7,12 @@ export const useSponsoredBanners = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const upsertBannerInState = (id: string, partial: Partial<SponsoredBanner>) => {
+    setBanners((prev) =>
+      prev.map((b) => (b.id === id ? ({ ...b, ...partial } as SponsoredBanner) : b))
+    );
+  };
+
   const fetchBanners = async (adminMode = false) => {
     setLoading(true);
     setError(null);
@@ -222,32 +228,25 @@ export const useSponsoredBanners = () => {
   };
 
   const updateBanner = async (id: string, updates: UpdateSponsoredBannerData): Promise<SponsoredBanner | null> => {
-    try {
-      const { data, error: updateError } = await supabase
-        .from('sponsored_banners')
-        .update(updates)
-        .eq('id', id)
-        .select('*')
-        .single();
+    const { data, error: updateError } = await supabase
+      .from('sponsored_banners')
+      .update(updates)
+      .eq('id', id)
+      .select('*')
+      .single();
 
-      if (updateError) {
-        throw updateError;
-      }
-
-      const transformedBanner: SponsoredBanner = {
-        ...data,
-      };
-
-      setBanners(prev => prev.map(banner => 
-        banner.id === id ? transformedBanner : banner
-      ));
-
-      return transformedBanner;
-    } catch (err) {
-      console.error('Error updating sponsored banner:', err);
-      setError(err instanceof Error ? err.message : 'Failed to update banner');
-      return null;
+    if (updateError) {
+      console.error('Error updating sponsored banner:', updateError);
+      setError(updateError.message || 'Failed to update banner');
+      throw updateError;
     }
+
+    const transformedBanner: SponsoredBanner = {
+      ...data,
+    };
+
+    setBanners((prev) => prev.map((banner) => (banner.id === id ? transformedBanner : banner)));
+    return transformedBanner;
   };
 
   const deleteBanner = async (id: string): Promise<boolean> => {
