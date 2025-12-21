@@ -32,6 +32,8 @@ interface CountryInfo {
   national_holidays: any[] | null;
   flag_url: string | null;
   coat_of_arms_url: string | null;
+  leader_image_url: string | null;
+  monument_image_url: string | null;
   national_anthem_url: string | null;
   climate: string | null;
   natural_resources: string | null;

@@ -100,12 +100,12 @@ export const CountryDetailPage: React.FC = () => {
       if (error) throw error;
       
       if (data) {
-        // Enrich with Wikipedia
+        // Enrich with Wikipedia only as fallback
         const wikiData = await fetchWikipediaCountryInfo(data.name);
         setCountry({
           ...data,
-          wikipedia_description: wikiData?.description || data.description,
-          coat_of_arms_url: wikiData?.coat_of_arms_url,
+          wikipedia_description: data.description || wikiData?.description,
+          coat_of_arms_url: data.coat_of_arms_url || wikiData?.coat_of_arms_url,
         });
 
         // Fetch businesses
@@ -196,24 +196,28 @@ export const CountryDetailPage: React.FC = () => {
                 {/* Flag, Coat of Arms & Name */}
                 <div className="flex items-start gap-6 mb-6">
                   <div className="flex items-center gap-4">
-                    {/* Show flag using flagcdn.com API */}
+                    {/* Use database flag_url if available, fallback to flagcdn.com API */}
                     <img
-                      src={`https://flagcdn.com/w160/${country.code.toLowerCase()}.png`}
+                      src={countryInfo?.flag_url || country.flag_url || `https://flagcdn.com/w160/${country.code.toLowerCase()}.png`}
                       alt={`${country.name} flag`}
                       className="w-24 h-16 object-cover rounded shadow-md border border-gray-200"
                       onError={(e) => {
-                        // Fallback to country code if flag fails to load
+                        // Fallback to flagcdn if database flag fails
                         const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        target.nextElementSibling?.classList.remove('hidden');
+                        if (!target.src.includes('flagcdn.com')) {
+                          target.src = `https://flagcdn.com/w160/${country.code.toLowerCase()}.png`;
+                        } else {
+                          target.style.display = 'none';
+                          target.nextElementSibling?.classList.remove('hidden');
+                        }
                       }}
                     />
                     <div className="w-24 h-16 bg-gray-100 rounded flex items-center justify-center hidden">
                       <span className="text-2xl font-bold text-gray-400">{country.code}</span>
                     </div>
-                    {country.coat_of_arms_url && (
+                    {(countryInfo?.coat_of_arms_url || country.coat_of_arms_url) && (
                       <img
-                        src={country.coat_of_arms_url}
+                        src={countryInfo?.coat_of_arms_url || country.coat_of_arms_url}
                         alt={`${country.name} Coat of Arms`}
                         className="w-16 h-16 object-contain opacity-80"
                       />
@@ -227,11 +231,11 @@ export const CountryDetailPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Description */}
-                {country.wikipedia_description && (
+                {/* Description - use database description first, then Wikipedia */}
+                {(countryInfo?.description || country.wikipedia_description) && (
                   <p className="text-lg text-gray-600 leading-relaxed max-w-xl">
-                    {country.wikipedia_description.slice(0, 300)}
-                    {country.wikipedia_description.length > 300 && '...'}
+                    {(countryInfo?.description || country.wikipedia_description || '').slice(0, 300)}
+                    {(countryInfo?.description || country.wikipedia_description || '').length > 300 && '...'}
                   </p>
                 )}
 
@@ -538,6 +542,15 @@ export const CountryDetailPage: React.FC = () => {
                   className="p-6 bg-gray-50 rounded-2xl"
                 >
                   <h3 className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-4">Leadership</h3>
+                  {countryInfo.leader_image_url && (
+                    <div className="mb-4">
+                      <img
+                        src={countryInfo.leader_image_url}
+                        alt={countryInfo.president_name}
+                        className="w-24 h-24 object-cover rounded-full border-2 border-gray-200 mx-auto"
+                      />
+                    </div>
+                  )}
                   <p className="text-lg font-bold text-black">{countryInfo.president_name}</p>
                   {countryInfo.government_type && (
                     <p className="text-sm text-gray-500 mt-1">{countryInfo.government_type}</p>
