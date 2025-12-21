@@ -285,28 +285,10 @@ export const AdminSponsoredBanners: React.FC = () => {
   const handleToggleActive = async (banner: SponsoredBanner) => {
     try {
       const newValue = !banner.is_active;
-
       setRowUpdating((prev) => ({ ...prev, [banner.id]: true }));
 
-      // If turning ON, deactivate any other active banners that target the same countries
-      if (newValue) {
-        const targetCountryIds = new Set(getBannerCountryIds(banner));
-
-        const conflicting = banners.filter((b) => {
-          if (b.id === banner.id) return false;
-          if (!b.is_active) return false;
-          const bCountries = getBannerCountryIds(b);
-          return bCountries.some((cid) => targetCountryIds.has(cid));
-        });
-
-        for (const other of conflicting) {
-          setRowUpdating((prev) => ({ ...prev, [other.id]: true }));
-          await updateBanner(other.id, { is_active: false } as any);
-          setRowUpdating((prev) => ({ ...prev, [other.id]: false }));
-        }
-      }
-
       await updateBanner(banner.id, { is_active: newValue } as any);
+      
       toast({
         title: newValue ? 'Activated' : 'Deactivated',
         description: `Banner ${newValue ? 'is now active' : 'has been deactivated'}`,
