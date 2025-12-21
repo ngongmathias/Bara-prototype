@@ -25,7 +25,10 @@ import {
   Phone,
   Plus,
   HelpCircle,
-  Download
+  Download,
+  Edit,
+  Save,
+  X as XIcon
 } from 'lucide-react';
 import { useSponsoredBanners } from '@/hooks/useSponsoredBanners';
 import { useToast } from '@/hooks/use-toast';
@@ -85,6 +88,28 @@ export const AdminSponsoredBanners: React.FC = () => {
   const [bannerCountries, setBannerCountries] = useState<Record<string, Array<{id: string; name: string; flag_url?: string}>>>({});
 
   const [rowUpdating, setRowUpdating] = useState<Record<string, boolean>>({});
+
+  // Edit dialog state
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingBanner, setEditingBanner] = useState<SponsoredBanner | null>(null);
+  const [editForm, setEditForm] = useState({
+    company_name: '',
+    company_website: '',
+    banner_alt_text: '',
+    contact_name: '',
+    contact_email: '',
+    contact_phone: '',
+    payment_status: 'pending' as 'pending' | 'paid' | 'failed' | 'refunded',
+    payment_amount: 0,
+    status: 'pending' as 'pending' | 'approved' | 'rejected' | 'active' | 'inactive',
+    display_on_top: false,
+    display_on_bottom: false,
+    admin_notes: '',
+  });
+  const [editBannerImage, setEditBannerImage] = useState<File | null>(null);
+  const [editBannerImageUrl, setEditBannerImageUrl] = useState('');
+  const [editCountryIds, setEditCountryIds] = useState<string[]>([]);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     fetchBanners(true); // Admin mode
@@ -358,6 +383,106 @@ export const AdminSponsoredBanners: React.FC = () => {
         description: "Failed to add notes",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleEditBanner = (banner: SponsoredBanner) => {
+    setEditingBanner(banner);
+    setEditForm({
+      company_name: banner.company_name || '',
+      company_website: banner.company_website || '',
+      banner_alt_text: banner.banner_alt_text || '',
+      contact_name: banner.contact_name || '',
+      contact_email: banner.contact_email || '',
+      contact_phone: banner.contact_phone || '',
+      payment_status: banner.payment_status || 'pending',
+      payment_amount: banner.payment_amount || 0,
+      status: banner.status || 'pending',
+      display_on_top: banner.display_on_top || false,
+      display_on_bottom: banner.display_on_bottom || false,
+      admin_notes: banner.admin_notes || '',
+    });
+    setEditBannerImageUrl(banner.banner_image_url || '');
+    setEditBannerImage(null);
+    
+    // Get country IDs for this banner
+    const countryIds = getBannerCountryIds(banner);
+    setEditCountryIds(countryIds);
+    
+    setShowEditDialog(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingBanner) return;
+
+    try {
+      setUpdating(true);
+
+      let imageUrl = editBannerImageUrl;
+
+      // Upload new image if selected
+      if (editBannerImage) {
+        imageUrl = await uploadImage(editBannerImage, 'sponsored-banners', 'banners');
+        
+        // Delete old image if it exists and is different
+        if (editingBanner.banner_image_url && editingBanner.banner_image_url !== imageUrl) {
+          try {
+            await deleteImage(editingBanner.banner_image_url);
+          } catch (err) {
+            console.warn('Failed to delete old image:', err);
+          }
+        }
+      }
+
+      // Update banner
+      await updateBanner(editingBanner.id, {
+        ...editForm,
+        banner_image_url: imageUrl,
+      } as any);
+
+      // Update banner countries if changed
+      const currentCountryIds = getBannerCountryIds(editingBanner);
+      const hasCountryChanges = 
+        editCountryIds.length !== currentCountryIds.length ||
+        editCountryIds.some(id => !currentCountryIds.includes(id));
+
+      if (hasCountryChanges) {
+        // Delete existing country associations
+        await supabase
+          .from('sponsored_banner_countries')
+          .delete()
+          .eq('banner_id', editingBanner.id);
+
+        // Insert new country associations
+        if (editCountryIds.length > 0) {
+          const insertData = editCountryIds.map(countryId => ({
+            banner_id: editingBanner.id,
+            country_id: countryId,
+          }));
+
+          await supabase
+            .from('sponsored_banner_countries')
+            .insert(insertData);
+        }
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Banner updated successfully',
+      });
+
+      setShowEditDialog(false);
+      setEditingBanner(null);
+      fetchBanners(true);
+    } catch (error) {
+      console.error('Error updating banner:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update banner',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -730,6 +855,15 @@ export const AdminSponsoredBanners: React.FC = () => {
                               }}
                             >
                               View
+                            </Button>
+                            
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditBanner(banner)}
+                            >
+                              <Edit className="w-3 h-3 mr-1" />
+                              Edit
                             </Button>
                             
                             <Button
@@ -1148,11 +1282,242 @@ export const AdminSponsoredBanners: React.FC = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Edit Banner Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5" />
+                Edit Banner
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6 py-4">
+              {/* Company Information */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Company Information</h3>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Company Name *</label>
+                  <Input
+                    value={editForm.company_name}
+                    onChange={(e) => setEditForm({ ...editForm, company_name: e.target.value })}
+                    placeholder="e.g., Visit Rwanda Tourism"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Company Website</label>
+                  <Input
+                    value={editForm.company_website}
+                    onChange={(e) => setEditForm({ ...editForm, company_website: e.target.value })}
+                    placeholder="https://example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Banner Alt Text</label>
+                  <Input
+                    value={editForm.banner_alt_text}
+                    onChange={(e) => setEditForm({ ...editForm, banner_alt_text: e.target.value })}
+                    placeholder="Descriptive text for accessibility"
+                  />
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Contact Information</h3>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Contact Name</label>
+                  <Input
+                    value={editForm.contact_name}
+                    onChange={(e) => setEditForm({ ...editForm, contact_name: e.target.value })}
+                    placeholder="John Doe"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Contact Email</label>
+                  <Input
+                    type="email"
+                    value={editForm.contact_email}
+                    onChange={(e) => setEditForm({ ...editForm, contact_email: e.target.value })}
+                    placeholder="contact@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Contact Phone</label>
+                  <Input
+                    value={editForm.contact_phone}
+                    onChange={(e) => setEditForm({ ...editForm, contact_phone: e.target.value })}
+                    placeholder="+250 XXX XXX XXX"
+                  />
+                </div>
+              </div>
+
+              {/* Banner Image */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Banner Image</h3>
+                
+                {editBannerImageUrl && !editBannerImage && (
+                  <div className="border rounded p-2">
+                    <img src={editBannerImageUrl} alt="Current banner" className="max-h-32 mx-auto" />
+                    <p className="text-xs text-gray-500 text-center mt-1">Current image</p>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Upload New Image (optional)</label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setEditBannerImage(file);
+                        setEditBannerImageUrl(URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Recommended: 728x90px or 1200x132px, under 300KB</p>
+                </div>
+              </div>
+
+              {/* Target Countries */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Target Countries</h3>
+                
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2">
+                  {countries.map((country) => (
+                    <label key={country.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                      <input
+                        type="checkbox"
+                        checked={editCountryIds.includes(country.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setEditCountryIds([...editCountryIds, country.id]);
+                          } else {
+                            setEditCountryIds(editCountryIds.filter(id => id !== country.id));
+                          }
+                        }}
+                        className="rounded"
+                      />
+                      {country.flag_url && <img src={country.flag_url} alt={country.name} className="w-5 h-4" />}
+                      <span className="text-sm">{country.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Payment & Status */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Payment Status</label>
+                  <Select value={editForm.payment_status} onValueChange={(value: any) => setEditForm({ ...editForm, payment_status: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="failed">Failed</SelectItem>
+                      <SelectItem value="refunded">Refunded</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Payment Amount ($)</label>
+                  <Input
+                    type="number"
+                    value={editForm.payment_amount}
+                    onChange={(e) => setEditForm({ ...editForm, payment_amount: parseFloat(e.target.value) || 0 })}
+                    placeholder="25"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Status</label>
+                  <Select value={editForm.status} onValueChange={(value: any) => setEditForm({ ...editForm, status: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Display Settings */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Display Settings</h3>
+                
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={editForm.display_on_top}
+                    onCheckedChange={(checked) => setEditForm({ ...editForm, display_on_top: checked })}
+                  />
+                  <label className="text-sm">Display on Top</label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={editForm.display_on_bottom}
+                    onCheckedChange={(checked) => setEditForm({ ...editForm, display_on_bottom: checked })}
+                  />
+                  <label className="text-sm">Display on Bottom</label>
+                </div>
+              </div>
+
+              {/* Admin Notes */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Admin Notes</label>
+                <Textarea
+                  value={editForm.admin_notes}
+                  onChange={(e) => setEditForm({ ...editForm, admin_notes: e.target.value })}
+                  placeholder="Internal notes about this banner..."
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowEditDialog(false)} disabled={updating}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEdit} disabled={updating} className="bg-blue-600 hover:bg-blue-700">
+                {updating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Help Dialog */}
         <Dialog open={isHelpDialogOpen} onOpenChange={setIsHelpDialogOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-comfortaa">Sponsored Banners Ad System Guide</DialogTitle>
+              <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                <HelpCircle className="w-6 h-6 text-blue-600" />
+                Sponsored Banner Ads - Complete Guide
+              </DialogTitle>
             </DialogHeader>
             
             <div className="space-y-6 font-roboto text-sm">
