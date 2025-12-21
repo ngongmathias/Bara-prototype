@@ -138,6 +138,10 @@ export const CountryDetailPage: React.FC = () => {
   };
 
   const getCoords = () => {
+    // Use database coordinates from countryInfo first, then fallback to hardcoded coords
+    if (countryInfo?.latitude && countryInfo?.longitude) {
+      return { lat: countryInfo.latitude, lng: countryInfo.longitude };
+    }
     const slug = countrySlug?.toLowerCase() || '';
     return COUNTRY_COORDS[slug] || { lat: 0, lng: 20 };
   };
@@ -241,16 +245,16 @@ export const CountryDetailPage: React.FC = () => {
 
                 {/* Quick Stats */}
                 <div className="flex flex-wrap gap-6 mt-8">
-                  {country.capital && (
+                  {(countryInfo?.capital || country.capital) && (
                     <div>
                       <p className="text-xs uppercase tracking-wider text-gray-400 mb-1">Capital</p>
-                      <p className="text-xl font-bold text-black">{country.capital}</p>
+                      <p className="text-xl font-bold text-black">{countryInfo?.capital || country.capital}</p>
                     </div>
                   )}
-                  {country.population && (
+                  {(countryInfo?.population || country.population) && (
                     <div>
                       <p className="text-xs uppercase tracking-wider text-gray-400 mb-1">Population</p>
-                      <p className="text-xl font-bold text-black">{formatNumber(country.population)}</p>
+                      <p className="text-xl font-bold text-black">{formatNumber(countryInfo?.population || country.population)}</p>
                     </div>
                   )}
                   {countryInfo?.area_sq_km && (
