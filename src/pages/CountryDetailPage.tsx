@@ -339,8 +339,10 @@ export const CountryDetailPage: React.FC = () => {
                   {[
                     { label: 'Language', value: countryInfo?.language || country.language },
                     { label: 'Currency', value: countryInfo?.currency || country.currency },
+                    { label: 'Currency Code', value: countryInfo?.currency_code },
                     { label: 'Calling Code', value: countryInfo?.calling_code },
                     { label: 'Timezone', value: countryInfo?.timezone },
+                    { label: 'Formation Date', value: countryInfo?.formation_date },
                   ].filter(item => item.value).map((item, i) => (
                     <div key={i} className="border-l-2 border-black pl-4">
                       <p className="text-xs text-gray-400 mb-1">{item.label}</p>
@@ -382,14 +384,14 @@ export const CountryDetailPage: React.FC = () => {
               )}
 
               {/* Demographics */}
-              {(countryInfo?.life_expectancy || countryInfo?.literacy_rate) && (
+              {(countryInfo?.life_expectancy || countryInfo?.literacy_rate || countryInfo?.largest_city) && (
                 <motion.section
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                 >
                   <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-6">Demographics</h2>
-                  <div className="flex flex-wrap gap-12">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
                     {countryInfo?.life_expectancy && (
                       <div>
                         <p className="text-5xl font-black text-black">{countryInfo.life_expectancy}</p>
@@ -409,6 +411,28 @@ export const CountryDetailPage: React.FC = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Cities */}
+                  {(countryInfo?.largest_city || countryInfo?.capital_population) && (
+                    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {countryInfo?.largest_city && (
+                        <div className="border-l-2 border-black pl-4">
+                          <p className="text-xs text-gray-400 mb-1">Largest City</p>
+                          <p className="text-2xl font-bold text-black">{countryInfo.largest_city}</p>
+                          {countryInfo?.largest_city_population && (
+                            <p className="text-sm text-gray-500 mt-1">{formatNumber(countryInfo.largest_city_population)} people</p>
+                          )}
+                        </div>
+                      )}
+                      {countryInfo?.capital_population && (
+                        <div className="border-l-2 border-black pl-4">
+                          <p className="text-xs text-gray-400 mb-1">Capital Population</p>
+                          <p className="text-2xl font-bold text-black">{formatNumber(countryInfo.capital_population)}</p>
+                          <p className="text-sm text-gray-500 mt-1">people</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </motion.section>
               )}
 
@@ -562,15 +586,21 @@ export const CountryDetailPage: React.FC = () => {
                 </motion.div>
               )}
 
-              {/* Resources */}
-              {(countryInfo?.natural_resources || countryInfo?.main_industries) && (
+              {/* Resources & Environment */}
+              {(countryInfo?.natural_resources || countryInfo?.main_industries || countryInfo?.climate || countryInfo?.tourism_attractions) && (
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   className="p-6 bg-gray-50 rounded-2xl"
                 >
-                  <h3 className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-4">Resources & Industry</h3>
+                  <h3 className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-4">Resources & Environment</h3>
+                  {countryInfo.climate && (
+                    <div className="mb-4">
+                      <p className="text-xs text-gray-400 mb-1">Climate</p>
+                      <p className="text-sm text-black">{countryInfo.climate}</p>
+                    </div>
+                  )}
                   {countryInfo.natural_resources && (
                     <div className="mb-4">
                       <p className="text-xs text-gray-400 mb-1">Natural Resources</p>
@@ -578,9 +608,15 @@ export const CountryDetailPage: React.FC = () => {
                     </div>
                   )}
                   {countryInfo.main_industries && (
-                    <div>
+                    <div className="mb-4">
                       <p className="text-xs text-gray-400 mb-1">Main Industries</p>
                       <p className="text-sm text-black">{countryInfo.main_industries}</p>
+                    </div>
+                  )}
+                  {countryInfo.tourism_attractions && (
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">Tourism Attractions</p>
+                      <p className="text-sm text-black">{countryInfo.tourism_attractions}</p>
                     </div>
                   )}
                 </motion.div>
