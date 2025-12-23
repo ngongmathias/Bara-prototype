@@ -140,30 +140,45 @@ const MarketplacePage = () => {
 
         {/* Country grid with subcategory links */}
         <section className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-8">
-            {popularCountries.map((country) => (
-              <div key={country.id} className="space-y-3">
-                <h3 className="font-semibold text-black text-base">{country.name}</h3>
-                <div className="space-y-2">
-                  {categoryTabs.slice(0, 5).map((cat) => (
-                    <button
-                      key={`${country.id}-${cat.id}`}
-                      type="button"
-                      onClick={() => {
-                        const params = new URLSearchParams();
-                        params.set('category', cat.id);
-                        params.set('country', country.id);
-                        navigate(`/marketplace/search?${params.toString()}`);
-                      }}
-                      className="block text-sm text-blue-600 hover:underline text-left"
-                    >
-                      {cat.label} in {country.name}
-                    </button>
-                  ))}
+          {loadingCountries ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-8">
+              {Array.from({ length: 8 }).map((_, idx) => (
+                <div key={idx} className="space-y-3 animate-pulse">
+                  <div className="h-5 bg-gray-200 rounded w-32" />
+                  <div className="space-y-2">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="h-4 bg-gray-100 rounded w-full" />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-8">
+              {countries.map((country) => (
+                <div key={country.id} className="space-y-3">
+                  <h3 className="font-semibold text-black text-base">{country.name}</h3>
+                  <div className="space-y-2">
+                    {categoryTabs.slice(0, 5).map((cat) => (
+                      <button
+                        key={`${country.id}-${cat.id}`}
+                        type="button"
+                        onClick={() => {
+                          const params = new URLSearchParams();
+                          params.set('category', cat.id);
+                          params.set('country', country.name);
+                          navigate(`/marketplace/search?${params.toString()}`);
+                        }}
+                        className="block text-sm text-blue-600 hover:underline text-left"
+                      >
+                        {cat.label} in {country.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
       
