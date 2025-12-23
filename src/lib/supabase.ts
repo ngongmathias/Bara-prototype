@@ -451,7 +451,15 @@ export const db = {
   slideshow_images: () => supabase.from('slideshow_images'),
   
   // Popup ads operations
-  popup_ads: () => supabase.from('popup_ads')
+  popup_ads: () => supabase.from('popup_ads'),
+
+  // Marketplace operations
+  marketplace_categories: () => supabase.from('marketplace_categories'),
+  marketplace_listings: () => supabase.from('marketplace_listings'),
+  marketplace_listing_images: () => supabase.from('marketplace_listing_images'),
+  marketplace_favorites: () => supabase.from('marketplace_favorites'),
+  marketplace_chat_threads: () => supabase.from('marketplace_chat_threads'),
+  marketplace_chat_messages: () => supabase.from('marketplace_chat_messages')
 }
 
 // Auth helper functions

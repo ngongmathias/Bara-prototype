@@ -52,6 +52,8 @@ import FaqPage from "./pages/FaqPage";
 // import { SimpleMapTest } from "./pages/SimpleMapTest";
 import { UltraSimpleMap } from "./components/UltraSimpleMap";
 import MarketplacePage from "./pages/MarketplacePage";
+import MarketplaceSearchPage from "./pages/MarketplaceSearchPage";
+import MarketplaceListingDetailPage from "./pages/MarketplaceListingDetailPage";
 import {EventsPage} from "./pages/EventsPage";
 import { ToolsPage } from "./pages/ToolsPage";
 import CommunitiesPage from "./pages/communities";
@@ -126,6 +128,8 @@ const AppRoutes = () => {
       
       {/* New Navigation Pages */}
       <Route path="/marketplace" element={<MarketplacePage />} />
+      <Route path="/marketplace/search" element={<MarketplaceSearchPage />} />
+      <Route path="/marketplace/listing/:listingId" element={<MarketplaceListingDetailPage />} />
       <Route path="/events" element={<EventsPage />} />
       <Route path="/events/:eventId" element={<EventsPage />} />
       <Route path="/tools" element={<ToolsPage />} />
