@@ -71,6 +71,7 @@ import { AdminSponsoredBanners } from "./pages/admin/AdminSponsoredBanners";
 import { AdminSlideshowImages } from "./pages/admin/AdminSlideshowImages";
 import AdminEventsSlideshow from "./pages/admin/AdminEventsSlideshow";
 import AdminPopups from "./pages/admin/AdminPopups";
+import { AdminMarketplaceListings } from "./pages/admin/AdminMarketplaceListings";
 import { MainLayout } from "./components/layout/MainLayout";
 
 const queryClient = new QueryClient();
@@ -297,6 +298,11 @@ const AppRoutes = () => {
       <Route path="/admin/events-slideshow" element={
         <AdminAuthGuard>
           <AdminEventsSlideshow />
+        </AdminAuthGuard>
+      } />
+      <Route path="/admin/marketplace-listings" element={
+        <AdminAuthGuard>
+          <AdminMarketplaceListings />
         </AdminAuthGuard>
       } />
       
