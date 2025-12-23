@@ -127,6 +127,11 @@ const Footer = () => {
                   {t('footer.askBara')}
                 </Link>
               </li>
+              <li>
+                <Link to="/tools" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
+                  Bara Tools
+                </Link>
+              </li>
             </ul>
           </div>
 

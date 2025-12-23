@@ -20,7 +20,8 @@ import {
   Shield,
   ChevronRight,
   ChevronLeft,
-  MapPin
+  MapPin,
+  Wrench
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -221,6 +222,43 @@ export const Header = () => {
                 {t('navigation.advertise')}
               </Button>
             </Link>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
+                  <Wrench className="w-4 h-4 mr-1.5" />
+                  Tools
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <Link to="/tools" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Wrench className="w-4 h-4 mr-2" />
+                    All Tools
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator />
+                <Link to="/tools#calculator" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer text-sm">Calculator</DropdownMenuItem>
+                </Link>
+                <Link to="/tools#compass" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer text-sm">Compass</DropdownMenuItem>
+                </Link>
+                <Link to="/tools#world-clock" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer text-sm">World Clock</DropdownMenuItem>
+                </Link>
+                <Link to="/tools#currency-converter" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer text-sm">Currency Converter</DropdownMenuItem>
+                </Link>
+                <Link to="/tools#unit-converter" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer text-sm">Unit Converter</DropdownMenuItem>
+                </Link>
+                <Link to="/tools#qr-generator" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer text-sm">QR Generator</DropdownMenuItem>
+                </Link>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           {/* Desktop Right Side - User, Country, Language */}

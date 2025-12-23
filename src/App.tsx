@@ -53,6 +53,7 @@ import FaqPage from "./pages/FaqPage";
 import { UltraSimpleMap } from "./components/UltraSimpleMap";
 import MarketplacePage from "./pages/MarketplacePage";
 import {EventsPage} from "./pages/EventsPage";
+import { ToolsPage } from "./pages/ToolsPage";
 import CommunitiesPage from "./pages/communities";
 import { CommunityPage } from "./pages/communities/CommunityPage";
 import UserSignInPage from "./pages/user/UserSignInPage";
@@ -127,6 +128,7 @@ const AppRoutes = () => {
       <Route path="/marketplace" element={<MarketplacePage />} />
       <Route path="/events" element={<EventsPage />} />
       <Route path="/events/:eventId" element={<EventsPage />} />
+      <Route path="/tools" element={<ToolsPage />} />
       <Route path="/advertise/checkout" element={<AdvertiseCheckoutPage />} />
       <Route path="/sponsor-country" element={<SponsorCountryPage />} />
       
