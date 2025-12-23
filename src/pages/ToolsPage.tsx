@@ -135,7 +135,7 @@ export const ToolsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative bg-black text-white py-20">
+      <section className="relative bg-white py-20">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -143,8 +143,8 @@ export const ToolsPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="text-5xl md:text-6xl font-black mb-6">Bara Tools</h1>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            <h1 className="text-5xl md:text-6xl font-black text-black mb-6">Bara Tools</h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Powerful mini apps to help you calculate, convert, and explore. All free, all simple.
             </p>
           </motion.div>
