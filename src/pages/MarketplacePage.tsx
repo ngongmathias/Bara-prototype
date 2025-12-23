@@ -111,84 +111,59 @@ const MarketplacePage = () => {
 
       {/* Main Content */}
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-        {/* Hero + global search */}
-        <section className="text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-comfortaa font-bold text-black mb-4">
-            Bara Marketplace
+        {/* Hero */}
+        <section className="text-center mb-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-comfortaa font-bold text-black mb-3">
+            Join millions of users to buy and sell anything across Africa
           </h1>
-          <p className="max-w-2xl mx-auto text-gray-600 mb-8">
-            Browse by category and country in a workflow inspired by Dubizzle, with our own clean black & white styling.
-          </p>
-
-          <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <Input
-                placeholder="What are you looking for?"
-                className="pl-12 h-14 text-base border-gray-300 focus:border-black focus:ring-black rounded-xl shadow-sm"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="mt-4 flex justify-center">
-              <Button type="submit" className="px-8">
-                Search marketplace
-              </Button>
-            </div>
-          </form>
         </section>
 
-        {/* Category tabs */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl sm:text-2xl font-semibold text-black">Browse by category</h2>
-          </div>
-
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2">
-            {categoryTabs.map((cat) => (
-              <motion.button
+        {/* Category tabs - dubizzle style */}
+        <section className="mb-12">
+          <div className="flex gap-0 overflow-x-auto border-b border-gray-200">
+            {categoryTabs.map((cat, idx) => (
+              <button
                 key={cat.id}
                 type="button"
                 onClick={() => handleCategoryClick(cat.id)}
-                whileHover={{ y: -1 }}
-                className={`flex-shrink-0 rounded-full border px-4 py-2 text-sm text-left whitespace-nowrap transition-colors ${
-                  activeCategory === cat.id
-                    ? 'bg-black text-white border-black'
-                    : 'bg-white text-gray-800 border-gray-300 hover:border-black'
+                className={`flex-shrink-0 px-6 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
+                  activeCategory === cat.id || (activeCategory === null && idx === 0)
+                    ? 'border-black text-black bg-gray-50'
+                    : 'border-transparent text-gray-600 hover:text-black hover:bg-gray-50'
                 }`}
               >
-                <div className="font-medium">{cat.label}</div>
-              </motion.button>
+                {cat.label}
+              </button>
             ))}
           </div>
         </section>
 
-        {/* Country grid */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl sm:text-2xl font-semibold text-black">Browse by country</h2>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {/* Country grid with subcategory links */}
+        <section className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-8">
             {popularCountries.map((country) => (
-              <motion.button
-                key={country.id}
-                type="button"
-                onClick={() => handleCountryClick(country.id)}
-                whileHover={{ y: -2 }}
-                className="border border-gray-200 rounded-lg px-4 py-3 text-left bg-white hover:border-black hover:shadow-sm transition-all"
-              >
-                <div className="font-medium text-black mb-1">{country.name}</div>
-                <div className="text-xs text-gray-500">View listings in this country</div>
-              </motion.button>
+              <div key={country.id} className="space-y-3">
+                <h3 className="font-semibold text-black text-base">{country.name}</h3>
+                <div className="space-y-2">
+                  {categoryTabs.slice(0, 5).map((cat) => (
+                    <button
+                      key={`${country.id}-${cat.id}`}
+                      type="button"
+                      onClick={() => {
+                        const params = new URLSearchParams();
+                        params.set('category', cat.id);
+                        params.set('country', country.id);
+                        navigate(`/marketplace/search?${params.toString()}`);
+                      }}
+                      className="block text-sm text-blue-600 hover:underline text-left"
+                    >
+                      {cat.label} in {country.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
-        </section>
-
-        {/* Coming soon note for advanced features */}
-        <section className="border-t border-gray-100 pt-6 text-sm text-gray-500">
-          Advanced filters, Supabase-powered results, posting listings, favorites, and messaging will appear on the
-          dedicated results view at <code className="px-1 py-0.5 bg-gray-100 rounded text-xs">/marketplace/search</code>.
         </section>
       </main>
       
