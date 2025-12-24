@@ -170,7 +170,7 @@ const MarketplaceListingDetailPage = () => {
     }
   };
 
-  const handleContactSeller = () => {
+  const handleContactSeller = async () => {
     if (!user) {
       toast({
         title: "Sign in required",
@@ -179,11 +179,43 @@ const MarketplaceListingDetailPage = () => {
       });
       return;
     }
-    
-    toast({
-      title: "Coming soon",
-      description: "Messaging functionality will be available soon"
-    });
+
+    if (!listing) return;
+
+    try {
+      const { data: existingThread, error: fetchError } = await supabase
+        .from('marketplace_chat_threads')
+        .select('id')
+        .eq('listing_id', listing.id)
+        .eq('buyer_id', user.id)
+        .maybeSingle();
+
+      if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
+
+      if (existingThread) {
+        navigate(`/user/messages?listing=${listing.id}`);
+      } else {
+        const { data: newThread, error: createError } = await supabase
+          .from('marketplace_chat_threads')
+          .insert({
+            listing_id: listing.id,
+            buyer_id: user.id,
+            seller_id: listing.seller_name
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        navigate(`/user/messages?listing=${listing.id}`);
+      }
+    } catch (error: any) {
+      console.error('Error creating chat:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start conversation",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleShare = async () => {
