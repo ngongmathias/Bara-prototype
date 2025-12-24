@@ -65,6 +65,7 @@ import { UserEventsPage } from "./pages/users/UserEventsPage";
 import { UserProfilePage } from "./pages/users/UserProfilePage";
 import { UserBannerSubmission } from "./pages/users/UserBannerSubmission";
 import UserSettingsPage from "./pages/users/UserSettingsPage";
+import { UserFavoritesPage } from "./pages/users/UserFavoritesPage";
 import AdvertiseCheckoutPage from "./pages/AdvertiseCheckoutPage";
 import { SponsorCountryPage } from "./pages/SponsorCountryPage";
 import { AdminSponsoredBanners } from "./pages/admin/AdminSponsoredBanners";
@@ -143,6 +144,11 @@ const AppRoutes = () => {
       <Route path="/user/sign-in" element={<UserSignInPage />} />
       <Route path="/user/sign-up" element={<UserSignUpPage />} />
       <Route path="/user/settings" element={<UserSettingsPage />} />
+      <Route path="/user/favorites" element={
+        <UserAuthGuard>
+          <UserFavoritesPage />
+        </UserAuthGuard>
+      } />
       
       {/* User Dashboard Routes */}
       <Route path="/users/dashboard" element={
