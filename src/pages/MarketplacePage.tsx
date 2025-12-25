@@ -34,7 +34,7 @@ const popularCountries = [
 const MarketplacePage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);`n  const loadingCountries = false;
 
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -155,7 +155,7 @@ const MarketplacePage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-8">
-              {countries.map((country) => (
+              {popularCountries.map((country) => (
                 <div key={country.id} className="space-y-3">
                   <h3 className="font-semibold text-black text-base">{country.name}</h3>
                   <div className="space-y-2">
