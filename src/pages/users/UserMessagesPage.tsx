@@ -354,3 +354,5 @@ export const UserMessagesPage = () => {
     </div>
   );
 };
+
+export default UserMessagesPage;
