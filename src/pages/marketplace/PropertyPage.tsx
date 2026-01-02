@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { TopBannerAd } from '@/components/TopBannerAd';
@@ -18,7 +18,7 @@ import { MarketplaceListing, MarketplaceCategory, MarketplaceSubcategory } from 
 import { MapPin, Bed, Bath, Maximize } from 'lucide-react';
 
 export const PropertyPage = () => {
-  const { categorySlug } = useParams();
+  const location = useLocation();`r`n  const categorySlug = location.pathname.split('/').pop();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
@@ -435,3 +435,4 @@ export const PropertyPage = () => {
 };
 
 export default PropertyPage;
+
