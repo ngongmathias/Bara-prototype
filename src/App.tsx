@@ -81,6 +81,7 @@ import { AdminSlideshowImages } from "./pages/admin/AdminSlideshowImages";
 import AdminEventsSlideshow from "./pages/admin/AdminEventsSlideshow";
 import AdminPopups from "./pages/admin/AdminPopups";
 import AdminMarketplace from "./pages/admin/AdminMarketplace";
+import AdminMarketplaceCategories from "./pages/admin/AdminMarketplaceCategories";
 import { MainLayout } from "./components/layout/MainLayout";
 
 const queryClient = new QueryClient();

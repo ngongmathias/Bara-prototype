@@ -93,6 +93,12 @@ const adminMenuItems = [
     description: "Moderate marketplace listings"
   },
   {
+    title: "Marketplace Categories",
+    icon: FolderOpen,
+    path: "/admin/marketplace-categories",
+    description: "Manage marketplace categories"
+  },
+  {
     title: "Contact Messages",
     icon: Mail,
     path: "/admin/contact-messages",
