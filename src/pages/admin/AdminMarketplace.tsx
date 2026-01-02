@@ -26,7 +26,8 @@ import {
   Search,
   AlertCircle,
   Image as ImageIcon,
-  Filter
+  Filter,
+  Edit
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -317,6 +318,15 @@ export const AdminMarketplace = () => {
                                 title="View"
                               >
                                 <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => window.open(`/marketplace/edit/${listing.id}`, '_blank')}
+                                className="text-blue-600 hover:text-blue-700"
+                                title="Edit"
+                              >
+                                <Edit className="w-4 h-4" />
                               </Button>
                               {listing.status === 'pending' && (
                                 <>

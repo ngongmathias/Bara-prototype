@@ -106,11 +106,31 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         
+        {/* Admin Routes - MUST come before marketplace dynamic routes */}
+        <Route path="/admin" element={
+          <AdminAuthGuard>
+            <AdminDashboard />
+          </AdminAuthGuard>
+        } />
+        <Route path="/admin/marketplace" element={
+          <AdminAuthGuard>
+            <AdminMarketplace />
+          </AdminAuthGuard>
+        } />
+        <Route path="/admin/marketplace-categories" element={
+          <AdminAuthGuard>
+            <AdminMarketplaceCategories />
+          </AdminAuthGuard>
+        } />
+        
         {/* Marketplace Routes - MUST come before broad business listings routes */}
         <Route path="/marketplace" element={<MarketplaceHub />} />
         <Route path="/marketplace/post" element={<PostListing />} />
         <Route path="/marketplace/my-listings" element={<MyListings />} />
         <Route path="/marketplace/listing/:listingId" element={<ListingDetailPage />} />
+        <Route path="/marketplace/edit/:listingId" element={<EditListing />} />
+        <Route path="/marketplace/search" element={<SearchResults />} />
+        <Route path="/marketplace/favorites" element={<MyFavorites />} />
         <Route path="/marketplace/property-sale" element={<PropertyPage />} />
         <Route path="/marketplace/property-rent" element={<PropertyPage />} />
         <Route path="/marketplace/motors" element={<MotorsPageNew />} />
@@ -322,11 +342,6 @@ const AppRoutes = () => {
       <Route path="/admin/popups" element={
         <AdminAuthGuard>
           <AdminPopups />
-        </AdminAuthGuard>
-      } />
-      <Route path="/admin/marketplace" element={
-        <AdminAuthGuard>
-          <AdminMarketplace />
         </AdminAuthGuard>
       } />
       <Route path="/admin/events-slideshow" element={
