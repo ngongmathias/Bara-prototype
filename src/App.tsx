@@ -131,6 +131,7 @@ const AppRoutes = () => {
       
       {/* New Navigation Pages */}
       <Route path="/marketplace" element={<MarketplaceHub />} />
+      <Route path="/marketplace/listing/:listingId" element={<ListingDetailPage />} />
       <Route path="/marketplace/property-sale" element={<PropertyPage />} />
       <Route path="/marketplace/property-rent" element={<PropertyPage />} />
       <Route path="/marketplace/motors" element={<MotorsPageNew />} />
