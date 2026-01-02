@@ -40,8 +40,10 @@ export const CategoryPage = () => {
   }, [categorySlug]);
 
   useEffect(() => {
-    fetchListings();
-  }, [selectedCountry, selectedSubcategory, minPrice, maxPrice]);
+    if (category) {
+      fetchListings();
+    }
+  }, [category, selectedCountry, selectedSubcategory, minPrice, maxPrice]);
 
   const fetchInitialData = async () => {
     try {

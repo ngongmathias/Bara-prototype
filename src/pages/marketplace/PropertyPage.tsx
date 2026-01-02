@@ -44,8 +44,10 @@ export const PropertyPage = () => {
   }, [categorySlug]);
 
   useEffect(() => {
-    fetchListings();
-  }, [selectedCountry, selectedSubcategory, propertyType, beds]);
+    if (category) {
+      fetchListings();
+    }
+  }, [category, selectedCountry, selectedSubcategory, propertyType, beds]);
 
   const fetchInitialData = async () => {
     try {

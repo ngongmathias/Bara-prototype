@@ -42,8 +42,10 @@ export const MotorsPageNew = () => {
   }, [categorySlug]);
 
   useEffect(() => {
-    fetchListings();
-  }, [selectedCountry, make, year, priceRange]);
+    if (category) {
+      fetchListings();
+    }
+  }, [category, selectedCountry, make, year, priceRange]);
 
   const fetchInitialData = async () => {
     try {
