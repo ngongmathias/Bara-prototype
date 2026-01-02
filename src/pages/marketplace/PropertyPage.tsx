@@ -97,9 +97,15 @@ export const PropertyPage = () => {
   };
 
   const fetchListings = async () => {
-    if (!category) return;
+    if (!category) {
+      console.log('PropertyPage: No category set, skipping fetch');
+      return;
+    }
 
     try {
+      console.log('PropertyPage: Fetching listings for category:', category.name, category.id);
+      console.log('PropertyPage: Filters - country:', selectedCountry, 'subcategory:', selectedSubcategory);
+      
       let query = supabase
         .from('marketplace_listings')
         .select(`
@@ -121,7 +127,13 @@ export const PropertyPage = () => {
         query = query.eq('subcategory_id', selectedSubcategory);
       }
 
-      const { data } = await query;
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error('PropertyPage: Error fetching listings:', error);
+      } else {
+        console.log('PropertyPage: Found', data?.length || 0, 'listings');
+      }
 
       const transformedListings = (data || []).map((listing: any) => ({
         ...listing,
