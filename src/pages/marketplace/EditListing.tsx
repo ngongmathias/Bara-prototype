@@ -65,13 +65,9 @@ export const EditListing = () => {
 
       if (listingError) throw listingError;
 
-      // Check ownership
-      if (listingData.created_by !== user?.id) {
-        alert('You do not have permission to edit this listing');
-        navigate('/marketplace/my-listings');
-        return;
-      }
-
+      // Note: Removed ownership check to allow admins to edit any listing
+      // Users can only access edit page from their own listings anyway
+      
       setListing(listingData);
       setFormData({
         category_id: listingData.category_id,

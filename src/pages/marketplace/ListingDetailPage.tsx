@@ -267,15 +267,9 @@ export const ListingDetailPage = () => {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="icon">
-                        <Heart className="w-5 h-5" />
-                      </Button>
-                      <Button variant="outline" size="icon">
-                        <Share2 className="w-5 h-5" />
-                      </Button>
-                      <Button variant="outline" size="icon">
-                        <Flag className="w-5 h-5" />
-                      </Button>
+                      <FavoriteButton listingId={listing.id} />
+                      <ShareModal listingId={listing.id} title={listing.title} />
+                      <ReportModal listingId={listing.id} />
                     </div>
                   </div>
 
