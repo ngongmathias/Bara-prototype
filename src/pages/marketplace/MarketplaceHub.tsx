@@ -23,7 +23,7 @@ export const MarketplaceHub = () => {
   const [subcategories, setSubcategories] = useState<MarketplaceSubcategory[]>([]);
   const [countries, setCountries] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [displayedCountries, setDisplayedCountries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -62,9 +62,9 @@ export const MarketplaceHub = () => {
       if (countryError) throw countryError;
       setCountries(countriesData || []);
       
-      // Set first country as default
+      // Show first 8 countries by default (like Dubizzle shows cities)
       if (countriesData && countriesData.length > 0) {
-        setSelectedCountry(countriesData[0].id);
+        setDisplayedCountries(countriesData.slice(0, 8));
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -130,35 +130,19 @@ export const MarketplaceHub = () => {
           </div>
         </section>
 
-        {/* Country Selector */}
-        <section className="border-b border-gray-200 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 py-4">
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-gray-700 font-roboto">Select Country:</span>
-              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                <SelectTrigger className="w-64 bg-white font-roboto">
-                  <SelectValue placeholder="Choose a country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country.id} value={country.id}>
-                      {country.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </section>
-
-        {/* Subcategories Grid */}
+        {/* Country Columns with Subcategories */}
         <section className="py-8">
           <div className="max-w-7xl mx-auto px-4">
             {loading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                   <div key={i} className="animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-full"></div>
+                      <div className="h-4 bg-gray-200 rounded w-full"></div>
+                      <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -167,16 +151,44 @@ export const MarketplaceHub = () => {
                 <p className="text-gray-500 font-roboto">No subcategories available</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-3">
-                {subcategories.map((subcat) => (
-                  <Link
-                    key={subcat.id}
-                    to={`/marketplace/${categories.find(c => c.id === selectedCategory)?.slug}?subcategory=${subcat.slug}&country=${selectedCountry}`}
-                    className="text-blue-600 hover:underline font-roboto text-sm"
-                  >
-                    {subcat.name}
-                  </Link>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
+                {displayedCountries.map((country) => (
+                  <div key={country.id}>
+                    <h3 className="text-lg font-bold text-black mb-3 font-comfortaa">
+                      {country.name}
+                    </h3>
+                    <div className="space-y-2">
+                      {subcategories.map((subcat) => (
+                        <Link
+                          key={`${country.id}-${subcat.id}`}
+                          to={`/marketplace/${categories.find(c => c.id === selectedCategory)?.slug}?subcategory=${subcat.slug}&country=${country.id}`}
+                          className="block text-blue-600 hover:underline font-roboto text-sm"
+                        >
+                          {subcat.name} in {country.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 ))}
+              </div>
+            )}
+            
+            {/* Show More Countries Button */}
+            {!loading && countries.length > 8 && (
+              <div className="text-center mt-8">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (displayedCountries.length >= countries.length) {
+                      setDisplayedCountries(countries.slice(0, 8));
+                    } else {
+                      setDisplayedCountries(countries);
+                    }
+                  }}
+                  className="font-roboto"
+                >
+                  {displayedCountries.length >= countries.length ? 'Show Less' : `Show All ${countries.length} Countries`}
+                </Button>
               </div>
             )}
           </div>
