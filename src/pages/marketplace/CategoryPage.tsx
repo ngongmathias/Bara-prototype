@@ -98,11 +98,11 @@ export const CategoryPage = () => {
         .order('created_at', { ascending: false })
         .limit(20);
 
-      if (selectedCountry) {
+      if (selectedCountry && selectedCountry !== 'all') {
         query = query.eq('country_id', selectedCountry);
       }
 
-      if (selectedSubcategory) {
+      if (selectedSubcategory && selectedSubcategory !== 'all') {
         query = query.eq('subcategory_id', selectedSubcategory);
       }
 
@@ -175,7 +175,7 @@ export const CategoryPage = () => {
                   <SelectValue placeholder="All Countries" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Countries</SelectItem>
+                  <SelectItem value="all">All Countries</SelectItem>
                   {countries.map((country) => (
                     <SelectItem key={country.id} value={country.id}>
                       {country.name}
@@ -190,7 +190,7 @@ export const CategoryPage = () => {
                   <SelectValue placeholder="All Subcategories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Subcategories</SelectItem>
+                  <SelectItem value="all">All Subcategories</SelectItem>
                   {subcategories.map((subcat) => (
                     <SelectItem key={subcat.id} value={subcat.id}>
                       {subcat.name}

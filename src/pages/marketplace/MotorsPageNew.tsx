@@ -100,7 +100,7 @@ export const MotorsPageNew = () => {
         .order('created_at', { ascending: false })
         .limit(20);
 
-      if (selectedCountry) {
+      if (selectedCountry && selectedCountry !== 'all') {
         query = query.eq('country_id', selectedCountry);
       }
 
@@ -168,7 +168,7 @@ export const MotorsPageNew = () => {
                   <SelectValue placeholder="City" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Cities</SelectItem>
+                  <SelectItem value="all">All Cities</SelectItem>
                   {countries.map((country) => (
                     <SelectItem key={country.id} value={country.id}>
                       {country.name}
@@ -183,7 +183,7 @@ export const MotorsPageNew = () => {
                   <SelectValue placeholder="Make And Model" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Makes</SelectItem>
+                  <SelectItem value="all">All Makes</SelectItem>
                   {popularMakes.map((makeName) => (
                     <SelectItem key={makeName} value={makeName}>
                       {makeName}
@@ -198,7 +198,7 @@ export const MotorsPageNew = () => {
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any Price</SelectItem>
+                  <SelectItem value="all">Any Price</SelectItem>
                   <SelectItem value="0-20000">Under $20k</SelectItem>
                   <SelectItem value="20000-40000">$20k - $40k</SelectItem>
                   <SelectItem value="40000-60000">$40k - $60k</SelectItem>
@@ -212,7 +212,7 @@ export const MotorsPageNew = () => {
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any Year</SelectItem>
+                  <SelectItem value="all">Any Year</SelectItem>
                   <SelectItem value="2024">2024</SelectItem>
                   <SelectItem value="2023">2023</SelectItem>
                   <SelectItem value="2022">2022</SelectItem>
@@ -228,7 +228,7 @@ export const MotorsPageNew = () => {
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any Kilometers</SelectItem>
+                  <SelectItem value="all">Any Kilometers</SelectItem>
                   <SelectItem value="0-50000">Under 50,000 km</SelectItem>
                   <SelectItem value="50000-100000">50k - 100k km</SelectItem>
                   <SelectItem value="100000+">100k+ km</SelectItem>

@@ -109,11 +109,11 @@ export const PropertyPage = () => {
         .order('created_at', { ascending: false })
         .limit(20);
 
-      if (selectedCountry) {
+      if (selectedCountry && selectedCountry !== 'all') {
         query = query.eq('country_id', selectedCountry);
       }
 
-      if (selectedSubcategory) {
+      if (selectedSubcategory && selectedSubcategory !== 'all') {
         query = query.eq('subcategory_id', selectedSubcategory);
       }
 
@@ -190,7 +190,7 @@ export const PropertyPage = () => {
                   <SelectValue placeholder="Enter location" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Locations</SelectItem>
+                  <SelectItem value="all">All Locations</SelectItem>
                   {countries.map((country) => (
                     <SelectItem key={country.id} value={country.id}>
                       {country.name}
@@ -205,7 +205,7 @@ export const PropertyPage = () => {
                   <SelectValue placeholder="All in Residential" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   {subcategories.map((subcat) => (
                     <SelectItem key={subcat.id} value={subcat.id}>
                       {subcat.name}
@@ -220,7 +220,7 @@ export const PropertyPage = () => {
                   <SelectValue placeholder="Any" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any Price</SelectItem>
+                  <SelectItem value="all">Any Price</SelectItem>
                   <SelectItem value="0-100000">Under $100k</SelectItem>
                   <SelectItem value="100000-250000">$100k - $250k</SelectItem>
                   <SelectItem value="250000-500000">$250k - $500k</SelectItem>
@@ -234,7 +234,7 @@ export const PropertyPage = () => {
                   <SelectValue placeholder="Any" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any Beds</SelectItem>
+                  <SelectItem value="all">Any Beds</SelectItem>
                   <SelectItem value="1">1 Bed</SelectItem>
                   <SelectItem value="2">2 Beds</SelectItem>
                   <SelectItem value="3">3 Beds</SelectItem>
