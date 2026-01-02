@@ -135,10 +135,10 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Global Africa Column - Collapsible for long list */}
+          {/* BARA Global Column - Collapsible for long list */}
           <div className="lg:col-span-2">
             <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-3 sm:mb-4 pb-2 border-b-2 border-[#70905a] font-comfortaa">
-              {t('footer.globalAfrica')}
+              BARA Global
             </h3>
             {isLoading ? (
               <div className="text-gray-500 text-sm">{t('footer.loadingCountries')}</div>
@@ -180,10 +180,10 @@ const Footer = () => {
             )}
           </div>
 
-          {/* Local Communities Column - Full width on mobile, 2 columns on larger screens */}
+          {/* BARA Communities Column - Full width on mobile, 2 columns on larger screens */}
           <div className="lg:col-span-1">
             <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-3 sm:mb-4 pb-2 border-b-2 border-[#70905a] font-comfortaa">
-              {t('footer.localCommunities')}
+              BARA Communities
             </h3>
             <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
               <div>
@@ -213,12 +213,12 @@ const Footer = () => {
               </div>
               <div>
                 <Link to="/communities/kensential-kenya" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
-                  KenSential Kenya
+                  KenSayTioNal Kenya
                 </Link>
               </div>
               <div>
                 <Link to="/communities/nigeriayeah-nigeria" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
-                  NigeriaYeah Nigeria
+                  NiaJaYeah Nigeria
                 </Link>
               </div>
               <div>
@@ -233,7 +233,7 @@ const Footer = () => {
               </div>
               <div>
                 <Link to="/communities/south-african-south-africa" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
-                  South AfriCan South Africa
+                  SaffaCan South Africa
                 </Link>
               </div>
               <div>
@@ -243,7 +243,7 @@ const Footer = () => {
               </div>
               <div>
                 <Link to="/communities/tanzaniya-tanzania" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
-                  TanzaniYa Tanzania
+                  TanzaCulAr Tanzania
                 </Link>
               </div>
               <div>
