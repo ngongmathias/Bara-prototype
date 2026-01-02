@@ -55,7 +55,11 @@ import {EventsPage} from "./pages/EventsPage";
 import { ToolsPage } from "./pages/ToolsPage";
 import CommunitiesPage from "./pages/communities";
 import MarketplaceHub from "./pages/marketplace/MarketplaceHub";
-import MotorsPage from "./pages/marketplace/MotorsPage";
+import CategoryPage from "./pages/marketplace/CategoryPage";
+import PropertyPage from "./pages/marketplace/PropertyPage";
+import MotorsPageNew from "./pages/marketplace/MotorsPageNew";
+import ClassifiedsPage from "./pages/marketplace/ClassifiedsPage";
+import JobsPage from "./pages/marketplace/JobsPage";
 import { CommunityPage } from "./pages/communities/CommunityPage";
 import UserSignInPage from "./pages/user/UserSignInPage";
 import UserSignUpPage from "./pages/user/UserSignUpPage";
@@ -325,6 +329,7 @@ const App = () => (
 );
 
 export default App;
+
 
 
 
