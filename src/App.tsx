@@ -63,6 +63,8 @@ import JobsPage from "./pages/marketplace/JobsPage";
 import ListingDetailPage from "./pages/marketplace/ListingDetailPage";
 import PostListing from "./pages/marketplace/PostListing";
 import MyListings from "./pages/marketplace/MyListings";
+import SearchResults from "./pages/marketplace/SearchResults";
+import MyFavorites from "./pages/marketplace/MyFavorites";
 import { CommunityPage } from "./pages/communities/CommunityPage";
 import UserSignInPage from "./pages/user/UserSignInPage";
 import UserSignUpPage from "./pages/user/UserSignUpPage";

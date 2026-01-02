@@ -86,7 +86,7 @@ export const PropertyPage = () => {
           .eq('category_id', categoryData.id)
           .limit(10);
         
-        const locations = [...new Set(locationsData?.map(l => l.location_details?.split(',')[0]).filter(Boolean))];
+        const locations = [...new Set(locationsData?.map(l => l.location_details?.split(',')[0]).filter(Boolean))] as string[];
         setPopularLocations(locations.slice(0, 5));
       }
       
@@ -98,14 +98,18 @@ export const PropertyPage = () => {
   };
 
   const fetchListings = async () => {
+    console.log('[PropertyPage] fetchListings called');
+    console.log('[PropertyPage] categorySlug:', categorySlug);
+    console.log('[PropertyPage] category:', category);
+    
     if (!category) {
-      console.log('PropertyPage: No category set, skipping fetch');
+      console.log('[PropertyPage] No category, skipping fetch');
       return;
     }
 
+    setLoading(true);
     try {
-      console.log('PropertyPage: Fetching listings for category:', category.name, category.id);
-      console.log('PropertyPage: Filters - country:', selectedCountry, 'subcategory:', selectedSubcategory);
+      console.log('[PropertyPage] Building query for category:', category.id);
       
       let query = supabase
         .from('marketplace_listings')
@@ -115,28 +119,33 @@ export const PropertyPage = () => {
           marketplace_listing_attributes(attribute_key, attribute_value)
         `)
         .eq('category_id', category.id)
-        .eq('status', 'active')
-        .order('is_featured', { ascending: false })
-        .order('created_at', { ascending: false })
-        .limit(20);
+        .eq('status', 'active');
 
+      // Apply country filter if selected
       if (selectedCountry && selectedCountry !== 'all') {
+        console.log('[PropertyPage] Applying country filter:', selectedCountry);
         query = query.eq('country_id', selectedCountry);
       }
 
+      // Apply subcategory filter if selected
       if (selectedSubcategory && selectedSubcategory !== 'all') {
+        console.log('[PropertyPage] Applying subcategory filter:', selectedSubcategory);
         query = query.eq('subcategory_id', selectedSubcategory);
       }
 
+      console.log('[PropertyPage] Executing query...');
       const { data, error } = await query;
-      
+
       if (error) {
-        console.error('PropertyPage: Error fetching listings:', error);
-      } else {
-        console.log('PropertyPage: Found', data?.length || 0, 'listings');
+        console.error('[PropertyPage] Error fetching listings:', error);
+        throw error;
       }
 
-      const transformedListings = (data || []).map((listing: any) => ({
+      console.log('[PropertyPage] Query result:', data);
+      console.log('[PropertyPage] Number of listings:', data?.length || 0);
+
+      // Transform and apply client-side filters for attributes
+      let transformedListings = (data || []).map((listing: any) => ({
         ...listing,
         images: listing.marketplace_listing_images || [],
         attributes: (listing.marketplace_listing_attributes || []).reduce(

@@ -16,7 +16,10 @@ import {
   Star,
   CheckCircle,
   AlertCircle,
-  Image
+  Image,
+  ShoppingBag,
+  Plus,
+  Heart
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
