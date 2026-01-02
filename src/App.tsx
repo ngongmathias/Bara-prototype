@@ -55,6 +55,8 @@ import MarketplacePage from "./pages/MarketplacePage";
 import {EventsPage} from "./pages/EventsPage";
 import { ToolsPage } from "./pages/ToolsPage";
 import CommunitiesPage from "./pages/communities";
+import MarketplaceHub from "./pages/marketplace/MarketplaceHub";
+import MotorsPage from "./pages/marketplace/MotorsPage";
 import { CommunityPage } from "./pages/communities/CommunityPage";
 import UserSignInPage from "./pages/user/UserSignInPage";
 import UserSignUpPage from "./pages/user/UserSignUpPage";
