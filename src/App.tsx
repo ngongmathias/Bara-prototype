@@ -103,8 +103,8 @@ const AppRoutes = () => {
         
         {/* Marketplace Routes - MUST come before broad business listings routes */}
         <Route path="/marketplace" element={<MarketplaceHub />} />
-        {/* <Route path="/marketplace/post" element={<PostListing />} /> */}
-        {/* <Route path="/marketplace/my-listings" element={<MyListings />} /> */}
+        <Route path="/marketplace/post" element={<PostListing />} />
+        <Route path="/marketplace/my-listings" element={<MyListings />} />
         <Route path="/marketplace/listing/:listingId" element={<ListingDetailPage />} />
         <Route path="/marketplace/property-sale" element={<PropertyPage />} />
         <Route path="/marketplace/property-rent" element={<PropertyPage />} />
