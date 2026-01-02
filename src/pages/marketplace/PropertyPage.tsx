@@ -18,7 +18,8 @@ import { MarketplaceListing, MarketplaceCategory, MarketplaceSubcategory } from 
 import { MapPin, Bed, Bath, Maximize } from 'lucide-react';
 
 export const PropertyPage = () => {
-  const location = useLocation();`r`n  const categorySlug = location.pathname.split('/').pop();
+  const location = useLocation();
+  const categorySlug = location.pathname.split('/').pop();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
@@ -435,4 +436,5 @@ export const PropertyPage = () => {
 };
 
 export default PropertyPage;
+
 
