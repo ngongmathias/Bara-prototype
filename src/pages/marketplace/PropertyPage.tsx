@@ -32,7 +32,7 @@ export const PropertyPage = () => {
 
   // Filters
   const [purpose, setPurpose] = useState<string>(categorySlug === 'property-sale' ? 'Buy' : 'Rent');
-  const [location, setLocation] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [priceRange, setPriceRange] = useState('');
   const [beds, setBeds] = useState('');
@@ -436,5 +436,6 @@ export const PropertyPage = () => {
 };
 
 export default PropertyPage;
+
 
 
