@@ -76,14 +76,16 @@ export const PropertyPage = () => {
       setCountries(countriesData || []);
       
       // Get popular locations from existing listings
-      const { data: locationsData } = await supabase
-        .from('marketplace_listings')
-        .select('location_details')
-        .eq('category_id', categoryData?.id)
-        .limit(10);
-      
-      const locations = [...new Set(locationsData?.map(l => l.location_details?.split(',')[0]).filter(Boolean))];
-      setPopularLocations(locations.slice(0, 5));
+      if (categoryData?.id) {
+        const { data: locationsData } = await supabase
+          .from('marketplace_listings')
+          .select('location_details')
+          .eq('category_id', categoryData.id)
+          .limit(10);
+        
+        const locations = [...new Set(locationsData?.map(l => l.location_details?.split(',')[0]).filter(Boolean))];
+        setPopularLocations(locations.slice(0, 5));
+      }
       
     } catch (error) {
       console.error('Error fetching data:', error);
