@@ -438,4 +438,3 @@ export const PropertyPage = () => {
 export default PropertyPage;
 
 
-

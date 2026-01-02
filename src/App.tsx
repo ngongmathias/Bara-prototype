@@ -1,4 +1,4 @@
-import { Toaster } from "@/components/ui/toaster";
+﻿import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -60,6 +60,7 @@ import PropertyPage from "./pages/marketplace/PropertyPage";
 import MotorsPageNew from "./pages/marketplace/MotorsPageNew";
 import ClassifiedsPage from "./pages/marketplace/ClassifiedsPage";
 import JobsPage from "./pages/marketplace/JobsPage";
+import ListingDetailPage from "./pages/marketplace/ListingDetailPage";
 import { CommunityPage } from "./pages/communities/CommunityPage";
 import UserSignInPage from "./pages/user/UserSignInPage";
 import UserSignUpPage from "./pages/user/UserSignUpPage";
@@ -97,6 +98,18 @@ const AppRoutes = () => {
       
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        
+        {/* Marketplace Routes - MUST come before broad business listings routes */}
+        <Route path="/marketplace" element={<MarketplaceHub />} />
+        <Route path="/marketplace/listing/:listingId" element={<ListingDetailPage />} />
+        <Route path="/marketplace/property-sale" element={<PropertyPage />} />
+        <Route path="/marketplace/property-rent" element={<PropertyPage />} />
+        <Route path="/marketplace/motors" element={<MotorsPageNew />} />
+        <Route path="/marketplace/classifieds" element={<ClassifiedsPage />} />
+        <Route path="/marketplace/jobs" element={<JobsPage />} />
+        <Route path="/marketplace/:categorySlug" element={<CategoryPage />} />
+        
+        {/* Business Listings Routes */}
         <Route path="/listings" element={<ListingsPage />} />
         <Route path="/business-listings" element={<ListingsPage />} />
       <Route path="/writeareview" element={<WriteReviewPage />} />
@@ -129,7 +142,15 @@ const AppRoutes = () => {
         </MainLayout>
       } />
       
-      {/* Other Pages */}
+      {/* New Navigation Pages */}
+      <Route path="/marketplace" element={<MarketplaceHub />} />
+      <Route path="/marketplace/listing/:listingId" element={<ListingDetailPage />} />
+      <Route path="/marketplace/property-sale" element={<PropertyPage />} />
+      <Route path="/marketplace/property-rent" element={<PropertyPage />} />
+      <Route path="/marketplace/motors" element={<MotorsPageNew />} />
+      <Route path="/marketplace/classifieds" element={<ClassifiedsPage />} />
+      <Route path="/marketplace/jobs" element={<JobsPage />} />
+      <Route path="/marketplace/:categorySlug" element={<CategoryPage />} />
       <Route path="/events" element={<EventsPage />} />
       <Route path="/events/:eventId" element={<EventsPage />} />
       <Route path="/tools" element={<ToolsPage />} />
