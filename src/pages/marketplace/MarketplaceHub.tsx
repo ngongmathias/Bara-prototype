@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import { TopBannerAd } from '@/components/TopBannerAd';
 import { BottomBannerAd } from '@/components/BottomBannerAd';
 import { Button } from '@/components/ui/button';
-import { db } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { MarketplaceCategory } from '@/types/marketplace';
 import { 
   Home, 
