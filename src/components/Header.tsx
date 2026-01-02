@@ -223,6 +223,13 @@ export const Header = () => {
               </Button>
             </Link>
 
+            <Link to="/writeareview" onClick={scrollToTop} className="link-underline">
+              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
+                <Crown className="w-4 h-4 mr-1.5" />
+                {t('navigation.writeReview')}
+              </Button>
+            </Link>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
@@ -430,40 +437,6 @@ export const Header = () => {
               </Button>
             </Link>
 
-          {/* Users Menu - Show dropdown when signed in, link when not signed in */}
-          {isSignedIn ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="font-roboto">
-                  <User className="w-4 h-4 mr-1" />
-                  {user?.fullName || user?.firstName || 'User'}
-                  <ChevronDown className="w-4 h-4 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48">
-                <DropdownMenuItem onClick={() => navigate('/users/dashboard')}>
-                  <User className="w-4 h-4 mr-2" />
-                  Dashboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/users/dashboard/events')}>
-                  <Calendar className="w-4 h-4 mr-2" />
-                  My Events
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/users/dashboard/profile')}>
-                  <Settings className="w-4 h-4 mr-2" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut()}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <UserNavLink />
-          )}
-
           <Link to="/advertise" onClick={scrollToTop}>
             <Button variant="ghost" className="font-roboto">
             <Building className="w-4 h-4 mr-1" />
@@ -478,8 +451,54 @@ export const Header = () => {
             </Button>
           </Link>
 
-          {/* Admin Link */}
-          <AdminNavLink />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="font-roboto">
+                <Wrench className="w-4 h-4 mr-1" />
+                Tools
+                <ChevronDown className="w-3 h-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <Link to="/tools" onClick={scrollToTop}>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Wrench className="w-4 h-4 mr-2" />
+                  All Tools
+                </DropdownMenuItem>
+              </Link>
+              <DropdownMenuSeparator />
+              <Link to="/tools#calculator" onClick={scrollToTop}>
+                <DropdownMenuItem className="cursor-pointer text-sm">Calculator</DropdownMenuItem>
+              </Link>
+              <Link to="/tools#compass" onClick={scrollToTop}>
+                <DropdownMenuItem className="cursor-pointer text-sm">Compass</DropdownMenuItem>
+              </Link>
+              <Link to="/tools#world-clock" onClick={scrollToTop}>
+                <DropdownMenuItem className="cursor-pointer text-sm">World Clock</DropdownMenuItem>
+              </Link>
+              <Link to="/tools#currency-converter" onClick={scrollToTop}>
+                <DropdownMenuItem className="cursor-pointer text-sm">Currency Converter</DropdownMenuItem>
+              </Link>
+              <Link to="/tools#unit-converter" onClick={scrollToTop}>
+                <DropdownMenuItem className="cursor-pointer text-sm">Unit Converter</DropdownMenuItem>
+              </Link>
+              <Link to="/tools#qr-generator" onClick={scrollToTop}>
+                <DropdownMenuItem className="cursor-pointer text-sm">QR Generator</DropdownMenuItem>
+              </Link>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {isSignedIn ? (
+            <Button variant="ghost" className="font-roboto" onClick={() => navigate('/users/dashboard')}>
+              <User className="w-4 h-4 mr-1" />
+              {user?.firstName || 'Account'}
+            </Button>
+          ) : (
+            <Button variant="ghost" className="font-roboto" onClick={() => navigate('/user/sign-in')}>
+              <User className="w-4 h-4 mr-1" />
+              Sign In
+            </Button>
+          )}
           </div>
         </div>
       </div>
