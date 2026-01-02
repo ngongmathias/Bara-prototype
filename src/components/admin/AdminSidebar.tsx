@@ -21,8 +21,7 @@ import {
   Image,
   Mail,
   Info,
-  Calendar,
-  ShoppingBag
+  Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -74,12 +73,6 @@ const adminMenuItems = [
     icon: Calendar,
     path: "/admin/events",
     description: "Manage events and event details"
-  },
-  {
-    title: "Marketplace Listings",
-    icon: ShoppingBag,
-    path: "/admin/marketplace-listings",
-    description: "Manage marketplace listings and products"
   },
   {
     title: "Sponsored Ads",

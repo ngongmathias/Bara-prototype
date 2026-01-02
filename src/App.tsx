@@ -52,8 +52,6 @@ import FaqPage from "./pages/FaqPage";
 // import { SimpleMapTest } from "./pages/SimpleMapTest";
 import { UltraSimpleMap } from "./components/UltraSimpleMap";
 import MarketplacePage from "./pages/MarketplacePage";
-import MarketplaceSearchPage from "./pages/MarketplaceSearchPage";
-import MarketplaceListingDetailPage from "./pages/MarketplaceListingDetailPage";
 import {EventsPage} from "./pages/EventsPage";
 import { ToolsPage } from "./pages/ToolsPage";
 import CommunitiesPage from "./pages/communities";
@@ -65,14 +63,12 @@ import { UserEventsPage } from "./pages/users/UserEventsPage";
 import { UserProfilePage } from "./pages/users/UserProfilePage";
 import { UserBannerSubmission } from "./pages/users/UserBannerSubmission";
 import UserSettingsPage from "./pages/users/UserSettingsPage";
-import { UserFavoritesPage } from "./pages/users/UserFavoritesPage";
 import AdvertiseCheckoutPage from "./pages/AdvertiseCheckoutPage";
 import { SponsorCountryPage } from "./pages/SponsorCountryPage";
 import { AdminSponsoredBanners } from "./pages/admin/AdminSponsoredBanners";
 import { AdminSlideshowImages } from "./pages/admin/AdminSlideshowImages";
 import AdminEventsSlideshow from "./pages/admin/AdminEventsSlideshow";
 import AdminPopups from "./pages/admin/AdminPopups";
-import { AdminMarketplaceListings } from "./pages/admin/AdminMarketplaceListings";
 import { MainLayout } from "./components/layout/MainLayout";
 
 const queryClient = new QueryClient();
@@ -130,8 +126,6 @@ const AppRoutes = () => {
       
       {/* New Navigation Pages */}
       <Route path="/marketplace" element={<MarketplacePage />} />
-      <Route path="/marketplace/search" element={<MarketplaceSearchPage />} />
-      <Route path="/marketplace/listing/:listingId" element={<MarketplaceListingDetailPage />} />
       <Route path="/events" element={<EventsPage />} />
       <Route path="/events/:eventId" element={<EventsPage />} />
       <Route path="/tools" element={<ToolsPage />} />
@@ -144,11 +138,6 @@ const AppRoutes = () => {
       <Route path="/user/sign-in" element={<UserSignInPage />} />
       <Route path="/user/sign-up" element={<UserSignUpPage />} />
       <Route path="/user/settings" element={<UserSettingsPage />} />
-      <Route path="/user/favorites" element={
-        <UserAuthGuard>
-          <UserFavoritesPage />
-        </UserAuthGuard>
-      } />
       
       {/* User Dashboard Routes */}
       <Route path="/users/dashboard" element={
@@ -304,11 +293,6 @@ const AppRoutes = () => {
       <Route path="/admin/events-slideshow" element={
         <AdminAuthGuard>
           <AdminEventsSlideshow />
-        </AdminAuthGuard>
-      } />
-      <Route path="/admin/marketplace-listings" element={
-        <AdminAuthGuard>
-          <AdminMarketplaceListings />
         </AdminAuthGuard>
       } />
       
