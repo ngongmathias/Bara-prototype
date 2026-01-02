@@ -246,6 +246,16 @@ export const MyListings = () => {
                             View
                           </Button>
                           
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/marketplace/edit/${listing.id}`)}
+                            className="font-roboto"
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
+                          
                           {listing.status === 'active' && (
                             <Button
                               variant="outline"
