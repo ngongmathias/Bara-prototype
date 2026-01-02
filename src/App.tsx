@@ -1,4 +1,4 @@
-import { Toaster } from "@/components/ui/toaster";
+﻿import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -65,6 +65,7 @@ import PostListing from "./pages/marketplace/PostListing";
 import MyListings from "./pages/marketplace/MyListings";
 import SearchResults from "./pages/marketplace/SearchResults";
 import MyFavorites from "./pages/marketplace/MyFavorites";
+import EditListing from "./pages/marketplace/EditListing";
 import { CommunityPage } from "./pages/communities/CommunityPage";
 import UserSignInPage from "./pages/user/UserSignInPage";
 import UserSignUpPage from "./pages/user/UserSignUpPage";
@@ -79,6 +80,7 @@ import { AdminSponsoredBanners } from "./pages/admin/AdminSponsoredBanners";
 import { AdminSlideshowImages } from "./pages/admin/AdminSlideshowImages";
 import AdminEventsSlideshow from "./pages/admin/AdminEventsSlideshow";
 import AdminPopups from "./pages/admin/AdminPopups";
+import AdminMarketplace from "./pages/admin/AdminMarketplace";
 import { MainLayout } from "./components/layout/MainLayout";
 
 const queryClient = new QueryClient();
@@ -105,11 +107,8 @@ const AppRoutes = () => {
         
         {/* Marketplace Routes - MUST come before broad business listings routes */}
         <Route path="/marketplace" element={<MarketplaceHub />} />
-        <Route path="/marketplace/search" element={<SearchResults />} />
-        <Route path="/marketplace/favorites" element={<MyFavorites />} />
         <Route path="/marketplace/post" element={<PostListing />} />
         <Route path="/marketplace/my-listings" element={<MyListings />} />
-        <Route path="/marketplace/edit/:listingId" element={<EditListing />} />
         <Route path="/marketplace/listing/:listingId" element={<ListingDetailPage />} />
         <Route path="/marketplace/property-sale" element={<PropertyPage />} />
         <Route path="/marketplace/property-rent" element={<PropertyPage />} />
@@ -322,6 +321,11 @@ const AppRoutes = () => {
       <Route path="/admin/popups" element={
         <AdminAuthGuard>
           <AdminPopups />
+        </AdminAuthGuard>
+      } />
+      <Route path="/admin/marketplace" element={
+        <AdminAuthGuard>
+          <AdminMarketplace />
         </AdminAuthGuard>
       } />
       <Route path="/admin/events-slideshow" element={

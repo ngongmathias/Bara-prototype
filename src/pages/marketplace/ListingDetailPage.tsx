@@ -11,9 +11,6 @@ import {
   MapPin, 
   Phone, 
   Mail, 
-  Share2, 
-  Heart, 
-  Flag,
   Calendar,
   Eye,
   ChevronLeft,
@@ -22,6 +19,9 @@ import {
   Building2,
   MessageCircle
 } from 'lucide-react';
+import { ReportModal } from '@/components/marketplace/ReportModal';
+import { ShareModal } from '@/components/marketplace/ShareModal';
+import { FavoriteButton } from '@/components/marketplace/FavoriteButton';
 
 export const ListingDetailPage = () => {
   const { listingId } = useParams();
@@ -262,19 +262,8 @@ export const ListingDetailPage = () => {
                         </span>
                         <span className="flex items-center gap-1">
                           <Eye className="w-4 h-4" />
-                          {listing.views_count || 0} views
+                          {listing.view_count || 0} views
                         </span>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2 text-sm text-gray-600 font-roboto">
-                            <Eye className="w-4 h-4" />
-                            <span>{listing.views_count || 0} views</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <FavoriteButton listingId={listing.id} />
-                            <ShareModal listingId={listing.id} title={listing.title} />
-                            <ReportModal listingId={listing.id} />
-                          </div>
-                        </div>
                       </div>
                     </div>
                     <div className="flex gap-2">
