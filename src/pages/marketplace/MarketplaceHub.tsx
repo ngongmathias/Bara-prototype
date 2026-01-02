@@ -39,13 +39,21 @@ export const MarketplaceHub = () => {
 
   const fetchCategories = async () => {
     try {
+      console.log('Fetching marketplace categories...');
       const { data, error } = await db
         .from('marketplace_categories')
         .select('*')
         .eq('is_active', true)
         .order('display_order', { ascending: true });
 
-      if (error) throw error;
+      console.log('Categories response:', { data, error });
+      
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+      
+      console.log('Categories loaded:', data?.length || 0);
       setCategories(data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
