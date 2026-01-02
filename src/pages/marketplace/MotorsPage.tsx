@@ -79,7 +79,7 @@ export const MotorsPage = () => {
   const fetchListings = async () => {
     try {
       setLoading(true);
-      let query = db
+      let query = supabase
         .from('marketplace_listings')
         .select(`
           *,

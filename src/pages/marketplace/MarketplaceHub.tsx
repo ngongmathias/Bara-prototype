@@ -40,7 +40,7 @@ export const MarketplaceHub = () => {
   const fetchCategories = async () => {
     try {
       console.log('Fetching marketplace categories...');
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from('marketplace_categories')
         .select('*')
         .eq('is_active', true)
