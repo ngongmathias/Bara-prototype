@@ -233,7 +233,7 @@ const CategoryListingsPage = () => {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-600 mb-4">Category not found</h1>
             <Button onClick={() => navigate('/listings/categories')} className="bg-black hover:bg-gray-800">
-              Browse Categories
+              Back to Categories
             </Button>
           </div>
         </div>
