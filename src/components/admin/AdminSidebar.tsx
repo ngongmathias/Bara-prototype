@@ -87,6 +87,12 @@ const adminMenuItems = [
     description: "View and moderate reviews"
   },
   {
+    title: "Marketplace",
+    icon: Building2,
+    path: "/admin/marketplace",
+    description: "Moderate marketplace listings"
+  },
+  {
     title: "Contact Messages",
     icon: Mail,
     path: "/admin/contact-messages",

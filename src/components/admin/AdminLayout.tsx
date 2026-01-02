@@ -71,6 +71,7 @@ export const AdminLayout = ({ children, title, subtitle }: AdminLayoutProps) => 
     if (path === "/admin/businesses") return "Businesses Management";
     if (path === "/admin/sponsored-ads") return "Sponsored Ads Management";
     if (path === "/admin/reviews") return "Reviews Management";
+    if (path === "/admin/marketplace") return "Marketplace Administration";
     if (path === "/admin/contact-messages") return "Contact Messages";
     if (path === "/admin/users") return "Users Management";
     if (path === "/admin/settings") return "Account Settings";

@@ -647,24 +647,32 @@ export const AdminDashboard = () => {
                   onClick={() => navigate('/admin/reviews')}
                 >
                   <MessageSquare className="w-5 h-5" />
-                  <span className="font-roboto text-sm">View Reviews</span>
-              </Button>
+                  <span className="font-roboto text-sm">Moderate Reviews</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-auto p-4 flex-col space-y-2"
+                  onClick={() => navigate('/admin/marketplace')}
+                >
+                  <Target className="w-5 h-5" />
+                  <span className="font-roboto text-sm">Marketplace</span>
+                </Button>
                 <Button 
                   variant="outline" 
                   className="h-auto p-4 flex-col space-y-2"
                   onClick={() => navigate('/admin/sponsored-ads')}
                 >
                   <Target className="w-5 h-5" />
-                  <span className="font-roboto text-sm">Sponsored Ads</span>
-              </Button>
+                  <span className="font-roboto text-sm">Manage Ads</span>
+                </Button>
                 <Button 
                   variant="outline" 
                   className="h-auto p-4 flex-col space-y-2"
-                  onClick={() => navigate('/admin/settings')}
+                  onClick={() => navigate('/admin/reports')}
                 >
-                  <Settings className="w-5 h-5" />
-                  <span className="font-roboto text-sm">Account Settings</span>
-              </Button>
+                  <AlertCircle className="w-5 h-5" />
+                  <span className="font-roboto text-sm">View Reports</span>
+                </Button>
             </div>
           </CardContent>
         </Card>
