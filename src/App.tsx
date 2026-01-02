@@ -1,4 +1,4 @@
-import { Toaster } from "@/components/ui/toaster";
+﻿import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -61,6 +61,8 @@ import MotorsPageNew from "./pages/marketplace/MotorsPageNew";
 import ClassifiedsPage from "./pages/marketplace/ClassifiedsPage";
 import JobsPage from "./pages/marketplace/JobsPage";
 import ListingDetailPage from "./pages/marketplace/ListingDetailPage";
+import PostListing from "./pages/marketplace/PostListing";
+import MyListings from "./pages/marketplace/MyListings";
 import { CommunityPage } from "./pages/communities/CommunityPage";
 import UserSignInPage from "./pages/user/UserSignInPage";
 import UserSignUpPage from "./pages/user/UserSignUpPage";
@@ -101,8 +103,8 @@ const AppRoutes = () => {
         
         {/* Marketplace Routes - MUST come before broad business listings routes */}
         <Route path="/marketplace" element={<MarketplaceHub />} />
-        <Route path="/marketplace/post" element={<PostListing />} />
-        <Route path="/marketplace/my-listings" element={<MyListings />} />
+        {/* <Route path="/marketplace/post" element={<PostListing />} /> */}
+        {/* <Route path="/marketplace/my-listings" element={<MyListings />} /> */}
         <Route path="/marketplace/listing/:listingId" element={<ListingDetailPage />} />
         <Route path="/marketplace/property-sale" element={<PropertyPage />} />
         <Route path="/marketplace/property-rent" element={<PropertyPage />} />
