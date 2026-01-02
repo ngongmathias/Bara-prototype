@@ -127,6 +127,11 @@ const AppRoutes = () => {
       
       {/* New Navigation Pages */}
       <Route path="/marketplace" element={<MarketplaceHub />} />
+      <Route path="/marketplace/property-sale" element={<PropertyPage />} />
+      <Route path="/marketplace/property-rent" element={<PropertyPage />} />
+      <Route path="/marketplace/motors" element={<MotorsPageNew />} />
+      <Route path="/marketplace/classifieds" element={<ClassifiedsPage />} />
+      <Route path="/marketplace/jobs" element={<JobsPage />} />
       <Route path="/marketplace/:categorySlug" element={<CategoryPage />} />
       <Route path="/events" element={<EventsPage />} />
       <Route path="/events/:eventId" element={<EventsPage />} />
