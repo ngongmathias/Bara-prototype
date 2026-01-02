@@ -101,6 +101,26 @@ export const UserDashboard = () => {
                     </Button>
                   </Link>
                   
+                  <Link to="/marketplace/my-listings">
+                    <Button 
+                      variant="ghost"
+                      className="w-full justify-start"
+                    >
+                      <ShoppingBag className="mr-3 h-4 w-4" />
+                      My Listings
+                    </Button>
+                  </Link>
+                  
+                  <Link to="/marketplace/post">
+                    <Button 
+                      variant="ghost"
+                      className="w-full justify-start"
+                    >
+                      <Plus className="mr-3 h-4 w-4" />
+                      Post Listing
+                    </Button>
+                  </Link>
+                  
                   <Link to="/users/dashboard/banner-submissions">
                     <Button 
                       variant={isActive('/users/dashboard/banner-submissions') ? 'default' : 'ghost'} 
