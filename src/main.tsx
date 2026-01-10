@@ -7,22 +7,20 @@ import './lib/i18n' // Initialize i18n
 // Clerk configuration
 const clerkConfig = {
   publishableKey: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '',
-  // Enable automatic account creation
   signIn: {
     // Redirect to home page after sign in
     afterSignInUrl: '/',
-    // Automatically create accounts for new users
-    fallbackRedirectUrl: '/',
+    // Don't automatically redirect, let Clerk handle new users
+    fallbackRedirectUrl: '',
   },
   signUp: {
-    // Automatically create accounts for new users
-    automatic: true,
+    // Don't automatically create accounts
+    automatic: false,
     // Redirect to home page after sign up
     afterSignUpUrl: '/',
   },
   // Session management
   session: {
-    // Automatically create user sessions
     singleSessionMode: false,
   },
   appearance: {

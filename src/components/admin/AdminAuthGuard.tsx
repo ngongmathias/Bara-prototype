@@ -59,11 +59,7 @@ export const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
             variant: "destructive"
           });
           
-          // Redirect to home after showing message
-          setTimeout(() => {
-            navigate('/');
-          }, 2000);
-          
+          // Show error but don't redirect - let the user see the message
           return;
         }
 
