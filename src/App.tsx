@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CountrySelectionProvider } from "@/context/CountrySelectionContext";
 import { useAuthLogging } from "@/hooks/useAuthLogging";
+import { useUserAutoCreate } from "@/hooks/useUserAutoCreate";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -357,6 +358,13 @@ const AppRoutes = () => {
   );
 };
 
+// Component to handle automatic user creation on sign-in
+const UserAutoCreateWrapper = () => {
+  useUserAutoCreate(); // This will handle user creation in the database
+  useAuthLogging();    // Keep the existing auth logging
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -364,6 +372,7 @@ const App = () => (
       <Sonner />
       <CountrySelectionProvider>
         <BrowserRouter>
+          <UserAutoCreateWrapper />
           <AppRoutes />
         </BrowserRouter>
       </CountrySelectionProvider>
