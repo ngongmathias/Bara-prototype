@@ -1,0 +1,105 @@
+{
+  "common": {
+    "search": "Pesquisar",
+    "find": "Encontrar",
+    "view": "Ver",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "submit": "Enviar",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "close": "Fechar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "yes": "Sim",
+    "no": "Não",
+    "ok": "OK"
+  },
+  "navigation": {
+    "home": "Início",
+    "listings": "Listagens",
+    "advertise": "Anunciar",
+    "writeReview": "Escrever Avaliação",
+    "searchByCity": "Pesquisar por Cidade",
+    "searchByCountry": "Pesquisar por País",
+    "marketplace": "Mercado",
+    "events": "Eventos",
+    "about": "Sobre",
+    "contact": "Contato",
+    "login": "Entrar",
+    "signup": "Cadastrar",
+    "profile": "Perfil",
+    "logout": "Sair"
+  },
+  "languages": {
+    "english": "Inglês",
+    "french": "Francês",
+    "spanish": "Espanhol",
+    "portuguese": "Português",
+    "swahili": "Suaíli",
+    "selectLanguage": "Selecionar Idioma"
+  },
+  "homepage": {
+    "hero": {
+      "title": "Pesquisar • Explorar • Conectar • Crescer",
+      "subtitle": "Encontre os melhores negócios na sua área",
+      "searchPlaceholder": "Encontrar um negócio",
+      "locationPlaceholder": "Localização",
+      "searchButton": "ENCONTRAR"
+    },
+    "categories": {
+      "title": "Navegar Categorias",
+      "viewMore": "Ver Mais",
+      "viewLess": "Ver Menos",
+      "viewAllCategories": "Ver Todas as Categorias"
+    },
+    "businesses": {
+      "title": "Negócios em Destaque",
+      "viewAll": "Ver Todos"
+    }
+  },
+  "business": {
+    "owners": "Proprietários de Negócios",
+    "manageListing": {
+      "title": "Gerencie sua listagem gratuita.",
+      "step1": "Atualize as informações do seu negócio em alguns passos.",
+      "step2": "Facilite para seus clientes encontrarem você no BARA.",
+      "new": "Novo!",
+      "jobPosting": "Publique uma vaga de emprego na sua listagem gratuita."
+    },
+    "claimListing": "Reivindicar Sua Listagem",
+    "orCall": "ou ligue",
+    "toast": {
+      "title": "Ligue para mais detalhes",
+      "description": "Por favor, ligue (+250) 791 568 519 para mais informações sobre reivindicar sua listagem.",
+      "callNow": "Ligar Agora"
+    },
+    "details": {
+      "phone": "Telefone",
+      "email": "E-mail",
+      "website": "Website",
+      "address": "Endereço",
+      "hours": "Horário",
+      "services": "Serviços",
+      "reviews": "Avaliações",
+      "rating": "Classificação",
+      "orderOnline": "Pedir Online",
+      "visitWebsite": "Visitar Website",
+      "getDirections": "Obter Direções",
+      "share": "Compartilhar"
+    },
+    "status": {
+      "active": "Ativo",
+      "pending": "Pendente",
+      "suspended": "Suspenso",
+      "premium": "Premium"
+    }
+  },
+  "footer": {
+    "copyright": "© 2026 Bara, Inc. Todos os direitos reservados."
+  }
+}

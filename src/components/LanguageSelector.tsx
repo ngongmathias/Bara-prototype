@@ -13,6 +13,7 @@ const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
   { code: 'fr', name: 'Français', flag: '🇫🇷' },
   { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'pt', name: 'Português', flag: '🇵🇹' },
   { code: 'sw', name: 'Kiswahili', flag: '🇹🇿' },
   { code: 'ar', name: 'العربية', flag: '🇦🇷' }
 ];
