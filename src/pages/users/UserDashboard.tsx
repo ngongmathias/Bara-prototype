@@ -104,13 +104,23 @@ export const UserDashboard = () => {
                     </Button>
                   </Link>
                   
+                  <Link to="/users/dashboard/listings">
+                    <Button 
+                      variant={isActive('/users/dashboard/listings') ? 'default' : 'ghost'}
+                      className="w-full justify-start"
+                    >
+                      <Building className="mr-3 h-4 w-4" />
+                      My Listings
+                    </Button>
+                  </Link>
+                  
                   <Link to="/marketplace/my-listings">
                     <Button 
-                      variant="ghost"
+                      variant={isActive('/marketplace/my-listings') ? 'default' : 'ghost'}
                       className="w-full justify-start"
                     >
                       <ShoppingBag className="mr-3 h-4 w-4" />
-                      My Listings
+                      My Marketplace Ads
                     </Button>
                   </Link>
                   
@@ -120,7 +130,7 @@ export const UserDashboard = () => {
                       className="w-full justify-start"
                     >
                       <Plus className="mr-3 h-4 w-4" />
-                      Post Listing
+                      Post Marketplace Ad
                     </Button>
                   </Link>
                   
