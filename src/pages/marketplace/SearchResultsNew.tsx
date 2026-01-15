@@ -45,12 +45,39 @@ export const SearchResultsNew = () => {
   const [condition, setCondition] = useState(searchParams.get('condition') || '');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'recent');
   
-  // Category-specific filters
+  // Category-specific filters - Motors/Vehicles
   const [carBrand, setCarBrand] = useState(searchParams.get('brand') || '');
   const [carBodyType, setCarBodyType] = useState(searchParams.get('body_type') || '');
+  const [carYear, setCarYear] = useState(searchParams.get('year') || '');
+  const [carFuelType, setCarFuelType] = useState(searchParams.get('fuel_type') || '');
+  const [carTransmission, setCarTransmission] = useState(searchParams.get('transmission') || '');
+  const [carMileage, setCarMileage] = useState(searchParams.get('mileage') || '');
+  
+  // Properties
   const [propertyBedrooms, setPropertyBedrooms] = useState(searchParams.get('bedrooms') || '');
   const [propertyBathrooms, setPropertyBathrooms] = useState(searchParams.get('bathrooms') || '');
   const [propertyType, setPropertyType] = useState(searchParams.get('property_type') || '');
+  const [propertyArea, setPropertyArea] = useState(searchParams.get('area') || '');
+  const [propertyFurnished, setPropertyFurnished] = useState(searchParams.get('furnished') || '');
+  
+  // Electronics & Mobiles
+  const [electronicsBrand, setElectronicsBrand] = useState(searchParams.get('electronics_brand') || '');
+  const [electronicsWarranty, setElectronicsWarranty] = useState(searchParams.get('warranty') || '');
+  
+  // Fashion
+  const [fashionSize, setFashionSize] = useState(searchParams.get('size') || '');
+  const [fashionGender, setFashionGender] = useState(searchParams.get('gender') || '');
+  const [fashionBrand, setFashionBrand] = useState(searchParams.get('fashion_brand') || '');
+  
+  // Jobs
+  const [jobType, setJobType] = useState(searchParams.get('job_type') || '');
+  const [experienceLevel, setExperienceLevel] = useState(searchParams.get('experience') || '');
+  const [workType, setWorkType] = useState(searchParams.get('work_type') || '');
+  
+  // Pets
+  const [petType, setPetType] = useState(searchParams.get('pet_type') || '');
+  const [petAge, setPetAge] = useState(searchParams.get('pet_age') || '');
+  const [petGender, setPetGender] = useState(searchParams.get('pet_gender') || '');
   
   const [subcategories, setSubcategories] = useState<any[]>([]);
 
@@ -208,31 +235,77 @@ export const SearchResultsNew = () => {
         query = query.eq('is_featured', true);
       }
       
-      // Category-specific attribute filters
+      // Motors attribute filters
       const brandParam = searchParams.get('brand');
-      if (brandParam) {
-        query = query.contains('attributes', { make: brandParam });
-      }
+      if (brandParam) query = query.contains('attributes', { make: brandParam });
       
       const bodyTypeParam = searchParams.get('body_type');
-      if (bodyTypeParam) {
-        query = query.contains('attributes', { body_type: bodyTypeParam });
-      }
+      if (bodyTypeParam) query = query.contains('attributes', { body_type: bodyTypeParam });
       
+      const yearParam = searchParams.get('year');
+      if (yearParam) query = query.contains('attributes', { year: yearParam });
+      
+      const fuelTypeParam = searchParams.get('fuel_type');
+      if (fuelTypeParam) query = query.contains('attributes', { fuel_type: fuelTypeParam });
+      
+      const transmissionParam = searchParams.get('transmission');
+      if (transmissionParam) query = query.contains('attributes', { transmission: transmissionParam });
+      
+      const mileageParam = searchParams.get('mileage');
+      if (mileageParam) query = query.contains('attributes', { mileage: mileageParam });
+      
+      // Property attribute filters
       const bedroomsParam = searchParams.get('bedrooms');
-      if (bedroomsParam) {
-        query = query.contains('attributes', { bedrooms: parseInt(bedroomsParam) });
-      }
+      if (bedroomsParam) query = query.contains('attributes', { bedrooms: parseInt(bedroomsParam) });
       
       const bathroomsParam = searchParams.get('bathrooms');
-      if (bathroomsParam) {
-        query = query.contains('attributes', { bathrooms: parseInt(bathroomsParam) });
-      }
+      if (bathroomsParam) query = query.contains('attributes', { bathrooms: parseInt(bathroomsParam) });
       
       const propertyTypeParam = searchParams.get('property_type');
-      if (propertyTypeParam) {
-        query = query.contains('attributes', { property_type: propertyTypeParam });
-      }
+      if (propertyTypeParam) query = query.contains('attributes', { property_type: propertyTypeParam });
+      
+      const areaParam = searchParams.get('area');
+      if (areaParam) query = query.contains('attributes', { area: areaParam });
+      
+      const furnishedParam = searchParams.get('furnished');
+      if (furnishedParam) query = query.contains('attributes', { furnished: furnishedParam });
+      
+      // Electronics attribute filters
+      const electronicsBrandParam = searchParams.get('electronics_brand');
+      if (electronicsBrandParam) query = query.contains('attributes', { brand: electronicsBrandParam });
+      
+      const warrantyParam = searchParams.get('warranty');
+      if (warrantyParam) query = query.contains('attributes', { warranty: warrantyParam });
+      
+      // Fashion attribute filters
+      const sizeParam = searchParams.get('size');
+      if (sizeParam) query = query.contains('attributes', { size: sizeParam });
+      
+      const genderParam = searchParams.get('gender');
+      if (genderParam) query = query.contains('attributes', { gender: genderParam });
+      
+      const fashionBrandParam = searchParams.get('fashion_brand');
+      if (fashionBrandParam) query = query.contains('attributes', { brand: fashionBrandParam });
+      
+      // Jobs attribute filters
+      const jobTypeParam = searchParams.get('job_type');
+      if (jobTypeParam) query = query.contains('attributes', { job_type: jobTypeParam });
+      
+      const experienceParam = searchParams.get('experience');
+      if (experienceParam) query = query.contains('attributes', { experience_level: experienceParam });
+      
+      const workTypeParam = searchParams.get('work_type');
+      if (workTypeParam) query = query.contains('attributes', { work_type: workTypeParam });
+      
+      // Pets attribute filters
+      const petTypeParam = searchParams.get('pet_type');
+      if (petTypeParam) query = query.contains('attributes', { pet_type: petTypeParam });
+      
+      const petAgeParam = searchParams.get('pet_age');
+      if (petAgeParam) query = query.contains('attributes', { pet_age: petAgeParam });
+      
+      const petGenderParam = searchParams.get('pet_gender');
+      if (petGenderParam) query = query.contains('attributes', { pet_gender: petGenderParam });
 
       // Sorting
       const sortParam = searchParams.get('sort') || 'recent';
@@ -327,36 +400,39 @@ export const SearchResultsNew = () => {
       params.delete('sort');
     }
     
-    // Category-specific filters
-    if (carBrand && carBrand !== 'all') {
-      params.set('brand', carBrand);
-    } else {
-      params.delete('brand');
-    }
+    // Motors filters
+    if (carBrand && carBrand !== 'all') params.set('brand', carBrand); else params.delete('brand');
+    if (carBodyType && carBodyType !== 'all') params.set('body_type', carBodyType); else params.delete('body_type');
+    if (carYear && carYear !== 'all') params.set('year', carYear); else params.delete('year');
+    if (carFuelType && carFuelType !== 'all') params.set('fuel_type', carFuelType); else params.delete('fuel_type');
+    if (carTransmission && carTransmission !== 'all') params.set('transmission', carTransmission); else params.delete('transmission');
+    if (carMileage && carMileage !== 'all') params.set('mileage', carMileage); else params.delete('mileage');
     
-    if (carBodyType && carBodyType !== 'all') {
-      params.set('body_type', carBodyType);
-    } else {
-      params.delete('body_type');
-    }
+    // Property filters
+    if (propertyBedrooms && propertyBedrooms !== 'all') params.set('bedrooms', propertyBedrooms); else params.delete('bedrooms');
+    if (propertyBathrooms && propertyBathrooms !== 'all') params.set('bathrooms', propertyBathrooms); else params.delete('bathrooms');
+    if (propertyType && propertyType !== 'all') params.set('property_type', propertyType); else params.delete('property_type');
+    if (propertyArea && propertyArea !== 'all') params.set('area', propertyArea); else params.delete('area');
+    if (propertyFurnished && propertyFurnished !== 'all') params.set('furnished', propertyFurnished); else params.delete('furnished');
     
-    if (propertyBedrooms && propertyBedrooms !== 'all') {
-      params.set('bedrooms', propertyBedrooms);
-    } else {
-      params.delete('bedrooms');
-    }
+    // Electronics filters
+    if (electronicsBrand && electronicsBrand !== 'all') params.set('electronics_brand', electronicsBrand); else params.delete('electronics_brand');
+    if (electronicsWarranty && electronicsWarranty !== 'all') params.set('warranty', electronicsWarranty); else params.delete('warranty');
     
-    if (propertyBathrooms && propertyBathrooms !== 'all') {
-      params.set('bathrooms', propertyBathrooms);
-    } else {
-      params.delete('bathrooms');
-    }
+    // Fashion filters
+    if (fashionSize && fashionSize !== 'all') params.set('size', fashionSize); else params.delete('size');
+    if (fashionGender && fashionGender !== 'all') params.set('gender', fashionGender); else params.delete('gender');
+    if (fashionBrand && fashionBrand !== 'all') params.set('fashion_brand', fashionBrand); else params.delete('fashion_brand');
     
-    if (propertyType && propertyType !== 'all') {
-      params.set('property_type', propertyType);
-    } else {
-      params.delete('property_type');
-    }
+    // Jobs filters
+    if (jobType && jobType !== 'all') params.set('job_type', jobType); else params.delete('job_type');
+    if (experienceLevel && experienceLevel !== 'all') params.set('experience', experienceLevel); else params.delete('experience');
+    if (workType && workType !== 'all') params.set('work_type', workType); else params.delete('work_type');
+    
+    // Pets filters
+    if (petType && petType !== 'all') params.set('pet_type', petType); else params.delete('pet_type');
+    if (petAge && petAge !== 'all') params.set('pet_age', petAge); else params.delete('pet_age');
+    if (petGender && petGender !== 'all') params.set('pet_gender', petGender); else params.delete('pet_gender');
     
     setSearchParams(params);
     setShowFilters(false);
@@ -370,11 +446,40 @@ export const SearchResultsNew = () => {
     setMaxPrice('');
     setCondition('all');
     setSortBy('recent');
+    
+    // Motors
     setCarBrand('all');
     setCarBodyType('all');
+    setCarYear('all');
+    setCarFuelType('all');
+    setCarTransmission('all');
+    setCarMileage('all');
+    
+    // Properties
     setPropertyBedrooms('all');
     setPropertyBathrooms('all');
     setPropertyType('all');
+    setPropertyArea('all');
+    setPropertyFurnished('all');
+    
+    // Electronics
+    setElectronicsBrand('all');
+    setElectronicsWarranty('all');
+    
+    // Fashion
+    setFashionSize('all');
+    setFashionGender('all');
+    setFashionBrand('all');
+    
+    // Jobs
+    setJobType('all');
+    setExperienceLevel('all');
+    setWorkType('all');
+    
+    // Pets
+    setPetType('all');
+    setPetAge('all');
+    setPetGender('all');
     
     const params = new URLSearchParams();
     const query = searchParams.get('q');
@@ -392,11 +497,34 @@ export const SearchResultsNew = () => {
     minPrice,
     maxPrice,
     condition && condition !== 'all',
+    // Motors
     carBrand && carBrand !== 'all',
     carBodyType && carBodyType !== 'all',
+    carYear && carYear !== 'all',
+    carFuelType && carFuelType !== 'all',
+    carTransmission && carTransmission !== 'all',
+    carMileage && carMileage !== 'all',
+    // Properties
     propertyBedrooms && propertyBedrooms !== 'all',
     propertyBathrooms && propertyBathrooms !== 'all',
     propertyType && propertyType !== 'all',
+    propertyArea && propertyArea !== 'all',
+    propertyFurnished && propertyFurnished !== 'all',
+    // Electronics
+    electronicsBrand && electronicsBrand !== 'all',
+    electronicsWarranty && electronicsWarranty !== 'all',
+    // Fashion
+    fashionSize && fashionSize !== 'all',
+    fashionGender && fashionGender !== 'all',
+    fashionBrand && fashionBrand !== 'all',
+    // Jobs
+    jobType && jobType !== 'all',
+    experienceLevel && experienceLevel !== 'all',
+    workType && workType !== 'all',
+    // Pets
+    petType && petType !== 'all',
+    petAge && petAge !== 'all',
+    petGender && petGender !== 'all',
   ].filter(Boolean).length;
 
   return (
@@ -574,6 +702,8 @@ export const SearchResultsNew = () => {
                             <SelectItem value="Volkswagen">Volkswagen</SelectItem>
                             <SelectItem value="Hyundai">Hyundai</SelectItem>
                             <SelectItem value="Kia">Kia</SelectItem>
+                            <SelectItem value="Mazda">Mazda</SelectItem>
+                            <SelectItem value="Chevrolet">Chevrolet</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -596,11 +726,80 @@ export const SearchResultsNew = () => {
                           </SelectContent>
                         </Select>
                       </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Year</label>
+                        <Select value={carYear} onValueChange={setCarYear}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any Year" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any Year</SelectItem>
+                            <SelectItem value="2024">2024</SelectItem>
+                            <SelectItem value="2023">2023</SelectItem>
+                            <SelectItem value="2022">2022</SelectItem>
+                            <SelectItem value="2021">2021</SelectItem>
+                            <SelectItem value="2020">2020</SelectItem>
+                            <SelectItem value="2019">2019</SelectItem>
+                            <SelectItem value="2018">2018</SelectItem>
+                            <SelectItem value="2017">2017</SelectItem>
+                            <SelectItem value="2016">2016</SelectItem>
+                            <SelectItem value="2015">2015</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Fuel Type</label>
+                        <Select value={carFuelType} onValueChange={setCarFuelType}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="Petrol">Petrol</SelectItem>
+                            <SelectItem value="Diesel">Diesel</SelectItem>
+                            <SelectItem value="Electric">Electric</SelectItem>
+                            <SelectItem value="Hybrid">Hybrid</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Transmission</label>
+                        <Select value={carTransmission} onValueChange={setCarTransmission}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="Automatic">Automatic</SelectItem>
+                            <SelectItem value="Manual">Manual</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Mileage</label>
+                        <Select value={carMileage} onValueChange={setCarMileage}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="0-10000">0 - 10,000 km</SelectItem>
+                            <SelectItem value="10000-30000">10,000 - 30,000 km</SelectItem>
+                            <SelectItem value="30000-60000">30,000 - 60,000 km</SelectItem>
+                            <SelectItem value="60000-100000">60,000 - 100,000 km</SelectItem>
+                            <SelectItem value="100000+">100,000+ km</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </>
                   )}
 
                   {/* Category-Specific Filters for Properties */}
-                  {selectedCategory === 'property-sale' && (
+                  {(selectedCategory === 'property-sale' || selectedCategory === 'property-rent') && (
                     <>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Bedrooms</label>
@@ -648,6 +847,218 @@ export const SearchResultsNew = () => {
                             <SelectItem value="House">House</SelectItem>
                             <SelectItem value="Land">Land</SelectItem>
                             <SelectItem value="Commercial">Commercial</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Area (sqm)</label>
+                        <Select value={propertyArea} onValueChange={setPropertyArea}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="0-50">0 - 50 sqm</SelectItem>
+                            <SelectItem value="50-100">50 - 100 sqm</SelectItem>
+                            <SelectItem value="100-200">100 - 200 sqm</SelectItem>
+                            <SelectItem value="200-300">200 - 300 sqm</SelectItem>
+                            <SelectItem value="300+">300+ sqm</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Furnished</label>
+                        <Select value={propertyFurnished} onValueChange={setPropertyFurnished}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="Furnished">Furnished</SelectItem>
+                            <SelectItem value="Unfurnished">Unfurnished</SelectItem>
+                            <SelectItem value="Semi-Furnished">Semi-Furnished</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Electronics & Mobiles Filters */}
+                  {(selectedCategory === 'electronics' || selectedCategory === 'mobile-tablets') && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+                        <Select value={electronicsBrand} onValueChange={setElectronicsBrand}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="All Brands" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Brands</SelectItem>
+                            <SelectItem value="Apple">Apple</SelectItem>
+                            <SelectItem value="Samsung">Samsung</SelectItem>
+                            <SelectItem value="Sony">Sony</SelectItem>
+                            <SelectItem value="LG">LG</SelectItem>
+                            <SelectItem value="Dell">Dell</SelectItem>
+                            <SelectItem value="HP">HP</SelectItem>
+                            <SelectItem value="Lenovo">Lenovo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Warranty</label>
+                        <Select value={electronicsWarranty} onValueChange={setElectronicsWarranty}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="Yes">With Warranty</SelectItem>
+                            <SelectItem value="No">No Warranty</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Fashion Filters */}
+                  {selectedCategory === 'fashion' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                        <Select value={fashionGender} onValueChange={setFashionGender}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="Men">Men</SelectItem>
+                            <SelectItem value="Women">Women</SelectItem>
+                            <SelectItem value="Unisex">Unisex</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
+                        <Select value={fashionSize} onValueChange={setFashionSize}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="XS">XS</SelectItem>
+                            <SelectItem value="S">S</SelectItem>
+                            <SelectItem value="M">M</SelectItem>
+                            <SelectItem value="L">L</SelectItem>
+                            <SelectItem value="XL">XL</SelectItem>
+                            <SelectItem value="XXL">XXL</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Jobs Filters */}
+                  {selectedCategory === 'jobs' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Job Type</label>
+                        <Select value={jobType} onValueChange={setJobType}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="Full-time">Full-time</SelectItem>
+                            <SelectItem value="Part-time">Part-time</SelectItem>
+                            <SelectItem value="Contract">Contract</SelectItem>
+                            <SelectItem value="Internship">Internship</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Experience Level</label>
+                        <Select value={experienceLevel} onValueChange={setExperienceLevel}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="Entry Level">Entry Level</SelectItem>
+                            <SelectItem value="Mid Level">Mid Level</SelectItem>
+                            <SelectItem value="Senior Level">Senior Level</SelectItem>
+                            <SelectItem value="Executive">Executive</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Work Type</label>
+                        <Select value={workType} onValueChange={setWorkType}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="Remote">Remote</SelectItem>
+                            <SelectItem value="On-site">On-site</SelectItem>
+                            <SelectItem value="Hybrid">Hybrid</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Pets Filters */}
+                  {selectedCategory === 'pets' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Pet Type</label>
+                        <Select value={petType} onValueChange={setPetType}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="Dog">Dog</SelectItem>
+                            <SelectItem value="Cat">Cat</SelectItem>
+                            <SelectItem value="Bird">Bird</SelectItem>
+                            <SelectItem value="Fish">Fish</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
+                        <Select value={petAge} onValueChange={setPetAge}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="Puppy/Kitten">Puppy/Kitten</SelectItem>
+                            <SelectItem value="Young">Young</SelectItem>
+                            <SelectItem value="Adult">Adult</SelectItem>
+                            <SelectItem value="Senior">Senior</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                        <Select value={petGender} onValueChange={setPetGender}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="Male">Male</SelectItem>
+                            <SelectItem value="Female">Female</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
