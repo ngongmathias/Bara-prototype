@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
+import { TopBannerAd } from "@/components/TopBannerAd";
+import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -598,6 +600,7 @@ export const WriteReviewPage = () => {
   return (
     <div className="min-h-screen bg-background font-roboto">
       <Header />
+      <TopBannerAd />
       
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-gray-50 to-gray-100 py-16">
@@ -1095,6 +1098,7 @@ export const WriteReviewPage = () => {
         </div>
       </div>
       )}
+      <BottomBannerAd />
       <Footer />
     </div>
   );
