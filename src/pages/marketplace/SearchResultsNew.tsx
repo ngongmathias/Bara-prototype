@@ -50,11 +50,8 @@ export const SearchResultsNew = () => {
   }, []);
 
   useEffect(() => {
-    // Only perform search after categories are loaded
-    if (categories.length > 0) {
-      performSearch();
-    }
-  }, [searchParams, selectedCountryFilter, categories]);
+    performSearch();
+  }, [searchParams, selectedCountryFilter]);
 
   const fetchCategories = async () => {
     try {
@@ -106,11 +103,9 @@ export const SearchResultsNew = () => {
 
       // Category filter - filter by slug directly using join
       const categoryParam = searchParams.get('category');
-      if (categoryParam && categories.length > 0) {
-        const category = categories.find(c => c.slug === categoryParam);
-        if (category) {
-          query = query.eq('category_id', category.id);
-        }
+      if (categoryParam) {
+        // Use the joined table to filter by slug
+        query = query.eq('marketplace_categories.slug', categoryParam);
       }
 
       // Country filter - use selected country from context or URL param

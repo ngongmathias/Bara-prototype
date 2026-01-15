@@ -228,7 +228,7 @@ const MarketplacePageNew = () => {
               </div>
               <Button 
                 type="submit" 
-                className="h-12 px-6 bg-red-600 hover:bg-red-700 text-white font-medium"
+                className="h-12 px-6 bg-[#FBBC05] hover:bg-[#F4B400] text-gray-900 font-medium"
               >
                 <Search className="w-5 h-5" />
               </Button>
@@ -237,7 +237,7 @@ const MarketplacePageNew = () => {
             {/* Post Ad Button */}
             <Button
               onClick={() => navigate('/marketplace/post')}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 h-12 whitespace-nowrap"
+              className="bg-[#FBBC05] hover:bg-[#F4B400] text-gray-900 font-semibold px-6 h-12 whitespace-nowrap"
             >
               Post Your Ad
             </Button>
