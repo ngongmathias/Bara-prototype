@@ -38,16 +38,34 @@ export const SearchResultsNew = () => {
   
   // Filter states
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
+  const [selectedSubcategory, setSelectedSubcategory] = useState(searchParams.get('subcategory') || '');
   const [selectedCountryFilter, setSelectedCountryFilter] = useState(searchParams.get('country') || selectedCountry?.id || '');
   const [minPrice, setMinPrice] = useState(searchParams.get('min_price') || '');
   const [maxPrice, setMaxPrice] = useState(searchParams.get('max_price') || '');
   const [condition, setCondition] = useState(searchParams.get('condition') || '');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'recent');
+  
+  // Category-specific filters
+  const [carBrand, setCarBrand] = useState(searchParams.get('brand') || '');
+  const [carBodyType, setCarBodyType] = useState(searchParams.get('body_type') || '');
+  const [propertyBedrooms, setPropertyBedrooms] = useState(searchParams.get('bedrooms') || '');
+  const [propertyBathrooms, setPropertyBathrooms] = useState(searchParams.get('bathrooms') || '');
+  const [propertyType, setPropertyType] = useState(searchParams.get('property_type') || '');
+  
+  const [subcategories, setSubcategories] = useState<any[]>([]);
 
   useEffect(() => {
     fetchCategories();
     fetchCountries();
   }, []);
+  
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchSubcategories(selectedCategory);
+    } else {
+      setSubcategories([]);
+    }
+  }, [selectedCategory]);
 
   useEffect(() => {
     performSearch();
@@ -81,13 +99,38 @@ export const SearchResultsNew = () => {
       console.error('Error fetching countries:', error);
     }
   };
+  
+  const fetchSubcategories = async (categorySlug: string) => {
+    try {
+      const { data: categoryData } = await supabase
+        .from('marketplace_categories')
+        .select('id')
+        .eq('slug', categorySlug)
+        .maybeSingle();
+      
+      if (categoryData) {
+        const { data } = await supabase
+          .from('marketplace_subcategories')
+          .select('*')
+          .eq('category_id', categoryData.id)
+          .eq('is_active', true)
+          .order('display_order');
+        
+        setSubcategories(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+    }
+  };
 
   const performSearch = async () => {
     setLoading(true);
     try {
       // Get category ID if filtering by category
       let categoryId = null;
+      let subcategoryId = null;
       const categoryParam = searchParams.get('category');
+      const subcategoryParam = searchParams.get('subcategory');
       
       if (categoryParam) {
         const { data: categoryData } = await supabase
@@ -98,12 +141,24 @@ export const SearchResultsNew = () => {
         
         categoryId = categoryData?.id;
       }
+      
+      // Get subcategory ID if filtering by subcategory
+      if (subcategoryParam) {
+        const { data: subcategoryData } = await supabase
+          .from('marketplace_subcategories')
+          .select('id')
+          .eq('slug', subcategoryParam)
+          .maybeSingle();
+        
+        subcategoryId = subcategoryData?.id;
+      }
 
       let query = supabase
         .from('marketplace_listings')
         .select(`
           *,
           marketplace_categories(name, slug),
+          marketplace_subcategories(name, slug),
           countries(name, code, flag_url),
           marketplace_listing_images(image_url, is_primary)
         `)
@@ -118,6 +173,11 @@ export const SearchResultsNew = () => {
       // Category filter
       if (categoryId) {
         query = query.eq('category_id', categoryId);
+      }
+      
+      // Subcategory filter
+      if (subcategoryId) {
+        query = query.eq('subcategory_id', subcategoryId);
       }
 
       // Country filter - use selected country from context or URL param
@@ -146,6 +206,32 @@ export const SearchResultsNew = () => {
       const featuredParam = searchParams.get('featured');
       if (featuredParam === 'true') {
         query = query.eq('is_featured', true);
+      }
+      
+      // Category-specific attribute filters
+      const brandParam = searchParams.get('brand');
+      if (brandParam) {
+        query = query.contains('attributes', { make: brandParam });
+      }
+      
+      const bodyTypeParam = searchParams.get('body_type');
+      if (bodyTypeParam) {
+        query = query.contains('attributes', { body_type: bodyTypeParam });
+      }
+      
+      const bedroomsParam = searchParams.get('bedrooms');
+      if (bedroomsParam) {
+        query = query.contains('attributes', { bedrooms: parseInt(bedroomsParam) });
+      }
+      
+      const bathroomsParam = searchParams.get('bathrooms');
+      if (bathroomsParam) {
+        query = query.contains('attributes', { bathrooms: parseInt(bathroomsParam) });
+      }
+      
+      const propertyTypeParam = searchParams.get('property_type');
+      if (propertyTypeParam) {
+        query = query.contains('attributes', { property_type: propertyTypeParam });
       }
 
       // Sorting
@@ -205,6 +291,12 @@ export const SearchResultsNew = () => {
       params.delete('category');
     }
     
+    if (selectedSubcategory && selectedSubcategory !== 'all') {
+      params.set('subcategory', selectedSubcategory);
+    } else {
+      params.delete('subcategory');
+    }
+    
     if (selectedCountryFilter && selectedCountryFilter !== 'all') {
       params.set('country', selectedCountryFilter);
     } else {
@@ -235,17 +327,54 @@ export const SearchResultsNew = () => {
       params.delete('sort');
     }
     
+    // Category-specific filters
+    if (carBrand && carBrand !== 'all') {
+      params.set('brand', carBrand);
+    } else {
+      params.delete('brand');
+    }
+    
+    if (carBodyType && carBodyType !== 'all') {
+      params.set('body_type', carBodyType);
+    } else {
+      params.delete('body_type');
+    }
+    
+    if (propertyBedrooms && propertyBedrooms !== 'all') {
+      params.set('bedrooms', propertyBedrooms);
+    } else {
+      params.delete('bedrooms');
+    }
+    
+    if (propertyBathrooms && propertyBathrooms !== 'all') {
+      params.set('bathrooms', propertyBathrooms);
+    } else {
+      params.delete('bathrooms');
+    }
+    
+    if (propertyType && propertyType !== 'all') {
+      params.set('property_type', propertyType);
+    } else {
+      params.delete('property_type');
+    }
+    
     setSearchParams(params);
     setShowFilters(false);
   };
 
   const clearFilters = () => {
     setSelectedCategory('all');
+    setSelectedSubcategory('all');
     setSelectedCountryFilter(selectedCountry?.id || 'all');
     setMinPrice('');
     setMaxPrice('');
     setCondition('all');
     setSortBy('recent');
+    setCarBrand('all');
+    setCarBodyType('all');
+    setPropertyBedrooms('all');
+    setPropertyBathrooms('all');
+    setPropertyType('all');
     
     const params = new URLSearchParams();
     const query = searchParams.get('q');
@@ -257,11 +386,17 @@ export const SearchResultsNew = () => {
   };
 
   const activeFiltersCount = [
-    selectedCategory,
-    selectedCountryFilter && selectedCountryFilter !== selectedCountry?.id,
+    selectedCategory && selectedCategory !== 'all',
+    selectedSubcategory && selectedSubcategory !== 'all',
+    selectedCountryFilter && selectedCountryFilter !== selectedCountry?.id && selectedCountryFilter !== 'all',
     minPrice,
     maxPrice,
-    condition,
+    condition && condition !== 'all',
+    carBrand && carBrand !== 'all',
+    carBodyType && carBodyType !== 'all',
+    propertyBedrooms && propertyBedrooms !== 'all',
+    propertyBathrooms && propertyBathrooms !== 'all',
+    propertyType && propertyType !== 'all',
   ].filter(Boolean).length;
 
   return (
@@ -324,6 +459,26 @@ export const SearchResultsNew = () => {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {/* Subcategory Filter */}
+                  {subcategories.length > 0 && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Subcategory</label>
+                      <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
+                        <SelectTrigger className="font-roboto">
+                          <SelectValue placeholder="All Subcategories" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Subcategories</SelectItem>
+                          {subcategories.map((subcat) => (
+                            <SelectItem key={subcat.id} value={subcat.slug}>
+                              {subcat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
 
                   {/* Country Filter */}
                   <div>
@@ -397,6 +552,107 @@ export const SearchResultsNew = () => {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {/* Category-Specific Filters for Motors */}
+                  {selectedCategory === 'motors' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+                        <Select value={carBrand} onValueChange={setCarBrand}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="All Brands" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Brands</SelectItem>
+                            <SelectItem value="Toyota">Toyota</SelectItem>
+                            <SelectItem value="Honda">Honda</SelectItem>
+                            <SelectItem value="Nissan">Nissan</SelectItem>
+                            <SelectItem value="Mercedes-Benz">Mercedes-Benz</SelectItem>
+                            <SelectItem value="BMW">BMW</SelectItem>
+                            <SelectItem value="Audi">Audi</SelectItem>
+                            <SelectItem value="Ford">Ford</SelectItem>
+                            <SelectItem value="Volkswagen">Volkswagen</SelectItem>
+                            <SelectItem value="Hyundai">Hyundai</SelectItem>
+                            <SelectItem value="Kia">Kia</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Body Type</label>
+                        <Select value={carBodyType} onValueChange={setCarBodyType}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="All Types" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Types</SelectItem>
+                            <SelectItem value="Sedan">Sedan</SelectItem>
+                            <SelectItem value="SUV">SUV</SelectItem>
+                            <SelectItem value="Hatchback">Hatchback</SelectItem>
+                            <SelectItem value="Coupe">Coupe</SelectItem>
+                            <SelectItem value="Pickup">Pickup Truck</SelectItem>
+                            <SelectItem value="Van">Van</SelectItem>
+                            <SelectItem value="Wagon">Wagon</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Category-Specific Filters for Properties */}
+                  {selectedCategory === 'property-sale' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Bedrooms</label>
+                        <Select value={propertyBedrooms} onValueChange={setPropertyBedrooms}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="1">1</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                            <SelectItem value="3">3</SelectItem>
+                            <SelectItem value="4">4</SelectItem>
+                            <SelectItem value="5">5+</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Bathrooms</label>
+                        <Select value={propertyBathrooms} onValueChange={setPropertyBathrooms}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="Any" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Any</SelectItem>
+                            <SelectItem value="1">1</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                            <SelectItem value="3">3</SelectItem>
+                            <SelectItem value="4">4+</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
+                        <Select value={propertyType} onValueChange={setPropertyType}>
+                          <SelectTrigger className="font-roboto">
+                            <SelectValue placeholder="All Types" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Types</SelectItem>
+                            <SelectItem value="Apartment">Apartment</SelectItem>
+                            <SelectItem value="Villa">Villa</SelectItem>
+                            <SelectItem value="House">House</SelectItem>
+                            <SelectItem value="Land">Land</SelectItem>
+                            <SelectItem value="Commercial">Commercial</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="flex gap-2 mt-4">
