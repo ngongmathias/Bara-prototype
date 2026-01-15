@@ -8,6 +8,8 @@ import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
+import { TopBannerAd } from "@/components/TopBannerAd";
+import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { CityMapLeaflet } from "@/components/CityMapLeaflet";
 import { useCountrySelection } from "@/context/CountrySelectionContext";
 import {
@@ -246,6 +248,7 @@ const CategoryListingsPage = () => {
       {/* Header */}
       <div className="relative z-20">
         <Header />
+        <TopBannerAd />
       </div>
       
       <div className="relative z-10">
@@ -758,6 +761,7 @@ const CategoryListingsPage = () => {
       </div>
       
       {/* Footer */}
+      <BottomBannerAd />
       <Footer />
     </div>
   );
