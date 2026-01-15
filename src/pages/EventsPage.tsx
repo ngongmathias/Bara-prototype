@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { EventCard } from "@/components/EventCard";
+import { EventGalleryModal } from "@/components/EventGalleryModal";
 import { ScrollReveal, SkeletonCard } from "@/components/animations";
 import { FullscreenMapModal } from "@/components/FullscreenMapModal";
 import { InteractiveEventsMap } from "@/components/InteractiveEventsMap";
@@ -35,6 +36,8 @@ export const EventsPage = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid');
   const [showFilters, setShowFilters] = useState(false); // Mobile filters collapsed by default
   const [timeFilter, setTimeFilter] = useState<'all' | 'active' | 'happening' | 'today' | 'tomorrow' | 'weekend'>('all');
+  const [galleryModalOpen, setGalleryModalOpen] = useState(false);
+  const [selectedGalleryEvent, setSelectedGalleryEvent] = useState<DatabaseEvent | null>(null);
 
   // Use real data from database
   const { events, loading, searchEvents} = useEvents();
@@ -169,6 +172,14 @@ export const EventsPage = () => {
 
   const handleBackToList = () => {
     setSelectedEvent(null);
+  };
+
+  const handleViewGallery = (eventId: string) => {
+    const event = events.find(e => e.id === eventId);
+    if (event && event.event_images && event.event_images.length > 0) {
+      setSelectedGalleryEvent(event);
+      setGalleryModalOpen(true);
+    }
   };
 
   const handleLocationClick = async (eventId: string, city?: string) => {
@@ -1109,6 +1120,8 @@ export const EventsPage = () => {
                               isFree={event.is_free}
                               entryFee={event.entry_fee}
                               currency={event.currency}
+                              galleryImages={event.event_images}
+                              isPastEvent={true}
                               onViewEvent={(id) => {
                                 const eventToView = events.find(e => e.id === id);
                                 if (eventToView) {
@@ -1116,6 +1129,7 @@ export const EventsPage = () => {
                                 }
                               }}
                               onLocationClick={handleLocationClick}
+                              onViewGallery={handleViewGallery}
                             />
                           </div>
                         ))}
@@ -1280,6 +1294,23 @@ export const EventsPage = () => {
         selectedEventId={selectedEventForMap}
         title="Events in this Area"
       />
+
+      {/* Gallery Modal */}
+      {selectedGalleryEvent && (
+        <EventGalleryModal
+          isOpen={galleryModalOpen}
+          onClose={() => {
+            setGalleryModalOpen(false);
+            setSelectedGalleryEvent(null);
+          }}
+          eventTitle={selectedGalleryEvent.title}
+          images={selectedGalleryEvent.event_images || []}
+          eventDate={selectedGalleryEvent.start_date}
+        />
+      )}
+      
+      <BottomBannerAd />
+      <Footer />
     </div>
   );
 };

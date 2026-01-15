@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, MapPin, Hash, User, Share2, Heart } from 'lucide-react';
+import { Calendar, Clock, MapPin, Hash, User, Share2, Heart, Image as ImageIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { VerificationIcon, VerificationStatus } from '@/components/ui/verification-badge';
 import { EventTimingBadge } from '@/components/EventTimingBadge';
@@ -27,8 +27,11 @@ interface EventCardProps {
     email: string;
     verification?: VerificationStatus;
   };
+  galleryImages?: string[]; // Gallery images for past events
+  isPastEvent?: boolean; // Flag to indicate if event has ended
   onViewEvent?: (id: string) => void;
   onLocationClick?: (eventId: string, city?: string) => void;
+  onViewGallery?: (id: string) => void; // Callback to open gallery modal
 }
 
 export const EventCard = ({
@@ -49,8 +52,11 @@ export const EventCard = ({
   entryFee,
   currency = 'USD',
   createdBy,
+  galleryImages,
+  isPastEvent,
   onViewEvent,
   onLocationClick,
+  onViewGallery,
 }: EventCardProps) => {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -288,7 +294,24 @@ export const EventCard = ({
           </div>
         )}
         
-        <div className="mt-4">
+        <div className="mt-4 space-y-2">
+          {/* Gallery Button for Past Events with Images */}
+          {isPastEvent && galleryImages && galleryImages.length > 0 && onViewGallery && (
+            <motion.button
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewGallery(id);
+              }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-2.5 px-4 rounded-md shadow-lg hover:shadow-xl transition-all"
+            >
+              <ImageIcon className="w-4 h-4" />
+              View Gallery ({galleryImages.length} photos)
+            </motion.button>
+          )}
+          
+          {/* View Event Button */}
           <motion.button
             onClick={handleViewEvent}
             whileHover={{ scale: 1.02 }}
