@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
+import { TopBannerAd } from "@/components/TopBannerAd";
+import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { 
   Building, 
   Target, 
@@ -44,6 +46,7 @@ const AboutUsPage = () => {
   return (
     <>
       <Header />
+      <TopBannerAd />
       <div className="min-h-screen bg-white">
         {/* Hero Section (monochrome) */}
         <section className="py-20 bg-white">
@@ -308,6 +311,7 @@ const AboutUsPage = () => {
           </div>
         </section>
       </div>
+      <BottomBannerAd />
       <Footer />
     </>
   );

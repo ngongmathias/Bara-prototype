@@ -1,6 +1,8 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
+import { TopBannerAd } from "@/components/TopBannerAd";
+import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Globe, Crown, Clock, Building, ChevronRight, Camera, Users, ArrowLeft, Award, CheckCircle, Map, Navigation, ExternalLink } from "lucide-react";
@@ -54,6 +56,7 @@ export const BusinessDetailPage = () => {
     return (
       <div className="min-h-screen bg-background font-roboto">
         <Header />
+        <TopBannerAd />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
             <Skeleton className="h-8 w-32 mb-4" />
@@ -75,6 +78,7 @@ export const BusinessDetailPage = () => {
             </div>
         </div>
         </div>
+        <BottomBannerAd />
         <Footer />
       </div>
     );
@@ -85,6 +89,7 @@ export const BusinessDetailPage = () => {
   return (
     <div className="min-h-screen bg-background font-roboto">
       <Header />
+      <TopBannerAd />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -101,6 +106,7 @@ export const BusinessDetailPage = () => {
                 </Button>
               </div>
             </div>
+        <BottomBannerAd />
         <Footer />
       </div>
     );
@@ -112,6 +118,7 @@ export const BusinessDetailPage = () => {
   return (
     <div className="min-h-screen bg-background font-roboto">
       <Header />
+      <TopBannerAd />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
@@ -479,7 +486,7 @@ export const BusinessDetailPage = () => {
           </div>
         </div>
       </div>
-      
+      <BottomBannerAd />
       <Footer />
     </div>
   );
