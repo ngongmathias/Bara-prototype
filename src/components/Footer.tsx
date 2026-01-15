@@ -25,6 +25,7 @@ const Footer = () => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAllCountries, setShowAllCountries] = useState(false);
+  const [showLanguageSelector, setShowLanguageSelector] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -258,16 +259,26 @@ const Footer = () => {
 
         </div>
 
-        {/* Language Selector */}
+        {/* Language Selector - Collapsible */}
         <div className="border-t border-gray-300 pt-6 pb-4">
           <div className="flex flex-col items-center gap-3">
-            <div className="flex items-center gap-2 text-gray-700">
+            <button
+              onClick={() => setShowLanguageSelector(!showLanguageSelector)}
+              className="flex items-center gap-2 text-gray-700 hover:text-black transition-colors font-roboto text-sm font-medium"
+            >
               <Globe className="w-4 h-4" />
-              <span className="text-sm font-medium font-roboto">Select Language</span>
-            </div>
-            <div className="w-full max-w-xs">
-              <StyledGoogleTranslate />
-            </div>
+              <span>Change Language</span>
+              {showLanguageSelector ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </button>
+            {showLanguageSelector && (
+              <div className="w-full max-w-xs animate-in fade-in-0 slide-in-from-top-2">
+                <StyledGoogleTranslate />
+              </div>
+            )}
           </div>
         </div>
 
