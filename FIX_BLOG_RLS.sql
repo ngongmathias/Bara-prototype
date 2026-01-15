@@ -64,7 +64,7 @@ WITH CHECK (true);
 -- Blog Comments: Public can read approved, all operations allowed
 CREATE POLICY "blog_comments_select_approved"
 ON blog_comments FOR SELECT
-USING (status = 'approved');
+USING (is_approved = true);
 
 CREATE POLICY "blog_comments_all_operations"
 ON blog_comments FOR ALL
