@@ -1,6 +1,8 @@
 import React from 'react';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
+import { TopBannerAd } from '@/components/TopBannerAd';
+import { BottomBannerAd } from '@/components/BottomBannerAd';
 import { useUser } from '@clerk/clerk-react';
 import { Navigate, Link, Outlet, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -46,6 +48,7 @@ export const UserDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      <TopBannerAd />
       
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -218,7 +221,7 @@ export const UserDashboard = () => {
           </div>
         </div>
       </div>
-      
+      <BottomBannerAd />
       <Footer />
     </div>
   );
