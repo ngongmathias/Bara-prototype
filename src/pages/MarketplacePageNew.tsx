@@ -194,10 +194,19 @@ const MarketplacePageNew = () => {
     navigate(`/marketplace/search?${params.toString()}`);
   };
 
+  // Helper function to convert subcategory name to slug
+  const subcategoryToSlug = (subcategoryName: string): string => {
+    return subcategoryName
+      .toLowerCase()
+      .replace(/&/g, 'and')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
   const handleSubcategoryClick = (categorySlug: string, subcategory: string) => {
     const params = new URLSearchParams();
     params.set('category', categorySlug);
-    params.set('subcategory', subcategory);
+    params.set('subcategory', subcategoryToSlug(subcategory));
     
     if (selectedCountry) {
       params.set('country', selectedCountry.id);

@@ -131,12 +131,21 @@ const categories: Category[] = [
 export const AllCategoriesPage = () => {
   const navigate = useNavigate();
 
-  const handleCategoryClick = (slug: string) => {
-    navigate(`/marketplace/search?category=${slug}`);
+  const handleCategoryClick = (categorySlug: string) => {
+    navigate(`/marketplace/search?category=${categorySlug}`);
+  };
+
+  // Helper function to convert subcategory name to slug
+  const subcategoryToSlug = (subcategoryName: string): string => {
+    return subcategoryName
+      .toLowerCase()
+      .replace(/&/g, 'and')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   };
 
   const handleSubcategoryClick = (categorySlug: string, subcategory: string) => {
-    navigate(`/marketplace/search?category=${categorySlug}&subcategory=${encodeURIComponent(subcategory)}`);
+    navigate(`/marketplace/search?category=${categorySlug}&subcategory=${subcategoryToSlug(subcategory)}`);
   };
 
   return (
