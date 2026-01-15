@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { AdminNavLink } from "./AdminNavLink";
 import { UserNavLink } from "./UserNavLink";
+import { StyledGoogleTranslate } from "./StyledGoogleTranslate";
 import { db } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { fetchWikipediaCountryInfo } from "@/lib/wikipedia";
@@ -79,6 +80,7 @@ export const Header = () => {
   const [mobileMenuClosing, setMobileMenuClosing] = useState(false);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  const [showLanguageSelector, setShowLanguageSelector] = useState(false);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -306,6 +308,21 @@ export const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Language Selector - Collapsible */}
+            <DropdownMenu open={showLanguageSelector} onOpenChange={setShowLanguageSelector}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="font-roboto flex items-center gap-1 hover:bg-gray-100 transition-colors duration-200">
+                  <Globe className="w-4 h-4" />
+                  <span className="hidden sm:inline text-sm">Language</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showLanguageSelector ? 'rotate-180' : ''}`} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-64" align="end">
+                <div className="p-3">
+                  <StyledGoogleTranslate />
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* User Profile */}
             {isSignedIn ? (
@@ -581,6 +598,25 @@ export const Header = () => {
 
                 {/* Language & Country - PROMINENT */}
                 <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
+                    <p className="text-xs font-semibold text-gray-500 mb-2">LANGUAGE</p>
+                    <button
+                      onClick={() => setShowLanguageSelector(!showLanguageSelector)}
+                      className="w-full text-left text-sm font-medium text-gray-900 hover:text-blue-600 flex items-center justify-between"
+                    >
+                      <span>Change</span>
+                      {showLanguageSelector ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </button>
+                    {showLanguageSelector && (
+                      <div className="mt-3 animate-in fade-in-0 slide-in-from-top-2">
+                        <StyledGoogleTranslate />
+                      </div>
+                    )}
+                  </div>
                   <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
                     <p className="text-xs font-semibold text-gray-500 mb-2">COUNTRY</p>
                     <button
