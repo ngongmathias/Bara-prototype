@@ -1056,6 +1056,9 @@ export const EventsPage = () => {
                               city={event.city_name}
                               startDate={event.start_date}
                               endDate={event.end_date}
+                              isFree={event.is_free}
+                              entryFee={event.entry_fee}
+                              currency={event.currency}
                               onViewEvent={(id) => {
                                 const eventToView = events.find(e => e.id === id);
                                 if (eventToView) {
@@ -1103,6 +1106,9 @@ export const EventsPage = () => {
                               city={event.city_name}
                               startDate={event.start_date}
                               endDate={event.end_date}
+                              isFree={event.is_free}
+                              entryFee={event.entry_fee}
+                              currency={event.currency}
                               onViewEvent={(id) => {
                                 const eventToView = events.find(e => e.id === id);
                                 if (eventToView) {

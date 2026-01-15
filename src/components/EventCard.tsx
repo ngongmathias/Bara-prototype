@@ -19,6 +19,9 @@ interface EventCardProps {
   city?: string;
   startDate?: string; // ISO date string for timing badge
   endDate?: string; // ISO date string for timing badge
+  isFree?: boolean;
+  entryFee?: number;
+  currency?: string;
   createdBy?: {
     name: string;
     email: string;
@@ -42,6 +45,9 @@ export const EventCard = ({
   city,
   startDate,
   endDate,
+  isFree,
+  entryFee,
+  currency = 'USD',
   createdBy,
   onViewEvent,
   onLocationClick,
@@ -151,6 +157,22 @@ export const EventCard = ({
             </span>
           </div>
         )}
+        {/* Price Badge - Bottom Left */}
+        <div className="absolute bottom-3 left-3">
+          {isFree ? (
+            <span className="bg-green-500 text-white text-sm font-semibold px-3 py-1.5 rounded-full shadow-lg">
+              FREE
+            </span>
+          ) : entryFee && entryFee > 0 ? (
+            <span className="bg-blue-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full shadow-lg">
+              {currency === 'USD' && '$'}
+              {currency === 'EUR' && '€'}
+              {currency === 'GBP' && '£'}
+              {entryFee.toLocaleString()}
+              {!['USD', 'EUR', 'GBP'].includes(currency) && ` ${currency}`}
+            </span>
+          ) : null}
+        </div>
         {/* Save & Share Buttons */}
         <div className="absolute top-3 right-3 flex gap-2">
           {/* Save/Bookmark Button */}
