@@ -357,6 +357,7 @@ All colors MUST be HSL.
   /* Google Translate Styling - Clean Implementation */
   #google_translate_element {
     display: inline-block;
+    width: 100%;
   }
 
   /* Hide Google Translate banner frame */
@@ -378,25 +379,10 @@ All colors MUST be HSL.
     position: static !important;
   }
 
-  /* Style the select dropdown */
-  .goog-te-combo {
-    padding: 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-    background-color: white;
-    cursor: pointer;
-    font-family: 'Roboto', sans-serif;
-  }
-
-  .goog-te-combo:focus {
-    outline: none;
-    border-color: #3b82f6;
-  }
-
   /* Hide Google branding */
   .goog-te-gadget {
     font-size: 0 !important;
+    line-height: 0 !important;
   }
 
   .goog-te-gadget > span {
@@ -404,6 +390,46 @@ All colors MUST be HSL.
   }
 
   .goog-te-gadget > div {
-    display: inline !important;
+    display: inline-block !important;
+    width: 100% !important;
+  }
+
+  /* Style the select dropdown */
+  .goog-te-combo {
+    width: 100% !important;
+    padding: 10px 14px !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    background-color: white !important;
+    cursor: pointer !important;
+    font-family: 'Roboto', sans-serif !important;
+    color: #1f2937 !important;
+    transition: all 0.2s ease !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    background-size: 16px !important;
+    padding-right: 40px !important;
+  }
+
+  .goog-te-combo:hover {
+    border-color: #3b82f6 !important;
+    background-color: #f9fafb !important;
+  }
+
+  .goog-te-combo:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  }
+
+  .goog-te-combo option {
+    padding: 10px !important;
+    font-size: 14px !important;
   }
 }
