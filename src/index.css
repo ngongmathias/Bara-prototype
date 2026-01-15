@@ -359,12 +359,23 @@ All colors MUST be HSL.
     display: inline-block;
   }
 
-  /* Hide Google Translate banner */
-  .goog-te-banner-frame {
+  /* COMPLETELY HIDE Google Translate top bar */
+  .goog-te-banner-frame.skiptranslate {
     display: none !important;
   }
 
-  /* Hide Google branding text */
+  body {
+    top: 0px !important;
+    position: static !important;
+  }
+
+  /* Hide the Google Translate banner frame */
+  .goog-te-banner-frame {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Hide "Powered by" text and branding */
   .goog-te-gadget {
     font-size: 0 !important;
     color: transparent !important;
@@ -378,15 +389,35 @@ All colors MUST be HSL.
     display: inline !important;
   }
 
-  /* Style the dropdown */
+  .goog-te-gadget .goog-te-gadget-simple {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  /* Hide Google logo */
+  .goog-te-gadget-icon {
+    display: none !important;
+  }
+
+  /* Style the language dropdown to match your design */
   .goog-te-combo {
-    padding: 6px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
+    padding: 8px 32px 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
     font-size: 14px;
+    font-family: 'Roboto', sans-serif;
     background-color: white;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
     cursor: pointer;
     transition: all 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    min-width: 140px;
   }
 
   .goog-te-combo:hover {
@@ -400,12 +431,26 @@ All colors MUST be HSL.
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
-  /* Remove top frame that Google Translate adds */
-  body {
-    top: 0 !important;
+  /* Hide the dropdown arrow that Google adds */
+  .goog-te-combo option {
+    padding: 8px;
   }
 
+  /* Ensure no top spacing is added by Google Translate */
   .skiptranslate {
     display: inline-block !important;
+  }
+
+  /* Force remove any iframe that Google Translate adds at the top */
+  iframe.goog-te-banner-frame {
+    display: none !important;
+    height: 0 !important;
+    visibility: hidden !important;
+  }
+
+  /* Remove any top margin/padding Google Translate adds to body */
+  html body {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
   }
 }
