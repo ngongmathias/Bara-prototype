@@ -1,14 +1,13 @@
+/* Import enhanced animations */
+@import './styles/animations.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Import enhanced animations */
-@import './styles/animations.css';
-
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
-
 @layer base {
   :root {
     /* BARA LISTINGS Brand Colors */
