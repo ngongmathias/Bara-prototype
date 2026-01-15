@@ -12,7 +12,7 @@ import PetsDetail from './details/PetsDetail';
 import KidsDetail from './details/KidsDetail';
 import HobbiesDetail from './details/HobbiesDetail';
 import BusinessDetail from './details/BusinessDetail';
-import ListingDetailPageNew from './ListingDetailPageNew';
+import ListingDetailPage from './ListingDetailPage';
 
 /**
  * Category Detail Router
@@ -30,7 +30,7 @@ import ListingDetailPageNew from './ListingDetailPageNew';
  * 9. Kids & Babies -> KidsDetail
  * 10. Hobbies -> HobbiesDetail
  * 11. Businesses & Industrial -> BusinessDetail
- * 12. Everything else -> ListingDetailPageNew (generic)
+ * 12. Everything else -> ListingDetailPage (generic)
  */
 
 export const CategoryDetailRouter = () => {
@@ -77,7 +77,7 @@ export const CategoryDetailRouter = () => {
 
   // Route based on category slug
   if (!categorySlug) {
-    return <ListingDetailPageNew />;
+    return <ListingDetailPage />;
   }
 
   // 1. Properties
@@ -235,7 +235,7 @@ export const CategoryDetailRouter = () => {
   }
 
   // 12. Default to generic detail page for other categories
-  return <ListingDetailPageNew />;
+  return <ListingDetailPage />;
 };
 
 export default CategoryDetailRouter;
