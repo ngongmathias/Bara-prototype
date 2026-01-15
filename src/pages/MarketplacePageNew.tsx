@@ -208,8 +208,8 @@ const MarketplacePageNew = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-roboto">
-      <TopBannerAd />
       <Header />
+      <TopBannerAd />
 
       {/* Top Bar - Search and Post Ad */}
       <div className="bg-white border-b border-gray-200">
@@ -273,11 +273,16 @@ const MarketplacePageNew = () => {
       </div>
 
       {/* Verification Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-2">Verify your account</h2>
-          <p className="text-xl text-white mb-6">and stay unique</p>
-          <Button className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8 h-12">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">✨</span>
+            <div>
+              <span className="text-white font-semibold">Verify your account</span>
+              <span className="text-white/90 ml-2">and stay unique</span>
+            </div>
+          </div>
+          <Button className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-6 h-9 text-sm">
             Verify now
           </Button>
         </div>
@@ -294,15 +299,24 @@ const MarketplacePageNew = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => {
               const Icon = category.icon;
+              const emoji = category.id === 'motors' ? '🚗' : 
+                           category.id === 'property' ? '🏠' :
+                           category.id === 'mobiles-tablets' ? '📱' :
+                           category.id === 'jobs' ? '💼' :
+                           category.id === 'home-furniture' ? '🛋️' :
+                           category.id === 'electronics' ? '📺' :
+                           category.id === 'fashion' ? '👗' :
+                           category.id === 'services' ? '🔧' :
+                           category.id === 'kids-babies' ? '👶' :
+                           category.id === 'pets' ? '🐾' :
+                           category.id === 'hobbies' ? '🎨' : '🏢';
               return (
                 <div
                   key={category.id}
-                  className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                  className="bg-white rounded-lg p-6 hover:shadow-md transition-all hover:-translate-y-1"
                 >
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Icon className="w-6 h-6 text-blue-600" />
-                    </div>
+                  <div className="flex items-start gap-3 mb-4">
+                    <span className="text-3xl">{emoji}</span>
                     <div className="flex-1">
                       <button
                         onClick={() => handleCategoryClick(category.slug)}
@@ -313,7 +327,7 @@ const MarketplacePageNew = () => {
                     </div>
                   </div>
                   
-                  <div className="space-y-2 ml-16">
+                  <div className="space-y-2">
                     {category.subcategories.slice(0, 5).map((subcategory) => (
                       <button
                         key={subcategory}
