@@ -263,6 +263,7 @@ const MarketplacePageNew = () => {
               );
             })}
             <button
+              onClick={() => navigate('/marketplace/categories')}
               className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors whitespace-nowrap"
             >
               <Package className="w-5 h-5" />
@@ -351,6 +352,18 @@ const MarketplacePageNew = () => {
                 </div>
               );
             })}
+          </div>
+
+          {/* View All Categories Button */}
+          <div className="flex justify-center mt-8">
+            <Button
+              onClick={() => navigate('/marketplace/categories')}
+              variant="outline"
+              className="px-8 py-6 text-base font-semibold font-roboto"
+            >
+              View All Categories
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </Button>
           </div>
         </section>
 

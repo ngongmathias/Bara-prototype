@@ -70,6 +70,7 @@ import CategoryPostForm from "./pages/marketplace/CategoryPostForm";
 import MyListings from "./pages/marketplace/MyListings";
 import SearchResults from "./pages/marketplace/SearchResults";
 import SearchResultsNew from "./pages/marketplace/SearchResultsNew";
+import { AllCategoriesPage } from "./pages/marketplace/AllCategoriesPage";
 import MyFavorites from "./pages/marketplace/MyFavorites";
 import EditListing from "./pages/marketplace/EditListing";
 import { CommunityPage } from "./pages/communities/CommunityPage";
@@ -132,11 +133,11 @@ const AppRoutes = () => {
         
         {/* Marketplace Routes - MUST come before broad business listings routes */}
         <Route path="/marketplace" element={<MarketplacePageNew />} />
-        <Route path="/marketplace/post" element={<CategoryPostForm />} />
+        <Route path="/marketplace/categories" element={<AllCategoriesPage />} />
+        <Route path="/marketplace/search" element={<SearchResultsNew />} />
         <Route path="/marketplace/my-listings" element={<MyListings />} />
         <Route path="/marketplace/listing/:listingId" element={<CategoryDetailRouter />} />
         <Route path="/marketplace/edit/:listingId" element={<EditListing />} />
-        <Route path="/marketplace/search" element={<SearchResultsNew />} />
         <Route path="/marketplace/favorites" element={<MyFavorites />} />
         <Route path="/marketplace/property-sale" element={<PropertyPage />} />
         <Route path="/marketplace/property-rent" element={<PropertyPage />} />
