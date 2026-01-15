@@ -95,9 +95,20 @@ export const SearchResultsNew = () => {
           .from('marketplace_categories')
           .select('id, name, slug')
           .eq('slug', categoryParam)
-          .single();
+          .maybeSingle();
         
         console.log('📂 Category lookup result:', { categoryData, catError });
+        
+        if (!categoryData) {
+          console.warn('⚠️ Category not found in database with slug:', categoryParam);
+          console.log('🔧 Fetching all categories to see what exists...');
+          const { data: allCats } = await supabase
+            .from('marketplace_categories')
+            .select('id, name, slug')
+            .limit(20);
+          console.log('📋 Available categories:', allCats);
+        }
+        
         categoryId = categoryData?.id;
       }
 
