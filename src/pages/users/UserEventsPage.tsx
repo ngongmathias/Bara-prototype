@@ -22,13 +22,15 @@ import {
   Save,
   X,
   Eye,
-  Upload
+  Upload,
+  Images
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEvents, useEventCategories, useEventManagement, useCountries, useCitiesByCountry } from '@/hooks/useEvents';
 import { uploadEventImage, EventsService } from '@/lib/eventsService';
 import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { MultiHashtagInput } from '@/components/ui/multi-hashtag-input';
+import { EventGalleryUpload } from '@/components/EventGalleryUpload';
 import { useUser } from '@clerk/clerk-react';
 
 interface FormTicket {
@@ -74,6 +76,8 @@ export const UserEventsPage = () => {
   const [editingEvent, setEditingEvent] = useState<DatabaseEvent | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [galleryUploadOpen, setGalleryUploadOpen] = useState(false);
+  const [selectedEventForGallery, setSelectedEventForGallery] = useState<DatabaseEvent | null>(null);
   
   const { toast } = useToast();
   const { events, loading, searchEvents } = useEvents();
@@ -761,13 +765,30 @@ export const UserEventsPage = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => window.open(`/events/${event.id}`, '_blank')}
+                          title="View Event"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
+                        {/* Gallery Button for Past Events */}
+                        {new Date(event.end_date) < new Date() && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedEventForGallery(event);
+                              setGalleryUploadOpen(true);
+                            }}
+                            className="text-purple-600 hover:text-purple-700"
+                            title="Manage Gallery"
+                          >
+                            <Images className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEdit(event)}
+                          title="Edit Event"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -776,6 +797,7 @@ export const UserEventsPage = () => {
                           size="sm"
                           onClick={() => handleDelete(event.id)}
                           className="text-red-600 hover:text-red-700"
+                          title="Delete Event"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -808,6 +830,24 @@ export const UserEventsPage = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Gallery Upload Modal */}
+      {selectedEventForGallery && (
+        <EventGalleryUpload
+          isOpen={galleryUploadOpen}
+          onClose={() => {
+            setGalleryUploadOpen(false);
+            setSelectedEventForGallery(null);
+          }}
+          eventId={selectedEventForGallery.id}
+          eventTitle={selectedEventForGallery.title}
+          existingImages={selectedEventForGallery.event_images || []}
+          onUploadComplete={() => {
+            // Refresh events list
+            searchEvents({ limit: 100 });
+          }}
+        />
+      )}
     </div>
   );
 };
