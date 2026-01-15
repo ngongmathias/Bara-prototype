@@ -31,7 +31,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { LanguageSelector } from "./LanguageSelector";
+import { GoogleTranslate } from "./GoogleTranslate";
 import { AdminNavLink } from "./AdminNavLink";
 import { UserNavLink } from "./UserNavLink";
 import { db } from "@/lib/supabase";
@@ -307,8 +307,8 @@ export const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Language Selector */}
-            <LanguageSelector />
+            {/* Google Translate */}
+            <GoogleTranslate />
 
             {/* User Profile */}
             {isSignedIn ? (
@@ -586,7 +586,7 @@ export const Header = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
                     <p className="text-xs font-semibold text-gray-500 mb-2">LANGUAGE</p>
-                    <LanguageSelector />
+                    <GoogleTranslate />
                   </div>
                   <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
                     <p className="text-xs font-semibold text-gray-500 mb-2">COUNTRY</p>
