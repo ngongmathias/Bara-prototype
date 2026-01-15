@@ -36,6 +36,12 @@ export const CategoryPage = () => {
   const [maxPrice, setMaxPrice] = useState('');
 
   useEffect(() => {
+    // Don't fetch if this is a reserved slug - it should be handled by a specific route
+    const reservedSlugs = ['post', 'categories', 'search', 'my-listings', 'favorites', 'edit'];
+    if (categorySlug && reservedSlugs.includes(categorySlug)) {
+      setLoading(false);
+      return;
+    }
     fetchInitialData();
   }, [categorySlug]);
 

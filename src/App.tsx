@@ -145,6 +145,7 @@ const AppRoutes = () => {
         <Route path="/marketplace/motors" element={<MotorsPageNew />} />
         <Route path="/marketplace/classifieds" element={<ClassifiedsPage />} />
         <Route path="/marketplace/jobs" element={<JobsPage />} />
+        {/* Catch-all route MUST be last */}
         <Route path="/marketplace/:categorySlug" element={<CategoryPage />} />
         
         {/* Business Listings Routes */}
