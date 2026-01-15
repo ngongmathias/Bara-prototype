@@ -353,4 +353,57 @@ All colors MUST be HSL.
   [role="dialog"] {
     max-width: 100vw !important;
   }
+
+  /* Google Translate Styling - Clean Implementation */
+  #google_translate_element {
+    display: inline-block;
+  }
+
+  /* Hide Google Translate banner frame */
+  body > .skiptranslate {
+    display: none !important;
+  }
+
+  iframe.goog-te-banner-frame {
+    display: none !important;
+  }
+
+  .goog-te-banner-frame {
+    display: none !important;
+  }
+
+  /* Prevent body position shift */
+  body {
+    top: 0 !important;
+    position: static !important;
+  }
+
+  /* Style the select dropdown */
+  .goog-te-combo {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  .goog-te-combo:focus {
+    outline: none;
+    border-color: #3b82f6;
+  }
+
+  /* Hide Google branding */
+  .goog-te-gadget {
+    font-size: 0 !important;
+  }
+
+  .goog-te-gadget > span {
+    display: none !important;
+  }
+
+  .goog-te-gadget > div {
+    display: inline !important;
+  }
 }
