@@ -88,14 +88,20 @@ export const SearchResultsNew = () => {
       // Get category ID if filtering by category
       let categoryId = null;
       const categoryParam = searchParams.get('category');
+      console.log('🔍 Category param from URL:', categoryParam);
+      
       if (categoryParam) {
-        const { data: categoryData } = await supabase
+        const { data: categoryData, error: catError } = await supabase
           .from('marketplace_categories')
-          .select('id')
+          .select('id, name, slug')
           .eq('slug', categoryParam)
           .single();
+        
+        console.log('📂 Category lookup result:', { categoryData, catError });
         categoryId = categoryData?.id;
       }
+
+      console.log('🎯 Filtering by category_id:', categoryId);
 
       let query = supabase
         .from('marketplace_listings')
@@ -115,7 +121,10 @@ export const SearchResultsNew = () => {
 
       // Category filter
       if (categoryId) {
+        console.log('✅ Applying category filter with ID:', categoryId);
         query = query.eq('category_id', categoryId);
+      } else {
+        console.log('⚠️ No category filter applied');
       }
 
       // Country filter - use selected country from context or URL param
@@ -164,7 +173,17 @@ export const SearchResultsNew = () => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Search query error:', error);
+        throw error;
+      }
+
+      console.log('📊 Search results count:', data?.length);
+      console.log('📋 First 3 results:', data?.slice(0, 3).map(d => ({ 
+        title: d.title, 
+        category: d.marketplace_categories?.slug,
+        category_id: d.category_id 
+      })));
 
       const transformed = (data || []).map((listing: any) => ({
         ...listing,
