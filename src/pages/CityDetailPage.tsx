@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
+import { TopBannerAd } from "@/components/TopBannerAd";
+import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -281,8 +283,9 @@ export const CityDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-yp-gray-light">
+    <div className="min-h-screen bg-background">
       <Header />
+      <TopBannerAd />
       
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -473,7 +476,7 @@ export const CityDetailPage: React.FC = () => {
           </div>
         )}
       </div>
-      
+      <BottomBannerAd />
       <Footer />
     </div>
   );
