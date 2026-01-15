@@ -24,6 +24,17 @@ export const UserSignInPage = () => {
                 card: 'bg-white shadow-lg border border-gray-200 rounded-lg p-6',
                 headerTitle: 'text-xl font-semibold text-gray-900',
                 headerSubtitle: 'text-sm text-gray-600',
+                footerActionText: 'text-sm text-gray-600',
+                footerActionLink: 'text-blue-600 hover:text-blue-800 font-medium',
+                formFieldInput: 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6',
+                formFieldErrorText: 'text-red-600 text-sm mt-1 font-medium',
+                alert: 'bg-red-50 border border-red-200 text-red-800 rounded-md p-3 mb-4',
+                alertText: 'text-sm font-medium',
+              },
+              layout: {
+                socialButtonsPlacement: 'top',
+                socialButtonsVariant: 'blockButton',
+                showOptionalFields: true,
               }
             }}
           />
