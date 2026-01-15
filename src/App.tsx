@@ -37,7 +37,7 @@ import { AdminBusinesses } from "./pages/admin/AdminBusinesses";
 import { AdminEventsEnhanced as AdminEvents } from "./pages/admin/AdminEventsEnhanced";
 import { AdminReviews } from "./pages/admin/AdminReviews";
 import { AdminSponsoredAds } from "./pages/admin/AdminSponsoredAds";
-import { AdminReports } from "./pages/admin/AdminReportsNew";
+import { AdminReports } from "./pages/admin/AdminReports";
 import { AdminCategories } from "./pages/admin/AdminCategories";
 import { AdminUsers } from "./pages/admin/AdminUsers";
 import { AdminManagement } from "./pages/admin/AdminManagement";
@@ -54,22 +54,18 @@ import { UltraSimpleMap } from "./components/UltraSimpleMap";
 import {EventsPage} from "./pages/EventsPage";
 import { ToolsPage } from "./pages/ToolsPage";
 import CommunitiesPage from "./pages/communities";
-import MarketplaceHub from "./pages/marketplace/MarketplaceHub";
-import MarketplacePageNew from "./pages/MarketplacePageNew";
+import MarketplacePage from "./pages/MarketplacePage";
 import CategoryPage from "./pages/marketplace/CategoryPage";
 import PropertyPage from "./pages/marketplace/PropertyPage";
-import MotorsPageNew from "./pages/marketplace/MotorsPageNew";
+import MotorsPage from "./pages/marketplace/MotorsPage";
 import ClassifiedsPage from "./pages/marketplace/ClassifiedsPage";
 import JobsPage from "./pages/marketplace/JobsPage";
 import ListingDetailPage from "./pages/marketplace/ListingDetailPage";
-import ListingDetailPageNew from "./pages/marketplace/ListingDetailPageNew";
 import CategoryDetailRouter from "./pages/marketplace/CategoryDetailRouter";
 import PostListing from "./pages/marketplace/PostListing";
-import PostListingNew from "./pages/marketplace/PostListingNew";
 import CategoryPostForm from "./pages/marketplace/CategoryPostForm";
 import MyListings from "./pages/marketplace/MyListings";
 import SearchResults from "./pages/marketplace/SearchResults";
-import SearchResultsNew from "./pages/marketplace/SearchResultsNew";
 import { AllCategoriesPage } from "./pages/marketplace/AllCategoriesPage";
 import MyFavorites from "./pages/marketplace/MyFavorites";
 import EditListing from "./pages/marketplace/EditListing";
@@ -88,7 +84,6 @@ import { AdminSlideshowImages } from "./pages/admin/AdminSlideshowImages";
 import AdminEventsSlideshow from "./pages/admin/AdminEventsSlideshow";
 import AdminPopups from "./pages/admin/AdminPopups";
 import AdminMarketplace from "./pages/admin/AdminMarketplace";
-import AdminMarketplaceNew from "./pages/admin/AdminMarketplaceNew";
 import AdminMarketplaceCategories from "./pages/admin/AdminMarketplaceCategories";
 import { MainLayout } from "./components/layout/MainLayout";
 import BlogPage from "./pages/BlogPage";
@@ -125,7 +120,7 @@ const AppRoutes = () => {
         } />
         <Route path="/admin/marketplace" element={
           <AdminAuthGuard>
-            <AdminMarketplaceNew />
+            <AdminMarketplace />
           </AdminAuthGuard>
         } />
         <Route path="/admin/marketplace-categories" element={
@@ -135,17 +130,17 @@ const AppRoutes = () => {
         } />
         
         {/* Marketplace Routes - MUST come before broad business listings routes */}
-        <Route path="/marketplace" element={<MarketplacePageNew />} />
+        <Route path="/marketplace" element={<MarketplacePage />} />
         <Route path="/marketplace/categories" element={<AllCategoriesPage />} />
-        <Route path="/marketplace/search" element={<SearchResultsNew />} />
-        <Route path="/marketplace/post" element={<PostListingNew />} />
+        <Route path="/marketplace/search" element={<SearchResults />} />
+        <Route path="/marketplace/post" element={<PostListing />} />
         <Route path="/marketplace/my-listings" element={<MyListings />} />
         <Route path="/marketplace/listing/:listingId" element={<CategoryDetailRouter />} />
         <Route path="/marketplace/edit/:listingId" element={<EditListing />} />
         <Route path="/marketplace/favorites" element={<MyFavorites />} />
         <Route path="/marketplace/property-sale" element={<PropertyPage />} />
         <Route path="/marketplace/property-rent" element={<PropertyPage />} />
-        <Route path="/marketplace/motors" element={<MotorsPageNew />} />
+        <Route path="/marketplace/motors" element={<MotorsPage />} />
         <Route path="/marketplace/classifieds" element={<ClassifiedsPage />} />
         <Route path="/marketplace/jobs" element={<JobsPage />} />
         {/* Catch-all route MUST be last */}
@@ -184,15 +179,7 @@ const AppRoutes = () => {
         </MainLayout>
       } />
       
-      {/* New Navigation Pages */}
-      <Route path="/marketplace-old" element={<MarketplaceHub />} />
-      <Route path="/marketplace/listing/:listingId" element={<ListingDetailPage />} />
-      <Route path="/marketplace/property-sale" element={<PropertyPage />} />
-      <Route path="/marketplace/property-rent" element={<PropertyPage />} />
-      <Route path="/marketplace/motors" element={<MotorsPageNew />} />
-      <Route path="/marketplace/classifieds" element={<ClassifiedsPage />} />
-      <Route path="/marketplace/jobs" element={<JobsPage />} />
-      <Route path="/marketplace/:categorySlug" element={<CategoryPage />} />
+      {/* Additional Navigation Pages */}
       <Route path="/events" element={<EventsPage />} />
       <Route path="/events/:eventId" element={<EventsPage />} />
       <Route path="/tools" element={<ToolsPage />} />

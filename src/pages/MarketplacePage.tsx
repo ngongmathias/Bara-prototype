@@ -1,196 +1,464 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { motion } from "framer-motion";
 import { 
-  Search
+  Search,
+  Car,
+  Home,
+  Smartphone,
+  Briefcase,
+  ShoppingBag,
+  Users,
+  Wrench,
+  Baby,
+  Package,
+  Palette,
+  ChevronRight,
+  MapPin,
+  ChevronDown,
+  Tv,
+  Shirt,
+  PawPrint,
+  Music,
+  Building2
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useCountrySelection } from '@/context/CountrySelectionContext';
+import { supabase } from '@/lib/supabase';
 
-const categoryTabs = [
-  { id: 'motors', label: 'Motors', description: 'Cars, bikes, and more' },
-  { id: 'property', label: 'Property', description: 'Homes, apartments, and land' },
-  { id: 'electronics', label: 'Electronics', description: 'Phones, laptops, and gadgets' },
-  { id: 'fashion', label: 'Fashion & Beauty', description: 'Clothing, shoes, and accessories' },
-  { id: 'services', label: 'Services', description: 'Home, business, and personal services' },
-  { id: 'jobs', label: 'Jobs', description: 'Full-time, part-time, and freelance' },
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon: any;
+  subcategories: string[];
+}
+
+const categories: Category[] = [
+  {
+    id: 'motors',
+    name: 'Vehicles',
+    slug: 'motors',
+    icon: Car,
+    subcategories: ['Cars for Sale', 'Cars for Rent', 'Motorcycles', 'Boats', 'Trucks & Commercial Vehicles', 'Auto Accessories', 'Auto Parts & Spare Parts', 'Heavy Vehicles', 'Buses']
+  },
+  {
+    id: 'property-sale',
+    name: 'Properties',
+    slug: 'property-sale',
+    icon: Home,
+    subcategories: ['Apartments for Sale', 'Apartments for Rent', 'Villas for Sale', 'Villas for Rent', 'Townhouses for Sale', 'Townhouses for Rent', 'Penthouses', 'Residential Land', 'Commercial for Sale', 'Commercial for Rent']
+  },
+  {
+    id: 'mobile-tablets',
+    name: 'Mobiles & Tablets',
+    slug: 'mobile-tablets',
+    icon: Smartphone,
+    subcategories: ['Mobile Phones', 'Tablets', 'Accessories', 'Smart Watches', 'Mobile Numbers']
+  },
+  {
+    id: 'jobs',
+    name: 'Jobs',
+    slug: 'jobs',
+    icon: Briefcase,
+    subcategories: ['Accounting, Finance & Banking', 'Engineering', 'IT & Software', 'Sales', 'Marketing', 'Healthcare', 'Education & Training', 'Hospitality & Tourism', 'Customer Service', 'Administration']
+  },
+  {
+    id: 'furniture-garden',
+    name: 'Home & Office Furniture - Decor',
+    slug: 'furniture-garden',
+    icon: Package,
+    subcategories: ['Furniture', 'Office Furniture', 'Home Decor', 'Garden & Outdoor', 'Lighting', 'Curtains & Blinds', 'Carpets & Rugs']
+  },
+  {
+    id: 'electronics',
+    name: 'Electronics & Appliances',
+    slug: 'electronics',
+    icon: Tv,
+    subcategories: ['TV - Audio - Video', 'Computers - Accessories', 'Cameras', 'Home Appliances', 'Video Games', 'Gaming Consoles', 'Air Conditioners', 'Washing Machines', 'Refrigerators']
+  },
+  {
+    id: 'fashion',
+    name: 'Fashion & Beauty',
+    slug: 'fashion',
+    icon: ShoppingBag,
+    subcategories: ["Women's Clothing", "Men's Clothing", 'Shoes', 'Bags', 'Watches', 'Jewelry', 'Beauty Products', 'Perfumes', 'Sunglasses']
+  },
+  {
+    id: 'pets',
+    name: 'Pets - Birds - Ornamental fish',
+    slug: 'pets',
+    icon: Users,
+    subcategories: ['Dogs', 'Cats', 'Birds', 'Fish', 'Pet Accessories', 'Pet Food', 'Pet Services', 'Livestock']
+  },
+  {
+    id: 'kids-babies',
+    name: 'Kids & Babies',
+    slug: 'kids-babies',
+    icon: Baby,
+    subcategories: ['Baby & Mom Healthcare', 'Baby Clothing', 'Baby Furniture', 'Toys', 'Strollers', 'Car Seats', 'Baby Gear', 'Kids Clothing', 'Kids Shoes']
+  },
+  {
+    id: 'hobbies',
+    name: 'Hobbies',
+    slug: 'hobbies',
+    icon: Palette,
+    subcategories: ['Antiques - Collectibles', 'Bicycles', 'Books', 'Music Instruments', 'Sports Equipment', 'Camping & Outdoor', 'Art & Crafts']
+  },
+  {
+    id: 'business-industrial',
+    name: 'Businesses & Industrial',
+    slug: 'business-industrial',
+    icon: Building2,
+    subcategories: ['Agriculture', 'Construction', 'Equipment', 'Industrial Machinery', 'Restaurants', 'Retail Businesses', 'Manufacturing']
+  },
+  {
+    id: 'services',
+    name: 'Services',
+    slug: 'services',
+    icon: Wrench,
+    subcategories: ['Business', 'Car', 'Domestic', 'Education', 'Health', 'IT & Web', 'Legal Services', 'Moving & Storage', 'Event Services']
+  }
 ];
 
-const popularCountries = [
-  { id: 'United Arab Emirates', name: 'United Arab Emirates' },
-  { id: 'Rwanda', name: 'Rwanda' },
-  { id: 'Nigeria', name: 'Nigeria' },
-  { id: 'Ghana', name: 'Ghana' },
-  { id: 'Kenya', name: 'Kenya' },
-  { id: 'South Africa', name: 'South Africa' },
-  { id: 'Egypt', name: 'Egypt' },
-  { id: 'Morocco', name: 'Morocco' },
-];
-
-const MarketplacePage = () => {
+const MarketplacePageNew = () => {
   const navigate = useNavigate();
+  const { selectedCountry } = useCountrySelection();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const loadingCountries = false;
+  const [featuredListings, setFeaturedListings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFeaturedListings();
+  }, [selectedCountry]);
+
+  const fetchFeaturedListings = async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from('marketplace_listings')
+        .select(`
+          *,
+          marketplace_categories(name, slug),
+          countries(name, code, flag_url),
+          marketplace_listing_images(image_url, is_primary)
+        `)
+        .eq('status', 'active')
+        .eq('is_featured', true)
+        .order('created_at', { ascending: false })
+        .limit(8);
+
+      if (selectedCountry) {
+        query = query.eq('country_id', selectedCountry.id);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      setFeaturedListings(data || []);
+    } catch (error) {
+      console.error('Error fetching featured listings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const params = new URLSearchParams();
-    const queryValue = searchQuery.trim();
-
-    if (queryValue) {
-      params.set('query', queryValue);
+    
+    if (searchQuery.trim()) {
+      params.set('q', searchQuery.trim());
+    }
+    
+    if (selectedCountry) {
+      params.set('country', selectedCountry.id);
     }
 
-    if (activeCategory) {
-      params.set('category', activeCategory);
-    }
-
-    const searchUrl = params.toString()
-      ? `/marketplace/search?${params.toString()}`
-      : '/marketplace/search';
-
-    navigate(searchUrl);
+    navigate(`/marketplace/search?${params.toString()}`);
   };
 
-  const handleCategoryClick = (categoryId: string) => {
-    setActiveCategory(categoryId);
-
+  const handleCategoryClick = (categorySlug: string) => {
     const params = new URLSearchParams();
-    const queryValue = searchQuery.trim();
-
-    if (queryValue) {
-      params.set('query', queryValue);
+    params.set('category', categorySlug);
+    
+    if (selectedCountry) {
+      params.set('country', selectedCountry.id);
     }
 
-    if (categoryId) {
-      params.set('category', categoryId);
-    }
-
-    const searchUrl = params.toString()
-      ? `/marketplace/search?${params.toString()}`
-      : '/marketplace/search';
-
-    navigate(searchUrl);
+    navigate(`/marketplace/search?${params.toString()}`);
   };
 
-  const handleCountryClick = (countryId: string) => {
+  // Helper function to convert subcategory name to slug
+  const subcategoryToSlug = (subcategoryName: string): string => {
+    return subcategoryName
+      .toLowerCase()
+      .replace(/&/g, 'and')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  const handleSubcategoryClick = (categorySlug: string, subcategory: string) => {
     const params = new URLSearchParams();
-    const queryValue = searchQuery.trim();
-
-    if (queryValue) {
-      params.set('query', queryValue);
+    params.set('category', categorySlug);
+    params.set('subcategory', subcategoryToSlug(subcategory));
+    
+    if (selectedCountry) {
+      params.set('country', selectedCountry.id);
     }
 
-    if (activeCategory) {
-      params.set('category', activeCategory);
-    }
-
-    params.set('country', countryId);
-
-    const searchUrl = `/marketplace/search?${params.toString()}`;
-
-    navigate(searchUrl);
+    navigate(`/marketplace/search?${params.toString()}`);
   };
 
   return (
-    <div className="relative min-h-screen bg-white font-roboto">
+    <div className="min-h-screen bg-gray-50 font-roboto">
+      <Header />
+      <TopBannerAd />
 
-      {/* Header */}
-      <div className="relative z-20">
-        <Header />
+      {/* Top Bar - Search and Post Ad */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-4">
+            {/* Search Bar */}
+            <form onSubmit={handleSearchSubmit} className="flex-1 flex gap-2">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Find Cars, Mobile Phones and more..."
+                  className="pl-12 h-12 text-base font-roboto"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="h-12 px-6 bg-black hover:bg-gray-800 text-white font-medium"
+              >
+                <Search className="w-5 h-5" />
+              </Button>
+            </form>
+
+            {/* Post Ad Button */}
+            <Button
+              onClick={() => navigate('/marketplace/post')}
+              className="bg-black hover:bg-gray-800 text-white font-semibold px-6 h-12 whitespace-nowrap"
+            >
+              Post Your Ad
+            </Button>
+          </div>
+        </div>
       </div>
 
-      {/* Top Banner Ad */}
-      <div className="relative z-10">
-        <TopBannerAd />
+      {/* Category Tabs */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
+            {categories.slice(0, 6).map((category) => {
+              const Icon = category.icon;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => handleCategoryClick(category.slug)}
+                  className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors whitespace-nowrap border-b-2 border-transparent hover:border-blue-600"
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{category.name}</span>
+                </button>
+              );
+            })}
+            <button
+              onClick={() => navigate('/marketplace/categories')}
+              className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors whitespace-nowrap"
+            >
+              <Package className="w-5 h-5" />
+              <span className="font-medium">More Categories</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Verification Banner */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">✨</span>
+            <div>
+              <span className="text-white font-semibold">Verify your account</span>
+              <span className="text-white/90 ml-2">and stay unique</span>
+            </div>
+          </div>
+          <Button className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-6 h-9 text-sm">
+            Verify now
+          </Button>
+        </div>
       </div>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-        {/* Hero */}
-        <section className="text-center mb-12">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-comfortaa font-bold text-black mb-3">
-            Join millions of users to buy and sell anything across Africa
-          </h1>
-        </section>
-
-        {/* Category tabs - dubizzle style */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Popular Categories */}
         <section className="mb-12">
-          <div className="flex gap-0 overflow-x-auto border-b border-gray-200">
-            {categoryTabs.map((cat, idx) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => handleCategoryClick(cat.id)}
-                className={`flex-shrink-0 px-6 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
-                  activeCategory === cat.id || (activeCategory === null && idx === 0)
-                    ? 'border-black text-black bg-gray-50'
-                    : 'border-transparent text-gray-600 hover:text-black hover:bg-gray-50'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 font-comfortaa">
+            Popular Categories
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.map((category) => {
+              const Icon = category.icon;
+              const emoji = category.id === 'motors' ? '🚗' : 
+                           category.id === 'property-sale' ? '🏠' :
+                           category.id === 'mobile-tablets' ? '📱' :
+                           category.id === 'jobs' ? '💼' :
+                           category.id === 'furniture-garden' ? '🛋️' :
+                           category.id === 'electronics' ? '📺' :
+                           category.id === 'fashion' ? '👗' :
+                           category.id === 'pets' ? '🐾' :
+                           category.id === 'kids-babies' ? '👶' :
+                           category.id === 'hobbies' ? '🎨' :
+                           category.id === 'business-industrial' ? '🏢' :
+                           category.id === 'services' ? '🔧' : '📦';
+              return (
+                <div
+                  key={category.id}
+                  className="bg-white rounded-lg p-6 hover:shadow-md transition-all hover:-translate-y-1"
+                >
+                  <div className="flex items-start gap-3 mb-4">
+                    <span className="text-3xl">{emoji}</span>
+                    <div className="flex-1">
+                      <button
+                        onClick={() => handleCategoryClick(category.slug)}
+                        className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors text-left font-comfortaa"
+                      >
+                        {category.name}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {category.subcategories.slice(0, 5).map((subcategory) => (
+                      <button
+                        key={subcategory}
+                        onClick={() => handleSubcategoryClick(category.slug, subcategory)}
+                        className="block text-sm text-blue-600 hover:underline text-left font-roboto"
+                      >
+                        {subcategory}
+                      </button>
+                    ))}
+                    {category.subcategories.length > 5 && (
+                      <button
+                        onClick={() => handleCategoryClick(category.slug)}
+                        className="flex items-center text-sm text-gray-600 hover:text-blue-600 font-roboto"
+                      >
+                        All in {category.name}
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* View All Categories Button */}
+          <div className="flex justify-center mt-8">
+            <Button
+              onClick={() => navigate('/marketplace/categories')}
+              variant="outline"
+              className="px-8 py-6 text-base font-semibold font-roboto"
+            >
+              View All Categories
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </Button>
           </div>
         </section>
 
-        {/* Country grid with subcategory links */}
-        <section className="space-y-6">
-          {loadingCountries ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-8">
-              {Array.from({ length: 8 }).map((_, idx) => (
-                <div key={idx} className="space-y-3 animate-pulse">
-                  <div className="h-5 bg-gray-200 rounded w-32" />
-                  <div className="space-y-2">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <div key={i} className="h-4 bg-gray-100 rounded w-full" />
-                    ))}
-                  </div>
-                </div>
-              ))}
+        {/* Featured Listings */}
+        {featuredListings.length > 0 && (
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 font-comfortaa">
+                Featured Listings
+              </h2>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/marketplace/search?featured=true')}
+                className="font-roboto"
+              >
+                View All
+              </Button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-8">
-              {popularCountries.map((country) => (
-                <div key={country.id} className="space-y-3">
-                  <h3 className="font-semibold text-black text-base">{country.name}</h3>
-                  <div className="space-y-2">
-                    {categoryTabs.slice(0, 5).map((cat) => (
-                      <button
-                        key={`${country.id}-${cat.id}`}
-                        type="button"
-                        onClick={() => {
-                          const params = new URLSearchParams();
-                          params.set('category', cat.id);
-                          params.set('country', country.name);
-                          navigate(`/marketplace/search?${params.toString()}`);
-                        }}
-                        className="block text-sm text-blue-600 hover:underline text-left"
-                      >
-                        {cat.label} in {country.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </main>
-      
-      {/* Bottom Banner Ad */}
-      <div className="relative z-10">
-        <BottomBannerAd />
-      </div>
 
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="bg-white border border-gray-200 rounded-lg overflow-hidden animate-pulse">
+                    <div className="w-full h-48 bg-gray-200" />
+                    <div className="p-4 space-y-3">
+                      <div className="h-4 bg-gray-200 rounded w-3/4" />
+                      <div className="h-6 bg-gray-200 rounded w-1/2" />
+                      <div className="h-4 bg-gray-200 rounded w-full" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {featuredListings.map((listing) => {
+                  const primaryImage = listing.marketplace_listing_images?.find((img: any) => img.is_primary)?.image_url ||
+                                     listing.marketplace_listing_images?.[0]?.image_url;
+
+                  return (
+                    <div
+                      key={listing.id}
+                      onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
+                      className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                    >
+                      <div className="relative w-full h-48 bg-gray-100">
+                        {primaryImage ? (
+                          <img
+                            src={primaryImage}
+                            alt={listing.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="w-12 h-12 text-gray-400" />
+                          </div>
+                        )}
+                        <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-xs font-semibold px-2 py-1 rounded">
+                          FEATURED
+                        </div>
+                      </div>
+
+                      <div className="p-4">
+                        <div className="text-xl font-bold text-blue-600 mb-2 font-comfortaa">
+                          {listing.currency} {parseFloat(listing.price).toLocaleString()}
+                        </div>
+                        <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 font-roboto">
+                          {listing.title}
+                        </h3>
+                        <div className="flex items-center justify-between text-sm text-gray-600 font-roboto">
+                          <span>{listing.countries?.name}</span>
+                          <span>{new Date(listing.created_at).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
+      </main>
+
+      <BottomBannerAd />
       <Footer />
     </div>
   );
 };
 
-export default MarketplacePage;
+export default MarketplacePageNew;

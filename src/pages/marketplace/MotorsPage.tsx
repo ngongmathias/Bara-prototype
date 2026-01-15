@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { TopBannerAd } from '@/components/TopBannerAd';
 import { BottomBannerAd } from '@/components/BottomBannerAd';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -14,42 +13,49 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
-import { MotorListing, MarketplaceSubcategory } from '@/types/marketplace';
-import { Search, SlidersHorizontal, MapPin, Gauge, Calendar, Settings } from 'lucide-react';
+import { MarketplaceListing, MarketplaceCategory, MarketplaceSubcategory } from '@/types/marketplace';
+import { MapPin, Gauge, Calendar } from 'lucide-react';
 
-export const MotorsPage = () => {
+export const MotorsPageNew = () => {
+  const { categorySlug } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const [category, setCategory] = useState<MarketplaceCategory | null>(null);
   const [subcategories, setSubcategories] = useState<MarketplaceSubcategory[]>([]);
-  const [listings, setListings] = useState<MotorListing[]>([]);
+  const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [countries, setCountries] = useState<any[]>([]);
+  const [popularMakes, setPopularMakes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState<string>('');
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [selectedYear, setSelectedYear] = useState('');
-  const [selectedMake, setSelectedMake] = useState('');
+  const [city, setCity] = useState('');
+  const [make, setMake] = useState('');
+  const [model, setModel] = useState('');
+  const [priceRange, setPriceRange] = useState('');
+  const [year, setYear] = useState('');
+  const [kilometers, setKilometers] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState<string>(searchParams.get('country') || '');
 
   useEffect(() => {
     fetchInitialData();
-  }, []);
+  }, [categorySlug]);
 
   useEffect(() => {
-    fetchListings();
-  }, [selectedCountry, selectedSubcategory, minPrice, maxPrice, selectedYear, selectedMake]);
+    if (category) {
+      fetchListings();
+    }
+  }, [category, selectedCountry, make, year, priceRange]);
 
   const fetchInitialData = async () => {
     try {
-      // Fetch subcategories
       const { data: categoryData } = await supabase
         .from('marketplace_categories')
-        .select('id')
+        .select('*')
         .eq('slug', 'motors')
         .single();
+
+      setCategory(categoryData);
 
       if (categoryData) {
         const { data: subcatData } = await supabase
@@ -62,13 +68,16 @@ export const MotorsPage = () => {
         setSubcategories(subcatData || []);
       }
 
-      // Fetch countries
       const { data: countriesData } = await supabase
         .from('countries')
         .select('id, name, code')
         .order('name');
 
       setCountries(countriesData || []);
+      
+      // Popular makes
+      setPopularMakes(['Mercedes-Benz', 'Toyota', 'BMW', 'Nissan', 'Land Rover', 'Ford', 'Porsche', 'Audi']);
+      
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -77,8 +86,9 @@ export const MotorsPage = () => {
   };
 
   const fetchListings = async () => {
+    if (!category) return;
+
     try {
-      setLoading(true);
       let query = supabase
         .from('marketplace_listings')
         .select(`
@@ -86,24 +96,18 @@ export const MotorsPage = () => {
           marketplace_listing_images(image_url, is_primary),
           marketplace_listing_attributes(attribute_key, attribute_value)
         `)
+        .eq('category_id', category.id)
         .eq('status', 'active')
+        .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(20);
 
-      // Apply filters
-      if (selectedCountry) {
+      if (selectedCountry && selectedCountry !== 'all') {
         query = query.eq('country_id', selectedCountry);
       }
 
-      if (selectedSubcategory) {
-        query = query.eq('subcategory_id', selectedSubcategory);
-      }
+      const { data } = await query;
 
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      // Transform data to include attributes as object
       const transformedListings = (data || []).map((listing: any) => ({
         ...listing,
         images: listing.marketplace_listing_images || [],
@@ -119,16 +123,10 @@ export const MotorsPage = () => {
       setListings(transformedListings);
     } catch (error) {
       console.error('Error fetching listings:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleSearch = () => {
-    fetchListings();
-  };
-
-  const popularMakes = ['Mercedes-Benz', 'Toyota', 'BMW', 'Nissan', 'Land Rover', 'Ford', 'Porsche', 'Audi'];
+  const totalAds = listings.length;
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -136,72 +134,43 @@ export const MotorsPage = () => {
       <TopBannerAd />
 
       <main className="flex-1">
-        {/* Hero Section - Minimalist */}
+        {/* Breadcrumb */}
         <section className="border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 py-8">
-            <h1 className="text-3xl sm:text-4xl font-bold text-black mb-6 font-comfortaa">
-              Motors
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center gap-2 text-sm font-roboto">
+              <button onClick={() => navigate('/marketplace')} className="text-gray-600 hover:text-black">
+                Marketplace
+              </button>
+              <span className="text-gray-400">›</span>
+              <button onClick={() => navigate('/marketplace/motors')} className="text-gray-600 hover:text-black">
+                Motors
+              </button>
+              <span className="text-gray-400">›</span>
+              <span className="text-black font-medium">Used Cars</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Title */}
+        <section className="border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <h1 className="text-2xl font-bold text-black font-comfortaa">
+              Used Cars for Sale • {totalAds.toLocaleString()} Ads
             </h1>
-
-            {/* Search Bar */}
-            <div className="flex gap-3 mb-6">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  type="text"
-                  placeholder="Search for cars, motorcycles..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="pl-10 h-12 border-gray-300 font-roboto"
-                />
-              </div>
-              <Button
-                onClick={handleSearch}
-                className="bg-black text-white hover:bg-gray-800 h-12 px-8 font-roboto"
-              >
-                Search
-              </Button>
-            </div>
-
-            {/* Subcategory Tabs */}
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              <Button
-                variant={!selectedSubcategory ? 'default' : 'outline'}
-                onClick={() => setSelectedSubcategory('')}
-                className={`whitespace-nowrap font-roboto ${
-                  !selectedSubcategory ? 'bg-black text-white' : 'border-gray-300'
-                }`}
-              >
-                All Motors
-              </Button>
-              {subcategories.map((subcat) => (
-                <Button
-                  key={subcat.id}
-                  variant={selectedSubcategory === subcat.id ? 'default' : 'outline'}
-                  onClick={() => setSelectedSubcategory(subcat.id)}
-                  className={`whitespace-nowrap font-roboto ${
-                    selectedSubcategory === subcat.id ? 'bg-black text-white' : 'border-gray-300'
-                  }`}
-                >
-                  {subcat.name}
-                </Button>
-              ))}
-            </div>
           </div>
         </section>
 
         {/* Filters Bar */}
         <section className="border-b border-gray-200 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 py-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-              {/* Country Filter */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {/* City */}
               <Select value={selectedCountry} onValueChange={setSelectedCountry}>
                 <SelectTrigger className="bg-white font-roboto">
-                  <SelectValue placeholder="Select Country" />
+                  <SelectValue placeholder="City" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Countries</SelectItem>
+                  <SelectItem value="all">All Cities</SelectItem>
                   {countries.map((country) => (
                     <SelectItem key={country.id} value={country.id}>
                       {country.name}
@@ -210,101 +179,141 @@ export const MotorsPage = () => {
                 </SelectContent>
               </Select>
 
-              {/* Make Filter */}
-              <Select value={selectedMake} onValueChange={setSelectedMake}>
+              {/* Make */}
+              <Select value={make} onValueChange={setMake}>
                 <SelectTrigger className="bg-white font-roboto">
-                  <SelectValue placeholder="Make & Model" />
+                  <SelectValue placeholder="Make And Model" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Makes</SelectItem>
-                  {popularMakes.map((make) => (
-                    <SelectItem key={make} value={make}>
-                      {make}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* Year Filter */}
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="bg-white font-roboto">
-                  <SelectValue placeholder="Year" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Any Year</SelectItem>
-                  {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
+                  <SelectItem value="all">All Makes</SelectItem>
+                  {popularMakes.map((makeName) => (
+                    <SelectItem key={makeName} value={makeName}>
+                      {makeName}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
               {/* Price Range */}
-              <Input
-                type="number"
-                placeholder="Min Price"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                className="bg-white font-roboto"
-              />
-              <Input
-                type="number"
-                placeholder="Max Price"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                className="bg-white font-roboto"
-              />
-            </div>
-          </div>
-        </section>
+              <Select value={priceRange} onValueChange={setPriceRange}>
+                <SelectTrigger className="bg-white font-roboto">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Any Price</SelectItem>
+                  <SelectItem value="0-20000">Under $20k</SelectItem>
+                  <SelectItem value="20000-40000">$20k - $40k</SelectItem>
+                  <SelectItem value="40000-60000">$40k - $60k</SelectItem>
+                  <SelectItem value="60000+">$60k+</SelectItem>
+                </SelectContent>
+              </Select>
 
-        {/* Popular Makes Quick Filter */}
-        <section className="border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 py-4">
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-              {popularMakes.map((make) => (
-                <Button
-                  key={make}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedMake(make)}
-                  className="whitespace-nowrap border-gray-300 font-roboto text-sm"
+              {/* Year */}
+              <Select value={year} onValueChange={setYear}>
+                <SelectTrigger className="bg-white font-roboto">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Any Year</SelectItem>
+                  <SelectItem value="2024">2024</SelectItem>
+                  <SelectItem value="2023">2023</SelectItem>
+                  <SelectItem value="2022">2022</SelectItem>
+                  <SelectItem value="2021">2021</SelectItem>
+                  <SelectItem value="2020">2020</SelectItem>
+                  <SelectItem value="2019">2019</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Kilometers */}
+              <Select value={kilometers} onValueChange={setKilometers}>
+                <SelectTrigger className="bg-white font-roboto">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Any Kilometers</SelectItem>
+                  <SelectItem value="0-50000">Under 50,000 km</SelectItem>
+                  <SelectItem value="50000-100000">50k - 100k km</SelectItem>
+                  <SelectItem value="100000+">100k+ km</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Filters Button */}
+              <Button variant="outline" className="font-roboto">
+                Filters
+              </Button>
+            </div>
+
+            {/* Popular Makes */}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {popularMakes.slice(0, 7).map((makeName) => (
+                <button
+                  key={makeName}
+                  onClick={() => setMake(makeName)}
+                  className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 font-roboto"
                 >
-                  {make}
-                </Button>
+                  {makeName}
+                </button>
               ))}
+              <button className="px-3 py-1 text-sm text-blue-600 hover:underline font-roboto">
+                View More
+              </button>
             </div>
           </div>
         </section>
 
         {/* Listings Grid */}
-        <section className="py-8">
+        <section className="py-6">
           <div className="max-w-7xl mx-auto px-4">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600 font-roboto">Sort:</span>
+                <Select defaultValue="default">
+                  <SelectTrigger className="w-32 h-8 text-sm font-roboto">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">Default</SelectItem>
+                    <SelectItem value="newest">Newest</SelectItem>
+                    <SelectItem value="price-low">Price: Low to High</SelectItem>
+                    <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button variant="outline" size="sm" className="font-roboto">
+                Save Search
+              </Button>
+            </div>
+
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div className="grid grid-cols-1 gap-4">
+                {[1, 2, 3].map((i) => (
                   <div key={i} className="border border-gray-200 rounded-lg overflow-hidden animate-pulse">
-                    <div className="h-48 bg-gray-200"></div>
-                    <div className="p-4 space-y-3">
-                      <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    <div className="flex gap-4">
+                      <div className="w-64 h-48 bg-gray-200"></div>
+                      <div className="flex-1 p-4 space-y-3">
+                        <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : listings.length === 0 ? (
               <div className="text-center py-16">
-                <p className="text-gray-500 text-lg font-roboto">No vehicles found</p>
+                <p className="text-gray-500 text-lg font-roboto">No cars found</p>
                 <p className="text-gray-400 text-sm font-roboto mt-2">Try adjusting your filters</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-4">
                 {listings.map((listing) => {
                   const primaryImage = listing.images?.find((img: any) => img.is_primary)?.image_url || 
                                      listing.images?.[0]?.image_url || 
-                                     '/placeholder-car.jpg';
+                                     '/placeholder.jpg';
+                  const make = listing.attributes?.make || '';
+                  const model = listing.attributes?.model || '';
+                  const year = listing.attributes?.year || '';
+                  const kilometers = listing.attributes?.kilometers || '';
+                  const transmission = listing.attributes?.transmission || '';
 
                   return (
                     <div
@@ -312,58 +321,56 @@ export const MotorsPage = () => {
                       onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
                       className="border border-gray-200 rounded-lg overflow-hidden hover:border-black transition-colors cursor-pointer group"
                     >
-                      {/* Image */}
-                      <div className="relative h-48 bg-gray-100">
-                        <img
-                          src={primaryImage}
-                          alt={listing.title}
-                          className="w-full h-full object-cover"
-                        />
-                        {listing.is_featured && (
-                          <div className="absolute top-2 right-2 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded">
-                            FEATURED
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        {/* Image */}
+                        <div className="relative w-full sm:w-64 h-48 bg-gray-100 flex-shrink-0">
+                          <img
+                            src={primaryImage}
+                            alt={listing.title}
+                            className="w-full h-full object-cover"
+                          />
+                          {listing.is_featured && (
+                            <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
+                              CAR OF THE WEEK
+                            </div>
+                          )}
+                          <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            📷 {listing.images?.length || 1}
                           </div>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div className="p-4">
-                        {/* Price */}
-                        <div className="text-2xl font-bold text-black mb-2 font-comfortaa">
-                          {listing.currency} {listing.price?.toLocaleString()}
                         </div>
 
-                        {/* Title */}
-                        <h3 className="font-bold text-black mb-2 group-hover:underline font-roboto">
-                          {listing.title}
-                        </h3>
+                        {/* Details */}
+                        <div className="flex-1 p-4">
+                          <div className="text-2xl font-bold text-black mb-2 font-comfortaa">
+                            {listing.currency} {listing.price?.toLocaleString()}
+                          </div>
 
-                        {/* Specs */}
-                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-3 font-roboto">
-                          {listing.attributes?.year && (
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {listing.attributes.year}
-                            </div>
-                          )}
-                          {listing.attributes?.kilometers && (
-                            <div className="flex items-center gap-1">
-                              <Gauge className="w-4 h-4" />
-                              {listing.attributes.kilometers} km
-                            </div>
-                          )}
-                          {listing.attributes?.transmission && (
-                            <div className="flex items-center gap-1">
-                              <Settings className="w-4 h-4" />
-                              {listing.attributes.transmission}
-                            </div>
-                          )}
-                        </div>
+                          <div className="text-sm text-gray-700 mb-2 font-roboto">
+                            {make} • {model} • {listing.attributes?.fuel_type || 'Petrol'}
+                          </div>
 
-                        {/* Location */}
-                        <div className="flex items-center gap-1 text-sm text-gray-500 font-roboto">
-                          <MapPin className="w-4 h-4" />
-                          {listing.location_details || 'Location not specified'}
+                          <h3 className="font-medium text-black mb-2 group-hover:underline font-roboto">
+                            {listing.title}
+                          </h3>
+
+                          <div className="flex items-center gap-4 text-sm text-gray-600 mb-2 font-roboto">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" /> {year}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Gauge className="w-4 h-4" /> {kilometers ? `${parseInt(kilometers).toLocaleString()} km` : 'N/A'}
+                            </span>
+                            <span>⚙️ {transmission}</span>
+                          </div>
+
+                          <div className="flex items-center gap-1 text-sm text-gray-500 font-roboto">
+                            <MapPin className="w-4 h-4" />
+                            {listing.location_details || 'Location not specified'}
+                          </div>
+
+                          <div className="mt-3 text-sm text-gray-600 font-roboto">
+                            Listed by <span className="font-medium">{listing.seller_name}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -381,4 +388,4 @@ export const MotorsPage = () => {
   );
 };
 
-export default MotorsPage;
+export default MotorsPageNew;
