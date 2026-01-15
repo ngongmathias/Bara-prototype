@@ -26,7 +26,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
-import { uploadImage } from '@/lib/uploadImage';
+import { uploadImage } from '@/lib/storage';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 
 export const PostListingNew = () => {
