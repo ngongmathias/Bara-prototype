@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import {Link} from 'react-router-dom';
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
+import { TopBannerAd } from "@/components/TopBannerAd";
+import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { 
   Target, 
   Users, 
@@ -24,6 +26,7 @@ const AdvertisePage = () => {
   return (
     <>
       <Header />
+      <TopBannerAd />
       <div className="relative min-h-screen bg-white">
         {/* Title & Stats */}
         <section className="relative z-10 py-16">
@@ -283,6 +286,7 @@ const AdvertisePage = () => {
           </div>
         </section>
       </div>
+      <BottomBannerAd />
       <Footer />
     </>
   );
