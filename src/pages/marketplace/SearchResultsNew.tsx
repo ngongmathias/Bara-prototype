@@ -85,6 +85,18 @@ export const SearchResultsNew = () => {
   const performSearch = async () => {
     setLoading(true);
     try {
+      // Get category ID if filtering by category
+      let categoryId = null;
+      const categoryParam = searchParams.get('category');
+      if (categoryParam) {
+        const { data: categoryData } = await supabase
+          .from('marketplace_categories')
+          .select('id')
+          .eq('slug', categoryParam)
+          .single();
+        categoryId = categoryData?.id;
+      }
+
       let query = supabase
         .from('marketplace_listings')
         .select(`
@@ -101,11 +113,9 @@ export const SearchResultsNew = () => {
         query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location_details.ilike.%${searchQuery}%`);
       }
 
-      // Category filter - filter by slug directly using join
-      const categoryParam = searchParams.get('category');
-      if (categoryParam) {
-        // Use the joined table to filter by slug
-        query = query.eq('marketplace_categories.slug', categoryParam);
+      // Category filter
+      if (categoryId) {
+        query = query.eq('category_id', categoryId);
       }
 
       // Country filter - use selected country from context or URL param
