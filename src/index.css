@@ -356,8 +356,10 @@ All colors MUST be HSL.
 
   /* Google Translate Styling - Clean Implementation */
   #google_translate_element {
-    display: inline-block;
-    width: 100%;
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
   }
 
   /* Hide Google Translate banner frame */
