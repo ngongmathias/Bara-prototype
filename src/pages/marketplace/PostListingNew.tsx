@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { TopBannerAd } from '@/components/TopBannerAd';
@@ -33,7 +34,8 @@ export const PostListingNew = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { selectedCountry } = useCountrySelection();
-  const [user, setUser] = useState<any>(null);
+  const { user: clerkUser, isLoaded, isSignedIn } = useUser();
+  const [userId, setUserId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
@@ -64,7 +66,12 @@ export const PostListingNew = () => {
   const [selectedCategorySlug, setSelectedCategorySlug] = useState('');
 
   useEffect(() => {
-    checkAuth();
+    if (isLoaded) {
+      checkAuth();
+    }
+  }, [isLoaded, isSignedIn]);
+
+  useEffect(() => {
     fetchCategories();
     fetchCountries();
   }, []);
@@ -77,9 +84,11 @@ export const PostListingNew = () => {
 
   const checkAuth = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
+      if (!isLoaded) {
+        return;
+      }
+
+      if (!isSignedIn || !clerkUser) {
         toast({
           title: 'Authentication Required',
           description: 'Please sign in to post a listing',
@@ -89,29 +98,17 @@ export const PostListingNew = () => {
         return;
       }
 
-      setUser(user);
+      setUserId(clerkUser.id);
       
-      // Pre-fill user info if available
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (profile) {
-        setFormData(prev => ({
-          ...prev,
-          seller_name: profile.full_name || user.email?.split('@')[0] || '',
-          seller_email: user.email || '',
-          seller_phone: profile.phone || '',
-        }));
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          seller_name: user.email?.split('@')[0] || '',
-          seller_email: user.email || '',
-        }));
-      }
+      // Pre-fill user info from Clerk
+      const userEmail = clerkUser.primaryEmailAddress?.emailAddress || '';
+      const userName = clerkUser.fullName || clerkUser.firstName || userEmail.split('@')[0] || '';
+      
+      setFormData(prev => ({
+        ...prev,
+        seller_name: userName,
+        seller_email: userEmail,
+      }));
     } catch (error) {
       console.error('Auth check error:', error);
     } finally {
@@ -278,7 +275,7 @@ export const PostListingNew = () => {
           price: parseFloat(formData.price),
           country_id: selectedCountries[0], // Primary country
           status: 'pending',
-          created_by: user.id,
+          created_by: userId,
           views_count: 0,
           favorites_count: 0,
           attributes: Object.keys(attributes).length > 0 ? attributes : null,
