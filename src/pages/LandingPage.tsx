@@ -12,7 +12,8 @@ import {
   Users, 
   Megaphone,
   Search,
-  ChevronDown
+  ChevronDown,
+  FileText
 } from 'lucide-react';
 import { db } from '@/lib/supabase';
 
@@ -64,6 +65,14 @@ const miniApps: MiniApp[] = [
     icon: Calendar,
     path: '/events',
     color: 'from-orange-500 to-red-500',
+  },
+  {
+    id: 'blog',
+    title: 'BARA Blog',
+    description: 'Read insights & stories',
+    icon: FileText,
+    path: '/blog',
+    color: 'from-indigo-500 to-purple-500',
   },
   {
     id: 'marketplace',

@@ -12,7 +12,8 @@ import {
   Megaphone,
   Search,
   ChevronDown,
-  Sparkles
+  Sparkles,
+  FileText
 } from 'lucide-react';
 import { db } from '@/lib/supabase';
 
@@ -29,7 +30,7 @@ interface MiniApp {
   description: string;
   icon: React.ElementType;
   path: string;
-  gradient: string;
+  color: string;
 }
 
 const miniApps: MiniApp[] = [
@@ -39,7 +40,7 @@ const miniApps: MiniApp[] = [
     description: 'Promote your business',
     icon: Megaphone,
     path: '/advertise',
-    gradient: 'from-purple-600 to-pink-600',
+    color: 'from-purple-600 to-pink-600',
   },
   {
     id: 'countries',
@@ -47,7 +48,7 @@ const miniApps: MiniApp[] = [
     description: 'Explore African nations',
     icon: Globe,
     path: '/countries',
-    gradient: 'from-blue-600 to-cyan-600',
+    color: 'from-blue-600 to-cyan-600',
   },
   {
     id: 'listings',
@@ -55,7 +56,7 @@ const miniApps: MiniApp[] = [
     description: 'Browse businesses',
     icon: Store,
     path: '/listings',
-    gradient: 'from-green-600 to-emerald-600',
+    color: 'from-green-600 to-emerald-600',
   },
   {
     id: 'events',
@@ -63,7 +64,15 @@ const miniApps: MiniApp[] = [
     description: 'Discover happenings',
     icon: Calendar,
     path: '/events',
-    gradient: 'from-orange-600 to-red-600',
+    color: 'from-orange-600 to-red-600',
+  },
+  {
+    id: 'blog',
+    title: 'BARA Blog',
+    description: 'Read insights & stories',
+    icon: FileText,
+    path: '/blog',
+    color: 'from-indigo-500 to-purple-500',
   },
   {
     id: 'marketplace',
@@ -71,7 +80,7 @@ const miniApps: MiniApp[] = [
     description: 'Shop products',
     icon: ShoppingBag,
     path: '/marketplace',
-    gradient: 'from-yellow-600 to-orange-600',
+    color: 'from-yellow-600 to-orange-600',
   },
   {
     id: 'communities',
@@ -79,7 +88,7 @@ const miniApps: MiniApp[] = [
     description: 'Join local groups',
     icon: Users,
     path: '/communities',
-    gradient: 'from-indigo-600 to-purple-600',
+    color: 'from-indigo-600 to-purple-600',
   },
 ];
 
@@ -263,7 +272,7 @@ export const LandingPageV2 = () => {
                   className="group relative bg-gray-900/50 backdrop-blur-sm border border-gray-800 hover:border-gold-400/50 rounded-xl p-6 transition-all duration-300 overflow-hidden"
                 >
                   {/* Gradient on Hover */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${app.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${app.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                   
                   {/* Content */}
                   <div className="relative z-10 flex flex-col items-center text-center gap-3">
