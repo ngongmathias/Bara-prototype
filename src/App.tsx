@@ -135,6 +135,7 @@ const AppRoutes = () => {
         <Route path="/marketplace" element={<MarketplacePageNew />} />
         <Route path="/marketplace/categories" element={<AllCategoriesPage />} />
         <Route path="/marketplace/search" element={<SearchResultsNew />} />
+        <Route path="/marketplace/post" element={<PostListingNew />} />
         <Route path="/marketplace/my-listings" element={<MyListings />} />
         <Route path="/marketplace/listing/:listingId" element={<CategoryDetailRouter />} />
         <Route path="/marketplace/edit/:listingId" element={<EditListing />} />

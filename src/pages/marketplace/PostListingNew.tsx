@@ -59,6 +59,10 @@ export const PostListingNew = () => {
     location_details: '',
   });
 
+  // Category-specific attributes
+  const [attributes, setAttributes] = useState<Record<string, any>>({});
+  const [selectedCategorySlug, setSelectedCategorySlug] = useState('');
+
   useEffect(() => {
     checkAuth();
     fetchCategories();
@@ -277,6 +281,7 @@ export const PostListingNew = () => {
           created_by: user.id,
           views_count: 0,
           favorites_count: 0,
+          attributes: Object.keys(attributes).length > 0 ? attributes : null,
         })
         .select()
         .single();
@@ -396,7 +401,12 @@ export const PostListingNew = () => {
                   <Label htmlFor="category">Category *</Label>
                   <Select
                     value={formData.category_id}
-                    onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+                    onValueChange={(value) => {
+                      const category = categories.find(c => c.id === value);
+                      setFormData({ ...formData, category_id: value });
+                      setSelectedCategorySlug(category?.slug || '');
+                      setAttributes({}); // Reset attributes when category changes
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
@@ -428,6 +438,295 @@ export const PostListingNew = () => {
                   </Select>
                 </div>
               </div>
+
+              {/* Category-Specific Fields */}
+              {selectedCategorySlug === 'motors' && (
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h3 className="font-semibold text-gray-900 mb-4">Vehicle Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Brand/Make</Label>
+                      <Input
+                        value={attributes.make || ''}
+                        onChange={(e) => setAttributes({...attributes, make: e.target.value})}
+                        placeholder="e.g., Toyota"
+                      />
+                    </div>
+                    <div>
+                      <Label>Model</Label>
+                      <Input
+                        value={attributes.model || ''}
+                        onChange={(e) => setAttributes({...attributes, model: e.target.value})}
+                        placeholder="e.g., Camry"
+                      />
+                    </div>
+                    <div>
+                      <Label>Year</Label>
+                      <Select value={attributes.year || ''} onValueChange={(value) => setAttributes({...attributes, year: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
+                        <SelectContent>
+                          {Array.from({length: 10}, (_, i) => 2024 - i).map(year => (
+                            <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Body Type</Label>
+                      <Select value={attributes.body_type || ''} onValueChange={(value) => setAttributes({...attributes, body_type: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Sedan">Sedan</SelectItem>
+                          <SelectItem value="SUV">SUV</SelectItem>
+                          <SelectItem value="Hatchback">Hatchback</SelectItem>
+                          <SelectItem value="Coupe">Coupe</SelectItem>
+                          <SelectItem value="Pickup">Pickup Truck</SelectItem>
+                          <SelectItem value="Van">Van</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Fuel Type</Label>
+                      <Select value={attributes.fuel_type || ''} onValueChange={(value) => setAttributes({...attributes, fuel_type: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select fuel type" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Petrol">Petrol</SelectItem>
+                          <SelectItem value="Diesel">Diesel</SelectItem>
+                          <SelectItem value="Electric">Electric</SelectItem>
+                          <SelectItem value="Hybrid">Hybrid</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Transmission</Label>
+                      <Select value={attributes.transmission || ''} onValueChange={(value) => setAttributes({...attributes, transmission: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select transmission" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Automatic">Automatic</SelectItem>
+                          <SelectItem value="Manual">Manual</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Mileage (km)</Label>
+                      <Input
+                        type="number"
+                        value={attributes.mileage || ''}
+                        onChange={(e) => setAttributes({...attributes, mileage: e.target.value})}
+                        placeholder="e.g., 35000"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(selectedCategorySlug === 'property-sale' || selectedCategorySlug === 'property-rent') && (
+                <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                  <h3 className="font-semibold text-gray-900 mb-4">Property Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Property Type</Label>
+                      <Select value={attributes.property_type || ''} onValueChange={(value) => setAttributes({...attributes, property_type: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Apartment">Apartment</SelectItem>
+                          <SelectItem value="Villa">Villa</SelectItem>
+                          <SelectItem value="House">House</SelectItem>
+                          <SelectItem value="Land">Land</SelectItem>
+                          <SelectItem value="Commercial">Commercial</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Bedrooms</Label>
+                      <Select value={attributes.bedrooms?.toString() || ''} onValueChange={(value) => setAttributes({...attributes, bedrooms: parseInt(value)})}>
+                        <SelectTrigger><SelectValue placeholder="Select bedrooms" /></SelectTrigger>
+                        <SelectContent>
+                          {[1,2,3,4,5,6].map(num => (
+                            <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Bathrooms</Label>
+                      <Select value={attributes.bathrooms?.toString() || ''} onValueChange={(value) => setAttributes({...attributes, bathrooms: parseInt(value)})}>
+                        <SelectTrigger><SelectValue placeholder="Select bathrooms" /></SelectTrigger>
+                        <SelectContent>
+                          {[1,2,3,4,5].map(num => (
+                            <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Area (sqm)</Label>
+                      <Input
+                        type="number"
+                        value={attributes.area || ''}
+                        onChange={(e) => setAttributes({...attributes, area: e.target.value})}
+                        placeholder="e.g., 120"
+                      />
+                    </div>
+                    <div>
+                      <Label>Furnished</Label>
+                      <Select value={attributes.furnished || ''} onValueChange={(value) => setAttributes({...attributes, furnished: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select option" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Furnished">Furnished</SelectItem>
+                          <SelectItem value="Unfurnished">Unfurnished</SelectItem>
+                          <SelectItem value="Semi-Furnished">Semi-Furnished</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(selectedCategorySlug === 'electronics' || selectedCategorySlug === 'mobile-tablets') && (
+                <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <h3 className="font-semibold text-gray-900 mb-4">Product Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Brand</Label>
+                      <Input
+                        value={attributes.brand || ''}
+                        onChange={(e) => setAttributes({...attributes, brand: e.target.value})}
+                        placeholder="e.g., Apple, Samsung"
+                      />
+                    </div>
+                    <div>
+                      <Label>Warranty</Label>
+                      <Select value={attributes.warranty || ''} onValueChange={(value) => setAttributes({...attributes, warranty: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select warranty" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Yes">With Warranty</SelectItem>
+                          <SelectItem value="No">No Warranty</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedCategorySlug === 'fashion' && (
+                <div className="mt-6 p-4 bg-pink-50 rounded-lg border border-pink-200">
+                  <h3 className="font-semibold text-gray-900 mb-4">Fashion Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Gender</Label>
+                      <Select value={attributes.gender || ''} onValueChange={(value) => setAttributes({...attributes, gender: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Men">Men</SelectItem>
+                          <SelectItem value="Women">Women</SelectItem>
+                          <SelectItem value="Unisex">Unisex</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Size</Label>
+                      <Select value={attributes.size || ''} onValueChange={(value) => setAttributes({...attributes, size: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select size" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="XS">XS</SelectItem>
+                          <SelectItem value="S">S</SelectItem>
+                          <SelectItem value="M">M</SelectItem>
+                          <SelectItem value="L">L</SelectItem>
+                          <SelectItem value="XL">XL</SelectItem>
+                          <SelectItem value="XXL">XXL</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedCategorySlug === 'jobs' && (
+                <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <h3 className="font-semibold text-gray-900 mb-4">Job Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Job Type</Label>
+                      <Select value={attributes.job_type || ''} onValueChange={(value) => setAttributes({...attributes, job_type: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Full-time">Full-time</SelectItem>
+                          <SelectItem value="Part-time">Part-time</SelectItem>
+                          <SelectItem value="Contract">Contract</SelectItem>
+                          <SelectItem value="Internship">Internship</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Experience Level</Label>
+                      <Select value={attributes.experience_level || ''} onValueChange={(value) => setAttributes({...attributes, experience_level: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Entry Level">Entry Level</SelectItem>
+                          <SelectItem value="Mid Level">Mid Level</SelectItem>
+                          <SelectItem value="Senior Level">Senior Level</SelectItem>
+                          <SelectItem value="Executive">Executive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Work Type</Label>
+                      <Select value={attributes.work_type || ''} onValueChange={(value) => setAttributes({...attributes, work_type: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select work type" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Remote">Remote</SelectItem>
+                          <SelectItem value="On-site">On-site</SelectItem>
+                          <SelectItem value="Hybrid">Hybrid</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedCategorySlug === 'pets' && (
+                <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                  <h3 className="font-semibold text-gray-900 mb-4">Pet Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Pet Type</Label>
+                      <Select value={attributes.pet_type || ''} onValueChange={(value) => setAttributes({...attributes, pet_type: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Dog">Dog</SelectItem>
+                          <SelectItem value="Cat">Cat</SelectItem>
+                          <SelectItem value="Bird">Bird</SelectItem>
+                          <SelectItem value="Fish">Fish</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Age</Label>
+                      <Select value={attributes.pet_age || ''} onValueChange={(value) => setAttributes({...attributes, pet_age: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select age" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Puppy/Kitten">Puppy/Kitten</SelectItem>
+                          <SelectItem value="Young">Young</SelectItem>
+                          <SelectItem value="Adult">Adult</SelectItem>
+                          <SelectItem value="Senior">Senior</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Gender</Label>
+                      <Select value={attributes.pet_gender || ''} onValueChange={(value) => setAttributes({...attributes, pet_gender: value})}>
+                        <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
