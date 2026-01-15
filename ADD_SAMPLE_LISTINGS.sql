@@ -1,13 +1,10 @@
 -- Add sample marketplace listings for all categories
 -- Run this in Supabase SQL Editor
--- Note: Replace 'YOUR_USER_ID' with an actual user ID from your users table
--- You can get a user ID by running: SELECT id FROM users LIMIT 1;
-
--- First, let's get the category IDs and a sample country ID
--- You'll need to replace these with actual IDs from your database
+-- Note: This script uses the first user from your users table
+-- Make sure you have at least one user in your database
 
 -- Sample listings for VEHICLES (motors)
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Toyota Camry 2020 - Excellent Condition',
   'Well-maintained Toyota Camry 2020 with low mileage. Full service history, single owner. Perfect for families.',
@@ -22,7 +19,7 @@ SELECT
   '{"make": "Toyota", "model": "Camry", "year": 2020, "mileage": 35000, "fuel_type": "Petrol", "transmission": "Automatic"}'::jsonb
 FROM marketplace_categories WHERE slug = 'motors' LIMIT 1;
 
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Honda Motorcycle 2022 - Like New',
   'Honda CB500X 2022 in pristine condition. Only 5000km. Perfect for city and highway riding.',
@@ -38,7 +35,7 @@ SELECT
 FROM marketplace_categories WHERE slug = 'motors' LIMIT 1;
 
 -- Sample listings for PROPERTIES (property-sale)
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Modern 3-Bedroom Apartment for Sale',
   'Beautiful modern apartment in prime location. 3 bedrooms, 2 bathrooms, spacious living area with balcony.',
@@ -53,7 +50,7 @@ SELECT
   '{"bedrooms": 3, "bathrooms": 2, "area_sqm": 120, "property_type": "Apartment", "furnished": true}'::jsonb
 FROM marketplace_categories WHERE slug = 'property-sale' LIMIT 1;
 
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Luxury Villa with Pool - Prime Location',
   'Stunning 5-bedroom villa with swimming pool, garden, and modern amenities. Gated community.',
@@ -69,7 +66,7 @@ SELECT
 FROM marketplace_categories WHERE slug = 'property-sale' LIMIT 1;
 
 -- Sample listings for MOBILES & TABLETS
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'iPhone 14 Pro Max 256GB - Unlocked',
   'iPhone 14 Pro Max in excellent condition. 256GB storage, unlocked for all carriers. Includes original box and accessories.',
@@ -84,7 +81,7 @@ SELECT
   '{"brand": "Apple", "model": "iPhone 14 Pro Max", "storage": "256GB", "color": "Deep Purple", "ram": "6GB"}'::jsonb
 FROM marketplace_categories WHERE slug = 'mobile-tablets' LIMIT 1;
 
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Samsung Galaxy Tab S8 - Brand New',
   'Brand new Samsung Galaxy Tab S8 with S Pen. Perfect for work and entertainment.',
@@ -100,7 +97,7 @@ SELECT
 FROM marketplace_categories WHERE slug = 'mobile-tablets' LIMIT 1;
 
 -- Sample listings for JOBS
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Senior Software Engineer - Remote',
   'Join our growing tech team! Looking for experienced software engineer with React and Node.js skills. Competitive salary and benefits.',
@@ -115,7 +112,7 @@ SELECT
   '{"job_type": "Full-time", "experience": "5+ years", "salary_period": "monthly", "company": "Tech Solutions Ltd"}'::jsonb
 FROM marketplace_categories WHERE slug = 'jobs' LIMIT 1;
 
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Marketing Manager - Leading Company',
   'Exciting opportunity for marketing professional. Lead our marketing team and drive growth strategies.',
@@ -131,7 +128,7 @@ SELECT
 FROM marketplace_categories WHERE slug = 'jobs' LIMIT 1;
 
 -- Sample listings for FURNITURE & GARDEN
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Modern L-Shaped Sofa - Grey',
   'Comfortable L-shaped sofa in excellent condition. Grey fabric, perfect for modern living rooms.',
@@ -146,7 +143,7 @@ SELECT
   '{"furniture_type": "Sofa", "material": "Fabric", "color": "Grey", "dimensions": "280x180cm"}'::jsonb
 FROM marketplace_categories WHERE slug = 'furniture-garden' LIMIT 1;
 
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Wooden Dining Table Set - 6 Chairs',
   'Beautiful solid wood dining table with 6 matching chairs. Perfect for family gatherings.',
@@ -162,7 +159,7 @@ SELECT
 FROM marketplace_categories WHERE slug = 'furniture-garden' LIMIT 1;
 
 -- Sample listings for ELECTRONICS & APPLIANCES
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Samsung 55" 4K Smart TV - 2023 Model',
   'Brand new Samsung 55-inch 4K Smart TV. Crystal clear picture, smart features, warranty included.',
@@ -177,7 +174,7 @@ SELECT
   '{"brand": "Samsung", "screen_size": "55 inches", "resolution": "4K", "smart_tv": true}'::jsonb
 FROM marketplace_categories WHERE slug = 'electronics' LIMIT 1;
 
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'MacBook Pro 16" M2 - Like New',
   'MacBook Pro 16-inch with M2 chip. 16GB RAM, 512GB SSD. Perfect for professionals.',
@@ -193,7 +190,7 @@ SELECT
 FROM marketplace_categories WHERE slug = 'electronics' LIMIT 1;
 
 -- Sample listings for FASHION & BEAUTY
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Designer Handbag - Authentic',
   'Authentic designer handbag in excellent condition. Comes with authenticity certificate.',
@@ -208,7 +205,7 @@ SELECT
   '{"brand": "Michael Kors", "color": "Black", "material": "Leather", "gender": "Women"}'::jsonb
 FROM marketplace_categories WHERE slug = 'fashion' LIMIT 1;
 
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Men''s Formal Shoes - Italian Leather',
   'Premium Italian leather formal shoes. Size 42, perfect for business and formal occasions.',
@@ -224,7 +221,7 @@ SELECT
 FROM marketplace_categories WHERE slug = 'fashion' LIMIT 1;
 
 -- Sample listings for PETS
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Golden Retriever Puppies - Vaccinated',
   'Adorable Golden Retriever puppies ready for new homes. Fully vaccinated, health checked.',
@@ -240,7 +237,7 @@ SELECT
 FROM marketplace_categories WHERE slug = 'pets' LIMIT 1;
 
 -- Sample listings for KIDS & BABIES
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Baby Stroller - Premium Brand',
   'High-quality baby stroller in excellent condition. Lightweight, easy to fold, includes rain cover.',
@@ -256,7 +253,7 @@ SELECT
 FROM marketplace_categories WHERE slug = 'kids-babies' LIMIT 1;
 
 -- Sample listings for HOBBIES
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Mountain Bike - Professional Grade',
   'Professional mountain bike with full suspension. Perfect for trails and off-road adventures.',
@@ -272,7 +269,7 @@ SELECT
 FROM marketplace_categories WHERE slug = 'hobbies' LIMIT 1;
 
 -- Sample listings for BUSINESS & INDUSTRIAL
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Restaurant Business for Sale - Established',
   'Profitable restaurant business in prime location. Fully equipped, trained staff, loyal customer base.',
@@ -288,7 +285,7 @@ SELECT
 FROM marketplace_categories WHERE slug = 'business-industrial' LIMIT 1;
 
 -- Sample listings for SERVICES
-INSERT INTO marketplace_listings (title, description, price, category_id, country_id, user_id, status, is_featured, condition, location_details, attributes)
+INSERT INTO marketplace_listings (title, description, price, category_id, country_id, created_by, status, is_featured, condition, location_details, attributes)
 SELECT 
   'Professional Web Development Services',
   'Expert web development services. Custom websites, e-commerce, mobile apps. Competitive rates.',
