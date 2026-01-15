@@ -4,7 +4,8 @@ import { scrollToTop } from '@/lib/scrollToTop';
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/supabase';
 import { useToast } from "@/components/ui/use-toast";
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Globe } from 'lucide-react';
+import { StyledGoogleTranslate } from './StyledGoogleTranslate';
 
 interface Country {
   id: string;
@@ -257,102 +258,18 @@ const Footer = () => {
 
         </div>
 
-        {/* Communities Section */}
-        {/* <div className="border-t border-gray-300 pt-6 sm:pt-8">
-          <h3 className="text-lg font-bold text-gray-800 mb-4 pb-2 border-b-2 border-[#70905a] font-comfortaa text-center sm:text-left">
-            {t('footer.communities')}
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4">
-            
-            <div>
-              <Link 
-                to="/communities/rwandaful-rwanda" 
-                className="text-gray-700 hover:text-black transition-colors flex items-center font-roboto text-sm sm:text-base"
-              >
-                <span className="mr-2">🇷🇼</span>
-                {t('footer.rwandafulRwanda')}
-              </Link>
+        {/* Language Selector */}
+        <div className="border-t border-gray-300 pt-6 pb-4">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2 text-gray-700">
+              <Globe className="w-4 h-4" />
+              <span className="text-sm font-medium font-roboto">Select Language</span>
             </div>
-            <div>
-              <Link 
-                to="/communities/beautiful-botswana" 
-                className="text-gray-700 hover:text-black transition-colors flex items-center font-roboto text-sm sm:text-base"
-              >
-                <span className="mr-2">🇧🇼</span>
-                {t('footer.beautifulBotswana')}
-              </Link>
-            </div>
-            <div>
-              <Link 
-                to="/communities/kenyaful-kenya" 
-                className="text-gray-700 hover:text-black transition-colors flex items-center font-roboto text-sm sm:text-base"
-              >
-                <span className="mr-2">🇰🇪</span>
-                {t('footer.kenyafulKenya')}
-              </Link>
-            </div>
-            <div>
-              <Link 
-                to="/communities/ugandaful-uganda" 
-                className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base"
-              >
-                <span className="mr-2">🇺🇬</span>
-                {t('footer.ugandafulUganda')}
-              </Link>
-            </div>
-            <div>
-              <Link 
-                to="/communities/tanzaniaful-tanzania" 
-                className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base"
-              >
-                <span className="mr-2">🇹🇿</span>
-                {t('footer.tanzaniafulTanzania')}
-              </Link>
-            </div>
-            <div>
-              <Link 
-                to="/communities/ethiopiaful-ethiopia" 
-                className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base"
-              >
-                <span className="mr-2">🇪🇹</span>
-                {t('footer.ethiopiafulEthiopia')}
-              </Link>
-            </div>
-            <div>
-              <Link 
-                to="/communities/ghanaful-ghana" 
-                className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base"
-              >
-                <span className="mr-2">🇬🇭</span>
-                {t('footer.ghanafulGhana')}
-              </Link>
-            </div>
-            <div>
-              <Link 
-                to="/communities/nigeriaful-nigeria" 
-                className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base"
-              >
-                <span className="mr-2">🇳🇬</span>
-                {t('footer.nigeriafulNigeria')}
-              </Link>
+            <div className="w-full max-w-xs">
+              <StyledGoogleTranslate />
             </div>
           </div>
-        </div> */}
-
-        {/* Legal Links */}
-        {/* <div className="border-t border-gray-300 pt-6 pb-4">
-          <div className="flex flex-wrap justify-center gap-6">
-            <Link to="/privacy" className="text-[#e64600] hover:text-[#c93e00] transition-colors">
-              {t('footer.privacy')}
-            </Link>
-            <Link to="/terms" className="text-[#e64600] hover:text-[#c93e00] transition-colors">
-              {t('footer.terms')}
-            </Link>
-            <Link to="/legal" className="text-[#e64600] hover:text-[#c93e00] transition-colors">
-              {t('footer.legal')}
-            </Link>
-          </div>
-        </div> */}
+        </div>
 
         {/* Copyright Information */}
         <div className="border-t border-gray-300 pt-3 sm:pt-4 md:pt-6">
