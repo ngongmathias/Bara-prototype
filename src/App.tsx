@@ -91,6 +91,9 @@ import AdminMarketplace from "./pages/admin/AdminMarketplace";
 import AdminMarketplaceNew from "./pages/admin/AdminMarketplaceNew";
 import AdminMarketplaceCategories from "./pages/admin/AdminMarketplaceCategories";
 import { MainLayout } from "./components/layout/MainLayout";
+import BlogPage from "./pages/BlogPage";
+import BlogPostDetail from "./pages/BlogPostDetail";
+import AdminBlog from "./pages/admin/AdminBlog";
 
 const queryClient = new QueryClient();
 
@@ -193,6 +196,8 @@ const AppRoutes = () => {
       <Route path="/events" element={<EventsPage />} />
       <Route path="/events/:eventId" element={<EventsPage />} />
       <Route path="/tools" element={<ToolsPage />} />
+      <Route path="/blog" element={<BlogPage />} />
+      <Route path="/blog/:slug" element={<BlogPostDetail />} />
       <Route path="/advertise/checkout" element={<AdvertiseCheckoutPage />} />
       <Route path="/sponsor-country" element={<SponsorCountryPage />} />
       
@@ -337,6 +342,11 @@ const AppRoutes = () => {
       <Route path="/admin/banner-ads" element={
         <AdminAuthGuard>
           <AdminBannerAds />
+        </AdminAuthGuard>
+      } />
+      <Route path="/admin/blog" element={
+        <AdminAuthGuard>
+          <AdminBlog />
         </AdminAuthGuard>
       } />
       <Route path="/admin/sponsored-banners" element={

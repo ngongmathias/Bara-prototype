@@ -18,6 +18,7 @@ import {
   Crown,
   ChevronDown,
   Shield,
+  FileText,
   ChevronRight,
   ChevronLeft,
   MapPin,
@@ -199,6 +200,13 @@ export const Header = () => {
               <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
                 <Calendar className="w-4 h-4 mr-1.5" />
                 {t('navigation.events')}
+              </Button>
+            </Link>
+            
+            <Link to="/blog" onClick={scrollToTop} className="link-underline">
+              <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
+                <FileText className="w-4 h-4 mr-1.5" />
+                Blog
               </Button>
             </Link>
             
@@ -436,6 +444,13 @@ export const Header = () => {
                 {t('navigation.events')}
               </Button>
             </Link>
+            
+            <Link to="/blog" onClick={scrollToTop}>
+              <Button variant="ghost" className="font-roboto">
+                <FileText className="w-4 h-4 mr-1" />
+                Blog
+              </Button>
+            </Link>
 
           <Link to="/advertise" onClick={scrollToTop}>
             <Button variant="ghost" className="font-roboto">
@@ -606,6 +621,12 @@ export const Header = () => {
                     <Button variant="ghost" className="w-full justify-start font-roboto h-12">
                       <Calendar className="w-5 h-5 mr-3" />
                       {t('navigation.events')}
+                    </Button>
+                  </Link>
+                  <Link to="/blog" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
+                    <Button variant="ghost" className="w-full justify-start font-roboto h-12">
+                      <FileText className="w-5 h-5 mr-3" />
+                      Blog
                     </Button>
                   </Link>
                 </div>
