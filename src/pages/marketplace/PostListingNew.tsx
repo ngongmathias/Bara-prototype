@@ -48,6 +48,7 @@ export const PostListingNew = () => {
     title: '',
     description: '',
     category_id: '',
+    subcategory_id: '',
     price: '',
     currency: 'USD',
     price_type: 'fixed',
@@ -64,6 +65,7 @@ export const PostListingNew = () => {
   // Category-specific attributes
   const [attributes, setAttributes] = useState<Record<string, any>>({});
   const [selectedCategorySlug, setSelectedCategorySlug] = useState('');
+  const [subcategories, setSubcategories] = useState<any[]>([]);
 
   useEffect(() => {
     if (isLoaded) {
@@ -75,6 +77,14 @@ export const PostListingNew = () => {
     fetchCategories();
     fetchCountries();
   }, []);
+
+  useEffect(() => {
+    if (formData.category_id) {
+      fetchSubcategories(formData.category_id);
+    } else {
+      setSubcategories([]);
+    }
+  }, [formData.category_id]);
 
   useEffect(() => {
     if (selectedCountry && selectedCountries.length === 0) {
@@ -132,14 +142,32 @@ export const PostListingNew = () => {
 
   const fetchCountries = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('countries')
-        .select('id, name, code, flag_url')
+        .select('*')
         .order('name');
       
+      if (error) throw error;
       setCountries(data || []);
     } catch (error) {
       console.error('Error fetching countries:', error);
+    }
+  };
+
+  const fetchSubcategories = async (categoryId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('marketplace_subcategories')
+        .select('*')
+        .eq('category_id', categoryId)
+        .eq('is_active', true)
+        .order('display_order');
+      
+      if (error) throw error;
+      setSubcategories(data || []);
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+      setSubcategories([]);
     }
   };
 
@@ -268,17 +296,27 @@ export const PostListingNew = () => {
       );
 
       // Create listing
-      const { data: listing, error: listingError } = await supabase
+      const { data: listingData, error: listingError } = await supabase
         .from('marketplace_listings')
         .insert({
-          ...formData,
+          title: formData.title,
+          description: formData.description,
+          category_id: formData.category_id,
+          subcategory_id: formData.subcategory_id || null,
+          country_id: selectedCountries[0],
           price: parseFloat(formData.price),
-          country_id: selectedCountries[0], // Primary country
-          status: 'pending',
+          currency: formData.currency,
+          price_type: formData.price_type,
+          condition: formData.condition || null,
+          seller_name: formData.seller_name,
+          seller_email: formData.seller_email,
+          seller_phone: formData.seller_phone,
+          seller_whatsapp: formData.seller_whatsapp,
+          seller_type: formData.seller_type,
+          location_details: formData.location_details,
+          status: 'active',
           created_by: userId,
-          views_count: 0,
-          favorites_count: 0,
-          attributes: Object.keys(attributes).length > 0 ? attributes : null,
+          attributes: attributes,
         })
         .select()
         .single();
@@ -288,7 +326,7 @@ export const PostListingNew = () => {
       // Insert images
       const imagesWithListingId = uploadedImages.map(img => ({
         ...img,
-        listing_id: listing.id,
+        listing_id: listingData.id,
       }));
 
       const { error: imagesError } = await supabase
@@ -400,7 +438,7 @@ export const PostListingNew = () => {
                     value={formData.category_id}
                     onValueChange={(value) => {
                       const category = categories.find(c => c.id === value);
-                      setFormData({ ...formData, category_id: value });
+                      setFormData({ ...formData, category_id: value, subcategory_id: '' });
                       setSelectedCategorySlug(category?.slug || '');
                       setAttributes({}); // Reset attributes when category changes
                     }}
@@ -417,6 +455,28 @@ export const PostListingNew = () => {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Subcategory - show if category has subcategories */}
+                {subcategories.length > 0 && (
+                  <div>
+                    <Label htmlFor="subcategory">Type</Label>
+                    <Select
+                      value={formData.subcategory_id}
+                      onValueChange={(value) => setFormData({ ...formData, subcategory_id: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subcategories.map((subcat) => (
+                          <SelectItem key={subcat.id} value={subcat.id}>
+                            {subcat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 {/* Only show condition for physical products, not services/jobs/pets */}
                 {!['jobs', 'services', 'pets', 'businesses-industrial'].includes(selectedCategorySlug) && (
