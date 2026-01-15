@@ -354,12 +354,11 @@ All colors MUST be HSL.
     max-width: 100vw !important;
   }
 
-  /* Google Translate Styling - Clean Implementation */
-  #google_translate_element {
-    display: none !important;
-    visibility: hidden !important;
-    position: absolute !important;
-    left: -9999px !important;
+  /* Google Translate Styling - Visible but Beautiful */
+  #google_translate_element,
+  .styled-google-translate {
+    display: inline-block !important;
+    width: 100% !important;
   }
 
   /* Hide Google Translate banner frame */
