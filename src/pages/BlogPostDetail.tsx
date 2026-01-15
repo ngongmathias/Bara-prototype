@@ -12,7 +12,9 @@ import {
   Facebook,
   Twitter,
   Linkedin,
-  Link as LinkIcon
+  Link as LinkIcon,
+  MessageCircle,
+  Heart
 } from 'lucide-react';
 import { Header } from '../components/Header';
 import Footer from '../components/Footer';
@@ -39,6 +41,8 @@ export const BlogPostDetail = () => {
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [comments, setComments] = useState<BlogComment[]>([]);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [commentText, setCommentText] = useState('');
@@ -153,6 +157,37 @@ export const BlogPostDetail = () => {
     }
   };
 
+  const handleLike = async () => {
+    if (!user) {
+      toast({
+        title: 'Sign In Required',
+        description: 'Please sign in to like this post',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setIsLiked(!isLiked);
+      setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+      
+      // TODO: Implement actual like/unlike API call when backend is ready
+      toast({
+        title: isLiked ? 'Post Unliked' : 'Post Liked',
+        description: isLiked ? 'Removed from your liked posts' : 'Added to your liked posts',
+      });
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      setIsLiked(!isLiked);
+      setLikesCount(prev => isLiked ? prev + 1 : prev - 1);
+      toast({
+        title: 'Error',
+        description: 'Failed to update like status',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleShare = (platform: string) => {
     const url = window.location.href;
     const title = post?.title || '';
@@ -167,6 +202,9 @@ export const BlogPostDetail = () => {
         break;
       case 'linkedin':
         shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+        break;
+      case 'whatsapp':
+        shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + url)}`;
         break;
       case 'copy':
         navigator.clipboard.writeText(url);
@@ -372,6 +410,18 @@ export const BlogPostDetail = () => {
 
             <div className="ml-auto flex items-center gap-3">
               <button
+                onClick={handleLike}
+                className={`p-2 rounded-full transition-colors flex items-center gap-2 ${
+                  isLiked
+                    ? 'bg-red-100 text-red-600'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <Heart className="w-5 h-5" fill={isLiked ? 'currentColor' : 'none'} />
+                {likesCount > 0 && <span className="text-sm font-medium">{likesCount}</span>}
+              </button>
+
+              <button
                 onClick={handleBookmark}
                 className={`p-2 rounded-full transition-colors ${
                   isBookmarked
@@ -412,6 +462,13 @@ export const BlogPostDetail = () => {
                     >
                       <Linkedin className="w-4 h-4" />
                       Share on LinkedIn
+                    </button>
+                    <button
+                      onClick={() => handleShare('whatsapp')}
+                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      Share on WhatsApp
                     </button>
                     <button
                       onClick={() => handleShare('copy')}
