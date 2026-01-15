@@ -125,7 +125,7 @@ const categories: Category[] = [
   }
 ];
 
-const MarketplacePageNew = () => {
+const MarketplacePage = () => {
   const navigate = useNavigate();
   const { selectedCountry } = useCountrySelection();
   const [searchQuery, setSearchQuery] = useState('');
@@ -461,4 +461,4 @@ const MarketplacePageNew = () => {
   );
 };
 
-export default MarketplacePageNew;
+export default MarketplacePage;

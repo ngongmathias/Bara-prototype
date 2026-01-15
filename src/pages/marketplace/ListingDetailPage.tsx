@@ -28,7 +28,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaWhatsapp } from 'react-icons/fa';
 
-export const ListingDetailPageNew = () => {
+export const ListingDetailPage = () => {
   const { listingId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -671,4 +671,4 @@ export const ListingDetailPageNew = () => {
   );
 };
 
-export default ListingDetailPageNew;
+export default ListingDetailPage;

@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/select';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 
-export const SearchResultsNew = () => {
+export const SearchResults = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { selectedCountry } = useCountrySelection();
@@ -1216,4 +1216,4 @@ export const SearchResultsNew = () => {
   );
 };
 
-export default SearchResultsNew;
+export default SearchResults;

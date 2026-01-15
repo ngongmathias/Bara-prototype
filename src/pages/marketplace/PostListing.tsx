@@ -30,7 +30,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import { uploadImage } from '@/lib/storage';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 
-export const PostListingNew = () => {
+export const PostListing = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { selectedCountry } = useCountrySelection();
@@ -1133,4 +1133,4 @@ export const PostListingNew = () => {
   );
 };
 
-export default PostListingNew;
+export default PostListing;

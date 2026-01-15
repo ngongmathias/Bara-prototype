@@ -39,7 +39,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 
-export const AdminMarketplaceNew = () => {
+export const AdminMarketplace = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [listings, setListings] = useState<any[]>([]);
@@ -834,4 +834,4 @@ export const AdminMarketplaceNew = () => {
   );
 };
 
-export default AdminMarketplaceNew;
+export default AdminMarketplace;

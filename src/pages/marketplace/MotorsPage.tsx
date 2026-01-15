@@ -16,7 +16,7 @@ import { supabase } from '@/lib/supabase';
 import { MarketplaceListing, MarketplaceCategory, MarketplaceSubcategory } from '@/types/marketplace';
 import { MapPin, Gauge, Calendar } from 'lucide-react';
 
-export const MotorsPageNew = () => {
+export const MotorsPage = () => {
   const { categorySlug } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -388,4 +388,4 @@ export const MotorsPageNew = () => {
   );
 };
 
-export default MotorsPageNew;
+export default MotorsPage;
