@@ -15,7 +15,7 @@ import {
   Link as LinkIcon
 } from 'lucide-react';
 import { Header } from '../components/Header';
-import { Footer } from '../components/Footer';
+import Footer from '../components/Footer';
 import { TopBannerAd } from '../components/TopBannerAd';
 import { BottomBannerAd } from '../components/BottomBannerAd';
 import { BlogCard } from '../components/BlogCard';
