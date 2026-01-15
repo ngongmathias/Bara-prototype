@@ -418,22 +418,25 @@ export const PostListingNew = () => {
                   </Select>
                 </div>
 
-                <div>
-                  <Label htmlFor="condition">Condition</Label>
-                  <Select
-                    value={formData.condition}
-                    onValueChange={(value) => setFormData({ ...formData, condition: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select condition" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="new">New</SelectItem>
-                      <SelectItem value="used">Used</SelectItem>
-                      <SelectItem value="like-new">Like New</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Only show condition for physical products, not services/jobs/pets */}
+                {!['jobs', 'services', 'pets', 'businesses-industrial'].includes(selectedCategorySlug) && (
+                  <div>
+                    <Label htmlFor="condition">Condition</Label>
+                    <Select
+                      value={formData.condition}
+                      onValueChange={(value) => setFormData({ ...formData, condition: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select condition" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="new">New</SelectItem>
+                        <SelectItem value="used">Used</SelectItem>
+                        <SelectItem value="like-new">Like New</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               {/* Category-Specific Fields */}
@@ -443,11 +446,35 @@ export const PostListingNew = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Brand/Make</Label>
-                      <Input
-                        value={attributes.make || ''}
-                        onChange={(e) => setAttributes({...attributes, make: e.target.value})}
-                        placeholder="e.g., Toyota"
-                      />
+                      <Select 
+                        value={attributes.make || ''} 
+                        onValueChange={(value) => setAttributes({...attributes, make: value})}
+                      >
+                        <SelectTrigger><SelectValue placeholder="Select brand" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Toyota">Toyota</SelectItem>
+                          <SelectItem value="Honda">Honda</SelectItem>
+                          <SelectItem value="Nissan">Nissan</SelectItem>
+                          <SelectItem value="Mercedes-Benz">Mercedes-Benz</SelectItem>
+                          <SelectItem value="BMW">BMW</SelectItem>
+                          <SelectItem value="Audi">Audi</SelectItem>
+                          <SelectItem value="Volkswagen">Volkswagen</SelectItem>
+                          <SelectItem value="Ford">Ford</SelectItem>
+                          <SelectItem value="Chevrolet">Chevrolet</SelectItem>
+                          <SelectItem value="Hyundai">Hyundai</SelectItem>
+                          <SelectItem value="Kia">Kia</SelectItem>
+                          <SelectItem value="Mazda">Mazda</SelectItem>
+                          <SelectItem value="Subaru">Subaru</SelectItem>
+                          <SelectItem value="Mitsubishi">Mitsubishi</SelectItem>
+                          <SelectItem value="Suzuki">Suzuki</SelectItem>
+                          <SelectItem value="Isuzu">Isuzu</SelectItem>
+                          <SelectItem value="Land Rover">Land Rover</SelectItem>
+                          <SelectItem value="Jeep">Jeep</SelectItem>
+                          <SelectItem value="Peugeot">Peugeot</SelectItem>
+                          <SelectItem value="Renault">Renault</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
                       <Label>Model</Label>
