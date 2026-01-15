@@ -29,6 +29,25 @@ export const AdminMarketplaceCategories = () => {
   const [loading, setLoading] = useState(true);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
+  // Hardcoded category slugs that cannot be edited or deleted
+  const HARDCODED_CATEGORY_SLUGS = [
+    'motors',
+    'property-sale',
+    'property-rent',
+    'mobile-tablets',
+    'electronics',
+    'furniture-garden',
+    'fashion',
+    'pets',
+    'kids-babies',
+    'jobs',
+    'services',
+    'business-industrial',
+    'hobbies'
+  ];
+  
+  const isHardcodedCategory = (slug: string) => HARDCODED_CATEGORY_SLUGS.includes(slug);
+  
   // Category form state
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -348,6 +367,25 @@ export const AdminMarketplaceCategories = () => {
           </Dialog>
         </div>
 
+        {/* Info Banner */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex gap-3">
+            <div className="flex-shrink-0">
+              <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-blue-900 font-comfortaa mb-1">About Category Management</h3>
+              <p className="text-sm text-blue-800 font-roboto">
+                <strong>Main Categories (12 total)</strong> are hardcoded in the frontend for consistent UI/UX and cannot be edited or deleted here. 
+                However, you have full control over <strong>subcategories</strong> - you can add, edit, and remove them as needed. 
+                Subcategories help organize listings within each main category (e.g., "Cars for Sale" and "Motorcycles" under Motors).
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Categories Table */}
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
           <Table>
@@ -415,22 +453,32 @@ export const AdminMarketplaceCategories = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => openEditCategory(category)}
-                              className="text-blue-600 hover:text-blue-700"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => deleteCategory(category.id)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            {isHardcodedCategory(category.slug) ? (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs text-gray-500 border-gray-300">
+                                  System Category
+                                </Badge>
+                              </div>
+                            ) : (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => openEditCategory(category)}
+                                  className="text-blue-600 hover:text-blue-700"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => deleteCategory(category.id)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
