@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { AdminNavLink } from "./AdminNavLink";
 import { UserNavLink } from "./UserNavLink";
+import { GoogleTranslate } from "./GoogleTranslate";
 import { db } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { fetchWikipediaCountryInfo } from "@/lib/wikipedia";
@@ -306,6 +307,11 @@ export const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Google Translate */}
+            <div className="hidden sm:block">
+              <GoogleTranslate />
+            </div>
+
             {/* User Profile */}
             {isSignedIn ? (
               <DropdownMenu>
@@ -578,16 +584,22 @@ export const Header = () => {
                   </div>
                 )}
 
-                {/* Country Selection - PROMINENT */}
-                <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
-                  <p className="text-xs font-semibold text-gray-500 mb-2">COUNTRY</p>
-                  <button
-                    onClick={toggleCountriesExpanded}
-                    className="w-full text-left text-sm font-medium text-gray-900 hover:text-blue-600"
-                  >
-                    {selectedCountry ? selectedCountry.name : 'Select'}
-                    <ChevronRight className={`w-4 h-4 inline ml-1 transition-transform ${countriesExpanded ? 'rotate-90' : ''}`} />
-                  </button>
+                {/* Language & Country - PROMINENT */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
+                    <p className="text-xs font-semibold text-gray-500 mb-2">LANGUAGE</p>
+                    <GoogleTranslate />
+                  </div>
+                  <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
+                    <p className="text-xs font-semibold text-gray-500 mb-2">COUNTRY</p>
+                    <button
+                      onClick={toggleCountriesExpanded}
+                      className="w-full text-left text-sm font-medium text-gray-900 hover:text-blue-600"
+                    >
+                      {selectedCountry ? selectedCountry.name : 'Select'}
+                      <ChevronRight className={`w-4 h-4 inline ml-1 transition-transform ${countriesExpanded ? 'rotate-90' : ''}`} />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Navigation Links */}
