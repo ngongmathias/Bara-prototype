@@ -40,88 +40,88 @@ interface Category {
 
 const categories: Category[] = [
   {
-    id: 'property-sale',
-    name: 'Property for Sale',
-    slug: 'property-sale',
-    icon: Home,
-    subcategories: ['Apartments for Sale', 'Villas for Sale', 'Land', 'Commercial']
-  },
-  {
-    id: 'property-rent',
-    name: 'Property for Rent',
-    slug: 'property-rent',
-    icon: Home,
-    subcategories: ['Apartments for Rent', 'Villas for Rent', 'Commercial for Rent']
-  },
-  {
     id: 'motors',
-    name: 'Motors',
+    name: 'Vehicles',
     slug: 'motors',
     icon: Car,
-    subcategories: ['Cars for Sale', 'Cars for Rent', 'Motorcycles', 'Boats', 'Auto Accessories', 'Auto Parts']
+    subcategories: ['Cars for Sale', 'Cars for Rent', 'Motorcycles', 'Boats', 'Trucks & Commercial Vehicles', 'Auto Accessories', 'Auto Parts & Spare Parts', 'Heavy Vehicles', 'Buses']
   },
   {
-    id: 'classifieds',
-    name: 'Classifieds',
-    slug: 'classifieds',
-    icon: ShoppingBag,
-    subcategories: ['General Items', 'Miscellaneous', 'Other']
+    id: 'property-sale',
+    name: 'Properties',
+    slug: 'property-sale',
+    icon: Home,
+    subcategories: ['Apartments for Sale', 'Apartments for Rent', 'Villas for Sale', 'Villas for Rent', 'Townhouses for Sale', 'Townhouses for Rent', 'Penthouses', 'Residential Land', 'Commercial for Sale', 'Commercial for Rent']
+  },
+  {
+    id: 'mobile-tablets',
+    name: 'Mobiles & Tablets',
+    slug: 'mobile-tablets',
+    icon: Smartphone,
+    subcategories: ['Mobile Phones', 'Tablets', 'Accessories', 'Smart Watches', 'Mobile Numbers']
   },
   {
     id: 'jobs',
     name: 'Jobs',
     slug: 'jobs',
     icon: Briefcase,
-    subcategories: ['Accounting', 'Engineering', 'IT & Software', 'Sales', 'Marketing', 'Healthcare']
+    subcategories: ['Accounting, Finance & Banking', 'Engineering', 'IT & Software', 'Sales', 'Marketing', 'Healthcare', 'Education & Training', 'Hospitality & Tourism', 'Customer Service', 'Administration']
   },
   {
     id: 'furniture-garden',
-    name: 'Furniture & Garden',
+    name: 'Home & Office Furniture - Decor',
     slug: 'furniture-garden',
     icon: Package,
-    subcategories: ['Furniture', 'Office Furniture', 'Home Decor', 'Garden & Outdoor', 'Lighting']
-  },
-  {
-    id: 'mobile-tablets',
-    name: 'Mobile & Tablets',
-    slug: 'mobile-tablets',
-    icon: Smartphone,
-    subcategories: ['Mobile Phones', 'Tablets', 'Accessories', 'Smart Watches', 'Mobile Numbers']
+    subcategories: ['Furniture', 'Office Furniture', 'Home Decor', 'Garden & Outdoor', 'Lighting', 'Curtains & Blinds', 'Carpets & Rugs']
   },
   {
     id: 'electronics',
     name: 'Electronics & Appliances',
     slug: 'electronics',
     icon: Tv,
-    subcategories: ['TV - Audio - Video', 'Computers - Accessories', 'Cameras', 'Home Appliances', 'Video Games']
+    subcategories: ['TV - Audio - Video', 'Computers - Accessories', 'Cameras', 'Home Appliances', 'Video Games', 'Gaming Consoles', 'Air Conditioners', 'Washing Machines', 'Refrigerators']
   },
   {
     id: 'fashion',
     name: 'Fashion & Beauty',
     slug: 'fashion',
     icon: ShoppingBag,
-    subcategories: ["Women's Clothing", "Men's Clothing", 'Shoes', 'Bags', 'Watches', 'Beauty Products']
+    subcategories: ["Women's Clothing", "Men's Clothing", 'Shoes', 'Bags', 'Watches', 'Jewelry', 'Beauty Products', 'Perfumes', 'Sunglasses']
   },
   {
-    id: 'services',
-    name: 'Services',
-    slug: 'services',
-    icon: Wrench,
-    subcategories: ['Business', 'Car', 'Domestic', 'Education', 'Health', 'IT & Web']
+    id: 'pets',
+    name: 'Pets - Birds - Ornamental fish',
+    slug: 'pets',
+    icon: Users,
+    subcategories: ['Dogs', 'Cats', 'Birds', 'Fish', 'Pet Accessories', 'Pet Food', 'Pet Services', 'Livestock']
   },
   {
     id: 'kids-babies',
     name: 'Kids & Babies',
     slug: 'kids-babies',
     icon: Baby,
-    subcategories: ['Baby & Mom Healthcare', 'Baby Clothing', 'Baby Furniture', 'Toys', 'Strollers']
+    subcategories: ['Baby & Mom Healthcare', 'Baby Clothing', 'Baby Furniture', 'Toys', 'Strollers', 'Car Seats', 'Baby Gear', 'Kids Clothing', 'Kids Shoes']
   },
   {
-    id: 'pets',
-    name: 'Pets & Animals',
-    slug: 'pets',
-    icon: Users,
-    subcategories: ['Dogs', 'Cats', 'Birds', 'Fish', 'Pet Accessories', 'Pet Services']
+    id: 'hobbies',
+    name: 'Hobbies',
+    slug: 'hobbies',
+    icon: Palette,
+    subcategories: ['Antiques - Collectibles', 'Bicycles', 'Books', 'Music Instruments', 'Sports Equipment', 'Camping & Outdoor', 'Art & Crafts']
+  },
+  {
+    id: 'business-industrial',
+    name: 'Businesses & Industrial',
+    slug: 'business-industrial',
+    icon: Building2,
+    subcategories: ['Agriculture', 'Construction', 'Equipment', 'Industrial Machinery', 'Restaurants', 'Retail Businesses', 'Manufacturing']
+  },
+  {
+    id: 'services',
+    name: 'Services',
+    slug: 'services',
+    icon: Wrench,
+    subcategories: ['Business', 'Car', 'Domestic', 'Education', 'Health', 'IT & Web', 'Legal Services', 'Moving & Storage', 'Event Services']
   }
 ];
 
@@ -299,18 +299,18 @@ const MarketplacePageNew = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => {
               const Icon = category.icon;
-              const emoji = category.id === 'property-sale' ? '🏠' :
-                           category.id === 'property-rent' ? '🏘️' :
-                           category.id === 'motors' ? '🚗' : 
-                           category.id === 'classifieds' ? '🛍️' :
+              const emoji = category.id === 'motors' ? '🚗' : 
+                           category.id === 'property-sale' ? '🏠' :
+                           category.id === 'mobile-tablets' ? '📱' :
                            category.id === 'jobs' ? '💼' :
                            category.id === 'furniture-garden' ? '🛋️' :
-                           category.id === 'mobile-tablets' ? '📱' :
                            category.id === 'electronics' ? '📺' :
                            category.id === 'fashion' ? '👗' :
-                           category.id === 'services' ? '🔧' :
+                           category.id === 'pets' ? '🐾' :
                            category.id === 'kids-babies' ? '👶' :
-                           category.id === 'pets' ? '🐾' : '📦';
+                           category.id === 'hobbies' ? '🎨' :
+                           category.id === 'business-industrial' ? '🏢' :
+                           category.id === 'services' ? '🔧' : '📦';
               return (
                 <div
                   key={category.id}
