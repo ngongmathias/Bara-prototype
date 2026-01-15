@@ -27,18 +27,24 @@ export const StyledGoogleTranslate = () => {
           pageLanguage: 'en',
           includedLanguages: 'en,fr,es,pt,sw,ar,rw',
           layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+          autoDisplay: false,
         },
         'google_translate_element'
       );
 
-      setTimeout(() => {
+      // Remove banner with multiple attempts
+      const removeBanner = () => {
         const banner = document.querySelector('.goog-te-banner-frame');
         if (banner && banner.parentNode) {
           banner.parentNode.removeChild(banner);
         }
-        document.body.style.top = '0';
+        document.body.style.top = '0px';
         document.body.style.position = 'static';
-      }, 100);
+      };
+
+      setTimeout(removeBanner, 100);
+      setTimeout(removeBanner, 500);
+      setTimeout(removeBanner, 1000);
     };
 
     addScript();
@@ -51,5 +57,5 @@ export const StyledGoogleTranslate = () => {
     };
   }, []);
 
-  return <div id="google_translate_element" className="styled-google-translate"></div>;
+  return <div id="google_translate_element"></div>;
 };
