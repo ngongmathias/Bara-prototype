@@ -224,7 +224,7 @@ const ContactUsPage = () => {
                     <Mail className="w-6 h-6 text-black" />
                     <div>
                       <p className="font-semibold font-roboto">{t('contact.info.general.email')}</p>
-                      <p className="text-gray-600 font-roboto">info@bara.com</p>
+                      <p className="text-gray-600 font-roboto">info@BARA.com</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
@@ -265,7 +265,7 @@ const ContactUsPage = () => {
                     <MailIcon className="w-6 h-6 text-black" />
                     <div>
                       <p className="font-semibold font-roboto">{t('contact.info.support.email')}</p>
-                      <p className="text-gray-600 font-roboto">support@bara.com</p>
+                      <p className="text-gray-600 font-roboto">support@BARA.com</p>
                       <p className="text-sm text-gray-500 font-roboto">{t('contact.info.support.emailResponse')}</p>
                     </div>
                   </div>
@@ -285,7 +285,7 @@ const ContactUsPage = () => {
                     <MailIcon className="w-6 h-6 text-black" />
                     <div>
                       <p className="font-semibold font-roboto">{t('contact.info.business.email')}</p>
-                      <p className="text-gray-600 font-roboto">business@bara.com</p>
+                      <p className="text-gray-600 font-roboto">business@BARA.com</p>
                       <p className="text-sm text-gray-500 font-roboto">{t('contact.info.business.description')}</p>
                     </div>
                   </div>

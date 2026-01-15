@@ -734,7 +734,7 @@ export const EventsPage = () => {
       {/* Page Title */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-6">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-comfortaa font-bold text-black text-center">
-          Bara Events
+          BARA Events
         </h1>
       </div>
 
