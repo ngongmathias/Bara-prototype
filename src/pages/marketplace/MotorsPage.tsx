@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { db } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { MotorListing, MarketplaceSubcategory } from '@/types/marketplace';
 import { Search, SlidersHorizontal, MapPin, Gauge, Calendar, Settings } from 'lucide-react';
 
@@ -45,14 +45,14 @@ export const MotorsPage = () => {
   const fetchInitialData = async () => {
     try {
       // Fetch subcategories
-      const { data: categoryData } = await db
+      const { data: categoryData } = await supabase
         .from('marketplace_categories')
         .select('id')
         .eq('slug', 'motors')
         .single();
 
       if (categoryData) {
-        const { data: subcatData } = await db
+        const { data: subcatData } = await supabase
           .from('marketplace_subcategories')
           .select('*')
           .eq('category_id', categoryData.id)
@@ -63,7 +63,7 @@ export const MotorsPage = () => {
       }
 
       // Fetch countries
-      const { data: countriesData } = await db
+      const { data: countriesData } = await supabase
         .from('countries')
         .select('id, name, code')
         .order('name');
