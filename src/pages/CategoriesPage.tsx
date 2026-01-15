@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { db } from "@/lib/supabase";
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
+import { TopBannerAd } from "@/components/TopBannerAd";
+import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { Users, UtensilsCrossed, Stethoscope, Wrench, HardHat, Zap, Car, Home, Scale, Bed, Plane, Building, Wine, Scissors, BookOpen, Coffee, Film, Heart, Users as UsersIcon, User, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Building2, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, CreditCard, Smartphone, ArrowLeft, Search, ArrowRight } from "lucide-react";
 
 // Icon mapping for categories
@@ -113,7 +115,9 @@ export const CategoriesPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-background">
+        <Header />
+        <TopBannerAd />
         <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -244,6 +248,7 @@ export const CategoriesPage = () => {
       </div>
       
       {/* Footer */}
+      <BottomBannerAd />
       <Footer />
     </div>
   );

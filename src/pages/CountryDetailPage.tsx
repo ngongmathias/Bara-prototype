@@ -18,6 +18,10 @@ import { db } from "@/lib/supabase";
 import { fetchWikipediaCountryInfo } from "@/lib/wikipedia";
 import { useSponsoredBanners } from "@/hooks/useSponsoredBanners";
 import { useCountryInfo } from "@/hooks/useCountryInfo";
+import { Header } from "@/components/Header";
+import Footer from "@/components/Footer";
+import { TopBannerAd } from "@/components/TopBannerAd";
+import { BottomBannerAd } from "@/components/BottomBannerAd";
 
 interface Country {
   id: string;
@@ -659,6 +663,8 @@ export const CountryDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <BottomBannerAd />
+      <Footer />
     </div>
   );
 };
