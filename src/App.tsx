@@ -55,15 +55,21 @@ import {EventsPage} from "./pages/EventsPage";
 import { ToolsPage } from "./pages/ToolsPage";
 import CommunitiesPage from "./pages/communities";
 import MarketplaceHub from "./pages/marketplace/MarketplaceHub";
+import MarketplacePageNew from "./pages/MarketplacePageNew";
 import CategoryPage from "./pages/marketplace/CategoryPage";
 import PropertyPage from "./pages/marketplace/PropertyPage";
 import MotorsPageNew from "./pages/marketplace/MotorsPageNew";
 import ClassifiedsPage from "./pages/marketplace/ClassifiedsPage";
 import JobsPage from "./pages/marketplace/JobsPage";
 import ListingDetailPage from "./pages/marketplace/ListingDetailPage";
+import ListingDetailPageNew from "./pages/marketplace/ListingDetailPageNew";
+import CategoryDetailRouter from "./pages/marketplace/CategoryDetailRouter";
 import PostListing from "./pages/marketplace/PostListing";
+import PostListingNew from "./pages/marketplace/PostListingNew";
+import CategoryPostForm from "./pages/marketplace/CategoryPostForm";
 import MyListings from "./pages/marketplace/MyListings";
 import SearchResults from "./pages/marketplace/SearchResults";
+import SearchResultsNew from "./pages/marketplace/SearchResultsNew";
 import MyFavorites from "./pages/marketplace/MyFavorites";
 import EditListing from "./pages/marketplace/EditListing";
 import { CommunityPage } from "./pages/communities/CommunityPage";
@@ -81,6 +87,7 @@ import { AdminSlideshowImages } from "./pages/admin/AdminSlideshowImages";
 import AdminEventsSlideshow from "./pages/admin/AdminEventsSlideshow";
 import AdminPopups from "./pages/admin/AdminPopups";
 import AdminMarketplace from "./pages/admin/AdminMarketplace";
+import AdminMarketplaceNew from "./pages/admin/AdminMarketplaceNew";
 import AdminMarketplaceCategories from "./pages/admin/AdminMarketplaceCategories";
 import { MainLayout } from "./components/layout/MainLayout";
 
@@ -114,7 +121,7 @@ const AppRoutes = () => {
         } />
         <Route path="/admin/marketplace" element={
           <AdminAuthGuard>
-            <AdminMarketplace />
+            <AdminMarketplaceNew />
           </AdminAuthGuard>
         } />
         <Route path="/admin/marketplace-categories" element={
@@ -124,12 +131,12 @@ const AppRoutes = () => {
         } />
         
         {/* Marketplace Routes - MUST come before broad business listings routes */}
-        <Route path="/marketplace" element={<MarketplaceHub />} />
-        <Route path="/marketplace/post" element={<PostListing />} />
+        <Route path="/marketplace" element={<MarketplacePageNew />} />
+        <Route path="/marketplace/post" element={<CategoryPostForm />} />
         <Route path="/marketplace/my-listings" element={<MyListings />} />
-        <Route path="/marketplace/listing/:listingId" element={<ListingDetailPage />} />
+        <Route path="/marketplace/listing/:listingId" element={<CategoryDetailRouter />} />
         <Route path="/marketplace/edit/:listingId" element={<EditListing />} />
-        <Route path="/marketplace/search" element={<SearchResults />} />
+        <Route path="/marketplace/search" element={<SearchResultsNew />} />
         <Route path="/marketplace/favorites" element={<MyFavorites />} />
         <Route path="/marketplace/property-sale" element={<PropertyPage />} />
         <Route path="/marketplace/property-rent" element={<PropertyPage />} />
@@ -172,7 +179,7 @@ const AppRoutes = () => {
       } />
       
       {/* New Navigation Pages */}
-      <Route path="/marketplace" element={<MarketplaceHub />} />
+      <Route path="/marketplace-old" element={<MarketplaceHub />} />
       <Route path="/marketplace/listing/:listingId" element={<ListingDetailPage />} />
       <Route path="/marketplace/property-sale" element={<PropertyPage />} />
       <Route path="/marketplace/property-rent" element={<PropertyPage />} />

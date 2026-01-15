@@ -29,11 +29,13 @@ export interface MarketplaceListing {
   category_id: string;
   subcategory_id?: string;
   country_id: string;
+  country_ids?: string[];
   title: string;
   description: string;
   price?: number;
   currency: string;
   price_type: 'fixed' | 'negotiable' | 'yearly' | 'monthly';
+  condition?: 'new' | 'used' | 'like-new';
   seller_name: string;
   seller_email: string;
   seller_phone?: string;
@@ -56,6 +58,7 @@ export interface MarketplaceListing {
   attributes?: Record<string, string>;
   category?: MarketplaceCategory;
   subcategory?: MarketplaceSubcategory;
+  country?: { id: string; name: string; code: string; flag_url?: string };
 }
 
 export interface ListingImage {
