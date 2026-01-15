@@ -50,8 +50,11 @@ export const SearchResultsNew = () => {
   }, []);
 
   useEffect(() => {
-    performSearch();
-  }, [searchParams, selectedCountryFilter]);
+    // Only perform search after categories are loaded
+    if (categories.length > 0) {
+      performSearch();
+    }
+  }, [searchParams, selectedCountryFilter, categories]);
 
   const fetchCategories = async () => {
     try {
@@ -61,7 +64,9 @@ export const SearchResultsNew = () => {
         .eq('is_active', true)
         .order('display_order');
       
-      setCategories(data || []);
+      if (data) {
+        setCategories(data);
+      }
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -99,9 +104,9 @@ export const SearchResultsNew = () => {
         query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location_details.ilike.%${searchQuery}%`);
       }
 
-      // Category filter
+      // Category filter - filter by slug directly using join
       const categoryParam = searchParams.get('category');
-      if (categoryParam) {
+      if (categoryParam && categories.length > 0) {
         const category = categories.find(c => c.slug === categoryParam);
         if (category) {
           query = query.eq('category_id', category.id);
