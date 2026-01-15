@@ -199,13 +199,13 @@ export const SearchResultsNew = () => {
   const applyFilters = () => {
     const params = new URLSearchParams(searchParams);
     
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== 'all') {
       params.set('category', selectedCategory);
     } else {
       params.delete('category');
     }
     
-    if (selectedCountryFilter) {
+    if (selectedCountryFilter && selectedCountryFilter !== 'all') {
       params.set('country', selectedCountryFilter);
     } else {
       params.delete('country');
@@ -223,7 +223,7 @@ export const SearchResultsNew = () => {
       params.delete('max_price');
     }
     
-    if (condition) {
+    if (condition && condition !== 'all') {
       params.set('condition', condition);
     } else {
       params.delete('condition');
@@ -240,11 +240,11 @@ export const SearchResultsNew = () => {
   };
 
   const clearFilters = () => {
-    setSelectedCategory('');
-    setSelectedCountryFilter(selectedCountry?.id || '');
+    setSelectedCategory('all');
+    setSelectedCountryFilter(selectedCountry?.id || 'all');
     setMinPrice('');
     setMaxPrice('');
-    setCondition('');
+    setCondition('all');
     setSortBy('recent');
     
     const params = new URLSearchParams();
@@ -315,7 +315,7 @@ export const SearchResultsNew = () => {
                         <SelectValue placeholder="All Categories" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Categories</SelectItem>
+                        <SelectItem value="all">All Categories</SelectItem>
                         {categories.map((cat) => (
                           <SelectItem key={cat.id} value={cat.slug}>
                             {cat.name}
@@ -333,7 +333,7 @@ export const SearchResultsNew = () => {
                         <SelectValue placeholder="All Countries" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Countries</SelectItem>
+                        <SelectItem value="all">All Countries</SelectItem>
                         {countries.map((country) => (
                           <SelectItem key={country.id} value={country.id}>
                             {country.name}
@@ -374,7 +374,7 @@ export const SearchResultsNew = () => {
                         <SelectValue placeholder="Any Condition" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any Condition</SelectItem>
+                        <SelectItem value="all">Any Condition</SelectItem>
                         <SelectItem value="new">New</SelectItem>
                         <SelectItem value="used">Used</SelectItem>
                         <SelectItem value="like-new">Like New</SelectItem>
