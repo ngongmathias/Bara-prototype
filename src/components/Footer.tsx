@@ -4,8 +4,7 @@ import { scrollToTop } from '@/lib/scrollToTop';
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/supabase';
 import { useToast } from "@/components/ui/use-toast";
-import { ChevronDown, ChevronUp, Globe } from 'lucide-react';
-import { StyledGoogleTranslate } from './StyledGoogleTranslate';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Country {
   id: string;
@@ -25,7 +24,6 @@ const Footer = () => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAllCountries, setShowAllCountries] = useState(false);
-  const [showLanguageSelector, setShowLanguageSelector] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -257,29 +255,6 @@ const Footer = () => {
           </div>
 
 
-        </div>
-
-        {/* Language Selector - Collapsible */}
-        <div className="border-t border-gray-300 pt-6 pb-4">
-          <div className="flex flex-col items-center gap-3">
-            <button
-              onClick={() => setShowLanguageSelector(!showLanguageSelector)}
-              className="flex items-center gap-2 text-gray-700 hover:text-black transition-colors font-roboto text-sm font-medium"
-            >
-              <Globe className="w-4 h-4" />
-              <span>Change Language</span>
-              {showLanguageSelector ? (
-                <ChevronUp className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
-            </button>
-            {showLanguageSelector && (
-              <div className="w-full max-w-xs animate-in fade-in-0 slide-in-from-top-2">
-                <StyledGoogleTranslate />
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Copyright Information */}
