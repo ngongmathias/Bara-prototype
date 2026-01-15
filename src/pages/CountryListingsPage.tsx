@@ -11,6 +11,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { db } from "@/lib/supabase";
 import { FeaturedBusinesses } from "@/components/FeaturedBusinesses";
 import { CityMapLeaflet } from "@/components/CityMapLeaflet";
+import { Header } from "@/components/Header";
+import Footer from "@/components/Footer";
+import { TopBannerAd } from "@/components/TopBannerAd";
+import { BottomBannerAd } from "@/components/BottomBannerAd";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -460,6 +464,8 @@ export const CountryListingsPage = () => {
 
   return (
     <div className="min-h-screen bg-white font-roboto">
+      <Header />
+      <TopBannerAd />
       {/* Search Header */}
       <div className="bg-white border-b border-gray-200 py-4">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
@@ -1153,6 +1159,8 @@ export const CountryListingsPage = () => {
           </div>
         </div>
       </div>
+      <BottomBannerAd />
+      <Footer />
     </div>
   );
 };
