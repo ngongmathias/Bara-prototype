@@ -32,16 +32,8 @@ export const GoogleTranslate = () => {
         },
         'google_translate_element'
       );
-
-      // Try to remove banner
-      setTimeout(() => {
-        const banner = document.querySelector('.goog-te-banner-frame');
-        if (banner && banner.parentNode) {
-          banner.parentNode.removeChild(banner);
-        }
-        document.body.style.top = '0';
-        document.body.style.position = 'static';
-      }, 500);
+      
+      // Don't hide the banner - it's needed for translation to work properly
     };
 
     addScript();
