@@ -81,19 +81,32 @@ export const LanguageSelectorWithTranslate = () => {
     setCurrentLanguage(language);
     setIsOpen(false);
 
-    if (!isGoogleTranslateReady) {
-      console.warn('Google Translate not ready yet');
-      return;
-    }
-
-    // Trigger Google Translate by selecting the language in the hidden dropdown
-    setTimeout(() => {
+    // Function to trigger Google Translate
+    const triggerTranslation = () => {
       const googleSelect = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-      if (googleSelect) {
-        googleSelect.value = language.code;
-        googleSelect.dispatchEvent(new Event('change'));
+      
+      if (!googleSelect) {
+        console.warn('Google Translate dropdown not found, retrying...');
+        // Retry after a delay
+        setTimeout(triggerTranslation, 200);
+        return;
       }
-    }, 100);
+
+      console.log('Triggering translation to:', language.code);
+      googleSelect.value = language.code;
+      
+      // Try multiple event types to ensure it triggers
+      googleSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      googleSelect.dispatchEvent(new Event('click', { bubbles: true }));
+      
+      // Also try triggering the onchange handler directly if it exists
+      if (googleSelect.onchange) {
+        googleSelect.onchange(new Event('change'));
+      }
+    };
+
+    // Start trying to trigger translation
+    setTimeout(triggerTranslation, 100);
   };
 
   return (
