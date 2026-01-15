@@ -62,6 +62,9 @@ interface FormData {
   city_id: string;
   hashtags: string[];
   tickets: FormTicket[];
+  is_free: boolean;
+  entry_fee: string;
+  currency: string;
 }
 
 export const UserEventsPage = () => {
@@ -104,7 +107,10 @@ export const UserEventsPage = () => {
     country_id: '',
     city_id: '',
     hashtags: [],
-    tickets: []
+    tickets: [],
+    is_free: false,
+    entry_fee: '',
+    currency: 'USD'
   });
 
   // Cities hook - only fetch when country is selected
@@ -162,7 +168,10 @@ export const UserEventsPage = () => {
       country_id: '',
       city_id: '',
       hashtags: [],
-      tickets: []
+      tickets: [],
+      is_free: false,
+      entry_fee: '',
+      currency: 'USD'
     });
     setEditingEvent(null);
     setImagePreview(null);
@@ -202,7 +211,10 @@ export const UserEventsPage = () => {
       country_id: event.country_id || '',
       city_id: event.city_id || '',
       hashtags: event.tags || [],
-      tickets: []
+      tickets: [],
+      is_free: event.is_free || false,
+      entry_fee: event.entry_fee?.toString() || '',
+      currency: event.currency || 'USD'
     });
     setImagePreview(event.event_image_url || null);
     setIsDialogOpen(true);
