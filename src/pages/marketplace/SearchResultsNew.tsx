@@ -40,6 +40,7 @@ export const SearchResultsNew = () => {
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
   const [selectedSubcategory, setSelectedSubcategory] = useState(searchParams.get('subcategory') || '');
   const [selectedCountryFilter, setSelectedCountryFilter] = useState(searchParams.get('country') || selectedCountry?.id || '');
+  const [selectedCurrency, setSelectedCurrency] = useState(searchParams.get('currency') || '');
   const [minPrice, setMinPrice] = useState(searchParams.get('min_price') || '');
   const [maxPrice, setMaxPrice] = useState(searchParams.get('max_price') || '');
   const [condition, setCondition] = useState(searchParams.get('condition') || '');
@@ -213,6 +214,12 @@ export const SearchResultsNew = () => {
         query = query.eq('country_id', countryParam);
       }
 
+      // Currency filter
+      const currencyParam = searchParams.get('currency');
+      if (currencyParam && currencyParam !== 'all') {
+        query = query.eq('currency', currencyParam);
+      }
+
       // Price filters
       const minPriceParam = searchParams.get('min_price');
       const maxPriceParam = searchParams.get('max_price');
@@ -376,6 +383,12 @@ export const SearchResultsNew = () => {
       params.delete('country');
     }
     
+    if (selectedCurrency && selectedCurrency !== 'all') {
+      params.set('currency', selectedCurrency);
+    } else {
+      params.delete('currency');
+    }
+    
     if (minPrice) {
       params.set('min_price', minPrice);
     } else {
@@ -439,12 +452,13 @@ export const SearchResultsNew = () => {
   };
 
   const clearFilters = () => {
-    setSelectedCategory('all');
-    setSelectedSubcategory('all');
-    setSelectedCountryFilter(selectedCountry?.id || 'all');
+    setSelectedCategory('');
+    setSelectedSubcategory('');
+    setSelectedCountryFilter('');
+    setSelectedCurrency('');
     setMinPrice('');
     setMaxPrice('');
-    setCondition('all');
+    setCondition('');
     setSortBy('recent');
     
     // Motors
@@ -493,9 +507,9 @@ export const SearchResultsNew = () => {
   const activeFiltersCount = [
     selectedCategory && selectedCategory !== 'all',
     selectedSubcategory && selectedSubcategory !== 'all',
-    selectedCountryFilter && selectedCountryFilter !== selectedCountry?.id && selectedCountryFilter !== 'all',
-    minPrice,
-    maxPrice,
+    selectedCountryFilter && selectedCountryFilter !== 'all',
+    selectedCurrency && selectedCurrency !== 'all',
+    minPrice || maxPrice,
     condition && condition !== 'all',
     // Motors
     carBrand && carBrand !== 'all',
@@ -622,6 +636,26 @@ export const SearchResultsNew = () => {
                             {country.name}
                           </SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Currency Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                    <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+                      <SelectTrigger className="font-roboto">
+                        <SelectValue placeholder="All Currencies" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Currencies</SelectItem>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                        <SelectItem value="EUR">EUR (€)</SelectItem>
+                        <SelectItem value="GBP">GBP (£)</SelectItem>
+                        <SelectItem value="RWF">RWF (FRw)</SelectItem>
+                        <SelectItem value="NGN">NGN (₦)</SelectItem>
+                        <SelectItem value="KES">KES (KSh)</SelectItem>
+                        <SelectItem value="ZAR">ZAR (R)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
