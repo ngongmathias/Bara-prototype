@@ -80,7 +80,6 @@ export const Header = () => {
   const [mobileMenuClosing, setMobileMenuClosing] = useState(false);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
-  const [showLanguageSelector, setShowLanguageSelector] = useState(false);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -308,21 +307,10 @@ export const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Google Translate - Collapsible */}
-            <DropdownMenu open={showLanguageSelector} onOpenChange={setShowLanguageSelector}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="hidden sm:flex items-center gap-1 font-roboto">
-                  <Globe className="w-4 h-4" />
-                  <span className="text-sm">Language</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showLanguageSelector ? 'rotate-180' : ''}`} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64" align="end">
-                <div className="p-3">
-                  <GoogleTranslate />
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Google Translate */}
+            <div className="hidden sm:block">
+              <GoogleTranslate />
+            </div>
 
             {/* User Profile */}
             {isSignedIn ? (
@@ -600,22 +588,7 @@ export const Header = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
                     <p className="text-xs font-semibold text-gray-500 mb-2">LANGUAGE</p>
-                    <button
-                      onClick={() => setShowLanguageSelector(!showLanguageSelector)}
-                      className="w-full text-left text-sm font-medium text-gray-900 hover:text-blue-600 flex items-center justify-between"
-                    >
-                      <span>Change</span>
-                      {showLanguageSelector ? (
-                        <ChevronUp className="w-4 h-4" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4" />
-                      )}
-                    </button>
-                    {showLanguageSelector && (
-                      <div className="mt-3">
-                        <GoogleTranslate />
-                      </div>
-                    )}
+                    <GoogleTranslate />
                   </div>
                   <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
                     <p className="text-xs font-semibold text-gray-500 mb-2">COUNTRY</p>

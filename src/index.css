@@ -359,6 +359,18 @@ All colors MUST be HSL.
     display: inline-block;
   }
 
+  /* Ensure banner doesn't cover navbar */
+  .goog-te-banner-frame.skiptranslate {
+    top: 0 !important;
+    z-index: 999 !important;
+  }
+
+  /* Keep navbar visible above banner */
+  header {
+    position: relative !important;
+    z-index: 1000 !important;
+  }
+
   .goog-te-gadget {
     font-size: 0 !important;
   }
