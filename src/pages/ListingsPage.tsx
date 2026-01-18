@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Building2, Users, UtensilsCrossed, Stethoscope, Wrench, Plane, Wine, Scissors, BookOpen, Coffee, Film, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, Zap, Car, Home, Scale, Bed, Heart } from "lucide-react";
+import { Building2, Users, UtensilsCrossed, Stethoscope, Wrench, Plane, Wine, Scissors, BookOpen, Coffee, Film, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, Zap, Car, Home, Scale, Bed, Heart, Calculator, Sparkles, Dumbbell, Music, Store, Briefcase, MapPin, Warehouse } from "lucide-react";
 import { db } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { TopBannerAd } from "@/components/TopBannerAd";
@@ -14,49 +14,49 @@ import { BottomBannerAd } from "@/components/BottomBannerAd";
 // Icon mapping for categories
 const iconMap: { [key: string]: any } = {
   'airports': Plane,
-  'banks': Building2,
+  'banks': Landmark,
   'bars': Wine,
   'barbers': Scissors,
   'bookstores': BookOpen,
   'cafes': Coffee,
   'cinemas-theatres': Film,
-  'clinics': Stethoscope,
-  'clubs-professional': Users,
-  'clubs-leisure': Users,
-  'dentists': Stethoscope,
+  'clinics': Hospital,
+  'clubs-professional': Briefcase,
+  'clubs-leisure': Music,
+  'dentists': Pill,
   'doctors': Stethoscope,
   'faith': Church,
   'farms': Leaf,
   'galleries-art': Palette,
-  'government': Landmark,
+  'government': Building2,
   'hospitals': Hospital,
   'hotels': Bed,
   'lawyers': Scale,
   'libraries': Book,
-  'markets': ShoppingBag,
-  'museums': Building2,
+  'markets': Store,
+  'museums': Landmark,
   'parks': Trees,
   'pharmacies': Pill,
   'post-offices': Mail,
   'recreation': Gamepad2,
   'real-estate': Home,
   'restaurants': UtensilsCrossed,
-  'salons': Scissors,
+  'salons': Sparkles,
   'schools': GraduationCap,
   'services': Wrench,
   'shopping': ShoppingBag,
-  'tours': Car,
+  'tours': MapPin,
   'transportation': Truck,
-  'universities': GraduationCap,
+  'universities': Book,
   'utilities': Zap,
-  'auto-repair': Wrench,
+  'auto-repair': Car,
   'coffee-shops': Coffee,
-  'gyms-fitness': Users,
-  'beauty-salons': Scissors,
+  'gyms-fitness': Dumbbell,
+  'beauty-salons': Sparkles,
   'pet-services': Heart,
-  'accounting': Building2,
-  'car-dealerships': Car,
-  'cleaning-services': Wrench
+  'accounting': Calculator,
+  'car-dealerships': Warehouse,
+  'cleaning-services': Sparkles
 };
 
 interface Category {
