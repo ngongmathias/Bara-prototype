@@ -9,6 +9,38 @@ declare global {
 
 export const GoogleTranslate = () => {
   useEffect(() => {
+    // Helper function to get cookie value
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+
+    // Helper function to clear Google Translate cookies
+    const clearGoogleTranslateCookies = () => {
+      const cookies = ['googtrans', 'googtrans_backup'];
+      const domains = [window.location.hostname, `.${window.location.hostname}`, ''];
+      
+      cookies.forEach(cookieName => {
+        domains.forEach(domain => {
+          if (domain) {
+            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain}`;
+          }
+          document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+        });
+      });
+    };
+
+    // Check if page is translated but shouldn't be (stale cookies)
+    const currentLang = getCookie('googtrans');
+    if (currentLang && currentLang !== '/en/en' && !document.querySelector('.goog-te-banner-frame')) {
+      // Cookies exist but no active translation banner - clear stale cookies
+      clearGoogleTranslateCookies();
+      window.location.reload();
+      return;
+    }
+
     // Add Google Translate script
     const addScript = () => {
       if (document.getElementById('google-translate-script')) {
@@ -59,27 +91,6 @@ export const GoogleTranslate = () => {
     // Cleanup interval on unmount
     return () => clearInterval(checkInterval);
   }, []);
-
-  // Helper function to get cookie value
-  const getCookie = (name: string) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop()?.split(';').shift();
-    return null;
-  };
-
-  // Helper function to clear Google Translate cookies
-  const clearGoogleTranslateCookies = () => {
-    const cookies = ['googtrans', 'googtrans_backup'];
-    const domains = [window.location.hostname, `.${window.location.hostname}`];
-    
-    cookies.forEach(cookieName => {
-      domains.forEach(domain => {
-        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain}`;
-        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
-      });
-    });
-  };
 
   return <div id="google_translate_element"></div>;
 };
