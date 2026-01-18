@@ -47,8 +47,10 @@ export const GoogleTranslate = () => {
       
       // If language changed from something to empty/null (Show original clicked)
       if (previousLang && previousLang !== '/en/en' && (!currentLang || currentLang === '/en/en')) {
+        // Clear all Google Translate cookies to ensure clean reset
+        clearGoogleTranslateCookies();
         // Reload page to ensure everything reverts to English
-        window.location.reload();
+        setTimeout(() => window.location.reload(), 100);
       }
       
       previousLang = currentLang;
@@ -64,6 +66,19 @@ export const GoogleTranslate = () => {
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop()?.split(';').shift();
     return null;
+  };
+
+  // Helper function to clear Google Translate cookies
+  const clearGoogleTranslateCookies = () => {
+    const cookies = ['googtrans', 'googtrans_backup'];
+    const domains = [window.location.hostname, `.${window.location.hostname}`];
+    
+    cookies.forEach(cookieName => {
+      domains.forEach(domain => {
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain}`;
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+      });
+    });
   };
 
   return <div id="google_translate_element"></div>;
