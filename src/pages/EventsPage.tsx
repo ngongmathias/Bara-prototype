@@ -1032,7 +1032,7 @@ export const EventsPage = () => {
                   Reset Filters
                 </Button>
                 <Button
-                  onClick={() => navigate('/users/dashboard/events/create')}
+                  onClick={() => navigate('/users/dashboard/events')}
                   className="px-6 py-2.5 h-auto text-sm font-semibold bg-black hover:bg-gray-800 text-white shadow-lg transition-all"
                 >
                   Create Event
