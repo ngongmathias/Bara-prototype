@@ -7,9 +7,9 @@ import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
-import { Users, UtensilsCrossed, Stethoscope, Wrench, HardHat, Zap, Car, Home, Scale, Bed, Plane, Building, Wine, Scissors, BookOpen, Coffee, Film, Heart, Users as UsersIcon, User, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Building2, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, CreditCard, Smartphone, ArrowLeft, Search, ArrowRight, Calculator, Sparkles, Dumbbell, Music, Store, Briefcase, MapPin, Warehouse } from "lucide-react";
+import { Users, UtensilsCrossed, Stethoscope, Wrench, HardHat, Zap, Car, Home, Scale, Bed, Plane, Building, Wine, Scissors, BookOpen, Coffee, Film, Heart, Users as UsersIcon, User, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Building2, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, CreditCard, Smartphone, ArrowLeft, Search, ArrowRight, Calculator, Sparkles, Dumbbell, Music, Store, Briefcase, MapPin, Warehouse, Lightbulb, PartyPopper, School, Calendar, Cross, Sprout, PaintBucket, Factory, Hammer, Activity, Soup, DollarSign, Megaphone, HeartPulse, Utensils, Waves } from "lucide-react";
 
-// Icon mapping for categories
+// Icon mapping for categories - each category has a unique, specific icon
 const iconMap: { [key: string]: any } = {
   'airports': Plane,
   'banks': Landmark,
@@ -18,21 +18,21 @@ const iconMap: { [key: string]: any } = {
   'bookstores': BookOpen,
   'cafes': Coffee,
   'cinemas-theatres': Film,
-  'clinics': Hospital,
+  'clinics': HeartPulse,
   'clubs-professional': Briefcase,
   'clubs-leisure': Music,
-  'dentists': Pill,
+  'dentists': Activity,
   'doctors': Stethoscope,
-  'faith': Church,
-  'farms': Leaf,
-  'galleries-art': Palette,
+  'faith': Cross,
+  'farms': Sprout,
+  'galleries-art': PaintBucket,
   'government': Building2,
   'hospitals': Hospital,
   'hotels': Bed,
   'lawyers': Scale,
   'libraries': Book,
   'markets': Store,
-  'museums': Landmark,
+  'museums': Palette,
   'parks': Trees,
   'pharmacies': Pill,
   'post-offices': Mail,
@@ -40,21 +40,28 @@ const iconMap: { [key: string]: any } = {
   'real-estate': Home,
   'restaurants': UtensilsCrossed,
   'salons': Sparkles,
-  'schools': GraduationCap,
+  'schools': School,
   'services': Wrench,
   'shopping': ShoppingBag,
   'tours': MapPin,
   'transportation': Truck,
-  'universities': Book,
+  'universities': GraduationCap,
   'utilities': Zap,
   'auto-repair': Car,
-  'coffee-shops': Coffee,
+  'coffee-shops': Soup,
   'gyms-fitness': Dumbbell,
   'beauty-salons': Sparkles,
   'pet-services': Heart,
   'accounting': Calculator,
   'car-dealerships': Warehouse,
-  'cleaning-services': Sparkles
+  'cleaning-services': Sparkles,
+  'consulting': Lightbulb,
+  'dance-studios': PartyPopper,
+  'driving-schools': Car,
+  'education': School,
+  'entertainment': PartyPopper,
+  'event-planning': Calendar,
+  'healthcare': HeartPulse
 };
 
 interface Category {
