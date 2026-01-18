@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Building2, Users, UtensilsCrossed, Stethoscope, Wrench, Plane, Wine, Scissors, BookOpen, Coffee, Film, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, Zap, Car, Home, Scale, Bed, Heart, Calculator, Sparkles, Dumbbell, Music, Store, Briefcase, MapPin, Warehouse, Lightbulb, PartyPopper, School, Calendar, Cross, Sprout, PaintBucket, Activity, Soup, HeartPulse, Waves, Music2, HardHat, Building, Shield, Languages, Megaphone, Mic2, Camera, DollarSign, Hammer } from "lucide-react";
+import { Building2, Users, UtensilsCrossed, Stethoscope, Wrench, Plane, Wine, Scissors, BookOpen, Coffee, Film, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, Zap, Car, Scale, Bed, Heart, Calculator, Sparkles, Dumbbell, Music, Store, Briefcase, MapPin, Warehouse, Lightbulb, PartyPopper, School, Calendar, Cross, Sprout, PaintBucket, Activity, Soup, HeartPulse, Waves, Music2, HardHat, Building, Shield, Languages, Megaphone, Mic2, Camera, DollarSign, Hammer, Key, ShoppingCart, Monitor, Utensils as Restaurant, ShieldCheck } from "lucide-react";
 import { db } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { TopBannerAd } from "@/components/TopBannerAd";
@@ -59,13 +59,17 @@ const iconMap: { [key: string]: any } = {
   'pharmacies': DollarSign,
   'photography': Camera,
   'post-offices': Mail,
-  'real-estate': Home,
+  'real-estate': Key,
   'recreation': Gamepad2,
+  'restaurant': Restaurant,
   'restaurants': UtensilsCrossed,
+  'retail': ShoppingCart,
   'salons': Hammer,
   'schools': Users,
+  'security-services': ShieldCheck,
   'services': Wrench,
   'shopping': ShoppingBag,
+  'technology': Monitor,
   'tours': MapPin,
   'transportation': Truck,
   'universities': GraduationCap,

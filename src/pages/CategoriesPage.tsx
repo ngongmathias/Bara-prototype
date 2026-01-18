@@ -7,7 +7,7 @@ import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
-import { Users, UtensilsCrossed, Stethoscope, Wrench, HardHat, Zap, Car, Home, Scale, Bed, Plane, Building, Wine, Scissors, BookOpen, Coffee, Film, Heart, Users as UsersIcon, User, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Building2, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, CreditCard, Smartphone, ArrowLeft, Search, ArrowRight, Calculator, Sparkles, Dumbbell, Music, Store, Briefcase, MapPin, Warehouse, Lightbulb, PartyPopper, School, Calendar, Cross, Sprout, PaintBucket, Factory, Hammer, Activity, Soup, DollarSign, Megaphone, HeartPulse, Utensils, Waves, Shield, Camera, Music2, Mic2, Languages } from "lucide-react";
+import { Users, UtensilsCrossed, Stethoscope, Wrench, HardHat, Zap, Car, Scale, Bed, Plane, Building, Wine, Scissors, BookOpen, Coffee, Film, Heart, Users as UsersIcon, User, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Building2, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, CreditCard, Smartphone, ArrowLeft, Search, ArrowRight, Calculator, Sparkles, Dumbbell, Music, Store, Briefcase, MapPin, Warehouse, Lightbulb, PartyPopper, School, Calendar, Cross, Sprout, PaintBucket, Factory, Hammer, Activity, Soup, DollarSign, Megaphone, HeartPulse, Utensils, Waves, Shield, Camera, Music2, Mic2, Languages, Key, ShoppingCart, Monitor, Utensils as Restaurant, ShieldCheck } from "lucide-react";
 
 // Icon mapping for categories - each category has a completely unique icon
 const iconMap: { [key: string]: any } = {
@@ -57,13 +57,17 @@ const iconMap: { [key: string]: any } = {
   'pharmacies': DollarSign,
   'photography': Camera,
   'post-offices': Mail,
-  'real-estate': Home,
+  'real-estate': Key,
   'recreation': Gamepad2,
+  'restaurant': Restaurant,
   'restaurants': UtensilsCrossed,
+  'retail': ShoppingCart,
   'salons': Hammer,
   'schools': Users,
+  'security-services': ShieldCheck,
   'services': Wrench,
   'shopping': ShoppingBag,
+  'technology': Monitor,
   'tours': MapPin,
   'transportation': Truck,
   'universities': GraduationCap,
@@ -193,7 +197,7 @@ export const CategoriesPage = () => {
           {/* Categories Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {filteredCategories.map((category, index) => {
-              const IconComponent = iconMap[category.slug] || Home;
+              const IconComponent = iconMap[category.slug] || Building2;
               const translatedName = t(`categories.${category.slug}`, { defaultValue: category.name });
               
               return (

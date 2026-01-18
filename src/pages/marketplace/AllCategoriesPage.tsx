@@ -6,7 +6,7 @@ import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { 
   Car,
-  Home,
+  Key,
   Smartphone,
   Briefcase,
   ShoppingBag,
@@ -40,7 +40,7 @@ const categories: Category[] = [
     id: 'property-sale',
     name: 'Properties',
     slug: 'property-sale',
-    icon: Home,
+    icon: Key,
     subcategories: ['Apartments for Sale', 'Apartments for Rent', 'Villas for Sale', 'Villas for Rent', 'Townhouses for Sale', 'Townhouses for Rent', 'Penthouses', 'Residential Land', 'Commercial for Sale', 'Commercial for Rent']
   },
   {

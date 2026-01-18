@@ -10,7 +10,6 @@ import {
   HardHat, 
   Zap, 
   Car, 
-  Home, 
   Scale, 
   Bed,
   Plane,
@@ -63,7 +62,12 @@ import {
   DollarSign,
   Hammer,
   MapPin,
-  Store
+  Store,
+  Key,
+  ShoppingCart,
+  Monitor,
+  Utensils as Restaurant,
+  ShieldCheck
 } from "lucide-react";
 
 // Icon mapping for categories - each category has a completely unique icon
@@ -114,13 +118,17 @@ const iconMap: { [key: string]: any } = {
   'pharmacies': DollarSign,
   'photography': Camera,
   'post-offices': Mail,
-  'real-estate': Home,
+  'real-estate': Key,
   'recreation': Gamepad2,
+  'restaurant': Restaurant,
   'restaurants': UtensilsCrossed,
+  'retail': ShoppingCart,
   'salons': Hammer,
   'schools': Users,
+  'security-services': ShieldCheck,
   'services': Wrench,
   'shopping': ShoppingBag,
+  'technology': Monitor,
   'tours': MapPin,
   'transportation': Truck,
   'universities': GraduationCap,
@@ -261,7 +269,7 @@ export const CategoryGrid = () => {
         
                 <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
           {visibleCategories.map((category, index) => {
-            const IconComponent = iconMap[category.slug] || Home;
+            const IconComponent = iconMap[category.slug] || Building2;
             // Use the category name directly if translation is not available
             const translatedName = t(`categories.${category.slug}`, { defaultValue: category.name });
             
