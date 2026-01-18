@@ -37,7 +37,34 @@ export const GoogleTranslate = () => {
     };
 
     addScript();
+
+    // Fix for navbar staying translated when clicking "Show original"
+    // Monitor Google Translate cookie to detect language changes
+    let previousLang = getCookie('googtrans');
+    
+    const checkInterval = setInterval(() => {
+      const currentLang = getCookie('googtrans');
+      
+      // If language changed from something to empty/null (Show original clicked)
+      if (previousLang && previousLang !== '/en/en' && (!currentLang || currentLang === '/en/en')) {
+        // Reload page to ensure everything reverts to English
+        window.location.reload();
+      }
+      
+      previousLang = currentLang;
+    }, 500);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(checkInterval);
   }, []);
+
+  // Helper function to get cookie value
+  const getCookie = (name: string) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift();
+    return null;
+  };
 
   return <div id="google_translate_element"></div>;
 };
