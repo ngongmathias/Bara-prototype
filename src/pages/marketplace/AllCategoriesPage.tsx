@@ -25,7 +25,6 @@ interface Category {
   name: string;
   slug: string;
   icon: any;
-  emoji: string;
   subcategories: string[];
 }
 
@@ -35,7 +34,6 @@ const categories: Category[] = [
     name: 'Vehicles',
     slug: 'motors',
     icon: Car,
-    emoji: '🚗',
     subcategories: ['Cars for Sale', 'Cars for Rent', 'Motorcycles', 'Boats', 'Trucks & Commercial Vehicles', 'Auto Accessories', 'Auto Parts & Spare Parts', 'Heavy Vehicles', 'Buses']
   },
   {
@@ -43,7 +41,6 @@ const categories: Category[] = [
     name: 'Properties',
     slug: 'property-sale',
     icon: Home,
-    emoji: '🏠',
     subcategories: ['Apartments for Sale', 'Apartments for Rent', 'Villas for Sale', 'Villas for Rent', 'Townhouses for Sale', 'Townhouses for Rent', 'Penthouses', 'Residential Land', 'Commercial for Sale', 'Commercial for Rent']
   },
   {
@@ -51,7 +48,6 @@ const categories: Category[] = [
     name: 'Mobiles & Tablets',
     slug: 'mobile-tablets',
     icon: Smartphone,
-    emoji: '📱',
     subcategories: ['Mobile Phones', 'Tablets', 'Accessories', 'Smart Watches', 'Mobile Numbers']
   },
   {
@@ -59,7 +55,6 @@ const categories: Category[] = [
     name: 'Jobs',
     slug: 'jobs',
     icon: Briefcase,
-    emoji: '💼',
     subcategories: ['Accounting, Finance & Banking', 'Engineering', 'IT & Software', 'Sales', 'Marketing', 'Healthcare', 'Education & Training', 'Hospitality & Tourism', 'Customer Service', 'Administration']
   },
   {
@@ -67,7 +62,6 @@ const categories: Category[] = [
     name: 'Home & Office Furniture - Decor',
     slug: 'furniture-garden',
     icon: Package,
-    emoji: '🛋️',
     subcategories: ['Furniture', 'Office Furniture', 'Home Decor', 'Garden & Outdoor', 'Lighting', 'Curtains & Blinds', 'Carpets & Rugs']
   },
   {
@@ -75,7 +69,6 @@ const categories: Category[] = [
     name: 'Electronics & Appliances',
     slug: 'electronics',
     icon: Tv,
-    emoji: '📺',
     subcategories: ['TV - Audio - Video', 'Computers - Accessories', 'Cameras', 'Home Appliances', 'Video Games', 'Gaming Consoles', 'Air Conditioners', 'Washing Machines', 'Refrigerators']
   },
   {
@@ -83,7 +76,6 @@ const categories: Category[] = [
     name: 'Fashion & Beauty',
     slug: 'fashion',
     icon: ShoppingBag,
-    emoji: '👗',
     subcategories: ["Women's Clothing", "Men's Clothing", 'Shoes', 'Bags', 'Watches', 'Jewelry', 'Beauty Products', 'Perfumes', 'Sunglasses']
   },
   {
@@ -91,7 +83,6 @@ const categories: Category[] = [
     name: 'Pets - Birds - Ornamental fish',
     slug: 'pets',
     icon: Users,
-    emoji: '🐾',
     subcategories: ['Dogs', 'Cats', 'Birds', 'Fish', 'Pet Accessories', 'Pet Food', 'Pet Services', 'Livestock']
   },
   {
@@ -99,7 +90,6 @@ const categories: Category[] = [
     name: 'Kids & Babies',
     slug: 'kids-babies',
     icon: Baby,
-    emoji: '👶',
     subcategories: ['Baby & Mom Healthcare', 'Baby Clothing', 'Baby Furniture', 'Toys', 'Strollers', 'Car Seats', 'Baby Gear', 'Kids Clothing', 'Kids Shoes']
   },
   {
@@ -107,7 +97,6 @@ const categories: Category[] = [
     name: 'Hobbies',
     slug: 'hobbies',
     icon: Palette,
-    emoji: '🎨',
     subcategories: ['Antiques - Collectibles', 'Bicycles', 'Books', 'Music Instruments', 'Sports Equipment', 'Camping & Outdoor', 'Art & Crafts']
   },
   {
@@ -115,7 +104,6 @@ const categories: Category[] = [
     name: 'Businesses & Industrial',
     slug: 'business-industrial',
     icon: Building2,
-    emoji: '🏢',
     subcategories: ['Agriculture', 'Construction', 'Equipment', 'Industrial Machinery', 'Restaurants', 'Retail Businesses', 'Manufacturing']
   },
   {
@@ -123,7 +111,6 @@ const categories: Category[] = [
     name: 'Services',
     slug: 'services',
     icon: Wrench,
-    emoji: '🔧',
     subcategories: ['Business', 'Car', 'Domestic', 'Education', 'Health', 'IT & Web', 'Legal Services', 'Moving & Storage', 'Event Services']
   }
 ];
@@ -177,7 +164,9 @@ export const AllCategoriesPage = () => {
               >
                 {/* Category Header */}
                 <div className="flex items-start gap-3 mb-4 pb-4 border-b border-gray-200">
-                  <span className="text-4xl">{category.emoji}</span>
+                  <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-6 h-6 text-gray-700" />
+                  </div>
                   <div className="flex-1">
                     <button
                       onClick={() => handleCategoryClick(category.slug)}
