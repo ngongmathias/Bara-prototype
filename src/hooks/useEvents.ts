@@ -143,8 +143,12 @@ export const useEventCategories = () => {
     
     try {
       const categoriesData = await EventsService.getEventCategories();
-      setCategories(categoriesData);
-      return categoriesData;
+      // Sort categories alphabetically by name
+      const sortedCategories = categoriesData.sort((a, b) => 
+        a.name.localeCompare(b.name)
+      );
+      setCategories(sortedCategories);
+      return sortedCategories;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch event categories';
       setError(errorMessage);
