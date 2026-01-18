@@ -5,11 +5,59 @@ import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Building2 } from "lucide-react";
+import { Building2, Users, UtensilsCrossed, Stethoscope, Wrench, Plane, Wine, Scissors, BookOpen, Coffee, Film, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, Zap, Car, Home, Scale, Bed, Heart } from "lucide-react";
 import { db } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
+
+// Icon mapping for categories
+const iconMap: { [key: string]: any } = {
+  'airports': Plane,
+  'banks': Building2,
+  'bars': Wine,
+  'barbers': Scissors,
+  'bookstores': BookOpen,
+  'cafes': Coffee,
+  'cinemas-theatres': Film,
+  'clinics': Stethoscope,
+  'clubs-professional': Users,
+  'clubs-leisure': Users,
+  'dentists': Stethoscope,
+  'doctors': Stethoscope,
+  'faith': Church,
+  'farms': Leaf,
+  'galleries-art': Palette,
+  'government': Landmark,
+  'hospitals': Hospital,
+  'hotels': Bed,
+  'lawyers': Scale,
+  'libraries': Book,
+  'markets': ShoppingBag,
+  'museums': Building2,
+  'parks': Trees,
+  'pharmacies': Pill,
+  'post-offices': Mail,
+  'recreation': Gamepad2,
+  'real-estate': Home,
+  'restaurants': UtensilsCrossed,
+  'salons': Scissors,
+  'schools': GraduationCap,
+  'services': Wrench,
+  'shopping': ShoppingBag,
+  'tours': Car,
+  'transportation': Truck,
+  'universities': GraduationCap,
+  'utilities': Zap,
+  'auto-repair': Wrench,
+  'coffee-shops': Coffee,
+  'gyms-fitness': Users,
+  'beauty-salons': Scissors,
+  'pet-services': Heart,
+  'accounting': Building2,
+  'car-dealerships': Car,
+  'cleaning-services': Wrench
+};
 
 interface Category {
   id: string;
@@ -143,23 +191,26 @@ const ListingsPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {categories.slice(0, 12).map((cat, index) => (
-                <motion.button
-                  key={cat.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                  onClick={() => handleCategoryClick(cat.slug)}
-                  className="bg-white border border-gray-200 rounded-xl p-4 hover:border-black hover:shadow-md transition-all duration-300 group"
-                >
-                  <div className="w-12 h-12 bg-gray-100 rounded-full mx-auto mb-3 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                    <Building2 className="w-6 h-6 text-black" />
-                  </div>
-                  <p className="text-sm font-roboto font-medium text-black text-center">
-                    {cat.name}
-                  </p>
-                </motion.button>
-              ))}
+              {categories.slice(0, 12).map((cat, index) => {
+                const IconComponent = iconMap[cat.slug] || Building2;
+                return (
+                  <motion.button
+                    key={cat.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    onClick={() => handleCategoryClick(cat.slug)}
+                    className="bg-white border border-gray-200 rounded-xl p-4 hover:border-black hover:shadow-md transition-all duration-300 group"
+                  >
+                    <div className="w-12 h-12 bg-gray-100 rounded-full mx-auto mb-3 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                      <IconComponent className="w-6 h-6 text-black" />
+                    </div>
+                    <p className="text-sm font-roboto font-medium text-black text-center">
+                      {cat.name}
+                    </p>
+                  </motion.button>
+                );
+              })}
             </div>
           )}
 
