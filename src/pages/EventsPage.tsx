@@ -12,7 +12,7 @@ import { InteractiveEventsMap } from "@/components/InteractiveEventsMap";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, ChevronLeft, ChevronRight, MapPin, Calendar, Clock, ArrowLeft, CalendarDays, ArrowUpDown, X, Hash, Maximize2, LayoutGrid } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight, MapPin, Calendar, Clock, ArrowLeft, CalendarDays, ArrowUpDown, X, Hash, Maximize2, LayoutGrid, Share2, Copy } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from 'react-router-dom';
 import { useEvents, useEventCategories } from '@/hooks/useEvents';
@@ -38,11 +38,21 @@ export const EventsPage = () => {
   const [timeFilter, setTimeFilter] = useState<'all' | 'active' | 'happening' | 'today' | 'tomorrow' | 'weekend'>('all');
   const [galleryModalOpen, setGalleryModalOpen] = useState(false);
   const [selectedGalleryEvent, setSelectedGalleryEvent] = useState<DatabaseEvent | null>(null);
+  const [urlCountryFilter, setUrlCountryFilter] = useState<string | null>(null);
 
   // Use real data from database
   const { events, loading, searchEvents} = useEvents();
   const { categories } = useEventCategories();
   const { selectedCountry } = useCountrySelection();
+
+  // Check URL for country parameter on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const countryParam = urlParams.get('country');
+    if (countryParam) {
+      setUrlCountryFilter(countryParam);
+    }
+  }, []);
 
   // Load events on component mount and when selected country changes
   useEffect(() => {
@@ -99,7 +109,11 @@ export const EventsPage = () => {
     const matchesStartDate = !startDate || new Date(event.start_date) >= new Date(startDate);
     const matchesEndDate = !endDate || new Date(event.end_date) <= new Date(endDate);
     
-    return matchesSearch && matchesCategory && matchesStartDate && matchesEndDate;
+    // Filter by URL country parameter if present
+    const matchesCountry = !urlCountryFilter || 
+                          (event.country_name && event.country_name.toLowerCase() === urlCountryFilter.toLowerCase());
+    
+    return matchesSearch && matchesCategory && matchesStartDate && matchesEndDate && matchesCountry;
   });
 
   // Sort events
@@ -179,6 +193,27 @@ export const EventsPage = () => {
     if (event && event.event_images && event.event_images.length > 0) {
       setSelectedGalleryEvent(event);
       setGalleryModalOpen(true);
+    }
+  };
+
+  // Generate country-specific shareable link
+  const getCountrySpecificLink = (countryName?: string) => {
+    const baseUrl = window.location.origin;
+    if (!countryName) {
+      return `${baseUrl}/events`;
+    }
+    return `${baseUrl}/events?country=${encodeURIComponent(countryName.toLowerCase())}`;
+  };
+
+  // Copy country-specific link to clipboard
+  const handleCopyCountryLink = async (countryName?: string) => {
+    const link = getCountrySpecificLink(countryName);
+    try {
+      await navigator.clipboard.writeText(link);
+      alert(`Link copied! Share this to show events in ${countryName || 'all countries'}`);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+      alert('Failed to copy link. Please try again.');
     }
   };
 
@@ -972,8 +1007,17 @@ export const EventsPage = () => {
                 </button>
               </div>
 
-              {/* Right Side: Create Event + Reset Filters */}
+              {/* Right Side: Share Link + Create Event + Reset Filters */}
               <div className="flex gap-3">
+                <Button
+                  onClick={() => handleCopyCountryLink(selectedCountry?.name)}
+                  variant="outline"
+                  className="px-6 py-2.5 h-auto text-sm font-semibold border-2 border-blue-500 text-blue-600 hover:bg-blue-50 transition-all"
+                  title={`Share events for ${selectedCountry?.name || 'all countries'}`}
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share {selectedCountry?.name || 'All'} Events
+                </Button>
                 <Button
                   onClick={() => {
                     setSearchQuery('');
