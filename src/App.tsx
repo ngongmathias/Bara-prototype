@@ -190,7 +190,9 @@ const AppRoutes = () => {
       
       {/* Authentication Routes */}
       <Route path="/sign-in" element={<SignInPage />} />
+      <Route path="/sign-in/*" element={<SignInPage />} />
       <Route path="/sign-up" element={<SignUpPage />} />
+      <Route path="/sign-up/*" element={<SignUpPage />} />
       <Route path="/user/sign-in" element={<UserSignInPage />} />
       <Route path="/user/sign-up" element={<UserSignUpPage />} />
       <Route path="/user/settings" element={<UserSettingsPage />} />
