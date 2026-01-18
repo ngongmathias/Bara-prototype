@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { MarketplaceListing, MarketplaceCategory, MarketplaceSubcategory } from '@/types/marketplace';
-import { MapPin, Bed, Bath, Maximize } from 'lucide-react';
+import { MapPin, Bed, Bath, Maximize, Home } from 'lucide-react';
 
 export const PropertyPage = () => {
   const location = useLocation();
@@ -175,7 +175,9 @@ export const PropertyPage = () => {
         <section className="border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-3">
             <div className="flex items-center gap-2 text-sm font-roboto">
-              <button onClick={() => navigate('/')} className="text-gray-600 hover:text-black">🏠</button>
+              <button onClick={() => navigate('/')} className="text-gray-600 hover:text-black flex items-center">
+                <Home className="w-4 h-4" />
+              </button>
               <span className="text-gray-400">›</span>
               <button onClick={() => navigate('/marketplace')} className="text-gray-600 hover:text-black">
                 Marketplace
