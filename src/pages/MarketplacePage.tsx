@@ -92,7 +92,7 @@ const categories: Category[] = [
     id: 'pets',
     name: 'Pets - Birds - Ornamental fish',
     slug: 'pets',
-    icon: Users,
+    icon: PawPrint,
     subcategories: ['Dogs', 'Cats', 'Birds', 'Fish', 'Pet Accessories', 'Pet Food', 'Pet Services', 'Livestock']
   },
   {
@@ -316,25 +316,15 @@ const MarketplacePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => {
               const Icon = category.icon;
-              const emoji = category.id === 'motors' ? '🚗' : 
-                           category.id === 'property-sale' ? '🏠' :
-                           category.id === 'mobile-tablets' ? '📱' :
-                           category.id === 'jobs' ? '💼' :
-                           category.id === 'furniture-garden' ? '🛋️' :
-                           category.id === 'electronics' ? '📺' :
-                           category.id === 'fashion' ? '👗' :
-                           category.id === 'pets' ? '🐾' :
-                           category.id === 'kids-babies' ? '👶' :
-                           category.id === 'hobbies' ? '🎨' :
-                           category.id === 'business-industrial' ? '🏢' :
-                           category.id === 'services' ? '🔧' : '📦';
               return (
                 <div
                   key={category.id}
                   className="bg-white rounded-lg p-6 hover:shadow-md transition-all hover:-translate-y-1"
                 >
                   <div className="flex items-start gap-3 mb-4">
-                    <span className="text-3xl">{emoji}</span>
+                    <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-6 h-6 text-gray-700" />
+                    </div>
                     <div className="flex-1">
                       <button
                         onClick={() => handleCategoryClick(category.slug)}
