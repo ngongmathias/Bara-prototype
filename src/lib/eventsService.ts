@@ -253,6 +253,13 @@ export class EventsService {
         include_all_statuses = false
       } = params;
 
+      console.log('🔧 [EventsService.searchEvents] Parameters:', {
+        include_all_statuses,
+        limit,
+        offset,
+        has_filters: !!(search_query || country_id || city_id || category)
+      });
+
       // Build the query without foreign key relationships
       let query = supabase
         .from('events')
@@ -261,7 +268,10 @@ export class EventsService {
       
       // Only filter by status if not including all statuses (for public-facing pages)
       if (!include_all_statuses) {
+        console.log('⚠️ Filtering by status: upcoming, ongoing only');
         query = query.in('event_status', ['upcoming', 'ongoing']);
+      } else {
+        console.log('✅ Including ALL statuses (no filter)');
       }
       
       query = query
