@@ -56,7 +56,7 @@ export const EventsPage = () => {
 
   // Load events on component mount and when selected country changes
   useEffect(() => {
-    searchEvents({ limit: 100, country_id: selectedCountry?.id });
+    searchEvents({ country_id: selectedCountry?.id });
   }, [searchEvents, selectedCountry]);
 
   // Debug logging - show what we're filtering
