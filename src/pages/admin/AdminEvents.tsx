@@ -102,8 +102,10 @@ export const AdminEvents = () => {
 
   // Load all events from database (including completed/past events for admin)
   useEffect(() => {
+    console.log('🚀 [AdminEvents] useEffect triggered - about to load events');
     const loadEvents = async () => {
       try {
+        console.log('📞 [AdminEvents] Calling searchEvents with params:', { limit: 10000, include_all_statuses: true });
         const result = await searchEvents({ 
           limit: 10000,
           include_all_statuses: true // Admin needs to see all events including past ones
