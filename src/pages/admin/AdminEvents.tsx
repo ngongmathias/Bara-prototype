@@ -80,6 +80,7 @@ export const AdminEvents = () => {
   const { events, loading, searchEvents } = useEvents();
   const { categories } = useEventCategories();
   const { createEvent, updateEvent, deleteEvent } = useEventManagement();
+  const [totalEventsCount, setTotalEventsCount] = useState(0);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -99,35 +100,25 @@ export const AdminEvents = () => {
     tickets: [{ name: '', price: '', selected: true }]
   });
 
-  // Load events (mock data for now)
+  // Load all events from database
   useEffect(() => {
-    const mockEvents: Event[] = [
-      {
-        id: '1',
-        title: 'African Tech Summit',
-        description: 'Join us for the largest gathering of tech innovators, entrepreneurs, and investors in Africa.',
-        date: '2023-10-15',
-        time: '9:00 AM - 5:00 PM',
-        location: 'Nairobi, Kenya',
-        placeName: 'Kenyatta International Convention Centre',
-        imageUrl: 'https://images.unsplash.com/photo-1505373879543-15cdf5d1d1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-        category: 'Technology',
-        organizer: 'Africa Tech Network',
-        organizerHandle: '@africatech',
-        price: 'Free - $250',
-        capacity: '1000 attendees',
-        website: 'https://example.com/africatechsummit',
-        tickets: [
-          { name: 'Early Bird', price: 'Free', selected: true },
-          { name: 'General Admission', price: '$150' },
-          { name: 'VIP', price: '$250' }
-        ],
-        createdAt: '2023-09-01',
-        updatedAt: '2023-09-01'
+    const loadEvents = async () => {
+      try {
+        const result = await searchEvents({ limit: 10000 }); // Fetch all events
+        if (result) {
+          setTotalEventsCount(result.total_count);
+        }
+      } catch (error) {
+        console.error('Error loading events:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load events',
+          variant: 'destructive'
+        });
       }
-    ];
-    setEvents(mockEvents);
-  }, []);
+    };
+    loadEvents();
+  }, [searchEvents]);
 
   // Filter events
   const filteredEvents = events.filter(event => {
@@ -529,7 +520,7 @@ export const AdminEvents = () => {
         {/* Events Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Events ({filteredEvents.length})</CardTitle>
+            <CardTitle>Events ({filteredEvents.length} of {totalEventsCount} total)</CardTitle>
           </CardHeader>
           <CardContent>
             {filteredEvents.length > 0 ? (

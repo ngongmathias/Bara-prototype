@@ -54,6 +54,7 @@ interface DashboardStats {
   totalEvents: number;
   upcomingEvents: number;
   ongoingEvents: number;
+  completedEvents: number;
 }
 
 interface RecentActivity {
@@ -117,7 +118,8 @@ export const AdminDashboard = () => {
     errorCount: 0,
     totalEvents: 0,
     upcomingEvents: 0,
-    ongoingEvents: 0
+    ongoingEvents: 0,
+    completedEvents: 0
   });
   const [businessMetrics, setBusinessMetrics] = useState<BusinessMetrics>({
     total: 0,
@@ -160,9 +162,10 @@ export const AdminDashboard = () => {
       ]);
 
       // Fetch events metrics
-      const [upcomingEvents, ongoingEvents] = await Promise.all([
+      const [upcomingEvents, ongoingEvents, completedEvents] = await Promise.all([
         supabase.from('events').select('id', { count: 'exact', head: true }).eq('event_status', 'upcoming').eq('is_public', true),
-        supabase.from('events').select('id', { count: 'exact', head: true }).eq('event_status', 'ongoing').eq('is_public', true)
+        supabase.from('events').select('id', { count: 'exact', head: true }).eq('event_status', 'ongoing').eq('is_public', true),
+        supabase.from('events').select('id', { count: 'exact', head: true }).eq('event_status', 'completed').eq('is_public', true)
       ]);
 
       // Fetch business metrics
@@ -252,7 +255,8 @@ export const AdminDashboard = () => {
         errorCount: errorCount || 0,
         totalEvents: eventsResult.count || 0,
         upcomingEvents: upcomingEvents.count || 0,
-        ongoingEvents: ongoingEvents.count || 0
+        ongoingEvents: ongoingEvents.count || 0,
+        completedEvents: completedEvents.count || 0
       });
 
       setBusinessMetrics({
@@ -476,6 +480,10 @@ export const AdminDashboard = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm font-roboto">Ongoing</span>
                 <Badge variant="default" className="bg-green-100 text-green-800">{stats.ongoingEvents}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-roboto">Past/Completed</span>
+                <Badge variant="default" className="bg-gray-100 text-gray-800">{stats.completedEvents}</Badge>
               </div>
               <Button 
                 variant="outline" 

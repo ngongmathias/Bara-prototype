@@ -69,6 +69,9 @@ export const AdminLayout = ({ children, title, subtitle }: AdminLayoutProps) => 
     if (path === "/admin/global-africa") return "Global Africa Management";
     if (path === "/admin/categories") return "Categories Management";
     if (path === "/admin/businesses") return "Businesses Management";
+    if (path === "/admin/events") return "Events Management";
+    if (path === "/admin/blog") return "Blog Management";
+    if (path.startsWith("/admin/blog/")) return "Blog Editor";
     if (path === "/admin/sponsored-ads") return "Sponsored Ads Management";
     if (path === "/admin/reviews") return "Reviews Management";
     if (path === "/admin/marketplace") return "Marketplace Administration";

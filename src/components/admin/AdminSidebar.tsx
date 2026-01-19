@@ -21,7 +21,8 @@ import {
   Image,
   Mail,
   Info,
-  Calendar
+  Calendar,
+  BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -73,6 +74,12 @@ const adminMenuItems = [
     icon: Calendar,
     path: "/admin/events",
     description: "Manage events and event details"
+  },
+  {
+    title: "Blog",
+    icon: BookOpen,
+    path: "/admin/blog",
+    description: "Manage blog posts and content"
   },
   {
     title: "Sponsored Ads",
