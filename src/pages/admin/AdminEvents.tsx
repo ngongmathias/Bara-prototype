@@ -109,6 +109,12 @@ export const AdminEvents = () => {
           include_all_statuses: true // Admin needs to see all events including past ones
         });
         if (result) {
+          console.log('Admin Events - Total from DB:', result.total_count);
+          console.log('Admin Events - Events loaded:', result.events.length);
+          console.log('Admin Events - Event statuses:', result.events.reduce((acc: any, e: any) => {
+            acc[e.event_status] = (acc[e.event_status] || 0) + 1;
+            return acc;
+          }, {}));
           setTotalEventsCount(result.total_count);
         }
       } catch (error) {
