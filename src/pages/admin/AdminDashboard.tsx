@@ -51,6 +51,9 @@ interface DashboardStats {
   avgRating: number;
   recentActivity: number;
   errorCount: number;
+  totalEvents: number;
+  upcomingEvents: number;
+  ongoingEvents: number;
 }
 
 interface RecentActivity {
@@ -111,7 +114,10 @@ export const AdminDashboard = () => {
     recentGrowth: 0,
     avgRating: 0,
     recentActivity: 0,
-    errorCount: 0
+    errorCount: 0,
+    totalEvents: 0,
+    upcomingEvents: 0,
+    ongoingEvents: 0
   });
   const [businessMetrics, setBusinessMetrics] = useState<BusinessMetrics>({
     total: 0,
@@ -143,13 +149,20 @@ export const AdminDashboard = () => {
       setRefreshing(true);
       
       // Fetch basic counts
-      const [usersResult, businessesResult, citiesResult, countriesResult, reviewsResult, logsResult] = await Promise.all([
+      const [usersResult, businessesResult, citiesResult, countriesResult, reviewsResult, logsResult, eventsResult] = await Promise.all([
         supabase.from('users').select('id', { count: 'exact', head: true }),
         supabase.from('businesses').select('id', { count: 'exact', head: true }),
         supabase.from('cities').select('id', { count: 'exact', head: true }),
         supabase.from('countries').select('id', { count: 'exact', head: true }),
         supabase.from('reviews').select('id', { count: 'exact', head: true }),
-        supabase.from('user_logs').select('id', { count: 'exact', head: true })
+        supabase.from('user_logs').select('id', { count: 'exact', head: true }),
+        supabase.from('events').select('id', { count: 'exact', head: true }).eq('is_public', true)
+      ]);
+
+      // Fetch events metrics
+      const [upcomingEvents, ongoingEvents] = await Promise.all([
+        supabase.from('events').select('id', { count: 'exact', head: true }).eq('event_status', 'upcoming').eq('is_public', true),
+        supabase.from('events').select('id', { count: 'exact', head: true }).eq('event_status', 'ongoing').eq('is_public', true)
       ]);
 
       // Fetch business metrics
@@ -236,7 +249,10 @@ export const AdminDashboard = () => {
         recentGrowth: growthRate,
         avgRating: Math.round(avgRating * 10) / 10,
         recentActivity: recentActivity || 0,
-        errorCount: errorCount || 0
+        errorCount: errorCount || 0,
+        totalEvents: eventsResult.count || 0,
+        upcomingEvents: upcomingEvents.count || 0,
+        ongoingEvents: ongoingEvents.count || 0
       });
 
       setBusinessMetrics({
@@ -435,7 +451,43 @@ export const AdminDashboard = () => {
       </div>
 
       {/* Detailed Metrics Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+        {/* Events Metrics */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-comfortaa flex items-center space-x-2">
+              <Calendar className="w-5 h-5" />
+              <span>Events Overview</span>
+            </CardTitle>
+            <CardDescription className="font-roboto">
+              Event statistics and status
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-roboto">Total Events</span>
+                <Badge variant="outline">{stats.totalEvents}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-roboto">Upcoming</span>
+                <Badge variant="default" className="bg-blue-100 text-blue-800">{stats.upcomingEvents}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-roboto">Ongoing</span>
+                <Badge variant="default" className="bg-green-100 text-green-800">{stats.ongoingEvents}</Badge>
+              </div>
+              <Button 
+                variant="outline" 
+                className="w-full mt-2"
+                onClick={() => navigate('/admin/events')}
+              >
+                Manage Events
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Business Metrics */}
         <Card>
           <CardHeader>

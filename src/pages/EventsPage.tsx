@@ -42,6 +42,9 @@ export const EventsPage = () => {
 
   // Use real data from database
   const { events, loading, searchEvents} = useEvents();
+  const [totalEventsCount, setTotalEventsCount] = useState(0);
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const eventsLimit = 100;
   const { categories } = useEventCategories();
   const { selectedCountry } = useCountrySelection();
 
@@ -56,8 +59,18 @@ export const EventsPage = () => {
 
   // Load events on component mount and when selected country changes
   useEffect(() => {
-    searchEvents({ country_id: selectedCountry?.id });
-  }, [searchEvents, selectedCountry]);
+    const loadEvents = async () => {
+      const result = await searchEvents({ 
+        country_id: selectedCountry?.id,
+        limit: eventsLimit,
+        offset: currentOffset
+      });
+      if (result) {
+        setTotalEventsCount(result.total_count);
+      }
+    };
+    loadEvents();
+  }, [searchEvents, selectedCountry, currentOffset]);
 
   // Debug logging - show what we're filtering
   useEffect(() => {
@@ -931,8 +944,13 @@ export const EventsPage = () => {
               {/* Results Count */}
               <div className="pt-6 border-t border-gray-200">
                 <p className="text-base text-gray-600">
-                  <span className="font-bold text-gray-900 text-lg">{sortedEvents.length}</span> events found
+                  Showing <span className="font-bold text-gray-900 text-lg">{sortedEvents.length}</span> of <span className="font-bold text-gray-900 text-lg">{totalEventsCount}</span> total events
                 </p>
+                {totalEventsCount > eventsLimit && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Displaying {eventsLimit} events per page
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -1180,6 +1198,19 @@ export const EventsPage = () => {
                       </div>
                     </div>
                   )}
+
+              {/* Load More Button */}
+              {totalEventsCount > events.length && (
+                <div className="flex justify-center mt-12">
+                  <Button
+                    onClick={() => setCurrentOffset(prev => prev + eventsLimit)}
+                    className="px-8 py-3 text-base font-semibold bg-black hover:bg-gray-800 text-white"
+                    disabled={loading}
+                  >
+                    {loading ? 'Loading...' : `Load More Events (${events.length} of ${totalEventsCount})`}
+                  </Button>
+                </div>
+              )}
 
               {/* Pagination */}
               {totalPages > 1 && (
