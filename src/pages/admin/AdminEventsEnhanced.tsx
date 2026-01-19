@@ -75,6 +75,8 @@ export const AdminEventsEnhanced = () => {
   const [editingEvent, setEditingEvent] = useState<DatabaseEvent | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const eventsPerPage = 50;
   
   const { toast } = useToast();
   const { events, loading, searchEvents } = useEvents();
@@ -137,6 +139,17 @@ export const AdminEventsEnhanced = () => {
     const matchesCategory = selectedCategory === 'all' || event.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
+  const startIndex = (currentPage - 1) * eventsPerPage;
+  const endIndex = startIndex + eventsPerPage;
+  const paginatedEvents = filteredEvents.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory]);
 
   const handleImageUpload = async (file: File) => {
     setIsUploadingImage(true);
@@ -834,23 +847,27 @@ export const AdminEventsEnhanced = () => {
                 <p className="mt-2 text-gray-500">Loading events...</p>
               </div>
             ) : filteredEvents.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Event</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Country</TableHead>
-                    <TableHead>City</TableHead>
-                    <TableHead>Venue</TableHead>
-                    <TableHead>Organizer</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Capacity</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredEvents.map((event) => (
+              <>
+                <div className="mb-4 text-sm text-gray-600">
+                  Showing {startIndex + 1}-{Math.min(endIndex, filteredEvents.length)} of {filteredEvents.length} events
+                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Event</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Date & Time</TableHead>
+                      <TableHead>Country</TableHead>
+                      <TableHead>City</TableHead>
+                      <TableHead>Venue</TableHead>
+                      <TableHead>Organizer</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Capacity</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedEvents.map((event) => (
                     <TableRow key={event.id}>
                       <TableCell>
                         <div className="flex items-center space-x-3">
@@ -948,6 +965,34 @@ export const AdminEventsEnhanced = () => {
                   ))}
                 </TableBody>
               </Table>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <div className="text-sm text-gray-600">
+                    Page {currentPage} of {totalPages}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
+              </>
             ) : (
               <div className="text-center py-8">
                 <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
