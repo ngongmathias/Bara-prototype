@@ -555,9 +555,12 @@ export class EventsService {
     try {
       console.log('Creating event with data:', eventData);
       
+      // Remove hashtags field as it doesn't exist in the database schema
+      const { hashtags, ...cleanEventData } = eventData as any;
+      
       const { data, error } = await supabase
         .from('events')
-        .insert([eventData])
+        .insert([cleanEventData])
         .select('*')
         .single();
 
@@ -620,9 +623,12 @@ export class EventsService {
   // Update event
   static async updateEvent(eventId: string, eventData: Partial<Event>): Promise<Event> {
     try {
+      // Remove hashtags field as it doesn't exist in the database schema
+      const { hashtags, ...cleanEventData } = eventData as any;
+      
       const { data, error } = await supabase
         .from('events')
-        .update(eventData)
+        .update(cleanEventData)
         .eq('id', eventId)
         .select('*')
         .single();
