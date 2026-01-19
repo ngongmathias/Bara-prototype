@@ -32,6 +32,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { calculateEventStatus } from "@/utils/eventHelpers";
 import { FinancialKPIs } from "@/components/admin/dashboard/FinancialKPIs";
 import { RevenueChart } from "@/components/admin/dashboard/RevenueChart";
 import { BusinessGrowthChart } from "@/components/admin/dashboard/BusinessGrowthChart";
@@ -151,22 +152,34 @@ export const AdminDashboard = () => {
       setRefreshing(true);
       
       // Fetch basic counts
-      const [usersResult, businessesResult, citiesResult, countriesResult, reviewsResult, logsResult, eventsResult] = await Promise.all([
+      const [usersResult, businessesResult, citiesResult, countriesResult, reviewsResult, logsResult] = await Promise.all([
         supabase.from('users').select('id', { count: 'exact', head: true }),
         supabase.from('businesses').select('id', { count: 'exact', head: true }),
         supabase.from('cities').select('id', { count: 'exact', head: true }),
         supabase.from('countries').select('id', { count: 'exact', head: true }),
         supabase.from('reviews').select('id', { count: 'exact', head: true }),
-        supabase.from('user_logs').select('id', { count: 'exact', head: true }),
-        supabase.from('events').select('id', { count: 'exact', head: true }).eq('is_public', true)
+        supabase.from('user_logs').select('id', { count: 'exact', head: true })
       ]);
 
-      // Fetch events metrics
-      const [upcomingEvents, ongoingEvents, completedEvents] = await Promise.all([
-        supabase.from('events').select('id', { count: 'exact', head: true }).eq('event_status', 'upcoming').eq('is_public', true),
-        supabase.from('events').select('id', { count: 'exact', head: true }).eq('event_status', 'ongoing').eq('is_public', true),
-        supabase.from('events').select('id', { count: 'exact', head: true }).eq('event_status', 'completed').eq('is_public', true)
-      ]);
+      // Fetch all events with dates for real-time status calculation
+      const { data: allEvents } = await supabase
+        .from('events')
+        .select('id, start_date, end_date, event_status')
+        .eq('is_public', true);
+
+      // Calculate real-time event status counts
+      let upcomingCount = 0;
+      let ongoingCount = 0;
+      let completedCount = 0;
+
+      if (allEvents) {
+        allEvents.forEach(event => {
+          const realTimeStatus = calculateEventStatus(event.start_date, event.end_date, event.event_status);
+          if (realTimeStatus === 'upcoming') upcomingCount++;
+          else if (realTimeStatus === 'ongoing') ongoingCount++;
+          else if (realTimeStatus === 'completed') completedCount++;
+        });
+      }
 
       // Fetch business metrics
       const [activeBusinesses, pendingBusinesses, verifiedBusinesses, premiumBusinesses, sponsoredBusinesses] = await Promise.all([
@@ -253,10 +266,10 @@ export const AdminDashboard = () => {
         avgRating: Math.round(avgRating * 10) / 10,
         recentActivity: recentActivity || 0,
         errorCount: errorCount || 0,
-        totalEvents: eventsResult.count || 0,
-        upcomingEvents: upcomingEvents.count || 0,
-        ongoingEvents: ongoingEvents.count || 0,
-        completedEvents: completedEvents.count || 0
+        totalEvents: allEvents?.length || 0,
+        upcomingEvents: upcomingCount,
+        ongoingEvents: ongoingCount,
+        completedEvents: completedCount
       });
 
       setBusinessMetrics({
