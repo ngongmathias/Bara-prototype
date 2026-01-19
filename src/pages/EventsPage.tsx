@@ -614,9 +614,29 @@ export const EventsPage = () => {
             )}
             
             <div className="pt-6">
-              <Button className="w-full text-white font-semibold py-4 px-6 rounded-lg text-lg">
-              Get Tickets
-            </Button>
+              {event.is_free ? (
+                <Button 
+                  className="w-full text-white font-semibold py-4 px-6 rounded-lg text-lg bg-green-600 hover:bg-green-700"
+                  onClick={() => {
+                    // TODO: Implement RSVP functionality
+                    alert('RSVP functionality coming soon! For now, please contact the organizer directly.');
+                  }}
+                >
+                  RSVP - Free Event
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <Button 
+                    disabled
+                    className="w-full font-semibold py-4 px-6 rounded-lg text-lg opacity-50 cursor-not-allowed"
+                  >
+                    Ticket Sales Coming Soon
+                  </Button>
+                  <p className="text-sm text-gray-600 text-center">
+                    {event.entry_fee && event.currency ? `Price: ${event.currency} ${event.entry_fee}` : 'Paid Event'} - Contact organizer for tickets
+                  </p>
+                </div>
+              )}
           </div>
         </div>
       </div>

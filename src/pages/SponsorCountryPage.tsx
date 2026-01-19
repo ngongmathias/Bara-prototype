@@ -8,13 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { 
   Building, 
   Globe, 
   Image as ImageIcon, 
   MapPin, 
-  CreditCard,
+  Mail,
   CheckCircle,
   AlertCircle,
   Upload,
@@ -33,46 +33,27 @@ interface Country {
   flag_url?: string;
 }
 
-interface PaymentDialogProps {
+interface ContactDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onPaymentSuccess: () => void;
   amount: number;
   companyName: string;
+  countryName: string;
 }
 
-const PaymentDialog: React.FC<PaymentDialogProps> = ({ 
+const ContactDialog: React.FC<ContactDialogProps> = ({ 
   isOpen, 
   onClose, 
-  onPaymentSuccess, 
   amount, 
-  companyName 
+  companyName,
+  countryName
 }) => {
-  const { t } = useTranslation();
-  const [cardDetails, setCardDetails] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardholderName: ''
-  });
-  const [isProcessing, setIsProcessing] = useState(false);
-  const { toast } = useToast();
-
-  const handlePayment = async () => {
-    setIsProcessing(true);
-    
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // In a real implementation, you would integrate with Stripe or another payment processor
-    toast({
-      title: t('sponsorCountry.payment.successTitle'),
-      description: t('sponsorCountry.payment.successDescription', { amount, companyName }),
-    });
-    
-    setIsProcessing(false);
-    onPaymentSuccess();
-    onClose();
+  const handleContactSales = () => {
+    const subject = encodeURIComponent(`Country Sponsorship Inquiry - ${countryName}`);
+    const body = encodeURIComponent(
+      `Hi BARA Team,\n\nI'm interested in sponsoring the ${countryName} page.\n\nCompany: ${companyName}\nPackage: $${amount} USD\n\nPlease contact me with payment options and next steps.\n\nThank you!`
+    );
+    window.location.href = `mailto:sponsorship@baraafrika.com?subject=${subject}&body=${body}`;
   };
 
   if (!isOpen) return null;
@@ -82,74 +63,46 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="flex items-center">
-            <CreditCard className="w-5 h-5 mr-2" />
-            {t('sponsorCountry.payment.detailsTitle')}
+            <Mail className="w-5 h-5 mr-2" />
+            Country Sponsorship Inquiry
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Payment Setup Notice */}
+          <Alert className="border-yellow-500 bg-yellow-50">
+            <AlertCircle className="h-4 w-4 text-yellow-600" />
+            <AlertTitle className="text-yellow-800 font-semibold">Payment Processing Coming Soon</AlertTitle>
+            <AlertDescription className="text-yellow-700">
+              We're setting up secure payment processing. Contact us to sponsor now and get priority placement!
+            </AlertDescription>
+          </Alert>
+
           <div className="bg-blue-50 p-3 rounded-lg">
             <p className="text-sm text-blue-800">
-              <strong>{t('sponsorCountry.payment.amountLabel')}:</strong> ${amount} USD
+              <strong>Country:</strong> {countryName}
             </p>
             <p className="text-sm text-blue-800">
-              <strong>{t('sponsorCountry.payment.companyLabel')}:</strong> {companyName}
+              <strong>Package:</strong> ${amount} USD
+            </p>
+            <p className="text-sm text-blue-800">
+              <strong>Company:</strong> {companyName}
             </p>
           </div>
-          
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium">{t('sponsorCountry.payment.cardNumber')}</label>
-              <Input
-                placeholder={t('sponsorCountry.payment.cardNumberPlaceholder')}
-                value={cardDetails.cardNumber}
-                onChange={(e) => setCardDetails(prev => ({ ...prev, cardNumber: e.target.value }))}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">{t('sponsorCountry.payment.expiryDate')}</label>
-                <Input
-                  placeholder={t('sponsorCountry.payment.expiryPlaceholder')}
-                  value={cardDetails.expiryDate}
-                  onChange={(e) => setCardDetails(prev => ({ ...prev, expiryDate: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">{t('sponsorCountry.payment.cvv')}</label>
-                <Input
-                  placeholder={t('sponsorCountry.payment.cvvPlaceholder')}
-                  value={cardDetails.cvv}
-                  onChange={(e) => setCardDetails(prev => ({ ...prev, cvv: e.target.value }))}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium">{t('sponsorCountry.payment.cardholderName')}</label>
-              <Input
-                placeholder={t('sponsorCountry.payment.cardholderPlaceholder')}
-                value={cardDetails.cardholderName}
-                onChange={(e) => setCardDetails(prev => ({ ...prev, cardholderName: e.target.value }))}
-              />
-            </div>
-          </div>
-          
-          <div className="flex space-x-3 pt-4">
+
+          <div className="flex gap-3 pt-4">
             <Button
               variant="outline"
               onClick={onClose}
               className="flex-1"
-              disabled={isProcessing}
             >
-              {t('common.cancel')}
+              Cancel
             </Button>
             <Button
-              onClick={handlePayment}
-              disabled={isProcessing}
-              className="flex-1 bg-green-600 hover:bg-green-700"
+              onClick={handleContactSales}
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
             >
-              {isProcessing ? t('common.loading') : t('sponsorCountry.payment.payAmount', { amount })}
+              <Mail className="w-4 h-4 mr-2" />
+              Contact Sales
             </Button>
           </div>
         </CardContent>
@@ -167,7 +120,8 @@ export const SponsorCountryPage: React.FC = () => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [showContactDialog, setShowContactDialog] = useState(false);
+  const [selectedCountryName, setSelectedCountryName] = useState('');
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [bannerImageUrl, setBannerImageUrl] = useState<string>('');
   
@@ -248,10 +202,13 @@ export const SponsorCountryPage: React.FC = () => {
       return;
     }
 
-    setShowPaymentDialog(true);
+    // Get selected country name
+    const selectedCountry = countries.find(c => c.id === formData.country_id);
+    setSelectedCountryName(selectedCountry?.name || 'Selected Country');
+    setShowContactDialog(true);
   };
 
-  const handlePaymentSuccess = async () => {
+  const handleContactSuccess = async () => {
     setSubmitting(true);
     
     try {
@@ -557,12 +514,12 @@ export const SponsorCountryPage: React.FC = () => {
         </div>
       </div>
 
-      <PaymentDialog
-        isOpen={showPaymentDialog}
-        onClose={() => setShowPaymentDialog(false)}
-        onPaymentSuccess={handlePaymentSuccess}
+      <ContactDialog
+        isOpen={showContactDialog}
+        onClose={() => setShowContactDialog(false)}
         amount={25}
         companyName={formData.company_name}
+        countryName={selectedCountryName}
       />
       
       <Footer />

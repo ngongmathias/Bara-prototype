@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, X, Star, Zap, CheckCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Check, X, Star, Zap, CheckCircle, AlertCircle, Mail } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
 
 type Plan = 'normal' | 'pro' | 'premium';
 
@@ -60,16 +62,29 @@ export const PremiumFeatures = () => {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isYearly, setIsYearly] = useState(false);
 
+  const { toast } = useToast();
+
   const handleSelectPlan = (plan: Plan) => {
-    setSelectedPlan(plan);
-    setIsPaymentOpen(true);
+    if (plan === 'normal') {
+      // Free plan - show activation message
+      toast({
+        title: "Free Plan Active",
+        description: "You're using the free plan. All basic features are available!",
+      });
+    } else {
+      // Paid plans - show coming soon message
+      setSelectedPlan(plan);
+      setIsPaymentOpen(true);
+    }
   };
 
-  const handlePaymentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // In a real implementation, this would process the payment
-    console.log('Payment submitted for plan:', selectedPlan);
-    setIsPaymentOpen(false);
+  const handleContactSales = () => {
+    const planName = selectedPlan === 'pro' ? 'Pro' : 'Premium';
+    const subject = encodeURIComponent(`Premium Plan Inquiry - ${planName}`);
+    const body = encodeURIComponent(
+      `Hi BARA Team,\n\nI'm interested in upgrading to the ${planName} plan.\n\nPlease contact me with payment options and setup instructions.\n\nThank you!`
+    );
+    window.location.href = `mailto:support@baraafrika.com?subject=${subject}&body=${body}`;
   };
 
   return (
@@ -175,17 +190,24 @@ export const PremiumFeatures = () => {
         </div>
       </div>
 
-      {/* Payment Modal */}
+      {/* Contact Sales Modal for Paid Plans */}
       <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>{t('premiumFeatures.payment.title')}</DialogTitle>
+            <DialogTitle>Premium Plan Upgrade</DialogTitle>
             <DialogDescription>
-              {selectedPlan === 'normal' 
-                ? t('premiumFeatures.payment.freeDescription')
-                : t('premiumFeatures.payment.planDescription', { plan: selectedPlan ? t(`premiumFeatures.planNames.${selectedPlan}`) : '' })}
+              {selectedPlan ? `Upgrade to ${selectedPlan === 'pro' ? 'Pro' : 'Premium'} plan` : ''}
             </DialogDescription>
           </DialogHeader>
+
+          {/* Payment Setup Notice */}
+          <Alert className="border-yellow-500 bg-yellow-50">
+            <AlertCircle className="h-4 w-4 text-yellow-600" />
+            <AlertTitle className="text-yellow-800 font-semibold">Payment Processing Coming Soon</AlertTitle>
+            <AlertDescription className="text-yellow-700">
+              We're setting up secure payment processing. Contact us to upgrade early and get priority access!
+            </AlertDescription>
+          </Alert>
           
           <div className="mt-4 p-4 bg-muted/30 rounded-lg">
             <div className="flex justify-between items-center">
@@ -214,68 +236,35 @@ export const PremiumFeatures = () => {
             </div>
           </div>
 
-          <form onSubmit={handlePaymentSubmit} className="space-y-4 mt-6">
+          <div className="space-y-4 mt-6">
             <div className="space-y-2">
-              <Label htmlFor="name">{t('premiumFeatures.form.fullName')}</Label>
-              <Input id="name" placeholder={t('premiumFeatures.form.fullNamePlaceholder')} required />
+              <Label htmlFor="name">Your Name</Label>
+              <Input id="name" placeholder="John Doe" />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="email">{t('premiumFeatures.form.email')}</Label>
-              <Input id="email" type="email" placeholder={t('premiumFeatures.form.emailPlaceholder')} required />
+              <Label htmlFor="email">Email Address</Label>
+              <Input id="email" type="email" placeholder="you@example.com" />
             </div>
 
-            {selectedPlan !== 'normal' && (
-              <div className="space-y-2">
-                <Label>{t('premiumFeatures.payment.method')}</Label>
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center space-x-2 mb-4">
-                    <div className="w-8 h-6 bg-muted-foreground/10 rounded-sm flex items-center justify-center">
-                      <svg className="w-4 h-4 text-muted-foreground" viewBox="0 0 24 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21.5 0H2.5C1.125 0 0 1.125 0 2.5V13.5C0 14.875 1.125 16 2.5 16H21.5C22.875 16 24 14.875 24 13.5V2.5C24 1.125 22.875 0 21.5 0Z" fill="#0066CC"/>
-                        <path d="M16 8C16 5.8 14.2 4 12 4C9.8 4 8 5.8 8 8C8 10.2 9.8 12 12 12C14.2 12 16 10.2 16 8Z" fill="white"/>
-                        <path d="M12 10C10.9 10 10 9.1 10 8C10 6.9 10.9 6 12 6C13.1 6 14 6.9 14 8C14 9.1 13.1 10 12 10Z" fill="#0066CC"/>
-                      </svg>
-                    </div>
-                    <span className="text-sm font-medium">{t('premiumFeatures.payment.card')}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-xs" htmlFor="card-number">{t('premiumFeatures.payment.cardNumber')}</Label>
-                      <Input id="card-number" placeholder={t('premiumFeatures.payment.cardNumberPlaceholder')} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs" htmlFor="expiry">{t('premiumFeatures.payment.expiry')}</Label>
-                      <Input id="expiry" placeholder={t('premiumFeatures.payment.expiryPlaceholder')} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs" htmlFor="cvc">{t('premiumFeatures.payment.cvc')}</Label>
-                      <Input id="cvc" placeholder={t('premiumFeatures.payment.cvcPlaceholder')} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs" htmlFor="zip">{t('premiumFeatures.payment.zip')}</Label>
-                      <Input id="zip" placeholder={t('premiumFeatures.payment.zipPlaceholder')} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md mt-6">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                <strong>{t('premiumFeatures.notice.label')} </strong>{t('premiumFeatures.notice.text')}
-              </p>
+            <div className="space-y-2">
+              <Label htmlFor="message">Message (Optional)</Label>
+              <Input id="message" placeholder="Tell us about your business..." />
             </div>
 
             <div className="mt-6">
-              <Button type="submit" className="w-full py-6 text-base">
-                {selectedPlan === 'normal' ? t('premiumFeatures.actions.completeFree') : t('premiumFeatures.actions.confirmPayment')}
+              <Button 
+                onClick={handleContactSales}
+                className="w-full py-6 text-base bg-blue-600 hover:bg-blue-700"
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                Contact Sales Team
               </Button>
               <p className="mt-2 text-center text-sm text-muted-foreground">
-                {t('premiumFeatures.legal.agree')}
+                We'll respond within 24 hours with payment options
               </p>
             </div>
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
