@@ -109,12 +109,19 @@ export const AdminEvents = () => {
           include_all_statuses: true // Admin needs to see all events including past ones
         });
         if (result) {
-          console.log('Admin Events - Total from DB:', result.total_count);
-          console.log('Admin Events - Events loaded:', result.events.length);
-          console.log('Admin Events - Event statuses:', result.events.reduce((acc: any, e: any) => {
+          console.log('🔍 [Admin Events Debug - v2.0]', new Date().toISOString());
+          console.log('📊 Total from DB:', result.total_count);
+          console.log('📦 Events loaded:', result.events.length);
+          console.log('📈 Event statuses:', result.events.reduce((acc: any, e: any) => {
             acc[e.event_status] = (acc[e.event_status] || 0) + 1;
             return acc;
           }, {}));
+          console.log('🎯 First 3 events:', result.events.slice(0, 3).map((e: any) => ({
+            title: e.title,
+            status: e.event_status,
+            start: e.start_date,
+            end: e.end_date
+          })));
           setTotalEventsCount(result.total_count);
         }
       } catch (error) {
