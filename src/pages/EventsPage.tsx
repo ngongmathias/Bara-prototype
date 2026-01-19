@@ -40,6 +40,34 @@ export const EventsPage = () => {
   const [selectedGalleryEvent, setSelectedGalleryEvent] = useState<DatabaseEvent | null>(null);
   const [urlCountryFilter, setUrlCountryFilter] = useState<string | null>(null);
 
+  // Helper function to format event date for display
+  const formatEventDate = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const isSameDay = start.toDateString() === end.toDateString();
+    
+    if (isSameDay) {
+      return start.toLocaleDateString();
+    } else {
+      // Multi-day event - show date range
+      return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    }
+  };
+
+  // Helper function to format event time for display
+  const formatEventTime = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const isSameDay = start.toDateString() === end.toDateString();
+    
+    if (isSameDay) {
+      return `${start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    } else {
+      // Multi-day event - show opening time
+      return `Opens ${start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    }
+  };
+
   // Use real data from database
   const { events, loading, searchEvents} = useEvents();
   const [totalEventsCount, setTotalEventsCount] = useState(0);
@@ -443,17 +471,42 @@ export const EventsPage = () => {
           <div className="flex items-start">
               <Calendar className="h-6 w-6 text-black mr-3 mt-1 flex-shrink-0" />
             <div>
-                <p className="text-lg text-gray-700 font-medium">
-                  {new Date(event.start_date).toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
-                </p>
-                <p className="text-gray-600">
-                  {new Date(event.start_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {new Date(event.end_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                </p>
+                {(() => {
+                  const startDate = new Date(event.start_date);
+                  const endDate = new Date(event.end_date);
+                  const isSameDay = startDate.toDateString() === endDate.toDateString();
+                  
+                  if (isSameDay) {
+                    // Single day event
+                    return (
+                      <>
+                        <p className="text-lg text-gray-700 font-medium">
+                          {startDate.toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          })}
+                        </p>
+                        <p className="text-gray-600">
+                          {startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {endDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </p>
+                      </>
+                    );
+                  } else {
+                    // Multi-day event
+                    return (
+                      <>
+                        <p className="text-lg text-gray-700 font-medium">
+                          {startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - {endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        </p>
+                        <p className="text-gray-600">
+                          Opens: {startDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </p>
+                      </>
+                    );
+                  }
+                })()}
                 <p className="text-sm text-black mt-1 cursor-pointer hover:underline">Add to calendar</p>
             </div>
           </div>
@@ -1118,8 +1171,8 @@ export const EventsPage = () => {
                             <EventCard
                               id={event.id}
                               title={event.title}
-                              date={new Date(event.start_date).toLocaleDateString()}
-                              time={`${new Date(event.start_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(event.end_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                              date={formatEventDate(event.start_date, event.end_date)}
+                              time={formatEventTime(event.start_date, event.end_date)}
                               location={event.city_name ? `${event.city_name}, ${event.country_name}` : event.venue_address || ''}
                               imageUrl={event.event_image_url || ''}
                               category={event.category_name || event.category}
@@ -1168,8 +1221,8 @@ export const EventsPage = () => {
                             <EventCard
                               id={event.id}
                               title={event.title}
-                              date={new Date(event.start_date).toLocaleDateString()}
-                              time={`${new Date(event.start_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(event.end_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                              date={formatEventDate(event.start_date, event.end_date)}
+                              time={formatEventTime(event.start_date, event.end_date)}
                               location={event.city_name ? `${event.city_name}, ${event.country_name}` : event.venue_address || ''}
                               imageUrl={event.event_image_url || ''}
                               category={event.category_name || event.category}

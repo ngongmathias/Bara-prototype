@@ -100,11 +100,14 @@ export const AdminEvents = () => {
     tickets: [{ name: '', price: '', selected: true }]
   });
 
-  // Load all events from database
+  // Load all events from database (including completed/past events for admin)
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const result = await searchEvents({ limit: 10000 }); // Fetch all events
+        const result = await searchEvents({ 
+          limit: 10000,
+          include_all_statuses: true // Admin needs to see all events including past ones
+        });
         if (result) {
           setTotalEventsCount(result.total_count);
         }

@@ -137,6 +137,7 @@ export interface EventSearchParams {
   end_date?: string;
   limit?: number;
   offset?: number;
+  include_all_statuses?: boolean; // For admin: include completed/cancelled events
 }
 
 export interface EventSearchResult {
@@ -240,7 +241,7 @@ export class EventsService {
   static async searchEvents(params: EventSearchParams = {}): Promise<EventSearchResult> {
     try {
       const {
-        search_query = '',
+        search_query,
         country_id,
         city_id,
         category,
@@ -248,15 +249,22 @@ export class EventsService {
         start_date,
         end_date,
         limit = 20,
-        offset = 0
+        offset = 0,
+        include_all_statuses = false
       } = params;
 
       // Build the query without foreign key relationships
       let query = supabase
         .from('events')
         .select('*')
-        .eq('is_public', true)
-        .in('event_status', ['upcoming', 'ongoing'])
+        .eq('is_public', true);
+      
+      // Only filter by status if not including all statuses (for public-facing pages)
+      if (!include_all_statuses) {
+        query = query.in('event_status', ['upcoming', 'ongoing']);
+      }
+      
+      query = query
         .order('start_date', { ascending: true })
         .range(offset, offset + limit - 1);
 
@@ -297,11 +305,15 @@ export class EventsService {
       // Get total count separately to avoid any potential issues
       let totalCount = 0;
       try {
-        const countQuery = supabase
+        let countQuery = supabase
           .from('events')
           .select('*', { count: 'exact', head: true })
-          .eq('is_public', true)
-          .in('event_status', ['upcoming', 'ongoing']);
+          .eq('is_public', true);
+        
+        // Only filter by status if not including all statuses
+        if (!include_all_statuses) {
+          countQuery = countQuery.in('event_status', ['upcoming', 'ongoing']);
+        }
 
         // Apply the same filters for count
         if (search_query) {
