@@ -89,6 +89,7 @@ import { MainLayout } from "./components/layout/MainLayout";
 import BlogPage from "./pages/BlogPage";
 import BlogPostDetail from "./pages/BlogPostDetail";
 import AdminBlog from "./pages/admin/AdminBlog";
+import AdminBlogEditor from "./pages/admin/AdminBlogEditor";
 
 const queryClient = new QueryClient();
 
@@ -336,6 +337,16 @@ const AppRoutes = () => {
       <Route path="/admin/blog" element={
         <AdminAuthGuard>
           <AdminBlog />
+        </AdminAuthGuard>
+      } />
+      <Route path="/admin/blog/new" element={
+        <AdminAuthGuard>
+          <AdminBlogEditor />
+        </AdminAuthGuard>
+      } />
+      <Route path="/admin/blog/edit/:id" element={
+        <AdminAuthGuard>
+          <AdminBlogEditor />
         </AdminAuthGuard>
       } />
       <Route path="/admin/sponsored-banners" element={

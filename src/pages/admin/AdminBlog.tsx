@@ -122,6 +122,50 @@ export const AdminBlog = () => {
     }
   };
 
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      const updates: Partial<BlogPost> = { status: newStatus as any };
+      
+      // Set published_at when publishing
+      if (newStatus === 'published') {
+        const post = posts.find(p => p.id === id);
+        if (!post?.published_at) {
+          updates.published_at = new Date().toISOString();
+        }
+      }
+
+      await blogPostsService.update(id, updates);
+      toast({
+        title: 'Success',
+        description: `Post ${newStatus === 'published' ? 'published' : 'status updated'} successfully`,
+      });
+      loadData();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update post status',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleToggleFeatured = async (id: string, currentValue: boolean) => {
+    try {
+      await blogPostsService.update(id, { is_featured: !currentValue });
+      toast({
+        title: 'Success',
+        description: `Post ${!currentValue ? 'marked as featured' : 'removed from featured'}`,
+      });
+      loadData();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update featured status',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { color: string; label: string }> = {
       published: { color: 'bg-green-100 text-green-800', label: 'Published' },
@@ -344,6 +388,7 @@ export const AdminBlog = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => navigate(`/blog/${post.slug}`)}
+                              title="View Post"
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
@@ -351,14 +396,38 @@ export const AdminBlog = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => navigate(`/admin/blog/edit/${post.id}`)}
+                              title="Edit Post"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
+                            {post.status === 'draft' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleStatusChange(post.id, 'published')}
+                                className="text-green-600 hover:text-green-700"
+                                title="Publish Post"
+                              >
+                                <TrendingUp className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {post.status === 'published' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleStatusChange(post.id, 'archived')}
+                                className="text-orange-600 hover:text-orange-700"
+                                title="Archive Post"
+                              >
+                                <Calendar className="w-4 h-4" />
+                              </Button>
+                            )}
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDeletePost(post.id)}
                               className="text-red-600 hover:text-red-700"
+                              title="Delete Post"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
