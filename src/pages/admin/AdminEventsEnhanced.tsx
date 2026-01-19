@@ -823,7 +823,9 @@ export const AdminEventsEnhanced = () => {
         {/* Events Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Events ({filteredEvents.length})</CardTitle>
+            <CardTitle>
+              Events ({filteredEvents.length} {filteredEvents.length !== events.length ? `of ${events.length} total` : ''})
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
