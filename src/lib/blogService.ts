@@ -349,9 +349,12 @@ export const blogPostsService = {
   },
 
   async update(id: string, updates: Partial<BlogPost>): Promise<BlogPost> {
+    // Remove nested objects that aren't actual columns in the database
+    const { author, category, ...cleanUpdates } = updates as any;
+    
     const { data, error } = await supabase
       .from('blog_posts')
-      .update(updates)
+      .update(cleanUpdates)
       .eq('id', id)
       .select(`
         *,
