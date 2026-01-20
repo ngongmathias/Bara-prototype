@@ -588,6 +588,13 @@ export const AdminBlogEditor = () => {
                         }
                       }}
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      {(() => {
+                        const offset = -new Date().getTimezoneOffset() / 60;
+                        const sign = offset >= 0 ? '+' : '';
+                        return `Your timezone: UTC${sign}${offset}`;
+                      })()}
+                    </p>
                   </div>
                 )}
 
