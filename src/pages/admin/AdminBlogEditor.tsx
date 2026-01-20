@@ -138,13 +138,13 @@ export const AdminBlogEditor = () => {
       const filePath = `blog/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('public')
+        .from('event-images')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('public')
+        .from('event-images')
         .getPublicUrl(filePath);
 
       setFormData(prev => ({ ...prev, featured_image: publicUrl }));
@@ -234,8 +234,14 @@ export const AdminBlogEditor = () => {
 
     setSaving(true);
     try {
-      const postData: Partial<BlogPost> = {
+      // Clean up empty string values that should be null for UUID fields
+      const cleanedFormData = {
         ...formData,
+        category_id: formData.category_id && formData.category_id.trim() !== '' ? formData.category_id : null,
+      };
+
+      const postData: Partial<BlogPost> = {
+        ...cleanedFormData,
         status: (status || formData.status || 'draft') as 'draft' | 'published' | 'scheduled' | 'archived',
         reading_time: calculateReadingTime(formData.content || ''),
         slug: formData.slug || generateSlug(formData.title || ''),
