@@ -88,6 +88,7 @@ import AdminMarketplaceCategories from "./pages/admin/AdminMarketplaceCategories
 import { MainLayout } from "./components/layout/MainLayout";
 import BlogPage from "./pages/BlogPage";
 import BlogPostDetail from "./pages/BlogPostDetail";
+import UserBlogEditor from "./pages/UserBlogEditor";
 import AdminBlog from "./pages/admin/AdminBlog";
 import AdminBlogEditor from "./pages/admin/AdminBlogEditor";
 
@@ -185,6 +186,8 @@ const AppRoutes = () => {
       <Route path="/events/:eventId" element={<EventsPage />} />
       <Route path="/tools" element={<ToolsPage />} />
       <Route path="/blog" element={<BlogPage />} />
+      <Route path="/blog/write" element={<UserBlogEditor />} />
+      <Route path="/blog/edit/:id" element={<UserBlogEditor />} />
       <Route path="/blog/:slug" element={<BlogPostDetail />} />
       <Route path="/advertise/checkout" element={<AdvertiseCheckoutPage />} />
       <Route path="/sponsor-country" element={<SponsorCountryPage />} />

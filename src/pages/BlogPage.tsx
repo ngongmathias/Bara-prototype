@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, TrendingUp } from 'lucide-react';
+import { Search, TrendingUp, PenSquare } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
 import { Header } from '../components/Header';
 import Footer from '../components/Footer';
 import { TopBannerAd } from '../components/TopBannerAd';
@@ -9,6 +10,7 @@ import { BlogHero } from '../components/BlogHero';
 import { BlogCard } from '../components/BlogCard';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { NewsletterSubscribe } from '../components/NewsletterSubscribe';
+import { Button } from '../components/ui/button';
 import { 
   blogPostsService, 
   blogCategoriesService, 
@@ -20,6 +22,7 @@ import { useToast } from '../hooks/use-toast';
 export const BlogPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isSignedIn } = useUser();
   
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [featuredPost, setFeaturedPost] = useState<BlogPost | null>(null);
@@ -105,9 +108,20 @@ export const BlogPage = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Page Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-black mb-4 font-comfortaa">
-            BARA Blog
-          </h1>
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-black font-comfortaa">
+              BARA Blog
+            </h1>
+            {isSignedIn && (
+              <Button
+                onClick={() => navigate('/blog/write')}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <PenSquare className="w-4 h-4 mr-2" />
+                Write Post
+              </Button>
+            )}
+          </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto font-roboto">
             Insights, stories, and expert advice to help you grow your business and connect with opportunities worldwide.
           </p>
