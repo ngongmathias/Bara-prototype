@@ -234,10 +234,11 @@ export const AdminBlogEditor = () => {
 
     setSaving(true);
     try {
-      // Clean up empty string values that should be null for UUID fields
+      // Clean up empty string values that should be null for UUID and timestamp fields
       const cleanedFormData = {
         ...formData,
         category_id: formData.category_id && formData.category_id.trim() !== '' ? formData.category_id : null,
+        scheduled_for: formData.scheduled_for && formData.scheduled_for.trim() !== '' ? formData.scheduled_for : null,
       };
 
       const postData: Partial<BlogPost> = {
