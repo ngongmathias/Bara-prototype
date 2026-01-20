@@ -229,7 +229,7 @@ export const AdminBlogEditor = () => {
     return true;
   };
 
-  const handleSave = async (status?: 'draft' | 'published' | 'scheduled' | 'archived') => {
+  const handleSave = async (buttonStatus?: 'draft' | 'published') => {
     if (!validateForm()) return;
 
     setSaving(true);
@@ -241,14 +241,24 @@ export const AdminBlogEditor = () => {
         scheduled_for: formData.scheduled_for && formData.scheduled_for.trim() !== '' ? formData.scheduled_for : null,
       };
 
+      // Determine final status: use dropdown selection unless button explicitly sets draft/published
+      let finalStatus = formData.status || 'draft';
+      if (buttonStatus) {
+        // Only override if user clicked a specific button (draft/publish)
+        // But respect dropdown if it's set to scheduled or archived
+        if (formData.status !== 'scheduled' && formData.status !== 'archived') {
+          finalStatus = buttonStatus;
+        }
+      }
+
       const postData: Partial<BlogPost> = {
         ...cleanedFormData,
-        status: (status || formData.status || 'draft') as 'draft' | 'published' | 'scheduled' | 'archived',
+        status: finalStatus as 'draft' | 'published' | 'scheduled' | 'archived',
         reading_time: calculateReadingTime(formData.content || ''),
         slug: formData.slug || generateSlug(formData.title || ''),
       };
 
-      if (status === 'published' && !formData.published_at) {
+      if (finalStatus === 'published' && !formData.published_at) {
         postData.published_at = new Date().toISOString();
       }
 
