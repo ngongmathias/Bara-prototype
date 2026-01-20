@@ -564,22 +564,24 @@ export const AdminBlogEditor = () => {
                       value={
                         formData.scheduled_for 
                           ? (() => {
+                              // Convert ISO timestamp to local datetime-local format
                               const date = new Date(formData.scheduled_for);
-                              const offset = date.getTimezoneOffset() * 60000;
-                              const localDate = new Date(date.getTime() - offset);
-                              return localDate.toISOString().slice(0, 16);
+                              const year = date.getFullYear();
+                              const month = String(date.getMonth() + 1).padStart(2, '0');
+                              const day = String(date.getDate()).padStart(2, '0');
+                              const hours = String(date.getHours()).padStart(2, '0');
+                              const minutes = String(date.getMinutes()).padStart(2, '0');
+                              return `${year}-${month}-${day}T${hours}:${minutes}`;
                             })()
                           : ''
                       }
                       onChange={(e) => {
                         if (e.target.value) {
-                          // Convert local datetime to ISO while preserving the selected time
-                          const localDate = new Date(e.target.value);
-                          const offset = localDate.getTimezoneOffset() * 60000;
-                          const utcDate = new Date(localDate.getTime() + offset);
+                          // Convert local datetime to ISO timestamp
+                          const date = new Date(e.target.value);
                           setFormData(prev => ({
                             ...prev,
-                            scheduled_for: utcDate.toISOString(),
+                            scheduled_for: date.toISOString(),
                           }));
                         } else {
                           setFormData(prev => ({ ...prev, scheduled_for: '' }));
