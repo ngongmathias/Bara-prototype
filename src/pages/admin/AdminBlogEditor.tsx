@@ -561,11 +561,30 @@ export const AdminBlogEditor = () => {
                     <Input
                       id="scheduled_for"
                       type="datetime-local"
-                      value={formData.scheduled_for?.slice(0, 16)}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        scheduled_for: e.target.value ? new Date(e.target.value).toISOString() : '',
-                      }))}
+                      value={
+                        formData.scheduled_for 
+                          ? (() => {
+                              const date = new Date(formData.scheduled_for);
+                              const offset = date.getTimezoneOffset() * 60000;
+                              const localDate = new Date(date.getTime() - offset);
+                              return localDate.toISOString().slice(0, 16);
+                            })()
+                          : ''
+                      }
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          // Convert local datetime to ISO while preserving the selected time
+                          const localDate = new Date(e.target.value);
+                          const offset = localDate.getTimezoneOffset() * 60000;
+                          const utcDate = new Date(localDate.getTime() + offset);
+                          setFormData(prev => ({
+                            ...prev,
+                            scheduled_for: utcDate.toISOString(),
+                          }));
+                        } else {
+                          setFormData(prev => ({ ...prev, scheduled_for: '' }));
+                        }
+                      }}
                     />
                   </div>
                 )}
