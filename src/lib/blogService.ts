@@ -161,9 +161,12 @@ export const blogAuthorsService = {
       .from('blog_authors')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
     
-    if (error) return null;
+    if (error) {
+      console.error('Error fetching author by user_id:', error);
+      return null;
+    }
     return data;
   },
 

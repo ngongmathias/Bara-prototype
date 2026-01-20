@@ -138,13 +138,13 @@ export const AdminBlogEditor = () => {
       const filePath = `blog/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('blog-images')
+        .from('public')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('blog-images')
+        .from('public')
         .getPublicUrl(filePath);
 
       setFormData(prev => ({ ...prev, featured_image: publicUrl }));
@@ -229,14 +229,14 @@ export const AdminBlogEditor = () => {
     return true;
   };
 
-  const handleSave = async (status?: string) => {
+  const handleSave = async (status?: 'draft' | 'published' | 'scheduled' | 'archived') => {
     if (!validateForm()) return;
 
     setSaving(true);
     try {
       const postData: Partial<BlogPost> = {
         ...formData,
-        status: status || formData.status,
+        status: (status || formData.status || 'draft') as 'draft' | 'published' | 'scheduled' | 'archived',
         reading_time: calculateReadingTime(formData.content || ''),
         slug: formData.slug || generateSlug(formData.title || ''),
       };
