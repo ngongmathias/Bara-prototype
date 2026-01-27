@@ -1,10 +1,29 @@
-import { supabase } from './supabase';
+import { createClient } from '@supabase/supabase-js';
 
 export interface UploadResult {
   url: string;
   path: string;
   error?: string;
 }
+
+// Create a separate Supabase client with service role key for storage operations
+// This bypasses RLS policies since we're using Clerk for authentication
+const getStorageClient = () => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const serviceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Missing Supabase environment variables for storage operations');
+  }
+  
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false
+    }
+  });
+};
 
 export const uploadImage = async (
   file: File,
@@ -19,8 +38,11 @@ export const uploadImage = async (
 
     console.log(`Uploading to bucket: ${bucket}, folder: ${folder}, file: ${fileName}`);
 
+    // Use service role client for storage operations
+    const storageClient = getStorageClient();
+    
     // Upload file to Supabase Storage
-    const { data, error } = await supabase.storage
+    const { data, error } = await storageClient.storage
       .from(bucket)
       .upload(filePath, file, {
         cacheControl: '3600',
@@ -33,7 +55,7 @@ export const uploadImage = async (
     }
 
     // Get public URL
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = storageClient.storage
       .from(bucket)
       .getPublicUrl(filePath);
 
@@ -48,7 +70,8 @@ export const uploadImage = async (
 
 export const deleteImage = async (path: string, bucket: string = 'sponsored-banners'): Promise<boolean> => {
   try {
-    const { error } = await supabase.storage
+    const storageClient = getStorageClient();
+    const { error } = await storageClient.storage
       .from(bucket)
       .remove([path]);
 
