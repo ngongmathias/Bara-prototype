@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { optimizeImage, validateImage } from '@/utils/imageOptimization';
 
 export interface UploadResult {
   url: string;
@@ -28,11 +29,30 @@ const getStorageClient = () => {
 export const uploadImage = async (
   file: File,
   bucket: string = 'sponsored-banners',
-  folder: string = 'banners'
+  folder: string = 'banners',
+  optimize: boolean = true
 ): Promise<string> => {
   try {
+    // Validate image
+    const validation = validateImage(file);
+    if (validation !== true) {
+      throw new Error(validation);
+    }
+
+    // Optimize image before upload to reduce bandwidth
+    let fileToUpload = file;
+    if (optimize) {
+      console.log(`Optimizing image before upload...`);
+      fileToUpload = await optimizeImage(file, {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        quality: 0.85,
+        maxSizeMB: 1
+      });
+    }
+
     // Generate unique filename
-    const fileExt = file.name.split('.').pop();
+    const fileExt = fileToUpload.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `${folder}/${fileName}`;
 
@@ -41,11 +61,11 @@ export const uploadImage = async (
     // Use service role client for storage operations
     const storageClient = getStorageClient();
     
-    // Upload file to Supabase Storage
+    // Upload file to Supabase Storage with extended cache
     const { data, error } = await storageClient.storage
       .from(bucket)
-      .upload(filePath, file, {
-        cacheControl: '3600',
+      .upload(filePath, fileToUpload, {
+        cacheControl: '31536000', // 1 year cache to reduce bandwidth
         upsert: false
       });
 
@@ -89,7 +109,9 @@ export const deleteImage = async (path: string, bucket: string = 'sponsored-bann
 
 export const createBucket = async (bucketName: string): Promise<boolean> => {
   try {
-    const { data, error } = await supabase.storage.createBucket(bucketName, {
+    const storageClient = getStorageClient();
+    
+    const { data, error } = await storageClient.storage.createBucket(bucketName, {
       public: true,
       allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
       fileSizeLimit: 5242880 // 5MB
