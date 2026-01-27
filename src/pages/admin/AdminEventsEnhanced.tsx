@@ -119,7 +119,8 @@ export const AdminEventsEnhanced = () => {
   useEffect(() => {
     searchEvents({ 
       limit: 10000,
-      include_all_statuses: true // Admin needs to see all events including past ones
+      include_all_statuses: true, // Admin needs to see all events including past ones
+      include_private: true // Admin needs to see private/draft events
     });
   }, [searchEvents]);
 

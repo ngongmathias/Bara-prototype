@@ -138,6 +138,7 @@ export interface EventSearchParams {
   limit?: number;
   offset?: number;
   include_all_statuses?: boolean; // For admin: include completed/cancelled events
+  include_private?: boolean; // For admin: include non-public events
 }
 
 export interface EventSearchResult {
@@ -250,11 +251,13 @@ export class EventsService {
         end_date,
         limit = 20,
         offset = 0,
-        include_all_statuses = false
+        include_all_statuses = false,
+        include_private = false
       } = params;
 
       console.log('🔧 [EventsService.searchEvents] Parameters:', {
         include_all_statuses,
+        include_private,
         limit,
         offset,
         has_filters: !!(search_query || country_id || city_id || category)
@@ -263,8 +266,15 @@ export class EventsService {
       // Build the query without foreign key relationships
       let query = supabase
         .from('events')
-        .select('*')
-        .eq('is_public', true);
+        .select('*');
+      
+      // Only filter by is_public if not including private events (for admin)
+      if (!include_private) {
+        console.log('⚠️ Filtering by is_public: true only');
+        query = query.eq('is_public', true);
+      } else {
+        console.log('✅ Including ALL events (public and private)');
+      }
       
       // Only filter by status if not including all statuses (for public-facing pages)
       if (!include_all_statuses) {

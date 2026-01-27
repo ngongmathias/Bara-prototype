@@ -105,10 +105,11 @@ export const AdminEvents = () => {
     console.log('🚀 [AdminEvents] useEffect triggered - about to load events');
     const loadEvents = async () => {
       try {
-        console.log('📞 [AdminEvents] Calling searchEvents with params:', { limit: 10000, include_all_statuses: true });
+        console.log('📞 [AdminEvents] Calling searchEvents with params:', { limit: 10000, include_all_statuses: true, include_private: true });
         const result = await searchEvents({ 
           limit: 10000,
-          include_all_statuses: true // Admin needs to see all events including past ones
+          include_all_statuses: true, // Admin needs to see all events including past ones
+          include_private: true // Admin needs to see private/draft events
         });
         if (result) {
           console.log('🔍 [Admin Events Debug - v2.0]', new Date().toISOString());
