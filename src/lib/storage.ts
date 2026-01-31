@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './supabase';
 import { optimizeImage, validateImage } from '@/utils/imageOptimization';
 
 export interface UploadResult {
@@ -7,31 +7,12 @@ export interface UploadResult {
   error?: string;
 }
 
-// Create a separate Supabase client with service role key for storage operations
-// This bypasses RLS policies since we're using Clerk for authentication
-const getStorageClient = () => {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const serviceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
-  
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('Missing Supabase environment variables for storage operations');
-  }
-  
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false
-    }
-  });
-};
-
 export const uploadImage = async (
   file: File,
   bucket: string = 'sponsored-banners',
   folder: string = 'banners',
   optimize: boolean = true
-): Promise<string> => {
+): Promise<UploadResult> => {
   try {
     // Validate image
     const validation = validateImage(file);
@@ -58,11 +39,8 @@ export const uploadImage = async (
 
     console.log(`Uploading to bucket: ${bucket}, folder: ${folder}, file: ${fileName}`);
 
-    // Use service role client for storage operations
-    const storageClient = getStorageClient();
-    
     // Upload file to Supabase Storage with extended cache
-    const { data, error } = await storageClient.storage
+    const { data, error } = await supabase.storage
       .from(bucket)
       .upload(filePath, fileToUpload, {
         cacheControl: '31536000', // 1 year cache to reduce bandwidth
@@ -75,7 +53,7 @@ export const uploadImage = async (
     }
 
     // Get public URL
-    const { data: urlData } = storageClient.storage
+    const { data: urlData } = supabase.storage
       .from(bucket)
       .getPublicUrl(filePath);
 
@@ -90,8 +68,7 @@ export const uploadImage = async (
 
 export const deleteImage = async (path: string, bucket: string = 'sponsored-banners'): Promise<boolean> => {
   try {
-    const storageClient = getStorageClient();
-    const { error } = await storageClient.storage
+    const { error } = await supabase.storage
       .from(bucket)
       .remove([path]);
 
@@ -109,9 +86,7 @@ export const deleteImage = async (path: string, bucket: string = 'sponsored-bann
 
 export const createBucket = async (bucketName: string): Promise<boolean> => {
   try {
-    const storageClient = getStorageClient();
-    
-    const { data, error } = await storageClient.storage.createBucket(bucketName, {
+    const { data, error } = await supabase.storage.createBucket(bucketName, {
       public: true,
       allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
       fileSizeLimit: 5242880 // 5MB
