@@ -30,6 +30,9 @@ export const EventsPage = () => {
   const [selectedEvent, setSelectedEvent] = useState<DatabaseEvent | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 12;
+  const [activeEventsPage, setActiveEventsPage] = useState(1);
+  const [pastEventsPage, setPastEventsPage] = useState(1);
+  const eventsPerSection = 12;
   const [mapModalOpen, setMapModalOpen] = useState(false);
   const [mapEvents, setMapEvents] = useState<any[]>([]);
   const [selectedEventForMap, setSelectedEventForMap] = useState<string | undefined>();
@@ -213,8 +216,18 @@ export const EventsPage = () => {
 
   // Split into Active and Past events BEFORE pagination
   const now = new Date();
-  const activeEvents = timeFilteredEvents.filter(e => new Date(e.end_date) >= now);
-  const pastEvents = timeFilteredEvents.filter(e => new Date(e.end_date) < now);
+  const allActiveEvents = timeFilteredEvents.filter(e => new Date(e.end_date) >= now);
+  const allPastEvents = timeFilteredEvents.filter(e => new Date(e.end_date) < now);
+
+  // Paginate active events
+  const activeEventsTotalPages = Math.ceil(allActiveEvents.length / eventsPerSection);
+  const activeEventsStartIndex = (activeEventsPage - 1) * eventsPerSection;
+  const activeEvents = allActiveEvents.slice(activeEventsStartIndex, activeEventsStartIndex + eventsPerSection);
+
+  // Paginate past events
+  const pastEventsTotalPages = Math.ceil(allPastEvents.length / eventsPerSection);
+  const pastEventsStartIndex = (pastEventsPage - 1) * eventsPerSection;
+  const pastEvents = allPastEvents.slice(pastEventsStartIndex, pastEventsStartIndex + eventsPerSection);
 
   // Pagination (for display purposes, but we'll show all active and past separately)
   const totalPages = Math.ceil(sortedEvents.length / eventsPerPage);
@@ -1170,14 +1183,14 @@ export const EventsPage = () => {
               {sortedEvents.length > 0 ? (
               <>
             {/* Active Events Section */}
-            {activeEvents.length > 0 && (
+            {allActiveEvents.length > 0 && (
                     <div className="mb-12">
                       <div className="mb-6">
                         <h2 className="text-3xl font-bold text-gray-900 mb-2">
                           Active Events
                         </h2>
                         <p className="text-gray-600">
-                          {activeEvents.length} upcoming and ongoing events
+                          Showing {activeEventsStartIndex + 1}-{Math.min(activeEventsStartIndex + eventsPerSection, allActiveEvents.length)} of {allActiveEvents.length} upcoming and ongoing events
                         </p>
                       </div>
 
@@ -1216,18 +1229,68 @@ export const EventsPage = () => {
                           </div>
                         ))}
                       </div>
+
+                      {/* Active Events Pagination */}
+                      {activeEventsTotalPages > 1 && (
+                        <div className="flex justify-center items-center mt-8 space-x-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setActiveEventsPage(prev => Math.max(prev - 1, 1))}
+                            disabled={activeEventsPage === 1}
+                            className="px-4 py-2"
+                          >
+                            <ChevronLeft className="w-4 h-4 mr-1" />
+                            Previous
+                          </Button>
+                          
+                          <div className="flex space-x-1">
+                            {Array.from({ length: Math.min(activeEventsTotalPages, 5) }, (_, i) => {
+                              let pageNum;
+                              if (activeEventsTotalPages <= 5) {
+                                pageNum = i + 1;
+                              } else if (activeEventsPage <= 3) {
+                                pageNum = i + 1;
+                              } else if (activeEventsPage >= activeEventsTotalPages - 2) {
+                                pageNum = activeEventsTotalPages - 4 + i;
+                              } else {
+                                pageNum = activeEventsPage - 2 + i;
+                              }
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  variant={activeEventsPage === pageNum ? "default" : "outline"}
+                                  onClick={() => setActiveEventsPage(pageNum)}
+                                  className="w-10 h-10"
+                                >
+                                  {pageNum}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                          
+                          <Button
+                            variant="outline"
+                            onClick={() => setActiveEventsPage(prev => Math.min(prev + 1, activeEventsTotalPages))}
+                            disabled={activeEventsPage === activeEventsTotalPages}
+                            className="px-4 py-2"
+                          >
+                            Next
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
 
                   {/* Past Events Section */}
-                  {pastEvents.length > 0 && (
+                  {allPastEvents.length > 0 && (
                     <div className="mb-12">
                       <div className="mb-6">
                         <h2 className="text-3xl font-bold text-gray-900 mb-2">
                           Past Events
                         </h2>
                         <p className="text-gray-600">
-                          {pastEvents.length} past events
+                          Showing {pastEventsStartIndex + 1}-{Math.min(pastEventsStartIndex + eventsPerSection, allPastEvents.length)} of {allPastEvents.length} past events
                         </p>
                       </div>
 
@@ -1269,6 +1332,56 @@ export const EventsPage = () => {
                           </div>
                         ))}
                       </div>
+
+                      {/* Past Events Pagination */}
+                      {pastEventsTotalPages > 1 && (
+                        <div className="flex justify-center items-center mt-8 space-x-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setPastEventsPage(prev => Math.max(prev - 1, 1))}
+                            disabled={pastEventsPage === 1}
+                            className="px-4 py-2"
+                          >
+                            <ChevronLeft className="w-4 h-4 mr-1" />
+                            Previous
+                          </Button>
+                          
+                          <div className="flex space-x-1">
+                            {Array.from({ length: Math.min(pastEventsTotalPages, 5) }, (_, i) => {
+                              let pageNum;
+                              if (pastEventsTotalPages <= 5) {
+                                pageNum = i + 1;
+                              } else if (pastEventsPage <= 3) {
+                                pageNum = i + 1;
+                              } else if (pastEventsPage >= pastEventsTotalPages - 2) {
+                                pageNum = pastEventsTotalPages - 4 + i;
+                              } else {
+                                pageNum = pastEventsPage - 2 + i;
+                              }
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  variant={pastEventsPage === pageNum ? "default" : "outline"}
+                                  onClick={() => setPastEventsPage(pageNum)}
+                                  className="w-10 h-10"
+                                >
+                                  {pageNum}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                          
+                          <Button
+                            variant="outline"
+                            onClick={() => setPastEventsPage(prev => Math.min(prev + 1, pastEventsTotalPages))}
+                            disabled={pastEventsPage === pastEventsTotalPages}
+                            className="px-4 py-2"
+                          >
+                            Next
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
 

@@ -67,8 +67,7 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
           .select('*')
           .eq('is_active', true)
           .eq('display_on_top', true)
-          .order('created_at', { ascending: false })
-          .limit(10);
+          .order('created_at', { ascending: false });
 
         // Fallback strategies if no data
         if ((error && error.code === 'PGRST204') || !data || data.length === 0) {
@@ -77,8 +76,7 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
             .select('*')
             .eq('status', 'approved')
             .eq('display_on_top', true)
-            .order('created_at', { ascending: false })
-            .limit(10);
+            .order('created_at', { ascending: false });
           data = res1.data;
           error = res1.error;
         }
@@ -89,8 +87,7 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
             .select('*')
             .eq('payment_status', 'paid')
             .eq('display_on_top', true)
-            .order('created_at', { ascending: false })
-            .limit(10);
+            .order('created_at', { ascending: false });
           data = res2.data;
           error = res2.error;
         }
