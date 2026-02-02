@@ -73,7 +73,7 @@ export const EventsPage = () => {
   const { events, loading, searchEvents} = useEvents();
   const [totalEventsCount, setTotalEventsCount] = useState(0);
   const [currentOffset, setCurrentOffset] = useState(0);
-  const eventsLimit = 100;
+  const eventsLimit = 10000;
   const { categories } = useEventCategories();
   const { selectedCountry } = useCountrySelection();
 
@@ -92,7 +92,7 @@ export const EventsPage = () => {
       const result = await searchEvents({ 
         country_id: selectedCountry?.id,
         limit: eventsLimit,
-        offset: currentOffset,
+        offset: 0, // Always load from beginning
         include_all_statuses: true // Include past events for the Past Events section
       });
       if (result) {
@@ -100,7 +100,7 @@ export const EventsPage = () => {
       }
     };
     loadEvents();
-  }, [searchEvents, selectedCountry, currentOffset]);
+  }, [searchEvents, selectedCountry]);
 
   // Debug logging - show what we're filtering
   useEffect(() => {
