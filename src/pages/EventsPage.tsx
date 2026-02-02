@@ -94,7 +94,8 @@ export const EventsPage = () => {
       const result = await searchEvents({ 
         country_id: selectedCountry?.id,
         limit: eventsLimit,
-        offset: currentOffset
+        offset: currentOffset,
+        include_all_statuses: true // Include past events for the Past Events section
       });
       if (result) {
         setTotalEventsCount(result.total_count);
