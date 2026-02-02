@@ -215,8 +215,20 @@ export const EventsPage = () => {
 
   // Split into Active and Past events BEFORE pagination
   const now = new Date();
-  const allActiveEvents = timeFilteredEvents.filter(e => new Date(e.end_date) >= now);
+  console.log('🔍 [EventsPage] Current date:', now);
+  console.log('🔍 [EventsPage] Total events:', timeFilteredEvents.length);
+  
+  const allActiveEvents = timeFilteredEvents.filter(e => {
+    const eventEndDate = new Date(e.end_date);
+    const isActive = eventEndDate >= now;
+    console.log(`🔍 [EventsPage] Event "${e.title}": end_date=${e.end_date}, isActive=${isActive}`);
+    return isActive;
+  });
+  
   const allPastEvents = timeFilteredEvents.filter(e => new Date(e.end_date) < now);
+  
+  console.log('🔍 [EventsPage] Active events count:', allActiveEvents.length);
+  console.log('🔍 [EventsPage] Past events count:', allPastEvents.length);
 
   // Paginate active events
   const activeEventsTotalPages = Math.ceil(allActiveEvents.length / eventsPerSection);
