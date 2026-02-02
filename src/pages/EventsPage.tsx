@@ -28,9 +28,7 @@ export const EventsPage = () => {
   const [endDate, setEndDate] = useState('');
   const [sortBy, setSortBy] = useState('date');
   const [selectedEvent, setSelectedEvent] = useState<DatabaseEvent | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const eventsPerPage = 12;
-  const [activeEventsPage, setActiveEventsPage] = useState(1);
+    const [activeEventsPage, setActiveEventsPage] = useState(1);
   const [pastEventsPage, setPastEventsPage] = useState(1);
   const eventsPerSection = 12;
   const [mapModalOpen, setMapModalOpen] = useState(false);
@@ -230,11 +228,7 @@ export const EventsPage = () => {
   const pastEventsStartIndex = (pastEventsPage - 1) * eventsPerSection;
   const pastEvents = allPastEvents.slice(pastEventsStartIndex, pastEventsStartIndex + eventsPerSection);
 
-  // Pagination (for display purposes, but we'll show all active and past separately)
-  const totalPages = Math.ceil(sortedEvents.length / eventsPerPage);
-  const startIndex = (currentPage - 1) * eventsPerPage;
-  const currentEvents = sortedEvents.slice(startIndex, startIndex + eventsPerPage);
-
+  
   const handleViewEvent = (event: DatabaseEvent) => {
     setSelectedEvent(event);
   };
@@ -1386,55 +1380,8 @@ export const EventsPage = () => {
                     </div>
                   )}
 
-              {/* Load More Button */}
-              {totalEventsCount > events.length && (
-                <div className="flex justify-center mt-12">
-                  <Button
-                    onClick={() => setCurrentOffset(prev => prev + eventsLimit)}
-                    className="px-8 py-3 text-base font-semibold bg-black hover:bg-gray-800 text-white"
-                    disabled={loading}
-                  >
-                    {loading ? 'Loading...' : `Load More Events (${events.length} of ${totalEventsCount})`}
-                  </Button>
-                </div>
-              )}
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-              <div className="flex justify-center items-center mt-12 space-x-2">
-                  <Button
-                    variant="outline"
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                  >
-                  <ChevronLeft className="w-4 h-4 mr-1" />
-                  Previous
-                  </Button>
-                  
-                <div className="flex space-x-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                      <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
-                      onClick={() => setCurrentPage(page)}
-                      className="w-10 h-10"
-                    >
-                      {page}
-                      </Button>
-                  ))}
-                </div>
-                  
-                  <Button
-                    variant="outline"
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                  >
-                  Next
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </div>
-              )}
-            </>
+              
+                          </>
           ) : (
             <div className="text-center py-12">
             <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
