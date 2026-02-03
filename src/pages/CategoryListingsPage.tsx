@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -105,6 +105,7 @@ type SortType = 'default' | 'highest-rated' | 'most-reviewed' | 'newest';
 const CategoryListingsPage = () => {
   const navigate = useNavigate();
   const { categorySlug } = useParams<{ categorySlug: string }>();
+  const [searchParams] = useSearchParams();
   const { selectedCountry } = useCountrySelection();
   
   const [businesses, setBusinesses] = useState<Business[]>([]);
@@ -112,25 +113,26 @@ const CategoryListingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('list'); // Default to list like YP
   const [searchTerm, setSearchTerm] = useState("");
+  const [locationTerm, setLocationTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('default');
+
+  useEffect(() => {
+    const initialSearch = (searchParams.get('search') || '').trim();
+    const initialLocation = (searchParams.get('location') || '').trim();
+    setSearchTerm(initialSearch);
+    setLocationTerm(initialLocation);
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        if (categorySlug && categorySlug !== 'all') {
+        if (categorySlug) {
           // Fetch the category
-          const { data: catData } = await supabase
-            .from('categories')
-            .select('*')
-            .eq('slug', categorySlug)
-            .single();
-          
-          setCurrentCategory(catData || null);
+          if (categorySlug === 'all') {
+            setCurrentCategory({ id: 'all', name: 'All Businesses', slug: 'all' });
 
-          if (catData) {
-            // Build query for businesses - filter by country if selected
             let query = supabase
               .from('businesses')
               .select(`
@@ -140,27 +142,61 @@ const CategoryListingsPage = () => {
                 country:countries(name, code),
                 reviews(rating)
               `)
-              .eq('category_id', catData.id)
               .eq('status', 'active');
 
-            // Filter by selected country
             if (selectedCountry) {
               query = query.eq('country_id', selectedCountry.id);
             }
 
-            // Order by sponsored, premium, then name
             query = query
               .order('is_sponsored_ad', { ascending: false })
               .order('is_premium', { ascending: false })
               .order('name', { ascending: true });
 
             const { data: bizData, error } = await query;
-
             if (error) {
               console.error("Error fetching businesses:", error);
             } else {
-              console.log("Fetched businesses for country:", selectedCountry?.name, bizData?.length, bizData);
               setBusinesses(bizData || []);
+            }
+          } else {
+            const { data: catData } = await supabase
+              .from('categories')
+              .select('*')
+              .eq('slug', categorySlug)
+              .single();
+            
+            setCurrentCategory(catData || null);
+
+            if (catData) {
+              let query = supabase
+                .from('businesses')
+                .select(`
+                  *,
+                  category:categories(name, slug),
+                  city:cities(name),
+                  country:countries(name, code),
+                  reviews(rating)
+                `)
+                .eq('category_id', catData.id)
+                .eq('status', 'active');
+
+              if (selectedCountry) {
+                query = query.eq('country_id', selectedCountry.id);
+              }
+
+              query = query
+                .order('is_sponsored_ad', { ascending: false })
+                .order('is_premium', { ascending: false })
+                .order('name', { ascending: true });
+
+              const { data: bizData, error } = await query;
+
+              if (error) {
+                console.error("Error fetching businesses:", error);
+              } else {
+                setBusinesses(bizData || []);
+              }
             }
           }
         }
@@ -189,8 +225,19 @@ const CategoryListingsPage = () => {
   const filteredBusinesses = businesses
     .filter(biz => {
       // Search filter
-      const matchesSearch = biz.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        biz.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const q = searchTerm.trim().toLowerCase();
+      const loc = locationTerm.trim().toLowerCase();
+      const matchesSearch = !q ||
+        biz.name.toLowerCase().includes(q) ||
+        (biz.description || '').toLowerCase().includes(q) ||
+        (biz.address || '').toLowerCase().includes(q) ||
+        (biz.website || '').toLowerCase().includes(q) ||
+        (biz.phone || '').toLowerCase().includes(q) ||
+        (biz.city?.name || '').toLowerCase().includes(q);
+
+      const matchesLocation = !loc ||
+        (biz.address || '').toLowerCase().includes(loc) ||
+        (biz.city?.name || '').toLowerCase().includes(loc);
       
       // Feature filters
       if (activeFilter === 'order-online' && !biz.accepts_orders_online) return false;
@@ -198,7 +245,7 @@ const CategoryListingsPage = () => {
       if (activeFilter === 'coupons' && !biz.has_coupons) return false;
       if (activeFilter === 'verified' && !biz.is_verified) return false;
       
-      return matchesSearch;
+      return matchesSearch && matchesLocation;
     })
     .sort((a, b) => {
       switch (sortBy) {
