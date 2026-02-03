@@ -41,31 +41,43 @@ export const EventsPage = () => {
   const [selectedGalleryEvent, setSelectedGalleryEvent] = useState<DatabaseEvent | null>(null);
   const [urlCountryFilter, setUrlCountryFilter] = useState<string | null>(null);
 
+  const parseDate = (value?: string | null) => {
+    if (!value) return null;
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d;
+  };
+
   // Helper function to format event date for display
   const formatEventDate = (startDate: string, endDate: string) => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const isSameDay = start.toDateString() === end.toDateString();
+    const start = parseDate(startDate);
+    const end = parseDate(endDate);
+    if (!start && !end) return 'TBD';
+    if (start && !end) return start.toLocaleDateString();
+    if (!start && end) return end.toLocaleDateString();
+    const isSameDay = start!.toDateString() === end!.toDateString();
     
     if (isSameDay) {
-      return start.toLocaleDateString();
+      return start!.toLocaleDateString();
     } else {
       // Multi-day event - show date range
-      return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      return `${start!.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end!.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
     }
   };
 
   // Helper function to format event time for display
   const formatEventTime = (startDate: string, endDate: string) => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const isSameDay = start.toDateString() === end.toDateString();
+    const start = parseDate(startDate);
+    const end = parseDate(endDate);
+    if (!start && !end) return '';
+    if (start && !end) return start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    if (!start && end) return end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    const isSameDay = start!.toDateString() === end!.toDateString();
     
     if (isSameDay) {
-      return `${start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+      return `${start!.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${end!.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
     } else {
       // Multi-day event - show opening time
-      return `Opens ${start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+      return `Opens ${start!.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
     }
   };
 
@@ -102,26 +114,13 @@ export const EventsPage = () => {
     loadEvents();
   }, [searchEvents, selectedCountry]);
 
-  // Debug logging - show what we're filtering
-  useEffect(() => {
-    if (selectedCategory !== 'all') {
-      console.log('=== CATEGORY FILTER DEBUG ===');
-      console.log('Selected category:', selectedCategory);
-      console.log('Total events:', events.length);
-      console.log('Sample event categories:', events.slice(0, 5).map(e => ({
-        title: e.title,
-        category: e.category,
-        category_name: e.category_name
-      })));
-    }
-  }, [selectedCategory, events]);
-
   // Filter events based on search and filters
   const filteredEvents = events.filter(event => {
     
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (event.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (event.venue_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch = !searchQuery || 
+                         event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (event.venue_name && event.venue_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
                          (event.organizer_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                          // Include hashtag search in main search
                          (event.tags && event.tags.some(tag => 
@@ -146,11 +145,17 @@ export const EventsPage = () => {
       : '';
     
     const matchesCategory = selectedCategory === 'all' || 
+                           event.category === selectedCategory ||
+                           event.category_name === selectedCategory ||
                            eventCategorySlug === selectedCategory ||
                            categoryNameSlug === selectedCategory;
     
-    const matchesStartDate = !startDate || new Date(event.start_date) >= new Date(startDate);
-    const matchesEndDate = !endDate || new Date(event.end_date) <= new Date(endDate);
+    const eventStart = parseDate(event.start_date);
+    const eventEnd = parseDate(event.end_date);
+    const filterStart = parseDate(startDate);
+    const filterEnd = parseDate(endDate);
+    const matchesStartDate = !filterStart || !eventStart || eventStart >= filterStart;
+    const matchesEndDate = !filterEnd || !eventEnd || eventEnd <= filterEnd;
     
     // Filter by URL country parameter if present
     const matchesCountry = !urlCountryFilter || 
@@ -163,7 +168,7 @@ export const EventsPage = () => {
   const sortedEvents = [...filteredEvents].sort((a, b) => {
     switch (sortBy) {
       case 'date':
-        return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+        return (parseDate(a.start_date)?.getTime() ?? Number.POSITIVE_INFINITY) - (parseDate(b.start_date)?.getTime() ?? Number.POSITIVE_INFINITY);
       case 'title':
         return a.title.localeCompare(b.title);
       case 'location':
@@ -178,8 +183,9 @@ export const EventsPage = () => {
     if (timeFilter === 'all') return true;
     
     const now = new Date();
-    const eventStart = new Date(event.start_date);
-    const eventEnd = new Date(event.end_date);
+    const eventStart = parseDate(event.start_date);
+    const eventEnd = parseDate(event.end_date);
+    if (!eventStart || !eventEnd) return true;
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -215,20 +221,20 @@ export const EventsPage = () => {
 
   // Split into Active and Past events BEFORE pagination
   const now = new Date();
-  console.log('🔍 [EventsPage] Current date:', now);
-  console.log('🔍 [EventsPage] Total events:', timeFilteredEvents.length);
-  
   const allActiveEvents = timeFilteredEvents.filter(e => {
-    const eventEndDate = new Date(e.end_date);
-    const isActive = eventEndDate >= now;
-    console.log(`🔍 [EventsPage] Event "${e.title}": end_date=${e.end_date}, isActive=${isActive}`);
-    return isActive;
+    const end = parseDate(e.end_date);
+    const start = parseDate(e.start_date);
+    const compareDate = end ?? start;
+    if (!compareDate) return false;
+    return compareDate >= now;
   });
-  
-  const allPastEvents = timeFilteredEvents.filter(e => new Date(e.end_date) < now);
-  
-  console.log('🔍 [EventsPage] Active events count:', allActiveEvents.length);
-  console.log('🔍 [EventsPage] Past events count:', allPastEvents.length);
+  const allPastEvents = timeFilteredEvents.filter(e => {
+    const end = parseDate(e.end_date);
+    const start = parseDate(e.start_date);
+    const compareDate = end ?? start;
+    if (!compareDate) return true;
+    return compareDate < now;
+  });
 
   // Paginate active events
   const activeEventsTotalPages = Math.ceil(allActiveEvents.length / eventsPerSection);
@@ -492,16 +498,22 @@ export const EventsPage = () => {
               <Calendar className="h-6 w-6 text-black mr-3 mt-1 flex-shrink-0" />
             <div>
                 {(() => {
-                  const startDate = new Date(event.start_date);
-                  const endDate = new Date(event.end_date);
-                  const isSameDay = startDate.toDateString() === endDate.toDateString();
+                  const startDate = parseDate(event.start_date);
+                  const endDate = parseDate(event.end_date);
+                  if (!startDate && !endDate) {
+                    return (
+                      <p className="text-lg text-gray-700 font-medium">TBD</p>
+                    );
+                  }
+                  const effectiveStart = startDate ?? endDate!;
+                  const effectiveEnd = endDate ?? startDate!;
+                  const isSameDay = effectiveStart.toDateString() === effectiveEnd.toDateString();
                   
                   if (isSameDay) {
-                    // Single day event
                     return (
                       <>
                         <p className="text-lg text-gray-700 font-medium">
-                          {startDate.toLocaleDateString('en-US', { 
+                          {effectiveStart.toLocaleDateString('en-US', { 
                             weekday: 'long', 
                             year: 'numeric', 
                             month: 'long', 
@@ -509,19 +521,18 @@ export const EventsPage = () => {
                           })}
                         </p>
                         <p className="text-gray-600">
-                          {startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {endDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          {effectiveStart.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {effectiveEnd.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                         </p>
                       </>
                     );
                   } else {
-                    // Multi-day event
                     return (
                       <>
                         <p className="text-lg text-gray-700 font-medium">
-                          {startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - {endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                          {effectiveStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - {effectiveEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                         </p>
                         <p className="text-gray-600">
-                          Opens: {startDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          Opens: {effectiveStart.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {effectiveStart.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                         </p>
                       </>
                     );
@@ -840,7 +851,7 @@ export const EventsPage = () => {
                         </h4>
                         <p className="text-sm text-gray-600 flex items-center">
                           <Calendar className="w-4 h-4 mr-1" />
-                          {new Date(similarEvent.start_date).toLocaleDateString()}
+                          {(parseDate(similarEvent.start_date) ?? parseDate(similarEvent.end_date))?.toLocaleDateString() ?? 'TBD'}
                         </p>
                         <p className="text-sm text-gray-600 flex items-center mt-1">
                           <MapPin className="w-4 h-4 mr-1" />
@@ -1458,7 +1469,7 @@ export const EventsPage = () => {
                       const dayEvents = sortedEvents.filter(e => {
                         const eventDateStr = typeof e.start_date === 'string' 
                           ? e.start_date.split('T')[0]
-                          : new Date(e.start_date).toISOString().split('T')[0];
+                          : (parseDate(String(e.start_date))?.toISOString().split('T')[0] ?? '');
                         return eventDateStr === dateStr;
                       });
                       
