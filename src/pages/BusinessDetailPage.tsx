@@ -199,7 +199,7 @@ export const BusinessDetailPage = () => {
                       <img 
                         src={image} 
                         alt={`${business.name} - Image ${index + 1}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain bg-gray-100"
                       />
                     </div>
                   ))}
