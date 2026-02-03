@@ -1,5 +1,5 @@
 import { Clock } from 'lucide-react';
-import { format, isToday, isTomorrow, isPast, isFuture, parseISO, isWithinInterval, addHours } from 'date-fns';
+import { format, isToday, isTomorrow, isPast, isFuture, parseISO, isWithinInterval, addHours, isValid } from 'date-fns';
 
 interface EventTimingBadgeProps {
   startDate: string;
@@ -9,7 +9,10 @@ interface EventTimingBadgeProps {
 
 export const EventTimingBadge = ({ startDate, endDate, className = '' }: EventTimingBadgeProps) => {
   const start = parseISO(startDate);
-  const end = endDate ? parseISO(endDate) : addHours(start, 3); // Default 3 hour duration if no end date
+  if (!isValid(start)) return null;
+
+  const parsedEnd = endDate ? parseISO(endDate) : null;
+  const end = parsedEnd && isValid(parsedEnd) ? parsedEnd : addHours(start, 3); // Default 3 hour duration if no end date
   const now = new Date();
 
   // Check if event is happening right now
