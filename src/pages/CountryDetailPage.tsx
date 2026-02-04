@@ -208,7 +208,7 @@ export const CountryDetailPage: React.FC = () => {
                     <img
                       src={countryInfo?.flag_url || country.flag_url || `https://flagcdn.com/w160/${country.code.toLowerCase()}.png`}
                       alt={`${country.name} flag`}
-                      className="w-24 h-16 object-cover rounded shadow-md border border-gray-200"
+                      className="w-24 h-16 object-contain bg-white rounded shadow-md border border-gray-200"
                       onError={(e) => {
                         // Fallback to flagcdn if database flag fails
                         const target = e.target as HTMLImageElement;
@@ -275,7 +275,7 @@ export const CountryDetailPage: React.FC = () => {
                       <img
                         src={countryInfo.monument_image_url}
                         alt={`${country.name} Monument`}
-                        className="w-full h-56 object-cover"
+                        className="w-full h-56 object-contain bg-white"
                         loading="lazy"
                       />
                     </div>
@@ -593,7 +593,7 @@ export const CountryDetailPage: React.FC = () => {
                       <img
                         src={countryInfo.leader_image_url}
                         alt={countryInfo.president_name}
-                        className="w-24 h-24 object-cover rounded-full border-2 border-gray-200 mx-auto"
+                        className="w-24 h-24 object-contain bg-white rounded-full border-2 border-gray-200 mx-auto"
                       />
                     </div>
                   )}
