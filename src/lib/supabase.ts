@@ -99,20 +99,25 @@ export const getAuthenticatedDb = async () => {
 // For now, let's use the regular client but with proper error handling
 // This is a temporary solution until we can properly configure JWT authentication
 export const getAdminDb = () => {
-  // Create a client with service role key for admin operations
-  // This bypasses RLS policies for admin operations
-  const adminSupabase = createClient(SUPABASE_URL, import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false
-    },
-    db: {
-      schema: 'public'
-    }
-  });
+  if ((getAdminDb as any)._cachedDb) return (getAdminDb as any)._cachedDb;
 
-  return {
+  const adminSupabase = createClient(
+    SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false,
+        storageKey: 'sb-admin'
+      },
+      db: {
+        schema: 'public'
+      }
+    }
+  );
+
+  (getAdminDb as any)._cachedDb = {
     // Business operations
     businesses: () => adminSupabase.from('businesses'),
     
@@ -198,6 +203,8 @@ export const getAdminDb = () => {
     rss_feed_sources: () => adminSupabase.from('rss_feed_sources'),
     rss_feeds: () => adminSupabase.from('rss_feeds')
   };
+
+  return (getAdminDb as any)._cachedDb;
 };
 
 // Database types for TypeScript

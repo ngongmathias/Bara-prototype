@@ -574,8 +574,22 @@ export const AdminBusinesses = () => {
 
   const handleDeleteBusiness = async (businessId: string) => {
     if (!confirm('Are you sure you want to delete this business?')) return;
+
+    const isUuid = (value: string) =>
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+
+    if (!isUuid(businessId)) {
+      console.error('Error deleting business: invalid businessId:', businessId);
+      toast({
+        title: "Error",
+        description: "Failed to delete business",
+        variant: "destructive"
+      });
+      return;
+    }
     
     try {
+      console.log('Deleting business with id:', businessId);
       const { error } = await adminDb
         .businesses()
         .delete()
