@@ -268,6 +268,20 @@ export const CountryDetailPage: React.FC = () => {
                     </div>
                   )}
                 </div>
+
+                {countryInfo?.monument_image_url && (
+                  <div className="mt-8 max-w-xl">
+                    <div className="rounded-2xl overflow-hidden border border-gray-200 bg-gray-50">
+                      <img
+                        src={countryInfo.monument_image_url}
+                        alt={`${country.name} Monument`}
+                        className="w-full h-56 object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mt-3">Monument / Landmark</p>
+                  </div>
+                )}
               </motion.div>
 
               {/* Right: Map */}
