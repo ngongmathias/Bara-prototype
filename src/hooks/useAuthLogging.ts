@@ -14,6 +14,14 @@ export const useAuthLogging = () => {
       const logAuthEvent = async () => {
         try {
           const userEmail = user.primaryEmailAddress?.emailAddress || '';
+
+          // Ensure this Clerk user exists in the database users table for metrics/analytics
+          await ClerkSupabaseBridge.ensureDatabaseUser({
+            id: user.id,
+            email: userEmail,
+            firstName: user.firstName || undefined,
+            lastName: user.lastName || undefined,
+          });
           
           // Log the authentication event
           const logSuccess = await UserLogService.logAuthEvent(

@@ -742,7 +742,7 @@ export const Header = () => {
                         variant="ghost" 
                         className="w-full justify-start font-roboto h-12"
                         onClick={() => {
-                          navigate('/sign-in?redirect_url=/users/dashboard');
+                          navigate('/user/sign-in?redirect_url=/users/dashboard');
                           closeMobileMenu();
                           scrollToTop();
                         }}

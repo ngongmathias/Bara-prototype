@@ -43,7 +43,10 @@ export const UserDashboard = () => {
     return <Navigate to="/user/sign-in" replace />;
   }
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    if (path === '/users/dashboard') return location.pathname === path;
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">

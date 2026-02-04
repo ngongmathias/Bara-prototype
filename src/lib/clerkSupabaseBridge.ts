@@ -10,6 +10,56 @@ export interface ClerkUser {
 
 export class ClerkSupabaseBridge {
   /**
+   * Ensure a corresponding row exists in the public.users table for analytics/admin metrics.
+   * This project uses Clerk for auth, so we need to sync minimal user info into Supabase.
+   */
+  static async ensureDatabaseUser(clerkUser: ClerkUser): Promise<boolean> {
+    try {
+      const email = (clerkUser.email || '').toLowerCase().trim();
+      if (!email) return false;
+
+      const { data: existing, error: existingError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (existingError) {
+        console.error('Failed checking existing database user:', existingError);
+        return false;
+      }
+
+      if (existing?.id) {
+        return true;
+      }
+
+      const fullName = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || undefined;
+
+      const now = new Date().toISOString();
+
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert({
+          email,
+          full_name: fullName,
+          role: 'user',
+          created_at: now,
+          updated_at: now,
+        });
+
+      if (insertError) {
+        console.error('Failed inserting database user row:', insertError);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error ensuring database user:', error);
+      return false;
+    }
+  }
+
+  /**
    * Check if a Clerk user has admin privileges
    * SECURE: Only checks database, NO auto-grant
    */

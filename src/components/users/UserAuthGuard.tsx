@@ -18,7 +18,7 @@ export const UserAuthGuard = ({ children }: UserAuthGuardProps) => {
     if (!isSignedIn) {
       // User is not signed in, redirect to sign-in with redirect back to current page
       const currentPath = location.pathname + location.search;
-      navigate(`/sign-in?redirect_url=${encodeURIComponent(currentPath)}`);
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(currentPath)}`);
       return;
     }
   }, [isSignedIn, isLoaded, navigate, location]);
