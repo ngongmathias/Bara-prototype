@@ -525,12 +525,12 @@ export const Header = () => {
         <div className="md:hidden">
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black opacity-50 z-[9998]"
+            className="fixed inset-0 bg-black opacity-50 z-[2147483646]"
             onClick={closeMobileMenu}
           />
           
           {/* Mobile Menu */}
-          <div className="fixed top-0 right-0 h-full w-72 bg-white shadow-2xl transform translate-x-0 z-[9999]">
+          <div className="fixed top-0 right-0 h-full w-72 bg-white shadow-2xl transform translate-x-0 z-[2147483647]">
             <div className="flex flex-col h-full">
               {/* Mobile Menu Header */}
               <div className="flex items-center justify-between p-3 border-b border-gray-200">
