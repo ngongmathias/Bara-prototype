@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useUser, useClerk } from '@clerk/clerk-react';
@@ -521,32 +522,33 @@ export const Header = () => {
       </div>
 
       {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden">
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black opacity-50 z-[2147483646]"
-            onClick={closeMobileMenu}
-          />
-          
-          {/* Mobile Menu */}
-          <div className="fixed top-0 right-0 h-full w-72 bg-white shadow-2xl transform translate-x-0 z-[2147483647]">
-            <div className="flex flex-col h-full">
-              {/* Mobile Menu Header */}
-              <div className="flex items-center justify-between p-3 border-b border-gray-200">
-                <h2 className="text-base font-comfortaa font-semibold text-yp-dark">Menu</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={closeMobileMenu}
-                  className="p-1 hover:bg-gray-100 transition-colors duration-200"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
+      {isMobileMenuOpen && typeof document !== 'undefined' &&
+        createPortal(
+          <div className="md:hidden">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black opacity-50 z-[2147483646]"
+              onClick={closeMobileMenu}
+            />
 
-              {/* Mobile Menu Content */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            {/* Mobile Menu */}
+            <div className="fixed top-0 right-0 h-full w-72 bg-white shadow-2xl transform translate-x-0 z-[2147483647]">
+              <div className="flex flex-col h-full">
+                {/* Mobile Menu Header */}
+                <div className="flex items-center justify-between p-3 border-b border-gray-200">
+                  <h2 className="text-base font-comfortaa font-semibold text-yp-dark">Menu</h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={closeMobileMenu}
+                    className="p-1 hover:bg-gray-100 transition-colors duration-200"
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                {/* Mobile Menu Content */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-6">
                 {/* User Profile Section - AT TOP */}
                 {isSignedIn ? (
                   <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
@@ -819,11 +821,12 @@ export const Header = () => {
                 <div className="text-xs text-gray-500 font-roboto text-center">
                   BARA App - Connect with Local Businesses ✨
                 </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </header>
   );
 };

@@ -368,7 +368,7 @@ All colors MUST be HSL.
   /* Keep navbar visible above banner */
   header {
     position: relative !important;
-    z-index: 1000 !important;
+    z-index: 2147483645 !important;
   }
 
   .goog-te-gadget {
