@@ -18,37 +18,24 @@ export class ClerkSupabaseBridge {
       const email = (clerkUser.email || '').toLowerCase().trim();
       if (!email) return false;
 
-      const { data: existing, error: existingError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', email)
-        .maybeSingle();
-
-      if (existingError) {
-        console.error('Failed checking existing database user:', existingError);
-        return false;
-      }
-
-      if (existing?.id) {
-        return true;
-      }
-
       const fullName = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || undefined;
-
       const now = new Date().toISOString();
 
-      const { error: insertError } = await supabase
-        .from('users')
-        .insert({
-          email,
-          full_name: fullName,
-          role: 'user',
-          created_at: now,
-          updated_at: now,
-        });
+      const { error: upsertError } = await supabase
+        .from('clerk_users')
+        .upsert(
+          {
+            clerk_user_id: clerkUser.id,
+            email,
+            full_name: fullName,
+            updated_at: now,
+            last_sign_in_at: now,
+          },
+          { onConflict: 'email' }
+        );
 
-      if (insertError) {
-        console.error('Failed inserting database user row:', insertError);
+      if (upsertError) {
+        console.error('Failed upserting clerk_users row:', upsertError);
         return false;
       }
 

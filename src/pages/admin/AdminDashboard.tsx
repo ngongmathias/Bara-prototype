@@ -29,7 +29,7 @@ import {
   RefreshCw,
   Settings
 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase, getAdminDb } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { calculateEventStatus } from "@/utils/eventHelpers";
@@ -150,10 +150,12 @@ export const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setRefreshing(true);
+
+      const adminDb = getAdminDb();
       
       // Fetch basic counts
       const [usersResult, businessesResult, citiesResult, countriesResult, reviewsResult, logsResult] = await Promise.all([
-        supabase.from('users').select('id', { count: 'exact', head: true }),
+        adminDb.clerk_users().select('id', { count: 'exact', head: true }),
         supabase.from('businesses').select('id', { count: 'exact', head: true }),
         supabase.from('cities').select('id', { count: 'exact', head: true }),
         supabase.from('countries').select('id', { count: 'exact', head: true }),
@@ -234,8 +236,8 @@ export const AdminDashboard = () => {
       thisMonth.setDate(1);
       thisMonth.setHours(0, 0, 0, 0);
       
-      const { count: newThisMonth } = await supabase
-        .from('users')
+      const { count: newThisMonth } = await adminDb
+        .clerk_users()
         .select('id', { count: 'exact', head: true })
         .gte('created_at', thisMonth.toISOString());
 
@@ -243,8 +245,8 @@ export const AdminDashboard = () => {
       const lastMonth = new Date(thisMonth);
       lastMonth.setMonth(lastMonth.getMonth() - 1);
       
-      const { count: lastMonthUsers } = await supabase
-        .from('users')
+      const { count: lastMonthUsers } = await adminDb
+        .clerk_users()
         .select('id', { count: 'exact', head: true })
         .gte('created_at', lastMonth.toISOString())
         .lt('created_at', thisMonth.toISOString());
@@ -253,12 +255,12 @@ export const AdminDashboard = () => {
         ? ((newThisMonth || 0) - lastMonthUsers) / lastMonthUsers * 100 
         : 0;
 
-        setStats({
-          totalUsers: usersResult.count || 0,
-          totalBusinesses: businessesResult.count || 0,
-          totalCities: citiesResult.count || 0,
-          totalCountries: countriesResult.count || 0,
-          totalReviews: reviewsResult.count || 0,
+      setStats({
+        totalUsers: usersResult.count || 0,
+        totalBusinesses: businessesResult.count || 0,
+        totalCities: citiesResult.count || 0,
+        totalCountries: countriesResult.count || 0,
+        totalReviews: reviewsResult.count || 0,
         totalLogs: logsResult.count || 0,
         sponsoredAds: sponsoredBusinesses.count || 0,
         premiumBusinesses: premiumBusinesses.count || 0,
@@ -297,19 +299,13 @@ export const AdminDashboard = () => {
       });
 
       setRecentActivities(activities || []);
-
-      } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch dashboard data',
-        variant: 'destructive'
-      });
-      } finally {
-        setLoading(false);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
       setRefreshing(false);
-      }
-    };
+    }
+  };
 
   useEffect(() => {
     fetchDashboardData();

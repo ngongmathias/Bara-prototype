@@ -142,6 +142,9 @@ export const getAdminDb = () => {
     // User operations
     users: () => adminSupabase.from('users'),
     
+    // Clerk-backed user metrics
+    clerk_users: () => adminSupabase.from('clerk_users'),
+    
     // Payment operations
     payments: () => adminSupabase.from('payments'),
     

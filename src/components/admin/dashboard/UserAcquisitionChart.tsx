@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Users } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { getAdminDb } from "@/lib/supabase";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 
 interface UserData {
@@ -28,6 +28,7 @@ export const UserAcquisitionChart = ({ className }: UserAcquisitionChartProps) =
   const fetchUserData = async () => {
     try {
       setLoading(true);
+      const adminDb = getAdminDb();
       const months = parseInt(timePeriod);
       const monthsData: UserData[] = [];
       let total = 0;
@@ -37,8 +38,8 @@ export const UserAcquisitionChart = ({ className }: UserAcquisitionChartProps) =
         const monthStart = startOfMonth(monthDate);
         const monthEnd = endOfMonth(monthDate);
         
-        const { data: users, error } = await supabase
-          .from('users')
+        const { data: users, error } = await adminDb
+          .clerk_users()
           .select('id')
           .gte('created_at', monthStart.toISOString())
           .lte('created_at', monthEnd.toISOString());
