@@ -9,12 +9,15 @@ ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow anonymous uploads to business-images" ON storage.objects;
 DROP POLICY IF EXISTS "Allow anonymous uploads to business-logos" ON storage.objects;
 DROP POLICY IF EXISTS "Allow anonymous uploads to sponsored-banners" ON storage.objects;
+DROP POLICY IF EXISTS "Allow anonymous uploads to country-page-ads" ON storage.objects;
 DROP POLICY IF EXISTS "Public read access for business-images" ON storage.objects;
 DROP POLICY IF EXISTS "Public read access for business-logos" ON storage.objects;
 DROP POLICY IF EXISTS "Public read access for sponsored-banners" ON storage.objects;
+DROP POLICY IF EXISTS "Public read access for country-page-ads" ON storage.objects;
 DROP POLICY IF EXISTS "Allow anonymous deletes from business-images" ON storage.objects;
 DROP POLICY IF EXISTS "Allow anonymous deletes from business-logos" ON storage.objects;
 DROP POLICY IF EXISTS "Allow anonymous deletes from sponsored-banners" ON storage.objects;
+DROP POLICY IF EXISTS "Allow anonymous deletes from country-page-ads" ON storage.objects;
 
 -- Business Images Bucket Policies
 CREATE POLICY "Allow anonymous uploads to business-images"
@@ -63,6 +66,22 @@ CREATE POLICY "Allow anonymous deletes from sponsored-banners"
 ON storage.objects FOR DELETE
 TO anon
 USING (bucket_id = 'sponsored-banners');
+
+-- Country Page Ads Bucket Policies
+CREATE POLICY "Allow anonymous uploads to country-page-ads"
+ON storage.objects FOR INSERT
+TO anon
+WITH CHECK (bucket_id = 'country-page-ads');
+
+CREATE POLICY "Public read access for country-page-ads"
+ON storage.objects FOR SELECT
+TO public
+USING (bucket_id = 'country-page-ads');
+
+CREATE POLICY "Allow anonymous deletes from country-page-ads"
+ON storage.objects FOR DELETE
+TO anon
+USING (bucket_id = 'country-page-ads');
 
 -- Verify policies were created
 SELECT 
