@@ -1,0 +1,35 @@
+{
+  "mode": "invite",
+  "dry_run": true,
+  "old_user_count": 6,
+  "unique_email_count": 6,
+  "excluded_email_count": 3,
+  "invited": [],
+  "skipped": [
+    {
+      "email": "mathiasngwangong@gmail.com",
+      "reason": "dry_run"
+    },
+    {
+      "email": "rwandafulrwanda@gmail.com",
+      "reason": "dry_run"
+    },
+    {
+      "email": "manzidavid111@gmail.com",
+      "reason": "excluded"
+    },
+    {
+      "email": "m.david@alustudent.com",
+      "reason": "dry_run"
+    },
+    {
+      "email": "mathiasngongngai@gmail.com",
+      "reason": "dry_run"
+    },
+    {
+      "email": "manzidavid73@gmail.com",
+      "reason": "excluded"
+    }
+  ],
+  "failed": []
+}

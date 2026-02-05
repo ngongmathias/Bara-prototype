@@ -1,0 +1,33 @@
+{
+  "mode": "invite",
+  "dry_run": false,
+  "old_user_count": 6,
+  "unique_email_count": 6,
+  "excluded_email_count": 3,
+  "invited": [
+    {
+      "email": "mathiasngwangong@gmail.com"
+    },
+    {
+      "email": "rwandafulrwanda@gmail.com"
+    },
+    {
+      "email": "mathiasngongngai@gmail.com"
+    }
+  ],
+  "skipped": [
+    {
+      "email": "manzidavid111@gmail.com",
+      "reason": "excluded"
+    },
+    {
+      "email": "m.david@alustudent.com",
+      "reason": "excluded"
+    },
+    {
+      "email": "manzidavid73@gmail.com",
+      "reason": "excluded"
+    }
+  ],
+  "failed": []
+}
