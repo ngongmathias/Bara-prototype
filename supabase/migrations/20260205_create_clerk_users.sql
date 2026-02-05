@@ -13,6 +13,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS clerk_users_clerk_user_id_key ON public.clerk_
 
 ALTER TABLE public.clerk_users ENABLE ROW LEVEL SECURITY;
 
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+GRANT SELECT, INSERT, UPDATE ON TABLE public.clerk_users TO anon, authenticated, service_role;
+
 -- Allow client-side upsert (Clerk runs in the browser using the anon key)
 DROP POLICY IF EXISTS "Allow anon upsert to clerk_users" ON public.clerk_users;
 CREATE POLICY "Allow anon upsert to clerk_users"
