@@ -29,7 +29,7 @@ import {
   RefreshCw,
   Settings
 } from "lucide-react";
-import { supabase, getAdminDb } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { calculateEventStatus } from "@/utils/eventHelpers";
@@ -150,18 +150,21 @@ export const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setRefreshing(true);
-
-      const adminDb = getAdminDb();
       
       // Fetch basic counts
-      const [usersResult, businessesResult, citiesResult, countriesResult, reviewsResult, logsResult] = await Promise.all([
-        adminDb.clerk_users().select('id', { count: 'exact', head: true }),
+      const [clerkCountsResult, businessesResult, citiesResult, countriesResult, reviewsResult, logsResult] = await Promise.all([
+        supabase.rpc('get_clerk_user_counts'),
         supabase.from('businesses').select('id', { count: 'exact', head: true }),
         supabase.from('cities').select('id', { count: 'exact', head: true }),
         supabase.from('countries').select('id', { count: 'exact', head: true }),
         supabase.from('reviews').select('id', { count: 'exact', head: true }),
         supabase.from('user_logs').select('id', { count: 'exact', head: true })
       ]);
+
+      const clerkCounts = Array.isArray(clerkCountsResult.data) ? clerkCountsResult.data[0] : null;
+      const totalUsers = Number(clerkCounts?.total_users ?? 0);
+      const newThisMonth = Number(clerkCounts?.new_this_month ?? 0);
+      const lastMonthUsers = Number(clerkCounts?.last_month_users ?? 0);
 
       // Fetch all events with dates for real-time status calculation
       const { data: allEvents } = await supabase
@@ -231,32 +234,13 @@ export const AdminDashboard = () => {
         .order('created_at', { ascending: false })
         .limit(10);
 
-      // Calculate user growth (new users this month)
-      const thisMonth = new Date();
-      thisMonth.setDate(1);
-      thisMonth.setHours(0, 0, 0, 0);
-      
-      const { count: newThisMonth } = await adminDb
-        .clerk_users()
-        .select('id', { count: 'exact', head: true })
-        .gte('created_at', thisMonth.toISOString());
-
       // Calculate growth rate (simplified)
-      const lastMonth = new Date(thisMonth);
-      lastMonth.setMonth(lastMonth.getMonth() - 1);
-      
-      const { count: lastMonthUsers } = await adminDb
-        .clerk_users()
-        .select('id', { count: 'exact', head: true })
-        .gte('created_at', lastMonth.toISOString())
-        .lt('created_at', thisMonth.toISOString());
-
-      const growthRate = lastMonthUsers && lastMonthUsers > 0 
-        ? ((newThisMonth || 0) - lastMonthUsers) / lastMonthUsers * 100 
+      const growthRate = lastMonthUsers > 0 
+        ? (newThisMonth - lastMonthUsers) / lastMonthUsers * 100 
         : 0;
 
       setStats({
-        totalUsers: usersResult.count || 0,
+        totalUsers,
         totalBusinesses: businessesResult.count || 0,
         totalCities: citiesResult.count || 0,
         totalCountries: countriesResult.count || 0,
@@ -292,9 +276,9 @@ export const AdminDashboard = () => {
       });
 
       setUserMetrics({
-        total: usersResult.count || 0,
-        active: usersResult.count || 0, // Simplified for now
-        newThisMonth: newThisMonth || 0,
+        total: totalUsers,
+        active: totalUsers, // Simplified for now
+        newThisMonth,
         growthRate: growthRate
       });
 

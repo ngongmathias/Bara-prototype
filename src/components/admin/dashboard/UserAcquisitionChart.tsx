@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Users } from "lucide-react";
-import { getAdminDb } from "@/lib/supabase";
-import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
+import { supabase } from "@/lib/supabase";
+import { format } from "date-fns";
 
 interface UserData {
   month: string;
@@ -28,38 +28,26 @@ export const UserAcquisitionChart = ({ className }: UserAcquisitionChartProps) =
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const adminDb = getAdminDb();
       const months = parseInt(timePeriod);
-      const monthsData: UserData[] = [];
-      let total = 0;
-      
-      for (let i = months - 1; i >= 0; i--) {
-        const monthDate = subMonths(new Date(), i);
-        const monthStart = startOfMonth(monthDate);
-        const monthEnd = endOfMonth(monthDate);
-        
-        const { data: users, error } = await adminDb
-          .clerk_users()
-          .select('id')
-          .gte('created_at', monthStart.toISOString())
-          .lte('created_at', monthEnd.toISOString());
-        
-        if (error) {
-          console.error('Error fetching users:', error);
-          continue;
-        }
-        
-        const newUsers = users?.length || 0;
-        total += newUsers;
-        
-        monthsData.push({
-          month: format(monthDate, 'MMM yyyy'),
-          newUsers
-        });
+
+      const { data: rows, error } = await supabase.rpc('get_clerk_user_new_by_month', { months });
+      if (error) {
+        console.error('Error fetching user data:', error);
+        setData([]);
+        setTotalNewUsers(0);
+        return;
       }
-      
+
+      const monthsData: UserData[] = (rows || []).map((row: any) => {
+        const monthDate = new Date(row.month_start);
+        return {
+          month: format(monthDate, 'MMM yyyy'),
+          newUsers: Number(row.new_users || 0)
+        };
+      });
+
       setData(monthsData);
-      setTotalNewUsers(total);
+      setTotalNewUsers(monthsData.reduce((sum, item) => sum + item.newUsers, 0));
     } catch (error) {
       console.error('Error fetching user data:', error);
     } finally {
