@@ -1,27 +1,14 @@
-import { SignIn, useSignIn } from '@clerk/clerk-react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { SignIn } from '@clerk/clerk-react';
+import { useLocation } from 'react-router-dom';
+import { useMemo } from 'react';
 
 export const SignInPage = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const { isLoaded, isSignedIn } = useSignIn();
-
-  // Redirect if already signed in
-  useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      const searchParams = new URLSearchParams(location.search);
-      const redirectUrl = searchParams.get('redirect_url') || '/';
-      navigate(redirectUrl);
-    }
-  }, [isLoaded, isSignedIn, navigate, location.search]);
-
-  // Handle redirect after sign in
-  const handleSignInSuccess = () => {
+  const finishUrl = useMemo(() => {
     const searchParams = new URLSearchParams(location.search);
-    const redirectUrl = searchParams.get('redirect_url') || '/';
-    navigate(redirectUrl);
-  };
+    const redirectUrl = searchParams.get('redirect_url') || '/admin';
+    return `/auth/finish?mode=sign_in&redirect_url=${encodeURIComponent(redirectUrl)}`;
+  }, [location.search]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -40,9 +27,7 @@ export const SignInPage = () => {
             routing="path" 
             path="/sign-in"
             signUpUrl="/sign-up"
-            afterSignInUrl={location.search ? `${location.pathname}${location.search}` : '/'}
-            afterSignUpUrl={location.search ? `${location.pathname}${location.search}` : '/'}
-            onSuccess={handleSignInSuccess}
+            afterSignInUrl={finishUrl}
             appearance={{
               elements: {
                 formButtonPrimary: 'bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200',

@@ -1,8 +1,7 @@
 import { SignUp } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
 
 export const SignUpPage = () => {
-  const navigate = useNavigate();
+  const finishUrl = `/auth/finish?mode=sign_up&redirect_url=${encodeURIComponent('/admin')}`;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -21,7 +20,7 @@ export const SignUpPage = () => {
             routing="path" 
             path="/sign-up"
             signInUrl="/sign-in"
-            afterSignUpUrl="/admin"
+            afterSignUpUrl={finishUrl}
             appearance={{
               elements: {
                 formButtonPrimary: 'bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200',

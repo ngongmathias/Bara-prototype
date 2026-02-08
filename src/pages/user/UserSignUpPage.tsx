@@ -6,6 +6,7 @@ export const UserSignUpPage = () => {
   const searchParams = new URLSearchParams(location.search);
   const redirectUrl = searchParams.get('redirect_url') || '/user/settings';
   const signInUrl = `/user/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`;
+  const finishUrl = `/auth/finish?mode=sign_up&redirect_url=${encodeURIComponent(redirectUrl)}`;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -23,7 +24,7 @@ export const UserSignUpPage = () => {
             routing="path" 
             path="/user/sign-up"
             signInUrl={signInUrl}
-            afterSignUpUrl={redirectUrl}
+            afterSignUpUrl={finishUrl}
             appearance={{
               elements: {
                 formButtonPrimary: 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200',

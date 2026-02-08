@@ -21,21 +21,60 @@ export class ClerkSupabaseBridge {
       const fullName = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || undefined;
       const now = new Date().toISOString();
 
-      const { error: upsertError } = await supabase
+      const { data: existingById, error: existingByIdError } = await supabase
         .from('clerk_users')
-        .upsert(
-          {
+        .select('id')
+        .eq('clerk_user_id', clerkUser.id)
+        .maybeSingle();
+
+      if (existingByIdError) {
+        console.error('Failed checking clerk_users by clerk_user_id:', existingByIdError);
+        return false;
+      }
+
+      if (existingById?.id) {
+        return true;
+      }
+
+      const { data: existingByEmail, error: existingByEmailError } = await supabase
+        .from('clerk_users')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (existingByEmailError) {
+        console.error('Failed checking clerk_users by email:', existingByEmailError);
+        return false;
+      }
+
+      if (existingByEmail?.id) {
+        const { error: attachError } = await supabase
+          .from('clerk_users')
+          .update({
             clerk_user_id: clerkUser.id,
-            email,
             full_name: fullName,
             updated_at: now,
-            last_sign_in_at: now,
-          },
-          { onConflict: 'email' }
-        );
+          })
+          .eq('id', existingByEmail.id);
 
-      if (upsertError) {
-        console.error('Failed upserting clerk_users row:', upsertError);
+        if (attachError) {
+          console.error('Failed attaching clerk_user_id to existing clerk_users row:', attachError);
+          return false;
+        }
+
+        return true;
+      }
+
+      const { error: insertError } = await supabase.from('clerk_users').insert({
+        clerk_user_id: clerkUser.id,
+        email,
+        full_name: fullName,
+        created_at: now,
+        updated_at: now,
+      });
+
+      if (insertError) {
+        console.error('Failed inserting clerk_users row:', insertError);
         return false;
       }
 

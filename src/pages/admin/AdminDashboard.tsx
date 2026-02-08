@@ -86,6 +86,8 @@ interface ReviewMetrics {
 interface UserMetrics {
   total: number;
   active: number;
+  newToday: number;
+  newLast7Days: number;
   newThisMonth: number;
   growthRate: number;
 }
@@ -140,6 +142,8 @@ export const AdminDashboard = () => {
   const [userMetrics, setUserMetrics] = useState<UserMetrics>({
     total: 0,
     active: 0,
+    newToday: 0,
+    newLast7Days: 0,
     newThisMonth: 0,
     growthRate: 0
   });
@@ -163,6 +167,8 @@ export const AdminDashboard = () => {
 
       const clerkCounts = Array.isArray(clerkCountsResult.data) ? clerkCountsResult.data[0] : null;
       const totalUsers = Number(clerkCounts?.total_users ?? 0);
+      const newToday = Number(clerkCounts?.new_today ?? 0);
+      const newLast7Days = Number(clerkCounts?.new_last_7_days ?? 0);
       const newThisMonth = Number(clerkCounts?.new_this_month ?? 0);
       const lastMonthUsers = Number(clerkCounts?.last_month_users ?? 0);
 
@@ -278,6 +284,8 @@ export const AdminDashboard = () => {
       setUserMetrics({
         total: totalUsers,
         active: totalUsers, // Simplified for now
+        newToday,
+        newLast7Days,
         newThisMonth,
         growthRate: growthRate
       });
@@ -303,7 +311,7 @@ export const AdminDashboard = () => {
       color: "bg-blue-500",
       change: `${userMetrics.growthRate > 0 ? '+' : ''}${userMetrics.growthRate.toFixed(1)}%`,
       changeType: userMetrics.growthRate >= 0 ? "positive" as const : "negative" as const,
-      subtitle: `${userMetrics.newThisMonth} new this month`
+      subtitle: `${userMetrics.newToday} new today, ${userMetrics.newLast7Days} new last 7 days`
     },
     {
       title: "Total Businesses",
@@ -594,6 +602,14 @@ export const AdminDashboard = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm font-roboto">New This Month</span>
                 <Badge variant="default" className="bg-blue-100 text-blue-800">{userMetrics.newThisMonth}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-roboto">New Today</span>
+                <Badge variant="default" className="bg-blue-100 text-blue-800">{userMetrics.newToday}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-roboto">New Last 7 Days</span>
+                <Badge variant="default" className="bg-blue-100 text-blue-800">{userMetrics.newLast7Days}</Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm font-roboto">Growth Rate</span>
