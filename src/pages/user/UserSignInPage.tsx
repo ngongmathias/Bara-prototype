@@ -108,7 +108,35 @@ export const UserSignInPage = () => {
               }
             }}
           />
+          {/* Fallback UI for email/password 'account not found' */}
+          <div id="clerk-account-not-found-fallback" style={{ display: 'none' }} className="bg-blue-50 border border-blue-200 rounded-md p-4 text-center">
+            <p className="text-sm text-blue-800 mb-3">No account found with this email. Would you like to create one?</p>
+            <Link
+              to={signUpUrl}
+              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+            >
+              Create an account
+            </Link>
+          </div>
         </div>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              const observer = new MutationObserver(() => {
+                const alert = document.querySelector('[role="alert"]');
+                const fallback = document.getElementById('clerk-account-not-found-fallback');
+                if (alert && fallback) {
+                  const text = alert.textContent || '';
+                  if (/couldn't find your account|no account found/i.test(text)) {
+                    alert.closest('.clerk-alert')?.setAttribute('style', 'display:none');
+                    fallback.removeAttribute('style');
+                  }
+                }
+              });
+              observer.observe(document.body, { childList: true, subtree: true });
+            })();
+          `
+        }} />
       </div>
     </div>
   );
