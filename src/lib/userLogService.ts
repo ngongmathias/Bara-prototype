@@ -29,7 +29,8 @@ export interface AdminUser {
 export interface DatabaseUser {
   id: string;
   email: string;
-  full_name?: string;
+  first_name?: string;
+  last_name?: string;
   phone?: string;
   avatar_url?: string;
   role: string;
@@ -377,17 +378,23 @@ export class UserLogService {
     
     const csvContent = [
       headers.join(','),
-      ...users.map(user => [
-        user.id,
-        `"${user.email}"`,
-        `"${user.full_name || user.first_name + ' ' + (user.last_name || '') || 'N/A'}"`,
-        user.role || 'N/A',
-        `"${user.phone || 'N/A'}"`,
-        `"${user.country || 'N/A'}"`,
-        `"${user.city || 'N/A'}"`,
-        new Date(user.created_at).toLocaleDateString(),
-        new Date(user.updated_at).toLocaleDateString()
-      ].join(','))
+      ...users.map(user => {
+        const isAdmin = 'role' in user && !!user.role;
+        const fullName = isAdmin
+          ? `${(user as AdminUser).first_name || ''} ${(user as AdminUser).last_name || ''}`.trim() || 'N/A'
+          : `${(user as DatabaseUser).first_name || ''} ${(user as DatabaseUser).last_name || ''}`.trim() || 'N/A';
+        return [
+          user.id,
+          `"${user.email}"`,
+          `"${fullName}"`,
+          user.role || 'N/A',
+          `"${(user as DatabaseUser).phone || 'N/A'}"`,
+          `"${(user as DatabaseUser).country || 'N/A'}"`,
+          `"${(user as DatabaseUser).city || 'N/A'}"`,
+          new Date(user.created_at).toLocaleDateString(),
+          new Date(user.updated_at).toLocaleDateString()
+        ].join(',');
+      })
     ].join('\n');
 
     return csvContent;
