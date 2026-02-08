@@ -92,6 +92,7 @@ import UserBlogEditor from "./pages/UserBlogEditor";
 import AdminBlog from "./pages/admin/AdminBlog";
 import AdminBlogEditor from "./pages/admin/AdminBlogEditor";
 import AuthFinishPage from "./pages/auth/AuthFinishPage";
+import SSOCallbackPage from "./pages/auth/SSOCallbackPage";
 
 const queryClient = new QueryClient();
 
@@ -200,6 +201,7 @@ const AppRoutes = () => {
       <Route path="/sign-up/*" element={<SignUpPage />} />
       <Route path="/user/sign-in" element={<UserSignInPage />} />
       <Route path="/user/sign-up" element={<UserSignUpPage />} />
+      <Route path="/sso-callback" element={<SSOCallbackPage />} />
       <Route path="/auth/finish" element={<AuthFinishPage />} />
       <Route path="/user/settings" element={<UserSettingsPage />} />
       
