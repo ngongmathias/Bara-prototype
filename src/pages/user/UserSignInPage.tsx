@@ -34,7 +34,7 @@ export const UserSignInPage = () => {
   useEffect(() => {
     const observer = new MutationObserver(() => {
       const alert = document.querySelector('[role="alert"]');
-      if (alert && /couldn't find your account/i.test(alert.textContent || '')) {
+      if (alert && /find your account/i.test(alert.textContent || '')) {
         // Hide Clerk's error and redirect to Sign Up
         alert.closest('.clerk-alert')?.setAttribute('style', 'display:none');
         navigate(signUpUrl);
