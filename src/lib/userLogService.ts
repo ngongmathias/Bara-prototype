@@ -271,7 +271,7 @@ export class UserLogService {
   static async getDatabaseUsers(page: number = 1, pageSize: number = 15, searchTerm?: string): Promise<PaginatedUsers> {
     try {
       let query = supabase
-        .from('users')
+        .from('clerk_users')
         .select('*', { count: 'exact' });
 
       if (searchTerm) {
