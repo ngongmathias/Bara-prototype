@@ -43,11 +43,31 @@ export const AuthFinishPage = () => {
             throw new Error('Unable to verify your account. Please try again.');
           }
 
+          const isOAuth = (user.externalAccounts?.length ?? 0) > 0;
+
           if (!existing?.id) {
-            setError('No account found for this sign-in. Please use Sign Up to create an account.');
-            await clerk.signOut();
-            navigate(`/user/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`);
-            return;
+            if (isOAuth) {
+              // OAuth user with no platform record → implicit sign-up
+              const flagKey = `bara_platform_user_created_${user.id}`;
+              if (!sessionStorage.getItem(flagKey)) {
+                const ok = await ClerkSupabaseBridge.ensureDatabaseUser({
+                  id: user.id,
+                  email: userEmail,
+                  firstName: user.firstName || undefined,
+                  lastName: user.lastName || undefined,
+                });
+                if (!ok) {
+                  throw new Error('Failed to create your user profile. Please try again.');
+                }
+                sessionStorage.setItem(flagKey, '1');
+              }
+            } else {
+              // Email/password sign-in with no existing record → strict block
+              setError('No account found for this sign-in. Please use Sign Up to create an account.');
+              await clerk.signOut();
+              navigate(`/user/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`);
+              return;
+            }
           }
         }
 
