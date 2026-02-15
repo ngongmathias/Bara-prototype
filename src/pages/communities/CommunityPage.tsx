@@ -36,7 +36,13 @@ const communityData: Record<string, Omit<CommunityData, 'id'>> = {
   },
   'kensential-kenya': {
     name: 'KenSential Kenya',
-    description: 'Famous for its wildlife safaris, the Great Rift Valley, and the Maasai culture, Kenya offers breathtaking landscapes and incredible wildlife experiences. From the savannas of the Maasai Mara to the white sand beaches of the coast, Kenya is a land of contrasts and natural beauty.'
+    description: 'Famous for its wildlife safaris, the Great Rift Valley, and the Maasai culture, Kenya offers breathtaking landscapes and incredible wildlife experiences. From the savannas of the Maasai Mara to the white sand beaches of the coast, Kenya is a land of contrasts and natural beauty.',
+    groups: [
+      'https://chat.whatsapp.com/ERGTm2rfMGuAqMHeQMd339',
+      'https://chat.whatsapp.com/KHw6dnedPr9KG5XkgUdVWj',
+      'https://chat.whatsapp.com/JNVJUnsh3ZV5xcN6UyDZf6',
+      'https://chat.whatsapp.com/HeMn0O4wggs5vwjyFnK0ZK'
+    ]
   },
   'nigeriayeah-nigeria': {
     name: 'NigeriaYeah Nigeria',
