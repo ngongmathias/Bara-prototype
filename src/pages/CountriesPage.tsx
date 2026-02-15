@@ -43,17 +43,60 @@ export const CountriesPage = () => {
         // Don't throw, just log - we have fallback in globe
       }
       
+      let allCountries: Country[] = [];
+      
       if (data && data.length > 0) {
         // Generate slug from name since the column doesn't exist
         const countriesWithSlug = data.map(country => ({
           ...country,
           slug: country.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
         }));
+        allCountries = countriesWithSlug;
         console.log(`✅ Loaded ${countriesWithSlug.length} countries from database`);
-        setCountries(countriesWithSlug);
       } else {
         console.log('No countries returned from database');
       }
+
+      // Add Bara Global entries (diaspora communities)
+      const baraGlobalEntries: Country[] = [
+        {
+          id: 'bara-global-blackafrican-europeans',
+          name: 'Black/African Europeans',
+          code: 'BG',
+          slug: 'blackafrican-europeans',
+          flag_url: null,
+          flag_emoji: '🌍',
+          description: 'The Black/African European community represents people of African descent living across Europe.',
+          population: null,
+          capital: null,
+        },
+        {
+          id: 'bara-global-blackafrican-americans',
+          name: 'Black/African Americans',
+          code: 'BG',
+          slug: 'blackafrican-americans',
+          flag_url: null,
+          flag_emoji: '🌍',
+          description: 'Black/African Americans have shaped American history, culture, and society for centuries.',
+          population: null,
+          capital: null,
+        },
+        {
+          id: 'bara-global-blackafrican-brazilians',
+          name: 'Black/African Brazilians',
+          code: 'BG',
+          slug: 'blackafrican-brazilians',
+          flag_url: null,
+          flag_emoji: '🌍',
+          description: 'Brazil has the largest population of African descent outside Africa.',
+          population: null,
+          capital: null,
+        },
+      ];
+
+      // Merge database countries with Bara Global entries
+      allCountries = [...allCountries, ...baraGlobalEntries];
+      setCountries(allCountries);
     } catch (error) {
       console.error('Exception fetching countries:', error);
     } finally {
