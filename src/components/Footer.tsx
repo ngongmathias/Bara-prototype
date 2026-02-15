@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { scrollToTop } from '@/lib/scrollToTop';
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/supabase';
+import { slugFromName } from '@/lib/locationSlug';
 import { useToast } from "@/components/ui/use-toast";
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -10,6 +11,7 @@ interface Country {
   id: string;
   name: string;
   code: string;
+  slug?: string;
   flag_url: string | null;
   wikipedia_url: string | null;
   description: string | null;
@@ -17,6 +19,10 @@ interface Country {
   capital: string | null;
   currency: string | null;
   language: string | null;
+}
+
+function countryToSlug(c: Country): string {
+  return c.slug ?? slugFromName(c.name);
 }
 
 const Footer = () => {
@@ -52,7 +58,29 @@ const Footer = () => {
             variant: "destructive"
           });
         } else if (data) {
-          setCountries(data);
+          const withSlug = (data as Country[]).map(c => ({
+            ...c,
+            slug: c.slug ?? slugFromName(c.name),
+          }));
+          // Fetch communities (Global Africa) from DB – same list as Countries page
+          const { data: gaData } = await db.global_africa()
+            .select('id, name, code')
+            .eq('is_active', true)
+            .order('display_order', { ascending: true });
+          const communities: Country[] = (gaData || []).map((ga: { id: string; name: string; code: string | null }) => ({
+            id: ga.id,
+            name: ga.name,
+            code: ga.code || 'GA',
+            slug: slugFromName(ga.name),
+            flag_url: null,
+            wikipedia_url: null,
+            description: null,
+            population: null,
+            capital: null,
+            currency: null,
+            language: null,
+          }));
+          setCountries([...withSlug, ...communities]);
         }
       } catch (error) {
         console.error('Error fetching countries:', error);
@@ -148,7 +176,7 @@ const Footer = () => {
                   {(showAllCountries ? countries : countries.slice(0, 12)).map((country) => (
                     <div key={country.id} className="truncate">
                       <Link 
-                        to={`/countries/${country.name.toLowerCase().replace(/\s+/g, '-')}`}
+                        to={`/countries/${countryToSlug(country)}`}
                         onClick={scrollToTop}
                         className="text-gray-700 hover:text-black transition-colors flex items-center font-roboto text-sm sm:text-base"
                         title={country.name}

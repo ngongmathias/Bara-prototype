@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Users, ArrowRight, Search, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/supabase';
+import { slugFromName } from '@/lib/locationSlug';
 
 interface Country {
   id: string;
@@ -46,56 +48,42 @@ export const CountriesPage = () => {
       let allCountries: Country[] = [];
       
       if (data && data.length > 0) {
-        // Generate slug from name since the column doesn't exist
-        const countriesWithSlug = data.map(country => ({
+        const countriesWithSlug = data.map((country: { name: string; [k: string]: unknown }) => ({
           ...country,
-          slug: country.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+          slug: slugFromName(country.name),
         }));
         allCountries = countriesWithSlug;
         console.log(`✅ Loaded ${countriesWithSlug.length} countries from database`);
-      } else {
-        console.log('No countries returned from database');
       }
 
-      // Add Bara Global entries (diaspora communities)
-      const baraGlobalEntries: Country[] = [
-        {
-          id: 'bara-global-blackafrican-europeans',
-          name: 'Black/African Europeans',
-          code: 'BG',
-          slug: 'blackafrican-europeans',
-          flag_url: null,
-          flag_emoji: '🌍',
-          description: 'The Black/African European community represents people of African descent living across Europe.',
-          population: null,
-          capital: null,
-        },
-        {
-          id: 'bara-global-blackafrican-americans',
-          name: 'Black/African Americans',
-          code: 'BG',
-          slug: 'blackafrican-americans',
-          flag_url: null,
-          flag_emoji: '🌍',
-          description: 'Black/African Americans have shaped American history, culture, and society for centuries.',
-          population: null,
-          capital: null,
-        },
-        {
-          id: 'bara-global-blackafrican-brazilians',
-          name: 'Black/African Brazilians',
-          code: 'BG',
-          slug: 'blackafrican-brazilians',
-          flag_url: null,
-          flag_emoji: '🌍',
-          description: 'Brazil has the largest population of African descent outside Africa.',
-          population: null,
-          capital: null,
-        },
-      ];
+      // Fetch communities (Global Africa / diaspora) from DB – same UI as countries
+      const { data: gaData } = await db.global_africa()
+        .select('id, name, code, flag_emoji, display_order')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+      const { data: gaInfoData } = await db.global_africa_info().select('global_africa_id, description, population, location, largest_city, flag_url');
 
-      // Merge database countries with Bara Global entries
-      allCountries = [...allCountries, ...baraGlobalEntries];
+      const infoByEntryId = new Map(
+        (gaInfoData || []).map((info: { global_africa_id: string; description?: string | null; population?: number | null; location?: string | null; largest_city?: string | null; flag_url?: string | null }) => [info.global_africa_id, info])
+      );
+
+      const communities: Country[] = (gaData || []).map((ga: { id: string; name: string; code: string | null; flag_emoji: string | null }) => {
+        const info = infoByEntryId.get(ga.id);
+        return {
+          id: ga.id,
+          name: ga.name,
+          code: ga.code || 'GA',
+          slug: slugFromName(ga.name),
+          flag_url: info?.flag_url ?? null,
+          flag_emoji: ga.flag_emoji ?? '🌍',
+          description: info?.description ?? null,
+          population: info?.population ?? null,
+          capital: info?.location ?? info?.largest_city ?? null,
+        };
+      });
+
+      allCountries = [...allCountries, ...communities];
+      if (communities.length > 0) console.log(`✅ Loaded ${communities.length} communities (Global Africa)`);
       setCountries(allCountries);
     } catch (error) {
       console.error('Exception fetching countries:', error);
