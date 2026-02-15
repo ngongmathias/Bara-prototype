@@ -261,39 +261,49 @@ export const CountryDetailPage: React.FC = () => {
               >
                 {/* Flag, Coat of Arms & Name */}
                 <div className="flex items-start gap-6 mb-6">
-                  <div className="flex items-center gap-4">
-                    {/* Use database flag_url if available, fallback to flagcdn.com API */}
-                    <img
-                      src={countryInfo?.flag_url || country.flag_url || `https://flagcdn.com/w160/${country.code.toLowerCase()}.png`}
-                      alt={`${country.name} flag`}
-                      className="w-24 h-16 object-contain bg-white rounded shadow-md border border-gray-200"
-                      onError={(e) => {
-                        // Fallback to flagcdn if database flag fails
-                        const target = e.target as HTMLImageElement;
-                        if (!target.src.includes('flagcdn.com')) {
-                          target.src = `https://flagcdn.com/w160/${country.code.toLowerCase()}.png`;
-                        } else {
-                          target.style.display = 'none';
-                          target.nextElementSibling?.classList.remove('hidden');
-                        }
-                      }}
-                    />
-                    <div className="w-24 h-16 bg-gray-100 rounded flex items-center justify-center hidden">
-                      <span className="text-2xl font-bold text-gray-400">{country.code}</span>
+                  {(countryInfo?.flag_url || country.flag_url || country.flag_emoji || country.code) && (
+                    <div className="flex items-center gap-4">
+                      {/* Use database flag_url if available, fallback to flagcdn.com API or emoji */}
+                      {country.flag_emoji ? (
+                        <div className="w-24 h-16 bg-gray-100 rounded flex items-center justify-center text-4xl">
+                          {country.flag_emoji}
+                        </div>
+                      ) : (
+                        <img
+                          src={countryInfo?.flag_url || country.flag_url || `https://flagcdn.com/w160/${country.code.toLowerCase()}.png`}
+                          alt={`${country.name} flag`}
+                          className="w-24 h-16 object-contain bg-white rounded shadow-md border border-gray-200"
+                          onError={(e) => {
+                            // Fallback to flagcdn if database flag fails
+                            const target = e.target as HTMLImageElement;
+                            if (!target.src.includes('flagcdn.com')) {
+                              target.src = `https://flagcdn.com/w160/${country.code.toLowerCase()}.png`;
+                            } else {
+                              target.style.display = 'none';
+                              target.nextElementSibling?.classList.remove('hidden');
+                            }
+                          }}
+                        />
+                      )}
+                      <div className="w-24 h-16 bg-gray-100 rounded flex items-center justify-center hidden">
+                        <span className="text-2xl font-bold text-gray-400">{country.code}</span>
+                      </div>
+                      {(countryInfo?.coat_of_arms_url || country.coat_of_arms_url) && (
+                        <img
+                          src={countryInfo?.coat_of_arms_url || country.coat_of_arms_url}
+                          alt={`${country.name} Coat of Arms`}
+                          className="w-16 h-16 object-contain opacity-80"
+                        />
+                      )}
                     </div>
-                    {(countryInfo?.coat_of_arms_url || country.coat_of_arms_url) && (
-                      <img
-                        src={countryInfo?.coat_of_arms_url || country.coat_of_arms_url}
-                        alt={`${country.name} Coat of Arms`}
-                        className="w-16 h-16 object-contain opacity-80"
-                      />
-                    )}
-                  </div>
+                  )}
                   <div>
                     <h1 className="text-5xl lg:text-6xl font-black text-black tracking-tight">
                       {country.name}
                     </h1>
-                    <p className="text-gray-400 text-lg mt-1">{country.code}</p>
+                    {country.code && (
+                      <p className="text-gray-400 text-lg mt-1">{country.code}</p>
+                    )}
                   </div>
                 </div>
 
@@ -342,23 +352,25 @@ export const CountryDetailPage: React.FC = () => {
                 )}
               </motion.div>
 
-              {/* Right: Map */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 }}
-                className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm"
-              >
-                <UltraSimpleMap
-                  countryData={{
-                    name: country.name,
-                    capital: country.capital,
-                    latitude: getCoords().lat,
-                    longitude: getCoords().lng
-                  }}
-                  countryName={country.name}
-                />
-              </motion.div>
+              {/* Right: Map - only show if coordinates are meaningful */}
+              {((countryInfo?.latitude && countryInfo?.longitude) || COUNTRY_COORDS[countrySlug || '']) && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm"
+                >
+                  <UltraSimpleMap
+                    countryData={{
+                      name: country.name,
+                      capital: country.capital,
+                      latitude: getCoords().lat,
+                      longitude: getCoords().lng
+                    }}
+                    countryName={country.name}
+                  />
+                </motion.div>
+              )}
             </div>
           </div>
         </div>
