@@ -50,7 +50,8 @@ const communityData: Record<string, Omit<CommunityData, 'id'>> = {
       'https://chat.whatsapp.com/CTXgiOGUbUV6x6JaP83rRm',
       'https://chat.whatsapp.com/E1vc00NDaTp6IP582Z1WGi',
       'https://chat.whatsapp.com/D85ihyzUNrZIe9ELaHnwKk',
-      'https://chat.whatsapp.com/JPyVanlaRvs9ylC1EKtt64'
+      'https://chat.whatsapp.com/JPyVanlaRvs9ylC1EKtt64',
+      'https://chat.whatsapp.com/Io6PvS54IQrHGH4PSnqu2Z'
     ]
   },
   'senegalastic-senegal': {
@@ -131,7 +132,7 @@ export const CommunityPage = () => {
             </div>
             
             <div>
-              <h2 className="text-xl font-semibold mb-4">WhatsApp Groups</h2>
+              <h2 className="text-xl font-semibold mb-4">WhatsApp Community</h2>
               {community.groups && community.groups.length > 0 ? (
                 <div className="space-y-3">
                   {community.groups.map((group, index) => (
@@ -142,7 +143,7 @@ export const CommunityPage = () => {
                       rel="noopener noreferrer"
                       className="block w-full sm:w-auto px-4 py-2 border border-green-500 text-green-600 rounded-lg hover:bg-green-50 transition-colors flex items-center justify-between"
                     >
-                      <span>Group {index + 1}</span>
+                      <span>Community {index + 1}</span>
                       <ExternalLink className="w-4 h-4 ml-2" />
                     </a>
                   ))}
