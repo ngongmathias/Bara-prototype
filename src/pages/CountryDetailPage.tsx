@@ -66,6 +66,47 @@ const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
   'tanzania': { lat: -6.369, lng: 34.8888 },
   'uganda': { lat: 1.3733, lng: 32.2903 },
   'morocco': { lat: 31.7917, lng: -7.0926 },
+  // Bara Global entries (non-countries)
+  'blackafrican-europeans': { lat: 50.0, lng: 10.0 }, // Central Europe
+  'blackafrican-americans': { lat: 39.8283, lng: -98.5795 }, // Central US
+  'blackafrican-brazilians': { lat: -14.235, lng: -51.9253 }, // Central Brazil
+};
+
+// Bara Global entries (non-country diaspora communities)
+const BARA_GLOBAL_ENTRIES: Record<string, Omit<Country, 'id' | 'code'>> = {
+  'blackafrican-europeans': {
+    name: 'Black/African Europeans',
+    flag_url: null,
+    flag_emoji: '🌍',
+    wikipedia_url: null,
+    description: 'The Black/African European community represents people of African descent living across Europe. From the UK and France to Germany and the Netherlands, African Europeans contribute richly to cultural, economic, and political life while maintaining strong connections to their African heritage.',
+    population: null,
+    capital: null,
+    currency: null,
+    language: 'Various (English, French, Portuguese, Spanish, Dutch, etc.)',
+  },
+  'blackafrican-americans': {
+    name: 'Black/African Americans',
+    flag_url: null,
+    flag_emoji: '🌍',
+    wikipedia_url: null,
+    description: 'Black/African Americans have shaped American history, culture, and society for centuries. From the civil rights movement to contributions in arts, sciences, politics, and business, African American culture continues to influence global trends while preserving unique traditions and heritage.',
+    population: null,
+    capital: null,
+    currency: null,
+    language: 'English',
+  },
+  'blackafrican-brazilians': {
+    name: 'Black/African Brazilians',
+    flag_url: null,
+    flag_emoji: '🌍',
+    wikipedia_url: null,
+    description: 'Brazil has the largest population of African descent outside Africa. Afro-Brazilians have profoundly influenced Brazilian culture through music, dance, cuisine, religion, and martial arts. From carnival celebrations to capoeira and samba, African heritage is integral to Brazilian identity.',
+    population: null,
+    capital: null,
+    currency: null,
+    language: 'Portuguese',
+  },
 };
 
 export const CountryDetailPage: React.FC = () => {
@@ -95,6 +136,23 @@ export const CountryDetailPage: React.FC = () => {
 
   const fetchData = async () => {
     try {
+      // First check if this is a Bara Global entry
+      const baraGlobalEntry = BARA_GLOBAL_ENTRIES[countrySlug || ''];
+      if (baraGlobalEntry) {
+        // Use Bara Global entry with generated ID
+        const globalCountry: Country = {
+          id: `bara-global-${countrySlug}`,
+          code: 'BG',
+          ...baraGlobalEntry,
+        };
+        setCountry(globalCountry);
+        // No businesses for Bara Global entries
+        setBusinesses([]);
+        setLoading(false);
+        return;
+      }
+
+      // Otherwise, try to fetch from database (real countries)
       const pattern = countrySlug?.replace(/-/g, ' ') || '';
       const { data, error } = await db.countries()
         .select('*')
