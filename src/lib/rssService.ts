@@ -122,10 +122,12 @@ export async function fetchAndParseRSSFeed(feedUrl: string, sourceName: string):
   try {
     // 1. Try rss2json.com first (Reliable JSON API, handles CORS)
     try {
+      console.log(`Fetching RSS via rss2json: ${feedUrl}`);
       const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'ok') {
+          console.log(`rss2json success for ${sourceName}: ${data.items.length} items`);
           return data.items.map((item: any) => ({
             title: item.title,
             link: item.link,
@@ -139,7 +141,11 @@ export async function fetchAndParseRSSFeed(feedUrl: string, sourceName: string):
             category: item.categories?.length > 0 ? item.categories[0] : undefined,
             guid: item.guid || item.link,
           }));
+        } else {
+          console.warn(`rss2json returned status ${data.status} for ${sourceName}`);
         }
+      } else {
+        console.warn(`rss2json http error ${response.status} for ${sourceName}`);
       }
     } catch (error) {
       console.warn(`rss2json failed for ${sourceName}, trying fallbacks...`, error);

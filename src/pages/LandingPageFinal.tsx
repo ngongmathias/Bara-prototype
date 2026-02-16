@@ -18,7 +18,8 @@ import {
   FileText
 } from 'lucide-react';
 import { db } from '@/lib/supabase';
-import { useSponsoredBanners } from '@/hooks/useSponsoredBanners';
+import { TopBannerAd } from '@/components/TopBannerAd';
+import { BottomBannerAd } from '@/components/BottomBannerAd';
 
 
 interface Country {
@@ -95,11 +96,10 @@ export const LandingPageFinal = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const { banners, fetchActiveBanners, incrementBannerView, incrementBannerClick } = useSponsoredBanners();
+
 
   useEffect(() => {
     fetchCountries();
-    fetchActiveBanners();
   }, []);
 
   const fetchCountries = async () => {
@@ -139,6 +139,7 @@ export const LandingPageFinal = () => {
   return (
     <div className="relative min-h-screen bg-white">
       {/* Header */}
+      <TopBannerAd />
       <div className="relative z-20">
         <Header />
       </div>
@@ -146,36 +147,7 @@ export const LandingPageFinal = () => {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-8 py-16 gap-12">
 
-        {/* Sponsored Banner - Top */}
-        {banners.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-4xl mb-4"
-          >
-            {banners.slice(0, 1).map((banner) => (
-              <a
-                key={banner.id}
-                href={banner.company_website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow relative group"
-                onClick={() => incrementBannerClick(banner.id)}
-              >
-                <img
-                  src={banner.banner_image_url || ''}
-                  alt={banner.company_name}
-                  className="w-full h-32 or h-auto object-cover"
-                  onLoad={() => incrementBannerView(banner.id)}
-                />
-                <div className="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded">
-                  Sponsored
-                </div>
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
-              </a>
-            ))}
-          </motion.div>
-        )}
+
 
         {/* Interactive Logo Section */}
         <motion.div
@@ -330,6 +302,7 @@ export const LandingPageFinal = () => {
 
       {/* Footer */}
       <div className="relative z-20 mt-16">
+        <BottomBannerAd />
         <Footer />
       </div>
     </div>
