@@ -16,13 +16,13 @@ export const useSponsoredBanners = () => {
   const fetchBanners = async (adminMode = false) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error: fetchError } = await supabase
         .from('sponsored_banners')
         .select(`
           *,
-          countries!sponsored_banners_country_id_fkey(
+          countries:country_id (
             name,
             code,
             flag_url
@@ -56,13 +56,13 @@ export const useSponsoredBanners = () => {
   const fetchActiveBanners = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error: fetchError } = await supabase
         .from('sponsored_banners')
         .select(`
           *,
-          countries!sponsored_banners_country_id_fkey(
+          countries:country_id (
             name,
             code,
             flag_url
@@ -96,7 +96,7 @@ export const useSponsoredBanners = () => {
   const fetchBannerByCountry = async (countryId: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // 1) Prefer active + paid
       let { data, error: fetchError } = await supabase

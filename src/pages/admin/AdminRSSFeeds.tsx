@@ -78,7 +78,7 @@ export const AdminRSSFeeds = () => {
         description: 'Fetching latest news from all sources...',
       });
 
-      const result = await refreshRSSFeeds();
+      const result = await refreshRSSFeeds(true);
 
       if (result.success) {
         toast({

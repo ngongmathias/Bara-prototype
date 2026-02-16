@@ -388,7 +388,7 @@ async function smartFetchNews(source: RSSFeedSource): Promise<RSSFeedItem[]> {
   return await fetchAndParseRSSFeed(source.url, source.name);
 }
 
-export async function refreshRSSFeeds(): Promise<{ success: boolean; itemsAdded: number }> {
+export async function refreshRSSFeeds(forceRefresh = false): Promise<{ success: boolean; itemsAdded: number }> {
   try {
     const sources = await getRSSFeedSources();
     let totalItemsAdded = 0;
@@ -411,7 +411,7 @@ export async function refreshRSSFeeds(): Promise<{ success: boolean; itemsAdded:
         const now = new Date();
         const minutesSinceLastFetch = (now.getTime() - lastFetch.getTime()) / (1000 * 60);
 
-        if (minutesSinceLastFetch < source.fetchIntervalMinutes) {
+        if (!forceRefresh && minutesSinceLastFetch < source.fetchIntervalMinutes) {
           console.log(`⏭️ Skipping ${source.name} - fetched ${minutesSinceLastFetch.toFixed(0)} minutes ago`);
           continue;
         }
