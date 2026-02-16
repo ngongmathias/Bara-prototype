@@ -457,6 +457,9 @@ export async function refreshRSSFeeds(forceRefresh = false): Promise<{ success: 
         .from('rss_feed_sources')
         .update({ last_fetched_at: new Date().toISOString() })
         .eq('id', source.id);
+
+      // Add a 5-second delay to avoid rate limiting (429 errors from rss2json)
+      await new Promise(resolve => setTimeout(resolve, 5000));
     }
 
     console.log(`✅ RSS refresh complete. Added ${totalItemsAdded} new items.`);
