@@ -18,6 +18,13 @@ interface Country {
   capital: string | null;
 }
 
+// Legacy slugs for existing links – shown in list when not already in DB
+const LEGACY_BARA_GLOBAL_ENTRIES: Country[] = [
+  { id: 'legacy-blackafrican-europeans', name: 'Black/African Europeans', code: 'BG', slug: 'blackafrican-europeans', flag_url: null, flag_emoji: '🌍', description: 'The Black/African European community represents people of African descent living across Europe.', population: null, capital: null },
+  { id: 'legacy-blackafrican-americans', name: 'Black/African Americans', code: 'BG', slug: 'blackafrican-americans', flag_url: null, flag_emoji: '🌍', description: 'Black/African Americans have shaped American history, culture, and society for centuries.', population: null, capital: null },
+  { id: 'legacy-blackafrican-brazilians', name: 'Black/African Brazilians', code: 'BG', slug: 'blackafrican-brazilians', flag_url: null, flag_emoji: '🌍', description: 'Brazil has the largest population of African descent outside Africa.', population: null, capital: null },
+];
+
 export const CountriesPage = () => {
   const navigate = useNavigate();
   const [countries, setCountries] = useState<Country[]>([]);
@@ -84,6 +91,10 @@ export const CountriesPage = () => {
 
       allCountries = [...allCountries, ...communities];
       if (communities.length > 0) console.log(`✅ Loaded ${communities.length} communities (Global Africa)`);
+      // Add legacy slug entries only if not already present (e.g. from DB)
+      const existingSlugs = new Set(allCountries.map(c => c.slug));
+      const toAdd = LEGACY_BARA_GLOBAL_ENTRIES.filter(e => !existingSlugs.has(e.slug));
+      if (toAdd.length > 0) allCountries = [...allCountries, ...toAdd];
       setCountries(allCountries);
     } catch (error) {
       console.error('Exception fetching countries:', error);

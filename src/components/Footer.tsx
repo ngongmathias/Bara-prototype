@@ -25,6 +25,13 @@ function countryToSlug(c: Country): string {
   return c.slug ?? slugFromName(c.name);
 }
 
+// Legacy slugs so existing links appear in footer when not in DB
+const LEGACY_FOOTER_ENTRIES: Country[] = [
+  { id: 'legacy-blackafrican-europeans', name: 'Black/African Europeans', code: 'BG', slug: 'blackafrican-europeans', flag_url: null, wikipedia_url: null, description: null, population: null, capital: null, currency: null, language: null },
+  { id: 'legacy-blackafrican-americans', name: 'Black/African Americans', code: 'BG', slug: 'blackafrican-americans', flag_url: null, wikipedia_url: null, description: null, population: null, capital: null, currency: null, language: null },
+  { id: 'legacy-blackafrican-brazilians', name: 'Black/African Brazilians', code: 'BG', slug: 'blackafrican-brazilians', flag_url: null, wikipedia_url: null, description: null, population: null, capital: null, currency: null, language: null },
+];
+
 const Footer = () => {
   const { t } = useTranslation();
   const [countries, setCountries] = useState<Country[]>([]);
@@ -80,7 +87,10 @@ const Footer = () => {
             currency: null,
             language: null,
           }));
-          setCountries([...withSlug, ...communities]);
+          const combined = [...withSlug, ...communities];
+          const existingSlugs = new Set(combined.map(c => countryToSlug(c)));
+          const toAdd = LEGACY_FOOTER_ENTRIES.filter(e => !existingSlugs.has(e.slug!));
+          setCountries([...combined, ...toAdd]);
         }
       } catch (error) {
         console.error('Error fetching countries:', error);
