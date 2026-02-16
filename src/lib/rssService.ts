@@ -120,16 +120,41 @@ export async function getRSSFeedSources(): Promise<RSSFeedSource[]> {
  */
 export async function fetchAndParseRSSFeed(feedUrl: string, sourceName: string): Promise<RSSFeedItem[]> {
   try {
-    // Try multiple CORS proxies for reliability
+    // 1. Try rss2json.com first (Reliable JSON API, handles CORS)
+    try {
+      const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'ok') {
+          return data.items.map((item: any) => ({
+            title: item.title,
+            link: item.link,
+            description: item.description || item.content || '',
+            pubDate: item.pubDate,
+            source: sourceName,
+            countryCode: undefined, // Will be filled by caller
+            countryName: undefined, // Will be filled by caller
+            imageUrl: item.thumbnail || item.enclosure?.link,
+            author: item.author,
+            category: item.categories?.length > 0 ? item.categories[0] : undefined,
+            guid: item.guid || item.link,
+          }));
+        }
+      }
+    } catch (error) {
+      console.warn(`rss2json failed for ${sourceName}, trying fallbacks...`, error);
+    }
+
+    // 2. Fallback: Try multiple CORS proxies for raw XML
     const proxies = [
-      `https://corsproxy.io/?${encodeURIComponent(feedUrl)}`,
       `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`,
+      `https://corsproxy.io/?${encodeURIComponent(feedUrl)}`,
       `https://cors-anywhere.herokuapp.com/${feedUrl}`,
     ];
-    
+
     let xmlText = '';
     let lastError: Error | null = null;
-    
+
     // Try each proxy until one works
     for (const proxyUrl of proxies) {
       try {
@@ -144,57 +169,57 @@ export async function fetchAndParseRSSFeed(feedUrl: string, sourceName: string):
         continue;
       }
     }
-    
+
     // If all proxies failed, throw error
     if (!xmlText) {
       throw lastError || new Error('All CORS proxies failed');
     }
-    
+
     // Parse XML
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-    
+
     // Check for parsing errors
     const parseError = xmlDoc.querySelector('parsererror');
     if (parseError) {
       console.error('XML parsing error:', parseError.textContent);
       return [];
     }
-    
+
     // Try RSS 2.0 format first
     let items = xmlDoc.querySelectorAll('item');
-    
+
     // If no items, try Atom format
     if (items.length === 0) {
       items = xmlDoc.querySelectorAll('entry');
     }
-    
+
     const feedItems: RSSFeedItem[] = [];
-    
+
     items.forEach((item, index) => {
       if (index >= 10) return; // Limit to 10 items per feed
-      
+
       // RSS 2.0 format
       const title = item.querySelector('title')?.textContent || '';
       const link = item.querySelector('link')?.textContent || item.querySelector('link')?.getAttribute('href') || '';
-      const description = item.querySelector('description')?.textContent || 
-                         item.querySelector('summary')?.textContent || 
-                         item.querySelector('content')?.textContent || '';
-      const pubDate = item.querySelector('pubDate')?.textContent || 
-                     item.querySelector('published')?.textContent || 
-                     item.querySelector('updated')?.textContent || 
-                     new Date().toISOString();
-      const guid = item.querySelector('guid')?.textContent || 
-                  item.querySelector('id')?.textContent || 
-                  link;
-      const author = item.querySelector('author')?.textContent || 
-                    item.querySelector('dc\\:creator')?.textContent || '';
-      
+      const description = item.querySelector('description')?.textContent ||
+        item.querySelector('summary')?.textContent ||
+        item.querySelector('content')?.textContent || '';
+      const pubDate = item.querySelector('pubDate')?.textContent ||
+        item.querySelector('published')?.textContent ||
+        item.querySelector('updated')?.textContent ||
+        new Date().toISOString();
+      const guid = item.querySelector('guid')?.textContent ||
+        item.querySelector('id')?.textContent ||
+        link;
+      const author = item.querySelector('author')?.textContent ||
+        item.querySelector('dc\\:creator')?.textContent || '';
+
       // Try to extract image
-      let imageUrl = item.querySelector('media\\:thumbnail')?.getAttribute('url') || 
-                    item.querySelector('media\\:content')?.getAttribute('url') || 
-                    item.querySelector('enclosure[type^="image"]')?.getAttribute('url') || '';
-      
+      let imageUrl = item.querySelector('media\\:thumbnail')?.getAttribute('url') ||
+        item.querySelector('media\\:content')?.getAttribute('url') ||
+        item.querySelector('enclosure[type^="image"]')?.getAttribute('url') || '';
+
       // If no image in item, try to extract from description
       if (!imageUrl && description) {
         const imgMatch = description.match(/<img[^>]+src="([^">]+)"/);
@@ -202,7 +227,7 @@ export async function fetchAndParseRSSFeed(feedUrl: string, sourceName: string):
           imageUrl = imgMatch[1];
         }
       }
-      
+
       feedItems.push({
         title: title.trim(),
         link: link.trim(),
@@ -214,7 +239,7 @@ export async function fetchAndParseRSSFeed(feedUrl: string, sourceName: string):
         guid: guid.trim(),
       });
     });
-    
+
     return feedItems;
   } catch (error) {
     console.error(`Error fetching RSS feed from ${feedUrl}:`, error);
@@ -248,7 +273,7 @@ async function fetchFromNewsAPI(countryCode: string): Promise<RSSFeedItem[]> {
     const response = await fetch(
       `https://newsapi.org/v2/top-headlines?country=${countryCode.toLowerCase()}&pageSize=10&apiKey=${apiKey}`
     );
-    
+
     if (!response.ok) throw new Error(`NewsAPI error: ${response.status}`);
     const data = await response.json();
 
@@ -277,7 +302,7 @@ async function fetchFromGNews(countryCode: string): Promise<RSSFeedItem[]> {
     const response = await fetch(
       `https://gnews.io/api/v4/top-headlines?country=${countryCode.toLowerCase()}&max=10&token=${apiKey}`
     );
-    
+
     if (!response.ok) throw new Error(`GNews error: ${response.status}`);
     const data = await response.json();
 
@@ -306,7 +331,7 @@ async function fetchFromCurrents(countryCode: string): Promise<RSSFeedItem[]> {
     const response = await fetch(
       `https://api.currentsapi.services/v1/latest-news?country=${countryCode}&language=en&apiKey=${apiKey}`
     );
-    
+
     if (!response.ok) throw new Error(`Currents error: ${response.status}`);
     const data = await response.json();
 
@@ -373,7 +398,7 @@ export async function refreshRSSFeeds(): Promise<{ success: boolean; itemsAdded:
     if (hasNewsAPI()) configuredAPIs.push('NewsAPI');
     if (hasGNews()) configuredAPIs.push('GNews');
     if (hasCurrents()) configuredAPIs.push('Currents');
-    
+
     if (configuredAPIs.length > 0) {
       console.log(`🔑 Configured APIs: ${configuredAPIs.join(', ')}`);
     } else {
@@ -393,7 +418,7 @@ export async function refreshRSSFeeds(): Promise<{ success: boolean; itemsAdded:
       }
 
       console.log(`📰 Fetching news from ${source.name}...`);
-      
+
       // Use smart fetch (APIs first, RSS fallback)
       const items = await smartFetchNews(source);
 

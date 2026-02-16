@@ -6,18 +6,19 @@ import { RSSFeeds } from '@/components/landing/RSSFeeds';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
-import { 
-  Globe, 
-  Store, 
-  Calendar, 
-  ShoppingBag, 
-  Users, 
+import {
+  Globe,
+  Store,
+  Calendar,
+  ShoppingBag,
+  Users,
   Megaphone,
   Search,
   ChevronDown,
   FileText
 } from 'lucide-react';
 import { db } from '@/lib/supabase';
+import { useSponsoredBanners } from '@/hooks/useSponsoredBanners';
 
 interface Country {
   id: string;
@@ -93,8 +94,11 @@ export const LandingPageFinal = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const { banners, fetchActiveBanners, incrementBannerView, incrementBannerClick } = useSponsoredBanners();
+
   useEffect(() => {
     fetchCountries();
+    fetchActiveBanners();
   }, []);
 
   const fetchCountries = async () => {
@@ -140,7 +144,38 @@ export const LandingPageFinal = () => {
 
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-8 py-16 gap-12">
-        
+
+        {/* Sponsored Banner - Top */}
+        {banners.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-4xl mb-4"
+          >
+            {banners.slice(0, 1).map((banner) => (
+              <a
+                key={banner.id}
+                href={banner.company_website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow relative group"
+                onClick={() => incrementBannerClick(banner.id)}
+              >
+                <img
+                  src={banner.banner_image_url || ''}
+                  alt={banner.company_name}
+                  className="w-full h-32 or h-auto object-cover"
+                  onLoad={() => incrementBannerView(banner.id)}
+                />
+                <div className="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded">
+                  Sponsored
+                </div>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+              </a>
+            ))}
+          </motion.div>
+        )}
+
         {/* Interactive Logo Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -181,10 +216,9 @@ export const LandingPageFinal = () => {
                   </>
                 )}
               </span>
-              <ChevronDown 
-                className={`w-5 h-5 transition-transform duration-300 ${
-                  isDropdownOpen ? 'rotate-180' : ''
-                }`} 
+              <ChevronDown
+                className={`w-5 h-5 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''
+                  }`}
               />
             </motion.button>
 
@@ -254,8 +288,8 @@ export const LandingPageFinal = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 + index * 0.05 }}
-                  whileHover={{ 
-                    scale: 1.05, 
+                  whileHover={{
+                    scale: 1.05,
                     y: -4,
                     boxShadow: "0 10px 30px rgba(0,0,0,0.1)"
                   }}
@@ -285,8 +319,8 @@ export const LandingPageFinal = () => {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="w-full max-w-6xl mt-8"
         >
-          <RSSFeeds 
-            countryName={selectedCountry?.name} 
+          <RSSFeeds
+            countryName={selectedCountry?.name}
             countryCode={selectedCountry?.code}
           />
         </motion.div>

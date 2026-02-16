@@ -34,8 +34,8 @@ const communityData: Record<string, Omit<CommunityData, 'id'>> = {
     name: 'GhaNation Ghana',
     description: 'Experience the gateway to Africa, Ghana is known for its rich history, beautiful beaches, and as the center of the transatlantic slave trade. Experience the warmth of Ghanaian hospitality and the rhythm of highlife music.'
   },
-  'kensential-kenya': {
-    name: 'KenSential Kenya',
+  'kensaytional-kenya': {
+    name: 'KenSayTioNal Kenya',
     description: 'Famous for its wildlife safaris, the Great Rift Valley, and the Maasai culture, Kenya offers breathtaking landscapes and incredible wildlife experiences. From the savannas of the Maasai Mara to the white sand beaches of the coast, Kenya is a land of contrasts and natural beauty.',
     groups: [
       'https://chat.whatsapp.com/ERGTm2rfMGuAqMHeQMd339',
@@ -44,8 +44,8 @@ const communityData: Record<string, Omit<CommunityData, 'id'>> = {
       'https://chat.whatsapp.com/HeMn0O4wggs5vwjyFnK0ZK'
     ]
   },
-  'nigeriayeah-nigeria': {
-    name: 'NigeriaYeah Nigeria',
+  'naijayeah-nigeria': {
+    name: 'NaijaYeah Nigeria',
     description: 'Experience the giant of Africa, where diverse cultures, music, and cuisine come together in a vibrant celebration of life. Nigeria is home to Nollywood, Afrobeat music, and some of the most welcoming people on the continent.'
   },
   'rwandaful-rwanda': {
@@ -102,28 +102,28 @@ export const CommunityPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Link 
-          to="/" 
+        <Link
+          to="/communities"
           className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
+          Back to Communities
         </Link>
-        
+
         <div className="bg-white rounded-xl shadow-sm p-6 sm:p-8 md:p-10">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
             {community.name}
           </h1>
-          
+
           <div className="prose max-w-3xl text-gray-600 mb-8">
             <p className="text-lg">{community.description}</p>
           </div>
-          
+
           <div className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">WhatsApp Channel</h2>
               {community.channelLink ? (
-                <a 
+                <a
                   href={community.channelLink}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -133,10 +133,37 @@ export const CommunityPage = () => {
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </a>
               ) : (
-                <p className="text-gray-500">Coming soon</p>
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border-2 border-blue-200">
+                  <h3 className="text-xl font-bold mb-3 text-gray-900">
+                    🌍 Become a Country Growth Manager!
+                  </h3>
+                  <p className="text-gray-700 mb-4">
+                    This community is waiting for a passionate leader like you!
+                    As a Country Growth Manager, you'll help build and nurture
+                    our {community.name.split(' ')[1]} community by:
+                  </p>
+                  <ul className="list-disc list-inside mb-4 text-gray-700 space-y-2">
+                    <li>Creating and moderating WhatsApp groups</li>
+                    <li>Organizing community events and activities</li>
+                    <li>Connecting diaspora members and locals</li>
+                    <li>Promoting businesses and cultural initiatives</li>
+                  </ul>
+                  <p className="text-gray-700 mb-4">
+                    <strong>What you'll gain:</strong> Leadership experience,
+                    networking opportunities, and the satisfaction of building
+                    something meaningful for your community.
+                  </p>
+                  <Link
+                    to="/contact-us"
+                    className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                  >
+                    Contact Us to Apply
+                    <ExternalLink className="w-4 h-4 ml-2" />
+                  </Link>
+                </div>
               )}
             </div>
-            
+
             <div>
               <h2 className="text-xl font-semibold mb-4">WhatsApp Community</h2>
               {community.groups && community.groups.length > 0 ? (
@@ -155,7 +182,11 @@ export const CommunityPage = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500">More groups coming soon</p>
+                !community.channelLink && (
+                  <p className="text-gray-500 italic">
+                    Groups will be available once a Country Growth Manager is appointed.
+                  </p>
+                )
               )}
             </div>
           </div>
