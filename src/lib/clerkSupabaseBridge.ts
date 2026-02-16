@@ -220,7 +220,7 @@ export class ClerkSupabaseBridge {
         .from('admin_users')
         .select('*')
         .eq('user_id', clerkUserId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         if (error.code === 'PGRST116') {
