@@ -39,13 +39,9 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
         )
       ]).catch(() => [] as RSSFeedItem[]);
       
-      if (cachedFeeds.length > 0) {
-        setFeeds(cachedFeeds);
-        setLoading(false);
-      } else {
-        // No cached feeds - just stop loading, don't try to refresh automatically
-        setLoading(false);
-      }
+      // Always update feeds state - clears old feeds when empty
+      setFeeds(cachedFeeds);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching RSS feeds:', error);
       setLoading(false);

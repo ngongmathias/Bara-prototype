@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { UltraSimpleMap } from "@/components/UltraSimpleMap";
-import { 
+import {
   ArrowLeft,
   MapPin,
   Users,
@@ -58,7 +58,7 @@ interface Business {
   reviews?: Array<{ id: string; rating: number }>;
 }
 
-// Fallback coordinates for map when not in DB (countries and communities)
+// Fallback coordinates for map when not in DB (countries only; communities use global_africa_info lat/lng)
 const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
   'rwanda': { lat: -1.9403, lng: 29.8739 },
   'nigeria': { lat: 9.082, lng: 8.6753 },
@@ -70,61 +70,20 @@ const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
   'tanzania': { lat: -6.369, lng: 34.8888 },
   'uganda': { lat: 1.3733, lng: 32.2903 },
   'morocco': { lat: 31.7917, lng: -7.0926 },
-  // Legacy Bara Global slugs (used in existing links; DB may use different names)
-  'blackafrican-europeans': { lat: 50.0, lng: 10.0 },
-  'blackafrican-americans': { lat: 39.8283, lng: -98.5795 },
-  'blackafrican-brazilians': { lat: -14.235, lng: -51.9253 },
-};
-
-// Legacy slugs for existing URLs – when DB has no matching community by name-derived slug
-const LEGACY_SLUG_ENTRIES: Record<string, Omit<Country, 'id' | 'code'>> = {
-  'blackafrican-europeans': {
-    name: 'Black/African Europeans',
-    flag_url: null,
-    flag_emoji: '🌍',
-    wikipedia_url: null,
-    description: 'The Black/African European community represents people of African descent living across Europe. From the UK and France to Germany and the Netherlands, African Europeans contribute richly to cultural, economic, and political life while maintaining strong connections to their African heritage.',
-    population: null,
-    capital: null,
-    currency: null,
-    language: 'Various (English, French, Portuguese, Spanish, Dutch, etc.)',
-  },
-  'blackafrican-americans': {
-    name: 'Black/African Americans',
-    flag_url: null,
-    flag_emoji: '🌍',
-    wikipedia_url: null,
-    description: 'Black/African Americans have shaped American history, culture, and society for centuries. From the civil rights movement to contributions in arts, sciences, politics, and business, African American culture continues to influence global trends while preserving unique traditions and heritage.',
-    population: null,
-    capital: null,
-    currency: null,
-    language: 'English',
-  },
-  'blackafrican-brazilians': {
-    name: 'Black/African Brazilians',
-    flag_url: null,
-    flag_emoji: '🌍',
-    wikipedia_url: null,
-    description: 'Brazil has the largest population of African descent outside Africa. Afro-Brazilians have profoundly influenced Brazilian culture through music, dance, cuisine, religion, and martial arts. From carnival celebrations to capoeira and samba, African heritage is integral to Brazilian identity.',
-    population: null,
-    capital: null,
-    currency: null,
-    language: 'Portuguese',
-  },
 };
 
 export const CountryDetailPage: React.FC = () => {
   const { countrySlug } = useParams<{ countrySlug: string }>();
   const navigate = useNavigate();
-  
+
   const [country, setCountry] = useState<Country | null>(null);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
 
   const { banners: allSponsoredBanners, incrementBannerClick, incrementBannerView } = useSponsoredBanners();
   // Fix: Properly filter country page ads by active status, payment, and country match
-  const sponsoredBanners = allSponsoredBanners.filter(banner => 
-    banner.show_on_country_detail && 
+  const sponsoredBanners = allSponsoredBanners.filter(banner =>
+    banner.show_on_country_detail &&
     banner.is_active === true &&
     banner.payment_status === 'paid' &&
     banner.status === 'active' &&
@@ -184,20 +143,7 @@ export const CountryDetailPage: React.FC = () => {
         return;
       }
 
-      // Legacy slugs (existing links): blackafrican-europeans, blackafrican-americans, blackafrican-brazilians
-      const legacyEntry = LEGACY_SLUG_ENTRIES[slug];
-      if (legacyEntry) {
-        setCountry({
-          id: `legacy-${slug}`,
-          code: 'BG',
-          ...legacyEntry,
-        });
-        setBusinesses([]);
-        setLoading(false);
-        return;
-      }
-
-      // Otherwise, try to fetch from database (real countries)
+      // Try to fetch from database (real countries)
       const pattern = countrySlug?.replace(/-/g, ' ') || '';
       const { data, error } = await db.countries()
         .select('*')
@@ -205,7 +151,7 @@ export const CountryDetailPage: React.FC = () => {
         .maybeSingle();
 
       if (error) throw error;
-      
+
       if (data) {
         // Enrich with Wikipedia only as fallback
         const wikiData = await fetchWikipediaCountryInfo(data.name);
@@ -226,7 +172,7 @@ export const CountryDetailPage: React.FC = () => {
           .eq('country_id', data.id)
           .eq('status', 'active')
           .limit(12);
-        
+
         setBusinesses(bizData || []);
       }
     } catch (error) {
@@ -284,7 +230,7 @@ export const CountryDetailPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-white">
-      
+
       <div className="relative z-10">
         {/* Hero Section - Full Width */}
         <div className="border-b border-gray-100">
@@ -401,25 +347,26 @@ export const CountryDetailPage: React.FC = () => {
                 )}
               </motion.div>
 
-              {/* Right: Map - only show if coordinates are meaningful */}
-              {((countryInfo?.latitude && countryInfo?.longitude) || COUNTRY_COORDS[countrySlug || '']) && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm"
-                >
-                  <UltraSimpleMap
-                    countryData={{
-                      name: country.name,
-                      capital: country.capital,
-                      latitude: getCoords().lat,
-                      longitude: getCoords().lng
-                    }}
-                    countryName={country.name}
-                  />
-                </motion.div>
-              )}
+              {/* Right: Map - only show if we have actual coordinates from database */}
+              {((country?.latitude != null && country?.longitude != null) ||
+                (countryInfo?.latitude != null && countryInfo?.longitude != null)) && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm"
+                  >
+                    <UltraSimpleMap
+                      countryData={{
+                        name: country.name,
+                        capital: country.capital,
+                        latitude: getCoords().lat,
+                        longitude: getCoords().lng
+                      }}
+                      countryName={country.name}
+                    />
+                  </motion.div>
+                )}
             </div>
           </div>
         </div>
@@ -461,10 +408,10 @@ export const CountryDetailPage: React.FC = () => {
         {/* Country Details - Magazine Style */}
         <div className="max-w-6xl mx-auto px-6 py-16">
           <div className="grid lg:grid-cols-3 gap-12">
-            
+
             {/* Main Content - 2 columns */}
             <div className="lg:col-span-2 space-y-16">
-              
+
               {/* At a Glance */}
               <motion.section
                 initial={{ opacity: 0, y: 20 }}
@@ -649,14 +596,14 @@ export const CountryDetailPage: React.FC = () => {
                 >
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400">Featured Businesses</h2>
-                    <Link 
+                    <Link
                       to={`/countries/${countrySlug}/listings`}
                       className="text-sm font-medium text-black hover:underline flex items-center gap-1"
                     >
                       View All <ChevronRight className="w-4 h-4" />
                     </Link>
                   </div>
-                  
+
                   <div className="grid md:grid-cols-2 gap-4">
                     {businesses.slice(0, 6).map((biz, i) => (
                       <motion.div

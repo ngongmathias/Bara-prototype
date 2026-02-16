@@ -52,6 +52,19 @@ Run these migrations in the following order:
 
 ---
 
+### 3. Global Africa community seeds (optional)
+**File:** `seed_global_africa_communities.sql`
+
+**Purpose:** Adds more diaspora communities so URLs like `/countries/blackafrican-british` and `/countries/blackafrican-europeans` work. Safe to run anytime (uses ON CONFLICT DO NOTHING).
+
+**What it adds:** Black/African British, Black/African Europeans, Black/African Americans, Black/African Brazilians.
+
+```sql
+\i database/migrations/seed_global_africa_communities.sql
+```
+
+---
+
 ## How to Run Migrations
 
 ### Using Supabase Dashboard
