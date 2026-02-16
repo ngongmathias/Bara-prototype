@@ -138,11 +138,10 @@ export const LandingPageFinal = () => {
 
   return (
     <div className="relative min-h-screen bg-white">
-      {/* Header */}
-      <TopBannerAd />
       <div className="relative z-20">
         <Header />
       </div>
+      <TopBannerAd />
 
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-8 py-16 gap-12">
