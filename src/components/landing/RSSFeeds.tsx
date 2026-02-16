@@ -14,31 +14,37 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
+    console.log(`RSSFeeds mounted for: ${countryName} (${countryCode})`);
     fetchFeeds();
-    
+
     // Set a timeout to stop loading after 10 seconds
     const timeout = setTimeout(() => {
       setLoading(false);
     }, 10000);
-    
+
     return () => clearTimeout(timeout);
   }, [countryName, countryCode]);
 
   const fetchFeeds = async () => {
     setLoading(true);
-    
+
     try {
+      console.log(`Fetching feeds for code: ${countryCode}`);
       // Fetch cached RSS feeds from database with timeout
       const cachedFeeds = await Promise.race([
         getRSSFeeds({
           countryCode: countryCode,
           limit: 6,
         }),
-        new Promise<never>((_, reject) => 
+        new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('Timeout')), 8000)
         )
-      ]).catch(() => [] as RSSFeedItem[]);
-      
+      ]).catch((err) => {
+        console.warn('RSS fetch timeout or error:', err);
+        return [] as RSSFeedItem[];
+      });
+
+      console.log(`Feeds loaded for ${countryCode}: ${cachedFeeds.length} items`);
       // Always update feeds state - clears old feeds when empty
       setFeeds(cachedFeeds);
       setLoading(false);
@@ -50,16 +56,16 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    
+
     try {
       // Refresh feeds from sources with timeout
       const result = await Promise.race([
         refreshRSSFeeds(),
-        new Promise<{ success: false }>((resolve) => 
+        new Promise<{ success: false }>((resolve) =>
           setTimeout(() => resolve({ success: false }), 15000)
         )
       ]);
-      
+
       if (result.success) {
         // Fetch updated feeds
         const updatedFeeds = await getRSSFeeds({
@@ -81,7 +87,7 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    
+
     if (diffHours < 1) return 'Just now';
     if (diffHours < 24) return `${diffHours}h ago`;
     return `${Math.floor(diffHours / 24)}d ago`;
@@ -138,15 +144,15 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
                 </span>
                 <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-black transition-colors" />
               </div>
-              
+
               <h3 className="text-sm font-bold text-black mb-2 line-clamp-2 group-hover:text-gray-700">
                 {feed.title}
               </h3>
-              
+
               <p className="text-xs text-gray-600 mb-3 line-clamp-3">
                 {feed.description}
               </p>
-              
+
               <div className="flex items-center justify-between text-xs text-gray-400">
                 <span>{formatDate(feed.pubDate)}</span>
                 <span className="text-black font-medium group-hover:underline">Read more →</span>
