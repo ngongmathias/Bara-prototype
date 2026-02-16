@@ -10,7 +10,7 @@ export const TestRSSPage = () => {
     const runTest = async () => {
         setLoading(true);
         setLogs([]);
-        addLog('Starting VERBOSE RSS Diagnostic...');
+        addLog('Starting VERBOSE RSS Diagnostic (with DB Save)...');
 
         try {
             // 1. Get Source URL
@@ -58,7 +58,6 @@ export const TestRSSPage = () => {
             const proxies = [
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`,
                 `https://corsproxy.io/?${encodeURIComponent(feedUrl)}`,
-                // `https://cors-anywhere.herokuapp.com/${feedUrl}`, // Usually requires demo access
             ];
 
             for (const proxy of proxies) {
@@ -88,6 +87,30 @@ export const TestRSSPage = () => {
                 }
             }
 
+            // 4. Test DB Save (Upsert)
+            addLog('\n--- Attempt: Saving Test Item to DB ---');
+            const testItem = {
+                title: "Test Article " + new Date().toISOString(),
+                link: "https://example.com/test",
+                description: "Test Description",
+                pub_date: new Date().toISOString(),
+                source: "Test Source",
+                country_code: "EU-BA",
+                country_name: "Black/African Europeans",
+                guid: "test-" + new Date().getTime()
+            };
+
+            const { error: saveError } = await supabase
+                .from('rss_feeds')
+                .upsert(testItem);
+
+            if (saveError) {
+                addLog(`❌ DB Save Failed: ${saveError.message}`);
+                addLog(`   Details: ${JSON.stringify(saveError)}`);
+            } else {
+                addLog('✅ DB Save Successful! (Test item inserted)');
+            }
+
         } catch (e: any) {
             addLog(`❌ Critical Test Error: ${e.message}`);
         } finally {
@@ -102,9 +125,9 @@ export const TestRSSPage = () => {
             <button
                 onClick={runTest}
                 disabled={loading}
-                className="px-4 py-2 bg-red-600 text-white rounded disabled:opacity-50"
+                className="px-4 py-2 bg-purple-600 text-white rounded disabled:opacity-50"
             >
-                {loading ? 'Running...' : 'Run Verbose Test'}
+                {loading ? 'Running...' : 'Run DB Test'}
             </button>
 
             <div className="mt-6 bg-black text-green-400 p-4 rounded-lg font-mono text-xs whitespace-pre-wrap min-h-[400px] overflow-auto">
