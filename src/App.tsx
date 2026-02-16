@@ -94,6 +94,9 @@ import AdminBlog from "./pages/admin/AdminBlog";
 import AdminBlogEditor from "./pages/admin/AdminBlogEditor";
 import AuthFinishPage from "./pages/auth/AuthFinishPage";
 import SSOCallbackPage from "./pages/auth/SSOCallbackPage";
+import SportsHome from "./pages/sports/SportsHome";
+import SportsScores from "./pages/sports/SportsScores";
+import StreamsHome from "./pages/streams/StreamsHome";
 
 const queryClient = new QueryClient();
 
@@ -219,9 +222,14 @@ const AppRoutes = () => {
           <Route path="profile" element={<UserProfilePage />} />
         </Route>
 
-        {/* Community Pages */}
+        {/* Communities Routes */}
         <Route path="/communities" element={<CommunitiesPage />} />
-        <Route path="/communities/:communityId" element={<CommunityPage />} />
+        <Route path="/communities/:slug" element={<CommunityPage />} />
+
+        {/* Mini-Apps Routes */}
+        <Route path="/sports" element={<SportsHome />} />
+        <Route path="/sports/scores" element={<SportsScores />} />
+        <Route path="/streams" element={<StreamsHome />} />
 
         {/* <Route path="/googlemaps" element={<GoogleMapsTest />} /> */}
         <Route path="/map-test" element={<MapTestPage />} />

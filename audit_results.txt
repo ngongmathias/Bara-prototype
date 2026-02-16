@@ -1,0 +1,41 @@
+| Country Name | Code | Status | Source URL |
+|---|---|---|---|
+| Angola                         | AO    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:angola&gl=AO&hl=en-AO&ceid=AO:en |
+| Antigua and Barbuda            | AG    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:antigua and barbuda&gl=AG&hl=en-AG&ceid=AG:en |
+| Barbados                       | BB    | ✅ OK       | https://news.google.com/rss/search?q=Barbados+news\u0026hl=en\u0026gl=BB\u0026ceid=BB:en |
+| Belize                         | BZ    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:belize&gl=BZ&hl=en-BZ&ceid=BZ:en |
+| Benin                          | BJ    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:benin&gl=BJ&hl=en-BJ&ceid=BJ:en |
+| Black/African Americans        | US-BA | ✅ OK       | https://news.google.com/rss/search?q=African+American&hl=en-US&gl=US&ceid=US:en |
+| Black/African Brazilians       | BR-BA | ✅ OK       | https://news.google.com/rss/search?q=Afro-Brazilian+OR+Black+Brazil&hl=pt-BR&gl=BR&ceid=BR:pt-419 |
+| Black/African British          | GB-BA | ✅ OK       | https://news.google.com/rss/search?q=Black+British+OR+African+British&hl=en-GB&gl=GB&ceid=GB:en |
+| Black/African Europeans        | EU-BA | ✅ OK       | https://news.google.com/rss/search?q=Black+European+OR+African+diaspora+Europe&hl=en&gl=DE&ceid=DE:en |
+| Botswana                       | BW    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:botswana&gl=BW&hl=en-BW&ceid=BW:en |
+| Burkina Faso                   | BF    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:burkina faso&gl=BF&hl=en-BF&ceid=BF:en |
+| Cameroon                       | CM    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:cameroon&gl=CM&hl=en-CM&ceid=CM:en |
+| Cape Verde                     | CV    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:cape verde&gl=CV&hl=en-CV&ceid=CV:en |
+| Dominica                       | DM    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:dominica&gl=DM&hl=en-DM&ceid=DM:en |
+| Egypt                          | EG    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:egypt&gl=EG&hl=en-EG&ceid=EG:en |
+| Ethiopia                       | ET    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:ethiopia&gl=ET&hl=en-ET&ceid=ET:en |
+| Gabon                          | GA    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:gabon&gl=GA&hl=en-GA&ceid=GA:en |
+| Ghana                          | GH    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:ghana&gl=GH&hl=en-GH&ceid=GH:en |
+| Grenada                        | GD    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:grenada&gl=GD&hl=en-GD&ceid=GD:en |
+| Haiti                          | HT    | ✅ OK       | https://news.google.com/rss/search?q=Haiti+news&hl=fr&gl=HT&ceid=HT:fr |
+| HBCU                           | ED    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:hbcu&gl=ED&hl=en-ED&ceid=ED:en |
+| Jamaica                        | JM    | ✅ OK       | https://news.google.com/rss/search?q=Jamaica+news&hl=en&gl=JM&ceid=JM:en |
+| Kenya                          | KE    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:kenya&gl=KE&hl=en-KE&ceid=KE:en |
+| Malawi                         | MW    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:malawi&gl=MW&hl=en-MW&ceid=MW:en |
+| Morocco                        | MC    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:morocco&gl=MC&hl=en-MC&ceid=MC:en |
+| Nigeria                        | NG    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:nigeria&gl=NG&hl=en-NG&ceid=NG:en |
+| Rwanda                         | RW    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:rwanda&gl=RW&hl=en-RW&ceid=RW:en |
+| Saint Lucia                    | LC    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:saint lucia&gl=LC&hl=en-LC&ceid=LC:en |
+| Saint Vincent and the Grenadines | VC    | ✅ OK       | https://news.google.com/rss/search?q=Saint+Vincent+Grenadines\u0026hl=en\u0026gl=VC\u0026ceid=VC:en |
+| Senegal                        | SN    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:senegal&gl=SN&hl=en-SN&ceid=SN:en |
+| Seychelles                     | SC    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:seychelles&gl=SC&hl=en-SC&ceid=SC:en |
+| South Africa                   | ZA    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:south africa&gl=ZA&hl=en-ZA&ceid=ZA:en |
+| Tanzania                       | TZ    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:tanzania&gl=TZ&hl=en-TZ&ceid=TZ:en |
+| The Bahamas                    | BS    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:the bahamas&gl=BS&hl=en-BS&ceid=BS:en |
+| The Gambia                     | GM    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:the gambia&gl=GM&hl=en-GM&ceid=GM:en |
+| Trinidad & Tobago              | TT    | ✅ OK       | https://news.google.com/rss/search?q=Trinidad+Tobago+news&hl=en&gl=TT&ceid=TT:en |
+| Uganda                         | UG    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:uganda&gl=UG&hl=en-UG&ceid=UG:en |
+| Zambia                         | ZM    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:zambia&gl=ZM&hl=en-ZM&ceid=ZM:en |
+| Zimbabwe                       | ZW    | ✅ OK       | https://news.google.com/rss/search?q=when:24h+allinurl:zimbabwe&gl=ZW&hl=en-ZW&ceid=ZW:en |
