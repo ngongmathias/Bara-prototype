@@ -14,7 +14,6 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    console.log(`RSSFeeds mounted for: ${countryName} (${countryCode})`);
     fetchFeeds();
 
     // Set a timeout to stop loading after 10 seconds
@@ -29,7 +28,6 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
     setLoading(true);
 
     try {
-      console.log(`Fetching feeds for code: ${countryCode}`);
       // Fetch cached RSS feeds from database with timeout
       const cachedFeeds = await Promise.race([
         getRSSFeeds({
@@ -44,7 +42,6 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
         return [] as RSSFeedItem[];
       });
 
-      console.log(`Feeds loaded for ${countryCode}: ${cachedFeeds.length} items`);
       // Always update feeds state - clears old feeds when empty
       setFeeds(cachedFeeds);
       setLoading(false);
