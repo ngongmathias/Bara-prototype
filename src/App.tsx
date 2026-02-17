@@ -96,7 +96,14 @@ import AuthFinishPage from "./pages/auth/AuthFinishPage";
 import SSOCallbackPage from "./pages/auth/SSOCallbackPage";
 import SportsHome from "./pages/sports/SportsHome";
 import SportsScores from "./pages/sports/SportsScores";
+import MatchCenter from "./pages/sports/MatchCenter";
+import TeamPage from "./pages/sports/TeamPage";
+import LeagueTablePage from "./pages/sports/LeagueTablePage";
 import StreamsHome from "./pages/streams/StreamsHome";
+import PlaylistPage from "./pages/streams/PlaylistPage";
+import ArtistPage from "./pages/streams/ArtistPage";
+import SearchPage from "./pages/SearchPage";
+import TestSportsApi from "./pages/TestSportsApi";
 
 const queryClient = new QueryClient();
 
@@ -229,7 +236,15 @@ const AppRoutes = () => {
         {/* Mini-Apps Routes */}
         <Route path="/sports" element={<SportsHome />} />
         <Route path="/sports/scores" element={<SportsScores />} />
+        <Route path="/sports/game/:id" element={<MatchCenter />} />
+        <Route path="/sports/match/:id" element={<MatchCenter />} />
+        <Route path="/sports/team/:id" element={<TeamPage />} />
+        <Route path="/sports/table/:id" element={<LeagueTablePage />} />
         <Route path="/streams" element={<StreamsHome />} />
+        <Route path="/streams/playlist/:id" element={<PlaylistPage />} />
+        <Route path="/streams/artist/:id" element={<ArtistPage />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/test-sports-api" element={<TestSportsApi />} />
 
         {/* <Route path="/googlemaps" element={<GoogleMapsTest />} /> */}
         <Route path="/map-test" element={<MapTestPage />} />

@@ -47,6 +47,51 @@ const mockMatches: Match[] = [
     },
 ];
 
+// Top Navigation Bar Component
+function TopNavBar() {
+    const [isMoreSportsOpen, setIsMoreSportsOpen] = useState(false);
+
+    return (
+        <nav className="bg-black text-white">
+            <div className="flex items-center justify-between px-4 h-12">
+                {/* ESPN Logo + Sports */}
+                <div className="flex items-center gap-6">
+                    <div className="bg-[#CC0000] px-3 py-1 font-bold text-xl">ESPN</div>
+                    <a href="#" className="text-sm hover:underline">Football</a>
+                    <a href="#" className="text-sm hover:underline">NBA</a>
+                    <a href="#" className="text-sm hover:underline">NFL</a>
+                    <a href="#" className="text-sm hover:underline">MLB</a>
+                    <a href="#" className="text-sm hover:underline">Cricket</a>
+                    <a href="#" className="text-sm hover:underline">Boxing</a>
+                    <a href="#" className="text-sm hover:underline">Rugby</a>
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsMoreSportsOpen(!isMoreSportsOpen)}
+                            className="text-sm hover:underline"
+                        >
+                            More Sports
+                        </button>
+                        {isMoreSportsOpen && (
+                            <div className="absolute top-full left-0 mt-1 bg-white text-black shadow-lg rounded p-4 w-48 z-50">
+                                <a href="#" className="block py-1 hover:underline text-sm">Tennis</a>
+                                <a href="#" className="block py-1 hover:underline text-sm">Golf</a>
+                                <a href="#" className="block py-1 hover:underline text-sm">F1</a>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Right side */}
+                <div className="flex items-center gap-4">
+                    <a href="#" className="text-sm hover:underline">Fantasy</a>
+                    <button className="text-white">🔍</button>
+                    <button className="text-white">👤</button>
+                </div>
+            </div>
+        </nav>
+    );
+}
+
 export default function SportsScores() {
     const [selectedDate, setSelectedDate] = useState('MON');
 
@@ -64,6 +109,9 @@ export default function SportsScores() {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            {/* Top Navigation Bar */}
+            <TopNavBar />
+
             {/* Header */}
             <div className="bg-white border-b">
                 <div className="max-w-6xl mx-auto px-4 py-6">
@@ -77,8 +125,8 @@ export default function SportsScores() {
                                 key={day}
                                 onClick={() => setSelectedDate(day)}
                                 className={`flex-1 text-center py-3 rounded transition ${selectedDate === day
-                                        ? 'bg-black text-white font-bold'
-                                        : 'hover:bg-gray-100'
+                                    ? 'bg-black text-white font-bold'
+                                    : 'hover:bg-gray-100'
                                     }`}
                             >
                                 <div className="text-xs">{day}</div>
@@ -180,9 +228,12 @@ function MatchRow({ match }: { match: Match }) {
 
                     {/* Action Buttons */}
                     <div className="col-span-5 lg:col-span-4 flex gap-2 justify-end">
-                        <button className="px-3 py-1 border border-blue-600 text-blue-600 rounded text-sm hover:bg-blue-50">
+                        <a
+                            href={`/sports/game/${match.id}`}
+                            className="px-3 py-1 border border-blue-600 text-blue-600 rounded text-sm hover:bg-blue-50"
+                        >
                             Gamecast
-                        </button>
+                        </a>
                         <button className="px-3 py-1 border border-blue-600 text-blue-600 rounded text-sm hover:bg-blue-50">
                             Statistics
                         </button>
@@ -204,6 +255,7 @@ function MatchRow({ match }: { match: Match }) {
         </div>
     );
 }
+
 
 function NewsCard({ title, time, source }: { title: string; time: string; source: string }) {
     return (
