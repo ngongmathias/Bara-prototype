@@ -39,6 +39,9 @@ interface CountryInfo {
   natural_resources: string | null;
   main_industries: string | null;
   tourism_attractions: string | null;
+  geography: string | null;
+  history: string | null;
+  culture: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -66,7 +69,7 @@ export const useCountryInfo = (countryId: string | null) => {
     const fetchCountryInfo = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         const { data, error } = await (db as any).country_info()
           .select('*')

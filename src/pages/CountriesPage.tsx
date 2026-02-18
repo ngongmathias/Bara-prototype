@@ -63,7 +63,7 @@ export const CountriesPage = () => {
       // Note: 'slug' column doesn't exist - we'll generate it from name
 
       const { data, error } = await supabase
-
+        .from('countries')
         .select('id, name, code, slug, flag_url, flag_emoji, description, population, capital')
         .order('name', { ascending: true });
 

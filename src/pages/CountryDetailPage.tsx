@@ -1062,6 +1062,82 @@ export const CountryDetailPage: React.FC = () => {
 
 
 
+              {/* Geography */}
+              {countryInfo?.geography && (
+                <motion.section
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                >
+                  <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-6 font-bold">Geography</h2>
+                  <div className="bg-gray-50 p-8 rounded-3xl border border-gray-100">
+                    <p className="text-xl text-gray-800 leading-relaxed font-serif italic">
+                      {countryInfo.geography}
+                    </p>
+                  </div>
+                </motion.section>
+              )}
+
+              {/* History */}
+              {countryInfo?.history && (
+                <motion.section
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                >
+                  <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-6 font-bold">History & Heritage</h2>
+                  <div className="prose prose-lg max-w-none">
+                    <p className="text-gray-700 leading-loose">
+                      {countryInfo.history}
+                    </p>
+                  </div>
+                </motion.section>
+              )}
+
+              {/* Culture */}
+              {countryInfo?.culture && (
+                <motion.section
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                >
+                  <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-6 font-bold">Culture & People</h2>
+                  <div className="grid md:grid-cols-2 gap-8 items-center">
+                    <div className="bg-black text-white p-8 rounded-3xl shadow-2xl">
+                       <p className="leading-relaxed opacity-90">
+                        {countryInfo.culture}
+                      </p>
+                    </div>
+                    <div className="space-y-4">
+                      {countryInfo?.ethnic_groups && Array.isArray(countryInfo.ethnic_groups) && (
+                        <div className="p-4 border-l-4 border-black bg-gray-50">
+                          <p className="text-xs font-bold uppercase text-gray-500 mb-2">Ethnic Groups</p>
+                          <div className="flex flex-wrap gap-2">
+                            {countryInfo.ethnic_groups.map((group: any, idx) => (
+                              <span key={idx} className="bg-white px-3 py-1 rounded-full text-sm border border-gray-100 shadow-sm">
+                                {typeof group === 'string' ? group : group.name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {countryInfo?.religions && Array.isArray(countryInfo.religions) && (
+                        <div className="p-4 border-l-4 border-gray-300 bg-gray-50">
+                          <p className="text-xs font-bold uppercase text-gray-500 mb-2">Religions</p>
+                          <div className="flex flex-wrap gap-2">
+                            {countryInfo.religions.map((rel: any, idx) => (
+                              <span key={idx} className="bg-white px-3 py-1 rounded-full text-sm border border-gray-100 shadow-sm">
+                                {typeof rel === 'string' ? rel : rel.name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.section>
+              )}
+
               {/* Businesses Section */}
 
               {businesses.length > 0 && (
