@@ -38,6 +38,7 @@ import { UserNavLink } from "./UserNavLink";
 import { GoogleTranslate } from "./GoogleTranslate";
 import { db } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { fetchWikipediaCountryInfo } from "@/lib/wikipedia";
 import { scrollToTop } from "@/lib/scrollToTop";
 import { useCountrySelection } from "@/context/CountrySelectionContext";
