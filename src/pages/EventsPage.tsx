@@ -395,6 +395,17 @@ export const EventsPage = () => {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           />
+          {/* Ticket Purchase Modal */}
+          {ticketModalEvent && (
+            <TicketPurchaseModal
+              isOpen={ticketModalOpen}
+              onClose={() => {
+                setTicketModalOpen(false);
+                setTicketModalEvent(null);
+              }}
+              event={ticketModalEvent}
+            />
+          )}
         </div>
         <Footer />
       </div>

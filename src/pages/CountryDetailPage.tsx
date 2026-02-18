@@ -424,9 +424,8 @@ export const CountryDetailPage: React.FC = () => {
 
                 {/* Flag, Coat of Arms & Name */}
 
-                <div className="flex items-start gap-6 mb-6">
-
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
+                  <div className="flex items-center gap-4 flex-shrink-0">
 
                     {/* Use database flag_url if available, fallback to flagcdn.com API */}
 
@@ -1104,7 +1103,7 @@ export const CountryDetailPage: React.FC = () => {
                   <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-6 font-bold">Culture & People</h2>
                   <div className="grid md:grid-cols-2 gap-8 items-center">
                     <div className="bg-black text-white p-8 rounded-3xl shadow-2xl">
-                       <p className="leading-relaxed opacity-90">
+                      <p className="leading-relaxed opacity-90">
                         {countryInfo.culture}
                       </p>
                     </div>

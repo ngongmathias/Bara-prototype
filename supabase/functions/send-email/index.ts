@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
             throw new Error("Missing RESEND_API_KEY environment variable");
         }
 
-        const { to, subject, type, data, from = "Bara Afrika <onboarding@resend.dev>" }: EmailRequest = await req.json();
+        const { to, subject, type, data, from = Deno.env.get("RESEND_FROM_EMAIL") || "Bara Afrika <noreply@mail.baraafrika.com>" }: EmailRequest = await req.json();
 
         let html;
         switch (type) {
