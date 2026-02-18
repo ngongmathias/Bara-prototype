@@ -197,7 +197,7 @@ function ScoreCard({
 function LeftSidebar() {
     return (
         <div className="space-y-6">
-            {/* Customize ESPN */}
+            {/* Customize Bara Sports */}
             <div>
                 <h3 className="font-comfortaa font-semibold text-sm mb-3">Customize Bara Sports</h3>
                 <button className="w-full bg-black text-white py-2 rounded-full font-semibold text-sm hover:bg-gray-800 transition mb-2">
@@ -250,19 +250,19 @@ function LeftSidebar() {
                 </div>
             </div>
 
-            {/* ESPN Apps */}
+            {/* Bara Sports Apps */}
             <div>
-                <h3 className="font-bold text-sm mb-2">ESPN Apps</h3>
+                <h3 className="font-bold text-sm mb-2">Bara Sports</h3>
                 <a href="#" className="flex items-center gap-2 text-sm hover:underline">
-                    📱 ESPN App
+                    📱 Bara Sports App
                 </a>
             </div>
 
-            {/* ESPN Sites */}
+            {/* Bara Sports Partners */}
             <div>
-                <h3 className="font-bold text-sm mb-2">ESPN Sites</h3>
+                <h3 className="font-bold text-sm mb-2">Bara Sports Partners</h3>
                 <a href="#" className="flex items-center gap-2 text-sm hover:underline text-blue-600">
-                    🏏 ESPNcricinfo
+                    🏏 Bara Cricket
                 </a>
             </div>
         </div>
