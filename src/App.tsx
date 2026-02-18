@@ -268,8 +268,16 @@ const AppRoutes = () => {
         <Route path="/auth/finish" element={<AuthFinishPage />} />
 
         {/* Messaging Routes */}
-        <Route path="/messages" element={<InboxPage />} />
-        <Route path="/messages/:conversationId" element={<ChatWindow />} />
+        <Route path="/messages" element={
+          <UserAuthGuard>
+            <InboxPage />
+          </UserAuthGuard>
+        } />
+        <Route path="/messages/:conversationId" element={
+          <UserAuthGuard>
+            <ChatWindow />
+          </UserAuthGuard>
+        } />
 
         {/* User Dashboard Routes */}
         <Route path="/users/dashboard" element={

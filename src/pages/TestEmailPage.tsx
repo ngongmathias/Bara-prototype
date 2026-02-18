@@ -116,6 +116,7 @@ export const TestEmailPage = () => {
                                         value={testEmail}
                                         onChange={(e) => setTestEmail(e.target.value)}
                                         placeholder="Enter your email to receive tests..."
+                                        autoComplete="off"
                                     />
                                     <p className="text-sm text-gray-500 mt-1">
                                         Enter the email where you want to receive the test emails.

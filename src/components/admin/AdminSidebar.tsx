@@ -24,7 +24,8 @@ import {
   Calendar,
   BookOpen,
   Music,
-  Trophy
+  Trophy,
+  Video
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -155,6 +156,18 @@ const adminMenuItems = [
     icon: Trophy,
     path: "/admin/sports",
     description: "Manage leagues & matches"
+  },
+  {
+    title: "Sports News",
+    icon: FileText,
+    path: "/admin/sports/news",
+    description: "Manage sports articles"
+  },
+  {
+    title: "Sports Videos",
+    icon: Video,
+    path: "/admin/sports/videos",
+    description: "Manage sports highlights"
   },
   {
     title: "Admin Management",

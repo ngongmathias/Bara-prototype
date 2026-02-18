@@ -112,7 +112,7 @@ export const AdminStreamsDashboard = () => {
                         </CardHeader>
                         <CardContent>
                             <p className="text-gray-500 mb-4">Upload albums and songs for your artists.</p>
-                            <Button className="w-full" disabled>Coming Soon</Button>
+                            <Button className="w-full" disabled>Song Management (In Development)</Button>
                         </CardContent>
                     </Card>
                 </div>

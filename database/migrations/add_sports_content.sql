@@ -26,18 +26,31 @@ ALTER TABLE public.sports_news ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sports_videos ENABLE ROW LEVEL SECURITY;
 
 -- Policies for sports_news
-CREATE POLICY "Public read sports_news" ON public.sports_news
-    FOR SELECT USING (true);
+-- Policies for sports_news
+DO $$ 
+BEGIN
+    DROP POLICY IF EXISTS "Public read sports_news" ON public.sports_news;
+    DROP POLICY IF EXISTS "Admin full access sports_news" ON public.sports_news;
+    
+    CREATE POLICY "Public read sports_news" ON public.sports_news
+        FOR SELECT USING (true);
 
-CREATE POLICY "Admin full access sports_news" ON public.sports_news
-    FOR ALL USING (auth.role() = 'service_role' OR auth.uid() IN (SELECT id FROM users WHERE role = 'admin'));
+    CREATE POLICY "Admin full access sports_news" ON public.sports_news
+        FOR ALL USING (auth.role() = 'service_role' OR auth.uid() IN (SELECT id FROM users WHERE role = 'admin'));
+END $$;
 
 -- Policies for sports_videos
-CREATE POLICY "Public read sports_videos" ON public.sports_videos
-    FOR SELECT USING (true);
+DO $$ 
+BEGIN
+    DROP POLICY IF EXISTS "Public read sports_videos" ON public.sports_videos;
+    DROP POLICY IF EXISTS "Admin full access sports_videos" ON public.sports_videos;
 
-CREATE POLICY "Admin full access sports_videos" ON public.sports_videos
-    FOR ALL USING (auth.role() = 'service_role' OR auth.uid() IN (SELECT id FROM users WHERE role = 'admin'));
+    CREATE POLICY "Public read sports_videos" ON public.sports_videos
+        FOR SELECT USING (true);
+
+    CREATE POLICY "Admin full access sports_videos" ON public.sports_videos
+        FOR ALL USING (auth.role() = 'service_role' OR auth.uid() IN (SELECT id FROM users WHERE role = 'admin'));
+END $$;
 
 -- Grant access
 GRANT SELECT ON public.sports_news TO anon, authenticated;

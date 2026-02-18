@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { renderAsync } from "npm:@react-email/render@0.0.7";
 import { WelcomeEmail } from "../../emails/WelcomeEmail.tsx";
 import { ListingCreatedEmail } from "../../emails/ListingCreatedEmail.tsx";
@@ -14,6 +13,7 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 interface EmailRequest {
@@ -24,7 +24,8 @@ interface EmailRequest {
     from?: string;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
+    // Handle CORS preflight requests
     if (req.method === "OPTIONS") {
         return new Response("ok", { headers: corsHeaders });
     }

@@ -244,6 +244,9 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                                         {currencySymbol}{(event.entry_fee || 0).toLocaleString()}
                                         {!currencySymbol && <span className="text-lg ml-1">{event.currency}</span>}
                                     </p>
+                                    <p className="text-xs text-gray-500 mt-2">
+                                        Pay directly to the organizer. Details provided next.
+                                    </p>
                                 </div>
                             )}
                         </div>

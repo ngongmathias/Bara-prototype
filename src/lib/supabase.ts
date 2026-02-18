@@ -7,18 +7,18 @@ console.log('Supabase URL:', SUPABASE_URL ? 'Set' : 'Missing');
 console.log('Supabase Anon Key:', supabaseAnonKey ? 'Set' : 'Missing');
 
 if (!SUPABASE_URL || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables:', {
+  console.warn('Missing Supabase environment variables - check your .env file or Vercel project settings', {
     VITE_SUPABASE_URL: !!SUPABASE_URL,
     VITE_SUPABASE_ANON_KEY: !!supabaseAnonKey
   });
-  throw new Error('Missing Supabase environment variables')
+  // throw new Error('Missing Supabase environment variables') // Don't crash the app
 }
 
 // Create Supabase client with error handling
 let supabaseClient: any = null;
 
 try {
-  supabaseClient = createClient(SUPABASE_URL, supabaseAnonKey, {
+  supabaseClient = createClient(SUPABASE_URL || '', supabaseAnonKey || '', {
     auth: {
       autoRefreshToken: false, // Disable Supabase auth since we're using Clerk
       persistSession: false,   // Disable Supabase session persistence
@@ -39,8 +39,8 @@ export const supabase = supabaseClient;
 
 // Verify the client is properly initialized
 if (!supabase) {
-  console.error('❌ Supabase client is null');
-  throw new Error('Failed to initialize Supabase client');
+  console.error('❌ Supabase client is null - data fetching will fail');
+  // throw new Error('Failed to initialize Supabase client');
 }
 
 // Test the connection with better error handling

@@ -10,14 +10,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Calendar, 
-  MapPin, 
-  Clock, 
-  User, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Calendar,
+  MapPin,
+  Clock,
+  User,
   Image as ImageIcon,
   Search,
   Filter,
@@ -66,6 +66,11 @@ interface FormData {
   city_id: string;
   hashtags: string[];
   tickets: FormTicket[];
+  is_free: boolean;
+  entry_fee: string;
+  currency: string;
+  payment_instructions: string;
+  payment_contact: string;
 }
 
 export const AdminEventsEnhanced = () => {
@@ -77,7 +82,7 @@ export const AdminEventsEnhanced = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 50;
-  
+
   const { toast } = useToast();
   const { events, loading, searchEvents } = useEvents();
   const { categories } = useEventCategories();
@@ -109,7 +114,13 @@ export const AdminEventsEnhanced = () => {
     country_id: '',
     city_id: '',
     hashtags: [],
-    tickets: [{ name: '', description: '', selected: true }]
+
+    tickets: [{ name: '', description: '', selected: true }],
+    is_free: false,
+    entry_fee: '',
+    currency: 'USD',
+    payment_instructions: '',
+    payment_contact: ''
   });
 
   // Cities hook - depends on formData.country_id
@@ -117,7 +128,7 @@ export const AdminEventsEnhanced = () => {
 
   // Load events on component mount
   useEffect(() => {
-    searchEvents({ 
+    searchEvents({
       limit: 10000,
       include_all_statuses: true, // Admin needs to see all events including past ones
       include_private: true // Admin needs to see private/draft events
@@ -126,8 +137,8 @@ export const AdminEventsEnhanced = () => {
 
   // Handle country change
   const handleCountryChange = (countryId: string) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       country_id: countryId,
       city_id: '' // Reset city when country changes
     }));
@@ -136,7 +147,7 @@ export const AdminEventsEnhanced = () => {
   // Filter events
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (event.organizer_name || '').toLowerCase().includes(searchQuery.toLowerCase());
+      (event.organizer_name || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || event.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -158,8 +169,8 @@ export const AdminEventsEnhanced = () => {
       // For new events, we'll use a temporary ID, for existing events use the event ID
       const eventId = editingEvent?.id || 'temp';
       const imageUrl = await uploadEventImage(file, eventId);
-      setFormData(prev => ({ 
-        ...prev, 
+      setFormData(prev => ({
+        ...prev,
         event_image_url: prev.event_image_url || imageUrl,
         event_images: [...prev.event_images, imageUrl]
       }));
@@ -200,7 +211,7 @@ export const AdminEventsEnhanced = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate capacity
     const capacityValue = parseInt(formData.capacity);
     if (formData.capacity && (isNaN(capacityValue) || capacityValue < 1 || capacityValue > 2147483647)) {
@@ -211,7 +222,7 @@ export const AdminEventsEnhanced = () => {
       });
       return;
     }
-    
+
     try {
       const eventData = {
         title: formData.title,
@@ -240,7 +251,12 @@ export const AdminEventsEnhanced = () => {
         city_id: formData.city_id || null,
         tags: formData.hashtags, // Add hashtags as tags
         is_public: true,
-        event_status: 'upcoming' as const
+        event_status: 'upcoming' as const,
+        is_free: formData.is_free,
+        entry_fee: formData.is_free ? 0 : parseFloat(formData.entry_fee) || 0,
+        currency: formData.currency,
+        payment_instructions: formData.payment_instructions,
+        payment_contact: formData.payment_contact
       };
 
       if (editingEvent) {
@@ -309,7 +325,12 @@ export const AdminEventsEnhanced = () => {
         name: ticket.name,
         description: ticket.description || '',
         selected: ticket.is_default || false
-      })) || [{ name: '', description: '', selected: true }]
+      })) || [{ name: '', description: '', selected: true }],
+      is_free: event.is_free ?? false,
+      entry_fee: event.entry_fee?.toString() || '',
+      currency: event.currency || 'USD',
+      payment_instructions: event.payment_instructions || '',
+      payment_contact: event.payment_contact || ''
     });
     setImagePreview(event.event_image_url || null);
     setIsDialogOpen(true);
@@ -357,7 +378,12 @@ export const AdminEventsEnhanced = () => {
       country_id: '',
       city_id: '',
       hashtags: [], // Reset hashtags
-      tickets: [{ name: '', description: '', selected: true }]
+      tickets: [{ name: '', description: '', selected: true }],
+      is_free: false,
+      entry_fee: '',
+      currency: 'USD',
+      payment_instructions: '',
+      payment_contact: ''
     });
     setImagePreview(null);
   };
@@ -379,7 +405,7 @@ export const AdminEventsEnhanced = () => {
   const updateTicket = (index: number, field: 'name' | 'description', value: string) => {
     setFormData(prev => ({
       ...prev,
-      tickets: prev.tickets.map((ticket, i) => 
+      tickets: prev.tickets.map((ticket, i) =>
         i === index ? { ...ticket, [field]: value } : ticket
       )
     }));
@@ -752,6 +778,85 @@ export const AdminEventsEnhanced = () => {
                   </div>
                 </div>
 
+                {/* Pricing & Payment Instructions */}
+                <div className="space-y-4 border-t pt-4 mt-4">
+                  <h3 className="text-lg font-semibold">Pricing & Payment</h3>
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="is_free"
+                      checked={formData.is_free}
+                      onChange={(e) => setFormData(prev => ({ ...prev, is_free: e.target.checked }))}
+                      className="w-5 h-5 rounded border-gray-300"
+                    />
+                    <Label htmlFor="is_free" className="cursor-pointer">This is a free event</Label>
+                  </div>
+
+                  {!formData.is_free && (
+                    <div className="space-y-4 pl-4 border-l-2 border-gray-200">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="entry_fee">Entry Fee *</Label>
+                          <Input
+                            id="entry_fee"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={formData.entry_fee}
+                            onChange={(e) => setFormData(prev => ({ ...prev, entry_fee: e.target.value }))}
+                            placeholder="e.g., 5000"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="currency">Currency</Label>
+                          <Select
+                            value={formData.currency}
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select currency" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="USD">USD ($)</SelectItem>
+                              <SelectItem value="EUR">EUR (€)</SelectItem>
+                              <SelectItem value="GBP">GBP (£)</SelectItem>
+                              <SelectItem value="XAF">XAF (CFA)</SelectItem>
+                              <SelectItem value="XOF">XOF (CFA)</SelectItem>
+                              <SelectItem value="NGN">NGN (₦)</SelectItem>
+                              <SelectItem value="KES">KES (KSh)</SelectItem>
+                              <SelectItem value="GHS">GHS (GH₵)</SelectItem>
+                              <SelectItem value="ZAR">ZAR (R)</SelectItem>
+                              <SelectItem value="TZS">TZS (TSh)</SelectItem>
+                              <SelectItem value="UGX">UGX (USh)</SelectItem>
+                              <SelectItem value="RWF">RWF (RF)</SelectItem>
+                              <SelectItem value="ETB">ETB (Br)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="payment_instructions">Payment Instructions</Label>
+                        <Textarea
+                          id="payment_instructions"
+                          value={formData.payment_instructions}
+                          onChange={(e) => setFormData(prev => ({ ...prev, payment_instructions: e.target.value }))}
+                          rows={3}
+                          placeholder="How should attendees pay? (Mobile Money, Bank Transfer, etc.)"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="payment_contact">Payment Contact</Label>
+                        <Input
+                          id="payment_contact"
+                          value={formData.payment_contact}
+                          onChange={(e) => setFormData(prev => ({ ...prev, payment_contact: e.target.value }))}
+                          placeholder="e.g., +254 7XX XXX XXX"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Social Media Links */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
@@ -869,130 +974,130 @@ export const AdminEventsEnhanced = () => {
                   </TableHeader>
                   <TableBody>
                     {paginatedEvents.map((event) => (
-                    <TableRow key={event.id}>
-                      <TableCell>
-                        <div className="flex items-center space-x-3">
-                          <img
-                            src={event.event_image_url || '/placeholder-event.jpg'}
-                            alt={event.title}
-                            className="w-12 h-12 rounded-lg object-cover"
-                          />
-                          <div>
-                            <div className="font-medium">{event.title}</div>
-                            <div className="text-sm text-gray-500 line-clamp-1">
-                              {event.description}
+                      <TableRow key={event.id}>
+                        <TableCell>
+                          <div className="flex items-center space-x-3">
+                            <img
+                              src={event.event_image_url || '/placeholder-event.jpg'}
+                              alt={event.title}
+                              className="w-12 h-12 rounded-lg object-cover"
+                            />
+                            <div>
+                              <div className="font-medium">{event.title}</div>
+                              <div className="text-sm text-gray-500 line-clamp-1">
+                                {event.description}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{event.category_name || event.category}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div>{new Date(event.start_date).toLocaleDateString()}</div>
-                          <div className="text-gray-500">
-                            {new Date(event.start_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
-                            {new Date(event.end_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{event.category_name || event.category}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>{new Date(event.start_date).toLocaleDateString()}</div>
+                            <div className="text-gray-500">
+                              {new Date(event.start_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -
+                              {new Date(event.end_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div>{event.country_name || 'N/A'}</div>
-                          <div className="text-gray-500">{event.country_code || ''}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div>{event.city_name || 'N/A'}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div>{event.venue_name}</div>
-                          <div className="text-gray-500">{event.venue_address}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div>{event.organizer_name}</div>
-                          <div className="text-gray-500">{event.organizer_handle}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={event.event_status === 'upcoming' ? 'default' : 
-                                  event.event_status === 'ongoing' ? 'secondary' : 
-                                  event.event_status === 'completed' ? 'outline' : 'destructive'}
-                        >
-                          {event.event_status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div>{event.capacity || 'Unlimited'}</div>
-                          <div className="text-gray-500">
-                            {event.registration_count || 0} registered
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>{event.country_name || 'N/A'}</div>
+                            <div className="text-gray-500">{event.country_code || ''}</div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => window.open(`/events/${event.id}`, '_blank')}
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>{event.city_name || 'N/A'}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>{event.venue_name}</div>
+                            <div className="text-gray-500">{event.venue_address}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>{event.organizer_name}</div>
+                            <div className="text-gray-500">{event.organizer_handle}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={event.event_status === 'upcoming' ? 'default' :
+                              event.event_status === 'ongoing' ? 'secondary' :
+                                event.event_status === 'completed' ? 'outline' : 'destructive'}
                           >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleEdit(event)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleDelete(event.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                            {event.event_status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>{event.capacity || 'Unlimited'}</div>
+                            <div className="text-gray-500">
+                              {event.registration_count || 0} registered
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => window.open(`/events/${event.id}`, '_blank')}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleEdit(event)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleDelete(event.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
 
-              {/* Pagination Controls */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-gray-600">
-                    Page {currentPage} of {totalPages}
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="text-sm text-gray-600">
+                      Page {currentPage} of {totalPages}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                      >
+                        Next
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                      disabled={currentPage === 1}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              )}
+                )}
               </>
             ) : (
               <div className="text-center py-8">
