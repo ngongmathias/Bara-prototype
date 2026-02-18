@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 import { UltraSimpleMap } from "@/components/UltraSimpleMap";
 
-import { 
+import {
 
   ArrowLeft,
 
@@ -144,7 +144,7 @@ export const CountryDetailPage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  
+
 
   const [country, setCountry] = useState<Country | null>(null);
 
@@ -158,9 +158,9 @@ export const CountryDetailPage: React.FC = () => {
 
   // Fix: Properly filter country page ads by active status, payment, and country match
 
-  const sponsoredBanners = allSponsoredBanners.filter(banner => 
+  const sponsoredBanners = allSponsoredBanners.filter(banner =>
 
-    banner.show_on_country_detail && 
+    banner.show_on_country_detail &&
 
     banner.is_active === true &&
 
@@ -192,35 +192,50 @@ export const CountryDetailPage: React.FC = () => {
 
     try {
 
-      const pattern = countrySlug?.replace(/-/g, ' ') || '';
+      console.log(`🔍 Resolving country with slug: ${countrySlug}`);
 
+      // 1. Try resolving by dedicated slug column first (most reliable)
       const { data, error } = await db.countries()
-
         .select('*')
+        .eq('slug', countrySlug)
+        .maybeSingle();
 
-        .or(`name.ilike.%${pattern}%,name.ilike.${pattern}%`)
+      if (error) {
+        console.error('Database error during slug resolution:', error);
+      }
 
-        .single();
+      let resolvedCountry = data;
+
+      // 2. Fallback to ilike name search if slug search fails (for backwards compatibility)
+      if (!resolvedCountry && countrySlug) {
+        const pattern = countrySlug.replace(/-/g, ' ');
+        console.log(`⚠️ Slug resolution failed, trying fallback name search: %${pattern}%`);
+
+        const { data: fallbackData } = await db.countries()
+          .select('*')
+          .or(`name.ilike.%${pattern}%,name.ilike.${pattern}%`)
+          .limit(1)
+          .maybeSingle();
+
+        resolvedCountry = fallbackData;
+      }
 
 
+      if (resolvedCountry) {
 
-      if (error) throw error;
-
-      
-
-      if (data) {
+        console.log(`✅ Resolved country: ${resolvedCountry.name} (${resolvedCountry.id})`);
 
         // Enrich with Wikipedia only as fallback
 
-        const wikiData = await fetchWikipediaCountryInfo(data.name);
+        const wikiData = await fetchWikipediaCountryInfo(resolvedCountry.name);
 
         setCountry({
 
-          ...data,
+          ...resolvedCountry,
 
-          wikipedia_description: data.description || wikiData?.description,
+          wikipedia_description: resolvedCountry.description || wikiData?.description,
 
-          coat_of_arms_url: data.coat_of_arms_url || wikiData?.coat_of_arms_url,
+          coat_of_arms_url: resolvedCountry.coat_of_arms_url || wikiData?.coat_of_arms_url,
 
         });
 
@@ -242,16 +257,19 @@ export const CountryDetailPage: React.FC = () => {
 
           `)
 
-          .eq('country_id', data.id)
+          .eq('country_id', resolvedCountry.id)
 
           .eq('status', 'active')
 
           .limit(12);
 
-        
+
 
         setBusinesses(bizData || []);
 
+      } else {
+        console.error(`❌ Could not resolve country for slug: ${countrySlug}`);
+        setCountry(null);
       }
 
     } catch (error) {
@@ -356,7 +374,7 @@ export const CountryDetailPage: React.FC = () => {
 
     <div className="relative min-h-screen bg-white">
 
-      
+
 
       <div className="relative z-10">
 
@@ -686,13 +704,13 @@ export const CountryDetailPage: React.FC = () => {
 
           <div className="grid lg:grid-cols-3 gap-12">
 
-            
+
 
             {/* Main Content - 2 columns */}
 
             <div className="lg:col-span-2 space-y-16">
 
-              
+
 
               {/* At a Glance */}
 
@@ -1062,7 +1080,7 @@ export const CountryDetailPage: React.FC = () => {
 
                     <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400">Featured Businesses</h2>
 
-                    <Link 
+                    <Link
 
                       to={`/countries/${countrySlug}/listings`}
 
@@ -1076,7 +1094,7 @@ export const CountryDetailPage: React.FC = () => {
 
                   </div>
 
-                  
+
 
                   <div className="grid md:grid-cols-2 gap-4">
 

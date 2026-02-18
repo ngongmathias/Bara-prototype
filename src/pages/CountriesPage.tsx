@@ -19,17 +19,11 @@ interface Country {
   code: string;
 
   slug: string;
-
   flag_url: string | null;
-
   flag_emoji: string | null;
-
   description: string | null;
-
   population: number | null;
-
   capital: string | null;
-
 }
 
 
@@ -70,10 +64,7 @@ export const CountriesPage = () => {
 
       const { data, error } = await supabase
 
-        .from('countries')
-
-        .select('id, name, code, flag_url, flag_emoji, description, population, capital')
-
+        .select('id, name, code, slug, flag_url, flag_emoji, description, population, capital')
         .order('name', { ascending: true });
 
 
@@ -86,24 +77,16 @@ export const CountriesPage = () => {
 
       }
 
-      
+
 
       if (data && data.length > 0) {
-
-        // Generate slug from name since the column doesn't exist
-
-        const countriesWithSlug = data.map(country => ({
-
+        // Use DB slug if available, otherwise generate it
+        const countriesWithSlug = data.map((country: any) => ({
           ...country,
-
-          slug: country.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-
+          slug: country.slug || country.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
         }));
-
         console.log(`✅ Loaded ${countriesWithSlug.length} countries from database`);
-
         setCountries(countriesWithSlug);
-
       } else {
 
         console.log('No countries returned from database');
@@ -172,7 +155,7 @@ export const CountriesPage = () => {
 
     <div className="relative min-h-screen bg-white">
 
-      
+
 
       <div className="relative z-10">
 
@@ -184,7 +167,7 @@ export const CountriesPage = () => {
 
             <div className="grid lg:grid-cols-2 gap-12 items-center">
 
-              
+
 
               {/* Left: Title & Search */}
 
@@ -208,7 +191,7 @@ export const CountriesPage = () => {
 
                 </h1>
 
-                
+
 
                 <p className="text-lg text-gray-600 mb-8 max-w-md leading-relaxed">
 
@@ -438,11 +421,11 @@ export const CountriesPage = () => {
 
               >
 
-                <img 
+                <img
 
-                  src="/bara-3.png" 
+                  src="/bara-3.png"
 
-                  alt="Africa Map" 
+                  alt="Africa Map"
 
                   className="w-full max-w-md h-auto"
 
@@ -464,7 +447,7 @@ export const CountriesPage = () => {
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            
+
 
             {/* Section Header */}
 
@@ -484,7 +467,7 @@ export const CountriesPage = () => {
 
               <p className="text-gray-500">
 
-                {searchQuery 
+                {searchQuery
 
                   ? `${filteredCountries.length} results for "${searchQuery}"`
 

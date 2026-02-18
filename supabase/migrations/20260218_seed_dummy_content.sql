@@ -1,0 +1,1 @@
+FROM new_leagues l WHERE l.name = 'English Premier League';
