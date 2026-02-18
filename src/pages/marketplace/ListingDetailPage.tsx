@@ -142,12 +142,6 @@ export const ListingDetailPage = () => {
     );
   };
 
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === (listing?.images?.length || 1) - 1 ? 0 : prev + 1
-    );
-  };
-
   const handleBaraChat = async () => {
     if (!user) {
       toast({ title: 'Please sign in', description: 'You need to be signed in to chat with sellers.' });

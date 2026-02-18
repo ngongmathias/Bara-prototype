@@ -266,7 +266,6 @@ export const UserEventsPage = () => {
         venue_latitude: formData.venue_latitude ? parseFloat(formData.venue_latitude) : null,
         venue_longitude: formData.venue_longitude ? parseFloat(formData.venue_longitude) : null,
         capacity: formData.capacity ? parseInt(formData.capacity) : null,
-        capacity: formData.capacity ? parseInt(formData.capacity) : null,
         tags: formData.hashtags,
         created_by_user_id: user.id,
         created_by_email: user.primaryEmailAddress?.emailAddress || '',
