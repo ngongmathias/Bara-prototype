@@ -1,11 +1,11 @@
 import { renderAsync } from "npm:@react-email/render@0.0.7";
-import { WelcomeEmail } from "../../emails/WelcomeEmail.tsx";
-import { ListingCreatedEmail } from "../../emails/ListingCreatedEmail.tsx";
-import { EventSubmittedEmail } from "../../emails/EventSubmittedEmail.tsx";
-import { BannerRequestEmail } from "../../emails/BannerRequestEmail.tsx";
-import { ListingApprovedEmail } from "../../emails/ListingApprovedEmail.tsx";
-import { ListingRejectedEmail } from "../../emails/ListingRejectedEmail.tsx";
-import { TicketPurchasedEmail } from "../../emails/TicketPurchasedEmail.tsx";
+import { WelcomeEmail } from "../_shared/emails/WelcomeEmail.tsx";
+import { ListingCreatedEmail } from "../_shared/emails/ListingCreatedEmail.tsx";
+import { EventSubmittedEmail } from "../_shared/emails/EventSubmittedEmail.tsx";
+import { BannerRequestEmail } from "../_shared/emails/BannerRequestEmail.tsx";
+import { ListingApprovedEmail } from "../_shared/emails/ListingApprovedEmail.tsx";
+import { ListingRejectedEmail } from "../_shared/emails/ListingRejectedEmail.tsx";
+import { TicketPurchasedEmail } from "../_shared/emails/TicketPurchasedEmail.tsx";
 import React from "npm:react@18.2.0";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");

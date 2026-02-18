@@ -3,32 +3,47 @@ import { Link } from 'react-router-dom';
 import { useLiveScores } from '../../hooks/useLiveScores';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { supabase } from '@/lib/supabase';
+import { Play, Calendar, User, ChevronRight } from 'lucide-react';
 
 export default function SportsHome() {
     return (
         <MainLayout>
-            <div className="min-h-screen bg-gray-50">
-                {/* Score Ticker */}
-                <LiveScoreTicker />
+            <div className="min-h-screen bg-gray-100 font-sans">
+                {/* Score Ticker - Dark Mode for Contrast */}
+                <div className="bg-[#2D2D2D] text-white border-b border-gray-700">
+                    <LiveScoreTicker />
+                </div>
 
-                {/* Main Layout - 3 Column Grid */}
-                <div className="max-w-[1440px] mx-auto grid grid-cols-12 gap-4 p-4">
-                    {/* Left Sidebar */}
-                    <aside className="col-span-12 lg:col-span-2 bg-white rounded-lg p-4">
-                        <LeftSidebar />
-                    </aside>
+                {/* Main Content Helper */}
+                <div className="max-w-[1440px] mx-auto p-4">
 
-                    {/* Main Content */}
-                    <main className="col-span-12 lg:col-span-7">
-                        <HeroArticle />
-                        <NewsFeed />
-                    </main>
+                    <div className="grid grid-cols-12 gap-6">
+                        {/* LEFT SIDEBAR (Quick Links) - 2 Cols */}
+                        <aside className="hidden lg:block col-span-2 space-y-6">
+                            <LeftSidebar />
+                        </aside>
 
-                    {/* Right Sidebar */}
-                    <aside className="col-span-12 lg:col-span-3">
-                        <TopVideos />
-                        <TopHeadlines />
-                    </aside>
+                        {/* CENTER CONTENT (Hero + News) - 7 Cols */}
+                        <main className="col-span-12 lg:col-span-7 space-y-6">
+                            <HeroArticle />
+
+                            {/* Section Header */}
+                            <div className="flex items-center justify-between border-b-2 border-gray-200 pb-2 mb-4">
+                                <h2 className="text-xl font-bold text-gray-900 uppercase tracking-tighter">Top Stories</h2>
+                                <Link to="/sports/news" className="text-blue-600 text-sm font-semibold hover:underline flex items-center">
+                                    See All <ChevronRight size={16} />
+                                </Link>
+                            </div>
+
+                            <NewsFeed />
+                        </main>
+
+                        {/* RIGHT SIDEBAR (Videos + Headlines) - 3 Cols */}
+                        <aside className="col-span-12 lg:col-span-3 space-y-6">
+                            <TopVideos />
+                            <TopHeadlines />
+                        </aside>
+                    </div>
                 </div>
             </div>
         </MainLayout>
@@ -37,280 +52,102 @@ export default function SportsHome() {
 
 // Live Score Ticker Component
 function LiveScoreTicker() {
-    // Fetch live scores from API
-    const { data: liveMatches, isLoading, error } = useLiveScores({
+    const { data: liveMatches, isLoading } = useLiveScores({
         enabled: true,
-        refetchInterval: 60000 // Auto-refresh every 60 seconds
+        refetchInterval: 60000
     });
 
-    if (error) {
-        // Silently fail - show empty ticker if API fails
-        return (
-            <div className="bg-white border-b border-gray-200 overflow-hidden">
-                <div className="flex items-center gap-4 px-4 py-2">
-                    <span className="text-sm text-gray-500">Scores unavailable</span>
-                </div>
-            </div>
-        );
-    }
+    if (isLoading) return <div className="h-12 flex items-center justify-center text-xs text-gray-400">Loading live scores...</div>;
 
-    if (isLoading) {
-        return (
-            <div className="bg-white border-b border-gray-200 overflow-hidden">
-                <div className="flex items-center gap-4 px-4 py-2">
-                    <span className="text-sm text-gray-500 animate-pulse">Loading scores...</span>
-                </div>
-            </div>
-        );
-    }
-
-    // If no matches, show friendly message
     if (!liveMatches || liveMatches.length === 0) {
         return (
-            <div className="bg-white border-b border-gray-200 overflow-hidden">
-                <div className="flex items-center gap-4 px-4 py-2">
-                    <span className="text-sm text-gray-500">No live matches at the moment</span>
-                </div>
+            <div className="h-12 flex items-center px-4 text-xs text-gray-400">
+                <span className="font-bold mr-2">MATCH CENTER:</span> No live matches currently.
             </div>
         );
     }
 
     return (
-        <div className="bg-white border-b border-gray-200 overflow-hidden">
-            <div className="flex items-center gap-4 px-4 py-2 overflow-x-auto">
-                {liveMatches.map((match) => {
-                    const isLive = ['1H', '2H', 'HT', 'LIVE'].includes(match.fixture.status.short);
-                    const isFinal = match.fixture.status.short === 'FT';
-
-                    return (
-                        <Link
-                            key={match.fixture.id}
-                            to={`/sports/match/${match.fixture.id}`}
-                            className="block"
-                        >
-                            <ScoreCard
-                                homeTeam={match.teams.home.name}
-                                awayTeam={match.teams.away.name}
-                                homeScore={match.goals.home}
-                                awayScore={match.goals.away}
-                                status={isLive ? 'LIVE' : isFinal ? 'FT' : new Date(match.fixture.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
-                                minute={match.fixture.status.elapsed}
-                                competition={match.league.name}
-                                homeTeamLogo={match.teams.home.logo}
-                                awayTeamLogo={match.teams.away.logo}
-                            />
-                        </Link>
-                    );
-                })}
-            </div>
+        <div className="flex items-center gap-4 px-4 py-2 overflow-x-auto scrollbar-hide">
+            <span className="font-bold text-xs uppercase text-gray-400 whitespace-nowrap">Live Scores:</span>
+            {liveMatches.map((match) => {
+                const isLive = ['1H', '2H', 'HT', 'LIVE'].includes(match.fixture.status.short);
+                return (
+                    <Link key={match.fixture.id} to={`/sports/match/${match.fixture.id}`} className="flex-shrink-0 hover:bg-white/10 rounded px-2 py-1 transition group">
+                        <div className="flex items-center gap-2 text-xs">
+                            <span className={`font-bold ${isLive ? 'text-red-500' : 'text-gray-400'}`}>
+                                {match.fixture.status.short} {isLive && '•'}
+                            </span>
+                            <div className="flex flex-col">
+                                <span className="font-semibold">{match.teams.home.code} <span className="text-gray-400">{match.goals.home ?? 0}</span></span>
+                                <span className="font-semibold">{match.teams.away.code} <span className="text-gray-400">{match.goals.away ?? 0}</span></span>
+                            </div>
+                        </div>
+                    </Link>
+                );
+            })}
         </div>
     );
 }
 
-// TopNavBar removed - now using MainLayout for consistent header/footer
-
-// Score Card Component
-function ScoreCard({
-    homeTeam,
-    awayTeam,
-    homeScore,
-    awayScore,
-    status,
-    minute,
-    competition,
-    homeTeamLogo,
-    awayTeamLogo
-}: {
-    homeTeam: string;
-    awayTeam: string;
-    homeScore: number | null;
-    awayScore: number | null;
-    status: string;
-    minute?: number | null;
-    competition: string;
-    homeTeamLogo?: string;
-    awayTeamLogo?: string;
-}) {
-    const isLive = status === 'LIVE';
-    const isFinal = status === 'FT';
-
-    return (
-        <div className="flex-shrink-0 bg-white border border-gray-200 rounded shadow-sm px-4 py-3 min-w-[200px] hover:shadow-md cursor-pointer transition">
-            {/* Competition Badge */}
-            <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-gray-600">{competition}</span>
-                {isLive && (
-                    <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">
-                        LIVE
-                    </span>
-                )}
-                {isFinal && (
-                    <span className="text-xs font-semibold text-gray-500">FT</span>
-                )}
-            </div>
-
-            {/* Teams and Scores */}
-            <div className="space-y-2">
-                {/* Home Team */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 flex-1">
-                        {homeTeamLogo ? (
-                            <img src={homeTeamLogo} alt={homeTeam} className="w-6 h-6 object-contain flex-shrink-0" />
-                        ) : (
-                            <div className="w-6 h-6 rounded-full bg-gray-200 flex-shrink-0"></div>
-                        )}
-                        <span className="font-semibold text-sm truncate">{homeTeam}</span>
-                    </div>
-                    {homeScore !== null && (
-                        <span className="font-bold text-lg ml-2">{homeScore}</span>
-                    )}
-                </div>
-
-                {/* Away Team */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 flex-1">
-                        {awayTeamLogo ? (
-                            <img src={awayTeamLogo} alt={awayTeam} className="w-6 h-6 object-contain flex-shrink-0" />
-                        ) : (
-                            <div className="w-6 h-6 rounded-full bg-gray-200 flex-shrink-0"></div>
-                        )}
-                        <span className="font-semibold text-sm truncate">{awayTeam}</span>
-                    </div>
-                    {awayScore !== null && (
-                        <span className="font-bold text-lg ml-2">{awayScore}</span>
-                    )}
-                </div>
-            </div>
-
-            {/* Status/Time */}
-            {!isLive && !isFinal && homeScore === null && (
-                <div className="text-xs text-gray-600 mt-2 text-center">{status}</div>
-            )}
-            {isLive && minute && (
-                <div className="text-xs text-red-600 font-semibold mt-2 text-center">{minute}'</div>
-            )}
-        </div>
-    );
-}
-
-// Left Sidebar Component
+// Sidebar
 function LeftSidebar() {
     return (
-        <div className="space-y-6">
-            {/* Customize Bara Sports */}
-            <div>
-                <h3 className="font-comfortaa font-semibold text-sm mb-3">Customize Bara Sports</h3>
-                <button className="w-full bg-black text-white py-2 rounded-full font-semibold text-sm hover:bg-gray-800 transition mb-2">
-                    Create Account
-                </button>
-                <button className="w-full text-blue-600 text-sm hover:underline">
-                    Log In
-                </button>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-                <h3 className="font-bold text-sm mb-2">Quick Links</h3>
-                <nav className="space-y-1">
-                    <Link to="/sports/table/2" className="flex items-center gap-2 text-sm hover:underline">
-                        <div className="w-5 h-5 rounded-full bg-blue-900"></div>
-                        UEFA Champions League
-                    </Link>
-                    <Link to="/sports/table/39" className="flex items-center gap-2 text-sm hover:underline">
-                        <div className="w-5 h-5 rounded-full bg-purple-700"></div>
-                        English Premier League
-                    </Link>
-                    <Link to="/sports/table/140" className="flex items-center gap-2 text-sm hover:underline">
-                        <div className="w-5 h-5 rounded-full bg-orange-500"></div>
-                        La Liga
-                    </Link>
-                    <Link to="/sports/scores" className="flex items-center gap-2 text-sm hover:underline">
-                        <div className="w-5 h-5 rounded-full bg-gray-600"></div>
-                        All Scores
-                    </Link>
-                </nav>
-            </div>
-
-            {/* Favorites */}
-            <div>
-                <h3 className="font-comfortaa font-semibold text-sm mb-3">Favorites</h3>
-                <div className="space-y-2">
-                    <FixtureCard
-                        homeTeam="WOL"
-                        awayTeam="ARS"
-                        score="1&2 - 18:30 PM"
-                        league="English Premier League"
-                    />
-                    <FixtureCard
-                        homeTeam="ARS"
-                        awayTeam="CHE"
-                        score="4 - FT"
-                        league="English Emirates FA Cup"
-                    />
-                </div>
-            </div>
-
-            {/* Bara Sports Apps */}
-            <div>
-                <h3 className="font-bold text-sm mb-2">Bara Sports</h3>
-                <a href="#" className="flex items-center gap-2 text-sm hover:underline">
-                    📱 Bara Sports App
-                </a>
-            </div>
-
-            {/* Bara Sports Partners */}
-            <div>
-                <h3 className="font-bold text-sm mb-2">Bara Sports Partners</h3>
-                <a href="#" className="flex items-center gap-2 text-sm hover:underline text-blue-600">
-                    🏏 Bara Cricket
-                </a>
-            </div>
+        <div className="bg-white rounded shadow-sm p-4 sticky top-4">
+            <h3 className="font-bold text-xs text-gray-500 uppercase mb-4 tracking-wider">Quick Links</h3>
+            <nav className="space-y-1">
+                <SidebarLink to="/sports/table/39" color="bg-purple-700" label="Premier League" />
+                <SidebarLink to="/sports/table/140" color="bg-orange-500" label="La Liga" />
+                <SidebarLink to="/sports/table/2" color="bg-blue-900" label="Champions League" />
+                <div className="h-px bg-gray-200 my-2"></div>
+                <SidebarLink to="/sports/scores" color="bg-gray-800" label="All Scores" />
+                <SidebarLink to="/sports/favorites" color="bg-red-600" label="My Teams" />
+            </nav>
         </div>
     );
 }
 
-function FixtureCard({ homeTeam, awayTeam, score, league }: { homeTeam: string; awayTeam: string; score: string; league: string }) {
+function SidebarLink({ to, color, label }: { to: string, color: string, label: string }) {
     return (
-        <div className="text-xs border-l-2 border-gray-300 pl-2 py-1 hover:border-blue-600 cursor-pointer">
-            <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-1">
-                    <div className="w-4 h-4 rounded-full bg-gray-300"></div>
-                    <span className="font-semibold">{homeTeam}</span>
-                </div>
-                <span></span>
-            </div>
-            <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-1">
-                    <div className="w-4 h-4 rounded-full bg-gray-300"></div>
-                    <span className="font-semibold">{awayTeam}</span>
-                </div>
-                <span className="font-bold">{score}</span>
-            </div>
-            <div className="text-gray-500">{league}</div>
-        </div>
+        <Link to={to} className="flex items-center gap-3 text-sm font-semibold text-gray-700 hover:text-blue-600 hover:bg-blue-50 p-2 rounded transition">
+            <div className={`w-2 h-2 rounded-full ${color}`}></div>
+            {label}
+        </Link>
     );
 }
 
-// Hero Article Component
+
+// Hero Article (Bigger, Bolder)
 function HeroArticle() {
+    // We ideally fetch this from DB, but for now using static or the first item
     return (
-        <article className="bg-white rounded-lg overflow-hidden mb-4">
-            <div className="relative h-80 bg-gradient-to-br from-purple-900 to-blue-900">
-                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
-                    <h1 className="text-white text-3xl font-bold mb-2">
-                        Real Madrid broke Mourinho... Now he could break them with Benfica
+        <article className="relative bg-gray-900 h-[400px] rounded-lg overflow-hidden group cursor-pointer shadow-md">
+            <img
+                src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2836&auto=format&fit=crop"
+                alt="Hero"
+                className="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition duration-500 grayscale-[20%] group-hover:grayscale-0"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent">
+                <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
+                    <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 uppercase tracking-wider mb-2 inline-block">Breaking News</span>
+                    <h1 className="text-white text-4xl md:text-5xl font-black leading-tight mb-4 drop-shadow-lg font-roboto-condensed">
+                        Mamelodi Sundowns seal historic treble with dominant derby win
                     </h1>
-                    <p className="text-gray-200 text-sm">
-                        Real Madrid know enough about ex-coach José Mourinho to expect a sting in the tail when they meet his Benfica team in their Champions League playoff.
+                    <p className="text-gray-300 text-lg line-clamp-2 md:line-clamp-none mb-4">
+                        The Brazilian's relentless season concludes with yet another trophy as they outclass their rivals in a match that will be remembered for years.
                     </p>
-                    <div className="text-gray-400 text-xs mt-2">17h • Mark Ogden</div>
+                    <div className="flex items-center gap-4 text-xs text-gray-400 font-semibold uppercase tracking-wider">
+                        <span>By Sports Desk</span>
+                        <span>•</span>
+                        <span>2 Hours Ago</span>
+                    </div>
                 </div>
             </div>
         </article>
     );
 }
 
-// News Feed Component
+// News Feed (List Layout like ESPN)
 function NewsFeed() {
     const [news, setNews] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -321,158 +158,103 @@ function NewsFeed() {
                 .from('sports_news')
                 .select('*')
                 .order('created_at', { ascending: false })
-                .limit(5);
+                .limit(10); // Fetch MORE items
             if (data) setNews(data);
             setLoading(false);
         };
         fetchNews();
     }, []);
 
-    if (loading) return <div className="p-4 bg-white rounded-lg">Loading news...</div>;
-
-    if (news.length === 0) {
-        return (
-            <div className="space-y-4">
-                <NewsCard
-                    title="Orlando Pirates and Mamelodi Sundowns clash in PSL title race six-pointer"
-                    category="PSL"
-                    time="14h"
-                    author="Lorenz Kohler"
-                />
-            </div>
-        );
-    }
+    if (loading) return <div className="space-y-4">{[1, 2, 3].map(i => <div key={i} className="h-32 bg-gray-200 animate-pulse rounded"></div>)}</div>;
 
     return (
         <div className="space-y-4">
             {news.map(item => (
-                <NewsCard
-                    key={item.id}
-                    title={item.title}
-                    category={item.category}
-                    time={new Date(item.created_at).toLocaleDateString()}
-                    author={item.author}
-                />
+                <NewsListItem key={item.id} item={item} />
             ))}
+            {news.length === 0 && <div className="p-8 text-center text-gray-500">No news articles found. Populating feed...</div>}
         </div>
     );
 }
 
-function NewsCard({ title, category, time, author }: { title: string; category: string; time: string; author: string }) {
+function NewsListItem({ item }: { item: any }) {
     return (
-        <article className="bg-white rounded-lg p-4 hover:shadow-md transition cursor-pointer">
-            <div className="text-xs font-semibold text-red-600 mb-2">{category}</div>
-            <h3 className="font-bold text-lg mb-2">{title}</h3>
-            <div className="text-sm text-gray-500">{time} • {author}</div>
-        </article>
+        <Link to={`/sports/news/${item.id}`} className="flex gap-4 p-4 bg-white border border-gray-100 rounded-lg hover:shadow-lg hover:border-blue-200 transition group">
+            <div className="w-1/3 md:w-48 aspect-video bg-gray-200 rounded overflow-hidden flex-shrink-0 relative">
+                <img
+                    src={item.image_url || 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=500&auto=format&fit=crop'}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                />
+            </div>
+            <div className="flex flex-col justify-center flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold text-red-600 uppercase tracking-tighter">{item.category}</span>
+                    <span className="text-xs text-gray-400">• {new Date(item.created_at).toLocaleDateString()}</span>
+                </div>
+                <h3 className="font-bold text-xl text-gray-900 leading-tight mb-2 group-hover:text-blue-700 transition">
+                    {item.title}
+                </h3>
+                <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
+                    <User size={12} /> {item.author || 'Staff Writer'}
+                </div>
+            </div>
+        </Link>
     );
 }
 
-// Top Videos Component
+// Right Sidebar Components
 function TopVideos() {
-    const [videos, setVideos] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchVideos = async () => {
-            const { data } = await supabase
-                .from('sports_videos')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(5);
-            if (data) setVideos(data);
-            setLoading(false);
-        };
-        fetchVideos();
-    }, []);
-
     return (
-        <div className="bg-white rounded-lg p-4 mb-4">
-            <h2 className="font-bold mb-3">Top Videos</h2>
-            <div className="space-y-3">
-                {loading ? (
-                    <div className="text-sm text-gray-500">Loading videos...</div>
-                ) : videos.length > 0 ? (
-                    videos.map(video => (
-                        <VideoCard
-                            key={video.id}
-                            title={video.title}
-                            duration={video.duration}
-                            league={video.league}
-                            isPlaying={video.is_live}
-                        />
-                    ))
-                ) : (
-                    <>
-                        <VideoCard
-                            title="Slot believes Szoboszlai has what it takes to become a future Liverpool captain"
-                            duration="1:26"
-                            league="English FA Cup"
-                            isPlaying={true}
-                        />
-                        <VideoCard
-                            title="Arbeloa: Vinicius Jr is one of the best players in the world"
-                            duration="0:55"
-                            league="Spanish LALIGA"
-                            isPlaying={false}
-                        />
-                    </>
-                )}
+        <div className="bg-white rounded shadow-sm overflow-hidden border border-gray-100">
+            <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 className="font-bold text-sm text-gray-900 uppercase tracking-wider">Top Videos</h3>
+            </div>
+            <div className="divide-y divide-gray-100">
+                <VideoListItem title="Highlights: Arsenal vs Chelsea" duration="10:23" />
+                <VideoListItem title="Klopp's farewell speech in full" duration="04:12" />
+                <VideoListItem title="Top 10 Goals of the Season so far" duration="08:45" />
+            </div>
+            <div className="p-3 bg-gray-50 text-center">
+                <Link to="/sports/videos" className="text-xs font-bold text-blue-600 hover:underline">View All Videos</Link>
             </div>
         </div>
     );
 }
 
-function VideoCard({ title, duration, league, isPlaying }: { title: string; duration: string; league: string; isPlaying: boolean }) {
+function VideoListItem({ title, duration }: { title: string, duration: string }) {
     return (
-        <div className="cursor-pointer group">
-            <div className="w-full h-20 bg-gray-200 rounded mb-2 relative overflow-hidden">
-                {/* Video thumbnail placeholder */}
-                <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400"></div>
-
-                {/* Duration badge */}
-                <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded">
-                    {duration}
-                </div>
-
-                {/* Play overlay appears on hover */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition flex items-center justify-center">
-                    <div className="w-10 h-10 bg-white/0 group-hover:bg-white/90 rounded-full flex items-center justify-center transition">
-                        <div className="text-black text-xl opacity-0 group-hover:opacity-100 transition">▶</div>
+        <div className="p-3 flex gap-3 hover:bg-gray-50 cursor-pointer group">
+            <div className="w-24 aspect-video bg-gray-800 rounded relative overflow-hidden flex-shrink-0">
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-red-600 transition">
+                        <Play size={10} fill="white" className="text-white ml-0.5" />
                     </div>
                 </div>
+                <span className="absolute bottom-1 right-1 bg-black/90 text-[10px] text-white px-1 rounded">{duration}</span>
             </div>
-
-            {isPlaying && (
-                <div className="flex items-center gap-1 text-[#CC0000] text-xs font-semibold mb-1">
-                    <span className="text-[#CC0000]">🔴</span> Now Playing
-                </div>
-            )}
-
-            <p className="text-sm font-semibold mb-1 line-clamp-2">{title}</p>
-            <p className="text-xs text-gray-500">{league}</p>
+            <div className="flex-1">
+                <h4 className="text-sm font-semibold leading-snug group-hover:text-blue-600 transition line-clamp-2">{title}</h4>
+            </div>
         </div>
     );
 }
 
-// Top Headlines Component
 function TopHeadlines() {
     return (
-        <div className="bg-white rounded-lg p-4">
-            <h2 className="font-bold mb-3">Top Headlines</h2>
-            <div className="space-y-3">
-                <HeadlineCard title="Ronaldo's coach: Al Nassr lack 'economic power'" />
-                <HeadlineCard title="Bayern's Kane 'proud' to score 500th career goal" />
-                <HeadlineCard title="Edwards, Wemby set tone for competitive ASG" />
-            </div>
+        <div className="bg-white rounded shadow-sm p-4 border border-gray-100">
+            <h3 className="font-bold text-sm text-gray-900 uppercase tracking-wider mb-4">Trending Now</h3>
+            <ul className="space-y-3">
+                <li className="text-sm font-medium hover:text-blue-600 cursor-pointer before:content-['•'] before:mr-2 before:text-red-500">
+                    Osimhen requests final transfer decision
+                </li>
+                <li className="text-sm font-medium hover:text-blue-600 cursor-pointer before:content-['•'] before:mr-2 before:text-red-500">
+                    Mbappe presented at Bernabeu in front of 80,000
+                </li>
+                <li className="text-sm font-medium hover:text-blue-600 cursor-pointer before:content-['•'] before:mr-2 before:text-red-500">
+                    Springboks announce squad for upcoming test series
+                </li>
+            </ul>
         </div>
-    );
-}
-
-function HeadlineCard({ title }: { title: string }) {
-    return (
-        <a href="#" className="block text-sm hover:underline">
-            {title}
-        </a>
     );
 }
