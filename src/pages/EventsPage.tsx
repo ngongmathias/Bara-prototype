@@ -9,6 +9,7 @@ import { EventGalleryModal } from "@/components/EventGalleryModal";
 import { ScrollReveal, SkeletonCard } from "@/components/animations";
 import { FullscreenMapModal } from "@/components/FullscreenMapModal";
 import { InteractiveEventsMap } from "@/components/InteractiveEventsMap";
+import { TicketPurchaseModal } from "@/components/TicketPurchaseModal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +29,7 @@ export const EventsPage = () => {
   const [endDate, setEndDate] = useState('');
   const [sortBy, setSortBy] = useState('date');
   const [selectedEvent, setSelectedEvent] = useState<DatabaseEvent | null>(null);
-    const [activeEventsPage, setActiveEventsPage] = useState(1);
+  const [activeEventsPage, setActiveEventsPage] = useState(1);
   const [pastEventsPage, setPastEventsPage] = useState(1);
   const eventsPerSection = 12;
   const [mapModalOpen, setMapModalOpen] = useState(false);
@@ -40,6 +41,8 @@ export const EventsPage = () => {
   const [galleryModalOpen, setGalleryModalOpen] = useState(false);
   const [selectedGalleryEvent, setSelectedGalleryEvent] = useState<DatabaseEvent | null>(null);
   const [urlCountryFilter, setUrlCountryFilter] = useState<string | null>(null);
+  const [ticketModalOpen, setTicketModalOpen] = useState(false);
+  const [ticketModalEvent, setTicketModalEvent] = useState<DatabaseEvent | null>(null);
 
   const parseDate = (value?: string | null) => {
     if (!value) return null;
@@ -55,7 +58,7 @@ export const EventsPage = () => {
     if (start && !end) return start.toLocaleDateString();
     if (!start && end) return end.toLocaleDateString();
     const isSameDay = start!.toDateString() === end!.toDateString();
-    
+
     if (isSameDay) {
       return start!.toLocaleDateString();
     } else {
@@ -69,20 +72,20 @@ export const EventsPage = () => {
     const start = parseDate(startDate);
     const end = parseDate(endDate);
     if (!start && !end) return '';
-    if (start && !end) return start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    if (!start && end) return end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    if (start && !end) return start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (!start && end) return end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const isSameDay = start!.toDateString() === end!.toDateString();
-    
+
     if (isSameDay) {
-      return `${start!.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${end!.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+      return `${start!.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end!.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     } else {
       // Multi-day event - show opening time
-      return `Opens ${start!.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+      return `Opens ${start!.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     }
   };
 
   // Use real data from database
-  const { events, loading, searchEvents} = useEvents();
+  const { events, loading, searchEvents } = useEvents();
   const [totalEventsCount, setTotalEventsCount] = useState(0);
   const [currentOffset, setCurrentOffset] = useState(0);
   const eventsLimit = 10000;
@@ -101,7 +104,7 @@ export const EventsPage = () => {
   // Load events on component mount and when selected country changes
   useEffect(() => {
     const loadEvents = async () => {
-      const result = await searchEvents({ 
+      const result = await searchEvents({
         country_id: selectedCountry?.id,
         limit: eventsLimit,
         offset: 0, // Always load from beginning
@@ -116,51 +119,51 @@ export const EventsPage = () => {
 
   // Filter events based on search and filters
   const filteredEvents = events.filter(event => {
-    
-    const matchesSearch = !searchQuery || 
-                         event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (event.venue_name && event.venue_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                         (event.organizer_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         // Include hashtag search in main search
-                         (event.tags && event.tags.some(tag => 
-                           tag.toLowerCase().includes(searchQuery.toLowerCase().replace('#', ''))
-                         ));
-    
+
+    const matchesSearch = !searchQuery ||
+      event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (event.venue_name && event.venue_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (event.organizer_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // Include hashtag search in main search
+      (event.tags && event.tags.some(tag =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase().replace('#', ''))
+      ));
+
     // Check both category slug and category field (which contains display name)
     // Convert event.category (display name) to slug format
-    const eventCategorySlug = event.category 
+    const eventCategorySlug = event.category
       ? event.category.toLowerCase()
-          .replace(/\s*&\s*/g, '-and-') // Replace " & " with "-and-"
-          .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
-          .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+        .replace(/\s*&\s*/g, '-and-') // Replace " & " with "-and-"
+        .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
+        .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
       : '';
-    
+
     // Also check category_name if it exists
-    const categoryNameSlug = event.category_name 
+    const categoryNameSlug = event.category_name
       ? event.category_name.toLowerCase()
-          .replace(/\s*&\s*/g, '-and-') // Replace " & " with "-and-"
-          .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
-          .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+        .replace(/\s*&\s*/g, '-and-') // Replace " & " with "-and-"
+        .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
+        .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
       : '';
-    
-    const matchesCategory = selectedCategory === 'all' || 
-                           event.category === selectedCategory ||
-                           event.category_name === selectedCategory ||
-                           eventCategorySlug === selectedCategory ||
-                           categoryNameSlug === selectedCategory;
-    
+
+    const matchesCategory = selectedCategory === 'all' ||
+      event.category === selectedCategory ||
+      event.category_name === selectedCategory ||
+      eventCategorySlug === selectedCategory ||
+      categoryNameSlug === selectedCategory;
+
     const eventStart = parseDate(event.start_date);
     const eventEnd = parseDate(event.end_date);
     const filterStart = parseDate(startDate);
     const filterEnd = parseDate(endDate);
     const matchesStartDate = !filterStart || !eventStart || eventStart >= filterStart;
     const matchesEndDate = !filterEnd || !eventEnd || eventEnd <= filterEnd;
-    
+
     // Filter by URL country parameter if present
-    const matchesCountry = !urlCountryFilter || 
-                          (event.country_name && event.country_name.toLowerCase() === urlCountryFilter.toLowerCase());
-    
+    const matchesCountry = !urlCountryFilter ||
+      (event.country_name && event.country_name.toLowerCase() === urlCountryFilter.toLowerCase());
+
     return matchesSearch && matchesCategory && matchesStartDate && matchesEndDate && matchesCountry;
   });
 
@@ -181,7 +184,7 @@ export const EventsPage = () => {
   // Apply time-based filter
   const timeFilteredEvents = sortedEvents.filter(event => {
     if (timeFilter === 'all') return true;
-    
+
     const now = new Date();
     const eventStart = parseDate(event.start_date);
     const eventEnd = parseDate(event.end_date);
@@ -191,7 +194,7 @@ export const EventsPage = () => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const dayAfterTomorrow = new Date(tomorrow);
     dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
-    
+
     switch (timeFilter) {
       case 'active':
         // Events that haven't ended yet (upcoming or ongoing)
@@ -246,7 +249,7 @@ export const EventsPage = () => {
   const pastEventsStartIndex = (pastEventsPage - 1) * eventsPerSection;
   const pastEvents = allPastEvents.slice(pastEventsStartIndex, pastEventsStartIndex + eventsPerSection);
 
-  
+
   const handleViewEvent = (event: DatabaseEvent) => {
     setSelectedEvent(event);
   };
@@ -289,7 +292,7 @@ export const EventsPage = () => {
     if (!clickedEvent) return;
 
     // Get ALL events with valid coordinates from the database
-    const eventsWithCoords = events.filter(e => 
+    const eventsWithCoords = events.filter(e =>
       ((e.latitude && e.longitude) || (e.venue_latitude && e.venue_longitude))
     );
 
@@ -314,7 +317,7 @@ export const EventsPage = () => {
   // Get ALL events with coordinates for event detail map
   const getAllEventsForMap = (currentEvent: DatabaseEvent) => {
     // Get ALL events with valid coordinates from the database
-    const eventsWithCoords = events.filter(e => 
+    const eventsWithCoords = events.filter(e =>
       e.id !== currentEvent.id && // Exclude current event to add it first
       ((e.latitude && e.longitude) || (e.venue_latitude && e.venue_longitude))
     );
@@ -367,7 +370,7 @@ export const EventsPage = () => {
     }
   }, [selectedEvent, navigate]);
 
-// Event Detail Component
+  // Event Detail Component
   const EventDetail = ({ event, onBack }: { event: DatabaseEvent; onBack: () => void }) => {
     const images = [
       ...(event.event_image_url ? [event.event_image_url] : []),
@@ -434,22 +437,22 @@ export const EventsPage = () => {
     }, [isLightboxVisible]);
 
     return (
-    <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-    <button 
-      onClick={onBack}
-      className="flex items-center text-black hover:opacity-80 mb-6 transition-colors"
-    >
-      <ArrowLeft className="w-5 h-5 mr-2" />
-      Back to Events
-    </button>
-    
-    <div className="md:flex">
-        <div className="md:flex-shrink-0 md:w-1/2">
+      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <button
+          onClick={onBack}
+          className="flex items-center text-black hover:opacity-80 mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Back to Events
+        </button>
+
+        <div className="md:flex">
+          <div className="md:flex-shrink-0 md:w-1/2">
             <div className="relative">
-        <img 
-                className="h-80 w-full object-cover md:h-full cursor-zoom-in" 
-                src={images[currentImageIndex] || 'https://via.placeholder.com/600x400?text=Event+Image'} 
-          alt={event.title} 
+              <img
+                className="h-80 w-full object-cover md:h-full cursor-zoom-in"
+                src={images[currentImageIndex] || 'https://via.placeholder.com/600x400?text=Event+Image'}
+                alt={event.title}
                 onClick={() => openLightboxAt(0)}
               />
               {images.length > 1 && (
@@ -466,291 +469,316 @@ export const EventsPage = () => {
                 </div>
               )}
             </div>
-      </div>
-        <div className="p-8 md:w-1/2">
-          <div className="flex items-center mb-4">
-            <Badge variant="secondary" className="bg-black/10 text-black border-black/20">
-              {event.category_name || event.category}
-            </Badge>
           </div>
-          
-          {/* Hashtags Display */}
-          {event.tags && event.tags.length > 0 && (
-            <div className="mb-4">
-              <div className="flex flex-wrap gap-2">
-                {event.tags.map((hashtag) => (
-                  <Badge 
-                    key={hashtag} 
-                    variant="outline" 
-                    className="text-xs px-2 py-1 bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
-                  >
-                    #{hashtag}
-                  </Badge>
-                ))}
-              </div>
+          <div className="p-8 md:w-1/2">
+            <div className="flex items-center mb-4">
+              <Badge variant="secondary" className="bg-black/10 text-black border-black/20">
+                {event.category_name || event.category}
+              </Badge>
             </div>
-          )}
-          
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{event.title}</h1>
-          
-          <div className="space-y-6">
-          <div className="flex items-start">
-              <Calendar className="h-6 w-6 text-black mr-3 mt-1 flex-shrink-0" />
-            <div>
-                {(() => {
-                  const startDate = parseDate(event.start_date);
-                  const endDate = parseDate(event.end_date);
-                  if (!startDate && !endDate) {
-                    return (
-                      <p className="text-lg text-gray-700 font-medium">TBD</p>
-                    );
-                  }
-                  const effectiveStart = startDate ?? endDate!;
-                  const effectiveEnd = endDate ?? startDate!;
-                  const isSameDay = effectiveStart.toDateString() === effectiveEnd.toDateString();
-                  
-                  if (isSameDay) {
-                    return (
-                      <>
-                        <p className="text-lg text-gray-700 font-medium">
-                          {effectiveStart.toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
-                          })}
-                        </p>
-                        <p className="text-gray-600">
-                          {effectiveStart.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {effectiveEnd.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                        </p>
-                      </>
-                    );
-                  } else {
-                    return (
-                      <>
-                        <p className="text-lg text-gray-700 font-medium">
-                          {effectiveStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - {effectiveEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                        </p>
-                        <p className="text-gray-600">
-                          Opens: {effectiveStart.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {effectiveStart.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                        </p>
-                      </>
-                    );
-                  }
-                })()}
-                <p className="text-sm text-black mt-1 cursor-pointer hover:underline">Add to calendar</p>
-            </div>
-          </div>
-          
-          <div className="flex items-start">
-              <MapPin className="h-6 w-6 text-black mr-3 mt-1 flex-shrink-0" />
-            <div>
-                <p className="text-lg text-gray-700 font-medium">{event.venue_name}</p>
-                <p className="text-gray-600">{event.venue_address}</p>
-                {event.city_name && (
-                  <p className="text-sm text-gray-500">{event.city_name}, {event.country_name}</p>
-                )}
-                {(() => {
-                  const hasCoords = (typeof event.venue_latitude === 'number' && typeof event.venue_longitude === 'number') ||
-                                   (typeof event.latitude === 'number' && typeof event.longitude === 'number');
-                  const lat = event.latitude || event.venue_latitude;
-                  const lng = event.longitude || event.venue_longitude;
-                  const mapsUrl = hasCoords
-                    ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
-                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue_name || ''} ${event.venue_address || ''} ${event.city_name || ''} ${event.country_name || ''}`.trim())}`;
-                  return (
-                    <a
-                      href={mapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-black mt-1 inline-block hover:underline"
+
+            {/* Hashtags Display */}
+            {event.tags && event.tags.length > 0 && (
+              <div className="mb-4">
+                <div className="flex flex-wrap gap-2">
+                  {event.tags.map((hashtag) => (
+                    <Badge
+                      key={hashtag}
+                      variant="outline"
+                      className="text-xs px-2 py-1 bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
                     >
-                      Get directions
-                    </a>
-                  );
-                })()}
-            </div>
-          </div>
-          
-            <div className="pt-6 border-t border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">About this event</h3>
-              <p className="text-gray-600 leading-relaxed">{event.description}</p>
-          </div>
-          
-            <div className="pt-6 border-t border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Event Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                  <p className="text-sm text-gray-500 uppercase tracking-wide">Organizer</p>
-                  <p className="text-gray-700 font-medium">{event.organizer_name}</p>
-                  {event.organizer_handle && (
-                    <p className="text-sm text-gray-500">{event.organizer_handle}</p>
-                  )}
-              </div>
-              <div>
-                  <p className="text-sm text-gray-500 uppercase tracking-wide">Capacity</p>
-                  <p className="text-gray-700 font-medium">{event.capacity || 'Unlimited'}</p>
-                  {event.registration_count && (
-                    <p className="text-sm text-gray-500">{event.registration_count} registered</p>
-                  )}
-              </div>
-                {event.organizer_email && (
-              <div>
-                    <p className="text-sm text-gray-500 uppercase tracking-wide">Contact</p>
-                    <p className="text-gray-700 font-medium">{event.organizer_email}</p>
-              </div>
-                )}
-                {event.website_url && (
-              <div>
-                    <p className="text-sm text-gray-500 uppercase tracking-wide">Website</p>
-                    <a href={event.website_url} className="text-black hover:underline font-medium" target="_blank" rel="noopener noreferrer">
-                  Visit website
-                </a>
-              </div>
-                )}
-            </div>
-          </div>
-          
-            {/* Social Media Links */}
-            {(event.facebook_url || event.twitter_url || event.instagram_url) && (
-              <div className="pt-6 border-t border-gray-200">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Follow Event</h3>
-                <div className="flex space-x-4">
-                  {event.facebook_url && (
-                    <a href={event.facebook_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
-                      <span className="sr-only">Facebook</span>
-                      <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                      </svg>
-                    </a>
-                  )}
-                  {event.twitter_url && (
-                    <a href={event.twitter_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-600">
-                      <span className="sr-only">Twitter</span>
-                      <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                      </svg>
-                    </a>
-                  )}
-                  {event.instagram_url && (
-                    <a href={event.instagram_url} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-800">
-                      <span className="sr-only">Instagram</span>
-                      <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987 6.62 0 11.987-5.367 11.987-11.987C24.014 5.367 18.637.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.198 14.895 3.708 13.744 3.708 12.447s.49-2.448 1.418-3.323c.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.928.875 1.418 2.026 1.418 3.323s-.49 2.448-1.418 3.244c-.875.807-2.026 1.297-3.323 1.297zm7.83-9.281h-1.297v1.297h1.297V7.707zm-5.533 1.297c.807 0 1.418.611 1.418 1.418s-.611 1.418-1.418 1.418-1.418-.611-1.418-1.418.611-1.418 1.418-1.418zm5.533 2.715H8.449c-2.715 0-4.933 2.218-4.933 4.933s2.218 4.933 4.933 4.933h7.83c2.715 0 4.933-2.218 4.933-4.933s-2.218-4.933-4.933-4.933z"/>
-                      </svg>
-                    </a>
-                  )}
+                      #{hashtag}
+                    </Badge>
+                  ))}
                 </div>
               </div>
             )}
-            
-            <div className="pt-6">
-              {event.is_free ? (
-                <Button 
-                  className="w-full text-white font-semibold py-4 px-6 rounded-lg text-lg bg-green-600 hover:bg-green-700"
-                  onClick={() => {
-                    // TODO: Implement RSVP functionality
-                    alert('RSVP functionality coming soon! For now, please contact the organizer directly.');
-                  }}
-                >
-                  RSVP - Free Event
-                </Button>
-              ) : (
-                <div className="space-y-2">
-                  <Button 
-                    disabled
-                    className="w-full font-semibold py-4 px-6 rounded-lg text-lg opacity-50 cursor-not-allowed"
-                  >
-                    Ticket Sales Coming Soon
-                  </Button>
-                  <p className="text-sm text-gray-600 text-center">
-                    {event.entry_fee && event.currency ? `Price: ${event.currency} ${event.entry_fee}` : 'Paid Event'} - Contact organizer for tickets
-                  </p>
+
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">{event.title}</h1>
+
+            <div className="space-y-6">
+              <div className="flex items-start">
+                <Calendar className="h-6 w-6 text-black mr-3 mt-1 flex-shrink-0" />
+                <div>
+                  {(() => {
+                    const startDate = parseDate(event.start_date);
+                    const endDate = parseDate(event.end_date);
+                    if (!startDate && !endDate) {
+                      return (
+                        <p className="text-lg text-gray-700 font-medium">TBD</p>
+                      );
+                    }
+                    const effectiveStart = startDate ?? endDate!;
+                    const effectiveEnd = endDate ?? startDate!;
+                    const isSameDay = effectiveStart.toDateString() === effectiveEnd.toDateString();
+
+                    if (isSameDay) {
+                      return (
+                        <>
+                          <p className="text-lg text-gray-700 font-medium">
+                            {effectiveStart.toLocaleDateString('en-US', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </p>
+                          <p className="text-gray-600">
+                            {effectiveStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {effectiveEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </>
+                      );
+                    } else {
+                      return (
+                        <>
+                          <p className="text-lg text-gray-700 font-medium">
+                            {effectiveStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - {effectiveEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                          </p>
+                          <p className="text-gray-600">
+                            Opens: {effectiveStart.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {effectiveStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </>
+                      );
+                    }
+                  })()}
+                  <p className="text-sm text-black mt-1 cursor-pointer hover:underline">Add to calendar</p>
                 </div>
-              )}
-          </div>
-        </div>
-      </div>
+              </div>
 
+              <div className="flex items-start">
+                <MapPin className="h-6 w-6 text-black mr-3 mt-1 flex-shrink-0" />
+                <div>
+                  <p className="text-lg text-gray-700 font-medium">{event.venue_name}</p>
+                  <p className="text-gray-600">{event.venue_address}</p>
+                  {event.city_name && (
+                    <p className="text-sm text-gray-500">{event.city_name}, {event.country_name}</p>
+                  )}
+                  {(() => {
+                    const hasCoords = (typeof event.venue_latitude === 'number' && typeof event.venue_longitude === 'number') ||
+                      (typeof event.latitude === 'number' && typeof event.longitude === 'number');
+                    const lat = event.latitude || event.venue_latitude;
+                    const lng = event.longitude || event.venue_longitude;
+                    const mapsUrl = hasCoords
+                      ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue_name || ''} ${event.venue_address || ''} ${event.city_name || ''} ${event.country_name || ''}`.trim())}`;
+                    return (
+                      <a
+                        href={mapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-black mt-1 inline-block hover:underline"
+                      >
+                        Get directions
+                      </a>
+                    );
+                  })()}
+                </div>
+              </div>
 
-      {/* Break out of container for full-width map */}
-    </div>
+              <div className="pt-6 border-t border-gray-200">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">About this event</h3>
+                <p className="text-gray-600 leading-relaxed">{event.description}</p>
+              </div>
 
-    {/* Full-width Interactive Map Section - Outside the constrained container */}
-    <div className="w-full bg-gray-50 py-8 mt-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-3xl font-bold text-gray-900">📍 Event Location & All Events Map</h3>
-            <div className="flex items-center gap-4 text-sm">
-              <span className="flex items-center">
-                <span className="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
-                <span className="font-medium">This Event</span>
-              </span>
-              <span className="flex items-center">
-                <span className="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
-                <span className="font-medium">Other Events</span>
-              </span>
-            </div>
-          </div>
-          <p className="text-gray-600">
-            Explore this event's location and discover {getAllEventsForMap(event).length - 1} other events happening around the world
-          </p>
-        </div>
-        
-        <div className="rounded-xl overflow-hidden border-2 border-gray-300 shadow-2xl bg-white">
-          {(() => {
-            const hasCoords = (typeof event.venue_latitude === 'number' && typeof event.venue_longitude === 'number') ||
-                             (typeof event.latitude === 'number' && typeof event.longitude === 'number');
-            
-            if (!hasCoords) {
-              return (
-                <div className="w-full h-[600px] bg-gray-100 flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-lg text-gray-600 font-medium">Location coordinates not available</p>
-                    <p className="text-sm text-gray-500 mt-2">Map cannot be displayed without coordinates</p>
+              <div className="pt-6 border-t border-gray-200">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Event Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-sm text-gray-500 uppercase tracking-wide">Organizer</p>
+                    <p className="text-gray-700 font-medium">{event.organizer_name}</p>
+                    {event.organizer_handle && (
+                      <p className="text-sm text-gray-500">{event.organizer_handle}</p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 uppercase tracking-wide">Capacity</p>
+                    <p className="text-gray-700 font-medium">{event.capacity || 'Unlimited'}</p>
+                    {event.registration_count && (
+                      <p className="text-sm text-gray-500">{event.registration_count} registered</p>
+                    )}
+                  </div>
+                  {event.organizer_email && (
+                    <div>
+                      <p className="text-sm text-gray-500 uppercase tracking-wide">Contact</p>
+                      <p className="text-gray-700 font-medium">{event.organizer_email}</p>
+                    </div>
+                  )}
+                  {event.website_url && (
+                    <div>
+                      <p className="text-sm text-gray-500 uppercase tracking-wide">Website</p>
+                      <a href={event.website_url} className="text-black hover:underline font-medium" target="_blank" rel="noopener noreferrer">
+                        Visit website
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Social Media Links */}
+              {(event.facebook_url || event.twitter_url || event.instagram_url) && (
+                <div className="pt-6 border-t border-gray-200">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Follow Event</h3>
+                  <div className="flex space-x-4">
+                    {event.facebook_url && (
+                      <a href={event.facebook_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                        <span className="sr-only">Facebook</span>
+                        <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                        </svg>
+                      </a>
+                    )}
+                    {event.twitter_url && (
+                      <a href={event.twitter_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-600">
+                        <span className="sr-only">Twitter</span>
+                        <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+                        </svg>
+                      </a>
+                    )}
+                    {event.instagram_url && (
+                      <a href={event.instagram_url} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-800">
+                        <span className="sr-only">Instagram</span>
+                        <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987 6.62 0 11.987-5.367 11.987-11.987C24.014 5.367 18.637.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.198 14.895 3.708 13.744 3.708 12.447s.49-2.448 1.418-3.323c.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.928.875 1.418 2.026 1.418 3.323s-.49 2.448-1.418 3.244c-.875.807-2.026 1.297-3.323 1.297zm7.83-9.281h-1.297v1.297h1.297V7.707zm-5.533 1.297c.807 0 1.418.611 1.418 1.418s-.611 1.418-1.418 1.418-1.418-.611-1.418-1.418.611-1.418 1.418-1.418zm5.533 2.715H8.449c-2.715 0-4.933 2.218-4.933 4.933s2.218 4.933 4.933 4.933h7.83c2.715 0 4.933-2.218 4.933-4.933s-2.218-4.933-4.933-4.933z" />
+                        </svg>
+                      </a>
+                    )}
                   </div>
                 </div>
-              );
-            }
+              )}
 
-            const allEventsForMap = getAllEventsForMap(event);
-            
-            return (
-              <InteractiveEventsMap
-                events={allEventsForMap}
-                selectedEventId={event.id}
-                height="700px"
-                showExpandButton={true}
-                onExpand={() => {
-                  setMapEvents(allEventsForMap);
-                  setSelectedEventForMap(event.id);
-                  setMapModalOpen(true);
-                }}
-              />
-            );
-          })()}
-        </div>
-        
-        <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm text-gray-600">
-            <Maximize2 className="w-4 h-4 inline mr-1 text-black" /> 
-            Click <strong className="text-black">"Expand Map"</strong> button to view in fullscreen mode
-          </p>
-          <p className="text-sm text-gray-500">
-            Total events on map: <strong>{getAllEventsForMap(event).length}</strong>
-          </p>
-        </div>
-      </div>
-    </div>
+              <div className="pt-6 space-y-3">
+                {/* Capacity / Sold Out Indicator */}
+                {event.max_capacity && event.max_capacity > 0 && (
+                  <div className={`flex items-center justify-between p-3 rounded-lg ${(event.current_registrations || 0) >= event.max_capacity
+                    ? 'bg-red-50 border border-red-200'
+                    : (event.max_capacity - (event.current_registrations || 0)) <= 10
+                      ? 'bg-orange-50 border border-orange-200'
+                      : 'bg-blue-50 border border-blue-200'
+                    }`}>
+                    <span className="text-sm font-medium">
+                      {(event.current_registrations || 0) >= event.max_capacity
+                        ? '🔴 Sold Out'
+                        : `🎟️ ${event.max_capacity - (event.current_registrations || 0)} spots left`
+                      }
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {event.current_registrations || 0}/{event.max_capacity} registered
+                    </span>
+                  </div>
+                )}
 
-    {/* Reopen container for other content if needed */}
-    <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden" style={{ marginTop: 0 }}>
-    </div>
+                {event.is_free ? (
+                  <Button
+                    className="w-full text-white font-semibold py-4 px-6 rounded-lg text-lg bg-green-600 hover:bg-green-700"
+                    onClick={() => {
+                      setTicketModalEvent(event);
+                      setTicketModalOpen(true);
+                    }}
+                    disabled={event.max_capacity ? (event.current_registrations || 0) >= event.max_capacity : false}
+                  >
+                    {event.max_capacity && (event.current_registrations || 0) >= event.max_capacity ? 'Sold Out' : 'Register — Free Event'}
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <Button
+                      className="w-full text-white font-semibold py-4 px-6 rounded-lg text-lg bg-black hover:opacity-80 transition-opacity"
+                      onClick={() => {
+                        setTicketModalEvent(event);
+                        setTicketModalOpen(true);
+                      }}
+                      disabled={event.max_capacity ? (event.current_registrations || 0) >= event.max_capacity : false}
+                    >
+                      {event.max_capacity && (event.current_registrations || 0) >= event.max_capacity ? 'Sold Out' : 'Buy Tickets'}
+                    </Button>
+                    <p className="text-sm text-gray-600 text-center">
+                      {event.entry_fee && event.currency ? `Price: ${event.currency} ${event.entry_fee}` : 'Paid Event'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+
+          {/* Break out of container for full-width map */}
+        </div>
+
+        {/* Full-width Interactive Map Section - Outside the constrained container */}
+        <div className="w-full bg-gray-50 py-8 mt-8">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-3xl font-bold text-gray-900">📍 Event Location & All Events Map</h3>
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="flex items-center">
+                    <span className="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
+                    <span className="font-medium">This Event</span>
+                  </span>
+                  <span className="flex items-center">
+                    <span className="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
+                    <span className="font-medium">Other Events</span>
+                  </span>
+                </div>
+              </div>
+              <p className="text-gray-600">
+                Explore this event's location and discover {getAllEventsForMap(event).length - 1} other events happening around the world
+              </p>
+            </div>
+
+            <div className="rounded-xl overflow-hidden border-2 border-gray-300 shadow-2xl bg-white">
+              {(() => {
+                const hasCoords = (typeof event.venue_latitude === 'number' && typeof event.venue_longitude === 'number') ||
+                  (typeof event.latitude === 'number' && typeof event.longitude === 'number');
+
+                if (!hasCoords) {
+                  return (
+                    <div className="w-full h-[600px] bg-gray-100 flex items-center justify-center">
+                      <div className="text-center">
+                        <MapPin className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-lg text-gray-600 font-medium">Location coordinates not available</p>
+                        <p className="text-sm text-gray-500 mt-2">Map cannot be displayed without coordinates</p>
+                      </div>
+                    </div>
+                  );
+                }
+
+                const allEventsForMap = getAllEventsForMap(event);
+
+                return (
+                  <InteractiveEventsMap
+                    events={allEventsForMap}
+                    selectedEventId={event.id}
+                    height="700px"
+                    showExpandButton={true}
+                    onExpand={() => {
+                      setMapEvents(allEventsForMap);
+                      setSelectedEventForMap(event.id);
+                      setMapModalOpen(true);
+                    }}
+                  />
+                );
+              })()}
+            </div>
+
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-sm text-gray-600">
+                <Maximize2 className="w-4 h-4 inline mr-1 text-black" />
+                Click <strong className="text-black">"Expand Map"</strong> button to view in fullscreen mode
+              </p>
+              <p className="text-sm text-gray-500">
+                Total events on map: <strong>{getAllEventsForMap(event).length}</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Reopen container for other content if needed */}
+        <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden" style={{ marginTop: 0 }}>
+        </div>
 
         {isLightboxVisible && (
-          <div 
+          <div
             className={`fixed inset-0 z-50 bg-black/95 backdrop-blur-[1px] flex items-center justify-center transition-opacity duration-300 ${isLightboxEntered ? 'opacity-100' : 'opacity-0'}`}
             onClick={closeLightbox}
             onTouchStart={(e) => setTouchStartX(e.changedTouches[0]?.clientX ?? null)}
@@ -795,7 +823,7 @@ export const EventsPage = () => {
                 </button>
               </>
             )}
-            <div 
+            <div
               className={`max-h-[95vh] max-w-[95vw] p-2 transition-all duration-300 ease-out ${isLightboxEntered ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
               onClick={(e) => e.stopPropagation()}
             >
@@ -815,14 +843,14 @@ export const EventsPage = () => {
         {/* Similar Events Recommendations */}
         {(() => {
           const similarEvents = events
-            .filter(e => 
-              e.id !== event.id && 
+            .filter(e =>
+              e.id !== event.id &&
               (e.category === event.category || e.category_name === event.category_name)
             )
             .slice(0, 3);
-          
+
           if (similarEvents.length === 0) return null;
-          
+
           return (
             <div className="mt-12 pt-8 border-t border-gray-200">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Similar Events</h3>
@@ -865,8 +893,8 @@ export const EventsPage = () => {
             </div>
           );
         })()}
-  </div>
-);
+      </div>
+    );
   };
 
   if (selectedEvent) {
@@ -914,10 +942,10 @@ export const EventsPage = () => {
               <span className="text-lg font-bold text-gray-900">Filters & Search</span>
               <Filter className={`w-5 h-5 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
             </button>
-            
+
             {/* Desktop: Always show title */}
             <h2 className="hidden lg:block text-3xl font-bold text-gray-900 mb-8">Filters</h2>
-            
+
             {/* Filters Content - Collapsible on mobile, always visible on desktop */}
             <div className={`space-y-6 ${showFilters ? 'block' : 'hidden lg:block'}`}>
               {/* Search */}
@@ -940,11 +968,10 @@ export const EventsPage = () => {
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setSelectedCategory('all')}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                      selectedCategory === 'all'
-                        ? 'bg-black text-white shadow-md'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === 'all'
+                      ? 'bg-black text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
                   >
                     All Categories
                   </button>
@@ -952,11 +979,10 @@ export const EventsPage = () => {
                     <button
                       key={category.id}
                       onClick={() => setSelectedCategory(category.slug)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                        selectedCategory === category.slug
-                          ? 'bg-black text-white shadow-md'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === category.slug
+                        ? 'bg-black text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
                     >
                       {category.name}
                     </button>
@@ -1069,61 +1095,55 @@ export const EventsPage = () => {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setTimeFilter('all')}
-                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                    timeFilter === 'all'
-                      ? 'bg-black text-white shadow-lg'
-                      : 'bg-gray-800 text-white hover:bg-gray-700'
-                  }`}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${timeFilter === 'all'
+                    ? 'bg-black text-white shadow-lg'
+                    : 'bg-gray-800 text-white hover:bg-gray-700'
+                    }`}
                 >
                   All Events
                 </button>
                 <button
                   onClick={() => setTimeFilter('active')}
-                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                    timeFilter === 'active'
-                      ? 'bg-black text-white shadow-lg'
-                      : 'bg-gray-800 text-white hover:bg-gray-700'
-                  }`}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${timeFilter === 'active'
+                    ? 'bg-black text-white shadow-lg'
+                    : 'bg-gray-800 text-white hover:bg-gray-700'
+                    }`}
                 >
                   Active
                 </button>
                 <button
                   onClick={() => setTimeFilter('happening')}
-                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                    timeFilter === 'happening'
-                      ? 'bg-black text-white shadow-lg'
-                      : 'bg-gray-800 text-white hover:bg-gray-700'
-                  }`}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${timeFilter === 'happening'
+                    ? 'bg-black text-white shadow-lg'
+                    : 'bg-gray-800 text-white hover:bg-gray-700'
+                    }`}
                 >
                   Happening
                 </button>
                 <button
                   onClick={() => setTimeFilter('today')}
-                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                    timeFilter === 'today'
-                      ? 'bg-black text-white shadow-lg'
-                      : 'bg-gray-800 text-white hover:bg-gray-700'
-                  }`}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${timeFilter === 'today'
+                    ? 'bg-black text-white shadow-lg'
+                    : 'bg-gray-800 text-white hover:bg-gray-700'
+                    }`}
                 >
                   Today
                 </button>
                 <button
                   onClick={() => setTimeFilter('tomorrow')}
-                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                    timeFilter === 'tomorrow'
-                      ? 'bg-black text-white shadow-lg'
-                      : 'bg-gray-800 text-white hover:bg-gray-700'
-                  }`}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${timeFilter === 'tomorrow'
+                    ? 'bg-black text-white shadow-lg'
+                    : 'bg-gray-800 text-white hover:bg-gray-700'
+                    }`}
                 >
                   Tomorrow
                 </button>
                 <button
                   onClick={() => setTimeFilter('weekend')}
-                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                    timeFilter === 'weekend'
-                      ? 'bg-black text-white shadow-lg'
-                      : 'bg-gray-800 text-white hover:bg-gray-700'
-                  }`}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${timeFilter === 'weekend'
+                    ? 'bg-black text-white shadow-lg'
+                    : 'bg-gray-800 text-white hover:bg-gray-700'
+                    }`}
                 >
                   Weekend
                 </button>
@@ -1161,363 +1181,360 @@ export const EventsPage = () => {
                 </Button>
               </div>
             </div>
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading events...</p>
-        </div>
-        ) : (
-          <>
-            {/* View Toggle */}
-            <div className="flex justify-end mb-6">
-              <div className="flex gap-2 bg-white rounded-lg p-1 shadow-sm">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-orange-500 text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                  Grid
-                </button>
-                <button
-                  onClick={() => setViewMode('calendar')}
-                  className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${
-                    viewMode === 'calendar'
-                      ? 'bg-orange-500 text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <CalendarDays className="w-4 h-4" />
-                  Calendar
-                </button>
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading events...</p>
               </div>
-            </div>
-
-            {viewMode === 'grid' ? (
+            ) : (
               <>
-              {sortedEvents.length > 0 ? (
-              <>
-            {/* Active Events Section */}
-            {allActiveEvents.length > 0 && (
-                    <div className="mb-12">
-                      <div className="mb-6">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                          Active Events
-                        </h2>
-                        <p className="text-gray-600">
-                          Showing {activeEventsStartIndex + 1}-{Math.min(activeEventsStartIndex + eventsPerSection, allActiveEvents.length)} of {allActiveEvents.length} upcoming and ongoing events
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {activeEvents.map((event, index) => (
-                          <div
-                            key={event.id}
-                            onClick={() => handleViewEvent(event)}
-                            className="cursor-pointer"
-                          >
-                            <EventCard
-                              id={event.id}
-                              title={event.title}
-                              date={formatEventDate(event.start_date, event.end_date)}
-                              time={formatEventTime(event.start_date, event.end_date)}
-                              location={event.city_name ? `${event.city_name}, ${event.country_name}` : event.venue_address || ''}
-                              imageUrl={event.event_image_url || ''}
-                              category={event.category_name || event.category}
-                              hashtags={event.tags || []}
-                              latitude={event.latitude}
-                              longitude={event.longitude}
-                              city={event.city_name}
-                              startDate={event.start_date}
-                              endDate={event.end_date}
-                              isFree={event.is_free}
-                              entryFee={event.entry_fee}
-                              currency={event.currency}
-                              onViewEvent={(id) => {
-                                const eventToView = events.find(e => e.id === id);
-                                if (eventToView) {
-                                  handleViewEvent(eventToView);
-                                }
-                              }}
-                              onLocationClick={handleLocationClick}
-                            />
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Active Events Pagination */}
-                      {activeEventsTotalPages > 1 && (
-                        <div className="flex justify-center items-center mt-8 space-x-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setActiveEventsPage(prev => Math.max(prev - 1, 1))}
-                            disabled={activeEventsPage === 1}
-                            className="px-4 py-2"
-                          >
-                            <ChevronLeft className="w-4 h-4 mr-1" />
-                            Previous
-                          </Button>
-                          
-                          <div className="flex space-x-1">
-                            {Array.from({ length: Math.min(activeEventsTotalPages, 5) }, (_, i) => {
-                              let pageNum;
-                              if (activeEventsTotalPages <= 5) {
-                                pageNum = i + 1;
-                              } else if (activeEventsPage <= 3) {
-                                pageNum = i + 1;
-                              } else if (activeEventsPage >= activeEventsTotalPages - 2) {
-                                pageNum = activeEventsTotalPages - 4 + i;
-                              } else {
-                                pageNum = activeEventsPage - 2 + i;
-                              }
-                              return (
-                                <Button
-                                  key={pageNum}
-                                  variant={activeEventsPage === pageNum ? "default" : "outline"}
-                                  onClick={() => setActiveEventsPage(pageNum)}
-                                  className="w-10 h-10"
-                                >
-                                  {pageNum}
-                                </Button>
-                              );
-                            })}
-                          </div>
-                          
-                          <Button
-                            variant="outline"
-                            onClick={() => setActiveEventsPage(prev => Math.min(prev + 1, activeEventsTotalPages))}
-                            disabled={activeEventsPage === activeEventsTotalPages}
-                            className="px-4 py-2"
-                          >
-                            Next
-                            <ChevronRight className="w-4 h-4 ml-1" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Past Events Section */}
-                  {allPastEvents.length > 0 && (
-                    <div className="mb-12">
-                      <div className="mb-6">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                          Past Events
-                        </h2>
-                        <p className="text-gray-600">
-                          Showing {pastEventsStartIndex + 1}-{Math.min(pastEventsStartIndex + eventsPerSection, allPastEvents.length)} of {allPastEvents.length} past events
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {pastEvents.map((event, index) => (
-                          <div
-                            key={event.id}
-                            onClick={() => handleViewEvent(event)}
-                            className="cursor-pointer"
-                          >
-                            <EventCard
-                              id={event.id}
-                              title={event.title}
-                              date={formatEventDate(event.start_date, event.end_date)}
-                              time={formatEventTime(event.start_date, event.end_date)}
-                              location={event.city_name ? `${event.city_name}, ${event.country_name}` : event.venue_address || ''}
-                              imageUrl={event.event_image_url || ''}
-                              category={event.category_name || event.category}
-                              hashtags={event.tags || []}
-                              latitude={event.latitude}
-                              longitude={event.longitude}
-                              city={event.city_name}
-                              startDate={event.start_date}
-                              endDate={event.end_date}
-                              isFree={event.is_free}
-                              entryFee={event.entry_fee}
-                              currency={event.currency}
-                              galleryImages={event.event_images}
-                              isPastEvent={true}
-                              onViewEvent={(id) => {
-                                const eventToView = events.find(e => e.id === id);
-                                if (eventToView) {
-                                  handleViewEvent(eventToView);
-                                }
-                              }}
-                              onLocationClick={handleLocationClick}
-                              onViewGallery={handleViewGallery}
-                            />
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Past Events Pagination */}
-                      {pastEventsTotalPages > 1 && (
-                        <div className="flex justify-center items-center mt-8 space-x-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setPastEventsPage(prev => Math.max(prev - 1, 1))}
-                            disabled={pastEventsPage === 1}
-                            className="px-4 py-2"
-                          >
-                            <ChevronLeft className="w-4 h-4 mr-1" />
-                            Previous
-                          </Button>
-                          
-                          <div className="flex space-x-1">
-                            {Array.from({ length: Math.min(pastEventsTotalPages, 5) }, (_, i) => {
-                              let pageNum;
-                              if (pastEventsTotalPages <= 5) {
-                                pageNum = i + 1;
-                              } else if (pastEventsPage <= 3) {
-                                pageNum = i + 1;
-                              } else if (pastEventsPage >= pastEventsTotalPages - 2) {
-                                pageNum = pastEventsTotalPages - 4 + i;
-                              } else {
-                                pageNum = pastEventsPage - 2 + i;
-                              }
-                              return (
-                                <Button
-                                  key={pageNum}
-                                  variant={pastEventsPage === pageNum ? "default" : "outline"}
-                                  onClick={() => setPastEventsPage(pageNum)}
-                                  className="w-10 h-10"
-                                >
-                                  {pageNum}
-                                </Button>
-                              );
-                            })}
-                          </div>
-                          
-                          <Button
-                            variant="outline"
-                            onClick={() => setPastEventsPage(prev => Math.min(prev + 1, pastEventsTotalPages))}
-                            disabled={pastEventsPage === pastEventsTotalPages}
-                            className="px-4 py-2"
-                          >
-                            Next
-                            <ChevronRight className="w-4 h-4 ml-1" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-              
-                          </>
-          ) : (
-            <div className="text-center py-12">
-            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No events found</h3>
-            <p className="text-gray-600 mb-6">
-              {searchQuery || selectedCategory !== 'all' || startDate || endDate
-                ? 'Try adjusting your search criteria or filters.'
-                : 'Check back later for upcoming events.'}
-            </p>
-            {(searchQuery || selectedCategory !== 'all' || startDate || endDate) && (
-              <Button
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('all');
-                  setStartDate('');
-                  setEndDate('');
-                }}
-                variant="outline"
-              >
-                Clear Filters
-              </Button>
-            )}
-            </div>
-          )}
-          </>
-        ) : (
-          /* Calendar View */
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Calendar View</h2>
-                <div className="grid grid-cols-7 gap-2">
-                  {/* Calendar implementation - showing events by date */}
-                  {(() => {
-                    const today = new Date();
-                    const currentMonth = today.getMonth();
-                    const currentYear = today.getFullYear();
-                    const firstDay = new Date(currentYear, currentMonth, 1);
-                    const lastDay = new Date(currentYear, currentMonth + 1, 0);
-                    const daysInMonth = lastDay.getDate();
-                    const startingDayOfWeek = firstDay.getDay();
-                    
-                    const days = [];
-                    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                    
-                    // Day headers
-                    dayNames.forEach(day => {
-                      days.push(
-                        <div key={`header-${day}`} className="text-center font-semibold text-gray-700 py-2">
-                          {day}
-                        </div>
-                      );
-                    });
-                    
-                    // Empty cells before first day
-                    for (let i = 0; i < startingDayOfWeek; i++) {
-                      days.push(<div key={`empty-${i}`} className="p-2"></div>);
-                    }
-                    
-                    // Days of month
-                    for (let day = 1; day <= daysInMonth; day++) {
-                      const date = new Date(currentYear, currentMonth, day);
-                      const dateStr = date.toISOString().split('T')[0];
-                      const dayEvents = sortedEvents.filter(e => {
-                        const eventDateStr = typeof e.start_date === 'string' 
-                          ? e.start_date.split('T')[0]
-                          : (parseDate(String(e.start_date))?.toISOString().split('T')[0] ?? '');
-                        return eventDateStr === dateStr;
-                      });
-                      
-                      days.push(
-                        <div
-                          key={day}
-                          className={`p-2 min-h-[100px] border rounded-lg ${
-                            day === today.getDate() && currentMonth === today.getMonth()
-                              ? 'bg-orange-50 border-orange-500'
-                              : 'border-gray-200'
-                          }`}
-                        >
-                          <div className="font-semibold text-sm text-gray-700 mb-1">{day}</div>
-                          {dayEvents.slice(0, 2).map(event => (
-                            <div
-                              key={event.id}
-                              onClick={() => handleViewEvent(event)}
-                              className="text-xs bg-black text-white p-1 rounded mb-1 cursor-pointer hover:bg-black/80 truncate"
-                              title={event.title}
-                            >
-                              {event.title}
-                            </div>
-                          ))}
-                          {dayEvents.length > 2 && (
-                            <div className="text-xs text-gray-500">+{dayEvents.length - 2} more</div>
-                          )}
-                        </div>
-                      );
-                    }
-                    
-                    return days;
-                  })()}
+                {/* View Toggle */}
+                <div className="flex justify-end mb-6">
+                  <div className="flex gap-2 bg-white rounded-lg p-1 shadow-sm">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${viewMode === 'grid'
+                        ? 'bg-orange-500 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                    >
+                      <LayoutGrid className="w-4 h-4" />
+                      Grid
+                    </button>
+                    <button
+                      onClick={() => setViewMode('calendar')}
+                      className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${viewMode === 'calendar'
+                        ? 'bg-orange-500 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                    >
+                      <CalendarDays className="w-4 h-4" />
+                      Calendar
+                    </button>
+                  </div>
                 </div>
-              </div>
+
+                {viewMode === 'grid' ? (
+                  <>
+                    {sortedEvents.length > 0 ? (
+                      <>
+                        {/* Active Events Section */}
+                        {allActiveEvents.length > 0 && (
+                          <div className="mb-12">
+                            <div className="mb-6">
+                              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                                Active Events
+                              </h2>
+                              <p className="text-gray-600">
+                                Showing {activeEventsStartIndex + 1}-{Math.min(activeEventsStartIndex + eventsPerSection, allActiveEvents.length)} of {allActiveEvents.length} upcoming and ongoing events
+                              </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                              {activeEvents.map((event, index) => (
+                                <div
+                                  key={event.id}
+                                  onClick={() => handleViewEvent(event)}
+                                  className="cursor-pointer"
+                                >
+                                  <EventCard
+                                    id={event.id}
+                                    title={event.title}
+                                    date={formatEventDate(event.start_date, event.end_date)}
+                                    time={formatEventTime(event.start_date, event.end_date)}
+                                    location={event.city_name ? `${event.city_name}, ${event.country_name}` : event.venue_address || ''}
+                                    imageUrl={event.event_image_url || ''}
+                                    category={event.category_name || event.category}
+                                    hashtags={event.tags || []}
+                                    latitude={event.latitude}
+                                    longitude={event.longitude}
+                                    city={event.city_name}
+                                    startDate={event.start_date}
+                                    endDate={event.end_date}
+                                    isFree={event.is_free}
+                                    entryFee={event.entry_fee}
+                                    currency={event.currency}
+                                    onViewEvent={(id) => {
+                                      const eventToView = events.find(e => e.id === id);
+                                      if (eventToView) {
+                                        handleViewEvent(eventToView);
+                                      }
+                                    }}
+                                    onLocationClick={handleLocationClick}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Active Events Pagination */}
+                            {activeEventsTotalPages > 1 && (
+                              <div className="flex justify-center items-center mt-8 space-x-2">
+                                <Button
+                                  variant="outline"
+                                  onClick={() => setActiveEventsPage(prev => Math.max(prev - 1, 1))}
+                                  disabled={activeEventsPage === 1}
+                                  className="px-4 py-2"
+                                >
+                                  <ChevronLeft className="w-4 h-4 mr-1" />
+                                  Previous
+                                </Button>
+
+                                <div className="flex space-x-1">
+                                  {Array.from({ length: Math.min(activeEventsTotalPages, 5) }, (_, i) => {
+                                    let pageNum;
+                                    if (activeEventsTotalPages <= 5) {
+                                      pageNum = i + 1;
+                                    } else if (activeEventsPage <= 3) {
+                                      pageNum = i + 1;
+                                    } else if (activeEventsPage >= activeEventsTotalPages - 2) {
+                                      pageNum = activeEventsTotalPages - 4 + i;
+                                    } else {
+                                      pageNum = activeEventsPage - 2 + i;
+                                    }
+                                    return (
+                                      <Button
+                                        key={pageNum}
+                                        variant={activeEventsPage === pageNum ? "default" : "outline"}
+                                        onClick={() => setActiveEventsPage(pageNum)}
+                                        className="w-10 h-10"
+                                      >
+                                        {pageNum}
+                                      </Button>
+                                    );
+                                  })}
+                                </div>
+
+                                <Button
+                                  variant="outline"
+                                  onClick={() => setActiveEventsPage(prev => Math.min(prev + 1, activeEventsTotalPages))}
+                                  disabled={activeEventsPage === activeEventsTotalPages}
+                                  className="px-4 py-2"
+                                >
+                                  Next
+                                  <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Past Events Section */}
+                        {allPastEvents.length > 0 && (
+                          <div className="mb-12">
+                            <div className="mb-6">
+                              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                                Past Events
+                              </h2>
+                              <p className="text-gray-600">
+                                Showing {pastEventsStartIndex + 1}-{Math.min(pastEventsStartIndex + eventsPerSection, allPastEvents.length)} of {allPastEvents.length} past events
+                              </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                              {pastEvents.map((event, index) => (
+                                <div
+                                  key={event.id}
+                                  onClick={() => handleViewEvent(event)}
+                                  className="cursor-pointer"
+                                >
+                                  <EventCard
+                                    id={event.id}
+                                    title={event.title}
+                                    date={formatEventDate(event.start_date, event.end_date)}
+                                    time={formatEventTime(event.start_date, event.end_date)}
+                                    location={event.city_name ? `${event.city_name}, ${event.country_name}` : event.venue_address || ''}
+                                    imageUrl={event.event_image_url || ''}
+                                    category={event.category_name || event.category}
+                                    hashtags={event.tags || []}
+                                    latitude={event.latitude}
+                                    longitude={event.longitude}
+                                    city={event.city_name}
+                                    startDate={event.start_date}
+                                    endDate={event.end_date}
+                                    isFree={event.is_free}
+                                    entryFee={event.entry_fee}
+                                    currency={event.currency}
+                                    galleryImages={event.event_images}
+                                    isPastEvent={true}
+                                    onViewEvent={(id) => {
+                                      const eventToView = events.find(e => e.id === id);
+                                      if (eventToView) {
+                                        handleViewEvent(eventToView);
+                                      }
+                                    }}
+                                    onLocationClick={handleLocationClick}
+                                    onViewGallery={handleViewGallery}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Past Events Pagination */}
+                            {pastEventsTotalPages > 1 && (
+                              <div className="flex justify-center items-center mt-8 space-x-2">
+                                <Button
+                                  variant="outline"
+                                  onClick={() => setPastEventsPage(prev => Math.max(prev - 1, 1))}
+                                  disabled={pastEventsPage === 1}
+                                  className="px-4 py-2"
+                                >
+                                  <ChevronLeft className="w-4 h-4 mr-1" />
+                                  Previous
+                                </Button>
+
+                                <div className="flex space-x-1">
+                                  {Array.from({ length: Math.min(pastEventsTotalPages, 5) }, (_, i) => {
+                                    let pageNum;
+                                    if (pastEventsTotalPages <= 5) {
+                                      pageNum = i + 1;
+                                    } else if (pastEventsPage <= 3) {
+                                      pageNum = i + 1;
+                                    } else if (pastEventsPage >= pastEventsTotalPages - 2) {
+                                      pageNum = pastEventsTotalPages - 4 + i;
+                                    } else {
+                                      pageNum = pastEventsPage - 2 + i;
+                                    }
+                                    return (
+                                      <Button
+                                        key={pageNum}
+                                        variant={pastEventsPage === pageNum ? "default" : "outline"}
+                                        onClick={() => setPastEventsPage(pageNum)}
+                                        className="w-10 h-10"
+                                      >
+                                        {pageNum}
+                                      </Button>
+                                    );
+                                  })}
+                                </div>
+
+                                <Button
+                                  variant="outline"
+                                  onClick={() => setPastEventsPage(prev => Math.min(prev + 1, pastEventsTotalPages))}
+                                  disabled={pastEventsPage === pastEventsTotalPages}
+                                  className="px-4 py-2"
+                                >
+                                  Next
+                                  <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+
+                      </>
+                    ) : (
+                      <div className="text-center py-12">
+                        <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No events found</h3>
+                        <p className="text-gray-600 mb-6">
+                          {searchQuery || selectedCategory !== 'all' || startDate || endDate
+                            ? 'Try adjusting your search criteria or filters.'
+                            : 'Check back later for upcoming events.'}
+                        </p>
+                        {(searchQuery || selectedCategory !== 'all' || startDate || endDate) && (
+                          <Button
+                            onClick={() => {
+                              setSearchQuery('');
+                              setSelectedCategory('all');
+                              setStartDate('');
+                              setEndDate('');
+                            }}
+                            variant="outline"
+                          >
+                            Clear Filters
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  /* Calendar View */
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Calendar View</h2>
+                    <div className="grid grid-cols-7 gap-2">
+                      {/* Calendar implementation - showing events by date */}
+                      {(() => {
+                        const today = new Date();
+                        const currentMonth = today.getMonth();
+                        const currentYear = today.getFullYear();
+                        const firstDay = new Date(currentYear, currentMonth, 1);
+                        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+                        const daysInMonth = lastDay.getDate();
+                        const startingDayOfWeek = firstDay.getDay();
+
+                        const days = [];
+                        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+                        // Day headers
+                        dayNames.forEach(day => {
+                          days.push(
+                            <div key={`header-${day}`} className="text-center font-semibold text-gray-700 py-2">
+                              {day}
+                            </div>
+                          );
+                        });
+
+                        // Empty cells before first day
+                        for (let i = 0; i < startingDayOfWeek; i++) {
+                          days.push(<div key={`empty-${i}`} className="p-2"></div>);
+                        }
+
+                        // Days of month
+                        for (let day = 1; day <= daysInMonth; day++) {
+                          const date = new Date(currentYear, currentMonth, day);
+                          const dateStr = date.toISOString().split('T')[0];
+                          const dayEvents = sortedEvents.filter(e => {
+                            const eventDateStr = typeof e.start_date === 'string'
+                              ? e.start_date.split('T')[0]
+                              : (parseDate(String(e.start_date))?.toISOString().split('T')[0] ?? '');
+                            return eventDateStr === dateStr;
+                          });
+
+                          days.push(
+                            <div
+                              key={day}
+                              className={`p-2 min-h-[100px] border rounded-lg ${day === today.getDate() && currentMonth === today.getMonth()
+                                ? 'bg-orange-50 border-orange-500'
+                                : 'border-gray-200'
+                                }`}
+                            >
+                              <div className="font-semibold text-sm text-gray-700 mb-1">{day}</div>
+                              {dayEvents.slice(0, 2).map(event => (
+                                <div
+                                  key={event.id}
+                                  onClick={() => handleViewEvent(event)}
+                                  className="text-xs bg-black text-white p-1 rounded mb-1 cursor-pointer hover:bg-black/80 truncate"
+                                  title={event.title}
+                                >
+                                  {event.title}
+                                </div>
+                              ))}
+                              {dayEvents.length > 2 && (
+                                <div className="text-xs text-gray-500">+{dayEvents.length - 2} more</div>
+                              )}
+                            </div>
+                          );
+                        }
+
+                        return days;
+                      })()}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
-        </div>
+          </div>
         </main>
       </div>
-      
+
       {/* Bottom Banner Ad */}
       <div className="relative z-10">
         <BottomBannerAd />
       </div>
 
       <Footer />
-      
+
       {/* Fullscreen Map Modal */}
       <FullscreenMapModal
         isOpen={mapModalOpen}
@@ -1540,9 +1557,21 @@ export const EventsPage = () => {
           eventDate={selectedGalleryEvent.start_date}
         />
       )}
-      
+
       <BottomBannerAd />
       <Footer />
+
+      {/* Ticket Purchase Modal */}
+      {ticketModalEvent && (
+        <TicketPurchaseModal
+          isOpen={ticketModalOpen}
+          onClose={() => {
+            setTicketModalOpen(false);
+            setTicketModalEvent(null);
+          }}
+          event={ticketModalEvent}
+        />
+      )}
     </div>
   );
 };

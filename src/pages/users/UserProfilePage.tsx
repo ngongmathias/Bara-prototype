@@ -5,14 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Building, 
-  Star, 
-  Shield, 
-  CheckCircle, 
+import {
+  User,
+  Mail,
+  Phone,
+  Building,
+  Star,
+  Shield,
+  CheckCircle,
   AlertCircle,
   Save,
   Camera
@@ -21,6 +21,18 @@ import { useUser } from '@clerk/clerk-react';
 import { useToast } from '@/hooks/use-toast';
 import { VerificationBadge, VerificationStatus } from '@/components/ui/verification-badge';
 import { EventsService } from '@/lib/eventsService';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from 'lucide-react';
 
 export const UserProfilePage = () => {
   const { user, isLoaded } = useUser();
@@ -35,6 +47,7 @@ export const UserProfilePage = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [businessWebsite, setBusinessWebsite] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Load verification status
   useEffect(() => {
@@ -94,9 +107,9 @@ export const UserProfilePage = () => {
     }
 
     try {
-      await EventsService.createUserVerification(user!.id, 'business', { 
+      await EventsService.createUserVerification(user!.id, 'business', {
         business_name: businessName,
-        website: businessWebsite 
+        website: businessWebsite
       });
       setVerificationStatus(prev => ({ ...prev, business: true }));
       toast({
@@ -109,6 +122,24 @@ export const UserProfilePage = () => {
         description: 'Failed to submit business verification. Please try again.',
         variant: 'destructive',
       });
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    setIsDeleting(true);
+    try {
+      await user.delete();
+      // Clerk handles redirect usually, but we can force it
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete account. Please try again.',
+        variant: 'destructive',
+      });
+      setIsDeleting(false);
     }
   };
 
@@ -150,9 +181,9 @@ export const UserProfilePage = () => {
           <div className="flex items-center space-x-6">
             <div className="flex-shrink-0">
               {user.imageUrl ? (
-                <img 
-                  src={user.imageUrl} 
-                  alt={user.fullName || 'User'} 
+                <img
+                  src={user.imageUrl}
+                  alt={user.fullName || 'User'}
                   className="h-20 w-20 rounded-full object-cover border-4 border-blue-100"
                 />
               ) : (
@@ -183,10 +214,10 @@ export const UserProfilePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="firstName">First Name</Label>
-              <Input 
-                id="firstName" 
-                value={user.firstName || ''} 
-                disabled 
+              <Input
+                id="firstName"
+                value={user.firstName || ''}
+                disabled
                 className="bg-gray-50"
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -195,10 +226,10 @@ export const UserProfilePage = () => {
             </div>
             <div>
               <Label htmlFor="lastName">Last Name</Label>
-              <Input 
-                id="lastName" 
-                value={user.lastName || ''} 
-                disabled 
+              <Input
+                id="lastName"
+                value={user.lastName || ''}
+                disabled
                 className="bg-gray-50"
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -209,10 +240,10 @@ export const UserProfilePage = () => {
 
           <div>
             <Label htmlFor="email">Email Address</Label>
-            <Input 
-              id="email" 
-              value={user.primaryEmailAddress?.emailAddress || ''} 
-              disabled 
+            <Input
+              id="email"
+              value={user.primaryEmailAddress?.emailAddress || ''}
+              disabled
               className="bg-gray-50"
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -249,23 +280,19 @@ export const UserProfilePage = () => {
           </div>
 
           {/* Phone Verification */}
-          <div className={`p-4 border rounded-lg ${
-            verificationStatus.phone ? 'bg-green-50' : 'bg-gray-50'
-          }`}>
+          <div className={`p-4 border rounded-lg ${verificationStatus.phone ? 'bg-green-50' : 'bg-gray-50'
+            }`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <Phone className={`h-5 w-5 mr-3 ${
-                  verificationStatus.phone ? 'text-green-600' : 'text-gray-400'
-                }`} />
+                <Phone className={`h-5 w-5 mr-3 ${verificationStatus.phone ? 'text-green-600' : 'text-gray-400'
+                  }`} />
                 <div>
-                  <h4 className={`font-medium ${
-                    verificationStatus.phone ? 'text-green-900' : 'text-gray-900'
-                  }`}>Phone Verification</h4>
-                  <p className={`text-sm ${
-                    verificationStatus.phone ? 'text-green-700' : 'text-gray-600'
-                  }`}>
-                    {verificationStatus.phone 
-                      ? 'Your phone number has been verified' 
+                  <h4 className={`font-medium ${verificationStatus.phone ? 'text-green-900' : 'text-gray-900'
+                    }`}>Phone Verification</h4>
+                  <p className={`text-sm ${verificationStatus.phone ? 'text-green-700' : 'text-gray-600'
+                    }`}>
+                    {verificationStatus.phone
+                      ? 'Your phone number has been verified'
                       : 'Verify your phone number for better security'
                     }
                   </p>
@@ -281,7 +308,7 @@ export const UserProfilePage = () => {
                 </Badge>
               )}
             </div>
-            
+
             {!verificationStatus.phone && (
               <div className="space-y-3">
                 <div>
@@ -302,23 +329,19 @@ export const UserProfilePage = () => {
           </div>
 
           {/* Business Verification */}
-          <div className={`p-4 border rounded-lg ${
-            verificationStatus.business ? 'bg-green-50' : 'bg-gray-50'
-          }`}>
+          <div className={`p-4 border rounded-lg ${verificationStatus.business ? 'bg-green-50' : 'bg-gray-50'
+            }`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <Building className={`h-5 w-5 mr-3 ${
-                  verificationStatus.business ? 'text-green-600' : 'text-gray-400'
-                }`} />
+                <Building className={`h-5 w-5 mr-3 ${verificationStatus.business ? 'text-green-600' : 'text-gray-400'
+                  }`} />
                 <div>
-                  <h4 className={`font-medium ${
-                    verificationStatus.business ? 'text-green-900' : 'text-gray-900'
-                  }`}>Business Verification</h4>
-                  <p className={`text-sm ${
-                    verificationStatus.business ? 'text-green-700' : 'text-gray-600'
-                  }`}>
-                    {verificationStatus.business 
-                      ? 'Your business has been verified' 
+                  <h4 className={`font-medium ${verificationStatus.business ? 'text-green-900' : 'text-gray-900'
+                    }`}>Business Verification</h4>
+                  <p className={`text-sm ${verificationStatus.business ? 'text-green-700' : 'text-gray-600'
+                    }`}>
+                    {verificationStatus.business
+                      ? 'Your business has been verified'
                       : 'Verify your business for professional events'
                     }
                   </p>
@@ -334,7 +357,7 @@ export const UserProfilePage = () => {
                 </Badge>
               )}
             </div>
-            
+
             {!verificationStatus.business && (
               <div className="space-y-3">
                 <div>
@@ -364,23 +387,19 @@ export const UserProfilePage = () => {
           </div>
 
           {/* Trusted Organizer */}
-          <div className={`p-4 border rounded-lg ${
-            verificationStatus.trusted_organizer ? 'bg-yellow-50' : 'bg-gray-50'
-          }`}>
+          <div className={`p-4 border rounded-lg ${verificationStatus.trusted_organizer ? 'bg-yellow-50' : 'bg-gray-50'
+            }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Star className={`h-5 w-5 mr-3 ${
-                  verificationStatus.trusted_organizer ? 'text-yellow-600' : 'text-gray-400'
-                }`} />
+                <Star className={`h-5 w-5 mr-3 ${verificationStatus.trusted_organizer ? 'text-yellow-600' : 'text-gray-400'
+                  }`} />
                 <div>
-                  <h4 className={`font-medium ${
-                    verificationStatus.trusted_organizer ? 'text-yellow-900' : 'text-gray-900'
-                  }`}>Trusted Organizer</h4>
-                  <p className={`text-sm ${
-                    verificationStatus.trusted_organizer ? 'text-yellow-700' : 'text-gray-600'
-                  }`}>
-                    {verificationStatus.trusted_organizer 
-                      ? 'You are a trusted event organizer' 
+                  <h4 className={`font-medium ${verificationStatus.trusted_organizer ? 'text-yellow-900' : 'text-gray-900'
+                    }`}>Trusted Organizer</h4>
+                  <p className={`text-sm ${verificationStatus.trusted_organizer ? 'text-yellow-700' : 'text-gray-600'
+                    }`}>
+                    {verificationStatus.trusted_organizer
+                      ? 'You are a trusted event organizer'
                       : 'Earned after successfully organizing multiple events'
                     }
                   </p>
@@ -401,7 +420,7 @@ export const UserProfilePage = () => {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Note:</strong> Verification requests are reviewed by our team. 
+              <strong>Note:</strong> Verification requests are reviewed by our team.
               Business and trusted organizer verifications may take 2-3 business days to process.
               You'll be notified via email once your verification is approved.
             </AlertDescription>
@@ -423,16 +442,59 @@ export const UserProfilePage = () => {
               Download Event Reports
             </Button>
           </div>
-          
+
           <div className="pt-4 border-t">
             <h4 className="font-medium text-gray-900 mb-2">Need Help?</h4>
             <p className="text-gray-600 text-sm mb-4">
-              If you have questions about verification or need assistance with your account, 
+              If you have questions about verification or need assistance with your account,
               please contact our support team.
             </p>
             <Button variant="outline" size="sm">
               Contact Support
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Danger Zone */}
+      <Card className="border-red-200 bg-red-50">
+        <CardHeader>
+          <CardTitle className="flex items-center text-red-700">
+            <Shield className="mr-2 h-5 w-5" />
+            Danger Zone
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium text-red-900">Delete Account</h3>
+              <p className="text-sm text-red-700 mt-1">
+                Permanently delete your account and all associated data. This action cannot be undone.
+              </p>
+            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Account
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your account
+                    and remove your data from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteAccount} className="bg-red-600 hover:bg-red-700">
+                    {isDeleting ? 'Deleting...' : 'Yes, delete my account'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>

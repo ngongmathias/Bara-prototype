@@ -18,9 +18,9 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
-import { 
-  Upload, 
-  X, 
+import {
+  Upload,
+  X,
   Image as ImageIcon,
   AlertCircle,
   CheckCircle,
@@ -109,11 +109,11 @@ export const PostListing = () => {
       }
 
       setUserId(clerkUser.id);
-      
+
       // Pre-fill user info from Clerk
       const userEmail = clerkUser.primaryEmailAddress?.emailAddress || '';
       const userName = clerkUser.fullName || clerkUser.firstName || userEmail.split('@')[0] || '';
-      
+
       setFormData(prev => ({
         ...prev,
         seller_name: userName,
@@ -133,7 +133,7 @@ export const PostListing = () => {
         .select('*')
         .eq('is_active', true)
         .order('display_order');
-      
+
       setCategories(data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -146,7 +146,7 @@ export const PostListing = () => {
         .from('countries')
         .select('*')
         .order('name');
-      
+
       if (error) throw error;
       setCountries(data || []);
     } catch (error) {
@@ -162,7 +162,7 @@ export const PostListing = () => {
         .eq('category_id', categoryId)
         .eq('is_active', true)
         .order('display_order');
-      
+
       if (error) throw error;
       setSubcategories(data || []);
     } catch (error) {
@@ -173,7 +173,7 @@ export const PostListing = () => {
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    
+
     if (selectedImages.length + files.length > 10) {
       toast({
         title: 'Too Many Images',
@@ -201,7 +201,7 @@ export const PostListing = () => {
   };
 
   const toggleCountrySelection = (countryId: string) => {
-    setSelectedCountries(prev => 
+    setSelectedCountries(prev =>
       prev.includes(countryId)
         ? prev.filter(id => id !== countryId)
         : [...prev, countryId]
@@ -337,7 +337,7 @@ export const PostListing = () => {
 
       // Insert country associations
       const countryInserts = selectedCountries.map(countryId => ({
-        listing_id: listing.id,
+        listing_id: listingData.id,
         country_id: countryId,
       }));
 
@@ -347,12 +347,26 @@ export const PostListing = () => {
 
       if (countriesError) throw countriesError;
 
+      // Send confirmation email
+      await supabase.functions.invoke('send-email', {
+        body: {
+          to: formData.seller_email,
+          subject: 'Marketplace Ad Received - Bara Afrika',
+          type: 'listing_created',
+          data: {
+            userFirstname: formData.seller_name.split(' ')[0],
+            listingTitle: formData.title,
+            listingId: listingData.id,
+          },
+        },
+      });
+
       toast({
         title: 'Success!',
         description: 'Your listing has been submitted for review',
       });
 
-      navigate(`/marketplace/listing/${listing.id}`);
+      navigate(`/marketplace/listing/${listingData.id}`);
     } catch (error) {
       console.error('Error creating listing:', error);
       toast({
@@ -506,9 +520,9 @@ export const PostListing = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Brand/Make</Label>
-                      <Select 
-                        value={attributes.make || ''} 
-                        onValueChange={(value) => setAttributes({...attributes, make: value})}
+                      <Select
+                        value={attributes.make || ''}
+                        onValueChange={(value) => setAttributes({ ...attributes, make: value })}
                       >
                         <SelectTrigger><SelectValue placeholder="Select brand" /></SelectTrigger>
                         <SelectContent>
@@ -540,16 +554,16 @@ export const PostListing = () => {
                       <Label>Model</Label>
                       <Input
                         value={attributes.model || ''}
-                        onChange={(e) => setAttributes({...attributes, model: e.target.value})}
+                        onChange={(e) => setAttributes({ ...attributes, model: e.target.value })}
                         placeholder="e.g., Camry"
                       />
                     </div>
                     <div>
                       <Label>Year</Label>
-                      <Select value={attributes.year || ''} onValueChange={(value) => setAttributes({...attributes, year: value})}>
+                      <Select value={attributes.year || ''} onValueChange={(value) => setAttributes({ ...attributes, year: value })}>
                         <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
                         <SelectContent>
-                          {Array.from({length: 10}, (_, i) => 2024 - i).map(year => (
+                          {Array.from({ length: 10 }, (_, i) => 2024 - i).map(year => (
                             <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
                           ))}
                         </SelectContent>
@@ -557,7 +571,7 @@ export const PostListing = () => {
                     </div>
                     <div>
                       <Label>Body Type</Label>
-                      <Select value={attributes.body_type || ''} onValueChange={(value) => setAttributes({...attributes, body_type: value})}>
+                      <Select value={attributes.body_type || ''} onValueChange={(value) => setAttributes({ ...attributes, body_type: value })}>
                         <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Sedan">Sedan</SelectItem>
@@ -571,7 +585,7 @@ export const PostListing = () => {
                     </div>
                     <div>
                       <Label>Fuel Type</Label>
-                      <Select value={attributes.fuel_type || ''} onValueChange={(value) => setAttributes({...attributes, fuel_type: value})}>
+                      <Select value={attributes.fuel_type || ''} onValueChange={(value) => setAttributes({ ...attributes, fuel_type: value })}>
                         <SelectTrigger><SelectValue placeholder="Select fuel type" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Petrol">Petrol</SelectItem>
@@ -583,7 +597,7 @@ export const PostListing = () => {
                     </div>
                     <div>
                       <Label>Transmission</Label>
-                      <Select value={attributes.transmission || ''} onValueChange={(value) => setAttributes({...attributes, transmission: value})}>
+                      <Select value={attributes.transmission || ''} onValueChange={(value) => setAttributes({ ...attributes, transmission: value })}>
                         <SelectTrigger><SelectValue placeholder="Select transmission" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Automatic">Automatic</SelectItem>
@@ -596,7 +610,7 @@ export const PostListing = () => {
                       <Input
                         type="number"
                         value={attributes.mileage || ''}
-                        onChange={(e) => setAttributes({...attributes, mileage: e.target.value})}
+                        onChange={(e) => setAttributes({ ...attributes, mileage: e.target.value })}
                         placeholder="e.g., 35000"
                       />
                     </div>
@@ -610,7 +624,7 @@ export const PostListing = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Property Type</Label>
-                      <Select value={attributes.property_type || ''} onValueChange={(value) => setAttributes({...attributes, property_type: value})}>
+                      <Select value={attributes.property_type || ''} onValueChange={(value) => setAttributes({ ...attributes, property_type: value })}>
                         <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Apartment">Apartment</SelectItem>
@@ -623,10 +637,10 @@ export const PostListing = () => {
                     </div>
                     <div>
                       <Label>Bedrooms</Label>
-                      <Select value={attributes.bedrooms?.toString() || ''} onValueChange={(value) => setAttributes({...attributes, bedrooms: parseInt(value)})}>
+                      <Select value={attributes.bedrooms?.toString() || ''} onValueChange={(value) => setAttributes({ ...attributes, bedrooms: parseInt(value) })}>
                         <SelectTrigger><SelectValue placeholder="Select bedrooms" /></SelectTrigger>
                         <SelectContent>
-                          {[1,2,3,4,5,6].map(num => (
+                          {[1, 2, 3, 4, 5, 6].map(num => (
                             <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
                           ))}
                         </SelectContent>
@@ -634,10 +648,10 @@ export const PostListing = () => {
                     </div>
                     <div>
                       <Label>Bathrooms</Label>
-                      <Select value={attributes.bathrooms?.toString() || ''} onValueChange={(value) => setAttributes({...attributes, bathrooms: parseInt(value)})}>
+                      <Select value={attributes.bathrooms?.toString() || ''} onValueChange={(value) => setAttributes({ ...attributes, bathrooms: parseInt(value) })}>
                         <SelectTrigger><SelectValue placeholder="Select bathrooms" /></SelectTrigger>
                         <SelectContent>
-                          {[1,2,3,4,5].map(num => (
+                          {[1, 2, 3, 4, 5].map(num => (
                             <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
                           ))}
                         </SelectContent>
@@ -648,13 +662,13 @@ export const PostListing = () => {
                       <Input
                         type="number"
                         value={attributes.area || ''}
-                        onChange={(e) => setAttributes({...attributes, area: e.target.value})}
+                        onChange={(e) => setAttributes({ ...attributes, area: e.target.value })}
                         placeholder="e.g., 120"
                       />
                     </div>
                     <div>
                       <Label>Furnished</Label>
-                      <Select value={attributes.furnished || ''} onValueChange={(value) => setAttributes({...attributes, furnished: value})}>
+                      <Select value={attributes.furnished || ''} onValueChange={(value) => setAttributes({ ...attributes, furnished: value })}>
                         <SelectTrigger><SelectValue placeholder="Select option" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Furnished">Furnished</SelectItem>
@@ -675,13 +689,13 @@ export const PostListing = () => {
                       <Label>Brand</Label>
                       <Input
                         value={attributes.brand || ''}
-                        onChange={(e) => setAttributes({...attributes, brand: e.target.value})}
+                        onChange={(e) => setAttributes({ ...attributes, brand: e.target.value })}
                         placeholder="e.g., Apple, Samsung"
                       />
                     </div>
                     <div>
                       <Label>Warranty</Label>
-                      <Select value={attributes.warranty || ''} onValueChange={(value) => setAttributes({...attributes, warranty: value})}>
+                      <Select value={attributes.warranty || ''} onValueChange={(value) => setAttributes({ ...attributes, warranty: value })}>
                         <SelectTrigger><SelectValue placeholder="Select warranty" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Yes">With Warranty</SelectItem>
@@ -699,7 +713,7 @@ export const PostListing = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Gender</Label>
-                      <Select value={attributes.gender || ''} onValueChange={(value) => setAttributes({...attributes, gender: value})}>
+                      <Select value={attributes.gender || ''} onValueChange={(value) => setAttributes({ ...attributes, gender: value })}>
                         <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Men">Men</SelectItem>
@@ -710,7 +724,7 @@ export const PostListing = () => {
                     </div>
                     <div>
                       <Label>Size</Label>
-                      <Select value={attributes.size || ''} onValueChange={(value) => setAttributes({...attributes, size: value})}>
+                      <Select value={attributes.size || ''} onValueChange={(value) => setAttributes({ ...attributes, size: value })}>
                         <SelectTrigger><SelectValue placeholder="Select size" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="XS">XS</SelectItem>
@@ -732,7 +746,7 @@ export const PostListing = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Job Type</Label>
-                      <Select value={attributes.job_type || ''} onValueChange={(value) => setAttributes({...attributes, job_type: value})}>
+                      <Select value={attributes.job_type || ''} onValueChange={(value) => setAttributes({ ...attributes, job_type: value })}>
                         <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Full-time">Full-time</SelectItem>
@@ -744,7 +758,7 @@ export const PostListing = () => {
                     </div>
                     <div>
                       <Label>Experience Level</Label>
-                      <Select value={attributes.experience_level || ''} onValueChange={(value) => setAttributes({...attributes, experience_level: value})}>
+                      <Select value={attributes.experience_level || ''} onValueChange={(value) => setAttributes({ ...attributes, experience_level: value })}>
                         <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Entry Level">Entry Level</SelectItem>
@@ -756,7 +770,7 @@ export const PostListing = () => {
                     </div>
                     <div>
                       <Label>Work Type</Label>
-                      <Select value={attributes.work_type || ''} onValueChange={(value) => setAttributes({...attributes, work_type: value})}>
+                      <Select value={attributes.work_type || ''} onValueChange={(value) => setAttributes({ ...attributes, work_type: value })}>
                         <SelectTrigger><SelectValue placeholder="Select work type" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Remote">Remote</SelectItem>
@@ -775,7 +789,7 @@ export const PostListing = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Pet Type</Label>
-                      <Select value={attributes.pet_type || ''} onValueChange={(value) => setAttributes({...attributes, pet_type: value})}>
+                      <Select value={attributes.pet_type || ''} onValueChange={(value) => setAttributes({ ...attributes, pet_type: value })}>
                         <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Dog">Dog</SelectItem>
@@ -788,7 +802,7 @@ export const PostListing = () => {
                     </div>
                     <div>
                       <Label>Age</Label>
-                      <Select value={attributes.pet_age || ''} onValueChange={(value) => setAttributes({...attributes, pet_age: value})}>
+                      <Select value={attributes.pet_age || ''} onValueChange={(value) => setAttributes({ ...attributes, pet_age: value })}>
                         <SelectTrigger><SelectValue placeholder="Select age" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Puppy/Kitten">Puppy/Kitten</SelectItem>
@@ -800,7 +814,7 @@ export const PostListing = () => {
                     </div>
                     <div>
                       <Label>Gender</Label>
-                      <Select value={attributes.pet_gender || ''} onValueChange={(value) => setAttributes({...attributes, pet_gender: value})}>
+                      <Select value={attributes.pet_gender || ''} onValueChange={(value) => setAttributes({ ...attributes, pet_gender: value })}>
                         <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Male">Male</SelectItem>

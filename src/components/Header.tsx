@@ -4,11 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { Button } from '@/components/ui/button';
-import { 
-  Building, 
-  Star, 
-  Menu, 
-  X, 
+import {
+  Building,
+  Star,
+  Menu,
+  X,
   Globe,
   List,
   ShoppingBag,
@@ -23,7 +23,8 @@ import {
   ChevronRight,
   ChevronLeft,
   MapPin,
-  Wrench
+  Wrench,
+  LayoutDashboard
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -87,7 +88,7 @@ export const Header = () => {
     const fetchCountries = async () => {
       try {
         console.log('Fetching countries from database...');
-        
+
         const { data, error } = await db.countries()
           .select(`
             id,
@@ -112,7 +113,7 @@ export const Header = () => {
           });
         } else {
           console.log(`Fetched ${data?.length || 0} countries from database:`, data);
-          
+
           if (data && data.length > 0) {
             setCountries(data);
           } else {
@@ -203,21 +204,21 @@ export const Header = () => {
                 {t('navigation.events')}
               </Button>
             </Link>
-            
+
             <Link to="/blog" onClick={scrollToTop} className="link-underline">
               <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
                 <FileText className="w-4 h-4 mr-1.5" />
                 Blog
               </Button>
             </Link>
-            
+
             <Link to="/listings" onClick={scrollToTop} className="link-underline">
               <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
                 <List className="w-4 h-4 mr-1.5" />
                 {t('navigation.listings')}
               </Button>
             </Link>
-            
+
             <Link to="/marketplace" onClick={scrollToTop} className="link-underline">
               <Button variant="ghost" className="font-roboto text-sm font-medium px-3 h-9 hover:bg-gray-100/50 transition-all">
                 <ShoppingBag className="w-4 h-4 mr-1.5" />
@@ -313,18 +314,25 @@ export const Header = () => {
               <GoogleTranslate />
             </div>
 
+            {/* Notification Bell */}
+            {isSignedIn && (
+              <div className="mr-1">
+                <NotificationBell />
+              </div>
+            )}
+
             {/* User Profile */}
             {isSignedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="h-10 w-10 p-0 rounded-full border-2 border-blue-500"
                   >
                     {user?.imageUrl ? (
-                      <img 
-                        src={user.imageUrl} 
-                        alt={user.fullName || 'User'} 
+                      <img
+                        src={user.imageUrl}
+                        alt={user.fullName || 'User'}
                         className="h-8 w-8 rounded-full object-cover"
                       />
                     ) : (
@@ -335,9 +343,9 @@ export const Header = () => {
                 <DropdownMenuContent className="w-56" align="end">
                   <div className="flex items-center gap-3 p-3 border-b">
                     {user?.imageUrl ? (
-                      <img 
-                        src={user.imageUrl} 
-                        alt={user.fullName || 'User'} 
+                      <img
+                        src={user.imageUrl}
+                        alt={user.fullName || 'User'}
                         className="h-10 w-10 rounded-full"
                       />
                     ) : (
@@ -371,21 +379,31 @@ export const Header = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button 
-                variant="default" 
-                onClick={() => navigate('/user/sign-in')}
-                className="font-roboto"
-              >
-                <User className="w-4 h-4 mr-2" />
-                Sign In
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/sign-up')}
+                  className="font-roboto hidden xl:inline-flex"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Sign Up
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={() => navigate('/user/sign-in')}
+                  className="font-roboto"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              </div>
             )}
           </div>
 
           {/* Mobile Menu Button */}
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             className="md:hidden"
             onClick={toggleMobileMenu}
             aria-label="Toggle mobile menu"
@@ -406,10 +424,10 @@ export const Header = () => {
               <ChevronLeft className="w-4 h-4 text-gray-600" />
             </button>
           )}
-          
+
           {/* Gradient fade indicator on right to show more content */}
           <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none z-10"></div>
-          
+
           {/* Subtle Right Arrow */}
           {showRightArrow && (
             <button
@@ -420,12 +438,12 @@ export const Header = () => {
               <ChevronRight className="w-4 h-4 text-gray-600" />
             </button>
           )}
-          
-          <div 
+
+          <div
             ref={scrollContainerRef}
             onScroll={handleScroll}
-            className="flex items-center justify-start space-x-2 pb-3 pt-3 overflow-x-auto px-4 scrollbar-hide" 
-            style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}
+            className="flex items-center justify-start space-x-2 pb-3 pt-3 overflow-x-auto px-4 scrollbar-hide"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             <Link to="/listings" onClick={scrollToTop}>
               <Button variant="ghost" className="font-roboto">
@@ -433,21 +451,21 @@ export const Header = () => {
                 {t('navigation.listings')}
               </Button>
             </Link>
-            
+
             <Link to="/marketplace" onClick={scrollToTop}>
               <Button variant="ghost" className="font-roboto">
                 <ShoppingBag className="w-4 h-4 mr-1" />
                 {t('navigation.marketplace')}
               </Button>
             </Link>
-            
+
             <Link to="/events" onClick={scrollToTop}>
               <Button variant="ghost" className="font-roboto">
                 <Calendar className="w-4 h-4 mr-1" />
                 {t('navigation.events')}
               </Button>
             </Link>
-            
+
             <Link to="/blog" onClick={scrollToTop}>
               <Button variant="ghost" className="font-roboto">
                 <FileText className="w-4 h-4 mr-1" />
@@ -455,68 +473,68 @@ export const Header = () => {
               </Button>
             </Link>
 
-          <Link to="/advertise" onClick={scrollToTop}>
-            <Button variant="ghost" className="font-roboto">
-            <Building className="w-4 h-4 mr-1" />
-            {t('navigation.advertise')}
-            </Button>
-          </Link>
-          
-          <Link to="/writeareview" onClick={scrollToTop}>
-            <Button variant="ghost" className="font-roboto">
-              <Crown className="w-4 h-4 mr-1" />
-              {t('navigation.writeReview')}
-            </Button>
-          </Link>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <Link to="/advertise" onClick={scrollToTop}>
               <Button variant="ghost" className="font-roboto">
-                <Wrench className="w-4 h-4 mr-1" />
-                Tools
-                <ChevronDown className="w-3 h-3 ml-1" />
+                <Building className="w-4 h-4 mr-1" />
+                {t('navigation.advertise')}
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              <Link to="/tools" onClick={scrollToTop}>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Wrench className="w-4 h-4 mr-2" />
-                  All Tools
-                </DropdownMenuItem>
-              </Link>
-              <DropdownMenuSeparator />
-              <Link to="/tools#calculator" onClick={scrollToTop}>
-                <DropdownMenuItem className="cursor-pointer text-sm">Calculator</DropdownMenuItem>
-              </Link>
-              <Link to="/tools#compass" onClick={scrollToTop}>
-                <DropdownMenuItem className="cursor-pointer text-sm">Compass</DropdownMenuItem>
-              </Link>
-              <Link to="/tools#world-clock" onClick={scrollToTop}>
-                <DropdownMenuItem className="cursor-pointer text-sm">World Clock</DropdownMenuItem>
-              </Link>
-              <Link to="/tools#currency-converter" onClick={scrollToTop}>
-                <DropdownMenuItem className="cursor-pointer text-sm">Currency Converter</DropdownMenuItem>
-              </Link>
-              <Link to="/tools#unit-converter" onClick={scrollToTop}>
-                <DropdownMenuItem className="cursor-pointer text-sm">Unit Converter</DropdownMenuItem>
-              </Link>
-              <Link to="/tools#qr-generator" onClick={scrollToTop}>
-                <DropdownMenuItem className="cursor-pointer text-sm">QR Generator</DropdownMenuItem>
-              </Link>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </Link>
 
-          {isSignedIn ? (
-            <Button variant="ghost" className="font-roboto" onClick={() => navigate('/users/dashboard')}>
-              <User className="w-4 h-4 mr-1" />
-              {user?.firstName || 'Account'}
-            </Button>
-          ) : (
-            <Button variant="ghost" className="font-roboto" onClick={() => navigate('/user/sign-in')}>
-              <User className="w-4 h-4 mr-1" />
-              Sign In
-            </Button>
-          )}
+            <Link to="/writeareview" onClick={scrollToTop}>
+              <Button variant="ghost" className="font-roboto">
+                <Crown className="w-4 h-4 mr-1" />
+                {t('navigation.writeReview')}
+              </Button>
+            </Link>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="font-roboto">
+                  <Wrench className="w-4 h-4 mr-1" />
+                  Tools
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <Link to="/tools" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Wrench className="w-4 h-4 mr-2" />
+                    All Tools
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator />
+                <Link to="/tools#calculator" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer text-sm">Calculator</DropdownMenuItem>
+                </Link>
+                <Link to="/tools#compass" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer text-sm">Compass</DropdownMenuItem>
+                </Link>
+                <Link to="/tools#world-clock" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer text-sm">World Clock</DropdownMenuItem>
+                </Link>
+                <Link to="/tools#currency-converter" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer text-sm">Currency Converter</DropdownMenuItem>
+                </Link>
+                <Link to="/tools#unit-converter" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer text-sm">Unit Converter</DropdownMenuItem>
+                </Link>
+                <Link to="/tools#qr-generator" onClick={scrollToTop}>
+                  <DropdownMenuItem className="cursor-pointer text-sm">QR Generator</DropdownMenuItem>
+                </Link>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {isSignedIn ? (
+              <Button variant="ghost" className="font-roboto" onClick={() => navigate('/users/dashboard')}>
+                <User className="w-4 h-4 mr-1" />
+                {user?.firstName || 'Account'}
+              </Button>
+            ) : (
+              <Button variant="ghost" className="font-roboto" onClick={() => navigate('/user/sign-in')}>
+                <User className="w-4 h-4 mr-1" />
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -549,278 +567,275 @@ export const Header = () => {
 
                 {/* Mobile Menu Content */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                {/* User Profile Section - AT TOP */}
-                {isSignedIn ? (
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
-                    <div className="flex items-center space-x-3">
-                      <img
-                        className="h-12 w-12 rounded-full object-cover border-2 border-blue-300"
-                        src={user?.imageUrl || '/default-avatar.png'}
-                        alt={user?.fullName || 'User avatar'}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-base font-bold text-gray-900 truncate">
-                          {user?.fullName || 'User'}
-                        </p>
-                        <p className="text-xs text-gray-600 truncate">
-                          {user?.primaryEmailAddress?.emailAddress}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-4 text-white">
-                    <p className="text-lg font-bold mb-2">Welcome to BARA!</p>
-                    <p className="text-sm mb-3 opacity-90">Sign in to access your dashboard and personalized features</p>
-                    <Button 
-                      variant="secondary" 
-                      className="w-full bg-white text-blue-600 hover:bg-gray-100 font-semibold"
-                      onClick={() => {
-                        navigate('/user/sign-in');
-                        closeMobileMenu();
-                      }}
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      Sign In
-                    </Button>
-                  </div>
-                )}
-
-                {/* Language & Country - PROMINENT */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-gray-500 mb-2">LANGUAGE</p>
-                    <GoogleTranslate />
-                  </div>
-                  <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-gray-500 mb-2">COUNTRY</p>
-                    <button
-                      onClick={toggleCountriesExpanded}
-                      className="w-full text-left text-sm font-medium text-gray-900 hover:text-blue-600"
-                    >
-                      {selectedCountry ? selectedCountry.name : 'Select'}
-                      <ChevronRight className={`w-4 h-4 inline ml-1 transition-transform ${countriesExpanded ? 'rotate-90' : ''}`} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Navigation Links */}
-                <div className="space-y-3">
-                  <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
-                    Navigation
-                  </h3>
-                  <Link to="/listings" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
-                    <Button variant="ghost" className="w-full justify-start font-roboto h-12">
-                      <List className="w-5 h-5 mr-3" />
-                      {t('navigation.listings')}
-                    </Button>
-                  </Link>
-                  <Link to="/marketplace" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
-                    <Button variant="ghost" className="w-full justify-start font-roboto h-12">
-                      <ShoppingBag className="w-5 h-5 mr-3" />
-                      {t('navigation.marketplace')}
-                    </Button>
-                  </Link>
-                  <Link to="/events" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
-                    <Button variant="ghost" className="w-full justify-start font-roboto h-12">
-                      <Calendar className="w-5 h-5 mr-3" />
-                      {t('navigation.events')}
-                    </Button>
-                  </Link>
-                  <Link to="/blog" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
-                    <Button variant="ghost" className="w-full justify-start font-roboto h-12">
-                      <FileText className="w-5 h-5 mr-3" />
-                      Blog
-                    </Button>
-                  </Link>
-                </div>
-
-                {/* Business Services */}
-                <div className="space-y-3">
-                  <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
-                    Business Services
-                  </h3>
-                  <Link to="/advertise" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
-                  <Button variant="ghost" className="w-full justify-start font-roboto h-12">
-                    <Building className="w-5 h-5 mr-3" />
-                    {t('navigation.advertise')}
-                  </Button>
-                  </Link>
-                  <Link to="/writeareview" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
-                    <Button variant="ghost" className="w-full justify-start font-roboto h-12">
-                      <Crown className="w-5 h-5 mr-3" />
-                      {t('navigation.writeReview')}
-                    </Button>
-                  </Link>
-                </div>
-
-                {/* Admin Access */}
-                <div className="space-y-3">
-                  <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
-                    Administration
-                  </h3>
-                  <Link to="/sign-in?redirect_url=/admin" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
-                    <Button variant="ghost" className="w-full justify-start font-roboto h-12">
-                      <Shield className="w-5 h-5 mr-3" />
-                      Admin Dashboard
-                    </Button>
-                  </Link>
-                </div>
-
-                {/* Authentication Section */}
-                <div className="space-y-3">
-                  <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
-                    Account
-                  </h3>
+                  {/* User Profile Section - AT TOP */}
                   {isSignedIn ? (
-                    <>
-                      <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
+                      <div className="flex items-center space-x-3">
                         <img
-                          className="h-10 w-10 rounded-full object-cover"
+                          className="h-12 w-12 rounded-full object-cover border-2 border-blue-300"
                           src={user?.imageUrl || '/default-avatar.png'}
                           alt={user?.fullName || 'User avatar'}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-base font-bold text-gray-900 truncate">
                             {user?.fullName || 'User'}
                           </p>
-                          <p className="text-xs text-gray-500 truncate">
+                          <p className="text-xs text-gray-600 truncate">
                             {user?.primaryEmailAddress?.emailAddress}
                           </p>
                         </div>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start font-roboto h-12"
-                        onClick={() => {
-                          navigate('/users/dashboard');
-                          closeMobileMenu();
-                          scrollToTop();
-                        }}
-                      >
-                        <User className="w-5 h-5 mr-3" />
-                        Dashboard
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start font-roboto h-12"
-                        onClick={() => {
-                          navigate('/users/dashboard/events');
-                          closeMobileMenu();
-                          scrollToTop();
-                        }}
-                      >
-                        <Calendar className="w-5 h-5 mr-3" />
-                        My Events
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start font-roboto h-12"
-                        onClick={() => {
-                          navigate('/users/dashboard/profile');
-                          closeMobileMenu();
-                          scrollToTop();
-                        }}
-                      >
-                        <Settings className="w-5 h-5 mr-3" />
-                        Profile
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start font-roboto h-12"
-                        onClick={() => {
-                          signOut();
-                          closeMobileMenu();
-                          scrollToTop();
-                        }}
-                      >
-                        <LogOut className="w-5 h-5 mr-3" />
-                        {t('navigation.logout')}
-                      </Button>
-                    </>
+                    </div>
                   ) : (
-                    <>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start font-roboto h-12"
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-4 text-white">
+                      <p className="text-lg font-bold mb-2">Welcome to BARA!</p>
+                      <p className="text-sm mb-3 opacity-90">Sign in to access your dashboard and personalized features</p>
+                      <Button
+                        variant="secondary"
+                        className="w-full bg-white text-blue-600 hover:bg-gray-100 font-semibold"
                         onClick={() => {
-                          navigate('/user/sign-in?redirect_url=/users/dashboard');
+                          navigate('/user/sign-in');
                           closeMobileMenu();
-                          scrollToTop();
                         }}
                       >
-                        <User className="w-5 h-5 mr-3" />
-                        {t('navigation.login')}
+                        <User className="w-4 h-4 mr-2" />
+                        Sign In
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start font-roboto h-12"
-                        onClick={() => {
-                          navigate('/sign-up');
-                          closeMobileMenu();
-                          scrollToTop();
-                        }}
-                      >
-                        <Settings className="w-5 h-5 mr-3" />
-                        {t('navigation.signup')}
-                      </Button>
-                    </>
+                    </div>
                   )}
-                </div>
 
-                {/* Countries Section */}
-                <div className="space-y-3">
-                  <button
-                    onClick={toggleCountriesExpanded}
-                    className="w-full flex items-center justify-between text-left text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide hover:text-yp-blue transition-colors duration-200"
-                  >
-                    <span>{t('navigation.searchByCountry')}</span>
-                    <ChevronRight 
-                      className={`w-4 h-4 transition-transform duration-200 ${
-                        countriesExpanded ? 'rotate-90' : ''
-                      }`} 
-                    />
-                  </button>
-                  
-                  <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                    countriesExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
-                  }`}>
-                    {isCountriesLoading ? (
-                      <div className="text-center py-4">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yp-blue mx-auto"></div>
-                        <p className="text-xs text-gray-500 mt-1">{t('common.loading')}</p>
-                      </div>
+                  {/* Language & Country - PROMINENT */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
+                      <p className="text-xs font-semibold text-gray-500 mb-2">LANGUAGE</p>
+                      <GoogleTranslate />
+                    </div>
+                    <div className="bg-white border-2 border-gray-200 rounded-lg p-3">
+                      <p className="text-xs font-semibold text-gray-500 mb-2">COUNTRY</p>
+                      <button
+                        onClick={toggleCountriesExpanded}
+                        className="w-full text-left text-sm font-medium text-gray-900 hover:text-blue-600"
+                      >
+                        {selectedCountry ? selectedCountry.name : 'Select'}
+                        <ChevronRight className={`w-4 h-4 inline ml-1 transition-transform ${countriesExpanded ? 'rotate-90' : ''}`} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Navigation Links */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
+                      Navigation
+                    </h3>
+                    <Link to="/listings" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
+                      <Button variant="ghost" className="w-full justify-start font-roboto h-12">
+                        <List className="w-5 h-5 mr-3" />
+                        {t('navigation.listings')}
+                      </Button>
+                    </Link>
+                    <Link to="/marketplace" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
+                      <Button variant="ghost" className="w-full justify-start font-roboto h-12">
+                        <ShoppingBag className="w-5 h-5 mr-3" />
+                        {t('navigation.marketplace')}
+                      </Button>
+                    </Link>
+                    <Link to="/events" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
+                      <Button variant="ghost" className="w-full justify-start font-roboto h-12">
+                        <Calendar className="w-5 h-5 mr-3" />
+                        {t('navigation.events')}
+                      </Button>
+                    </Link>
+                    <Link to="/blog" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
+                      <Button variant="ghost" className="w-full justify-start font-roboto h-12">
+                        <FileText className="w-5 h-5 mr-3" />
+                        Blog
+                      </Button>
+                    </Link>
+                  </div>
+
+                  {/* Business Services */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
+                      Business Services
+                    </h3>
+                    <Link to="/advertise" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
+                      <Button variant="ghost" className="w-full justify-start font-roboto h-12">
+                        <Building className="w-5 h-5 mr-3" />
+                        {t('navigation.advertise')}
+                      </Button>
+                    </Link>
+                    <Link to="/writeareview" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
+                      <Button variant="ghost" className="w-full justify-start font-roboto h-12">
+                        <Crown className="w-5 h-5 mr-3" />
+                        {t('navigation.writeReview')}
+                      </Button>
+                    </Link>
+                  </div>
+
+                  {/* Admin Access */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
+                      Administration
+                    </h3>
+                    <Link to="/sign-in?redirect_url=/admin" onClick={() => { closeMobileMenu(); scrollToTop(); }}>
+                      <Button variant="ghost" className="w-full justify-start font-roboto h-12">
+                        <Shield className="w-5 h-5 mr-3" />
+                        Admin Dashboard
+                      </Button>
+                    </Link>
+                  </div>
+
+                  {/* Authentication Section */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide">
+                      Account
+                    </h3>
+                    {isSignedIn ? (
+                      <>
+                        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                          <img
+                            className="h-10 w-10 rounded-full object-cover"
+                            src={user?.imageUrl || '/default-avatar.png'}
+                            alt={user?.fullName || 'User avatar'}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {user?.fullName || 'User'}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">
+                              {user?.primaryEmailAddress?.emailAddress}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start font-roboto h-12"
+                          onClick={() => {
+                            navigate('/users/dashboard');
+                            closeMobileMenu();
+                            scrollToTop();
+                          }}
+                        >
+                          <User className="w-5 h-5 mr-3" />
+                          Dashboard
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start font-roboto h-12"
+                          onClick={() => {
+                            navigate('/users/dashboard/events');
+                            closeMobileMenu();
+                            scrollToTop();
+                          }}
+                        >
+                          <Calendar className="w-5 h-5 mr-3" />
+                          My Events
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start font-roboto h-12"
+                          onClick={() => {
+                            navigate('/users/dashboard/profile');
+                            closeMobileMenu();
+                            scrollToTop();
+                          }}
+                        >
+                          <Settings className="w-5 h-5 mr-3" />
+                          Profile
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start font-roboto h-12"
+                          onClick={() => {
+                            signOut();
+                            closeMobileMenu();
+                            scrollToTop();
+                          }}
+                        >
+                          <LogOut className="w-5 h-5 mr-3" />
+                          {t('navigation.logout')}
+                        </Button>
+                      </>
                     ) : (
-                      <div className="space-y-2 pl-4 max-h-[600px] overflow-y-auto">
-                        {countries.map((country) => (
-                          <Button
-                            key={country.id}
-                            variant="ghost"
-                            className={`w-full justify-start font-roboto h-10 text-sm transition-all duration-200 ${
-                              countries.length > 0 && (selectedCountry?.id === country.id 
-                                ? "bg-yp-blue text-white shadow-md" 
-                                : "hover:bg-gray-100 text-gray-700"
-                            )}`}
-                            onClick={() => handleCountrySelect(country)}
-                          >
-                            <div className="flex items-center space-x-3">
-                              <MapPin className="w-4 h-4" />
-                              <span>{formatCountryDisplay(country)}</span>
-                            </div>
-                          </Button>
-                        ))}
-                      </div>
+                      <>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start font-roboto h-12"
+                          onClick={() => {
+                            navigate('/user/sign-in?redirect_url=/users/dashboard');
+                            closeMobileMenu();
+                            scrollToTop();
+                          }}
+                        >
+                          <User className="w-5 h-5 mr-3" />
+                          {t('navigation.login')}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start font-roboto h-12"
+                          onClick={() => {
+                            navigate('/sign-up');
+                            closeMobileMenu();
+                            scrollToTop();
+                          }}
+                        >
+                          <Settings className="w-5 h-5 mr-3" />
+                          {t('navigation.signup')}
+                        </Button>
+                      </>
                     )}
                   </div>
+
+                  {/* Countries Section */}
+                  <div className="space-y-3">
+                    <button
+                      onClick={toggleCountriesExpanded}
+                      className="w-full flex items-center justify-between text-left text-sm font-comfortaa font-semibold text-gray-900 uppercase tracking-wide hover:text-yp-blue transition-colors duration-200"
+                    >
+                      <span>{t('navigation.searchByCountry')}</span>
+                      <ChevronRight
+                        className={`w-4 h-4 transition-transform duration-200 ${countriesExpanded ? 'rotate-90' : ''
+                          }`}
+                      />
+                    </button>
+
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${countriesExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
+                      {isCountriesLoading ? (
+                        <div className="text-center py-4">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yp-blue mx-auto"></div>
+                          <p className="text-xs text-gray-500 mt-1">{t('common.loading')}</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2 pl-4 max-h-[600px] overflow-y-auto">
+                          {countries.map((country) => (
+                            <Button
+                              key={country.id}
+                              variant="ghost"
+                              className={`w-full justify-start font-roboto h-10 text-sm transition-all duration-200 ${countries.length > 0 && (selectedCountry?.id === country.id
+                                ? "bg-yp-blue text-white shadow-md"
+                                : "hover:bg-gray-100 text-gray-700"
+                              )}`}
+                              onClick={() => handleCountrySelect(country)}
+                            >
+                              <div className="flex items-center space-x-3">
+                                <MapPin className="w-4 h-4" />
+                                <span>{formatCountryDisplay(country)}</span>
+                              </div>
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                 </div>
 
-              </div>
-
-              {/* Mobile Menu Footer */}
-              <div className="p-4 border-t border-gray-200">
-                <div className="text-xs text-gray-500 font-roboto text-center">
-                  BARA App - Connect with Local Businesses ✨
-                </div>
+                {/* Mobile Menu Footer */}
+                <div className="p-4 border-t border-gray-200">
+                  <div className="text-xs text-gray-500 font-roboto text-center">
+                    BARA App - Connect with Local Businesses ✨
+                  </div>
                 </div>
               </div>
             </div>

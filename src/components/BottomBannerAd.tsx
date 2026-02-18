@@ -31,13 +31,13 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
   const instanceIndexRef = useRef<number>(bottomBannerAdInstanceCounter++ % 2);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   const ensureProtocol = (url: string | null | undefined) => {
     if (!url || url.trim() === '') return null;
-    
+
     // Clean the URL
     const cleanUrl = url.trim();
-    
+
     try {
       // If URL constructor succeeds, protocol is present and other details are also present
       const u = new URL(cleanUrl);
@@ -101,7 +101,7 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
               .from('sponsored_banner_countries')
               .select('country_id')
               .eq('banner_id', b.id);
-            
+
             return {
               id: b.id,
               banner_image_url: b.banner_image_url,
@@ -115,7 +115,7 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
 
         const rows: SponsoredBannerRow[] = bannersWithCountries
           .filter((b: SponsoredBannerRow) => !!b.banner_image_url);
-        
+
         setAllBanners(rows);
       } catch (err) {
         console.error('Error fetching bottom banners for BottomBannerAd:', err);
@@ -136,7 +136,7 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
     }
 
     // Filter banners that target the selected country
-    const countrySpecificBanners = allBanners.filter(banner => 
+    const countrySpecificBanners = allBanners.filter(banner =>
       banner.country_ids && banner.country_ids.includes(selectedCountry.id)
     );
 
@@ -161,9 +161,9 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
 
     const startSlideshow = () => {
       if (isPaused) return;
-      
+
       setProgress(0);
-      
+
       // Progress bar animation
       progressRef.current = setInterval(() => {
         setProgress(prev => {
@@ -176,11 +176,11 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
 
       intervalRef.current = setInterval(() => {
         if (isPaused) return;
-        
+
         setIsTransitioning(true);
-        
+
         setTimeout(() => {
-          setCurrentBannerIndex((prevIndex) => 
+          setCurrentBannerIndex((prevIndex) =>
             (prevIndex + 1) % banners.length
           );
           setIsTransitioning(false);
@@ -245,7 +245,7 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
   };
 
   const targetUrl = ensureProtocol(bannerToShow?.company_website || null);
-  
+
   // Debug: Log the target URL to help troubleshoot
   useEffect(() => {
     if (bannerToShow && targetUrl) {
@@ -273,11 +273,20 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
   }
 
   if (!bannerToShow) {
-    return null; // Don't render anything if no banner
+    // Render placeholder if no banner found
+    return (
+      <div className={`w-full py-4 flex justify-center ${className}`}>
+        <div className="w-full max-w-[728px] px-4">
+          <div className="w-full h-[90px] bg-gray-100 border border-gray-200 rounded flex items-center justify-center">
+            <span className="text-gray-400 text-sm font-roboto uppercase tracking-widest">Advertisement</span>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div 
+    <div
       className={`w-full py-4 flex justify-center ${className}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -285,88 +294,85 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
       <div className="w-full max-w-[728px] px-4">
         {/* Centered banner image - 728x90 leaderboard */}
         <div className="w-full relative">
-            {bannerToShow ? (
-              targetUrl ? (
-                <a
-                  href={targetUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block overflow-hidden hover:opacity-95 transition-opacity cursor-pointer"
-                  aria-label={`Visit ${bannerToShow.company_name} - ${bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}`}
-                  onClick={(e) => {
-                    console.log('Bottom banner clicked, navigating to:', targetUrl);
-                    bannerToShow?.id && handleBannerClick(bannerToShow.id, e);
-                  }}
+          {bannerToShow ? (
+            targetUrl ? (
+              <a
+                href={targetUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block overflow-hidden hover:opacity-95 transition-opacity cursor-pointer"
+                aria-label={`Visit ${bannerToShow.company_name} - ${bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}`}
+                onClick={(e) => {
+                  console.log('Bottom banner clicked, navigating to:', targetUrl);
+                  bannerToShow?.id && handleBannerClick(bannerToShow.id, e);
+                }}
+              >
+                <div
+                  className={`transition-all duration-600 ease-in-out ${isTransitioning ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
+                    }`}
                 >
-                  <div 
-                    className={`transition-all duration-600 ease-in-out ${
-                      isTransitioning ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
-                    }`}
-                  >
-                    <img
-                      src={bannerToShow.banner_image_url}
-                      alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
-                      className="w-full h-[90px] object-cover bg-white"
-                    />
-                  </div>
-                </a>
-              ) : (
-                <div className="overflow-hidden">
-                  <div 
-                    className={`transition-all duration-600 ease-in-out ${
-                      isTransitioning ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
-                    }`}
-                  >
-                    <img
-                      src={bannerToShow.banner_image_url}
-                      alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
-                      className="w-full h-[90px] object-cover bg-white"
-                    />
-                  </div>
-                </div>
-              )
-            ) : (
-              <div className="w-full h-[120px] md:h-[150px] bg-white border border-gray-200 rounded-lg flex items-center justify-center text-center px-4">
-                <div>
-                  <span className="text-gray-700 font-semibold text-lg">{t('bannerAd.placeholder.title')}</span>
-                  <span className="block text-gray-600 text-sm mt-2">{t('bannerAd.placeholder.subtitle')}</span>
-                </div>
-              </div>
-            )}
-            
-            {/* Slide indicators and progress bar */}
-            {banners.length > 1 && (
-              <div className="absolute bottom-4 right-4 flex flex-col items-end gap-2">
-                {/* Progress bar */}
-                <div className="w-16 h-1 bg-white/30 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-white transition-all duration-75 ease-linear"
-                    style={{ width: `${progress}%` }}
+                  <img
+                    src={bannerToShow.banner_image_url}
+                    alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
+                    className="w-full h-[90px] object-cover bg-white"
                   />
                 </div>
-                
-                {/* Slide indicators */}
-                <div className="flex gap-2">
-                  {banners.map((_, index) => (
-                    <button
-                      key={index}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                        index === currentBannerIndex 
-                          ? 'bg-white shadow-lg' 
-                          : 'bg-white/50 hover:bg-white/70'
-                      }`}
-                      onClick={() => {
-                        setCurrentBannerIndex(index);
-                        setIsTransitioning(true);
-                        setProgress(0);
-                        setTimeout(() => setIsTransitioning(false), 300);
-                      }}
-                      aria-label={`Go to slide ${index + 1}`}
-                    />
-                  ))}
+              </a>
+            ) : (
+              <div className="overflow-hidden">
+                <div
+                  className={`transition-all duration-600 ease-in-out ${isTransitioning ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
+                    }`}
+                >
+                  <img
+                    src={bannerToShow.banner_image_url}
+                    alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
+                    className="w-full h-[90px] object-cover bg-white"
+                  />
                 </div>
               </div>
-            )}
+            )
+          ) : (
+            <div className="w-full h-[120px] md:h-[150px] bg-white border border-gray-200 rounded-lg flex items-center justify-center text-center px-4">
+              <div>
+                <span className="text-gray-700 font-semibold text-lg">{t('bannerAd.placeholder.title')}</span>
+                <span className="block text-gray-600 text-sm mt-2">{t('bannerAd.placeholder.subtitle')}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Slide indicators and progress bar */}
+          {banners.length > 1 && (
+            <div className="absolute bottom-4 right-4 flex flex-col items-end gap-2">
+              {/* Progress bar */}
+              <div className="w-16 h-1 bg-white/30 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-white transition-all duration-75 ease-linear"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+
+              {/* Slide indicators */}
+              <div className="flex gap-2">
+                {banners.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentBannerIndex
+                        ? 'bg-white shadow-lg'
+                        : 'bg-white/50 hover:bg-white/70'
+                      }`}
+                    onClick={() => {
+                      setCurrentBannerIndex(index);
+                      setIsTransitioning(true);
+                      setProgress(0);
+                      setTimeout(() => setIsTransitioning(false), 300);
+                    }}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

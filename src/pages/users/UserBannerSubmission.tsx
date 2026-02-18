@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
+import {
   Upload,
   Image as ImageIcon,
   Video,
@@ -64,7 +64,7 @@ export const UserBannerSubmission = () => {
 
   const fetchUserSubmissions = async () => {
     if (!user) return;
-    
+
     const { data, error } = await supabase
       .from('user_slideshow_submissions')
       .select('*')
@@ -86,11 +86,11 @@ export const UserBannerSubmission = () => {
     const ext = f.name.split('.').pop();
     const prefix = type === 'video' ? 'user-submission-video' : type === 'thumbnail' ? 'user-submission-thumb' : 'user-submission-image';
     const name = `${prefix}-${user?.id}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    
+
     const bucketName = type === 'video' ? 'event-slideshow-videos' : 'event-slideshow-images';
     const { error } = await supabase.storage.from(bucketName).upload(name, f);
     if (error) throw error;
-    
+
     const { data: { publicUrl } } = supabase.storage.from(bucketName).getPublicUrl(name);
     const normalized = publicUrl.includes('/object/public/')
       ? publicUrl
@@ -101,7 +101,7 @@ export const UserBannerSubmission = () => {
   const onFile = (e: React.ChangeEvent<HTMLInputElement>, type: 'main' | 'thumbnail') => {
     const f = e.target.files?.[0];
     if (!f) return;
-    
+
     if (type === 'main') {
       setFile(f);
       setPreview(URL.createObjectURL(f));
@@ -121,7 +121,7 @@ export const UserBannerSubmission = () => {
 
   const submitBanner = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       toast({
         title: 'Authentication required',
@@ -141,7 +141,7 @@ export const UserBannerSubmission = () => {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       // Upload main media file
       let mediaUrl: string;
@@ -177,9 +177,23 @@ export const UserBannerSubmission = () => {
 
       if (error) throw error;
 
+      // Send confirmation email
+      await supabase.functions.invoke('send-email', {
+        body: {
+          to: user.primaryEmailAddress?.emailAddress,
+          subject: 'Banner Submission Received - Bara Afrika',
+          type: 'banner_submission_confirmation', // Assuming a new email template type
+          data: {
+            userName: user.fullName || user.firstName || 'User',
+            mediaType: form.media_type,
+            title: form.title || 'N/A',
+          },
+        },
+      });
+
       toast({
-        title: 'Submission successful!',
-        description: 'Your banner has been submitted for admin review.',
+        title: "Success! 🎉",
+        description: "Your banner submission has been received. We'll review it shortly.",
       });
 
       resetForm();
@@ -250,7 +264,7 @@ export const UserBannerSubmission = () => {
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          <strong>Note:</strong> All submissions require admin approval before appearing on the Events page. 
+          <strong>Note:</strong> All submissions require admin approval before appearing on the Events page.
           You will be notified via email once your submission is reviewed.
         </AlertDescription>
       </Alert>
@@ -264,7 +278,7 @@ export const UserBannerSubmission = () => {
           <form onSubmit={submitBanner} className="space-y-4">
             <div>
               <Label>Media Type</Label>
-              <Select value={form.media_type} onValueChange={(value: 'image' ) => setForm(prev => ({ ...prev, media_type: value }))}>
+              <Select value={form.media_type} onValueChange={(value: 'image') => setForm(prev => ({ ...prev, media_type: value }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -377,10 +391,10 @@ export const UserBannerSubmission = () => {
                 <div key={submission.id} className="border rounded-lg p-4">
                   <div className="flex items-start gap-4">
                     <div className="w-24 h-16 overflow-hidden rounded relative flex-shrink-0">
-                      <img 
-                        src={submission.thumbnail_url || submission.media_url} 
-                        alt={submission.alt_text || 'submission'} 
-                        className="w-full h-full object-cover" 
+                      <img
+                        src={submission.thumbnail_url || submission.media_url}
+                        alt={submission.alt_text || 'submission'}
+                        className="w-full h-full object-cover"
                       />
                       {submission.media_type === 'video' && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30">
@@ -388,7 +402,7 @@ export const UserBannerSubmission = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
                         <h4 className="font-medium">{submission.title || 'Untitled'}</h4>
@@ -400,12 +414,12 @@ export const UserBannerSubmission = () => {
                           )}
                         </Badge>
                       </div>
-                      
+
                       <div className="mb-2">
-                        <Badge 
+                        <Badge
                           variant={
-                            submission.submission_status === 'pending' ? 'outline' : 
-                            submission.submission_status === 'approved' ? 'default' : 'destructive'
+                            submission.submission_status === 'pending' ? 'outline' :
+                              submission.submission_status === 'approved' ? 'default' : 'destructive'
                           }
                         >
                           {submission.submission_status === 'pending' && <Clock className="w-3 h-3 mr-1" />}
@@ -418,11 +432,11 @@ export const UserBannerSubmission = () => {
                       {submission.description && (
                         <p className="text-sm text-gray-700 mb-2">{submission.description}</p>
                       )}
-                      
+
                       <p className="text-xs text-gray-500">
                         Submitted: {new Date(submission.created_at).toLocaleDateString()}
                       </p>
-                      
+
                       {submission.admin_notes && (
                         <Alert className="mt-2">
                           <AlertCircle className="h-4 w-4" />
@@ -434,8 +448,8 @@ export const UserBannerSubmission = () => {
                     </div>
 
                     {submission.submission_status === 'pending' && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => deleteSubmission(submission.id)}
                       >

@@ -86,6 +86,11 @@ import AdminEventsSlideshow from "./pages/admin/AdminEventsSlideshow";
 import AdminPopups from "./pages/admin/AdminPopups";
 import AdminMarketplace from "./pages/admin/AdminMarketplace";
 import AdminMarketplaceCategories from "./pages/admin/AdminMarketplaceCategories";
+import { AdminStreamsDashboard } from "./pages/admin/streams/AdminStreamsDashboard";
+import { AdminArtists } from "./pages/admin/streams/AdminArtists";
+import { AdminSportsDashboard } from "./pages/admin/sports/AdminSportsDashboard";
+import AdminSportsNews from "./pages/admin/sports/AdminSportsNews";
+import AdminSportsVideos from "./pages/admin/sports/AdminSportsVideos";
 import { MainLayout } from "./components/layout/MainLayout";
 import BlogPage from "./pages/BlogPage";
 import BlogPostDetail from "./pages/BlogPostDetail";
@@ -104,12 +109,27 @@ import PlaylistPage from "./pages/streams/PlaylistPage";
 import ArtistPage from "./pages/streams/ArtistPage";
 import SearchPage from "./pages/SearchPage";
 import TestSportsApi from "./pages/TestSportsApi";
+import TestEmailPage from "./pages/TestEmailPage";
+import { UserTicketsPage } from "./pages/users/UserTicketsPage";
+import { OrganizerRegistrationsPage } from "./pages/users/OrganizerRegistrationsPage";
+import TermsOfServicePage from "./pages/TermsOfServicePage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import { CookieConsent } from "./components/CookieConsent";
+import { NotificationsProvider } from "./context/NotificationsContext";
+import { InboxPage } from "./pages/messages/InboxPage";
+import { ChatWindow } from "./pages/messages/ChatWindow";
+import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
 
 const queryClient = new QueryClient();
+
+import { useWelcomeEmail } from "@/hooks/useWelcomeEmail";
 
 const AppRoutes = () => {
   // Use the auth logging hook to track all authentication events
   useAuthLogging();
+  // Check and send welcome email if needed
+  useWelcomeEmail();
+
   const { i18n } = useTranslation();
 
   // Keep document language and direction in sync with current i18n language
@@ -121,8 +141,9 @@ const AppRoutes = () => {
   }, [i18n.language]);
 
   return (
-    <>
+    <NotificationsProvider>
       <ScrollToTop />
+      <CookieConsent />
 
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -144,6 +165,36 @@ const AppRoutes = () => {
             <AdminMarketplaceCategories />
           </AdminAuthGuard>
         } />
+
+
+        {/* Streams Admin Routes */}
+        <Route path="/admin/streams" element={
+          <AdminAuthGuard>
+            <AdminStreamsDashboard />
+          </AdminAuthGuard>
+        } />
+        <Route path="/admin/streams/artists" element={
+          <AdminAuthGuard>
+            <AdminArtists />
+          </AdminAuthGuard>
+        } />
+
+        <Route path="/admin/sports" element={
+          <AdminAuthGuard>
+            <AdminSportsDashboard />
+          </AdminAuthGuard>
+        } />
+        <Route path="/admin/sports/news" element={
+          <AdminAuthGuard>
+            <AdminSportsNews />
+          </AdminAuthGuard>
+        } />
+        <Route path="/admin/sports/videos" element={
+          <AdminAuthGuard>
+            <AdminSportsVideos />
+          </AdminAuthGuard>
+        } />
+
 
         {/* Marketplace Routes - MUST come before broad business listings routes */}
         <Route path="/marketplace" element={<MarketplacePage />} />
@@ -215,7 +266,10 @@ const AppRoutes = () => {
         <Route path="/user/sign-up" element={<UserSignUpPage />} />
         <Route path="/sso-callback" element={<SSOCallbackPage />} />
         <Route path="/auth/finish" element={<AuthFinishPage />} />
-        <Route path="/user/settings" element={<UserSettingsPage />} />
+
+        {/* Messaging Routes */}
+        <Route path="/messages" element={<InboxPage />} />
+        <Route path="/messages/:conversationId" element={<ChatWindow />} />
 
         {/* User Dashboard Routes */}
         <Route path="/users/dashboard" element={
@@ -225,6 +279,8 @@ const AppRoutes = () => {
         }>
           <Route index element={<div className="p-6"><h2 className="text-2xl font-bold mb-4">Dashboard Home</h2><p>Welcome to your dashboard!</p></div>} />
           <Route path="events" element={<UserEventsPage />} />
+          <Route path="events/:eventId/registrations" element={<OrganizerRegistrationsPage />} />
+          <Route path="tickets" element={<UserTicketsPage />} />
           <Route path="banner-submissions" element={<UserBannerSubmission />} />
           <Route path="profile" element={<UserProfilePage />} />
         </Route>
@@ -245,6 +301,11 @@ const AppRoutes = () => {
         <Route path="/streams/artist/:id" element={<ArtistPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/test-sports-api" element={<TestSportsApi />} />
+        <Route path="/test-email" element={<TestEmailPage />} />
+        <Route path="/terms" element={<TermsOfServicePage />} />
+        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
         {/* <Route path="/googlemaps" element={<GoogleMapsTest />} /> */}
         <Route path="/map-test" element={<MapTestPage />} />
@@ -405,7 +466,7 @@ const AppRoutes = () => {
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </>
+    </NotificationsProvider>
   );
 };
 
@@ -421,10 +482,12 @@ const App = () => (
       <Toaster />
       <Sonner />
       <CountrySelectionProvider>
-        <BrowserRouter>
-          <AuthLogger />
-          <AppRoutes />
-        </BrowserRouter>
+        <AudioPlayerProvider>
+          <BrowserRouter>
+            <AuthLogger />
+            <AppRoutes />
+          </BrowserRouter>
+        </AudioPlayerProvider>
       </CountrySelectionProvider>
     </TooltipProvider>
   </QueryClientProvider>

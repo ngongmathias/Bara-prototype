@@ -25,11 +25,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Eye, 
-  Check, 
-  X, 
-  Trash2, 
+import {
+  Eye,
+  Check,
+  X,
+  Trash2,
   Search,
   Image as ImageIcon,
   Edit,
@@ -67,7 +67,7 @@ export const AdminMarketplace = () => {
         .select('*')
         .eq('is_active', true)
         .order('display_order');
-      
+
       setCategories(data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -80,7 +80,7 @@ export const AdminMarketplace = () => {
         .from('countries')
         .select('id, name, code, flag_url')
         .order('name');
-      
+
       setCountries(data || []);
     } catch (error) {
       console.error('Error fetching countries:', error);
@@ -125,12 +125,44 @@ export const AdminMarketplace = () => {
 
   const updateListingStatus = async (listingId: string, newStatus: string) => {
     try {
+      // Get listing details first to send email
+      const { data: listingDetails } = await supabase
+        .from('marketplace_listings')
+        .select(`
+          *,
+          marketplace_categories(name)
+        `)
+        .eq('id', listingId)
+        .single();
+
       const { error } = await supabase
         .from('marketplace_listings')
         .update({ status: newStatus })
         .eq('id', listingId);
 
       if (error) throw error;
+
+      // Send email notification
+      if (listingDetails && (newStatus === 'active' || newStatus === 'rejected')) {
+        const emailType = newStatus === 'active' ? 'listing_approved' : 'listing_rejected';
+        const emailSubject = newStatus === 'active'
+          ? 'Marketplace Ad Approved - Bara Afrika'
+          : 'Marketplace Ad Update - Bara Afrika';
+
+        await supabase.functions.invoke('send-email', {
+          body: {
+            to: listingDetails.seller_email,
+            subject: emailSubject,
+            type: emailType,
+            data: {
+              userFirstname: listingDetails.seller_name.split(' ')[0],
+              listingTitle: listingDetails.title,
+              listingId: listingDetails.id,
+              reason: newStatus === 'rejected' ? 'Does not meet community guidelines' : undefined
+            },
+          },
+        });
+      }
 
       toast({
         title: 'Success',
@@ -175,14 +207,14 @@ export const AdminMarketplace = () => {
 
   const openEditDialog = async (listing: any) => {
     setEditingListing(listing);
-    
+
     // Fetch countries associated with this listing
     try {
       const { data } = await supabase
         .from('marketplace_listing_countries')
         .select('country_id')
         .eq('listing_id', listing.id);
-      
+
       if (data && data.length > 0) {
         setSelectedCountries(data.map(c => c.country_id));
       } else {
@@ -193,7 +225,7 @@ export const AdminMarketplace = () => {
       console.error('Error fetching listing countries:', error);
       setSelectedCountries(listing.country_id ? [listing.country_id] : []);
     }
-    
+
     setShowEditDialog(true);
   };
 
@@ -242,7 +274,7 @@ export const AdminMarketplace = () => {
         title: 'Success',
         description: 'Listing updated successfully',
       });
-      
+
       setShowEditDialog(false);
       setEditingListing(null);
       setSelectedCountries([]);
@@ -301,7 +333,7 @@ export const AdminMarketplace = () => {
   };
 
   const toggleCountrySelection = (countryId: string) => {
-    setSelectedCountries(prev => 
+    setSelectedCountries(prev =>
       prev.includes(countryId)
         ? prev.filter(id => id !== countryId)
         : [...prev, countryId]
@@ -354,21 +386,19 @@ export const AdminMarketplace = () => {
           <div className="flex gap-4 mb-6 border-b border-gray-200">
             <button
               onClick={() => setActiveTab('listings')}
-              className={`px-4 py-2 font-roboto font-medium transition-colors ${
-                activeTab === 'listings'
-                  ? 'text-black border-b-2 border-black'
-                  : 'text-gray-600 hover:text-black'
-              }`}
+              className={`px-4 py-2 font-roboto font-medium transition-colors ${activeTab === 'listings'
+                ? 'text-black border-b-2 border-black'
+                : 'text-gray-600 hover:text-black'
+                }`}
             >
               Listings Management
             </button>
             <button
               onClick={() => setActiveTab('reports')}
-              className={`px-4 py-2 font-roboto font-medium transition-colors ${
-                activeTab === 'reports'
-                  ? 'text-black border-b-2 border-black'
-                  : 'text-gray-600 hover:text-black'
-              }`}
+              className={`px-4 py-2 font-roboto font-medium transition-colors ${activeTab === 'reports'
+                ? 'text-black border-b-2 border-black'
+                : 'text-gray-600 hover:text-black'
+                }`}
             >
               Reports ({reports.filter(r => r.status === 'pending').length})
             </button>
@@ -647,7 +677,7 @@ export const AdminMarketplace = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
                 <Input
                   value={editingListing.title}
-                  onChange={(e) => setEditingListing({...editingListing, title: e.target.value})}
+                  onChange={(e) => setEditingListing({ ...editingListing, title: e.target.value })}
                   className="font-roboto"
                 />
               </div>
@@ -657,7 +687,7 @@ export const AdminMarketplace = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                 <Textarea
                   value={editingListing.description}
-                  onChange={(e) => setEditingListing({...editingListing, description: e.target.value})}
+                  onChange={(e) => setEditingListing({ ...editingListing, description: e.target.value })}
                   rows={4}
                   className="font-roboto"
                 />
@@ -670,7 +700,7 @@ export const AdminMarketplace = () => {
                   <Input
                     type="number"
                     value={editingListing.price}
-                    onChange={(e) => setEditingListing({...editingListing, price: e.target.value})}
+                    onChange={(e) => setEditingListing({ ...editingListing, price: e.target.value })}
                     className="font-roboto"
                   />
                 </div>
@@ -678,7 +708,7 @@ export const AdminMarketplace = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
                   <Input
                     value={editingListing.currency}
-                    onChange={(e) => setEditingListing({...editingListing, currency: e.target.value})}
+                    onChange={(e) => setEditingListing({ ...editingListing, currency: e.target.value })}
                     className="font-roboto"
                   />
                 </div>
@@ -690,7 +720,7 @@ export const AdminMarketplace = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                   <Select
                     value={editingListing.category_id}
-                    onValueChange={(value) => setEditingListing({...editingListing, category_id: value})}
+                    onValueChange={(value) => setEditingListing({ ...editingListing, category_id: value })}
                   >
                     <SelectTrigger className="font-roboto">
                       <SelectValue />
@@ -708,7 +738,7 @@ export const AdminMarketplace = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Condition</label>
                   <Select
                     value={editingListing.condition || ''}
-                    onValueChange={(value) => setEditingListing({...editingListing, condition: value})}
+                    onValueChange={(value) => setEditingListing({ ...editingListing, condition: value })}
                   >
                     <SelectTrigger className="font-roboto">
                       <SelectValue placeholder="Select condition" />
@@ -776,7 +806,7 @@ export const AdminMarketplace = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                   <Select
                     value={editingListing.status}
-                    onValueChange={(value) => setEditingListing({...editingListing, status: value})}
+                    onValueChange={(value) => setEditingListing({ ...editingListing, status: value })}
                   >
                     <SelectTrigger className="font-roboto">
                       <SelectValue />
@@ -794,7 +824,7 @@ export const AdminMarketplace = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Featured</label>
                   <Select
                     value={editingListing.is_featured ? 'true' : 'false'}
-                    onValueChange={(value) => setEditingListing({...editingListing, is_featured: value === 'true'})}
+                    onValueChange={(value) => setEditingListing({ ...editingListing, is_featured: value === 'true' })}
                   >
                     <SelectTrigger className="font-roboto">
                       <SelectValue />

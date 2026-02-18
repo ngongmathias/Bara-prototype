@@ -1,36 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveScores } from '../../hooks/useLiveScores';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { supabase } from '@/lib/supabase';
 
 export default function SportsHome() {
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Top Navigation Bar */}
-            <TopNavBar />
+        <MainLayout>
+            <div className="min-h-screen bg-gray-50">
+                {/* Score Ticker */}
+                <LiveScoreTicker />
 
-            {/* Score Ticker */}
-            <LiveScoreTicker />
+                {/* Main Layout - 3 Column Grid */}
+                <div className="max-w-[1440px] mx-auto grid grid-cols-12 gap-4 p-4">
+                    {/* Left Sidebar */}
+                    <aside className="col-span-12 lg:col-span-2 bg-white rounded-lg p-4">
+                        <LeftSidebar />
+                    </aside>
 
-            {/* Main Layout - 3 Column Grid */}
-            <div className="max-w-[1440px] mx-auto grid grid-cols-12 gap-4 p-4">
-                {/* Left Sidebar */}
-                <aside className="col-span-12 lg:col-span-2 bg-white rounded-lg p-4">
-                    <LeftSidebar />
-                </aside>
+                    {/* Main Content */}
+                    <main className="col-span-12 lg:col-span-7">
+                        <HeroArticle />
+                        <NewsFeed />
+                    </main>
 
-                {/* Main Content */}
-                <main className="col-span-12 lg:col-span-7">
-                    <HeroArticle />
-                    <NewsFeed />
-                </main>
-
-                {/* Right Sidebar */}
-                <aside className="col-span-12 lg:col-span-3">
-                    <TopVideos />
-                    <TopHeadlines />
-                </aside>
+                    {/* Right Sidebar */}
+                    <aside className="col-span-12 lg:col-span-3">
+                        <TopVideos />
+                        <TopHeadlines />
+                    </aside>
+                </div>
             </div>
-        </div>
+        </MainLayout>
     );
 }
 
@@ -106,54 +107,7 @@ function LiveScoreTicker() {
     );
 }
 
-// Top Navigation Bar Component
-function TopNavBar() {
-    const [isMoreSportsOpen, setIsMoreSportsOpen] = useState(false);
-
-    return (
-        <nav className="bg-black text-white">
-            <div className="flex items-center justify-between px-4 h-12">
-                {/* ESPN Logo + Sports */}
-                <div className="flex items-center gap-6">
-                    <div className="bg-[#CC0000] px-3 py-1 font-bold text-xl">ESPN</div>
-                    <a href="#" className="text-sm hover:underline">Football</a>
-                    <a href="#" className="text-sm hover:underline">NBA</a>
-                    <a href="#" className="text-sm hover:underline">NFL</a>
-                    <a href="#" className="text-sm hover:underline">MLB</a>
-                    <a href="#" className="text-sm hover:underline">Cricket</a>
-                    <a href="#" className="text-sm hover:underline">Boxing</a>
-                    <a href="#" className="text-sm hover:underline">Rugby</a>
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsMoreSportsOpen(!isMoreSportsOpen)}
-                            className="text-sm hover:underline"
-                        >
-                            More Sports
-                        </button>
-                        {isMoreSportsOpen && (
-                            <div className="absolute top-full left-0 mt-1 bg-white text-black shadow-lg rounded p-4 w-48 z-50">
-                                <a href="#" className="block py-1 hover:underline text-sm">Tennis</a>
-                                <a href="#" className="block py-1 hover:underline text-sm">Golf</a>
-                                <a href="#" className="block py-1 hover:underline text-sm">F1</a>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Right side */}
-                <div className="flex items-center gap-4">
-                    <a href="#" className="text-sm hover:underline">Fantasy</a>
-                    <a href="/search" className="text-white hover:text-gray-300">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </a>
-                    <button className="text-white">👤</button>
-                </div>
-            </div>
-        </nav>
-    );
-}
+// TopNavBar removed - now using MainLayout for consistent header/footer
 
 // Score Card Component
 function ScoreCard({
@@ -245,8 +199,8 @@ function LeftSidebar() {
         <div className="space-y-6">
             {/* Customize ESPN */}
             <div>
-                <h3 className="font-bold text-sm mb-3">Customize ESPN</h3>
-                <button className="w-full bg-blue-600 text-white py-2 rounded-full font-semibold text-sm hover:bg-blue-700 transition mb-2">
+                <h3 className="font-comfortaa font-semibold text-sm mb-3">Customize Bara Sports</h3>
+                <button className="w-full bg-black text-white py-2 rounded-full font-semibold text-sm hover:bg-gray-800 transition mb-2">
                     Create Account
                 </button>
                 <button className="w-full text-blue-600 text-sm hover:underline">
@@ -258,28 +212,28 @@ function LeftSidebar() {
             <div>
                 <h3 className="font-bold text-sm mb-2">Quick Links</h3>
                 <nav className="space-y-1">
-                    <a href="#" className="flex items-center gap-2 text-sm hover:underline">
+                    <Link to="/sports/table/2" className="flex items-center gap-2 text-sm hover:underline">
                         <div className="w-5 h-5 rounded-full bg-blue-900"></div>
                         UEFA Champions League
-                    </a>
-                    <a href="#" className="flex items-center gap-2 text-sm hover:underline">
+                    </Link>
+                    <Link to="/sports/table/39" className="flex items-center gap-2 text-sm hover:underline">
                         <div className="w-5 h-5 rounded-full bg-purple-700"></div>
                         English Premier League
-                    </a>
-                    <a href="#" className="flex items-center gap-2 text-sm hover:underline">
+                    </Link>
+                    <Link to="/sports/table/140" className="flex items-center gap-2 text-sm hover:underline">
                         <div className="w-5 h-5 rounded-full bg-orange-500"></div>
-                        Basketball Africa League
-                    </a>
-                    <a href="#" className="flex items-center gap-2 text-sm hover:underline">
+                        La Liga
+                    </Link>
+                    <Link to="/sports/scores" className="flex items-center gap-2 text-sm hover:underline">
                         <div className="w-5 h-5 rounded-full bg-gray-600"></div>
-                        Boxing
-                    </a>
+                        All Scores
+                    </Link>
                 </nav>
             </div>
 
-            {/* Fixtures */}
+            {/* Favorites */}
             <div>
-                <h3 className="font-bold text-sm mb-2">Fixtures</h3>
+                <h3 className="font-comfortaa font-semibold text-sm mb-3">Favorites</h3>
                 <div className="space-y-2">
                     <FixtureCard
                         homeTeam="WOL"
@@ -358,20 +312,48 @@ function HeroArticle() {
 
 // News Feed Component
 function NewsFeed() {
+    const [news, setNews] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchNews = async () => {
+            const { data } = await supabase
+                .from('sports_news')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(5);
+            if (data) setNews(data);
+            setLoading(false);
+        };
+        fetchNews();
+    }, []);
+
+    if (loading) return <div className="p-4 bg-white rounded-lg">Loading news...</div>;
+
+    if (news.length === 0) {
+        return (
+            <div className="space-y-4">
+                <NewsCard
+                    title="Orlando Pirates and Mamelodi Sundowns clash in PSL title race six-pointer"
+                    category="PSL"
+                    time="14h"
+                    author="Lorenz Kohler"
+                />
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-4">
-            <NewsCard
-                title="Orlando Pirates and Mamelodi Sundowns clash in PSL title race six-pointer"
-                category="PSL"
-                time="14h"
-                author="Lorenz Kohler"
-            />
-            <NewsCard
-                title="FA Cup: Wrexham to host Chelsea in fifth round"
-                category="FA CUP"
-                time="1d"
-                author="ESPN"
-            />
+            {news.map(item => (
+                <NewsCard
+                    key={item.id}
+                    title={item.title}
+                    category={item.category}
+                    time={new Date(item.created_at).toLocaleDateString()}
+                    author={item.author}
+                />
+            ))}
         </div>
     );
 }
@@ -388,28 +370,54 @@ function NewsCard({ title, category, time, author }: { title: string; category: 
 
 // Top Videos Component
 function TopVideos() {
+    const [videos, setVideos] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchVideos = async () => {
+            const { data } = await supabase
+                .from('sports_videos')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(5);
+            if (data) setVideos(data);
+            setLoading(false);
+        };
+        fetchVideos();
+    }, []);
+
     return (
         <div className="bg-white rounded-lg p-4 mb-4">
             <h2 className="font-bold mb-3">Top Videos</h2>
             <div className="space-y-3">
-                <VideoCard
-                    title="Slot believes Szoboszlai has what it takes to become a future Liverpool captain"
-                    duration="1:26"
-                    league="English FA Cup"
-                    isPlaying={true}
-                />
-                <VideoCard
-                    title="Arbeloa: Vinicius Jr is one of the best players in the world"
-                    duration="0:55"
-                    league="Spanish LALIGA"
-                    isPlaying={false}
-                />
-                <VideoCard
-                    title="Gibbs hails Arsenal's ability to 'bounce back' this season"
-                    duration="1:52"
-                    league="English Premier League"
-                    isPlaying={false}
-                />
+                {loading ? (
+                    <div className="text-sm text-gray-500">Loading videos...</div>
+                ) : videos.length > 0 ? (
+                    videos.map(video => (
+                        <VideoCard
+                            key={video.id}
+                            title={video.title}
+                            duration={video.duration}
+                            league={video.league}
+                            isPlaying={video.is_live}
+                        />
+                    ))
+                ) : (
+                    <>
+                        <VideoCard
+                            title="Slot believes Szoboszlai has what it takes to become a future Liverpool captain"
+                            duration="1:26"
+                            league="English FA Cup"
+                            isPlaying={true}
+                        />
+                        <VideoCard
+                            title="Arbeloa: Vinicius Jr is one of the best players in the world"
+                            duration="0:55"
+                            league="Spanish LALIGA"
+                            isPlaying={false}
+                        />
+                    </>
+                )}
             </div>
         </div>
     );

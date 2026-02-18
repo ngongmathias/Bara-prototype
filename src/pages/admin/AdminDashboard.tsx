@@ -5,13 +5,13 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Users, 
-  Building2, 
-  MapPin, 
-  Globe, 
-  MessageSquare, 
-  TrendingUp, 
+import {
+  Users,
+  Building2,
+  MapPin,
+  Globe,
+  MessageSquare,
+  TrendingUp,
   TrendingDown,
   Eye,
   Plus,
@@ -154,7 +154,7 @@ export const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setRefreshing(true);
-      
+
       // Fetch basic counts
       const [clerkCountsResult, businessesResult, citiesResult, countriesResult, reviewsResult, logsResult] = await Promise.all([
         supabase.rpc('get_clerk_user_counts'),
@@ -214,14 +214,14 @@ export const AdminDashboard = () => {
         .select('rating')
         .eq('status', 'approved');
 
-      const avgRating = ratingData && ratingData.length > 0 
-        ? ratingData.reduce((sum, review) => sum + review.rating, 0) / ratingData.length 
+      const avgRating = ratingData && ratingData.length > 0
+        ? ratingData.reduce((sum, review) => sum + review.rating, 0) / ratingData.length
         : 0;
 
       // Fetch recent activity (last 24 hours)
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      
+
       const { count: recentActivity } = await supabase
         .from('user_logs')
         .select('id', { count: 'exact', head: true })
@@ -241,8 +241,8 @@ export const AdminDashboard = () => {
         .limit(10);
 
       // Calculate growth rate (simplified)
-      const growthRate = lastMonthUsers > 0 
-        ? (newThisMonth - lastMonthUsers) / lastMonthUsers * 100 
+      const growthRate = lastMonthUsers > 0
+        ? (newThisMonth - lastMonthUsers) / lastMonthUsers * 100
         : 0;
 
       setStats({
@@ -364,7 +364,7 @@ export const AdminDashboard = () => {
     const now = new Date();
     const date = new Date(dateString);
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 1) return 'Just now';
     if (diffInHours < 24) return `${diffInHours}h ago`;
     if (diffInHours < 48) return '1 day ago';
@@ -386,14 +386,14 @@ export const AdminDashboard = () => {
       {/* Header with refresh button */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-comfortaa font-bold text-yp-dark">Dashboard Overview</h2>
+          <h2 className="text-2xl font-comfortaa font-bold text-gray-900">Dashboard Overview</h2>
           <p className="text-gray-600 font-roboto">Real-time metrics and system insights</p>
         </div>
-        <Button 
+        <Button
           onClick={fetchDashboardData}
           variant="outline"
           size="sm"
-          disabled={refreshing}
+          className="bg-white border-gray-200 hover:bg-gray-50 text-gray-700 font-roboto"
         >
           <RefreshCw className={cn("w-4 h-4 mr-2", refreshing && "animate-spin")} />
           Refresh Data
@@ -405,7 +405,7 @@ export const AdminDashboard = () => {
         {statCards.map((stat, index) => (
           <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-roboto font-medium text-gray-600">
+              <CardTitle className="text-sm font-comfortaa font-bold text-gray-600">
                 {stat.title}
               </CardTitle>
               <div className={`p-2 rounded-full ${stat.color}`}>
@@ -413,7 +413,7 @@ export const AdminDashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-comfortaa font-bold text-yp-dark">
+              <div className="text-2xl font-comfortaa font-bold text-gray-900">
                 {stat.value}
               </div>
               <div className="flex items-center space-x-1 mt-1">
@@ -422,9 +422,8 @@ export const AdminDashboard = () => {
                 ) : (
                   <ArrowDownRight className="w-4 h-4 text-red-600" />
                 )}
-                <span className={`text-sm font-roboto ${
-                  stat.changeType === "positive" ? "text-green-600" : "text-red-600"
-                }`}>
+                <span className={`text-sm font-roboto ${stat.changeType === "positive" ? "text-green-600" : "text-red-600"
+                  }`}>
                   {stat.change}
                 </span>
               </div>
@@ -486,8 +485,8 @@ export const AdminDashboard = () => {
                 <span className="text-sm font-roboto">Past/Completed</span>
                 <Badge variant="default" className="bg-gray-100 text-gray-800">{stats.completedEvents}</Badge>
               </div>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full mt-2"
                 onClick={() => navigate('/admin/events')}
               >
@@ -619,9 +618,8 @@ export const AdminDashboard = () => {
                   ) : (
                     <ArrowDownRight className="w-4 h-4 text-red-600" />
                   )}
-                  <span className={`font-semibold ${
-                    userMetrics.growthRate >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <span className={`font-semibold ${userMetrics.growthRate >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
                     {userMetrics.growthRate > 0 ? '+' : ''}{userMetrics.growthRate.toFixed(1)}%
                   </span>
                 </div>
@@ -652,21 +650,21 @@ export const AdminDashboard = () => {
                 recentActivities.map((activity) => (
                   <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                     {getActivityIcon(activity.action)}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-roboto font-medium text-gray-900 truncate">
-                      {activity.action}
-                    </p>
-                    <p className="text-sm font-roboto text-gray-600 truncate">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-roboto font-medium text-gray-900 truncate">
+                        {activity.action}
+                      </p>
+                      <p className="text-sm font-roboto text-gray-600 truncate">
                         {activity.user_email} • {activity.resource_type}
-                    </p>
-                    <p className="text-xs font-roboto text-gray-500 mt-1">
+                      </p>
+                      <p className="text-xs font-roboto text-gray-500 mt-1">
                         {formatTimeAgo(activity.created_at)}
-                    </p>
-                  </div>
-                  <Badge variant="outline" className="text-xs flex-shrink-0">
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-xs flex-shrink-0">
                       {activity.resource_type}
-                  </Badge>
-                </div>
+                    </Badge>
+                  </div>
                 ))
               )}
             </div>
@@ -686,62 +684,62 @@ export const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-4 flex-col space-y-2"
-                  onClick={() => navigate('/admin/businesses')}
-                >
-                  <Building2 className="w-5 h-5" />
-                  <span className="font-roboto text-sm">Add Business</span>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-4 flex-col space-y-2"
-                  onClick={() => navigate('/admin/cities')}
-                >
-                  <MapPin className="w-5 h-5" />
-                  <span className="font-roboto text-sm">Add City</span>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-4 flex-col space-y-2"
-                  onClick={() => navigate('/admin/countries')}
-                >
-                  <Globe className="w-5 h-5" />
-                  <span className="font-roboto text-sm">Add Country</span>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex-col space-y-2"
+                onClick={() => navigate('/admin/businesses')}
+              >
+                <Building2 className="w-5 h-5" />
+                <span className="font-roboto text-sm">Add Business</span>
               </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-4 flex-col space-y-2"
-                  onClick={() => navigate('/admin/reviews')}
-                >
-                  <MessageSquare className="w-5 h-5" />
-                  <span className="font-roboto text-sm">Moderate Reviews</span>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-4 flex-col space-y-2"
-                  onClick={() => navigate('/admin/marketplace')}
-                >
-                  <Target className="w-5 h-5" />
-                  <span className="font-roboto text-sm">Marketplace</span>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-4 flex-col space-y-2"
-                  onClick={() => navigate('/admin/sponsored-ads')}
-                >
-                  <Target className="w-5 h-5" />
-                  <span className="font-roboto text-sm">Manage Ads</span>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-4 flex-col space-y-2"
-                  onClick={() => navigate('/admin/reports')}
-                >
-                  <AlertCircle className="w-5 h-5" />
-                  <span className="font-roboto text-sm">View Reports</span>
-                </Button>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex-col space-y-2"
+                onClick={() => navigate('/admin/cities')}
+              >
+                <MapPin className="w-5 h-5" />
+                <span className="font-roboto text-sm">Add City</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex-col space-y-2"
+                onClick={() => navigate('/admin/countries')}
+              >
+                <Globe className="w-5 h-5" />
+                <span className="font-roboto text-sm">Add Country</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex-col space-y-2"
+                onClick={() => navigate('/admin/reviews')}
+              >
+                <MessageSquare className="w-5 h-5" />
+                <span className="font-roboto text-sm">Moderate Reviews</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex-col space-y-2"
+                onClick={() => navigate('/admin/marketplace')}
+              >
+                <Target className="w-5 h-5" />
+                <span className="font-roboto text-sm">Marketplace</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex-col space-y-2"
+                onClick={() => navigate('/admin/sponsored-ads')}
+              >
+                <Target className="w-5 h-5" />
+                <span className="font-roboto text-sm">Manage Ads</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex-col space-y-2"
+                onClick={() => navigate('/admin/reports')}
+              >
+                <AlertCircle className="w-5 h-5" />
+                <span className="font-roboto text-sm">View Reports</span>
+              </Button>
             </div>
           </CardContent>
         </Card>

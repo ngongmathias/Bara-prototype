@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,21 +10,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Calendar, 
-  MapPin, 
-  Clock, 
-  User, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Calendar,
+  MapPin,
+  Clock,
+  User,
   Image as ImageIcon,
   Search,
   Save,
   X,
   Eye,
   Upload,
-  Images
+  Upload,
+  Images,
+  Users
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEvents, useEventCategories, useEventManagement, useCountries, useCitiesByCountry } from '@/hooks/useEvents';
@@ -67,6 +70,8 @@ interface FormData {
   is_free: boolean;
   entry_fee: string;
   currency: string;
+  payment_instructions: string;
+  payment_contact: string;
 }
 
 export const UserEventsPage = () => {
@@ -78,7 +83,7 @@ export const UserEventsPage = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [galleryUploadOpen, setGalleryUploadOpen] = useState(false);
   const [selectedEventForGallery, setSelectedEventForGallery] = useState<DatabaseEvent | null>(null);
-  
+
   const { toast } = useToast();
   const { events, loading, searchEvents } = useEvents();
   const { categories } = useEventCategories();
@@ -114,21 +119,23 @@ export const UserEventsPage = () => {
     tickets: [],
     is_free: false,
     entry_fee: '',
-    currency: 'USD'
+    currency: 'USD',
+    payment_instructions: '',
+    payment_contact: ''
   });
 
   // Cities hook - only fetch when country is selected
   const { cities, loading: citiesLoading } = useCitiesByCountry(formData.country_id || '');
 
   // Filter events to only show user's events
-  const userEvents = events.filter(event => 
+  const userEvents = events.filter(event =>
     event.created_by_user_id === user?.id
   );
 
   // Apply search and category filters to user's events
   const filteredEvents = userEvents.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (event.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+      (event.description || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || event.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -175,13 +182,15 @@ export const UserEventsPage = () => {
       tickets: [],
       is_free: false,
       entry_fee: '',
-      currency: 'USD'
+      currency: 'USD',
+      payment_instructions: '',
+      payment_contact: ''
     });
     setEditingEvent(null);
     setImagePreview(null);
   };
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
+  const handleInputChange = (field: keyof FormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -218,7 +227,9 @@ export const UserEventsPage = () => {
       tickets: [],
       is_free: event.is_free || false,
       entry_fee: event.entry_fee?.toString() || '',
-      currency: event.currency || 'USD'
+      currency: event.currency || 'USD',
+      payment_instructions: (event as any).payment_instructions || '',
+      payment_contact: (event as any).payment_contact || ''
     });
     setImagePreview(event.event_image_url || null);
     setIsDialogOpen(true);
@@ -236,7 +247,7 @@ export const UserEventsPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       toast({
         title: 'Authentication required',
@@ -249,11 +260,12 @@ export const UserEventsPage = () => {
     try {
       // Exclude tickets from eventData as it has incompatible types
       const { tickets, ...formDataWithoutTickets } = formData;
-      
+
       const eventData = {
         ...formDataWithoutTickets,
         venue_latitude: formData.venue_latitude ? parseFloat(formData.venue_latitude) : null,
         venue_longitude: formData.venue_longitude ? parseFloat(formData.venue_longitude) : null,
+        capacity: formData.capacity ? parseInt(formData.capacity) : null,
         capacity: formData.capacity ? parseInt(formData.capacity) : null,
         tags: formData.hashtags,
         created_by_user_id: user.id,
@@ -269,12 +281,26 @@ export const UserEventsPage = () => {
         });
       } else {
         await createEvent(eventData);
+
+        // Send confirmation email
+        await supabase.functions.invoke('send-email', {
+          body: {
+            to: user.primaryEmailAddress?.emailAddress,
+            subject: 'Event Submission Received - Bara Afrika',
+            type: 'event_submitted',
+            data: {
+              organizerName: user.fullName || user.firstName || 'Organizer',
+              eventName: eventData.title,
+            },
+          },
+        });
+
         toast({
           title: 'Event created',
           description: 'Your event has been successfully created.',
         });
       }
-      
+
       setIsDialogOpen(false);
       resetForm();
       // Refresh events list
@@ -327,7 +353,7 @@ export const UserEventsPage = () => {
               Create Event
             </Button>
           </DialogTrigger>
-          
+
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
@@ -351,8 +377,8 @@ export const UserEventsPage = () => {
 
                   <div>
                     <Label htmlFor="category">Category *</Label>
-                    <Select 
-                      value={formData.category} 
+                    <Select
+                      value={formData.category}
                       onValueChange={(value) => handleInputChange('category', value)}
                     >
                       <SelectTrigger>
@@ -431,8 +457,8 @@ export const UserEventsPage = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="country_id">Country *</Label>
-                      <Select 
-                        value={formData.country_id} 
+                      <Select
+                        value={formData.country_id}
                         onValueChange={(value) => handleInputChange('country_id', value)}
                       >
                         <SelectTrigger>
@@ -449,8 +475,8 @@ export const UserEventsPage = () => {
                     </div>
                     <div>
                       <Label htmlFor="city_id">City *</Label>
-                      <Select 
-                        value={formData.city_id} 
+                      <Select
+                        value={formData.city_id}
                         onValueChange={(value) => handleInputChange('city_id', value)}
                         disabled={!formData.country_id || citiesLoading}
                       >
@@ -559,9 +585,9 @@ export const UserEventsPage = () => {
                 <Label>Event Image</Label>
                 <div className="mt-2 flex items-center space-x-4">
                   {imagePreview && (
-                    <img 
-                      src={imagePreview} 
-                      alt="Event preview" 
+                    <img
+                      src={imagePreview}
+                      alt="Event preview"
                       className="w-20 h-20 object-cover rounded-lg border"
                     />
                   )}
@@ -587,6 +613,89 @@ export const UserEventsPage = () => {
                     </Button>
                   </div>
                 </div>
+              </div>
+
+              {/* Pricing & Payment Instructions */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Pricing & Payment</h3>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="is_free"
+                    checked={formData.is_free}
+                    onChange={(e) => handleInputChange('is_free', e.target.checked)}
+                    className="w-5 h-5 rounded border-gray-300"
+                  />
+                  <Label htmlFor="is_free" className="cursor-pointer">This is a free event</Label>
+                </div>
+
+                {!formData.is_free && (
+                  <div className="space-y-4 pl-8 border-l-2 border-gray-200">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="entry_fee">Entry Fee *</Label>
+                        <Input
+                          id="entry_fee"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={formData.entry_fee}
+                          onChange={(e) => handleInputChange('entry_fee', e.target.value)}
+                          placeholder="e.g., 5000"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="currency">Currency</Label>
+                        <Select
+                          value={formData.currency}
+                          onValueChange={(value) => handleInputChange('currency', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select currency" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="USD">USD ($)</SelectItem>
+                            <SelectItem value="EUR">EUR (€)</SelectItem>
+                            <SelectItem value="GBP">GBP (£)</SelectItem>
+                            <SelectItem value="XAF">XAF (CFA)</SelectItem>
+                            <SelectItem value="XOF">XOF (CFA)</SelectItem>
+                            <SelectItem value="NGN">NGN (₦)</SelectItem>
+                            <SelectItem value="KES">KES (KSh)</SelectItem>
+                            <SelectItem value="GHS">GHS (GH₵)</SelectItem>
+                            <SelectItem value="ZAR">ZAR (R)</SelectItem>
+                            <SelectItem value="TZS">TZS (TSh)</SelectItem>
+                            <SelectItem value="UGX">UGX (USh)</SelectItem>
+                            <SelectItem value="RWF">RWF (RF)</SelectItem>
+                            <SelectItem value="ETB">ETB (Br)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="payment_instructions">Payment Instructions</Label>
+                      <Textarea
+                        id="payment_instructions"
+                        value={formData.payment_instructions}
+                        onChange={(e) => handleInputChange('payment_instructions', e.target.value)}
+                        rows={3}
+                        placeholder="How should attendees pay? E.g.:
+Momo: 6XX XXX XXX (Name)
+Bank: Account #1234 at XYZ Bank
+Orange Money: *144*1*XXXX#"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">These instructions will be shown to ticket buyers.</p>
+                    </div>
+                    <div>
+                      <Label htmlFor="payment_contact">Payment Contact (Phone/WhatsApp)</Label>
+                      <Input
+                        id="payment_contact"
+                        value={formData.payment_contact}
+                        onChange={(e) => handleInputChange('payment_contact', e.target.value)}
+                        placeholder="e.g., +237 6XX XXX XXX"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Social Media Links */}
@@ -638,9 +747,9 @@ export const UserEventsPage = () => {
 
               {/* Submit Buttons */}
               <div className="flex justify-end space-x-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setIsDialogOpen(false)}
                 >
                   Cancel
@@ -716,8 +825,8 @@ export const UserEventsPage = () => {
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         {event.event_image_url && (
-                          <img 
-                            src={event.event_image_url} 
+                          <img
+                            src={event.event_image_url}
                             alt={event.title}
                             className="w-10 h-10 object-cover rounded"
                           />
@@ -753,7 +862,7 @@ export const UserEventsPage = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge 
+                      <Badge
                         variant={new Date(event.start_date) > new Date() ? 'default' : 'secondary'}
                       >
                         {new Date(event.start_date) > new Date() ? 'Upcoming' : 'Past'}
@@ -801,6 +910,17 @@ export const UserEventsPage = () => {
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
+                        <Link to={`/users/dashboard/events/${event.id}/registrations`}>
+                          <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50 relative">
+                            <Users className="h-4 w-4 mr-1" />
+                            Registrations
+                            {event.current_registrations > 0 && (
+                              <span className="ml-2 bg-blue-100 text-blue-700 text-xs rounded-full px-1.5 py-0.5 font-medium">
+                                {event.current_registrations}
+                              </span>
+                            )}
+                          </Button>
+                        </Link>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -812,7 +932,7 @@ export const UserEventsPage = () => {
               <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No events found</h3>
               <p className="text-gray-600 mb-6">
-                {searchQuery || selectedCategory !== 'all' 
+                {searchQuery || selectedCategory !== 'all'
                   ? 'Try adjusting your search or filters.'
                   : "You haven't created any events yet. Create your first event to get started."
                 }

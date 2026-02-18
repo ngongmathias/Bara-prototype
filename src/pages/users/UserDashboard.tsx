@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { TopBannerAd } from '@/components/TopBannerAd';
@@ -7,21 +7,22 @@ import { useUser } from '@clerk/clerk-react';
 import { Navigate, Link, Outlet, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  User, 
-  Calendar, 
-  Settings, 
-  Shield, 
-  Mail, 
-  Phone, 
-  Building, 
+import {
+  User,
+  Calendar,
+  Settings,
+  Shield,
+  Mail,
+  Phone,
+  Building,
   Star,
   CheckCircle,
   AlertCircle,
   Image,
   ShoppingBag,
   Plus,
-  Heart
+  Heart,
+  Ticket
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -52,7 +53,7 @@ export const UserDashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <TopBannerAd />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Navigation */}
@@ -62,9 +63,9 @@ export const UserDashboard = () => {
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0">
                     {user?.imageUrl ? (
-                      <img 
-                        src={user.imageUrl} 
-                        alt={user.fullName || 'User'} 
+                      <img
+                        src={user.imageUrl}
+                        alt={user.fullName || 'User'}
                         className="h-12 w-12 rounded-full object-cover border-2 border-blue-100"
                       />
                     ) : (
@@ -87,31 +88,41 @@ export const UserDashboard = () => {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="pt-0">
                 <nav className="space-y-2">
                   <Link to="/users/dashboard">
-                    <Button 
-                      variant={isActive('/users/dashboard') ? 'default' : 'ghost'} 
+                    <Button
+                      variant={isActive('/users/dashboard') ? 'default' : 'ghost'}
                       className="w-full justify-start"
                     >
                       <User className="mr-3 h-4 w-4" />
                       Dashboard
                     </Button>
                   </Link>
-                  
+
                   <Link to="/users/dashboard/events">
-                    <Button 
-                      variant={isActive('/users/dashboard/events') ? 'default' : 'ghost'} 
+                    <Button
+                      variant={isActive('/users/dashboard/events') ? 'default' : 'ghost'}
                       className="w-full justify-start"
                     >
                       <Calendar className="mr-3 h-4 w-4" />
                       My Events
                     </Button>
                   </Link>
-                  
+
+                  <Link to="/users/dashboard/tickets">
+                    <Button
+                      variant={isActive('/users/dashboard/tickets') ? 'default' : 'ghost'}
+                      className="w-full justify-start"
+                    >
+                      <Ticket className="mr-3 h-4 w-4" />
+                      My Tickets
+                    </Button>
+                  </Link>
+
                   <Link to="/users/dashboard/listings">
-                    <Button 
+                    <Button
                       variant={isActive('/users/dashboard/listings') ? 'default' : 'ghost'}
                       className="w-full justify-start"
                     >
@@ -119,9 +130,9 @@ export const UserDashboard = () => {
                       My Listings
                     </Button>
                   </Link>
-                  
+
                   <Link to="/marketplace/my-listings">
-                    <Button 
+                    <Button
                       variant={isActive('/marketplace/my-listings') ? 'default' : 'ghost'}
                       className="w-full justify-start"
                     >
@@ -129,9 +140,9 @@ export const UserDashboard = () => {
                       My Marketplace Ads
                     </Button>
                   </Link>
-                  
+
                   <Link to="/marketplace/post">
-                    <Button 
+                    <Button
                       variant="ghost"
                       className="w-full justify-start"
                     >
@@ -139,20 +150,20 @@ export const UserDashboard = () => {
                       Post Marketplace Ad
                     </Button>
                   </Link>
-                  
+
                   <Link to="/users/dashboard/banner-submissions">
-                    <Button 
-                      variant={isActive('/users/dashboard/banner-submissions') ? 'default' : 'ghost'} 
+                    <Button
+                      variant={isActive('/users/dashboard/banner-submissions') ? 'default' : 'ghost'}
                       className="w-full justify-start"
                     >
                       <Image className="mr-3 h-4 w-4" />
                       Banner Submissions
                     </Button>
                   </Link>
-                  
+
                   <Link to="/users/dashboard/profile">
-                    <Button 
-                      variant={isActive('/users/dashboard/profile') ? 'default' : 'ghost'} 
+                    <Button
+                      variant={isActive('/users/dashboard/profile') ? 'default' : 'ghost'}
                       className="w-full justify-start"
                     >
                       <Settings className="mr-3 h-4 w-4" />
@@ -181,7 +192,7 @@ export const UserDashboard = () => {
                     ✓ Verified
                   </Badge>
                 </div>
-                
+
                 {/* <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <Phone className="h-4 w-4 text-gray-400 mr-2" />
@@ -303,7 +314,7 @@ export const UserDashboardHome = () => {
                 </div>
               </Button>
             </Link>
-            
+
             <Link to="/user/profile">
               <Button variant="outline" className="w-full h-16 text-left justify-start">
                 <Settings className="mr-3 h-6 w-6" />
@@ -334,7 +345,7 @@ export const UserDashboardHome = () => {
                 <p className="text-sm text-green-700">Your email has been verified</p>
               </div>
             </div>
-            
+
             <div className="flex items-center p-4 bg-gray-50 rounded-lg">
               <AlertCircle className="h-5 w-5 text-gray-400 mr-3" />
               <div>
@@ -345,7 +356,7 @@ export const UserDashboardHome = () => {
                 Verify
               </Button>
             </div>
-            
+
             <div className="flex items-center p-4 bg-gray-50 rounded-lg">
               <AlertCircle className="h-5 w-5 text-gray-400 mr-3" />
               <div>

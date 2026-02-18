@@ -103,7 +103,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
         {/* Responsive Grid Layout */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8">
-          
+
           {/* About Column - Full width on mobile, 2 columns on larger screens */}
           <div className="lg:col-span-2">
             <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-3 sm:mb-4 pb-2 border-b-2 border-[#70905a] font-comfortaa">
@@ -175,7 +175,7 @@ const Footer = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2">
                   {(showAllCountries ? countries : countries.slice(0, 12)).map((country) => (
                     <div key={country.id} className="truncate">
-                      <Link 
+                      <Link
                         to={`/countries/${countryToSlug(country)}`}
                         onClick={scrollToTop}
                         className="text-gray-700 hover:text-black transition-colors flex items-center font-roboto text-sm sm:text-base"
@@ -287,6 +287,10 @@ const Footer = () => {
 
         {/* Copyright Information */}
         <div className="border-t border-gray-300 pt-3 sm:pt-4 md:pt-6">
+          <div className="flex justify-center space-x-6 mb-4 text-xs sm:text-sm text-gray-500 font-roboto">
+            <Link to="/terms" onClick={scrollToTop} className="hover:text-gray-900 transition-colors">Terms of Service</Link>
+            <Link to="/privacy" onClick={scrollToTop} className="hover:text-gray-900 transition-colors">Privacy Policy</Link>
+          </div>
           <div className="text-center text-xs sm:text-sm text-gray-500 space-y-1 sm:space-y-2">
             <p className="font-roboto">{t('footer.copyright')}</p>
             <p className="font-roboto">{t('footer.trademark')}</p>

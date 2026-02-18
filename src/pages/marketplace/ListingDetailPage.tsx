@@ -7,11 +7,11 @@ import { BottomBannerAd } from '@/components/BottomBannerAd';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Heart, 
-  Share2, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  Share2,
   Flag,
   MapPin,
   Calendar,
@@ -22,8 +22,11 @@ import {
   User,
   Clock,
   CheckCircle,
-  X
+  X,
+  MessageCircle
 } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
+import { MessagingService } from '@/lib/MessagingService';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -32,7 +35,8 @@ export const ListingDetailPage = () => {
   const { listingId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+  const { user } = useUser();
+
   const [listing, setListing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -73,7 +77,7 @@ export const ListingDetailPage = () => {
       };
 
       setListing(transformedListing);
-      
+
       // Fetch related listings
       if (data.category_id) {
         fetchRelatedListings(data.category_id, data.id);
@@ -127,15 +131,47 @@ export const ListingDetailPage = () => {
   };
 
   const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === 0 ? (listing?.images?.length || 1) - 1 : prev - 1
     );
   };
 
   const handleNextImage = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === (listing?.images?.length || 1) - 1 ? 0 : prev + 1
     );
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === (listing?.images?.length || 1) - 1 ? 0 : prev + 1
+    );
+  };
+
+  const handleBaraChat = async () => {
+    if (!user) {
+      toast({ title: 'Please sign in', description: 'You need to be signed in to chat with sellers.' });
+      navigate('/user/sign-in');
+      return;
+    }
+
+    if (listing?.user_id && user.id === listing.user_id) {
+      toast({ title: 'Cannot chat', description: 'This is your own listing.', variant: 'destructive' });
+      return;
+    }
+
+    if (!listing?.user_id) {
+      toast({ title: 'Error', description: 'Seller information missing.', variant: 'destructive' });
+      return;
+    }
+
+    try {
+      const conversationId = await MessagingService.startConversation(user.id, listing.user_id);
+      navigate(`/messages/${conversationId}`);
+    } catch (error) {
+      console.error(error);
+      toast({ title: 'Error', description: 'Failed to start chat', variant: 'destructive' });
+    }
   };
 
   const handleWhatsAppContact = () => {
@@ -334,9 +370,8 @@ export const ListingDetailPage = () => {
                     <button
                       key={image.id}
                       onClick={() => setCurrentImageIndex(index)}
-                      className={`flex-shrink-0 w-20 h-20 rounded border-2 overflow-hidden ${
-                        index === currentImageIndex ? 'border-blue-600' : 'border-gray-200'
-                      }`}
+                      className={`flex-shrink-0 w-20 h-20 rounded border-2 overflow-hidden ${index === currentImageIndex ? 'border-blue-600' : 'border-gray-200'
+                        }`}
                     >
                       <img
                         src={image.image_url}
@@ -419,6 +454,14 @@ export const ListingDetailPage = () => {
 
               {/* Contact Buttons */}
               <div className="space-y-3">
+                <Button
+                  onClick={handleBaraChat}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold h-12"
+                >
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Chat on Bara
+                </Button>
+
                 {listing.seller_whatsapp && (
                   <Button
                     onClick={handleWhatsAppContact}
@@ -527,7 +570,7 @@ export const ListingDetailPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedListings.map((item) => {
                 const itemImage = item.images?.find((img: any) => img.is_primary)?.image_url ||
-                                item.images?.[0]?.image_url;
+                  item.images?.[0]?.image_url;
                 return (
                   <div
                     key={item.id}

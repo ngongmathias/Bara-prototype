@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MainLayout } from '@/components/layout/MainLayout';
 
 interface Match {
     id: string;
@@ -47,221 +48,144 @@ const mockMatches: Match[] = [
     },
 ];
 
-// Top Navigation Bar Component
-function TopNavBar() {
-    const [isMoreSportsOpen, setIsMoreSportsOpen] = useState(false);
-
-    return (
-        <nav className="bg-black text-white">
-            <div className="flex items-center justify-between px-4 h-12">
-                {/* ESPN Logo + Sports */}
-                <div className="flex items-center gap-6">
-                    <div className="bg-[#CC0000] px-3 py-1 font-bold text-xl">ESPN</div>
-                    <a href="#" className="text-sm hover:underline">Football</a>
-                    <a href="#" className="text-sm hover:underline">NBA</a>
-                    <a href="#" className="text-sm hover:underline">NFL</a>
-                    <a href="#" className="text-sm hover:underline">MLB</a>
-                    <a href="#" className="text-sm hover:underline">Cricket</a>
-                    <a href="#" className="text-sm hover:underline">Boxing</a>
-                    <a href="#" className="text-sm hover:underline">Rugby</a>
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsMoreSportsOpen(!isMoreSportsOpen)}
-                            className="text-sm hover:underline"
-                        >
-                            More Sports
-                        </button>
-                        {isMoreSportsOpen && (
-                            <div className="absolute top-full left-0 mt-1 bg-white text-black shadow-lg rounded p-4 w-48 z-50">
-                                <a href="#" className="block py-1 hover:underline text-sm">Tennis</a>
-                                <a href="#" className="block py-1 hover:underline text-sm">Golf</a>
-                                <a href="#" className="block py-1 hover:underline text-sm">F1</a>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Right side */}
-                <div className="flex items-center gap-4">
-                    <a href="#" className="text-sm hover:underline">Fantasy</a>
-                    <button className="text-white">🔍</button>
-                    <button className="text-white">👤</button>
-                </div>
-            </div>
-        </nav>
-    );
-}
-
 export default function SportsScores() {
     const [selectedDate, setSelectedDate] = useState('MON');
 
     const days = ['FRI', 'SAT', 'SUN', 'MON', 'TUE', 'WED', 'THU'];
     const dates = ['12 FEB', '13 FEB', '14 FEB', '16 FEB', '17 FEB', '18 FEB', '19 FEB'];
 
-    // Group matches by league
-    const groupedMatches = mockMatches.reduce((acc, match) => {
-        if (!acc[match.league]) {
-            acc[match.league] = [];
-        }
-        acc[match.league].push(match);
-        return acc;
-    }, {} as Record<string, Match[]>);
-
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Top Navigation Bar */}
-            <TopNavBar />
-
-            {/* Header */}
-            <div className="bg-white border-b">
-                <div className="max-w-6xl mx-auto px-4 py-6">
-                    <h1 className="text-3xl font-bold mb-4">Soccer Scores</h1>
-
-                    {/* Date Picker */}
-                    <div className="flex items-center gap-2">
-                        <button className="p-2 hover:bg-gray-100 rounded">‹</button>
-                        {days.map((day, index) => (
-                            <button
-                                key={day}
-                                onClick={() => setSelectedDate(day)}
-                                className={`flex-1 text-center py-3 rounded transition ${selectedDate === day
-                                    ? 'bg-black text-white font-bold'
-                                    : 'hover:bg-gray-100'
-                                    }`}
-                            >
-                                <div className="text-xs">{day}</div>
-                                <div className="text-sm">{dates[index]}</div>
-                            </button>
-                        ))}
-                        <button className="p-2 hover:bg-gray-100 rounded">›</button>
-                        <button className="p-2 hover:bg-gray-100 rounded border border-gray-300">
-                            📅
-                        </button>
+        <MainLayout>
+            <div className="min-h-screen bg-gray-50">
+                {/* Page Header */}
+                <div className="bg-white border-b">
+                    <div className="max-w-7xl mx-auto px-4 py-6">
+                        <h1 className="text-3xl font-comfortaa font-semibold">Scores & Fixtures</h1>
                     </div>
                 </div>
-            </div>
 
-            {/* Matches Grid */}
-            <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-12 gap-6">
-                {/* Matches List */}
-                <div className="col-span-12 lg:col-span-9 space-y-6">
-                    <p className="text-gray-600">Monday, February 16, 2026</p>
+                {/* Date Selector */}
+                <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <div className="flex gap-2 overflow-x-auto py-4">
+                            {days.map((day, index) => (
+                                <button
+                                    key={day}
+                                    onClick={() => setSelectedDate(day)}
+                                    className={`flex-shrink-0 px-6 py-3 rounded-lg font-semibold transition ${selectedDate === day
+                                            ? 'bg-black text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                >
+                                    <div className="text-sm">{day}</div>
+                                    <div className="text-xs mt-1">{dates[index]}</div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
 
-                    {Object.entries(groupedMatches).map(([league, matches]) => (
-                        <div key={league} className="bg-white rounded-lg overflow-hidden">
-                            {/* League Header */}
-                            <div className="bg-gray-100 px-4 py-2 font-semibold">
-                                {league}
-                            </div>
-
-                            {/* Match Rows */}
-                            {matches.map((match) => (
+                {/* Matches */}
+                <div className="max-w-7xl mx-auto px-4 py-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Main Content */}
+                        <div className="lg:col-span-2 space-y-6">
+                            {mockMatches.map((match) => (
                                 <MatchRow key={match.id} match={match} />
                             ))}
                         </div>
-                    ))}
-                </div>
 
-                {/* Right Sidebar - News */}
-                <aside className="col-span-12 lg:col-span-3">
-                    <div className="bg-white rounded-lg p-4">
-                        <h2 className="font-bold mb-4">Football News</h2>
-                        <div className="space-y-4">
-                            <NewsCard
-                                title="PSG coach Luis Enrique slams 'worthless' Ousmane Dembélé take"
-                                time="1h"
-                                source="ESPN News Services"
-                            />
-                            <NewsCard
-                                title="Madrid's Arbeloa on Benfica: We want to win, it's not about revenge"
-                                time="1h"
-                                source="Alex Kirkland"
-                            />
+                        {/* Sidebar */}
+                        <div className="space-y-6">
+                            <div className="bg-white rounded-lg p-6 shadow-sm border">
+                                <h2 className="font-comfortaa font-semibold text-lg mb-4">Top News</h2>
+                                <div className="space-y-4">
+                                    <NewsCard
+                                        title="Transfer deadline day: All the latest moves"
+                                        time="2 hours ago"
+                                        source="Bara Sports"
+                                    />
+                                    <NewsCard
+                                        title="Champions League draw: Key matchups revealed"
+                                        time="5 hours ago"
+                                        source="Bara Sports"
+                                    />
+                                    <NewsCard
+                                        title="Injury update: Star player out for 3 weeks"
+                                        time="1 day ago"
+                                        source="Bara Sports"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </aside>
+                </div>
             </div>
-        </div>
+        </MainLayout>
     );
 }
 
 function MatchRow({ match }: { match: Match }) {
-    const [expanded, setExpanded] = useState(false);
-
     return (
-        <div className="border-b last:border-b-0">
-            <div
-                className="px-4 py-4 hover:bg-gray-50 cursor-pointer"
-                onClick={() => setExpanded(!expanded)}
-            >
-                <div className="grid grid-cols-12 gap-4 items-center">
-                    {/* Score/Competition Icon */}
-                    <div className="col-span-1 text-center">
-                        <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                            {match.league.substring(0, 2)}
+        <div className="bg-white rounded-lg shadow-sm border hover:shadow-md transition cursor-pointer">
+            {/* League Header */}
+            <div className="bg-gray-50 px-4 py-2 border-b">
+                <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-gray-700">{match.league}</span>
+                    <span className={`text-xs px-2 py-1 rounded font-semibold ${match.status === 'LIVE' ? 'bg-red-100 text-red-700' :
+                            match.status === 'FT' ? 'bg-gray-200 text-gray-700' :
+                                'bg-yellow-100 text-yellow-700'
+                        }`}>
+                        {match.status}
+                    </span>
+                </div>
+            </div>
+
+            {/* Match Details */}
+            <div className="p-4">
+                <div className="flex items-center justify-between">
+                    {/* Home Team */}
+                    <div className="flex items-center gap-3 flex-1">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold">
+                            {match.homeTeam.substring(0, 3).toUpperCase()}
                         </div>
+                        <span className="font-semibold">{match.homeTeam}</span>
                     </div>
 
-                    {/* Teams */}
-                    <div className="col-span-6 lg:col-span-7">
-                        <div className="flex items-center justify-between mb-1">
-                            <div className="flex items-center gap-2">
-                                <span className="font-semibold">{match.homeTeam}</span>
-                            </div>
-                            <span className="font-bold text-lg">{match.homeScore}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <span className="font-semibold">{match.awayTeam}</span>
-                            </div>
-                            <span className="font-bold text-lg">{match.awayScore}</span>
-                        </div>
-                        {match.minute && (
-                            <div className="text-xs text-red-600 font-semibold mt-1">
-                                {match.minute}'
-                            </div>
-                        )}
-                        {match.status === 'FT' && (
-                            <div className="text-xs text-gray-500 mt-1">Full Time</div>
-                        )}
+                    {/* Score */}
+                    <div className="flex items-center gap-4 px-6">
+                        <span className="text-2xl font-bold">{match.homeScore}</span>
+                        <span className="text-gray-400">-</span>
+                        <span className="text-2xl font-bold">{match.awayScore}</span>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="col-span-5 lg:col-span-4 flex gap-2 justify-end">
-                        <a
-                            href={`/sports/game/${match.id}`}
-                            className="px-3 py-1 border border-blue-600 text-blue-600 rounded text-sm hover:bg-blue-50"
-                        >
-                            Gamecast
-                        </a>
-                        <button className="px-3 py-1 border border-blue-600 text-blue-600 rounded text-sm hover:bg-blue-50">
-                            Statistics
-                        </button>
+                    {/* Away Team */}
+                    <div className="flex items-center gap-3 flex-1 justify-end">
+                        <span className="font-semibold">{match.awayTeam}</span>
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold">
+                            {match.awayTeam.substring(0, 3).toUpperCase()}
+                        </div>
                     </div>
                 </div>
 
                 {/* Venue */}
-                <div className="text-xs text-gray-500 mt-2">{match.venue}</div>
-            </div>
-
-            {/* Expanded Details */}
-            {expanded && (
-                <div className="px-4 py-3 bg-gray-50 border-t">
-                    <p className="text-sm text-gray-600">
-                        Match details and statistics would appear here...
-                    </p>
+                <div className="mt-3 text-xs text-gray-500 text-center">
+                    {match.venue}
                 </div>
-            )}
+            </div>
         </div>
     );
 }
 
-
 function NewsCard({ title, time, source }: { title: string; time: string; source: string }) {
     return (
-        <article className="cursor-pointer hover:underline">
-            <h3 className="font-semibold text-sm mb-1">{title}</h3>
-            <p className="text-xs text-gray-500">{time} • {source}</p>
-        </article>
+        <div className="pb-4 border-b last:border-0 cursor-pointer hover:bg-gray-50 p-2 rounded">
+            <h3 className="font-semibold text-sm leading-snug mb-1">{title}</h3>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+                <span>{source}</span>
+                <span>•</span>
+                <span>{time}</span>
+            </div>
+        </div>
     );
 }

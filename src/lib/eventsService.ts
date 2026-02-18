@@ -5,13 +5,13 @@ export const uploadEventImage = async (file: File, eventId: string): Promise<str
   const fileExt = file.name.split('.').pop();
   const randomPart = Math.random().toString(36).slice(2);
   const fileName = `${eventId}/${Date.now()}-${randomPart}.${fileExt}`;
-  
+
   const { data, error } = await supabase.storage
     .from('event-images')
     .upload(fileName, file);
-    
+
   if (error) throw error;
-  
+
   const { data: { publicUrl } } = supabase.storage
     .from('event-images')
     .getPublicUrl(fileName);
@@ -27,7 +27,7 @@ export const deleteEventImage = async (imageUrl: string): Promise<void> => {
   const { error } = await supabase.storage
     .from('event-images')
     .remove([fileName]);
-    
+
   if (error) throw error;
 };
 
@@ -108,12 +108,17 @@ export interface Event {
   created_at: string;
   updated_at: string;
   updated_by?: string;
-  
+
+  // Ticket info
+  is_free?: boolean;
+  entry_fee?: number;
+  currency?: string;
+
   // User tracking fields
   created_by_user_id?: string;
   created_by_email?: string;
   created_by_name?: string;
-  
+
   // Related data
   country_name?: string;
   country_code?: string;
@@ -125,6 +130,29 @@ export interface Event {
   category_color?: string;
   tickets?: EventTicket[];
   creator_verification?: any;
+
+  // Payment and capacity fields
+  payment_instructions?: string;
+  payment_contact?: string;
+  max_capacity?: number;
+  current_registrations?: number;
+}
+
+export interface EventRegistration {
+  id: string;
+  event_id: string;
+  user_id: string;
+  user_email: string;
+  user_name?: string;
+  ticket_type: string;
+  quantity: number;
+  payment_status: 'pending' | 'confirmed' | 'cancelled';
+  payment_method?: string;
+  payment_proof_url?: string;
+  confirmed_by_user: boolean;
+  confirmed_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface EventSearchParams {
@@ -267,7 +295,7 @@ export class EventsService {
       let query = supabase
         .from('events')
         .select('*');
-      
+
       // Only filter by is_public if not including private events (for admin)
       if (!include_private) {
         console.log('⚠️ Filtering by is_public: true only');
@@ -275,7 +303,7 @@ export class EventsService {
       } else {
         console.log('✅ Including ALL events (public and private)');
       }
-      
+
       // Only filter by status if not including all statuses (for public-facing pages)
       if (!include_all_statuses) {
         console.log('⚠️ Filtering by status: upcoming, ongoing only');
@@ -283,7 +311,7 @@ export class EventsService {
       } else {
         console.log('✅ Including ALL statuses (no filter)');
       }
-      
+
       query = query
         .order('start_date', { ascending: true })
         .range(offset, offset + limit - 1);
@@ -329,7 +357,7 @@ export class EventsService {
           .from('events')
           .select('*', { count: 'exact', head: true })
           .eq('is_public', true);
-        
+
         // Only filter by status if not including all statuses
         if (!include_all_statuses) {
           countQuery = countQuery.in('event_status', ['upcoming', 'ongoing']);
@@ -364,7 +392,7 @@ export class EventsService {
 
       // Get related data in batches to avoid N+1 queries
       const events: Event[] = [];
-      
+
       if (data && data.length > 0) {
         // Get unique IDs
         const countryIds = [...new Set(data.map(e => e.country_id).filter(Boolean))];
@@ -373,7 +401,7 @@ export class EventsService {
 
         // Batch fetch all related data
         const [countriesResult, citiesResult, categoriesResult] = await Promise.all([
-          countryIds.length > 0 
+          countryIds.length > 0
             ? supabase.from('countries').select('id, name, code').in('id', countryIds)
             : Promise.resolve({ data: [] }),
           cityIds.length > 0
@@ -435,7 +463,7 @@ export class EventsService {
 
       // Get related data separately
       const events: Event[] = [];
-      
+
       for (const event of data || []) {
         let countryData = null;
         let cityData = null;
@@ -564,10 +592,10 @@ export class EventsService {
   static async createEvent(eventData: Partial<Event>): Promise<Event> {
     try {
       console.log('Creating event with data:', eventData);
-      
+
       // Remove hashtags field as it doesn't exist in the database schema
       const { hashtags, ...cleanEventData } = eventData as any;
-      
+
       const { data, error } = await supabase
         .from('events')
         .insert([cleanEventData])
@@ -635,7 +663,7 @@ export class EventsService {
     try {
       // Remove hashtags field as it doesn't exist in the database schema
       const { hashtags, ...cleanEventData } = eventData as any;
-      
+
       const { data, error } = await supabase
         .from('events')
         .update(cleanEventData)
@@ -799,7 +827,7 @@ export class EventsService {
 
       // Get related data separately
       const events: Event[] = [];
-      
+
       for (const event of data || []) {
         let countryData = null;
         let cityData = null;
@@ -868,7 +896,7 @@ export class EventsService {
 
       // Get related data separately
       const events: Event[] = [];
-      
+
       for (const event of data || []) {
         let countryData = null;
         let cityData = null;
@@ -980,9 +1008,9 @@ export class EventsService {
     try {
       const { data, error } = await supabase
         .rpc('get_user_verification_status', { user_id_param: userId });
-      
+
       if (error) throw error;
-      
+
       // Convert array to object
       const verificationStatus = {
         email: false,
@@ -990,11 +1018,11 @@ export class EventsService {
         business: false,
         trusted_organizer: false
       };
-      
+
       data?.forEach((verification: any) => {
         verificationStatus[verification.verification_type as keyof typeof verificationStatus] = verification.is_verified;
       });
-      
+
       return verificationStatus;
     } catch (error) {
       console.error('Error getting user verification status:', error);
@@ -1018,7 +1046,7 @@ export class EventsService {
           verified_at: new Date().toISOString(),
           verification_data: verificationData
         });
-      
+
       if (error) throw error;
     } catch (error) {
       console.error('Error creating user verification:', error);
@@ -1070,7 +1098,7 @@ export class EventsService {
   static async getEventsWithCreatorInfo(params: EventSearchParams = {}): Promise<Event[]> {
     try {
       const events = await this.searchEvents(params);
-      
+
       // Get unique user IDs from events that have creators
       const userIds = [...new Set(
         events.events
@@ -1079,13 +1107,13 @@ export class EventsService {
       )].filter(Boolean) as string[];
 
       // Get verification status for all creators
-      const verificationPromises = userIds.map(userId => 
+      const verificationPromises = userIds.map(userId =>
         this.getUserVerificationStatus(userId).then(verification => ({
           userId,
           verification
         }))
       );
-      
+
       const verifications = await Promise.all(verificationPromises);
       const verificationMap = new Map(
         verifications.map(v => [v.userId, v.verification])
@@ -1094,8 +1122,8 @@ export class EventsService {
       // Add creator verification info to events
       const eventsWithCreatorInfo = events.events.map(event => ({
         ...event,
-        creator_verification: event.created_by_user_id 
-          ? verificationMap.get(event.created_by_user_id) 
+        creator_verification: event.created_by_user_id
+          ? verificationMap.get(event.created_by_user_id)
           : null
       }));
 
@@ -1103,6 +1131,128 @@ export class EventsService {
     } catch (error) {
       console.error('Error getting events with creator info:', error);
       throw error;
+    }
+  }
+
+  // ========== EVENT REGISTRATION METHODS ==========
+
+  // Create event registration
+  static async createEventRegistration(registration: Omit<EventRegistration, 'id' | 'created_at' | 'updated_at'>): Promise<EventRegistration> {
+    try {
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .insert([registration])
+        .select('*')
+        .single();
+
+      if (error) throw error;
+
+      // Increment event registration count
+      await supabase.rpc('increment_event_registrations', {
+        event_uuid: registration.event_id,
+        qty: registration.quantity
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error creating event registration:', error);
+      throw error;
+    }
+  }
+
+  // Get user's registrations
+  static async getUserRegistrations(userId: string): Promise<EventRegistration[]> {
+    try {
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching user registrations:', error);
+      throw error;
+    }
+  }
+
+  // Get registrations for an event
+  static async getEventRegistrations(eventId: string): Promise<EventRegistration[]> {
+    try {
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .select('*')
+        .eq('event_id', eventId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching event registrations:', error);
+      throw error;
+    }
+  }
+
+  // Update registration payment status
+  static async updateRegistrationStatus(
+    registrationId: string,
+    status: 'pending' | 'confirmed' | 'cancelled'
+  ): Promise<EventRegistration> {
+    try {
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .update({ payment_status: status, updated_at: new Date().toISOString() })
+        .eq('id', registrationId)
+        .select('*')
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating registration status:', error);
+      throw error;
+    }
+  }
+
+  // Confirm payment by user
+  static async confirmPaymentByUser(registrationId: string): Promise<EventRegistration> {
+    try {
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .update({
+          confirmed_by_user: true,
+          confirmed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', registrationId)
+        .select('*')
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      throw error;
+    }
+  }
+
+  // Check if event is sold out
+  static async isEventSoldOut(eventId: string): Promise<boolean> {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('max_capacity, current_registrations')
+        .eq('id', eventId)
+        .single();
+
+      if (error) throw error;
+
+      if (!data.max_capacity) return false; // No capacity limit
+      return (data.current_registrations || 0) >= data.max_capacity;
+    } catch (error) {
+      console.error('Error checking sold out status:', error);
+      return false;
     }
   }
 }
