@@ -160,6 +160,32 @@ export default function StreamsHome() {
                                 )}
                             </Section>
 
+                            {/* Popular Radio */}
+                            <Section title="Popular radio" showAllLink="/streams/radio">
+                                {[
+                                    { id: 'r1', title: 'Mike Kayihura', images: ['https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=200&h=200&fit=crop'], color: 'bg-[#509bf5]', footer: 'With Andy Bumuntu, Yvan Buravan, Igor...' },
+                                    { id: 'r2', title: 'Kivumbi King', images: ['https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-[#9b50f5]', footer: 'With Amalon, Nel Ngabo, Ish Kevin and more' },
+                                    { id: 'r3', title: 'The Ben', images: ['https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-[#f5509b]', footer: 'With Meddy, Bruce Melodie, Christopher...' },
+                                    { id: 'r4', title: 'Bruce Melodie', images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-[#50f59b]', footer: 'With Davis D, Chriss Eazy, Juno Kizigenza and more' },
+                                    { id: 'r5', title: 'Rema', images: ['https://plus.unsplash.com/premium_photo-1661601614051-9e7978280628?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-[#f59b50]', footer: 'With Shallipopi, ODUMODUBLVCK, Kizz...' }
+                                ].map(radio => (
+                                    <RadioCard key={radio.id} {...radio} />
+                                ))}
+                            </Section>
+
+                            {/* Featured Charts */}
+                            <Section title="Featured Charts" showAllLink="/streams/charts">
+                                {[
+                                    { id: 'c1', title: 'Top Songs Global', type: 'Weekly Music Charts', gradient: 'from-[#4e3c92] to-[#6a54bd]', footer: 'Your weekly update of the most played tracks...' },
+                                    { id: 'c2', title: 'Top Songs USA', type: 'Weekly Music Charts', gradient: 'from-[#e91e63] to-[#ff4081]', footer: 'Your weekly update of the most played tracks...' },
+                                    { id: 'c3', title: 'Top 50 Global', type: 'Daily Update', gradient: 'from-[#009688] to-[#26a69a]', footer: 'Your daily update of the most played tracks right...' },
+                                    { id: 'c4', title: 'Top 50 USA', type: 'Daily Update', gradient: 'from-[#f44336] to-[#ef5350]', footer: 'Your daily update of the most played tracks right...' },
+                                    { id: 'c5', title: 'Viral 50 Global', type: 'Daily Update', gradient: 'from-[#4caf50] to-[#66bb6a]', footer: 'Your daily update of the most viral tracks right...' }
+                                ].map(chart => (
+                                    <ChartCard key={chart.id} {...chart} />
+                                ))}
+                            </Section>
+
                             {/* Popular Artists */}
                             <Section title="Popular artists" showAllLink="/streams/artists">
                                 {popularArtists.length > 0 ? (
@@ -230,6 +256,65 @@ function QuickAccessTile({ title, gradient, icon, to }: { title: string; gradien
                 <Play size={20} fill="black" className="ml-1" />
             </button>
         </Link>
+    );
+}
+
+function RadioCard({ title, images, color, footer }: { title: string; images: string[]; color: string; footer: string }) {
+    return (
+        <div className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start border border-white/5">
+            <div className={`relative mb-4 aspect-square shadow-2xl rounded-md overflow-hidden ${color}`}>
+                <div className="absolute top-2 right-2 text-[10px] font-black tracking-tighter text-white opacity-80 uppercase">Radio</div>
+
+                {/* Image Collage */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                    {/* Left Small */}
+                    <img src={images[1]} className="absolute w-[40%] aspect-square rounded-full border-2 border-black/20 left-[10%] z-0 scale-90 translate-y-2 opacity-80" alt="" />
+                    {/* Right Small */}
+                    <img src={images[2]} className="absolute w-[40%] aspect-square rounded-full border-2 border-black/20 right-[10%] z-0 scale-90 translate-y-2 opacity-80" alt="" />
+                    {/* Center Large */}
+                    <img src={images[0]} className="w-[60%] aspect-square rounded-full border-4 border-black/20 z-10 shadow-2xl" alt="" />
+                </div>
+
+                <div className="absolute bottom-4 left-4 right-4">
+                    <h3 className="text-xl font-black text-white leading-tight tracking-tighter truncate">{title}</h3>
+                </div>
+
+                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20">
+                    <Play size={24} fill="black" className="ml-1" />
+                </button>
+            </div>
+            <h3 className="font-bold truncate text-white mb-1 text-sm tracking-tight">{title} Radio</h3>
+            <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">{footer}</p>
+        </div>
+    );
+}
+
+function ChartCard({ title, type, gradient, footer }: { title: string; type: string; gradient: string; footer: string }) {
+    return (
+        <div className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start border border-white/5">
+            <div className={`relative mb-4 aspect-square shadow-2xl rounded-md overflow-hidden bg-gradient-to-br ${gradient}`}>
+                <div className="absolute top-4 left-4">
+                    <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
+                        <div className="w-3 h-3 bg-[#1DB954] rounded-full rotate-45" />
+                    </div>
+                </div>
+
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                    <h4 className="text-3xl font-black text-white leading-none tracking-tighter mb-2 overflow-hidden break-words">{title.split(' ').join('\n')}</h4>
+                </div>
+
+                <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2">
+                    <div className="h-4 w-[2px] bg-white/40" />
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest opacity-80">{type}</span>
+                </div>
+
+                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20">
+                    <Play size={24} fill="black" className="ml-1" />
+                </button>
+            </div>
+            <h3 className="font-bold truncate text-white mb-1 text-sm tracking-tight">{title}</h3>
+            <p className="text-[11px] text-gray-400 line-clamp-2 leading-relaxed">{footer}</p>
+        </div>
     );
 }
 
