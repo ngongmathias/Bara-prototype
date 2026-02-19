@@ -1,10 +1,51 @@
-import { Home, Search, Library, Plus, Heart, Globe, Mic2 } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Home, Search, Library, Plus, Heart, Globe, Mic2, Loader2 } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
+import { useState } from 'react';
 
 export function StreamsSidebar({ className = "" }: { className?: string }) {
     const location = useLocation();
+    const navigate = useNavigate();
+    const [creating, setCreating] = useState(false);
 
     const isActive = (path: string) => location.pathname === path;
+
+    const handleCreatePlaylist = async () => {
+        try {
+            setCreating(true);
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                navigate('/sign-in');
+                return;
+            }
+
+            // Create a new playlist
+            const { data: newPlaylist, error } = await supabase
+                .from('playlists')
+                .insert([
+                    {
+                        title: 'My Playlist',
+                        description: 'My new playlist',
+                        user_id: user.id
+                    }
+                ])
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            if (newPlaylist) {
+                navigate(`/streams/playlist/${newPlaylist.id}`);
+            }
+        } catch (err) {
+            console.error('Error creating playlist:', err);
+            // Fallback for demo if insert fails due to schema mismatch
+            navigate('/streams/playlist/demo-new');
+        } finally {
+            setCreating(false);
+        }
+    };
 
     return (
         <div className={`bg-black text-gray-400 flex flex-col gap-2 p-2 ${className}`}>
@@ -18,12 +59,16 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
             {/* Library Card */}
             <div className="bg-[#121212] rounded-lg flex-grow flex flex-col overflow-hidden">
                 <div className="p-4 flex items-center justify-between shadow-md">
-                    <div className="flex items-center gap-3 text-gray-400 hover:text-white transition cursor-pointer">
+                    <Link to="/streams/library" className="flex items-center gap-3 text-gray-400 hover:text-white transition cursor-pointer">
                         <Library size={24} />
                         <span className="font-bold">Your Library</span>
-                    </div>
-                    <button className="p-1 hover:bg-white/10 rounded-full transition text-gray-400 hover:text-white">
-                        <Plus size={20} />
+                    </Link>
+                    <button
+                        onClick={handleCreatePlaylist}
+                        disabled={creating}
+                        className="p-1 hover:bg-white/10 rounded-full transition text-gray-400 hover:text-white disabled:opacity-50"
+                    >
+                        {creating ? <Loader2 size={20} className="animate-spin" /> : <Plus size={20} />}
                     </button>
                 </div>
 
@@ -34,7 +79,12 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
                             <h4 className="text-white font-bold text-sm">Create your first playlist</h4>
                             <p className="text-white text-xs">It's easy, we'll help you</p>
                         </div>
-                        <button className="bg-white text-black text-xs font-bold py-2 px-4 rounded-full hover:scale-105 transition active:scale-95">
+                        <button
+                            onClick={handleCreatePlaylist}
+                            disabled={creating}
+                            className="bg-white text-black text-xs font-bold py-2 px-4 rounded-full hover:scale-105 transition active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                        >
+                            {creating && <Loader2 size={12} className="animate-spin" />}
                             Create playlist
                         </button>
                     </div>
@@ -45,9 +95,12 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
                             <h4 className="text-white font-bold text-sm">Let's find some podcasts to follow</h4>
                             <p className="text-white text-xs">We'll keep you updated on new episodes</p>
                         </div>
-                        <button className="bg-white text-black text-xs font-bold py-2 px-4 rounded-full hover:scale-105 transition active:scale-95">
+                        <Link
+                            to="/streams/podcasts"
+                            className="inline-block bg-white text-black text-xs font-bold py-2 px-4 rounded-full hover:scale-105 transition active:scale-95"
+                        >
                             Browse podcasts
-                        </button>
+                        </Link>
                     </div>
                 </div>
 

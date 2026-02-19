@@ -115,6 +115,7 @@ import NewReleasesPage from "./pages/streams/NewReleasesPage";
 import LikedSongsPage from "./pages/streams/LikedSongsPage";
 import LibraryPage from "./pages/streams/LibraryPage";
 import ArtistDashboard from "@/pages/streams/ArtistDashboard";
+import PodcastsPage from "./pages/streams/PodcastsPage";
 import SearchPage from "./pages/SearchPage";
 import TestSportsApi from "./pages/TestSportsApi";
 import TestEmailPage from "./pages/TestEmailPage";
@@ -166,8 +167,9 @@ const AppRoutes = () => {
           <Route path="artists" element={<ArtistsPage />} />
           <Route path="trending" element={<TrendingSongsPage />} />
           <Route path="new-releases" element={<NewReleasesPage />} />
-          <Route path="liked" element={<LikedSongsPage />} />
-          <Route path="library" element={<LibraryPage />} />
+          <Route path="liked" element={<UserAuthGuard><LikedSongsPage /></UserAuthGuard>} />
+          <Route path="library" element={<UserAuthGuard><LibraryPage /></UserAuthGuard>} />
+          <Route path="podcasts" element={<PodcastsPage />} />
           <Route path="creator" element={<UserAuthGuard><ArtistDashboard /></UserAuthGuard>} />
           <Route path="*" element={<StreamsHome />} /> {/* Fallback within streams context */}
         </Route>

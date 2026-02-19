@@ -160,32 +160,6 @@ export default function StreamsHome() {
                                 )}
                             </Section>
 
-                            {/* Popular Radio */}
-                            <Section title="Popular radio" showAllLink="/streams/radio">
-                                {[
-                                    { id: 'r1', title: 'Mike Kayihura', images: ['https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=200&h=200&fit=crop'], color: 'bg-[#509bf5]', footer: 'With Andy Bumuntu, Yvan Buravan, Igor...' },
-                                    { id: 'r2', title: 'Kivumbi King', images: ['https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-[#9b50f5]', footer: 'With Amalon, Nel Ngabo, Ish Kevin and more' },
-                                    { id: 'r3', title: 'The Ben', images: ['https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-[#f5509b]', footer: 'With Meddy, Bruce Melodie, Christopher...' },
-                                    { id: 'r4', title: 'Bruce Melodie', images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-[#50f59b]', footer: 'With Davis D, Chriss Eazy, Juno Kizigenza and more' },
-                                    { id: 'r5', title: 'Rema', images: ['https://plus.unsplash.com/premium_photo-1661601614051-9e7978280628?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-[#f59b50]', footer: 'With Shallipopi, ODUMODUBLVCK, Kizz...' }
-                                ].map(radio => (
-                                    <RadioCard key={radio.id} {...radio} />
-                                ))}
-                            </Section>
-
-                            {/* Featured Charts */}
-                            <Section title="Featured Charts" showAllLink="/streams/charts">
-                                {[
-                                    { id: 'c1', title: 'Top Songs Global', type: 'Weekly Music Charts', gradient: 'from-[#4e3c92] to-[#6a54bd]', footer: 'Your weekly update of the most played tracks...' },
-                                    { id: 'c2', title: 'Top Songs USA', type: 'Weekly Music Charts', gradient: 'from-[#e91e63] to-[#ff4081]', footer: 'Your weekly update of the most played tracks...' },
-                                    { id: 'c3', title: 'Top 50 Global', type: 'Daily Update', gradient: 'from-[#009688] to-[#26a69a]', footer: 'Your daily update of the most played tracks right...' },
-                                    { id: 'c4', title: 'Top 50 USA', type: 'Daily Update', gradient: 'from-[#f44336] to-[#ef5350]', footer: 'Your daily update of the most played tracks right...' },
-                                    { id: 'c5', title: 'Viral 50 Global', type: 'Daily Update', gradient: 'from-[#4caf50] to-[#66bb6a]', footer: 'Your daily update of the most viral tracks right...' }
-                                ].map(chart => (
-                                    <ChartCard key={chart.id} {...chart} />
-                                ))}
-                            </Section>
-
                             {/* Popular Artists */}
                             <Section title="Popular artists" showAllLink="/streams/artists">
                                 {popularArtists.length > 0 ? (
@@ -213,7 +187,7 @@ export default function StreamsHome() {
                                 )}
                             </Section>
 
-                            {/* New Releases */}
+                            {/* Popular Albums and Singles */}
                             <Section title="Popular albums and singles" showAllLink="/streams/new-releases">
                                 {newReleases.length > 0 ? (
                                     newReleases.map(album => (
@@ -237,6 +211,33 @@ export default function StreamsHome() {
                                     <p className="text-gray-500 min-w-full py-12 text-center">No albums found.</p>
                                 )}
                             </Section>
+
+                            {/* Popular Radio */}
+                            <Section title="Popular radio" showAllLink="/streams/radio">
+                                {[
+                                    { id: 'r1', title: 'Mike Kayihura', images: ['https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=200&h=200&fit=crop'], color: 'bg-[#509bf5]', footer: 'With Andy Bumuntu, Yvan Buravan, Igor...' },
+                                    { id: 'r2', title: 'Kivumbi King', images: ['https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-[#9b50f5]', footer: 'With Amalon, Nel Ngabo, Ish Kevin and more' },
+                                    { id: 'r3', title: 'The Ben', images: ['https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-[#f5509b]', footer: 'With Meddy, Bruce Melodie, Christopher...' },
+                                    { id: 'r4', title: 'Bruce Melodie', images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-[#50f59b]', footer: 'With Davis D, Chriss Eazy, Juno Kizigenza and more' },
+                                    { id: 'r5', title: 'Rema', images: ['https://plus.unsplash.com/premium_photo-1661601614051-9e7978280628?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-[#f59b50]', footer: 'With Shallipopi, ODUMODUBLVCK, Kizz...' }
+                                ].map(radio => (
+                                    <RadioCard key={radio.id} {...radio} />
+                                ))}
+                            </Section>
+
+                            {/* Featured Charts */}
+                            <Section title="Featured Charts" showAllLink="/streams/charts">
+                                {[
+                                    { id: 'c1', title: 'Top Songs Global', type: 'Weekly Music Charts', gradient: 'from-[#4e3c92] to-[#6a54bd]', footer: 'Your weekly update of the most played tracks...' },
+                                    { id: 'c2', title: 'Top Songs USA', type: 'Weekly Music Charts', gradient: 'from-[#e91e63] to-[#ff4081]', footer: 'Your weekly update of the most played tracks...' },
+                                    { id: 'c3', title: 'Top 50 Global', type: 'Daily Update', gradient: 'from-[#009688] to-[#26a69a]', footer: 'Your daily update of the most played tracks right...' },
+                                    { id: 'c4', title: 'Top 50 USA', type: 'Daily Update', gradient: 'from-[#f44336] to-[#ef5350]', footer: 'Your daily update of the most played tracks right...' },
+                                    { id: 'c5', title: 'Viral 50 Global', type: 'Daily Update', gradient: 'from-[#4caf50] to-[#66bb6a]', footer: 'Your daily update of the most viral tracks right...' }
+                                ].map(chart => (
+                                    <ChartCard key={chart.id} {...chart} />
+                                ))}
+                            </Section>
+
                         </div>
                     )}
                 </main>
