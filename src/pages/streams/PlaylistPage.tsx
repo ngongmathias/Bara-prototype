@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { MainLayout } from '@/components/layout/MainLayout';
+import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
-import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock } from 'lucide-react';
+import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music } from 'lucide-react';
 
 interface PlaylistData {
     id: string;
@@ -55,9 +55,9 @@ export default function PlaylistPage() {
                         id: ps.songs.id,
                         title: ps.songs.title,
                         artist: ps.songs.artist,
-                        album: ps.songs.album,
+                        album_title: ps.songs.album,
                         duration: ps.songs.duration,
-                        audio_url: ps.songs.audio_url,
+                        file_url: ps.songs.audio_url,
                         cover_url: ps.songs.cover_url || '/placeholder.svg',
                     }));
                 setTracks(mappedTracks);
@@ -76,9 +76,9 @@ export default function PlaylistPage() {
                         id: s.id,
                         title: s.title,
                         artist: s.artist,
-                        album: s.album || 'Single',
+                        album_title: s.album || 'Single',
                         duration: s.duration,
-                        audio_url: s.audio_url,
+                        file_url: s.file_url || s.audio_url,
                         cover_url: s.cover_url || '/placeholder.svg',
                     })));
                 }
@@ -123,11 +123,11 @@ export default function PlaylistPage() {
 
     if (loading) {
         return (
-            <MainLayout>
+            <StreamsLayout>
                 <div className="min-h-screen bg-black text-white flex items-center justify-center">
-                    <Loader2 className="w-10 h-10 animate-spin text-green-500" />
+                    <Loader2 className="w-10 h-10 animate-spin text-[#1DB954]" />
                 </div>
-            </MainLayout>
+            </StreamsLayout>
         );
     }
 
@@ -136,34 +136,32 @@ export default function PlaylistPage() {
     const coverUrl = playlist?.cover_url;
 
     return (
-        <MainLayout>
+        <StreamsLayout>
             <div className="min-h-screen bg-black text-white pb-24">
                 {/* Hero Header */}
-                <div className="bg-gradient-to-b from-purple-600 to-purple-900/40 pt-16 pb-6 px-8">
+                <div className="bg-gradient-to-b from-blue-900/60 to-[#121212] pt-16 pb-6 px-8">
                     <div className="max-w-7xl mx-auto">
                         <div className="flex items-end gap-6">
                             {/* Playlist Cover */}
                             {coverUrl ? (
                                 <img src={coverUrl} alt={playlistTitle} className="w-56 h-56 rounded shadow-2xl object-cover flex-shrink-0" />
                             ) : (
-                                <div className="w-56 h-56 rounded shadow-2xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center flex-shrink-0">
-                                    <svg className="w-24 h-24 text-white/80" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-                                    </svg>
+                                <div className="w-56 h-56 rounded shadow-2xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center flex-shrink-0">
+                                    <Music size={100} className="text-gray-400" />
                                 </div>
                             )}
 
                             {/* Playlist Info */}
                             <div className="flex-1 pb-4">
-                                <div className="text-sm font-semibold mb-2 uppercase">Playlist</div>
-                                <h1 className="text-6xl font-comfortaa font-semibold mb-6 leading-tight">{playlistTitle}</h1>
-                                <p className="text-white/90 mb-4">{playlistDesc}</p>
-                                <div className="flex items-center gap-2 text-sm">
-                                    <span className="font-semibold">Bara Streams</span>
+                                <div className="text-xs font-bold mb-2 uppercase tracking-tight">Playlist</div>
+                                <h1 className="text-5xl md:text-8xl font-black mb-6 leading-tight tracking-tighter text-white">{playlistTitle}</h1>
+                                <p className="text-gray-300 text-sm mb-4 font-medium">{playlistDesc}</p>
+                                <div className="flex items-center gap-2 text-sm font-bold">
+                                    <span className="text-white hover:underline cursor-pointer">Bara Streams</span>
                                     <span className="text-white/70">•</span>
-                                    <span className="text-white/90">{tracks.length} songs</span>
+                                    <span className="text-white">{tracks.length} songs</span>
                                     <span className="text-white/70">•</span>
-                                    <span className="text-white/70">{Math.floor(totalDuration / 3600) > 0 ? `${Math.floor(totalDuration / 3600)} hr ` : ''}{Math.floor((totalDuration % 3600) / 60)} min</span>
+                                    <span className="text-gray-400 font-normal">{Math.floor(totalDuration / 3600) > 0 ? `${Math.floor(totalDuration / 3600)} hr ` : ''}{Math.floor((totalDuration % 3600) / 60)} min</span>
                                 </div>
                             </div>
                         </div>
@@ -171,11 +169,11 @@ export default function PlaylistPage() {
                 </div>
 
                 {/* Action Bar */}
-                <div className="bg-gradient-to-b from-black/40 to-black px-8 pt-6 pb-4">
-                    <div className="max-w-7xl mx-auto flex items-center gap-6">
+                <div className="bg-transparent px-8 pt-6 pb-4">
+                    <div className="max-w-7xl mx-auto flex items-center gap-8">
                         <button
                             onClick={handlePlayAll}
-                            className="w-14 h-14 rounded-full bg-[hsl(var(--yp-yellow))] hover:scale-105 transition flex items-center justify-center shadow-xl"
+                            className="w-14 h-14 rounded-full bg-[#1DB954] hover:scale-105 transition flex items-center justify-center shadow-xl active:scale-95"
                         >
                             <Play className="w-6 h-6 text-black ml-1" fill="black" />
                         </button>
@@ -218,15 +216,15 @@ export default function PlaylistPage() {
                                             onClick={() => handlePlayTrack(track)}
                                         >
                                             {/* Track Number / Play Button */}
-                                            <div className="flex items-center justify-center text-gray-400 group-hover:text-white">
+                                            <div className="flex items-center justify-center text-gray-400 group-hover:text-white w-8">
                                                 {isCurrentTrack && isPlaying ? (
                                                     <div className="flex items-end gap-[2px] h-3">
-                                                        <div className="w-[3px] bg-[hsl(var(--yp-yellow))] rounded-full animate-pulse" style={{ height: '60%' }}></div>
-                                                        <div className="w-[3px] bg-[hsl(var(--yp-yellow))] rounded-full animate-pulse" style={{ height: '100%', animationDelay: '0.2s' }}></div>
-                                                        <div className="w-[3px] bg-[hsl(var(--yp-yellow))] rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0.4s' }}></div>
+                                                        <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '60%' }}></div>
+                                                        <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '100%', animationDelay: '0.2s' }}></div>
+                                                        <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0.4s' }}></div>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-sm group-hover:hidden">{index + 1}</span>
+                                                    <span className={`text-sm group-hover:hidden ${isCurrentTrack ? 'text-[#1DB954]' : ''}`}>{index + 1}</span>
                                                 )}
                                                 <Play className="w-4 h-4 hidden group-hover:block" fill="currentColor" />
                                             </div>
@@ -239,7 +237,7 @@ export default function PlaylistPage() {
                                                     className="w-10 h-10 rounded object-cover flex-shrink-0"
                                                 />
                                                 <div className="min-w-0 flex-1">
-                                                    <div className={`font-semibold truncate transition ${isCurrentTrack ? 'text-[hsl(var(--yp-yellow))]' : 'group-hover:text-white'}`}>
+                                                    <div className={`font-bold truncate transition text-sm ${isCurrentTrack ? 'text-[#1DB954]' : 'group-hover:text-white'}`}>
                                                         {track.title}
                                                     </div>
                                                     <div className="text-sm text-gray-400 truncate">{track.artist}</div>
@@ -248,18 +246,18 @@ export default function PlaylistPage() {
 
                                             {/* Album */}
                                             <div className="flex items-center text-sm text-gray-400 truncate">
-                                                {track.album || 'Single'}
+                                                {track.album_title || 'Single'}
                                             </div>
 
                                             {/* Duration and Heart */}
-                                            <div className="flex items-center justify-end gap-4">
+                                            <div className="flex items-center justify-end gap-6 pr-4">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); toggleLike(track.id); }}
-                                                    className={`opacity-0 group-hover:opacity-100 transition ${likedTracks.includes(track.id) ? 'text-[hsl(var(--yp-yellow))] !opacity-100' : 'text-gray-400 hover:text-white'}`}
+                                                    className={`opacity-0 group-hover:opacity-100 transition ${likedTracks.includes(track.id) ? 'text-[#1DB954] !opacity-100' : 'text-gray-400 hover:text-white'}`}
                                                 >
-                                                    <Heart className="w-4 h-4" fill={likedTracks.includes(track.id) ? "currentColor" : "none"} />
+                                                    <Heart size={18} fill={likedTracks.includes(track.id) ? "currentColor" : "none"} />
                                                 </button>
-                                                <span className="text-sm text-gray-400 min-w-[40px] text-right">{formatDuration(track.duration)}</span>
+                                                <span className="text-sm text-gray-500 font-mono w-10 text-right">{formatDuration(track.duration)}</span>
                                             </div>
                                         </div>
                                     );
@@ -269,6 +267,6 @@ export default function PlaylistPage() {
                     </div>
                 </div>
             </div>
-        </MainLayout>
+        </StreamsLayout>
     );
 }

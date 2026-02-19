@@ -1,59 +1,122 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
+import { Play, Pause, Search as SearchIcon, Loader2, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-// Mock search results
-const mockResults = {
-    teams: [
-        { id: 1, name: "Manchester United", league: "Premier League", logo: "MUN" },
-        { id: 2, name: "Manchester City", league: "Premier League", logo: "MCI" }
-    ],
-    players: [
-        { id: 1, name: "Marcus Rashford", team: "Manchester United", position: "Forward" },
-        { id: 2, name: "Bruno Fernandes", team: "Manchester United", position: "Midfielder" }
-    ],
-    songs: [
-        { id: 1, title: "Last Last", artist: "Burna Boy", album: "Love, Damini", duration: "2:47", coverColor: "bg-orange-500" },
-        { id: 2, title: "Calm Down", artist: "Rema", album: "Rave & Roses", duration: "3:59", coverColor: "bg-purple-500" }
-    ],
-    artists: [
-        { id: 1, name: "Burna Boy", monthlyListeners: "28.5M", verified: true },
-        { id: 2, name: "Rema", monthlyListeners: "15.2M", verified: true }
-    ],
-    playlists: [
-        { id: 1, title: "Afrobeats Essentials", creator: "Bara Streams", trackCount: 50, coverGradient: "from-purple-600 to-blue-600" },
-        { id: 2, title: "Top Hits 2024", creator: "Bara Streams", trackCount: 100, coverGradient: "from-green-600 to-teal-600" }
-    ]
-};
+interface SearchResults {
+    songs: Song[];
+    artists: any[];
+    albums: any[];
+    teams: any[];
+}
 
 export default function SearchPage() {
+    const { play, currentSong, isPlaying, toggleLike, likedSongs } = useAudioPlayer();
     const [searchQuery, setSearchQuery] = useState("");
     const [activeCategory, setActiveCategory] = useState<'all' | 'sports' | 'music'>('all');
     const [isSearching, setIsSearching] = useState(false);
+    const [results, setResults] = useState<SearchResults>({
+        songs: [],
+        artists: [],
+        albums: [],
+        teams: []
+    });
+    const [loading, setLoading] = useState(false);
 
-    const handleSearch = (query: string) => {
-        setSearchQuery(query);
-        setIsSearching(query.length > 0);
+    useEffect(() => {
+        const fetchResults = async () => {
+            if (!searchQuery.trim()) {
+                setResults({ songs: [], artists: [], albums: [], teams: [] });
+                setIsSearching(false);
+                return;
+            }
+
+            setLoading(true);
+            setIsSearching(true);
+
+            try {
+                // Search Songs
+                const { data: songsData } = await supabase
+                    .from('songs')
+                    .select('*, artists(name)')
+                    .ilike('title', `%${searchQuery}%`)
+                    .limit(5);
+
+                // Search Artists
+                const { data: artistsData } = await supabase
+                    .from('artists')
+                    .select('*')
+                    .ilike('name', `%${searchQuery}%`)
+                    .limit(5);
+
+                // Search Albums
+                const { data: albumsData } = await supabase
+                    .from('albums')
+                    .select('*, artists(name)')
+                    .ilike('title', `%${searchQuery}%`)
+                    .limit(5);
+
+                // Search Teams (Sports)
+                const { data: teamsData } = await supabase
+                    .from('teams')
+                    .select('*')
+                    .ilike('name', `%${searchQuery}%`)
+                    .limit(5);
+
+                setResults({
+                    songs: (songsData || []).map(song => ({
+                        id: song.id,
+                        title: song.title,
+                        artist: song.artists?.name || 'Unknown Artist',
+                        file_url: song.file_url,
+                        cover_url: song.cover_url || '/placeholder-music.png',
+                        duration: song.duration,
+                        artist_id: song.artist_id,
+                        album_id: song.album_id
+                    })),
+                    artists: artistsData || [],
+                    albums: albumsData || [],
+                    teams: teamsData || []
+                });
+            } catch (error) {
+                console.error('Search error:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const debounce = setTimeout(fetchResults, 300);
+        return () => clearTimeout(debounce);
+    }, [searchQuery]);
+
+    const handleGenreClick = (genre: string) => {
+        setSearchQuery(genre);
+        setActiveCategory('music');
+        setIsSearching(true);
     };
 
     return (
         <div className="min-h-screen bg-black text-white">
             {/* Search Header */}
-            <div className="bg-gradient-to-b from-gray-900 to-black pt-16 pb-8 px-8">
+            <div className="bg-gradient-to-b from-purple-900/20 to-black pt-16 pb-8 px-8">
                 <div className="max-w-7xl mx-auto">
-                    <h1 className="text-4xl font-bold mb-6">Search</h1>
+                    <h1 className="text-4xl font-black mb-6">Search</h1>
 
                     {/* Search Input */}
                     <div className="relative">
-                        <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                        <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search for sports, teams, songs, artists..."
+                            placeholder="What do you want to listen to?"
                             value={searchQuery}
-                            onChange={(e) => handleSearch(e.target.value)}
-                            className="w-full bg-white text-black pl-14 pr-4 py-4 rounded-full text-lg font-semibold placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white"
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-white text-black pl-14 pr-4 py-4 rounded-full text-lg font-bold placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#1DB954]/20 transition-all"
                             autoFocus
                         />
+                        {loading && (
+                            <Loader2 className="absolute right-6 top-1/2 transform -translate-y-1/2 w-6 h-6 text-[#1DB954] animate-spin" />
+                        )}
                     </div>
 
                     {/* Category Filters */}
@@ -65,14 +128,14 @@ export default function SearchPage() {
                                 onClick={() => setActiveCategory('all')}
                             />
                             <CategoryPill
-                                label="Sports"
-                                active={activeCategory === 'sports'}
-                                onClick={() => setActiveCategory('sports')}
-                            />
-                            <CategoryPill
                                 label="Music"
                                 active={activeCategory === 'music'}
                                 onClick={() => setActiveCategory('music')}
+                            />
+                            <CategoryPill
+                                label="Sports"
+                                active={activeCategory === 'sports'}
+                                onClick={() => setActiveCategory('sports')}
                             />
                         </div>
                     )}
@@ -83,156 +146,154 @@ export default function SearchPage() {
             <div className="px-8 pb-24">
                 <div className="max-w-7xl mx-auto">
                     {!isSearching ? (
-                        <div className="text-center py-20">
-                            <div className="text-6xl mb-4">🔍</div>
-                            <h2 className="text-2xl font-bold mb-2">Find what you love</h2>
-                            <p className="text-gray-400">Search for teams, players, songs, artists, and playlists</p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-8">
+                            {/* Functional Genre Browsing */}
+                            {[
+                                { name: 'Afrobeats', color: 'from-orange-500 to-red-600' },
+                                { name: 'Amapiano', color: 'from-yellow-500 to-orange-600' },
+                                { name: 'Hip-Hop', color: 'from-blue-600 to-indigo-700' },
+                                { name: 'R&B', color: 'from-pink-500 to-purple-600' },
+                                { name: 'Highlife', color: 'from-green-500 to-emerald-700' },
+                                { name: 'Sports News', color: 'from-blue-400 to-blue-600' },
+                                { name: 'Live Matches', color: 'from-red-500 to-purple-800' },
+                                { name: 'Podcasts', color: 'from-teal-500 to-cyan-600' }
+                            ].map(genre => (
+                                <div
+                                    key={genre.name}
+                                    onClick={() => handleGenreClick(genre.name)}
+                                    className={`aspect-square rounded-xl p-4 cursor-pointer hover:scale-[1.02] transition-all shadow-xl relative overflow-hidden bg-gradient-to-br ${genre.color} group`}
+                                >
+                                    <span className="text-2xl font-black tracking-tight">{genre.name}</span>
+                                    <SearchIcon className="absolute -bottom-2 -right-2 w-24 h-24 text-black/20 transform rotate-12 group-hover:scale-110 transition-transform" />
+                                </div>
+                            ))}
                         </div>
                     ) : (
                         <div className="space-y-12 mt-8">
-                            {/* Teams Section */}
-                            {(activeCategory === 'all' || activeCategory === 'sports') && mockResults.teams.length > 0 && (
+                            {/* Songs Section */}
+                            {(activeCategory === 'all' || activeCategory === 'music') && results.songs.length > 0 && (
                                 <section>
-                                    <h2 className="text-2xl font-bold mb-6">Teams</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {mockResults.teams.map((team) => (
-                                            <a
-                                                key={team.id}
-                                                href={`/sports/team/${team.id}`}
-                                                className="bg-white/10 rounded-lg p-4 hover:bg-white/20 transition cursor-pointer flex items-center gap-4"
-                                            >
-                                                <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                                                    {team.logo}
+                                    <h2 className="text-2xl font-bold mb-6">Songs</h2>
+                                    <div className="space-y-2">
+                                        {results.songs.map((song) => {
+                                            const isCurrent = currentSong?.id === song.id;
+                                            return (
+                                                <div
+                                                    key={song.id}
+                                                    className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-2 rounded-lg group hover:bg-white/10 cursor-pointer items-center"
+                                                    onClick={() => play(song)}
+                                                >
+                                                    <div className="relative w-12 h-12">
+                                                        <img src={song.cover_url} className="w-12 h-12 rounded object-cover" alt="" />
+                                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            {isCurrent && isPlaying ? <Pause size={20} fill="white" /> : <Play size={20} fill="white" />}
+                                                        </div>
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <div className={`font-bold truncate ${isCurrent ? 'text-[#1DB954]' : 'text-white'}`}>{song.title}</div>
+                                                        <div className="text-sm text-gray-400">{song.artist}</div>
+                                                    </div>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); toggleLike(song.id); }}
+                                                        className={`p-2 transition-colors ${likedSongs.includes(song.id) ? 'text-[#1DB954]' : 'opacity-0 group-hover:opacity-100 text-gray-400 hover:text-white'}`}
+                                                    >
+                                                        <Heart size={18} fill={likedSongs.includes(song.id) ? "currentColor" : "none"} />
+                                                    </button>
+                                                    <div className="text-sm text-gray-500 w-12 text-right">
+                                                        {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
+                                                    </div>
                                                 </div>
-                                                <div className="min-w-0 flex-1">
-                                                    <div className="font-semibold text-lg truncate">{team.name}</div>
-                                                    <div className="text-sm text-gray-400">{team.league}</div>
-                                                </div>
-                                            </a>
-                                        ))}
-                                    </div>
-                                </section>
-                            )}
-
-                            {/* Players Section */}
-                            {(activeCategory === 'all' || activeCategory === 'sports') && mockResults.players.length > 0 && (
-                                <section>
-                                    <h2 className="text-2xl font-bold mb-6">Players</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {mockResults.players.map((player) => (
-                                            <div
-                                                key={player.id}
-                                                className="bg-white/10 rounded-lg p-4 hover:bg-white/20 transition cursor-pointer flex items-center gap-4"
-                                            >
-                                                <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-4xl flex-shrink-0">
-                                                    ⚽
-                                                </div>
-                                                <div className="min-w-0 flex-1">
-                                                    <div className="font-semibold text-lg truncate">{player.name}</div>
-                                                    <div className="text-sm text-gray-400">{player.position} • {player.team}</div>
-                                                </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </section>
                             )}
 
                             {/* Artists Section */}
-                            {(activeCategory === 'all' || activeCategory === 'music') && mockResults.artists.length > 0 && (
+                            {(activeCategory === 'all' || activeCategory === 'music') && results.artists.length > 0 && (
                                 <section>
                                     <h2 className="text-2xl font-bold mb-6">Artists</h2>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                        {mockResults.artists.map((artist) => (
-                                            <a
+                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                                        {results.artists.map((artist) => (
+                                            <Link
                                                 key={artist.id}
-                                                href={`/streams/artist/${artist.id}`}
-                                                className="bg-[#181818] p-4 rounded-lg hover:bg-[#282828] transition cursor-pointer group"
+                                                to={`/streams/artist/${artist.id}`}
+                                                className="bg-[#181818] p-4 rounded-lg hover:bg-[#282828] transition group text-center"
                                             >
-                                                <div className="relative mb-4">
-                                                    <div className="w-full aspect-square bg-gradient-to-br from-orange-500 to-red-500 rounded-full shadow-lg flex items-center justify-center text-5xl">
-                                                        🎤
-                                                    </div>
-                                                    <button className="absolute right-2 bottom-2 w-12 h-12 bg-[#1DB954] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl transform translate-y-2 group-hover:translate-y-0 hover:scale-110">
-                                                        <svg className="w-5 h-5 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path d="M8 5v14l11-7z" />
-                                                        </svg>
+                                                <div className="relative mb-4 aspect-square">
+                                                    <img
+                                                        src={artist.image_url || '/placeholder-artist.png'}
+                                                        className="w-full h-full object-cover rounded-full shadow-2xl"
+                                                        alt={artist.name}
+                                                    />
+                                                    <button className="absolute bottom-4 right-0 w-10 h-10 rounded-full bg-[#1DB954] text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl translate-y-2 group-hover:translate-y-0">
+                                                        <Play size={20} fill="black" className="ml-1" />
                                                     </button>
                                                 </div>
-                                                <h3 className="font-semibold text-base mb-1 truncate">{artist.name}</h3>
-                                                <p className="text-sm text-gray-400">
-                                                    {artist.verified && (
-                                                        <span className="inline-block mr-1">✓</span>
-                                                    )}
-                                                    Artist
-                                                </p>
-                                            </a>
+                                                <h3 className="font-bold truncate text-white text-sm">{artist.name}</h3>
+                                                <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Artist</p>
+                                            </Link>
                                         ))}
                                     </div>
                                 </section>
                             )}
 
-                            {/* Songs Section */}
-                            {(activeCategory === 'all' || activeCategory === 'music') && mockResults.songs.length > 0 && (
+                            {/* Albums Section */}
+                            {(activeCategory === 'all' || activeCategory === 'music') && results.albums.length > 0 && (
                                 <section>
-                                    <h2 className="text-2xl font-bold mb-6">Songs</h2>
-                                    <div className="space-y-2">
-                                        {mockResults.songs.map((song, index) => (
+                                    <h2 className="text-2xl font-bold mb-6">Albums</h2>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                                        {results.albums.map((album) => (
                                             <div
-                                                key={song.id}
-                                                className="grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 rounded group hover:bg-white/10 cursor-pointer items-center"
+                                                key={album.id}
+                                                className="bg-[#181818] p-4 rounded-lg hover:bg-[#282828] transition group flex flex-col h-full shadow-lg"
                                             >
-                                                <div className="text-gray-400 group-hover:text-white">
-                                                    <span className="group-hover:hidden">{index + 1}</span>
-                                                    <svg className="w-4 h-4 hidden group-hover:block" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M8 5v14l11-7z" />
-                                                    </svg>
+                                                <div className="relative mb-4 aspect-square">
+                                                    <img
+                                                        src={album.cover_url || '/placeholder-album.png'}
+                                                        className="w-full h-full rounded-md object-cover shadow-2xl"
+                                                        alt={album.title}
+                                                    />
+                                                    <button className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#1DB954] text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl translate-y-2 group-hover:translate-y-0">
+                                                        <Play size={20} fill="black" className="ml-1" />
+                                                    </button>
                                                 </div>
-                                                <div className="flex gap-3 items-center min-w-0">
-                                                    <div className={`w-10 h-10 ${song.coverColor} rounded flex-shrink-0`}></div>
-                                                    <div className="min-w-0 flex-1">
-                                                        <div className="font-semibold truncate group-hover:text-[#1DB954] transition">
-                                                            {song.title}
-                                                        </div>
-                                                        <div className="text-sm text-gray-400">{song.artist}</div>
-                                                    </div>
-                                                </div>
-                                                <div className="text-sm text-gray-400 truncate">{song.album}</div>
-                                                <div className="text-sm text-gray-400 text-right">{song.duration}</div>
+                                                <h3 className="font-bold truncate text-white text-sm">{album.title}</h3>
+                                                <p className="text-xs text-gray-400">{album.artists?.name}</p>
                                             </div>
                                         ))}
                                     </div>
                                 </section>
                             )}
 
-                            {/* Playlists Section */}
-                            {(activeCategory === 'all' || activeCategory === 'music') && mockResults.playlists.length > 0 && (
+                            {/* Teams Section */}
+                            {(activeCategory === 'all' || activeCategory === 'sports') && results.teams.length > 0 && (
                                 <section>
-                                    <h2 className="text-2xl font-bold mb-6">Playlists</h2>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                        {mockResults.playlists.map((playlist) => (
-                                            <a
-                                                key={playlist.id}
-                                                href={`/streams/playlist/${playlist.id}`}
-                                                className="bg-[#181818] p-4 rounded-lg hover:bg-[#282828] transition cursor-pointer group"
+                                    <h2 className="text-2xl font-bold mb-6">Sports Teams</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {results.teams.map((team) => (
+                                            <div
+                                                key={team.id}
+                                                className="bg-white/5 p-4 rounded-xl hover:bg-white/10 transition flex items-center gap-4 cursor-pointer"
                                             >
-                                                <div className="relative mb-4">
-                                                    <div className={`w-full aspect-square bg-gradient-to-br ${playlist.coverGradient} rounded shadow-lg flex items-center justify-center`}>
-                                                        <svg className="w-12 h-12 text-white/80" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-                                                        </svg>
-                                                    </div>
-                                                    <button className="absolute right-2 bottom-2 w-12 h-12 bg-[#1DB954] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl transform translate-y-2 group-hover:translate-y-0 hover:scale-110">
-                                                        <svg className="w-5 h-5 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path d="M8 5v14l11-7z" />
-                                                        </svg>
-                                                    </button>
+                                                <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center font-black text-xl">
+                                                    {team.short_name || team.name[0]}
                                                 </div>
-                                                <h3 className="font-semibold text-base mb-1 truncate">{playlist.title}</h3>
-                                                <p className="text-sm text-gray-400">{playlist.creator} • {playlist.trackCount} songs</p>
-                                            </a>
+                                                <div>
+                                                    <div className="font-bold">{team.name}</div>
+                                                    <div className="text-xs text-gray-500 uppercase font-bold tracking-wider">Football Team</div>
+                                                </div>
+                                            </div>
                                         ))}
                                     </div>
                                 </section>
+                            )}
+
+                            {isSearching && !loading && results.songs.length === 0 && results.artists.length === 0 && results.albums.length === 0 && results.teams.length === 0 && (
+                                <div className="text-center py-20">
+                                    <h2 className="text-2xl font-bold mb-2">No results found for "{searchQuery}"</h2>
+                                    <p className="text-gray-400">Please check your spelling or try searching for something else.</p>
+                                </div>
                             )}
                         </div>
                     )}
@@ -246,7 +307,7 @@ function CategoryPill({ label, active, onClick }: { label: string; active: boole
     return (
         <button
             onClick={onClick}
-            className={`px-6 py-2 rounded-full font-semibold transition ${active
+            className={`px-6 py-2 rounded-full font-bold transition-all ${active
                 ? 'bg-white text-black'
                 : 'bg-white/10 text-white hover:bg-white/20'
                 }`}

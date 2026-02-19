@@ -87,7 +87,7 @@ export const AdminStreamsDashboard = () => {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <Card className="hover:bg-gray-50 cursor-pointer transition-colors">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -96,7 +96,7 @@ export const AdminStreamsDashboard = () => {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-gray-500 mb-4">Add, edit, or remove artists from the platform.</p>
+                            <p className="text-gray-500 mb-4 text-sm">Add, edit, or remove artists from the platform.</p>
                             <Link to="/admin/streams/artists">
                                 <Button className="w-full">Go to Artists</Button>
                             </Link>
@@ -106,13 +106,30 @@ export const AdminStreamsDashboard = () => {
                     <Card className="hover:bg-gray-50 cursor-pointer transition-colors">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <Disc className="h-5 w-5 text-brand-blue" />
-                                Manage Content (Coming Soon)
+                                <Music className="h-5 w-5 text-brand-blue" />
+                                Manage Songs
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-gray-500 mb-4">Upload albums and songs for your artists.</p>
-                            <Button className="w-full" disabled>Song Management (In Development)</Button>
+                            <p className="text-gray-500 mb-4 text-sm">Upload and manage individual music tracks.</p>
+                            <Link to="/admin/streams/songs">
+                                <Button className="w-full">Go to Songs</Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="hover:bg-gray-50 cursor-pointer transition-colors">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Disc className="h-5 w-5 text-brand-blue" />
+                                Manage Albums
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-gray-500 mb-4 text-sm">Create and manage albums or EP collections.</p>
+                            <Link to="/admin/streams/albums">
+                                <Button className="w-full">Go to Albums</Button>
+                            </Link>
                         </CardContent>
                     </Card>
                 </div>

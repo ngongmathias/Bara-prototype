@@ -1,15 +1,17 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 // Types
 export interface Song {
     id: string;
     title: string;
     artist: string; // Display name
-    file_url: string;
+    file_url: string; // Track URL
     cover_url: string; // Album art
     duration: number; // Seconds
     album_id?: string;
     artist_id?: string;
+    album_title?: string; // Optional album name for lists
 }
 
 interface AudioPlayerContextType {
@@ -19,6 +21,9 @@ interface AudioPlayerContextType {
     progress: number;
     duration: number;
     queue: Song[];
+    isShuffle: boolean;
+    repeatMode: 'none' | 'one' | 'all';
+    likedSongs: string[];
     play: (song: Song) => void;
     pause: () => void;
     togglePlay: () => void;
@@ -28,6 +33,9 @@ interface AudioPlayerContextType {
     setVolume: (vol: number) => void;
     addToQueue: (song: Song) => void;
     playAlbum: (songs: Song[], startIndex?: number) => void;
+    toggleShuffle: () => void;
+    setRepeatMode: (mode: 'none' | 'one' | 'all') => void;
+    toggleLike: (songId: string) => Promise<void>;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
@@ -41,6 +49,9 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const [duration, setDuration] = useState(0);
     const [queue, setQueue] = useState<Song[]>([]);
     const [queueIndex, setQueueIndex] = useState(-1);
+    const [isShuffle, setIsShuffle] = useState(false);
+    const [repeatMode, setRepeatMode] = useState<'none' | 'one' | 'all'>('none');
+    const [likedSongs, setLikedSongs] = useState<string[]>([]);
 
     // Initialize Audio Object
     useEffect(() => {
@@ -51,11 +62,21 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
         const handleTimeUpdate = () => setProgress(audio.currentTime);
         const handleDurationChange = () => setDuration(audio.duration || 0);
-        const handleEnded = () => next(); // Auto-play next
+        const handleEnded = () => {
+            if (repeatMode === 'one') {
+                audio.currentTime = 0;
+                audio.play();
+            } else {
+                next();
+            }
+        };
 
         audio.addEventListener('timeupdate', handleTimeUpdate);
         audio.addEventListener('durationchange', handleDurationChange);
         audio.addEventListener('ended', handleEnded);
+
+        // Fetch liked songs for current user
+        fetchLikes();
 
         return () => {
             audio.removeEventListener('timeupdate', handleTimeUpdate);
@@ -63,7 +84,21 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
             audio.removeEventListener('ended', handleEnded);
             audio.pause();
         };
-    }, []);
+    }, [repeatMode]); // Re-bind ended listener if repeatMode changes
+
+    const fetchLikes = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data } = await supabase
+            .from('user_song_likes')
+            .select('song_id')
+            .eq('user_id', user.id);
+
+        if (data) {
+            setLikedSongs(data.map(l => l.song_id));
+        }
+    };
 
     // Handle Play/Pause side effects
     useEffect(() => {
@@ -91,33 +126,31 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         audioRef.current.src = song.file_url;
         audioRef.current.play().catch(e => console.error("Playback failed:", e));
 
-        // Update queue index if playing from queue
+        // Update queue index
         const index = queue.findIndex(s => s.id === song.id);
         if (index !== -1) setQueueIndex(index);
-        else {
-            // If not in queue, replace queue or just play standalone? 
-            // Spotify logic: playing a song usually starts a context. 
-            // For simplicity: clear queue and add this one if it's a single play
-            if (queue.length === 0) {
-                setQueue([song]);
-                setQueueIndex(0);
-            }
-        }
     };
 
     const pause = () => setIsPlaying(false);
-
     const togglePlay = () => setIsPlaying(!isPlaying);
 
     const next = () => {
         if (queue.length === 0) return;
 
-        const nextIndex = queueIndex + 1;
+        let nextIndex;
+        if (isShuffle) {
+            nextIndex = Math.floor(Math.random() * queue.length);
+        } else {
+            nextIndex = queueIndex + 1;
+        }
+
         if (nextIndex < queue.length) {
             setQueueIndex(nextIndex);
             play(queue[nextIndex]);
+        } else if (repeatMode === 'all') {
+            setQueueIndex(0);
+            play(queue[0]);
         } else {
-            // Loop or stop? Stop for now.
             setIsPlaying(false);
             if (audioRef.current) audioRef.current.currentTime = 0;
         }
@@ -126,7 +159,6 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const prev = () => {
         if (queue.length === 0) return;
 
-        // If more than 3 seconds in, restart song
         if (audioRef.current && audioRef.current.currentTime > 3) {
             audioRef.current.currentTime = 0;
             return;
@@ -137,7 +169,6 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
             setQueueIndex(prevIndex);
             play(queue[prevIndex]);
         } else {
-            // Start of queue
             if (audioRef.current) audioRef.current.currentTime = 0;
         }
     };
@@ -152,9 +183,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const setVolume = (vol: number) => {
         const newVol = Math.max(0, Math.min(1, vol));
         setVolumeState(newVol);
-        if (audioRef.current) {
-            audioRef.current.volume = newVol;
-        }
+        if (audioRef.current) audioRef.current.volume = newVol;
     };
 
     const addToQueue = (song: Song) => {
@@ -167,6 +196,35 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         play(songs[startIndex]);
     };
 
+    const toggleShuffle = () => setIsShuffle(!isShuffle);
+
+    const toggleLike = async (songId: string) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const isLiked = likedSongs.includes(songId);
+
+        if (isLiked) {
+            const { error } = await supabase
+                .from('user_song_likes')
+                .delete()
+                .eq('user_id', user.id)
+                .eq('song_id', songId);
+
+            if (!error) {
+                setLikedSongs(prev => prev.filter(id => id !== songId));
+            }
+        } else {
+            const { error } = await supabase
+                .from('user_song_likes')
+                .insert({ user_id: user.id, song_id: songId });
+
+            if (!error) {
+                setLikedSongs(prev => [...prev, songId]);
+            }
+        }
+    };
+
     return (
         <AudioPlayerContext.Provider
             value={{
@@ -176,6 +234,9 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 progress,
                 duration,
                 queue,
+                isShuffle,
+                repeatMode,
+                likedSongs,
                 play,
                 pause,
                 togglePlay,
@@ -185,6 +246,9 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 setVolume,
                 addToQueue,
                 playAlbum,
+                toggleShuffle,
+                setRepeatMode,
+                toggleLike
             }}
         >
             {children}

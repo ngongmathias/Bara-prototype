@@ -88,92 +88,127 @@ export default function StreamsHome() {
                                     title="Liked Songs"
                                     gradient="from-purple-900 to-purple-800"
                                     icon="💜"
+                                    to="/streams/liked"
                                 />
                                 <QuickAccessTile
-                                    title="Discover Weekly"
-                                    gradient="from-blue-900 to-blue-800"
-                                    icon="🎵"
+                                    title="Afrobeats Mix"
+                                    gradient="from-orange-900 to-orange-800"
+                                    icon="🌍"
+                                    to="/streams/search?q=Afrobeats"
                                 />
                                 <QuickAccessTile
                                     title="Amapiano Mix"
-                                    gradient="from-green-900 to-green-800"
-                                    icon="🔥"
+                                    gradient="from-yellow-900 to-yellow-800"
+                                    icon="🎹"
+                                    to="/streams/search?q=Amapiano"
                                 />
                             </div>
 
+                            {/* Made For You - Curated Mixes */}
+                            <Section title="Made For You">
+                                {[
+                                    { id: '1', title: 'Discover Weekly', artist: 'Personalized for you', cover: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=300&h=300&fit=crop', gradient: 'from-blue-600 to-blue-800' },
+                                    { id: '2', title: 'Daily Mix 1', artist: 'Afrobeats & Highlife', cover: 'https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=300&h=300&fit=crop', gradient: 'from-green-600 to-green-800' },
+                                    { id: '3', title: 'Daily Mix 2', artist: 'Amapiano Beats', cover: 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=300&h=300&fit=crop', gradient: 'from-orange-600 to-orange-800' },
+                                    { id: '4', title: 'Release Radar', artist: 'New from artists you follow', cover: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop', gradient: 'from-purple-600 to-purple-800' }
+                                ].map(mix => (
+                                    <div key={mix.id} className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl border border-white/5">
+                                        <div className="relative mb-4 aspect-square shadow-2xl">
+                                            <div className={`absolute inset-0 bg-gradient-to-br ${mix.gradient} opacity-20 rounded-lg`} />
+                                            <img
+                                                src={mix.cover}
+                                                alt={mix.title}
+                                                className="w-full h-full object-cover rounded-md shadow-xl"
+                                            />
+                                            <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
+                                                <Play size={24} fill="black" className="ml-1" />
+                                            </button>
+                                        </div>
+                                        <h3 className="font-bold truncate text-white mb-1 text-sm tracking-tight">{mix.title}</h3>
+                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{mix.artist}</p>
+                                    </div>
+                                ))}
+                            </Section>
+
                             {/* Trending Songs */}
-                            <Section title="Trending Now" showAllLink="/streams/trending">
+                            <Section title="Trending songs" showAllLink="/streams/trending">
                                 {trendingSongs.length > 0 ? (
                                     trendingSongs.map(song => (
-                                        <div key={song.id} className="bg-white/5 p-4 rounded-xl cursor-pointer hover:bg-white/10 transition-all duration-300 group flex flex-col h-full">
+                                        <div key={song.id} className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
                                                 <img
                                                     src={song.cover_url}
                                                     alt={song.title}
-                                                    className="w-full h-full object-cover rounded-lg"
+                                                    className="w-full h-full object-cover rounded-md shadow-lg"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }}
                                                 />
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
-                                                    className={`absolute bottom-3 right-3 w-12 h-12 rounded-full bg-purple-600 text-white flex items-center justify-center transition-all duration-300 shadow-xl translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 hover:scale-110 active:scale-95`}
+                                                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
                                                 >
-                                                    {currentSong?.id === song.id && isPlaying ? <Pause size={24} fill="white" /> : <Play size={24} fill="white" className="ml-1" />}
+                                                    {currentSong?.id === song.id && isPlaying ? <Pause size={24} fill="black" /> : <Play size={24} fill="black" className="ml-1" />}
                                                 </button>
                                             </div>
-                                            <h3 className="font-bold truncate text-white mb-1">{song.title}</h3>
-                                            <p className="text-sm text-gray-400 truncate mt-auto">{song.artist}</p>
+                                            <h3 className="font-bold truncate text-white mb-1 text-sm tracking-tight">{song.title}</h3>
+                                            <p className="text-xs text-gray-400 truncate mt-auto">{song.artist}</p>
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="col-span-full py-12 text-center border-2 border-dashed border-gray-800 rounded-2xl">
+                                    <div className="min-w-full py-12 text-center border-2 border-dashed border-gray-800 rounded-2xl">
                                         <p className="text-gray-500">No trending songs found. Use Admin panel to seed.</p>
                                     </div>
                                 )}
                             </Section>
 
                             {/* Popular Artists */}
-                            <Section title="Popular Artists" showAllLink="/streams/artists">
+                            <Section title="Popular artists" showAllLink="/streams/artists">
                                 {popularArtists.length > 0 ? (
                                     popularArtists.map(artist => (
-                                        <Link key={artist.id} to={`/streams/artist/${artist.id}`} className="group flex flex-col items-center">
-                                            <div className="bg-white/5 p-4 rounded-xl cursor-pointer hover:bg-white/10 transition-all duration-300 w-full text-center">
+                                        <Link key={artist.id} to={`/streams/artist/${artist.id}`} className="group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
+                                            <div className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 w-full text-center">
                                                 <div className="relative mb-4 aspect-square shadow-2xl">
                                                     <img
                                                         src={artist.image_url}
                                                         alt={artist.name}
-                                                        className="w-full h-full object-cover rounded-full"
+                                                        className="w-full h-full object-cover rounded-full shadow-lg"
                                                         onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop'; }}
                                                     />
+                                                    <button className="absolute bottom-6 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
+                                                        <Play size={24} fill="black" className="ml-1" />
+                                                    </button>
                                                 </div>
-                                                <h3 className="font-bold truncate text-white mb-1">{artist.name}</h3>
-                                                <p className="text-sm text-gray-500">Artist</p>
+                                                <h3 className="font-bold truncate text-white mb-1 text-sm">{artist.name}</h3>
+                                                <p className="text-xs text-gray-400">Artist</p>
                                             </div>
                                         </Link>
                                     ))
                                 ) : (
-                                    <p className="text-gray-500 col-span-full py-12 text-center">No artists found.</p>
+                                    <p className="text-gray-500 min-w-full py-12 text-center">No artists found.</p>
                                 )}
                             </Section>
 
                             {/* New Releases */}
-                            <Section title="New Releases" showAllLink="/streams/new-releases">
+                            <Section title="Popular albums and singles" showAllLink="/streams/new-releases">
                                 {newReleases.length > 0 ? (
                                     newReleases.map(album => (
-                                        <div key={album.id} className="bg-white/5 p-4 rounded-xl cursor-pointer hover:bg-white/10 transition-all duration-300 group flex flex-col h-full">
+                                        <div key={album.id} className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
                                                 <img
                                                     src={album.cover_url}
                                                     alt={album.title}
-                                                    className="w-full h-full object-cover rounded-lg"
+                                                    className="w-full h-full object-cover rounded-md shadow-lg"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&h=300&fit=crop'; }}
                                                 />
+                                                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
+                                                    <Play size={24} fill="black" className="ml-1" />
+                                                </button>
                                             </div>
-                                            <h3 className="font-bold truncate text-white mb-1">{album.title}</h3>
-                                            <p className="text-sm text-gray-400 truncate mt-auto">{album.artists?.name}</p>
+                                            <h3 className="font-bold truncate text-white mb-1 text-sm">{album.title}</h3>
+                                            <p className="text-xs text-gray-400 truncate mt-auto">{album.artists?.name}</p>
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-gray-500 col-span-full py-12 text-center">No albums found.</p>
+                                    <p className="text-gray-500 min-w-full py-12 text-center">No albums found.</p>
                                 )}
                             </Section>
                         </div>
@@ -184,32 +219,32 @@ export default function StreamsHome() {
     );
 }
 
-function QuickAccessTile({ title, gradient, icon }: { title: string; gradient: string; icon: string }) {
+function QuickAccessTile({ title, gradient, icon, to }: { title: string; gradient: string; icon: string; to: string }) {
     return (
-        <div className={`bg-gradient-to-r ${gradient} rounded-lg flex items-center gap-4 cursor-pointer hover:bg-white/10 transition-all duration-300 group overflow-hidden border border-white/5`}>
-            <div className="w-20 h-20 bg-black/40 flex items-center justify-center flex-shrink-0">
-                <span className="text-3xl">{icon}</span>
+        <Link to={to} className="bg-white/10 rounded-md flex items-center gap-4 cursor-pointer hover:bg-white/20 transition-all duration-300 group overflow-hidden relative">
+            <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                <span className="text-xl sm:text-2xl">{icon}</span>
             </div>
-            <h3 className="font-bold text-lg text-white">{title}</h3>
-            <button className="ml-auto mr-4 w-12 h-12 rounded-full bg-purple-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl hover:scale-110">
-                <Play size={24} fill="white" className="ml-1" />
+            <h3 className="font-bold text-sm sm:text-base text-white truncate pr-12">{title}</h3>
+            <button className="absolute right-2 w-10 h-10 rounded-full bg-[#1DB954] text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95">
+                <Play size={20} fill="black" className="ml-1" />
             </button>
-        </div>
+        </Link>
     );
 }
 
 function Section({ title, children, showAllLink }: { title: string; children: React.ReactNode; showAllLink?: string }) {
     return (
-        <div>
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white tracking-tight">{title}</h2>
+        <div className="mb-12">
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-white tracking-tight hover:underline cursor-pointer">{title}</h2>
                 {showAllLink && (
                     <Link to={showAllLink} className="text-sm font-bold text-gray-400 hover:text-white transition-colors hover:underline">
                         Show all
                     </Link>
                 )}
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            <div className="flex overflow-x-auto scrollbar-hide gap-6 pb-4 snap-x -mx-2 px-2">
                 {children}
             </div>
         </div>

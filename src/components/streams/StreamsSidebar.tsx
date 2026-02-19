@@ -1,4 +1,4 @@
-import { Home, Search, Library, PlusSquare, Heart } from 'lucide-react';
+import { Home, Search, Library, Plus, Heart, Globe, Mic2 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 export function StreamsSidebar({ className = "" }: { className?: string }) {
@@ -7,28 +7,65 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
     const isActive = (path: string) => location.pathname === path;
 
     return (
-        <div className={`bg-black text-gray-300 flex flex-col ${className}`}>
-            <div className="p-6">
-                <div className="space-y-4">
-                    <SidebarLink to="/streams" icon={<Home />} label="Home" active={isActive('/streams')} />
-                    <SidebarLink to="/streams/search" icon={<Search />} label="Search" active={isActive('/streams/search')} />
-                    <SidebarLink to="/streams/library" icon={<Library />} label="Your Library" active={isActive('/streams/library')} />
-                </div>
+        <div className={`bg-black text-gray-400 flex flex-col gap-2 p-2 ${className}`}>
+            {/* Top Navigation Card */}
+            <div className="bg-[#121212] rounded-lg p-4 space-y-4">
+                <SidebarLink to="/streams" icon={<Home size={24} />} label="Home" active={isActive('/streams')} />
+                <SidebarLink to="/streams/search" icon={<Search size={24} />} label="Search" active={isActive('/streams/search')} />
+                <SidebarLink to="/streams/creator" icon={<Mic2 size={24} className="text-[#1DB954]" />} label="Creator Portal" active={isActive('/streams/creator')} />
+            </div>
 
-                <div className="mt-8 space-y-4">
-                    <SidebarLink to="/streams/create-playlist" icon={<PlusSquare />} label="Create Playlist" />
-                    <SidebarLink to="/streams/liked" icon={<Heart className="text-purple-500 fill-purple-500" />} label="Liked Songs" />
-                </div>
-
-                <div className="mt-6 border-t border-gray-800 pt-4">
-                    <div className="h-40 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-gray-800">
-                        {/* Mock Playlists */}
-                        <div className="hover:text-white cursor-pointer transition text-sm">Afrobeats Essentials</div>
-                        <div className="hover:text-white cursor-pointer transition text-sm">Chill Vibes</div>
-                        <div className="hover:text-white cursor-pointer transition text-sm">Gym Hype</div>
-                        <div className="hover:text-white cursor-pointer transition text-sm">Top 50 - South Africa</div>
-                        <div className="hover:text-white cursor-pointer transition text-sm">Amapiano Grooves</div>
+            {/* Library Card */}
+            <div className="bg-[#121212] rounded-lg flex-grow flex flex-col overflow-hidden">
+                <div className="p-4 flex items-center justify-between shadow-md">
+                    <div className="flex items-center gap-3 text-gray-400 hover:text-white transition cursor-pointer">
+                        <Library size={24} />
+                        <span className="font-bold">Your Library</span>
                     </div>
+                    <button className="p-1 hover:bg-white/10 rounded-full transition text-gray-400 hover:text-white">
+                        <Plus size={20} />
+                    </button>
+                </div>
+
+                <div className="flex-grow overflow-y-auto p-2 space-y-4 scrollbar-hide">
+                    {/* Create Playlist Card */}
+                    <div className="bg-[#242424] p-4 rounded-lg space-y-4">
+                        <div className="space-y-1">
+                            <h4 className="text-white font-bold text-sm">Create your first playlist</h4>
+                            <p className="text-white text-xs">It's easy, we'll help you</p>
+                        </div>
+                        <button className="bg-white text-black text-xs font-bold py-2 px-4 rounded-full hover:scale-105 transition active:scale-95">
+                            Create playlist
+                        </button>
+                    </div>
+
+                    {/* Find Podcasts Card */}
+                    <div className="bg-[#242424] p-4 rounded-lg space-y-4">
+                        <div className="space-y-1">
+                            <h4 className="text-white font-bold text-sm">Let's find some podcasts to follow</h4>
+                            <p className="text-white text-xs">We'll keep you updated on new episodes</p>
+                        </div>
+                        <button className="bg-white text-black text-xs font-bold py-2 px-4 rounded-full hover:scale-105 transition active:scale-95">
+                            Browse podcasts
+                        </button>
+                    </div>
+                </div>
+
+                {/* Footer Links */}
+                <div className="p-4 mt-auto space-y-6">
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-[10px] text-gray-400 font-medium">
+                        <a href="#" className="hover:underline">Legal</a>
+                        <a href="#" className="hover:underline">Safety & Privacy Center</a>
+                        <a href="#" className="hover:underline">Privacy Policy</a>
+                        <a href="#" className="hover:underline">Cookies</a>
+                        <a href="#" className="hover:underline">About Ads</a>
+                        <a href="#" className="hover:underline">Accessibility</a>
+                    </div>
+
+                    <button className="flex items-center gap-1 text-white border border-gray-600 rounded-full px-3 py-1 text-xs font-bold hover:border-white hover:scale-105 transition">
+                        <Globe size={14} />
+                        <span>English</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -37,7 +74,7 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
 
 function SidebarLink({ to, icon, label, active }: { to: string; icon: React.ReactNode; label: string; active?: boolean }) {
     return (
-        <Link to={to} className={`flex items-center gap-4 transition font-semibold ${active ? 'text-white' : 'hover:text-white'}`}>
+        <Link to={to} className={`flex items-center gap-4 transition font-bold text-sm sm:text-base ${active ? 'text-white' : 'hover:text-white'}`}>
             {icon}
             <span>{label}</span>
         </Link>

@@ -1,0 +1,93 @@
+-- Reseed Data for Bara Prototype (Streams & Sports)
+-- Run this in your Supabase SQL Editor
+
+-- 1. CLEANUP (Clears existing data to prevent ID conflicts)
+TRUNCATE public.songs, public.albums, public.artists, public.sports_news, public.sports_videos, public.matches, public.teams, public.leagues CASCADE;
+
+-- 2. SEED STREAMS (Music)
+-- Insert Artists
+INSERT INTO public.artists (name, bio, image_url, is_verified) VALUES
+('Burna Boy', 'The African Giant.', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80', true),
+('Tyla', 'Amapiano pop sensation.', 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=500&q=80', true),
+('Davido', 'Afrobeats legend.', 'https://images.unsplash.com/photo-1520342868574-5fa3804e551c?w=500&q=80', true),
+('Kabza De Small', 'King of Amapiano.', 'https://images.unsplash.com/photo-1549833284-6a7df0b72665?w=500&q=80', true),
+('Black Coffee', 'International DJ and Producer.', 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=500&q=80', true);
+
+-- Insert Albums for each artist
+INSERT INTO public.albums (artist_id, title, cover_url, release_date, genre)
+SELECT id, name || ' - Greatest Hits', 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=500&q=80', NOW(), 'Afrobeats'
+FROM public.artists;
+
+-- Insert Songs for each album
+INSERT INTO public.songs (artist_id, album_id, title, file_url, cover_url, duration, plays)
+SELECT 
+  a.artist_id, 
+  a.id as album_id, 
+  'Track ' || gs.i || ' - ' || art.name, 
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+  'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80',
+  180 + (random() * 60)::int,
+  (random() * 1000000)::int
+FROM public.albums a
+JOIN public.artists art ON a.artist_id = art.id
+CROSS JOIN generate_series(1, 5) AS gs(i);
+
+-- 3. SEED SPORTS NEWS
+INSERT INTO public.sports_news (title, category, image_url, author, content) VALUES
+('Mamelodi Sundowns clinch 7th consecutive PSL title', 'PSL', 'https://images.unsplash.com/photo-1522778119026-d647f0565c6a?w=800&q=80', 'Staff Reporter', 'The Brazilians have done it again...'),
+('Springboks announce squad for upcoming Rugby Championship', 'Rugby', 'https://images.unsplash.com/photo-1533561334057-79754f9a5620?w=800&q=80', 'Rugby Desk', 'Rassie Erasmus has selected...'),
+('Bafana Bafana rise in latest FIFA rankings', 'Football', 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800&q=80', 'Soccer Laduma', 'Hugo Broos men have moved up...'),
+('Proteas women beat Australia in historic T20 victory', 'Cricket', 'https://images.unsplash.com/photo-1531415074968-bc2366c912da?w=800&q=80', 'Cricket SA', 'Laura Wolvaardt scored a matching winning...'),
+('Dricus du Plessis to defend UFC title in South Africa?', 'UFC', 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800&q=80', 'MMA Junkie', 'Dana White hints at Cape Town event...'),
+('Kaizer Chiefs appoint new head coach from Tunisia', 'PSL', 'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=800&q=80', 'KickOff', 'Nasreddine Nabi is the new man in charge...'),
+('Orlando Pirates win Nedbank Cup final', 'PSL', 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&q=80', 'Sowetan Live', 'Relebohile Mofokeng scored the winner...'),
+('Formula 1 considering return to Kyalami', 'Motorsport', 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=800&q=80', 'F1 News', 'Lewis Hamilton pushes for African GP...'),
+('Caster Semenya wins legal battle', 'Athletics', 'https://images.unsplash.com/photo-1552674605-5d28c4e1902c?w=800&q=80', 'News24', 'European Court of Human Rights rules in favor...'),
+('Siya Kolisi returns to Sharks from Racing 92', 'Rugby', 'https://images.unsplash.com/photo-1628891892233-04286161836f?w=800&q=80', 'Shark Tank', 'The captain is back in Durban...');
+
+-- 4. SEED SPORTS VIDEOS
+INSERT INTO public.sports_videos (title, video_url, duration, league, is_live) VALUES
+('Match Highlights: Chiefs vs Pirates', 'https://www.youtube.com/watch?v=dummy1', '10:24', 'Betway Premiership', false),
+('Rassie Erasmus Press Conference', 'https://www.youtube.com/watch?v=dummy2', '15:30', 'International Rugby', true),
+('Goal of the Month: Gaston Sirino', 'https://www.youtube.com/watch?v=dummy3', '03:12', 'Betway Premiership', false),
+('UFC 305 Embedded: Vlog Series', 'https://www.youtube.com/watch?v=dummy4', '09:45', 'UFC', false),
+('Bafana Bafana Training Session', 'https://www.youtube.com/watch?v=dummy5', '05:00', 'WC Qualifiers', false);
+
+-- 5. SEED LEAGUES & MATCHES
+INSERT INTO public.leagues (name, type) VALUES ('Betway Premiership', 'league'), ('English Premier League', 'league');
+
+-- Insert Teams
+INSERT INTO public.teams (name, short_name, league_id)
+SELECT 'Mamelodi Sundowns', 'MAM', id FROM public.leagues WHERE name = 'Betway Premiership'
+UNION ALL
+SELECT 'Orlando Pirates', 'ORL', id FROM public.leagues WHERE name = 'Betway Premiership'
+UNION ALL
+SELECT 'Kaizer Chiefs', 'KAI', id FROM public.leagues WHERE name = 'Betway Premiership'
+UNION ALL
+SELECT 'Manchester City', 'MCI', id FROM public.leagues WHERE name = 'English Premier League'
+UNION ALL
+SELECT 'Arsenal', 'ARS', id FROM public.leagues WHERE name = 'English Premier League';
+
+-- Insert Matches
+INSERT INTO public.matches (league_id, home_team_id, away_team_id, match_date, status, home_score, away_score, minute)
+SELECT 
+   l.id,
+   (SELECT id FROM public.teams WHERE name = 'Mamelodi Sundowns'),
+   (SELECT id FROM public.teams WHERE name = 'Orlando Pirates'),
+   NOW(),
+   'LIVE',
+   1,
+   1,
+   '67'''
+FROM public.leagues l WHERE l.name = 'Betway Premiership'
+UNION ALL
+SELECT 
+   l.id,
+   (SELECT id FROM public.teams WHERE name = 'Manchester City'),
+   (SELECT id FROM public.teams WHERE name = 'Arsenal'),
+   NOW(),
+   'FT',
+   3,
+   1,
+   'FT'
+FROM public.leagues l WHERE l.name = 'English Premier League';

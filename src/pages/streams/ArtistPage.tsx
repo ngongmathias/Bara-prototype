@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { MainLayout } from '@/components/layout/MainLayout';
+import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
-import { Loader2, Play, Pause } from 'lucide-react';
+import { Loader2, Play, Pause, BadgeCheck } from 'lucide-react';
 
 export default function ArtistPage() {
     const { id } = useParams();
@@ -76,73 +76,60 @@ export default function ArtistPage() {
 
     if (loading) {
         return (
-            <MainLayout>
+            <StreamsLayout>
                 <div className="min-h-screen bg-black text-white flex items-center justify-center">
-                    <Loader2 className="w-10 h-10 animate-spin text-green-500" />
+                    <Loader2 className="w-10 h-10 animate-spin text-[#1DB954]" />
                 </div>
-            </MainLayout>
+            </StreamsLayout>
         );
     }
 
     if (!artist) {
         return (
-            <MainLayout>
+            <StreamsLayout>
                 <div className="min-h-screen bg-black text-white flex items-center justify-center">
                     <p>Artist not found.</p>
                 </div>
-            </MainLayout>
+            </StreamsLayout>
         );
     }
 
     return (
-        <MainLayout>
+        <StreamsLayout>
             <div className="min-h-screen bg-black text-white pb-24">
                 {/* Hero Header */}
-                <div className="bg-gradient-to-b from-gray-800 to-black pt-20 pb-6 px-8 relative">
+                <div className="bg-gradient-to-b from-gray-700 to-[#121212] pt-20 pb-6 px-8 relative">
                     {artist.banner_url && (
-                        <div className="absolute inset-0 z-0 opacity-30">
-                            <img src={artist.banner_url} alt="Banner" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black"></div>
+                        <div className="absolute inset-0 z-0">
+                            <img src={artist.banner_url} alt="Banner" className="w-full h-full object-cover opacity-60" />
+                            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-[#121212]"></div>
                         </div>
                     )}
                     <div className="max-w-7xl mx-auto relative z-10">
-                        <div className="flex items-end gap-6">
-                            {/* Artist Image */}
-                            <div className="w-56 h-56 rounded-full shadow-2xl bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                {artist.image_url ? (
-                                    <img src={artist.image_url} alt={artist.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="text-8xl">🎤</div>
-                                )}
-                            </div>
-
+                        <div className="flex items-end gap-6 pb-6">
                             {/* Artist Info */}
-                            <div className="flex-1 pb-6">
-                                {artist.is_verified && (
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                                        </svg>
-                                        <span className="text-sm font-semibold">Verified Artist</span>
-                                    </div>
-                                )}
-                                <h1 className="text-6xl md:text-8xl font-comfortaa font-semibold mb-6 leading-none">{artist.name}</h1>
-                                {artist.bio && (
-                                    <p className="text-sm text-gray-300 max-w-2xl line-clamp-2">{artist.bio}</p>
-                                )}
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <BadgeCheck className="text-blue-400 w-6 h-6 fill-blue-400/20" />
+                                    <span className="text-sm font-bold">Verified Artist</span>
+                                </div>
+                                <h1 className="text-5xl md:text-8xl font-black mb-6 leading-none tracking-tighter text-white">{artist.name}</h1>
+                                <p className="text-sm font-bold text-gray-300">
+                                    {Math.floor(Math.random() * 500000) + 100000} monthly listeners
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Action Bar */}
-                <div className="bg-black px-8 pt-6 pb-4">
-                    <div className="max-w-7xl mx-auto flex items-center gap-6">
+                <div className="bg-[#121212] px-8 pt-6 pb-4">
+                    <div className="max-w-7xl mx-auto flex items-center gap-8">
                         {/* Play Button */}
                         {topTracks.length > 0 && (
                             <button
                                 onClick={() => handlePlaySong(topTracks[0])}
-                                className="w-14 h-14 rounded-full bg-green-500 hover:scale-105 transition flex items-center justify-center shadow-xl"
+                                className="w-14 h-14 rounded-full bg-[#1DB954] hover:scale-105 transition flex items-center justify-center shadow-xl active:scale-95"
                             >
                                 <Play fill="black" className="w-6 h-6 ml-1 text-black" />
                             </button>
@@ -151,7 +138,7 @@ export default function ArtistPage() {
                         {/* Follow Button */}
                         <button
                             onClick={() => setFollowing(!following)}
-                            className={`px-8 py-2 rounded-full font-semibold transition bg-transparent border border-gray-400 text-white hover:border-white`}
+                            className={`px-8 py-1.5 rounded-full font-bold transition bg-transparent border border-gray-500 text-white hover:border-white hover:scale-105 active:scale-95 text-sm uppercase tracking-widest`}
                         >
                             {following ? 'Following' : 'Follow'}
                         </button>
@@ -172,12 +159,16 @@ export default function ArtistPage() {
                                         onClick={() => handlePlaySong(track)}
                                     >
                                         {/* Track Number / Play Button */}
-                                        <div className="text-gray-400 group-hover:text-white flex justify-center">
+                                        <div className="text-gray-400 flex justify-center w-8">
                                             {currentSong?.id === track.id && isPlaying ? (
-                                                <img src="https://open.spotifycdn.com/cdn/images/equaliser-animated-green.f93a2ef4.gif" className="w-3 h-3" alt="playing" />
+                                                <div className="flex items-end gap-[2px] h-3">
+                                                    <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '60%' }}></div>
+                                                    <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '100%', animationDelay: '0.2s' }}></div>
+                                                    <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0.4s' }}></div>
+                                                </div>
                                             ) : (
                                                 <>
-                                                    <span className="group-hover:hidden">{index + 1}</span>
+                                                    <span className={`group-hover:hidden ${currentSong?.id === track.id ? 'text-[#1DB954]' : ''}`}>{index + 1}</span>
                                                     <Play fill="white" className="w-4 h-4 hidden group-hover:block" />
                                                 </>
                                             )}
@@ -187,7 +178,7 @@ export default function ArtistPage() {
                                         <div className="flex gap-3 items-center min-w-0">
                                             <img src={track.cover_url} alt={track.title} className="w-10 h-10 object-cover rounded" />
                                             <div className="min-w-0 flex-1">
-                                                <div className={`font-semibold truncate transition ${currentSong?.id === track.id ? 'text-green-500' : 'text-white'}`}>
+                                                <div className={`font-bold truncate transition text-sm ${currentSong?.id === track.id ? 'text-[#1DB954]' : 'text-white'}`}>
                                                     {track.title}
                                                 </div>
                                                 <div className="text-sm text-gray-400 flex items-center gap-2">
@@ -198,7 +189,7 @@ export default function ArtistPage() {
 
                                         {/* Album */}
                                         <div className="text-sm text-gray-400 truncate hidden md:block">
-                                            {(track as any).album_title}
+                                            {track.album_title || 'Single'}
                                         </div>
 
                                         {/* Duration */}
@@ -217,21 +208,21 @@ export default function ArtistPage() {
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-comfortaa font-semibold">Discography</h2>
                             </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            <div className="flex overflow-x-auto scrollbar-hide gap-6 pb-4">
                                 {albums.map((album) => (
-                                    <div key={album.id} className="bg-[#181818] p-4 rounded-lg hover:bg-[#282828] transition cursor-pointer group">
+                                    <div key={album.id} className="bg-[#181818] p-4 rounded-lg hover:bg-[#282828] transition cursor-pointer group min-w-[180px] flex flex-col">
                                         <div className="relative mb-4 aspect-square">
                                             <img
                                                 src={album.cover_url || '/placeholder-music.png'}
                                                 alt={album.title}
                                                 className="w-full h-full object-cover rounded shadow-lg"
                                             />
-                                            <button className="absolute right-2 bottom-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl transform translate-y-2 group-hover:translate-y-0 hover:scale-110">
-                                                <Play fill="black" className="w-6 h-6 ml-1" />
+                                            <button className="absolute right-2 bottom-2 w-10 h-10 bg-[#1DB954] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl transform translate-y-2 group-hover:translate-y-0 active:scale-95">
+                                                <Play fill="black" className="w-5 h-5 ml-1 text-black" />
                                             </button>
                                         </div>
-                                        <h3 className="font-semibold text-base mb-1 truncate">{album.title}</h3>
-                                        <p className="text-sm text-gray-400">{new Date(album.release_date).getFullYear()} • {album.type || 'Album'}</p>
+                                        <h3 className="font-bold text-sm mb-1 truncate">{album.title}</h3>
+                                        <p className="text-xs text-gray-400">{new Date(album.release_date).getFullYear()} • Album</p>
                                     </div>
                                 ))}
                             </div>
@@ -239,6 +230,6 @@ export default function ArtistPage() {
                     </div>
                 </div>
             </div>
-        </MainLayout>
+        </StreamsLayout>
     );
 }

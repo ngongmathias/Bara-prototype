@@ -88,6 +88,8 @@ import AdminMarketplace from "./pages/admin/AdminMarketplace";
 import AdminMarketplaceCategories from "./pages/admin/AdminMarketplaceCategories";
 import { AdminStreamsDashboard } from "./pages/admin/streams/AdminStreamsDashboard";
 import { AdminArtists } from "./pages/admin/streams/AdminArtists";
+import { AdminSongs } from "./pages/admin/streams/AdminSongs";
+import { AdminAlbums } from "./pages/admin/streams/AdminAlbums";
 import { AdminSportsDashboard } from "./pages/admin/sports/AdminSportsDashboard";
 import AdminSportsNews from "./pages/admin/sports/AdminSportsNews";
 import AdminSportsVideos from "./pages/admin/sports/AdminSportsVideos";
@@ -107,6 +109,12 @@ import LeagueTablePage from "./pages/sports/LeagueTablePage";
 import StreamsHome from "./pages/streams/StreamsHome";
 import PlaylistPage from "./pages/streams/PlaylistPage";
 import ArtistPage from "./pages/streams/ArtistPage";
+import ArtistsPage from "./pages/streams/ArtistsPage";
+import TrendingSongsPage from "./pages/streams/TrendingSongsPage";
+import NewReleasesPage from "./pages/streams/NewReleasesPage";
+import LikedSongsPage from "./pages/streams/LikedSongsPage";
+import LibraryPage from "./pages/streams/LibraryPage";
+import ArtistDashboard from "@/pages/streams/ArtistDashboard";
 import SearchPage from "./pages/SearchPage";
 import TestSportsApi from "./pages/TestSportsApi";
 import TestEmailPage from "./pages/TestEmailPage";
@@ -149,87 +157,39 @@ const AppRoutes = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/test-rss" element={<TestRSSPage />} />
 
-        {/* Admin Routes - MUST come before marketplace dynamic routes */}
-        <Route path="/admin" element={
-          <AdminAuthGuard>
-            <AdminDashboard />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/marketplace" element={
-          <AdminAuthGuard>
-            <AdminMarketplace />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/marketplace-categories" element={
-          <AdminAuthGuard>
-            <AdminMarketplaceCategories />
-          </AdminAuthGuard>
-        } />
+        {/* Mini-Apps Routes - Isolated with wildcard catch-alls to prevent fall-through */}
+        <Route path="/streams/*">
+          <Route index element={<StreamsHome />} />
+          <Route path="search" element={<SearchPage />} />
+          <Route path="playlist/:id" element={<PlaylistPage />} />
+          <Route path="artist/:id" element={<ArtistPage />} />
+          <Route path="artists" element={<ArtistsPage />} />
+          <Route path="trending" element={<TrendingSongsPage />} />
+          <Route path="new-releases" element={<NewReleasesPage />} />
+          <Route path="liked" element={<LikedSongsPage />} />
+          <Route path="library" element={<LibraryPage />} />
+          <Route path="creator" element={<UserAuthGuard><ArtistDashboard /></UserAuthGuard>} />
+          <Route path="*" element={<StreamsHome />} /> {/* Fallback within streams context */}
+        </Route>
 
+        <Route path="/sports/*">
+          <Route index element={<SportsHome />} />
+          <Route path="scores" element={<SportsScores />} />
+          <Route path="game/:id" element={<MatchCenter />} />
+          <Route path="match/:id" element={<MatchCenter />} />
+          <Route path="team/:id" element={<TeamPage />} />
+          <Route path="table/:id" element={<LeagueTablePage />} />
+          <Route path="*" element={<SportsHome />} />
+        </Route>
 
-        {/* Streams Admin Routes */}
-        <Route path="/admin/streams" element={
-          <AdminAuthGuard>
-            <AdminStreamsDashboard />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/streams/artists" element={
-          <AdminAuthGuard>
-            <AdminArtists />
-          </AdminAuthGuard>
-        } />
+        {/* Events Routes - Specific */}
+        <Route path="/events/*">
+          <Route index element={<EventsPage />} />
+          <Route path=":eventId" element={<EventsPage />} />
+          <Route path="*" element={<EventsPage />} />
+        </Route>
 
-        <Route path="/admin/sports" element={
-          <AdminAuthGuard>
-            <AdminSportsDashboard />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/sports/news" element={
-          <AdminAuthGuard>
-            <AdminSportsNews />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/sports/videos" element={
-          <AdminAuthGuard>
-            <AdminSportsVideos />
-          </AdminAuthGuard>
-        } />
-
-
-        {/* Marketplace Routes - MUST come before broad business listings routes */}
-        <Route path="/marketplace" element={<MarketplacePage />} />
-        <Route path="/marketplace/categories" element={<AllCategoriesPage />} />
-        <Route path="/marketplace/search" element={<SearchResults />} />
-        <Route path="/marketplace/post" element={<PostListing />} />
-        <Route path="/marketplace/my-listings" element={<MyListings />} />
-        <Route path="/marketplace/listing/:listingId" element={<CategoryDetailRouter />} />
-        <Route path="/marketplace/edit/:listingId" element={<EditListing />} />
-        <Route path="/marketplace/favorites" element={<MyFavorites />} />
-        <Route path="/marketplace/property-sale" element={<PropertyPage />} />
-        <Route path="/marketplace/property-rent" element={<PropertyPage />} />
-        <Route path="/marketplace/motors" element={<MotorsPage />} />
-        <Route path="/marketplace/classifieds" element={<ClassifiedsPage />} />
-        <Route path="/marketplace/jobs" element={<JobsPage />} />
-        {/* Catch-all route MUST be last */}
-        <Route path="/marketplace/:categorySlug" element={<CategoryPage />} />
-
-        {/* Business Listings Routes */}
-        <Route path="/listings" element={<ListingsPage />} />
-        <Route path="/business-listings" element={<ListingsPage />} />
-        <Route path="/writeareview" element={<WriteReviewPage />} />
-        <Route path="/write-review/:businessId" element={<WriteReviewPage />} />
-        <Route path="/claim-listing" element={<ClaimListingPage />} />
-        <Route path="/advertise" element={<AdvertisePage />} />
-        <Route path="/about" element={<AboutUsPage />} />
-        <Route path="/contact-us" element={<ContactUsPage />} />
-        <Route path="/faq" element={<FaqPage />} />
-        <Route path="/ask-question" element={<AskQuestionPage />} />
-        <Route path="/listings/categories" element={<CategoriesPage />} />
-        <Route path="/listings/category/:categorySlug" element={<CategoryListingsPage />} />
-        <Route path="/:city/search" element={<ListingsPage />} />
-        <Route path="/:city/:category" element={<CategoryListingsPage />} />
-        <Route path="/:city/:category/:businessId" element={<BusinessDetailPage />} />
-        <Route path="/cities/:citySlug" element={<CityDetailPage />} />
+        {/* Country and City Detail Routes - More specific than business listings */}
         <Route path="/countries" element={
           <MainLayout>
             <CountriesPage />
@@ -245,19 +205,64 @@ const AppRoutes = () => {
             <CountryDetailPage />
           </MainLayout>
         } />
+        <Route path="/cities/:citySlug" element={<CityDetailPage />} />
 
-        {/* Additional Navigation Pages */}
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/events/:eventId" element={<EventsPage />} />
+        {/* Marketplace Routes - Isolated with wildcard to prevent fall-through */}
+        <Route path="/marketplace/*">
+          <Route index element={<MarketplacePage />} />
+          <Route path="categories" element={<AllCategoriesPage />} />
+          <Route path="search" element={<SearchResults />} />
+          <Route path="post" element={<PostListing />} />
+          <Route path="my-listings" element={<MyListings />} />
+          <Route path="listing/:listingId" element={<CategoryDetailRouter />} />
+          <Route path="edit/:listingId" element={<EditListing />} />
+          <Route path="favorites" element={<MyFavorites />} />
+          <Route path="property-sale" element={<PropertyPage />} />
+          <Route path="property-rent" element={<PropertyPage />} />
+          <Route path="motors" element={<MotorsPage />} />
+          <Route path="classifieds" element={<ClassifiedsPage />} />
+          <Route path="jobs" element={<JobsPage />} />
+          <Route path=":categorySlug" element={<CategoryPage />} />
+          <Route path="*" element={<MarketplacePage />} />
+        </Route>
+
+        {/* Blog Routes - Isolated */}
+        <Route path="/blog/*">
+          <Route index element={<BlogPage />} />
+          <Route path="write" element={<UserBlogEditor />} />
+          <Route path="edit/:id" element={<UserBlogEditor />} />
+          <Route path=":slug" element={<BlogPostDetail />} />
+          <Route path="*" element={<BlogPage />} />
+        </Route>
+        {/* Messaging Routes - Isolated */}
+        <Route path="/messages/*">
+          <Route index element={<UserAuthGuard><InboxPage /></UserAuthGuard>} />
+          <Route path=":conversationId" element={<UserAuthGuard><ChatWindow /></UserAuthGuard>} />
+          <Route path="*" element={<UserAuthGuard><InboxPage /></UserAuthGuard>} />
+        </Route>
+
+        {/* User Dashboard Routes - Isolated */}
+        <Route path="/users/*">
+          <Route path="dashboard" element={<UserAuthGuard><UserDashboard /></UserAuthGuard>}>
+            <Route index element={<div className="p-6"><h2 className="text-2xl font-bold mb-4">Dashboard Home</h2><p>Welcome to your dashboard!</p></div>} />
+            <Route path="events" element={<UserEventsPage />} />
+            <Route path="events/:eventId/registrations" element={<OrganizerRegistrationsPage />} />
+            <Route path="tickets" element={<UserTicketsPage />} />
+            <Route path="banner-submissions" element={<UserBannerSubmission />} />
+            <Route path="profile" element={<UserProfilePage />} />
+          </Route>
+          <Route path="*" element={<UserAuthGuard><UserDashboard /></UserAuthGuard>} />
+        </Route>
+
         <Route path="/tools" element={<ToolsPage />} />
-        <Route path="/blog" element={<BlogPage />} />
-        <Route path="/blog/write" element={<UserBlogEditor />} />
-        <Route path="/blog/edit/:id" element={<UserBlogEditor />} />
-        <Route path="/blog/:slug" element={<BlogPostDetail />} />
+        <Route path="/about" element={<AboutUsPage />} />
+
+        {/* Advertise Routes */}
+        <Route path="/advertise" element={<AdvertisePage />} />
         <Route path="/advertise/checkout" element={<AdvertiseCheckoutPage />} />
         <Route path="/sponsor-country" element={<SponsorCountryPage />} />
 
-        {/* Authentication Routes */}
+        {/* Authentication Routes - Extremely specific */}
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path="/sign-in/*" element={<SignInPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
@@ -267,211 +272,48 @@ const AppRoutes = () => {
         <Route path="/sso-callback" element={<SSOCallbackPage />} />
         <Route path="/auth/finish" element={<AuthFinishPage />} />
 
-        {/* Messaging Routes */}
-        <Route path="/messages" element={
-          <UserAuthGuard>
-            <InboxPage />
-          </UserAuthGuard>
-        } />
-        <Route path="/messages/:conversationId" element={
-          <UserAuthGuard>
-            <ChatWindow />
-          </UserAuthGuard>
-        } />
-
-        {/* User Dashboard Routes */}
-        <Route path="/users/dashboard" element={
-          <UserAuthGuard>
-            <UserDashboard />
-          </UserAuthGuard>
-        }>
-          <Route index element={<div className="p-6"><h2 className="text-2xl font-bold mb-4">Dashboard Home</h2><p>Welcome to your dashboard!</p></div>} />
-          <Route path="events" element={<UserEventsPage />} />
-          <Route path="events/:eventId/registrations" element={<OrganizerRegistrationsPage />} />
-          <Route path="tickets" element={<UserTicketsPage />} />
-          <Route path="banner-submissions" element={<UserBannerSubmission />} />
-          <Route path="profile" element={<UserProfilePage />} />
+        {/* Admin Routes - Isolated with wildcard to prevent fall-through */}
+        <Route path="/admin/*">
+          <Route index element={<AdminAuthGuard><AdminDashboard /></AdminAuthGuard>} />
+          <Route path="cities" element={<AdminAuthGuard><AdminCities /></AdminAuthGuard>} />
+          <Route path="countries" element={<AdminAuthGuard><AdminCountries /></AdminAuthGuard>} />
+          <Route path="country-info" element={<AdminAuthGuard><AdminCountryInfo /></AdminAuthGuard>} />
+          <Route path="businesses" element={<AdminAuthGuard><AdminBusinesses /></AdminAuthGuard>} />
+          <Route path="events" element={<AdminAuthGuard><AdminEvents /></AdminAuthGuard>} />
+          <Route path="events-slideshow" element={<AdminAuthGuard><AdminEventsSlideshow /></AdminAuthGuard>} />
+          <Route path="sponsored-ads" element={<AdminAuthGuard><AdminSponsoredAds /></AdminAuthGuard>} />
+          <Route path="sponsored-banners" element={<AdminAuthGuard><AdminSponsoredBanners /></AdminAuthGuard>} />
+          <Route path="categories" element={<AdminAuthGuard><AdminCategories /></AdminAuthGuard>} />
+          <Route path="reports" element={<AdminAuthGuard><AdminReports /></AdminAuthGuard>} />
+          <Route path="reviews" element={<AdminAuthGuard><AdminReviews /></AdminAuthGuard>} />
+          <Route path="users" element={<AdminAuthGuard><AdminUsers /></AdminAuthGuard>} />
+          <Route path="admin-management" element={<AdminAuthGuard><AdminManagement /></AdminAuthGuard>} />
+          <Route path="rss-feeds" element={<AdminAuthGuard><AdminRSSFeeds /></AdminAuthGuard>} />
+          <Route path="settings" element={<AdminAuthGuard><AdminSettings /></AdminAuthGuard>} />
+          <Route path="contact-messages" element={<AdminAuthGuard><ContactMessagesPage /></AdminAuthGuard>} />
+          <Route path="banner-ads" element={<AdminAuthGuard><AdminBannerAds /></AdminAuthGuard>} />
+          <Route path="blog" element={<AdminAuthGuard><AdminBlog /></AdminAuthGuard>} />
+          <Route path="blog/new" element={<AdminAuthGuard><AdminBlogEditor /></AdminAuthGuard>} />
+          <Route path="blog/edit/:id" element={<AdminAuthGuard><AdminBlogEditor /></AdminAuthGuard>} />
+          <Route path="slideshow-images" element={<AdminAuthGuard><AdminSlideshowImages /></AdminAuthGuard>} />
+          <Route path="popups" element={<AdminAuthGuard><AdminPopups /></AdminAuthGuard>} />
+          <Route path="marketplace" element={<AdminAuthGuard><AdminMarketplace /></AdminAuthGuard>} />
+          <Route path="marketplace-categories" element={<AdminAuthGuard><AdminMarketplaceCategories /></AdminAuthGuard>} />
+          <Route path="streams" element={<AdminAuthGuard><AdminStreamsDashboard /></AdminAuthGuard>} />
+          <Route path="streams/artists" element={<AdminAuthGuard><AdminArtists /></AdminAuthGuard>} />
+          <Route path="streams/songs" element={<AdminAuthGuard><AdminSongs /></AdminAuthGuard>} />
+          <Route path="streams/albums" element={<AdminAuthGuard><AdminAlbums /></AdminAuthGuard>} />
+          <Route path="sports" element={<AdminAuthGuard><AdminSportsDashboard /></AdminAuthGuard>} />
+          <Route path="sports/news" element={<AdminAuthGuard><AdminSportsNews /></AdminAuthGuard>} />
+          <Route path="sports/videos" element={<AdminAuthGuard><AdminSportsVideos /></AdminAuthGuard>} />
+          <Route path="*" element={<AdminAuthGuard><AdminDashboard /></AdminAuthGuard>} />
         </Route>
 
-        {/* Communities Routes */}
-        <Route path="/communities" element={<CommunitiesPage />} />
-        <Route path="/communities/:slug" element={<CommunityPage />} />
+        {/* Business Listings Dynamic Routes - MUST BE AT BOTTOM TO PREVENT INTERCEPTION */}
+        <Route path="/:city/search" element={<ListingsPage />} />
+        <Route path="/:city/:category" element={<CategoryListingsPage />} />
+        <Route path="/:city/:category/:businessId" element={<BusinessDetailPage />} />
 
-        {/* Mini-Apps Routes */}
-        <Route path="/sports" element={<SportsHome />} />
-        <Route path="/sports/scores" element={<SportsScores />} />
-        <Route path="/sports/game/:id" element={<MatchCenter />} />
-        <Route path="/sports/match/:id" element={<MatchCenter />} />
-        <Route path="/sports/team/:id" element={<TeamPage />} />
-        <Route path="/sports/table/:id" element={<LeagueTablePage />} />
-        <Route path="/streams" element={<StreamsHome />} />
-        <Route path="/streams/playlist/:id" element={<PlaylistPage />} />
-        <Route path="/streams/artist/:id" element={<ArtistPage />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/test-sports-api" element={<TestSportsApi />} />
-        <Route path="/test-email" element={<TestEmailPage />} />
-        <Route path="/terms" element={<TermsOfServicePage />} />
-        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
-        <Route path="/privacy" element={<PrivacyPolicyPage />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-
-        {/* <Route path="/googlemaps" element={<GoogleMapsTest />} /> */}
-        <Route path="/map-test" element={<MapTestPage />} />
-        {/* <Route path="/simple-map-test" element={<SimpleMapTest />} */}
-        {/* <Route path="/callback-map-test" element={
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-4">Callback Map Test</h1>
-        <CityMapLeafletCallback
-          cityName="Cairo"
-          latitude={30.0444}
-          longitude={31.2357}
-          businesses={[
-            {
-              id: 'test-1',
-              name: 'Test Restaurant',
-              description: 'A test restaurant',
-              phone: '+1234567890',
-              website: 'https://example.com',
-              address: '123 Test St',
-              latitude: 30.0444 + 0.001,
-              longitude: 31.2357 + 0.001,
-              category: { name: 'Restaurant', slug: 'restaurant' },
-              reviews: []
-            }
-          ]}
-          height="500px"
-        />
-      </div>
-    } /> */}
-        <Route path="/ultra-simple-map" element={
-          <div className="p-8">
-            <h1 className="text-2xl font-bold mb-4">Ultra Simple Map Test</h1>
-            <UltraSimpleMap
-              cityName="Cairo"
-              latitude={30.0444}
-              longitude={31.2357}
-            />
-          </div>
-        } />
-
-        {/* Admin Routes - Protected by AdminAuthGuard */}
-        <Route path="/admin" element={
-          <AdminAuthGuard>
-            <AdminDashboard />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/cities" element={
-          <AdminAuthGuard>
-            <AdminCities />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/countries" element={
-          <AdminAuthGuard>
-            <AdminCountries />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/country-info" element={
-          <AdminAuthGuard>
-            <AdminCountryInfo />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/businesses" element={
-          <AdminAuthGuard>
-            <AdminBusinesses />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/events" element={
-          <AdminAuthGuard>
-            <AdminEvents />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/sponsored-ads" element={
-          <AdminAuthGuard>
-            <AdminSponsoredAds />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/categories" element={
-          <AdminAuthGuard>
-            <AdminCategories />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/reports" element={
-          <AdminAuthGuard>
-            <AdminReports />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/reviews" element={
-          <AdminAuthGuard>
-            <AdminReviews />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/users" element={
-          <AdminAuthGuard>
-            <AdminUsers />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/admin-management" element={
-          <AdminAuthGuard>
-            <AdminManagement />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/rss-feeds" element={
-          <AdminAuthGuard>
-            <AdminRSSFeeds />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/settings" element={
-          <AdminAuthGuard>
-            <AdminSettings />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/contact-messages" element={
-          <AdminAuthGuard>
-            <ContactMessagesPage />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/banner-ads" element={
-          <AdminAuthGuard>
-            <AdminBannerAds />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/blog" element={
-          <AdminAuthGuard>
-            <AdminBlog />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/blog/new" element={
-          <AdminAuthGuard>
-            <AdminBlogEditor />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/blog/edit/:id" element={
-          <AdminAuthGuard>
-            <AdminBlogEditor />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/sponsored-banners" element={
-          <AdminAuthGuard>
-            <AdminSponsoredBanners />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/slideshow-images" element={
-          <AdminAuthGuard>
-            <AdminSlideshowImages />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/popups" element={
-          <AdminAuthGuard>
-            <AdminPopups />
-          </AdminAuthGuard>
-        } />
-        <Route path="/admin/events-slideshow" element={
-          <AdminAuthGuard>
-            <AdminEventsSlideshow />
-          </AdminAuthGuard>
-        } />
-
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </NotificationsProvider>

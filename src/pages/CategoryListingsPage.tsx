@@ -63,7 +63,7 @@ const getCategoryAmenities = (categorySlug: string) => {
       { icon: Heart, label: 'Wellness' }
     ]
   };
-  
+
   return amenitiesMap[categorySlug] || [
     { icon: Building, label: 'Services' },
     { icon: Heart, label: 'Support' }
@@ -107,7 +107,7 @@ const CategoryListingsPage = () => {
   const { categorySlug } = useParams<{ categorySlug: string }>();
   const [searchParams] = useSearchParams();
   const { selectedCountry } = useCountrySelection();
-  
+
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
@@ -165,7 +165,7 @@ const CategoryListingsPage = () => {
               .select('*')
               .eq('slug', categorySlug)
               .single();
-            
+
             setCurrentCategory(catData || null);
 
             if (catData) {
@@ -238,13 +238,13 @@ const CategoryListingsPage = () => {
       const matchesLocation = !loc ||
         (biz.address || '').toLowerCase().includes(loc) ||
         (biz.city?.name || '').toLowerCase().includes(loc);
-      
+
       // Feature filters
       if (activeFilter === 'order-online' && !biz.accepts_orders_online) return false;
       if (activeFilter === 'kid-friendly' && !biz.is_kid_friendly) return false;
       if (activeFilter === 'coupons' && !biz.has_coupons) return false;
       if (activeFilter === 'verified' && !biz.is_verified) return false;
-      
+
       return matchesSearch && matchesLocation;
     })
     .sort((a, b) => {
@@ -265,27 +265,62 @@ const CategoryListingsPage = () => {
 
   // Get businesses with valid coordinates for map view
   const businessesWithCoords = filteredBusinesses.filter(b => b.latitude && b.longitude);
-  
+
   // Calculate map center from businesses
   const mapCenter = businessesWithCoords.length > 0
     ? {
-        lat: businessesWithCoords.reduce((sum, b) => sum + (b.latitude || 0), 0) / businessesWithCoords.length,
-        lng: businessesWithCoords.reduce((sum, b) => sum + (b.longitude || 0), 0) / businessesWithCoords.length
-      }
+      lat: businessesWithCoords.reduce((sum, b) => sum + (b.latitude || 0), 0) / businessesWithCoords.length,
+      lng: businessesWithCoords.reduce((sum, b) => sum + (b.longitude || 0), 0) / businessesWithCoords.length
+    }
     : { lat: 0, lng: 0 };
 
   if (!currentCategory && !loading) {
     return (
-      <div className="relative min-h-screen bg-white">
-        <div className="absolute inset-0 bg-white/60 pointer-events-none" />
-        <div className="relative z-10 flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-600 mb-4">Category not found</h1>
-            <Button onClick={() => navigate('/listings/categories')} className="bg-black hover:bg-gray-800">
-              Back to Categories
-            </Button>
-          </div>
+      <div className="relative min-h-screen bg-slate-50 flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center max-w-lg bg-white p-12 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100"
+          >
+            <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8">
+              <Search className="w-10 h-10 text-slate-300" />
+            </div>
+            <h1 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">Looking for something?</h1>
+            <p className="text-slate-500 mb-8 leading-relaxed">
+              We couldn't find a category matching <span className="font-bold text-slate-900">"{categorySlug}"</span>.
+              Search for businesses, services, or explore our popular categories below.
+            </p>
+
+            <div className="space-y-4">
+              <Button
+                onClick={() => navigate('/listings/categories')}
+                className="w-full h-12 bg-black hover:bg-slate-800 text-white rounded-xl font-bold transition-all hover:scale-[1.02]"
+              >
+                Browse All Categories
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/')}
+                className="w-full h-12 border-slate-200 hover:bg-slate-50 rounded-xl font-bold text-slate-600"
+              >
+                Back to Home
+              </Button>
+            </div>
+
+            <div className="mt-12 pt-8 border-t border-slate-100">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Popular Sections</p>
+              <div className="flex flex-wrap justify-center gap-4">
+                <button onClick={() => navigate('/streams')} className="text-sm font-semibold text-slate-600 hover:text-black hover:underline">Music</button>
+                <button onClick={() => navigate('/events')} className="text-sm font-semibold text-slate-600 hover:text-black hover:underline">Events</button>
+                <button onClick={() => navigate('/marketplace')} className="text-sm font-semibold text-slate-600 hover:text-black hover:underline">Marketplace</button>
+                <button onClick={() => navigate('/sports')} className="text-sm font-semibold text-slate-600 hover:text-black hover:underline">Sports</button>
+              </div>
+            </div>
+          </motion.div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -297,7 +332,7 @@ const CategoryListingsPage = () => {
         <Header />
         <TopBannerAd />
       </div>
-      
+
       <div className="relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Back Button & Header */}
@@ -313,7 +348,7 @@ const CategoryListingsPage = () => {
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
               <span className="text-sm font-medium">All Categories</span>
             </button>
-            
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h1 className="text-4xl md:text-5xl font-black text-black tracking-tight">
@@ -323,7 +358,7 @@ const CategoryListingsPage = () => {
                   {filteredBusinesses.length} {filteredBusinesses.length === 1 ? 'business' : 'businesses'} found
                 </p>
               </div>
-              
+
               <div className="flex items-center gap-4">
                 {/* Search within category */}
                 <div className="relative">
@@ -336,7 +371,7 @@ const CategoryListingsPage = () => {
                     className="pl-10 w-64 bg-white/80 border-gray-200 focus:border-black rounded-xl"
                   />
                 </div>
-                
+
                 {/* View Toggle */}
                 <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
                   <button
@@ -462,7 +497,7 @@ const CategoryListingsPage = () => {
                   <p className="text-gray-400">Businesses in this category don't have location data yet</p>
                 </div>
               )}
-              
+
               {/* Business list below map */}
               <div className="mt-6 space-y-3">
                 <h3 className="font-semibold text-gray-700">{filteredBusinesses.length} Results</h3>
@@ -508,17 +543,16 @@ const CategoryListingsPage = () => {
                     {filteredBusinesses.map((business, index) => {
                       const businessImage = business.images?.[0] || business.logo_url;
                       const listingNumber = index + 1;
-                      
+
                       return (
                         <div
                           key={business.id}
-                          className={`border-b border-gray-200 py-4 ${
-                            business.is_sponsored_ad ? 'bg-blue-50' : ''
-                          }`}
+                          className={`border-b border-gray-200 py-4 ${business.is_sponsored_ad ? 'bg-blue-50' : ''
+                            }`}
                         >
                           <div className="flex gap-4">
                             {/* Image */}
-                            <div 
+                            <div
                               className="w-28 h-28 flex-shrink-0 bg-gray-100 rounded overflow-hidden cursor-pointer"
                               onClick={() => handleBusinessClick(business)}
                             >
@@ -530,7 +564,7 @@ const CategoryListingsPage = () => {
                                 </div>
                               )}
                             </div>
-                            
+
                             {/* Middle: Business Info */}
                             <div className="flex-1 min-w-0">
                               {/* Business Name */}
@@ -538,7 +572,7 @@ const CategoryListingsPage = () => {
                                 {!business.is_sponsored_ad && (
                                   <span className="text-gray-500 font-medium">{listingNumber}.</span>
                                 )}
-                                <h3 
+                                <h3
                                   className="text-blue-600 hover:underline font-semibold cursor-pointer text-lg"
                                   onClick={() => handleBusinessClick(business)}
                                 >
@@ -548,18 +582,18 @@ const CategoryListingsPage = () => {
                                   <Badge className="bg-blue-600 text-white text-xs ml-2">Ad</Badge>
                                 )}
                               </div>
-                              
+
                               {/* Category Tags */}
                               <p className="text-sm text-gray-600 mt-1">
                                 {business.category?.name}
                                 {business.has_coupons && ', Coupons Available'}
                                 {business.is_kid_friendly && ', Kid Friendly'}
                               </p>
-                              
+
                               {/* Action Links - YP Style */}
                               <div className="flex items-center gap-3 mt-2 text-sm">
                                 {business.website && (
-                                  <a 
+                                  <a
                                     href={`https://${business.website}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -570,7 +604,7 @@ const CategoryListingsPage = () => {
                                   </a>
                                 )}
                                 {business.address && (
-                                  <a 
+                                  <a
                                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -580,36 +614,36 @@ const CategoryListingsPage = () => {
                                     Directions
                                   </a>
                                 )}
-                                <span 
+                                <span
                                   className="text-blue-600 hover:underline cursor-pointer"
                                   onClick={() => handleBusinessClick(business)}
                                 >
                                   More Info
                                 </span>
                               </div>
-                              
+
                               {/* Rating */}
                               {business.reviews && business.reviews.length > 0 && (
                                 <div className="flex items-center gap-1 mt-2">
                                   <div className="flex">
                                     {[...Array(5)].map((_, i) => (
-                                      <Crown 
-                                        key={i} 
-                                        className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-orange-500 fill-current' : 'text-gray-300'}`} 
+                                      <Crown
+                                        key={i}
+                                        className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-orange-500 fill-current' : 'text-gray-300'}`}
                                       />
                                     ))}
                                   </div>
                                   <span className="text-sm text-gray-600">({business.reviews.length})</span>
                                 </div>
                               )}
-                              
+
                               {/* Description snippet */}
                               {business.description && (
                                 <p className="text-sm text-gray-600 mt-2 line-clamp-2">
                                   "{business.description}"
                                 </p>
                               )}
-                              
+
                               {/* Category Amenities - YP Style */}
                               {(() => {
                                 const amenities = getCategoryAmenities(categorySlug || '');
@@ -628,11 +662,11 @@ const CategoryListingsPage = () => {
                                 );
                               })()}
                             </div>
-                            
+
                             {/* Right Side: Phone & Address */}
                             <div className="text-right flex-shrink-0 w-48">
                               {business.phone && (
-                                <a 
+                                <a
                                   href={`tel:${business.phone}`}
                                   className="text-xl font-bold text-black hover:text-gray-700 block border-b-2 border-black pb-1"
                                   onClick={(e) => e.stopPropagation()}
@@ -662,7 +696,7 @@ const CategoryListingsPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredBusinesses.map((business, index) => {
                       const businessImage = business.images?.[0] || business.logo_url;
-                      
+
                       return (
                         <motion.div
                           key={business.id}
@@ -670,20 +704,19 @@ const CategoryListingsPage = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: Math.min(index * 0.05, 0.3) }}
                           onClick={() => handleBusinessClick(business)}
-                          className={`bg-white border rounded-xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group relative ${
-                            business.is_sponsored_ad 
-                              ? 'border-blue-400 ring-2 ring-blue-200' 
-                              : business.is_premium 
-                                ? 'border-blue-400 ring-1 ring-blue-100' 
+                          className={`bg-white border rounded-xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group relative ${business.is_sponsored_ad
+                              ? 'border-blue-400 ring-2 ring-blue-200'
+                              : business.is_premium
+                                ? 'border-blue-400 ring-1 ring-blue-100'
                                 : 'border-gray-200 hover:border-black'
-                          }`}
+                            }`}
                         >
                           {business.is_sponsored_ad && (
                             <div className="absolute top-2 right-2 z-10">
                               <Badge className="bg-blue-600 text-white text-xs">Ad</Badge>
                             </div>
                           )}
-                          
+
                           <div className="bg-gray-100 h-48 flex items-center justify-center relative">
                             {businessImage ? (
                               <img src={businessImage} alt={business.name} className="w-full h-full object-cover" />
@@ -696,7 +729,7 @@ const CategoryListingsPage = () => {
                               </div>
                             )}
                           </div>
-                          
+
                           <div className="p-4">
                             <div className="flex items-start justify-between gap-2">
                               <h3 className="font-bold text-lg text-black group-hover:underline line-clamp-1">{business.name}</h3>
@@ -704,25 +737,25 @@ const CategoryListingsPage = () => {
                                 <Badge variant="secondary" className="text-xs flex-shrink-0">✓ Verified</Badge>
                               )}
                             </div>
-                            
+
                             {business.reviews && business.reviews.length > 0 && (
                               <div className="flex items-center gap-1 mt-2">
                                 <div className="flex">
                                   {[...Array(5)].map((_, i) => (
-                                    <Crown 
-                                      key={i} 
-                                      className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
+                                    <Crown
+                                      key={i}
+                                      className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
                                     />
                                   ))}
                                 </div>
                                 <span className="text-sm text-gray-400">({business.reviews.length})</span>
                               </div>
                             )}
-                            
+
                             {business.description && (
                               <p className="text-sm text-gray-500 mt-2 line-clamp-2">{business.description}</p>
                             )}
-                            
+
                             <div className="mt-3 space-y-1">
                               {business.address && (
                                 <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -744,7 +777,7 @@ const CategoryListingsPage = () => {
                   </div>
                 )}
               </div>
-              
+
               {/* Right Sidebar - YP Style */}
               {viewMode === 'list' && (
                 <div className="w-72 flex-shrink-0 hidden lg:block">
@@ -753,7 +786,7 @@ const CategoryListingsPage = () => {
                     <h3 className="font-semibold text-gray-800 mb-3">Popular {currentCategory?.name}</h3>
                     <div className="space-y-2">
                       {filteredBusinesses.slice(0, 3).map((biz) => (
-                        <div 
+                        <div
                           key={biz.id}
                           className="text-sm text-blue-600 hover:underline cursor-pointer"
                           onClick={() => handleBusinessClick(biz)}
@@ -763,26 +796,26 @@ const CategoryListingsPage = () => {
                       ))}
                     </div>
                   </div>
-                  
+
                   {/* Manage Listing CTA */}
                   <div className="border border-gray-200 rounded-lg p-4 mb-4 text-center">
                     <h3 className="font-semibold text-gray-800 mb-2">Manage your</h3>
                     <p className="text-2xl font-black text-black mb-2 underline decoration-2">FREE LISTING</p>
                     <p className="text-sm text-gray-600 mb-4">Update your business information in a few steps.</p>
-                    <Button 
+                    <Button
                       className="w-full bg-black hover:bg-gray-800 text-white"
                       onClick={() => navigate('/claim-listing')}
                     >
                       Claim Your Listing
                     </Button>
                   </div>
-                  
+
                   {/* Featured Businesses */}
                   <div className="border border-gray-200 rounded-lg p-4">
                     <h3 className="font-semibold text-gray-800 mb-3">Featured {currentCategory?.name}</h3>
                     <div className="space-y-3">
                       {filteredBusinesses.filter(b => b.is_premium).slice(0, 3).map((biz) => (
-                        <div 
+                        <div
                           key={biz.id}
                           className="cursor-pointer hover:bg-gray-50 p-2 rounded -mx-2"
                           onClick={() => handleBusinessClick(biz)}
@@ -806,7 +839,7 @@ const CategoryListingsPage = () => {
           {/* Bottom banner removed from category pages */}
         </div>
       </div>
-      
+
       {/* Footer */}
       <BottomBannerAd />
       <Footer />
