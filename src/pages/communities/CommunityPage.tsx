@@ -70,11 +70,14 @@ const communityData: Record<string, Omit<CommunityData, 'id'>> = {
   },
 
   'kensential-kenya': {
-
     name: 'KenSential Kenya',
-
-    description: 'Famous for its wildlife safaris, the Great Rift Valley, and the Maasai culture, Kenya offers breathtaking landscapes and incredible wildlife experiences. From the savannas of the Maasai Mara to the white sand beaches of the coast, Kenya is a land of contrasts and natural beauty.'
-
+    description: 'Famous for its wildlife safaris, the Great Rift Valley, and the Maasai culture, Kenya offers breathtaking landscapes and incredible wildlife experiences. From the savannas of the Maasai Mara to the white sand beaches of the coast, Kenya is a land of contrasts and natural beauty.',
+    groups: [
+      'https://chat.whatsapp.com/ERGTm2rfMGuAqMHeQMd339',
+      'https://chat.whatsapp.com/KHw6dnedPr9KG5XkgUdVWj',
+      'https://chat.whatsapp.com/JNVJUnsh3ZV5xcN6UyDZf6',
+      'https://chat.whatsapp.com/HeMn0O4wggs5vwjyFnK0ZK'
+    ]
   },
 
   'nigeriayeah-nigeria': {
@@ -86,25 +89,16 @@ const communityData: Record<string, Omit<CommunityData, 'id'>> = {
   },
 
   'rwandaful-rwanda': {
-
     name: 'Rwandaful Rwanda',
-
     description: 'Discover the land of a thousand hills, where vibrant culture meets breathtaking landscapes. Rwanda is renowned for its mountain gorillas, rich cultural heritage, and remarkable transformation into one of Africa\'s cleanest and safest countries.',
-
     channelLink: 'https://whatsapp.com/channel/0029Vb8RoY211ulWvNjHLq0X',
-
     groups: [
-
-      'https://chat.whatsapp.com/CTXgiOGUbUV6x6JaP83rRm',
-
+      'https://chat.whatsapp.com/BvppCFgXgpU7Tsmu9LGNjE',
       'https://chat.whatsapp.com/E1vc00NDaTp6IP582Z1WGi',
-
       'https://chat.whatsapp.com/D85ihyzUNrZIe9ELaHnwKk',
-
-      'https://chat.whatsapp.com/JPyVanlaRvs9ylC1EKtt64'
-
+      'https://chat.whatsapp.com/JPyVanlaRvs9ylC1EKtt64',
+      'https://chat.whatsapp.com/Io6PvS54IQrHGH4PSnqu2Z'
     ]
-
   },
 
   'senegalastic-senegal': {
