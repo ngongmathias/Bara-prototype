@@ -225,6 +225,7 @@ export const CountryDetailPage: React.FC = () => {
         const pattern = countrySlug.replace(/-/g, ' ');
         console.log(`🌍 Checking global_africa for community: ${pattern}`);
 
+        // Try exact match with spaces replaced
         const { data: gaData } = await db.global_africa()
           .select('id, name, code, description')
           .or(`name.ilike.%${pattern}%,name.ilike.${pattern}%`)
@@ -241,6 +242,30 @@ export const CountryDetailPage: React.FC = () => {
             currency: null,
             language: null
           };
+        } else {
+          // Fallback: try matching with pattern that accounts for removed special chars like /
+          // e.g., "blackafrican americans" should match "Black/African Americans"
+          const flexiblePattern = pattern.replace(/\s+/g, '%');
+          console.log(`🌍 Trying flexible pattern: %${flexiblePattern}%`);
+          
+          const { data: gaDataFlexible } = await db.global_africa()
+            .select('id, name, code, description')
+            .ilike('name', `%${flexiblePattern}%`)
+            .limit(1)
+            .maybeSingle();
+            
+          if (gaDataFlexible) {
+            console.log(`✅ Found community with flexible pattern: ${gaDataFlexible.name}`);
+            resolvedCountry = {
+              ...gaDataFlexible,
+              flag_url: null,
+              wikipedia_url: null,
+              population: null,
+              capital: null,
+              currency: null,
+              language: null
+            };
+          }
         }
       }
 
