@@ -409,8 +409,8 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-500">Status</span>
-                                    <Badge className={registration.payment_status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}>
-                                        {registration.payment_status === 'confirmed' ? 'Confirmed' : 'Pending Verification'}
+                                    <Badge className={event.is_free || registration.payment_status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}>
+                                        {event.is_free || registration.payment_status === 'confirmed' ? 'Confirmed' : 'Pending Verification'}
                                     </Badge>
                                 </div>
                             </div>

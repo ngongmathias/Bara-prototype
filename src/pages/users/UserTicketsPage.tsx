@@ -97,8 +97,9 @@ export const UserTicketsPage = () => {
         return true;
     });
 
-    const statusBadge = (status: string, confirmedByUser: boolean) => {
-        if (status === 'confirmed') return <Badge className="bg-green-100 text-green-800 border-green-200"><CheckCircle className="h-3 w-3 mr-1" />Confirmed</Badge>;
+    const statusBadge = (status: string, confirmedByUser: boolean, isFree?: boolean) => {
+        // Free events are always confirmed immediately
+        if (isFree || status === 'confirmed') return <Badge className="bg-green-100 text-green-800 border-green-200"><CheckCircle className="h-3 w-3 mr-1" />Confirmed</Badge>;
         if (status === 'rejected') return <Badge className="bg-red-100 text-red-800 border-red-200"><AlertCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
         if (status === 'refunded') return <Badge className="bg-gray-100 text-gray-800 border-gray-200">Refunded</Badge>;
         if (confirmedByUser) return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200"><Clock className="h-3 w-3 mr-1" />Awaiting Verification</Badge>;
@@ -222,7 +223,7 @@ export const UserTicketsPage = () => {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            {statusBadge(reg.payment_status, reg.confirmed_by_user)}
+                                            {statusBadge(reg.payment_status, reg.confirmed_by_user, reg.event?.is_free)}
                                         </div>
                                     </div>
 
