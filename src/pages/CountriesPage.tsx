@@ -8,6 +8,8 @@ import { MapPin, Users, ArrowRight, Search, X } from 'lucide-react';
 
 import { supabase } from '@/lib/supabase';
 
+import { slugFromName } from '@/lib/locationSlug';
+
 
 
 interface Country {
@@ -80,10 +82,10 @@ export const CountriesPage = () => {
 
 
       if (data && data.length > 0) {
-        // Use DB slug if available, otherwise generate it
+        // Use DB slug if available, otherwise generate it using shared function
         const countriesWithSlug = data.map((country: any) => ({
           ...country,
-          slug: country.slug || country.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+          slug: country.slug || slugFromName(country.name)
         }));
         console.log(`✅ Loaded ${countriesWithSlug.length} countries from database`);
         setCountries(countriesWithSlug);
