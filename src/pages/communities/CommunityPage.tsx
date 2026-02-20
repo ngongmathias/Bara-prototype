@@ -1,10 +1,9 @@
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-
 import { Button } from '@/components/ui/button';
-
 import { Link } from 'react-router-dom';
-
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Users, Globe, MessageCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 
 
@@ -153,165 +152,222 @@ const communityData: Record<string, Omit<CommunityData, 'id'>> = {
 
 
 export const CommunityPage = () => {
+  const { communitySlug } = useParams<{ communitySlug: string }>();
+  const [community, setCommunity] = useState(communitySlug ? communityData[communitySlug] : null);
+  const [loading, setLoading] = useState(true);
+  const [globalAfricaData, setGlobalAfricaData] = useState<any>(null);
 
-  const { communityId } = useParams<{ communityId: string }>();
+  useEffect(() => {
+    const fetchCommunityData = async () => {
+      if (!communitySlug) {
+        setLoading(false);
+        return;
+      }
 
-  const community = communityId ? communityData[communityId] : null;
+      // First check hardcoded data
+      const hardcodedCommunity = communityData[communitySlug];
+      if (hardcodedCommunity) {
+        setCommunity(hardcodedCommunity);
+      }
+
+      // Also fetch from database for additional info
+      try {
+        const pattern = communitySlug.replace(/-/g, ' ');
+        const { data: gaData } = await supabase
+          .from('global_africa')
+          .select('*')
+          .ilike('name', `%${pattern}%`)
+          .maybeSingle();
+
+        if (gaData) {
+          setGlobalAfricaData(gaData);
+          // If no hardcoded data, create community from DB data
+          if (!hardcodedCommunity) {
+            setCommunity({
+              name: gaData.name,
+              description: gaData.description || `${gaData.name} - A vibrant African community.`,
+              channelLink: gaData.channel_link,
+              groups: gaData.groups || []
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching community:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCommunityData();
+  }, [communitySlug]);
 
 
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#70905a] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading community...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!community) {
-
     return (
-
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-
-        <div className="text-center">
-
-          <h1 className="text-2xl font-bold mb-4">Community not found</h1>
-
-          <Link to="/" className="text-blue-600 hover:underline">
-
-            Return to home
-
-          </Link>
-
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center p-4">
+        <div className="text-center max-w-lg">
+          <Globe className="w-20 h-20 text-[#70905a] mx-auto mb-6 opacity-50" />
+          <h1 className="text-3xl font-bold mb-4 text-gray-900">Community Coming Soon</h1>
+          <p className="text-gray-600 mb-6">
+            This community page is being set up. We're working with local members to build a vibrant space for connection and collaboration.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link 
+              to="/communities" 
+              className="inline-flex items-center justify-center px-6 py-3 bg-[#70905a] text-white rounded-lg hover:bg-[#5a7549] transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Browse All Communities
+            </Link>
+            <Link 
+              to="/ask-question" 
+              className="inline-flex items-center justify-center px-6 py-3 border border-[#70905a] text-[#70905a] rounded-lg hover:bg-[#70905a]/10 transition-colors"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Express Interest
+            </Link>
+          </div>
         </div>
-
       </div>
-
     );
-
   }
 
 
 
   return (
-
-    <div className="min-h-screen bg-background">
-
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-
         <Link 
-
-          to="/" 
-
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6 transition-colors"
-
+          to="/communities" 
+          className="inline-flex items-center text-[#70905a] hover:text-[#5a7549] mb-6 transition-colors font-medium"
         >
-
           <ArrowLeft className="w-4 h-4 mr-2" />
-
-          Back to Home
-
+          Back to Communities
         </Link>
-
         
-
-        <div className="bg-white rounded-xl shadow-sm p-6 sm:p-8 md:p-10">
-
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-
-            {community.name}
-
-          </h1>
-
-          
-
-          <div className="prose max-w-3xl text-gray-600 mb-8">
-
-            <p className="text-lg">{community.description}</p>
-
-          </div>
-
-          
-
-          <div className="space-y-6">
-
-            <div>
-
-              <h2 className="text-xl font-semibold mb-4">WhatsApp Channel</h2>
-
-              {community.channelLink ? (
-
-                <a 
-
-                  href={community.channelLink}
-
-                  target="_blank"
-
-                  rel="noopener noreferrer"
-
-                  className="inline-flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-
-                >
-
-                  <span>Join Channel</span>
-
-                  <ExternalLink className="w-4 h-4 ml-2" />
-
-                </a>
-
-              ) : (
-
-                <p className="text-gray-500">Coming soon</p>
-
-              )}
-
+        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 md:p-12 border border-gray-100">
+          {/* Header with icon */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-16 h-16 bg-[#70905a] rounded-2xl flex items-center justify-center flex-shrink-0">
+              <Users className="w-8 h-8 text-white" />
             </div>
-
-            
-
             <div>
-
-              <h2 className="text-xl font-semibold mb-4">WhatsApp Groups</h2>
-
-              {community.groups && community.groups.length > 0 ? (
-
-                <div className="space-y-3">
-
-                  {community.groups.map((group, index) => (
-
-                    <a
-
-                      key={index}
-
-                      href={group}
-
-                      target="_blank"
-
-                      rel="noopener noreferrer"
-
-                      className="block w-full sm:w-auto px-4 py-2 border border-green-500 text-green-600 rounded-lg hover:bg-green-50 transition-colors flex items-center justify-between"
-
-                    >
-
-                      <span>Group {index + 1}</span>
-
-                      <ExternalLink className="w-4 h-4 ml-2" />
-
-                    </a>
-
-                  ))}
-
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                {community.name}
+              </h1>
+              <p className="text-gray-500 mt-1">Community Hub</p>
+            </div>
+          </div>
+          
+          {/* Description */}
+          <div className="prose max-w-3xl text-gray-600 mb-12">
+            <p className="text-lg leading-relaxed">{community.description}</p>
+          </div>
+          
+          {/* Stats or info if available from global_africa */}
+          {globalAfricaData && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+              {globalAfricaData.member_count && (
+                <div className="bg-gray-50 rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-[#70905a]">{globalAfricaData.member_count}</p>
+                  <p className="text-sm text-gray-500">Members</p>
                 </div>
-
-              ) : (
-
-                <p className="text-gray-500">More groups coming soon</p>
-
               )}
-
+              {globalAfricaData.city && (
+                <div className="bg-gray-50 rounded-xl p-4 text-center">
+                  <p className="text-lg font-semibold text-gray-900">{globalAfricaData.city}</p>
+                  <p className="text-sm text-gray-500">Location</p>
+                </div>
+              )}
             </div>
-
+          )}
+          
+          {/* WhatsApp Links */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-green-50 rounded-xl p-6 border border-green-100">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Globe className="w-5 h-5 text-green-600" />
+                WhatsApp Channel
+              </h2>
+              {community.channelLink || globalAfricaData?.channel_link ? (
+                <a 
+                  href={community.channelLink || globalAfricaData?.channel_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm"
+                >
+                  <span>Join Channel</span>
+                  <ExternalLink className="w-4 h-4 ml-2" />
+                </a>
+              ) : (
+                <div className="text-gray-500">
+                  <p className="mb-2">Channel coming soon</p>
+                  <Link 
+                    to="/ask-question" 
+                    className="text-sm text-green-600 hover:underline"
+                  >
+                    Want to help set this up?
+                  </Link>
+                </div>
+              )}
+            </div>
+            
+            <div className="bg-green-50 rounded-xl p-6 border border-green-100">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-green-600" />
+                WhatsApp Groups
+              </h2>
+              {(community.groups && community.groups.length > 0) || (globalAfricaData?.groups && globalAfricaData.groups.length > 0) ? (
+                <div className="space-y-3">
+                  {(community.groups || globalAfricaData?.groups || []).map((group: string, index: number) => (
+                    <a
+                      key={index}
+                      href={group}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full px-4 py-3 bg-white border border-green-200 text-green-700 rounded-lg hover:bg-green-100 transition-colors flex items-center justify-between shadow-sm"
+                    >
+                      <span className="font-medium">Group {index + 1}</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-gray-500">
+                  <p className="mb-2">Groups coming soon</p>
+                  <Link 
+                    to="/ask-question" 
+                    className="text-sm text-green-600 hover:underline"
+                  >
+                    Express interest in joining
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
-
+          
+          {/* Additional info from database */}
+          {globalAfricaData?.additional_info && (
+            <div className="mt-10 pt-10 border-t border-gray-200">
+              <h2 className="text-xl font-semibold mb-4">About This Community</h2>
+              <p className="text-gray-600 leading-relaxed">{globalAfricaData.additional_info}</p>
+            </div>
+          )}
         </div>
-
       </div>
-
     </div>
-
   );
 
 };
