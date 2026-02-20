@@ -81,7 +81,11 @@ Deno.serve(async (req) => {
         const responseData = await res.json();
 
         if (!res.ok) {
-            return new Response(JSON.stringify({ error: responseData }), {
+            console.error("Resend API Error:", responseData);
+            return new Response(JSON.stringify({
+                error: responseData.message || responseData.error || "Unknown Resend error",
+                details: responseData
+            }), {
                 status: 400,
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
             });

@@ -29,7 +29,7 @@ export const TestEmailPage = () => {
                     subject: 'Welcome to Bara Afrika! (Test)',
                     type: 'welcome',
                     data: {
-                        name: user?.firstName || 'Tester',
+                        userFirstname: user?.firstName || 'Tester',
                     },
                 },
             });
