@@ -94,6 +94,41 @@ export const TestEmailPage = () => {
         }
     };
 
+    const handleTestQueueEmail = async () => {
+        if (!testEmail) {
+            toast({ title: 'Error', description: 'Please enter an email address', variant: 'destructive' });
+            return;
+        }
+
+        setLoading('queue');
+        try {
+            const { error } = await supabase
+                .from('email_queue')
+                .insert({
+                    to_email: testEmail,
+                    subject: 'Queue System Test - Bara Afrika',
+                    html_content: '<p>This is a test of the database-driven email queue system.</p>',
+                    metadata: { type: 'test_manual' }
+                });
+
+            if (error) throw error;
+
+            toast({
+                title: 'Enqueued!',
+                description: 'Record added to email_queue table. Check Supabase to verify.',
+            });
+        } catch (error) {
+            console.error('Error enqueuing email:', error);
+            toast({
+                title: 'Error',
+                description: 'Failed to enqueue email.',
+                variant: 'destructive',
+            });
+        } finally {
+            setLoading(null);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
             <Header />
@@ -101,9 +136,9 @@ export const TestEmailPage = () => {
                 <div className="max-w-2xl mx-auto">
                     <h1 className="text-3xl font-bold mb-8">Email System Tester</h1>
 
-                    <Card className="mb-8">
+                    <Card className="mb-8 border-blue-200 bg-blue-50/50">
                         <CardHeader>
-                            <CardTitle className="flex items-center">
+                            <CardTitle className="flex items-center text-blue-700">
                                 <Mail className="mr-2 h-5 w-5" />
                                 Test Configuration
                             </CardTitle>
@@ -117,53 +152,82 @@ export const TestEmailPage = () => {
                                         onChange={(e) => setTestEmail(e.target.value)}
                                         placeholder="Enter your email to receive tests..."
                                         autoComplete="off"
+                                        className="bg-white"
                                     />
-                                    <p className="text-sm text-gray-500 mt-1">
-                                        Enter the email where you want to receive the test emails.
+                                    <p className="text-sm text-blue-600 mt-2">
+                                        <strong>Tip:</strong> Use this to verify that your Supabase edge function can reach your target address.
                                     </p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Welcome Email</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-gray-600 mb-4">
-                                    Tests the "Welcome to Bara" email sent to new users.
-                                </p>
-                                <Button
-                                    onClick={handleTestWelcomeEmail}
-                                    disabled={loading === 'welcome' || !testEmail}
-                                    className="w-full"
-                                >
-                                    {loading === 'welcome' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
-                                    Send Welcome Email
-                                </Button>
-                            </CardContent>
-                        </Card>
+                    <div className="space-y-8">
+                        <div>
+                            <h2 className="text-xl font-semibold mb-4 text-gray-700">1. Direct Edge Function Test (Old System)</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="text-sm font-medium">Welcome Email</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Button
+                                            onClick={handleTestWelcomeEmail}
+                                            disabled={loading === 'welcome' || !testEmail}
+                                            className="w-full"
+                                            variant="outline"
+                                        >
+                                            {loading === 'welcome' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+                                            Test Welcome
+                                        </Button>
+                                    </CardContent>
+                                </Card>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Ticket Purchase</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-gray-600 mb-4">
-                                    Tests the "Order Confirmed" email with dummy ticket data.
-                                </p>
-                                <Button
-                                    onClick={handleTestTicketEmail}
-                                    disabled={loading === 'ticket' || !testEmail}
-                                    className="w-full"
-                                >
-                                    {loading === 'ticket' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-                                    Send Ticket Email
-                                </Button>
-                            </CardContent>
-                        </Card>
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="text-sm font-medium">Ticket Receipt</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Button
+                                            onClick={handleTestTicketEmail}
+                                            disabled={loading === 'ticket' || !testEmail}
+                                            className="w-full"
+                                            variant="outline"
+                                        >
+                                            {loading === 'ticket' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+                                            Test Ticket
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 className="text-xl font-semibold mb-4 text-gray-700">2. Database Queue Test (New System)</h2>
+                            <Card className="border-green-200">
+                                <CardHeader className="bg-green-50/50">
+                                    <CardTitle className="flex items-center text-green-700">
+                                        <Mail className="mr-2 h-5 w-5" />
+                                        Test email_queue table
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="pt-6">
+                                    <p className="text-sm text-gray-600 mb-4">
+                                        This test inserts a record directly into the <strong>email_queue</strong> table.
+                                        If you have set up a Database Webhook to trigger your edge function on INSERT,
+                                        this will verify the entire end-to-end automated flow.
+                                    </p>
+                                    <Button
+                                        onClick={handleTestQueueEmail}
+                                        disabled={loading === 'queue' || !testEmail}
+                                        className="w-full bg-green-600 hover:bg-green-700"
+                                    >
+                                        {loading === 'queue' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+                                        Insert into Queue
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
                 </div>
             </div>

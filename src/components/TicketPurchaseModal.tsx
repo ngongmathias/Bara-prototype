@@ -88,26 +88,7 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
 
             setRegistration(reg);
 
-            // Send confirmation email
-            try {
-                await supabase.functions.invoke('send-email', {
-                    body: {
-                        to: user.primaryEmailAddress?.emailAddress,
-                        subject: `You're registered: ${event.title}`,
-                        type: 'ticket_purchased',
-                        data: {
-                            userFirstname: user.firstName || 'Guest',
-                            eventName: event.title,
-                            eventDate: new Date(event.start_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
-                            ticketCount: quantity,
-                            totalAmount: 'FREE',
-                            ticketId: reg.id.slice(0, 8).toUpperCase(),
-                        },
-                    },
-                });
-            } catch (emailError) {
-                console.warn('Email failed but registration was successful:', emailError);
-            }
+            // Email is now handled by database trigger on event_registrations
 
             setStep('done');
             toast({ title: 'Registration confirmed!', description: `You're registered for ${event.title}` });
@@ -146,26 +127,7 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
 
             setRegistration(reg);
 
-            // Send pending payment email
-            try {
-                await supabase.functions.invoke('send-email', {
-                    body: {
-                        to: user.primaryEmailAddress?.emailAddress,
-                        subject: `Ticket Reserved: ${event.title}`,
-                        type: 'ticket_purchased',
-                        data: {
-                            userFirstname: user.firstName || 'Guest',
-                            eventName: event.title,
-                            eventDate: new Date(event.start_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
-                            ticketCount: quantity,
-                            totalAmount: priceDisplay,
-                            ticketId: reg.id.slice(0, 8).toUpperCase(),
-                        },
-                    },
-                });
-            } catch (emailError) {
-                console.warn('Email failed but registration was successful:', emailError);
-            }
+            // Email is now handled by database trigger on event_registrations
 
             setStep('done');
             toast({ title: 'Ticket reserved!', description: `Your spot is reserved. The organizer will confirm your payment.` });

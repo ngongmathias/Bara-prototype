@@ -17,24 +17,10 @@ export const useWelcomeEmail = () => {
                     .eq('user_id', user.id)
                     .single();
 
-                // If profile doesn't exist or email not sent, send it
-                if (!profile || !profile.welcome_email_sent) {
-                    console.log('Sending welcome email to:', user.primaryEmailAddress?.emailAddress);
-
-                    // Send email
-                    await supabase.functions.invoke('send-email', {
-                        body: {
-                            to: user.primaryEmailAddress?.emailAddress,
-                            subject: 'Welcome to Bara Afrika!',
-                            type: 'welcome',
-                            data: {
-                                userFirstname: user.firstName || 'User',
-                            },
-                        },
-                    });
-
-                    // Update/Insert profile to prevent resending
-                    const { error: upsertError } = await supabase
+                // Welcome email is handled via database trigger on clerk_users INSERT.
+                // We ensure the profile exists here.
+                if (!profile) {
+                    await supabase
                         .from('user_profiles')
                         .upsert({
                             user_id: user.id,
@@ -43,8 +29,6 @@ export const useWelcomeEmail = () => {
                             welcome_email_sent: true,
                             updated_at: new Date().toISOString()
                         });
-
-                    if (upsertError) console.error('Error updating profile:', upsertError);
                 }
             } catch (err) {
                 console.error('Error checking welcome email:', err);

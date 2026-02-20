@@ -98,6 +98,7 @@ import BlogPage from "./pages/BlogPage";
 import BlogPostDetail from "./pages/BlogPostDetail";
 import UserBlogEditor from "./pages/UserBlogEditor";
 import AdminBlog from "./pages/admin/AdminBlog";
+import TestEmailPage from "./pages/TestEmailPage";
 import AdminBlogEditor from "./pages/admin/AdminBlogEditor";
 import AuthFinishPage from "./pages/auth/AuthFinishPage";
 import SSOCallbackPage from "./pages/auth/SSOCallbackPage";
@@ -118,7 +119,6 @@ import ArtistDashboard from "@/pages/streams/ArtistDashboard";
 import PodcastsPage from "./pages/streams/PodcastsPage";
 import SearchPage from "./pages/SearchPage";
 import TestSportsApi from "./pages/TestSportsApi";
-import TestEmailPage from "./pages/TestEmailPage";
 import { UserTicketsPage } from "./pages/users/UserTicketsPage";
 import { OrganizerRegistrationsPage } from "./pages/users/OrganizerRegistrationsPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
@@ -157,6 +157,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/test-rss" element={<TestRSSPage />} />
+        <Route path="/test-email" element={<TestEmailPage />} />
 
         {/* Mini-Apps Routes - Isolated with wildcard catch-alls to prevent fall-through */}
         <Route path="/streams/*">
@@ -190,6 +191,18 @@ const AppRoutes = () => {
           <Route path=":eventId" element={<EventsPage />} />
           <Route path="*" element={<EventsPage />} />
         </Route>
+
+        {/* Communities Routes */}
+        <Route path="/communities" element={
+          <MainLayout>
+            <CommunitiesPage />
+          </MainLayout>
+        } />
+        <Route path="/communities/:communitySlug" element={
+          <MainLayout>
+            <CommunityPage />
+          </MainLayout>
+        } />
 
         {/* Country and City Detail Routes - More specific than business listings */}
         <Route path="/countries" element={

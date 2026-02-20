@@ -220,6 +220,30 @@ export const CountryDetailPage: React.FC = () => {
         resolvedCountry = fallbackData;
       }
 
+      // 3. Community/Global Africa Fallback
+      if (!resolvedCountry && countrySlug) {
+        const pattern = countrySlug.replace(/-/g, ' ');
+        console.log(`🌍 Checking global_africa for community: ${pattern}`);
+
+        const { data: gaData } = await db.global_africa()
+          .select('id, name, code, description')
+          .or(`name.ilike.%${pattern}%,name.ilike.${pattern}%`)
+          .limit(1)
+          .maybeSingle();
+
+        if (gaData) {
+          resolvedCountry = {
+            ...gaData,
+            flag_url: null,
+            wikipedia_url: null,
+            population: null,
+            capital: null,
+            currency: null,
+            language: null
+          };
+        }
+      }
+
 
       if (resolvedCountry) {
 

@@ -281,18 +281,7 @@ export const UserEventsPage = () => {
       } else {
         await createEvent(eventData);
 
-        // Send confirmation email
-        await supabase.functions.invoke('send-email', {
-          body: {
-            to: user.primaryEmailAddress?.emailAddress,
-            subject: 'Event Submission Received - Bara Afrika',
-            type: 'event_submitted',
-            data: {
-              organizerName: user.fullName || user.firstName || 'Organizer',
-              eventName: eventData.title,
-            },
-          },
-        });
+        // Email is now handled by database trigger or admin approval process
 
         toast({
           title: 'Event created',

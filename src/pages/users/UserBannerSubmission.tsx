@@ -177,19 +177,7 @@ export const UserBannerSubmission = () => {
 
       if (error) throw error;
 
-      // Send confirmation email
-      await supabase.functions.invoke('send-email', {
-        body: {
-          to: user.primaryEmailAddress?.emailAddress,
-          subject: 'Banner Submission Received - Bara Afrika',
-          type: 'banner_submission_confirmation', // Assuming a new email template type
-          data: {
-            userName: user.fullName || user.firstName || 'User',
-            mediaType: form.media_type,
-            title: form.title || 'N/A',
-          },
-        },
-      });
+      // Email is now handled by database trigger on user_slideshow_submissions
 
       toast({
         title: "Success! 🎉",

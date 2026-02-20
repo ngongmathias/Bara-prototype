@@ -347,19 +347,7 @@ export const PostListing = () => {
 
       if (countriesError) throw countriesError;
 
-      // Send confirmation email
-      await supabase.functions.invoke('send-email', {
-        body: {
-          to: formData.seller_email,
-          subject: 'Marketplace Ad Received - Bara Afrika',
-          type: 'listing_created',
-          data: {
-            userFirstname: formData.seller_name.split(' ')[0],
-            listingTitle: formData.title,
-            listingId: listingData.id,
-          },
-        },
-      });
+      // Email is now handled by database trigger on marketplace_listings
 
       toast({
         title: 'Success!',
