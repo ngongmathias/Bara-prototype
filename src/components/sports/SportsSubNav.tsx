@@ -15,10 +15,7 @@ export const SportsSubNav = () => {
         <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm font-sans" onMouseLeave={() => setOpenMenu(null)}>
             {/* Top Tier: Major Sports */}
             <div className="max-w-[1440px] mx-auto px-4 flex items-center justify-between h-14">
-                <div className="flex items-center space-x-6 h-full overflow-x-auto no-scrollbar scroll-smooth">
-                    <NavLink to="/sports" end className={({ isActive }) => `text-sm font-black uppercase tracking-tighter flex items-center h-full border-b-4 transition-colors whitespace-nowrap ${isActive ? 'border-red-600 text-black' : 'border-transparent text-gray-500 hover:text-black'}`}>
-                        Home
-                    </NavLink>
+                <div className="flex items-center space-x-6 h-full overflow-x-auto scrollbar-hide scroll-smooth flex-1">
 
                     {Object.values(SPORTS_CONFIG).map((sport) => (
                         <div key={sport.id} className="h-full relative flex items-center" onMouseEnter={() => setOpenMenu(sport.id)}>
@@ -75,29 +72,55 @@ export const SportsSubNav = () => {
                             )}
                         </div>
                     ))}
+                </div>
 
-                    {/* More Sports Dropdown */}
-                    <div className="h-full relative flex items-center" onMouseEnter={() => setOpenMenu('more')}>
-                        <button className="text-sm font-black uppercase tracking-tighter text-gray-500 hover:text-black flex items-center gap-1 group whitespace-nowrap">
-                            More <ChevronDown size={14} className="group-hover:translate-y-0.5 transition-transform" />
-                        </button>
-                        {openMenu === 'more' && (
-                            <div className="absolute top-14 left-0 w-[480px] bg-white border border-gray-200 shadow-2xl rounded-b-xl p-6 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 border-b pb-2 mb-4 text-left">More Sports</h4>
-                                <div className="grid grid-cols-3 gap-y-3 gap-x-4 text-left">
+                {/* Pinned More Sports Button */}
+                <div className="h-full relative flex items-center ml-4 pl-4 border-l border-gray-100" onMouseEnter={() => setOpenMenu('more')}>
+                    <button className="text-[11px] font-black uppercase tracking-widest text-gray-500 hover:text-red-600 flex items-center gap-1.5 group whitespace-nowrap bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 transition-all">
+                        More <ChevronDown size={14} className="group-hover:translate-y-0.5 transition-transform" />
+                    </button>
+
+                    {openMenu === 'more' && (
+                        <>
+                            {/* Backdrop to "Pop to Front" */}
+                            <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[60] animate-in fade-in duration-300" />
+
+                            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[800px] bg-white shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] rounded-3xl p-10 z-[70] animate-in fade-in zoom-in-95 duration-300 border border-gray-100">
+                                <div className="flex items-center justify-between mb-8 border-b pb-4">
+                                    <h4 className="text-sm font-black uppercase tracking-[0.2em] text-gray-400">Sports Hub</h4>
+                                    <button onClick={() => setOpenMenu(null)} className="text-gray-400 hover:text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded bg-gray-50">Close</button>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-10 text-left">
                                     {MORE_SPORTS.map(s => (
-                                        <Link key={s.slug} to={`/sports/${s.slug}`} className="text-xs font-bold text-gray-700 hover:text-red-600 transition-colors uppercase tracking-tight">
+                                        <Link
+                                            key={s.slug}
+                                            to={`/sports/${s.slug}`}
+                                            onClick={() => setOpenMenu(null)}
+                                            className="text-sm font-black text-gray-800 hover:text-red-600 transition-all uppercase tracking-tighter hover:translate-x-1 inline-block"
+                                        >
                                             {s.label}
                                         </Link>
                                     ))}
                                 </div>
+                                <div className="mt-12 bg-gray-50 rounded-2xl p-6 flex items-center justify-between border border-dashed border-gray-200">
+                                    <div className="flex items-center gap-4">
+                                        <div className="bg-red-600 p-2 rounded-lg text-white">
+                                            <Trophy size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-black uppercase tracking-tight">Personalize Your Feed</p>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase">Follow teams to get custom news and scores</p>
+                                        </div>
+                                    </div>
+                                    <button className="bg-black text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-colors">Sign In</button>
+                                </div>
                             </div>
-                        )}
-                    </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Search */}
-                <div className="hidden md:flex items-center gap-4">
+                <div className="hidden lg:flex items-center gap-4 ml-6 pl-6 border-l border-gray-100">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <input
@@ -111,7 +134,7 @@ export const SportsSubNav = () => {
 
             {/* Bottom Tier: Contextual Links */}
             <div className="bg-gray-50 border-t border-gray-100">
-                <div className="max-w-[1440px] mx-auto px-4 flex items-center space-x-8 h-10 overflow-x-auto scrollbar-hide">
+                <div className="max-w-[1440px] mx-auto px-4 flex items-center space-x-8 h-10 overflow-x-auto scrollbar-hide scroll-smooth">
                     {activeSport.navItems.map((item, idx) => (
                         <ContextLink
                             key={idx}

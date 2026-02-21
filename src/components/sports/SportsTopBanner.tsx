@@ -69,11 +69,11 @@ export const SportsTopBanner = () => {
         <div className="bg-[#111] border-b border-white/10 text-white relative group h-[52px] flex items-center overflow-hidden w-full font-roboto-condensed">
             {/* League Selector (ESPN Style) */}
             <div className="h-full flex items-center bg-[#1a1a1a] z-20 shrink-0">
-                <div className="relative h-full flex items-center px-3 border-r border-white/10 hover:bg-white/5 transition-colors group/select">
+                <div className="relative h-full flex items-center px-4 border-r border-white/10 hover:bg-white/5 transition-colors group/select min-w-[130px]">
                     <select
                         value={selectedLeagueId || 'all'}
                         onChange={handleLeagueChange}
-                        className="appearance-none bg-transparent text-[11px] font-black uppercase tracking-tight pr-5 pl-1 cursor-pointer outline-none z-10"
+                        className="appearance-none bg-transparent text-[11px] font-black uppercase tracking-[0.1em] pr-6 pl-2 cursor-pointer outline-none z-10 w-full"
                     >
                         <option value="all" className="bg-[#1a1a1a]">Top Events</option>
                         {activeSport.scoreboardLeagues?.map(league => (
@@ -82,22 +82,22 @@ export const SportsTopBanner = () => {
                             </option>
                         ))}
                     </select>
-                    <ChevronDown size={12} className="absolute right-2 text-gray-400 group-hover/select:text-white transition-colors" />
+                    <ChevronDown size={14} className="absolute right-3 text-gray-500 group-hover/select:text-white transition-colors" />
                 </div>
 
                 {/* Date Selector */}
-                <div className="relative h-full flex items-center px-3 border-r border-white/10 hover:bg-white/5 transition-colors group/date overflow-hidden max-w-[100px]">
+                <div className="relative h-full flex items-center px-4 border-r border-white/10 hover:bg-white/5 transition-colors group/date min-w-[120px]">
                     <input
                         type="date"
                         value={selectedDate}
                         onChange={handleDateChange}
-                        className="appearance-none bg-transparent text-[11px] font-black uppercase tracking-tight cursor-pointer outline-none z-10 w-full"
+                        className="absolute inset-0 opacity-0 cursor-pointer z-20"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none pr-2">
-                        <span className="text-[11px] font-black uppercase mr-1">
+                    <div className="flex items-center justify-center gap-2 pointer-events-none w-full">
+                        <span className="text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
                             {new Date(selectedDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
                         </span>
-                        <ChevronDown size={12} className="text-gray-400 group-hover/date:text-white transition-colors" />
+                        <ChevronDown size={12} className="text-gray-500 group-hover/date:text-white transition-colors" />
                     </div>
                 </div>
             </div>
@@ -116,10 +116,10 @@ export const SportsTopBanner = () => {
                 className="flex items-center space-x-0 overflow-x-auto scrollbar-hide h-full snap-x snap-mandatory flex-1"
             >
                 {isSuspended ? (
-                    <div className="px-6 flex items-center gap-2 border-r border-gray-100 h-full">
-                        <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
-                        <span className="text-[10px] font-black text-red-500 uppercase tracking-widest whitespace-nowrap">
-                            Service Offline • API Suspended
+                    <div className="px-6 flex items-center gap-3 border-r border-white/10 h-full bg-red-950/20">
+                        <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.8)]"></span>
+                        <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.15em] whitespace-nowrap">
+                            API Suspension Notification
                         </span>
                     </div>
                 ) : matches && matches.length > 0 ? (
