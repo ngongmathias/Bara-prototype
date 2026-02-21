@@ -22,12 +22,12 @@ interface EmailPayload {
     html_content?: string;
     type?: string;
     data?: any;
-    to?: string | string[]; // Fallback for direct calls
+    metadata?: any;
+    to?: string | string[];
     from?: string;
 }
 
 Deno.serve(async (req) => {
-    // Handle CORS preflight requests
     if (req.method === "OPTIONS") {
         return new Response("ok", { headers: corsHeaders });
     }
@@ -40,24 +40,23 @@ Deno.serve(async (req) => {
         const body = await req.json();
         console.log("Processing email request:", JSON.stringify(body, null, 2));
 
-        // Handle standard payload OR Supabase Webhook payload (wrapped in 'record')
         const payload: EmailPayload = body.record || body;
 
-        const to = payload.to_email || payload.to;
-        const subject = payload.subject;
+        const to = payload.to_email || payload.to || (payload.metadata?.to_email);
+        const subject = payload.subject || (payload.metadata?.subject);
         const from = payload.from || Deno.env.get("RESEND_FROM_EMAIL") || "Bara Afrika <onboarding@resend.dev>";
 
         if (!to || !subject) {
             throw new Error("Missing 'to' or 'subject' in email request");
         }
 
-        let html = payload.html_content;
+        let html = payload.html_content || (payload.metadata?.html_content);
 
-        // If no raw HTML is provided, try to render using templates
-        if (!html && (payload.type || body.type)) {
-            const type = payload.type || body.type;
-            const data = payload.data || body.data || {};
+        // Template logic: check top-level type/data OR metadata.type/metadata.data
+        const type = payload.type || body.type || payload.metadata?.type;
+        const data = payload.data || body.data || payload.metadata?.data || {};
 
+        if (!html && type) {
             switch (type) {
                 case 'welcome':
                 case 'welcome_email':
@@ -89,14 +88,12 @@ Deno.serve(async (req) => {
                     html = await renderAsync(React.createElement(BannerRequestEmail, data));
                     break;
                 default:
-                    // If type is recognized but we don't have a template, we'll error
-                    // unless raw HTML was already provided.
                     if (!html) throw new Error(`Invalid email type: ${type}`);
             }
         }
 
         if (!html) {
-            throw new Error("Could not determine email content (missing html_content or valid type)");
+            throw new Error("Could not determine email content");
         }
 
         const res = await fetch("https://api.resend.com/emails", {
@@ -117,10 +114,7 @@ Deno.serve(async (req) => {
 
         if (!res.ok) {
             console.error("Resend API Error:", responseData);
-            return new Response(JSON.stringify({
-                error: responseData.message || responseData.error || "Unknown Resend error",
-                details: responseData
-            }), {
+            return new Response(JSON.stringify(responseData), {
                 status: 400,
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
             });
