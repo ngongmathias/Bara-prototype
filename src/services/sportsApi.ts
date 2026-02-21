@@ -4,11 +4,37 @@ const API_KEY = import.meta.env.VITE_API_FOOTBALL_KEY || 'demo-key';
 
 const SPORT_BASE_URLS: Record<string, string> = {
     football: 'https://v3.football.api-sports.io',
+    nba: 'https://v1.nba.api-sports.io',
     basketball: 'https://v1.basketball.api-sports.io',
     baseball: 'https://v1.baseball.api-sports.io',
+    nfl: 'https://v1.nfl.api-sports.io',
     'american-football': 'https://v1.american-football.api-sports.io',
     rugby: 'https://v1.rugby.api-sports.io',
-    cricket: 'https://v1.cricket.api-sports.io',
+    mma: 'https://v1.mma.api-sports.io',
+    f1: 'https://v1.formula-1.api-sports.io',
+    'formula-1': 'https://v1.formula-1.api-sports.io',
+    handball: 'https://v1.handball.api-sports.io',
+    hockey: 'https://v1.hockey.api-sports.io',
+    volleyball: 'https://v1.volleyball.api-sports.io',
+    cricket: 'https://v1.cricket.api-sports.io', // Placeholder, not currently supported by api-sports.io
+};
+
+// Endpoints mapping by sport
+const SPORT_ENDPOINTS: Record<string, { fixtures: string; events?: string; statistics?: string; lineups?: string }> = {
+    football: { fixtures: '/fixtures', events: '/fixtures/events', statistics: '/fixtures/statistics', lineups: '/fixtures/lineups' },
+    nba: { fixtures: '/games', statistics: '/games/statistics' },
+    basketball: { fixtures: '/games', statistics: '/games/statistics' },
+    nfl: { fixtures: '/games', statistics: '/games/statistics' },
+    'american-football': { fixtures: '/games', statistics: '/games/statistics' },
+    baseball: { fixtures: '/games', statistics: '/games/statistics' },
+    rugby: { fixtures: '/games', statistics: '/games/statistics' },
+    mma: { fixtures: '/fights' },
+    f1: { fixtures: '/races' },
+    'formula-1': { fixtures: '/races' },
+    hockey: { fixtures: '/games', statistics: '/games/statistics' },
+    handball: { fixtures: '/games' },
+    volleyball: { fixtures: '/games' },
+    cricket: { fixtures: '/fixtures' },
 };
 
 class SportsApiService {
@@ -23,6 +49,11 @@ class SportsApiService {
 
     private getBaseUrl(sport: string = 'football'): string {
         return SPORT_BASE_URLS[sport] || SPORT_BASE_URLS.football;
+    }
+
+    private getEndpoint(type: 'fixtures' | 'events' | 'statistics' | 'lineups', sport: string = 'football'): string {
+        const config = SPORT_ENDPOINTS[sport] || SPORT_ENDPOINTS.football;
+        return config[type] || SPORT_ENDPOINTS.football[type] || '/fixtures';
     }
 
     private async fetch<T>(endpoint: string, params: Record<string, any> = {}, sport: string = 'football'): Promise<ApiResponse<T>> {
@@ -70,7 +101,8 @@ class SportsApiService {
         live?: 'all' | string;
         timezone?: string;
     }, sport: string = 'football'): Promise<Match[]> {
-        const response = await this.fetch<Match[]>('/fixtures', params, sport);
+        const endpoint = this.getEndpoint('fixtures', sport);
+        const response = await this.fetch<Match[]>(endpoint, params, sport);
         return response.response;
     }
 
@@ -79,7 +111,8 @@ class SportsApiService {
         const params: any = { live: 'all' };
         if (league) params.league = league;
 
-        const response = await this.fetch<Match[]>('/fixtures', params, sport);
+        const endpoint = this.getEndpoint('fixtures', sport);
+        const response = await this.fetch<Match[]>(endpoint, params, sport);
         return response.response;
     }
 
@@ -90,20 +123,25 @@ class SportsApiService {
     }
 
     // Get match events (goals, cards, substitutions)
-    async getMatchEvents(fixtureId: number): Promise<MatchEvent[]> {
-        const response = await this.fetch<MatchEvent[]>('/fixtures/events', { fixture: fixtureId });
+    async getMatchEvents(fixtureId: number, sport: string = 'football'): Promise<MatchEvent[]> {
+        const endpoint = this.getEndpoint('events', sport);
+        const response = await this.fetch<MatchEvent[]>(endpoint, { fixture: fixtureId }, sport);
         return response.response;
     }
 
     // Get match statistics
-    async getMatchStatistics(fixtureId: number): Promise<MatchStatistic[]> {
-        const response = await this.fetch<MatchStatistic[]>('/fixtures/statistics', { fixture: fixtureId });
+    async getMatchStatistics(fixtureId: number, sport: string = 'football'): Promise<MatchStatistic[]> {
+        const endpoint = this.getEndpoint('statistics', sport);
+        // Some APIs use 'fixture', some use 'id'
+        const params = sport === 'football' ? { fixture: fixtureId } : { id: fixtureId };
+        const response = await this.fetch<MatchStatistic[]>(endpoint, params, sport);
         return response.response;
     }
 
     // Get match lineups
-    async getMatchLineups(fixtureId: number): Promise<Lineup[]> {
-        const response = await this.fetch<Lineup[]>('/fixtures/lineups', { fixture: fixtureId });
+    async getMatchLineups(fixtureId: number, sport: string = 'football'): Promise<Lineup[]> {
+        const endpoint = this.getEndpoint('lineups', sport);
+        const response = await this.fetch<Lineup[]>(endpoint, { fixture: fixtureId }, sport);
         return response.response;
     }
 

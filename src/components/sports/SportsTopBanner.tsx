@@ -69,7 +69,7 @@ export const SportsTopBanner = () => {
         <div className="bg-[#111] border-b border-white/10 text-white relative group h-[52px] flex items-center overflow-hidden w-full font-roboto-condensed">
             {/* League Selector (ESPN Style) */}
             <div className="h-full flex items-center bg-[#1a1a1a] z-20 shrink-0">
-                <div className="relative h-full flex items-center px-4 border-r border-white/10 hover:bg-white/5 transition-colors group/select min-w-[130px]">
+                <div className="relative h-full flex items-center px-4 border-r border-white/10 hover:bg-white/5 transition-colors group/select min-w-[140px]">
                     <select
                         value={selectedLeagueId || 'all'}
                         onChange={handleLeagueChange}
@@ -86,7 +86,7 @@ export const SportsTopBanner = () => {
                 </div>
 
                 {/* Date Selector */}
-                <div className="relative h-full flex items-center px-4 border-r border-white/10 hover:bg-white/5 transition-colors group/date min-w-[120px]">
+                <div className="relative h-full flex items-center px-4 border-r border-white/10 hover:bg-white/5 transition-colors group/date min-w-[130px]">
                     <input
                         type="date"
                         value={selectedDate}
