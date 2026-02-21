@@ -5,6 +5,7 @@ import type { Match, MatchEvent, MatchStatistic, Lineup } from '../../types/spor
 import { MainLayout } from '@/components/layout/MainLayout';
 import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
 import { SportsSubNav } from '../../components/sports/SportsSubNav';
+import { SponsorshipBanner } from '../../components/sports/SponsorshipBanner';
 
 export default function MatchCenter() {
     const { id } = useParams();
@@ -46,6 +47,30 @@ export default function MatchCenter() {
         );
     }
 
+    const isFootball = match.league.id !== 12 && match.league.id !== 1 && match.league.id !== 3 && match.league.id !== 2 && match.league.id !== 13; // Simple heuristic or use sport param
+    const { sport: sportSlug } = useParams();
+    const isBasketball = sportSlug === 'nba' || sportSlug === 'basketball' || match.league.id === 12;
+    const isCricket = sportSlug === 'cricket';
+
+    let homeScore: string | number = 0;
+    let awayScore: string | number = 0;
+
+    if (isFootball) {
+        homeScore = match.goals?.home ?? 0;
+        awayScore = match.goals?.away ?? 0;
+    } else if (isBasketball) {
+        homeScore = match.scores?.home?.total ?? 0;
+        awayScore = match.scores?.away?.total ?? 0;
+    } else if (isCricket) {
+        const home = match.scores?.home as any || {};
+        const away = match.scores?.away as any || {};
+        homeScore = home.runs ? `${home.runs}/${home.wickets || 0}` : '0';
+        awayScore = away.runs ? `${away.runs}/${away.wickets || 0}` : '0';
+    } else {
+        homeScore = match.goals?.home ?? match.scores?.home?.total ?? 0;
+        awayScore = match.goals?.away ?? match.scores?.away?.total ?? 0;
+    }
+
     return (
         <MainLayout>
             <div className="min-h-screen bg-gray-50">
@@ -53,26 +78,34 @@ export default function MatchCenter() {
                 <SportsSubNav />
                 {/* Match Header */}
                 <div className="bg-white border-b">
-                    <div className="max-w-6xl mx-auto px-4 py-6">
-                        <div className="flex items-center justify-between mb-4">
+                    <div className="max-w-6xl mx-auto px-4 py-8">
+                        <div className="flex items-center justify-between mb-6">
                             {/* Home Team */}
                             <div className="flex-1 flex flex-col items-center">
                                 <img
                                     src={match.teams.home.logo}
                                     alt={match.teams.home.name}
-                                    className="w-20 h-20 object-contain mb-2"
+                                    className="w-24 h-24 object-contain mb-3"
                                 />
-                                <h2 className="font-comfortaa font-semibold text-xl text-center">{match.teams.home.name}</h2>
+                                <h2 className="font-roboto-condensed font-black text-2xl text-center uppercase tracking-tight">{match.teams.home.name}</h2>
+                                {match.teams.home.winner === true && (
+                                    <span className="text-[10px] font-black uppercase text-green-600 mt-1 flex items-center gap-1">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-green-600"></div> Winner
+                                    </span>
+                                )}
                             </div>
 
                             {/* Score */}
                             <div className="flex-1 flex flex-col items-center">
-                                <div className="text-5xl font-bold mb-2">
-                                    {match.goals.home} - {match.goals.away}
+                                <div className="text-6xl font-black mb-3 font-roboto-condensed tabular-nums">
+                                    {homeScore} - {awayScore}
                                 </div>
-                                <div className="text-sm text-gray-600">{match.fixture.status.long}</div>
+                                <div className="text-xs font-black uppercase tracking-widest text-gray-500 py-1 px-3 bg-gray-100 rounded-full">{match.fixture.status.long}</div>
                                 {match.fixture.status.elapsed && (
-                                    <div className="text-sm font-semibold text-black">{match.fixture.status.elapsed}'</div>
+                                    <div className="text-sm font-black text-red-600 mt-2 flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+                                        {match.fixture.status.elapsed}'
+                                    </div>
                                 )}
                             </div>
 
@@ -81,17 +114,27 @@ export default function MatchCenter() {
                                 <img
                                     src={match.teams.away.logo}
                                     alt={match.teams.away.name}
-                                    className="w-20 h-20 object-contain mb-2"
+                                    className="w-24 h-24 object-contain mb-3"
                                 />
-                                <h2 className="font-comfortaa font-semibold text-xl text-center">{match.teams.away.name}</h2>
+                                <h2 className="font-roboto-condensed font-black text-2xl text-center uppercase tracking-tight">{match.teams.away.name}</h2>
+                                {match.teams.away.winner === true && (
+                                    <span className="text-[10px] font-black uppercase text-green-600 mt-1 flex items-center gap-1">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-green-600"></div> Winner
+                                    </span>
+                                )}
                             </div>
                         </div>
 
                         {/* Match Info */}
-                        <div className="text-center text-sm text-gray-600">
-                            {match.league.name} • {new Date(match.fixture.date).toLocaleDateString()}
+                        <div className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest border-t pt-4">
+                            {match.league.name} • {match.league.round} • {new Date(match.fixture.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </div>
                     </div>
+                </div>
+
+                {/* Sponsorship Section */}
+                <div className="max-w-6xl mx-auto px-4 py-8">
+                    <SponsorshipBanner />
                 </div>
 
                 {/* Tabs */}

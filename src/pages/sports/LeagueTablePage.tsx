@@ -4,6 +4,7 @@ import { useStandings } from '../../hooks/useTeamData';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
 import { SportsSubNav } from '../../components/sports/SportsSubNav';
+import { SponsorshipBanner } from '../../components/sports/SponsorshipBanner';
 
 export default function LeagueTablePage() {
     const { id } = useParams();
@@ -68,7 +69,10 @@ export default function LeagueTablePage() {
                 </div>
 
                 {/* League Table */}
-                <div className="max-w-7xl mx-auto px-4 py-6">
+                <div className="max-w-7xl mx-auto px-4 py-8">
+                    <div className="mb-8">
+                        <SponsorshipBanner />
+                    </div>
                     <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
                         <div className="overflow-x-auto">
                             <div className="min-w-[1000px]">

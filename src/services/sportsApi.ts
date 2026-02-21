@@ -46,11 +46,16 @@ class SportsApiService {
             const data = await response.json();
 
             if (data.errors && (Array.isArray(data.errors) ? data.errors.length > 0 : Object.keys(data.errors).length > 0)) {
-                throw new Error(`API returned errors: ${JSON.stringify(data.errors)}`);
+                const errorStr = JSON.stringify(data.errors);
+                if (errorStr.toLowerCase().includes('suspended')) {
+                    throw new Error('SPORTS_API_SUSPENDED');
+                }
+                throw new Error(`API returned errors: ${errorStr}`);
             }
 
             return data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.message === 'SPORTS_API_SUSPENDED') throw error;
             console.error('Sports API fetch error:', error);
             throw error;
         }

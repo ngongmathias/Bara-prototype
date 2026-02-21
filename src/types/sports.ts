@@ -4,19 +4,21 @@ export interface Team {
     id: number;
     name: string;
     code: string;
-    country: string;
+    country?: string;
     founded?: number;
     logo: string;
+    winner?: boolean;
     venue?: Venue;
 }
 
 export interface League {
     id: number;
     name: string;
-    type: string;
-    logo: string;
-    country: string;
+    type?: string;
+    logo?: string;
+    country?: string;
     season: number;
+    round?: string;
 }
 
 export interface Venue {
@@ -62,6 +64,10 @@ export interface Match {
     league: League;
     teams: Teams;
     goals: Goals;
+    scores?: {
+        home: { total: number | string; period1?: number; period2?: number; period3?: number; period4?: number; runs?: number; wickets?: number };
+        away: { total: number | string; period1?: number; period2?: number; period3?: number; period4?: number; runs?: number; wickets?: number };
+    };
     score: {
         halftime: Score;
         fulltime: Score;

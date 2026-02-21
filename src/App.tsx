@@ -189,10 +189,27 @@ const AppRoutes = () => {
           {/* Dynamic Sport Routes */}
           <Route path=":sport" element={<SportsHome />} />
           <Route path=":sport/scores" element={<SportsScores />} />
+          <Route path=":sport/fixtures" element={<SportsScores />} />
           <Route path=":sport/schedule" element={<SportsSchedule />} />
           <Route path=":sport/standings" element={<LeagueTablePage />} />
+          <Route path=":sport/table/:id" element={<LeagueTablePage />} />
+          <Route path=":sport/tables" element={<LeagueTablePage />} />
           <Route path=":sport/teams" element={<SportsTeams />} />
+          <Route path=":sport/team/:id" element={<TeamPage />} />
           <Route path=":sport/stats" element={<SportsStats />} />
+          <Route path=":sport/transfers" element={<SportsHome />} />
+          <Route path=":sport/leagues" element={<SportsHome />} />
+          <Route path=":sport/series" element={<SportsHome />} />
+          <Route path=":sport/rankings" element={<SportsHome />} />
+          <Route path=":sport/p4p" element={<SportsHome />} />
+          <Route path=":sport/upcoming" element={<SportsHome />} />
+          <Route path=":sport/tournaments" element={<SportsHome />} />
+          <Route path=":sport/countries" element={<SportsHome />} />
+          <Route path=":sport/cricinfo" element={<SportsHome />} />
+          <Route path=":sport/bpi" element={<SportsHome />} />
+          <Route path=":sport/power-rankings" element={<SportsHome />} />
+          <Route path=":sport/draft" element={<SportsHome />} />
+          <Route path=":sport/fpi" element={<SportsHome />} />
 
           <Route path="*" element={<SportsHome />} />
         </Route>
