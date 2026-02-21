@@ -7,12 +7,30 @@ export const useGamification = () => {
     const { user } = useUser();
     const [profile, setProfile] = useState<GamificationProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const [celebration, setCelebration] = useState<{
+        isOpen: boolean;
+        type: 'level_up' | 'achievement';
+        title: string;
+        subtitle: string;
+        xp?: number;
+        coins?: number;
+    }>({
+        isOpen: false,
+        type: 'level_up',
+        title: '',
+        subtitle: ''
+    });
 
     const fetchProfile = async () => {
         if (!user) return;
         const data = await GamificationService.getProfile(user.id);
         setProfile(data);
         setLoading(false);
+
+        // Check streak on first load
+        if (data) {
+            await GamificationService.checkDailyStreak(user.id);
+        }
     };
 
     useEffect(() => {
@@ -26,13 +44,44 @@ export const useGamification = () => {
                     'postgres_changes',
                     { event: '*', schema: 'public', table: 'gamification_profiles', filter: `user_id=eq.${user.id}` },
                     (payload) => {
-                        setProfile(payload.new as GamificationProfile);
+                        const newProfile = payload.new as GamificationProfile;
+
+                        // Detect Level Up for celebration
+                        setProfile(prev => {
+                            if (prev && newProfile.current_level > prev.current_level) {
+                                setCelebration({
+                                    isOpen: true,
+                                    type: 'level_up',
+                                    title: `Level ${newProfile.current_level}`,
+                                    subtitle: 'You are reaching new heights! Keep up the great work.',
+                                    xp: 0,
+                                    coins: newProfile.current_level * 10
+                                });
+                            }
+                            return newProfile;
+                        });
                     }
                 )
                 .subscribe();
 
+            // Listen for Achievement Unlocks
+            const handleAchievement = (e: any) => {
+                const { title, subtitle, xp, coins } = e.detail;
+                setCelebration({
+                    isOpen: true,
+                    type: 'achievement',
+                    title,
+                    subtitle,
+                    xp,
+                    coins
+                });
+            };
+
+            window.addEventListener('bara_achievement_earned', handleAchievement);
+
             return () => {
                 supabase.removeChannel(channel);
+                window.removeEventListener('bara_achievement_earned', handleAchievement);
             };
         }
     }, [user]);
@@ -65,6 +114,8 @@ export const useGamification = () => {
     return {
         profile,
         loading,
+        celebration,
+        setCelebration: (isOpen: boolean) => setCelebration(prev => ({ ...prev, isOpen })),
         addXP,
         spendCoins,
         getProgress,

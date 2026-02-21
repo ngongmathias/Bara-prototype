@@ -41,6 +41,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { fetchWikipediaCountryInfo } from "@/lib/wikipedia";
 import { XPProgressBar } from "./gamification/XPProgressBar";
+import { useGamification } from "@/hooks/useGamification";
+import { getPrestigeTier } from "@/lib/gamificationService";
 import { scrollToTop } from "@/lib/scrollToTop";
 import { useCountrySelection } from "@/context/CountrySelectionContext";
 
@@ -80,6 +82,7 @@ export const Header = () => {
   const [countriesExpanded, setCountriesExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
   const { selectedCountry, setSelectedCountry } = useCountrySelection();
+  const { profile } = useGamification();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileMenuClosing, setMobileMenuClosing] = useState(false);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -327,31 +330,49 @@ export const Header = () => {
             {isSignedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="h-10 w-10 p-0 rounded-full border-2 border-blue-500"
-                  >
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 overflow-visible ring-2 ring-white shadow-sm ring-offset-2 hover:opacity-90 transition-opacity">
+                    {/* Elite Prestige Border - Trigger */}
+                    <div className={`absolute inset-[-3px] rounded-full -z-10 ${profile ? (
+                        getPrestigeTier(profile.current_level) === 'Diamond' ? 'bg-gradient-to-tr from-blue-400 via-cyan-300 to-blue-400 animate-shimmer bg-[length:200%_100%]' :
+                          getPrestigeTier(profile.current_level) === 'Gold' ? 'bg-gradient-to-tr from-yellow-600 via-yellow-400 to-yellow-600 animate-shimmer bg-[length:200%_100%]' :
+                            getPrestigeTier(profile.current_level) === 'Silver' ? 'bg-gradient-to-tr from-slate-400 to-slate-200' :
+                              getPrestigeTier(profile.current_level) === 'Bronze' ? 'bg-gradient-to-tr from-amber-700 to-amber-500' :
+                                'bg-gray-200 opacity-50'
+                      ) : 'bg-transparent'
+                      }`} />
                     {user?.imageUrl ? (
                       <img
                         src={user.imageUrl}
                         alt={user.fullName || 'User'}
-                        className="h-8 w-8 rounded-full object-cover"
+                        className="h-full w-full rounded-full object-cover"
                       />
                     ) : (
-                      <User className="h-5 w-5 text-blue-600" />
+                      <div className="h-full w-full rounded-full bg-blue-50 flex items-center justify-center">
+                        <User className="h-5 w-5 text-blue-600" />
+                      </div>
                     )}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end">
                   <div className="flex items-center gap-3 p-3 border-b">
-                    {user?.imageUrl ? (
-                      <img
-                        src={user.imageUrl}
-                        alt={user.fullName || 'User'}
-                        className="h-10 w-10 rounded-full"
-                      />
+                    {/* Elite Prestige Border */}
+                    {user.imageUrl ? (
+                      <div className={`p-0.5 rounded-full ${profile ? (
+                        getPrestigeTier(profile.current_level) === 'Diamond' ? 'bg-gradient-to-tr from-blue-400 via-cyan-300 to-blue-400 animate-shimmer bg-[length:200%_100%]' :
+                          getPrestigeTier(profile.current_level) === 'Gold' ? 'bg-gradient-to-tr from-yellow-600 via-yellow-400 to-yellow-600 animate-shimmer bg-[length:200%_100%]' :
+                            getPrestigeTier(profile.current_level) === 'Silver' ? 'bg-gradient-to-tr from-slate-400 to-slate-200' :
+                              getPrestigeTier(profile.current_level) === 'Bronze' ? 'bg-gradient-to-tr from-amber-700 to-amber-500' :
+                                'bg-gray-200'
+                      ) : 'bg-gray-200'
+                        }`}>
+                        <img
+                          src={user.imageUrl}
+                          alt={user.fullName || 'User'}
+                          className="h-10 w-10 rounded-full border-2 border-white ring-1 ring-black/5"
+                        />
+                      </div>
                     ) : (
-                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-white ring-1 ring-black/5">
                         <User className="h-5 w-5 text-blue-600" />
                       </div>
                     )}

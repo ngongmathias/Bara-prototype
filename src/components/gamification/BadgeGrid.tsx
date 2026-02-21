@@ -50,7 +50,9 @@ export const BadgeGrid: React.FC = () => {
                         <Tooltip key={ach.id}>
                             <TooltipTrigger asChild>
                                 <div className="relative group cursor-help flex flex-col items-center gap-2">
-                                    <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 ${isLocked ? 'bg-gray-50 border-2 border-dashed border-gray-200 grayscale' : 'bg-orange-50 border-2 border-orange-200 shadow-sm hover:scale-110'
+                                    <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 ${isLocked
+                                            ? 'bg-gray-50 border-2 border-dashed border-gray-200 grayscale'
+                                            : 'bg-orange-50 border-2 border-orange-200 shadow-sm hover:scale-110 animate-shimmer bg-gradient-to-tr from-orange-50 via-white to-orange-50 bg-[length:200%_100%]'
                                         }`}>
                                         {getIcon(ach.category, isLocked)}
                                         {isLocked && (

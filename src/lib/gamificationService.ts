@@ -6,7 +6,9 @@ export interface GamificationProfile {
     current_level: number;
     bara_coins: number;
     daily_streak: number;
-    last_login_at: string;
+    last_activity_at: string;
+    consecutive_days: number;
+    multiplier: number;
 }
 
 export interface Achievement {
@@ -26,14 +28,23 @@ export const XP_REWARDS = {
     LISTING_CREATE: 200,
     TICKET_PURCHASE: 500,
     DAILY_STREAK_BONUS: 20,
+    SIGN_IN_BONUS: 50,
 };
 
 export const LEVEL_BASE_XP = 1000;
 export const LEVEL_MULTIPLIER = 1.5;
 
+export type PrestigeTier = 'Explorer' | 'Bronze' | 'Silver' | 'Gold' | 'Diamond';
+
+export const getPrestigeTier = (level: number): PrestigeTier => {
+    if (level >= 71) return 'Diamond';
+    if (level >= 41) return 'Gold';
+    if (level >= 21) return 'Silver';
+    if (level >= 11) return 'Bronze';
+    return 'Explorer';
+};
+
 export const calculateLevel = (xp: number): number => {
-    // Simple progression: Level 1 = 0, Level 2 = 1000, Level 3 = 2500, etc.
-    // Formula: XP = Base * (L^1.5) -> L = (XP/Base)^(1/1.5)
     if (xp < LEVEL_BASE_XP) return 1;
     return Math.floor(Math.pow(xp / LEVEL_BASE_XP, 1 / LEVEL_MULTIPLIER)) + 1;
 };
@@ -41,6 +52,12 @@ export const calculateLevel = (xp: number): number => {
 export const getXPForLevel = (level: number): number => {
     if (level <= 1) return 0;
     return Math.floor(LEVEL_BASE_XP * Math.pow(level - 1, LEVEL_MULTIPLIER));
+};
+
+// Custom Event for Floating XP UI
+export const emitXPEvent = (amount: number, reason: string) => {
+    const event = new CustomEvent('bara_xp_gain', { detail: { amount, reason } });
+    window.dispatchEvent(event);
 };
 
 export class GamificationService {
@@ -63,16 +80,16 @@ export class GamificationService {
             const profile = await this.getProfile(userId);
             if (!profile) return null;
 
-            const newXP = Number(profile.total_xp) + amount;
+            // Apply multiplier (MIT-level incentive)
+            const multipliedAmount = Math.round(amount * (profile.multiplier || 1));
+            const newXP = Number(profile.total_xp) + multipliedAmount;
             const newLevel = calculateLevel(newXP);
             const levelUp = newLevel > profile.current_level;
 
-            // Award 1 coin for every 100 XP gained (indirectly via this logic)
-            // Actually, let's just award coins based on specific achievement rewards
-            // But we can add a "level up" coin bonus
+            // Level up coin bonus (increased for higher tiers)
             const levelUpBonus = levelUp ? (newLevel * 10) : 0;
 
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('gamification_profiles')
                 .update({
                     total_xp: newXP,
@@ -80,17 +97,18 @@ export class GamificationService {
                     bara_coins: Number(profile.bara_coins) + levelUpBonus,
                     updated_at: new Date().toISOString()
                 })
-                .eq('user_id', userId)
-                .select()
-                .single();
+                .eq('user_id', userId);
 
             if (error) throw error;
+
+            // Trigger visual feedback event
+            emitXPEvent(multipliedAmount, reason);
 
             // Log history
             await supabase.from('gamification_history').insert({
                 user_id: userId,
                 type: 'xp_gain',
-                amount,
+                amount: multipliedAmount,
                 reason
             });
 
@@ -107,6 +125,55 @@ export class GamificationService {
         } catch (error) {
             console.error('Error adding XP:', error);
             return null;
+        }
+    }
+
+    static async checkDailyStreak(userId: string): Promise<void> {
+        try {
+            const profile = await this.getProfile(userId);
+            if (!profile) return;
+
+            const now = new Date();
+            const lastActivity = new Date(profile.last_activity_at);
+            const diffTime = Math.abs(now.getTime() - lastActivity.getTime());
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            let newStreak = profile.consecutive_days;
+            let multiplier = profile.multiplier;
+
+            if (diffDays === 1) {
+                // Streak continued
+                newStreak += 1;
+            } else if (diffDays > 1) {
+                // Streak broken
+                newStreak = 1;
+            } else {
+                // Same day activity, no update needed to streak count
+                return;
+            }
+
+            // MIT-level psychological scaling
+            if (newStreak >= 30) multiplier = 2.0;
+            else if (newStreak >= 7) multiplier = 1.5;
+            else if (newStreak >= 3) multiplier = 1.2;
+            else multiplier = 1.0;
+
+            const { error } = await supabase
+                .from('gamification_profiles')
+                .update({
+                    consecutive_days: newStreak,
+                    multiplier: multiplier,
+                    last_activity_at: now.toISOString()
+                })
+                .eq('user_id', userId);
+
+            if (error) throw error;
+
+            // Give a small daily bonus for returning
+            await this.addXP(userId, XP_REWARDS.SIGN_IN_BONUS, `Daily Streak: Day ${newStreak}`);
+
+        } catch (error) {
+            console.error('Error checking streak:', error);
         }
     }
 
@@ -195,6 +262,12 @@ export class GamificationService {
                 });
 
             if (insError) throw insError;
+
+            // Trigger visual celebration event
+            const event = new CustomEvent('bara_achievement_earned', {
+                detail: { title: achievement.title, subtitle: achievement.description, xp: achievement.xp_reward, coins: achievement.coin_reward }
+            });
+            window.dispatchEvent(event);
 
             // Give rewards
             if (achievement.xp_reward > 0) {
