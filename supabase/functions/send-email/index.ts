@@ -16,11 +16,13 @@ const corsHeaders = {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-interface EmailRequest {
-    to: string | string[];
-    subject: string;
-    type: 'welcome' | 'listing_created' | 'event_submitted' | 'banner_request' | 'listing_approved' | 'listing_rejected' | 'ticket_purchased';
-    data: any;
+interface EmailPayload {
+    to_email?: string;
+    subject?: string;
+    html_content?: string;
+    type?: string;
+    data?: any;
+    to?: string | string[]; // Fallback for direct calls
     from?: string;
 }
 
@@ -35,33 +37,66 @@ Deno.serve(async (req) => {
             throw new Error("Missing RESEND_API_KEY environment variable");
         }
 
-        const { to, subject, type, data, from = Deno.env.get("RESEND_FROM_EMAIL") || "Bara Afrika <noreply@mail.baraafrika.com>" }: EmailRequest = await req.json();
+        const body = await req.json();
+        console.log("Processing email request:", JSON.stringify(body, null, 2));
 
-        let html;
-        switch (type) {
-            case 'welcome':
-                html = await renderAsync(React.createElement(WelcomeEmail, data));
-                break;
-            case 'ticket_purchased':
-                html = await renderAsync(React.createElement(TicketPurchasedEmail, data));
-                break;
-            case 'listing_created':
-                html = await renderAsync(React.createElement(ListingCreatedEmail, data));
-                break;
-            case 'listing_approved':
-                html = await renderAsync(React.createElement(ListingApprovedEmail, data));
-                break;
-            case 'listing_rejected':
-                html = await renderAsync(React.createElement(ListingRejectedEmail, data));
-                break;
-            case 'event_submitted':
-                html = await renderAsync(React.createElement(EventSubmittedEmail, data));
-                break;
-            case 'banner_request':
-                html = await renderAsync(React.createElement(BannerRequestEmail, data));
-                break;
-            default:
-                throw new Error('Invalid email type');
+        // Handle standard payload OR Supabase Webhook payload (wrapped in 'record')
+        const payload: EmailPayload = body.record || body;
+
+        const to = payload.to_email || payload.to;
+        const subject = payload.subject;
+        const from = payload.from || Deno.env.get("RESEND_FROM_EMAIL") || "Bara Afrika <noreply@mail.baraafrika.com>";
+
+        if (!to || !subject) {
+            throw new Error("Missing 'to' or 'subject' in email request");
+        }
+
+        let html = payload.html_content;
+
+        // If no raw HTML is provided, try to render using templates
+        if (!html && (payload.type || body.type)) {
+            const type = payload.type || body.type;
+            const data = payload.data || body.data || {};
+
+            switch (type) {
+                case 'welcome':
+                case 'welcome_email':
+                    html = await renderAsync(React.createElement(WelcomeEmail, data));
+                    break;
+                case 'ticket_purchased':
+                case 'ticket_free':
+                case 'ticket_paid_confirmed':
+                case 'ticket_reserved_pending':
+                    html = await renderAsync(React.createElement(TicketPurchasedEmail, data));
+                    break;
+                case 'listing_created':
+                case 'marketplace_submission':
+                    html = await renderAsync(React.createElement(ListingCreatedEmail, data));
+                    break;
+                case 'listing_approved':
+                case 'marketplace_published':
+                    html = await renderAsync(React.createElement(ListingApprovedEmail, data));
+                    break;
+                case 'listing_rejected':
+                    html = await renderAsync(React.createElement(ListingRejectedEmail, data));
+                    break;
+                case 'event_submitted':
+                case 'event_submission':
+                    html = await renderAsync(React.createElement(EventSubmittedEmail, data));
+                    break;
+                case 'banner_request':
+                case 'banner_submission':
+                    html = await renderAsync(React.createElement(BannerRequestEmail, data));
+                    break;
+                default:
+                    // If type is recognized but we don't have a template, we'll error
+                    // unless raw HTML was already provided.
+                    if (!html) throw new Error(`Invalid email type: ${type}`);
+            }
+        }
+
+        if (!html) {
+            throw new Error("Could not determine email content (missing html_content or valid type)");
         }
 
         const res = await fetch("https://api.resend.com/emails", {
@@ -97,6 +132,7 @@ Deno.serve(async (req) => {
         });
 
     } catch (error: any) {
+        console.error("Email function error:", error.message);
         return new Response(JSON.stringify({ error: error.message }), {
             status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
