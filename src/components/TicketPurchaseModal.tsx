@@ -54,12 +54,11 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
 
     if (!isOpen) return null;
 
-    const isSoldOut = event.max_capacity && event.max_capacity > 0
-        ? (event.current_registrations || 0) >= event.max_capacity
-        : false;
-    const spotsLeft = event.max_capacity
-        ? event.max_capacity - (event.current_registrations || 0)
-        : null;
+    // An event is effectively free if is_free flag is set OR the entry fee is 0/null
+    const isEffectivelyFree = event.is_free || !event.entry_fee || event.entry_fee === 0;
+    const isUnlimited = !event.max_capacity || event.max_capacity === 0;
+    const isSoldOut = !isUnlimited && (event.current_registrations || 0) >= (event.max_capacity || 0);
+    const spotsLeft = isUnlimited ? null : (event.max_capacity || 0) - (event.current_registrations || 0);
     const totalPrice = (event.entry_fee || 0) * quantity;
     const currencySymbol = event.currency === 'USD' ? '$' : event.currency === 'EUR' ? '€' : event.currency === 'GBP' ? '£' : '';
     const priceDisplay = currencySymbol
@@ -158,7 +157,7 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                         </div>
                         <div>
                             <h2 className="text-lg font-bold text-gray-900">
-                                {step === 'done' ? 'All Set!' : event.is_free ? 'Register for Event' : 'Buy Tickets'}
+                                {step === 'done' ? 'All Set!' : isEffectivelyFree ? 'Register for Event' : 'Buy Tickets'}
                             </h2>
                             <p className="text-sm text-gray-500 line-clamp-1">{event.title}</p>
                         </div>
@@ -194,7 +193,7 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
 
                         {/* Price Display */}
                         <div className="text-center py-4">
-                            {event.is_free ? (
+                            {isEffectivelyFree ? (
                                 <div>
                                     <Badge className="bg-green-100 text-green-800 text-lg px-4 py-2 rounded-full">FREE</Badge>
                                     <p className="text-sm text-gray-500 mt-2">No payment required</p>
@@ -227,7 +226,7 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                                     </button>
                                     <span className="text-2xl font-bold w-8 text-center">{quantity}</span>
                                     <button
-                                        onClick={() => setQuantity(Math.min(spotsLeft || 10, quantity + 1))}
+                                        onClick={() => setQuantity(spotsLeft !== null ? Math.min(spotsLeft, quantity + 1) : quantity + 1)}
                                         className="w-10 h-10 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center hover:border-black transition-colors"
                                         disabled={spotsLeft !== null && quantity >= spotsLeft}
                                     >
@@ -249,14 +248,14 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                         {!isSoldOut && (
                             <Button
                                 className="w-full py-4 text-lg font-semibold rounded-xl"
-                                style={{ backgroundColor: event.is_free ? '#16a34a' : '#000' }}
-                                onClick={event.is_free ? handleRegisterFree : handleProceedToPay}
+                                style={{ backgroundColor: isEffectivelyFree ? '#16a34a' : '#000' }}
+                                onClick={isEffectivelyFree ? handleRegisterFree : handleProceedToPay}
                                 disabled={loading}
                             >
                                 {loading ? (
                                     <Loader2 className="w-5 h-5 animate-spin mr-2" />
                                 ) : null}
-                                {event.is_free ? `Register (${quantity} ticket${quantity > 1 ? 's' : ''})` : `Continue to Payment`}
+                                {isEffectivelyFree ? `Register (${quantity} ticket${quantity > 1 ? 's' : ''})` : `Continue to Payment`}
                             </Button>
                         )}
 
@@ -387,10 +386,10 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                         </div>
                         <div>
                             <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                                {event.is_free ? "You're In!" : 'Ticket Reserved!'}
+                                {isEffectivelyFree ? "You're In!" : 'Ticket Reserved!'}
                             </h3>
                             <p className="text-gray-600">
-                                {event.is_free
+                                {isEffectivelyFree
                                     ? `Your registration for ${event.title} is confirmed.`
                                     : `Your spot is reserved. The organizer will verify your payment.`
                                 }
@@ -409,8 +408,8 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-500">Status</span>
-                                    <Badge className={event.is_free || registration.payment_status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}>
-                                        {event.is_free || registration.payment_status === 'confirmed' ? 'Confirmed' : 'Pending Verification'}
+                                    <Badge className={isEffectivelyFree || registration.payment_status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}>
+                                        {isEffectivelyFree || registration.payment_status === 'confirmed' ? 'Confirmed' : 'Pending Verification'}
                                     </Badge>
                                 </div>
                             </div>

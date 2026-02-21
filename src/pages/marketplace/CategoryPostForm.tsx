@@ -19,12 +19,12 @@ import { uploadImage } from '@/utils/imageUpload';
 export const CategoryPostForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [countries, setCountries] = useState<any[]>([]);
-  
+
   // Form state
   const [selectedCategory, setSelectedCategory] = useState('');
   const [title, setTitle] = useState('');
@@ -41,10 +41,10 @@ export const CategoryPostForm = () => {
   const [sellerWhatsapp, setSellerWhatsapp] = useState('');
   const [sellerEmail, setSellerEmail] = useState('');
   const [sellerWebsite, setSellerWebsite] = useState('');
-  
+
   // Dynamic attributes based on category
   const [attributes, setAttributes] = useState<Record<string, any>>({});
-  
+
   // Images
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -77,7 +77,7 @@ export const CategoryPostForm = () => {
         .from('marketplace_categories')
         .select('id, name, slug')
         .order('name');
-      
+
       if (error) throw error;
       setCategories(data || []);
     } catch (error) {
@@ -91,7 +91,7 @@ export const CategoryPostForm = () => {
         .from('countries')
         .select('id, name, code')
         .order('name');
-      
+
       if (error) throw error;
       setCountries(data || []);
     } catch (error) {
@@ -111,7 +111,7 @@ export const CategoryPostForm = () => {
     }
 
     setImages(prev => [...prev, ...files]);
-    
+
     files.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -202,10 +202,10 @@ export const CategoryPostForm = () => {
     if (categoryConfig) {
       for (const field of categoryConfig.fields) {
         if (field.required && !attributes[field.name]) {
-          toast({ 
-            title: 'Error', 
-            description: `Please fill in: ${field.label}`, 
-            variant: 'destructive' 
+          toast({
+            title: 'Error',
+            description: `Please fill in: ${field.label}`,
+            variant: 'destructive'
           });
           return false;
         }
@@ -217,7 +217,7 @@ export const CategoryPostForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setLoading(true);
@@ -423,7 +423,7 @@ export const CategoryPostForm = () => {
                   <Checkbox
                     id={`${field.name}-${option.value}`}
                     checked={selectedValues.includes(option.value)}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       handleMultiselectChange(field.name, option.value, checked as boolean)
                     }
                   />
@@ -455,7 +455,7 @@ export const CategoryPostForm = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2 font-comfortaa">
-            Post a Listing
+            Sell Something
           </h1>
           <p className="text-gray-600 mb-8">
             Fill in the details below to create your marketplace listing
@@ -613,7 +613,7 @@ export const CategoryPostForm = () => {
               <h2 className="text-xl font-semibold text-gray-900 font-comfortaa">
                 Images
               </h2>
-              
+
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                 <input
                   type="file"
@@ -645,9 +645,8 @@ export const CategoryPostForm = () => {
                       <img
                         src={preview}
                         alt={`Preview ${index + 1}`}
-                        className={`w-full h-32 object-cover rounded-lg ${
-                          primaryImageIndex === index ? 'ring-4 ring-blue-500' : ''
-                        }`}
+                        className={`w-full h-32 object-cover rounded-lg ${primaryImageIndex === index ? 'ring-4 ring-blue-500' : ''
+                          }`}
                       />
                       <button
                         type="button"
@@ -659,11 +658,10 @@ export const CategoryPostForm = () => {
                       <button
                         type="button"
                         onClick={() => setPrimaryImageIndex(index)}
-                        className={`absolute bottom-2 left-2 text-xs px-2 py-1 rounded ${
-                          primaryImageIndex === index
+                        className={`absolute bottom-2 left-2 text-xs px-2 py-1 rounded ${primaryImageIndex === index
                             ? 'bg-blue-500 text-white'
                             : 'bg-white text-gray-700'
-                        }`}
+                          }`}
                       >
                         {primaryImageIndex === index ? 'Primary' : 'Set Primary'}
                       </button>
@@ -815,7 +813,7 @@ export const CategoryPostForm = () => {
                     Posting...
                   </>
                 ) : (
-                  'Post Listing'
+                  'List Item'
                 )}
               </Button>
             </div>

@@ -6,7 +6,7 @@ import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
+import {
   Search,
   Car,
   Key,
@@ -171,11 +171,11 @@ const MarketplacePage = () => {
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const params = new URLSearchParams();
-    
+
     if (searchQuery.trim()) {
       params.set('q', searchQuery.trim());
     }
-    
+
     if (selectedCountry) {
       params.set('country', selectedCountry.id);
     }
@@ -186,7 +186,7 @@ const MarketplacePage = () => {
   const handleCategoryClick = (categorySlug: string) => {
     const params = new URLSearchParams();
     params.set('category', categorySlug);
-    
+
     if (selectedCountry) {
       params.set('country', selectedCountry.id);
     }
@@ -207,7 +207,7 @@ const MarketplacePage = () => {
     const params = new URLSearchParams();
     params.set('category', categorySlug);
     params.set('subcategory', subcategoryToSlug(subcategory));
-    
+
     if (selectedCountry) {
       params.set('country', selectedCountry.id);
     }
@@ -227,7 +227,7 @@ const MarketplacePage = () => {
         </h1>
       </div>
 
-      {/* Top Bar - Search and Post Ad */}
+      {/* Top Bar - Search and Sell */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-4">
@@ -242,20 +242,20 @@ const MarketplacePage = () => {
                   className="pl-12 h-12 text-base font-roboto"
                 />
               </div>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="h-12 px-6 bg-black hover:bg-gray-800 text-white font-medium"
               >
                 <Search className="w-5 h-5" />
               </Button>
             </form>
 
-            {/* Post Ad Button */}
+            {/* Sell Something Button */}
             <Button
               onClick={() => navigate('/marketplace/post')}
               className="bg-black hover:bg-gray-800 text-white font-semibold px-6 h-12 whitespace-nowrap"
             >
-              Post Your Ad
+              Sell Something
             </Button>
           </div>
         </div>
@@ -296,7 +296,7 @@ const MarketplacePage = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-6 font-comfortaa">
             Popular Categories
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => {
               const Icon = category.icon;
@@ -318,7 +318,7 @@ const MarketplacePage = () => {
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     {category.subcategories.slice(0, 5).map((subcategory) => (
                       <button
@@ -390,7 +390,7 @@ const MarketplacePage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {featuredListings.map((listing) => {
                   const primaryImage = listing.marketplace_listing_images?.find((img: any) => img.is_primary)?.image_url ||
-                                     listing.marketplace_listing_images?.[0]?.image_url;
+                    listing.marketplace_listing_images?.[0]?.image_url;
 
                   return (
                     <div

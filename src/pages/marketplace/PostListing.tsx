@@ -347,7 +347,18 @@ export const PostListing = () => {
 
       if (countriesError) throw countriesError;
 
-      // Email is now handled by database trigger on marketplace_listings
+      // Frontend email fallback in case DB trigger is not applied yet
+      try {
+        await supabase.from('email_queue').insert({
+          to_email: formData.seller_email,
+          subject: '🛒 Listing Received: ' + formData.title,
+          html_content: `<p>Hi ${formData.seller_name || 'Seller'},</p><p>Your marketplace listing <strong>${formData.title}</strong> has been received and is currently under review. We will notify you once it is published.</p><p>Listing ID: ${listingData.id}</p><p>— The Bara Afrika Team</p>`,
+          metadata: { listing_id: listingData.id, type: 'marketplace_submission' }
+        });
+      } catch (emailErr) {
+        // Email failure must never block listing creation
+        console.warn('Email enqueue failed (non-critical):', emailErr);
+      }
 
       toast({
         title: 'Success!',
@@ -389,10 +400,10 @@ export const PostListing = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2 font-comfortaa">
-            Post Your Ad
+            Sell Something
           </h1>
           <p className="text-gray-600">
-            Fill in the details below to create your listing
+            Fill in the details below to list your item on the marketplace
           </p>
         </div>
 
