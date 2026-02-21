@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
 
         const to = payload.to_email || payload.to;
         const subject = payload.subject;
-        const from = payload.from || Deno.env.get("RESEND_FROM_EMAIL") || "Bara Afrika <noreply@mail.baraafrika.com>";
+        const from = payload.from || Deno.env.get("RESEND_FROM_EMAIL") || "Bara Afrika <onboarding@resend.dev>";
 
         if (!to || !subject) {
             throw new Error("Missing 'to' or 'subject' in email request");
