@@ -16,13 +16,14 @@ import {
 import { supabase } from '@/lib/supabase';
 import { MarketplaceListing, MarketplaceCategory, MarketplaceSubcategory } from '@/types/marketplace';
 import { MapPin, Bed, Bath, Maximize, Home } from 'lucide-react';
+import { PropertyCard } from '@/components/marketplace/SpecializedCards';
 
 export const PropertyPage = () => {
   const location = useLocation();
   const categorySlug = location.pathname.split('/').pop();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  
+
   const [category, setCategory] = useState<MarketplaceCategory | null>(null);
   const [subcategories, setSubcategories] = useState<MarketplaceSubcategory[]>([]);
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
@@ -77,7 +78,7 @@ export const PropertyPage = () => {
         .order('name');
 
       setCountries(countriesData || []);
-      
+
       // Get popular locations from existing listings
       if (categoryData?.id) {
         const { data: locationsData } = await supabase
@@ -85,11 +86,11 @@ export const PropertyPage = () => {
           .select('location_details')
           .eq('category_id', categoryData.id)
           .limit(10);
-        
+
         const locations = [...new Set(locationsData?.map(l => l.location_details?.split(',')[0]).filter(Boolean))] as string[];
         setPopularLocations(locations.slice(0, 5));
       }
-      
+
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -101,7 +102,7 @@ export const PropertyPage = () => {
     console.log('[PropertyPage] fetchListings called');
     console.log('[PropertyPage] categorySlug:', categorySlug);
     console.log('[PropertyPage] category:', category);
-    
+
     if (!category) {
       console.log('[PropertyPage] No category, skipping fetch');
       return;
@@ -110,7 +111,7 @@ export const PropertyPage = () => {
     setLoading(true);
     try {
       console.log('[PropertyPage] Building query for category:', category.id);
-      
+
       let query = supabase
         .from('marketplace_listings')
         .select(`
@@ -304,11 +305,10 @@ export const PropertyPage = () => {
                 <button
                   key={tab}
                   onClick={() => setFilterTab(tab)}
-                  className={`px-4 py-2 rounded-full font-roboto text-sm transition-colors ${
-                    filterTab === tab
-                      ? 'bg-black text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`px-4 py-2 rounded-full font-roboto text-sm transition-colors ${filterTab === tab
+                    ? 'bg-black text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
                 >
                   {tab}
                 </button>
@@ -366,74 +366,13 @@ export const PropertyPage = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4">
-                {listings.map((listing) => {
-                  const primaryImage = listing.images?.find((img: any) => img.is_primary)?.image_url || 
-                                     listing.images?.[0]?.image_url || 
-                                     '/placeholder.jpg';
-                  const bedrooms = listing.attributes?.bedrooms || 'N/A';
-                  const bathrooms = listing.attributes?.bathrooms || 'N/A';
-                  const sqft = listing.attributes?.sqft || 'N/A';
-
-                  return (
-                    <div
-                      key={listing.id}
-                      onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
-                      className="border border-gray-200 rounded-lg overflow-hidden hover:border-black transition-colors cursor-pointer group"
-                    >
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        {/* Image */}
-                        <div className="relative w-full sm:w-64 h-48 bg-gray-100 flex-shrink-0">
-                          <img
-                            src={primaryImage}
-                            alt={listing.title}
-                            className="w-full h-full object-cover"
-                          />
-                          {listing.is_featured && (
-                            <div className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
-                              PREMIUM
-                            </div>
-                          )}
-                          <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                            📷 {listing.images?.length || 1}
-                          </div>
-                        </div>
-
-                        {/* Details */}
-                        <div className="flex-1 p-4">
-                          <div className="text-2xl font-bold text-black mb-2 font-comfortaa">
-                            {listing.currency} {listing.price?.toLocaleString()}
-                            {categorySlug === 'property-rent' && <span className="text-sm font-normal"> Yearly</span>}
-                          </div>
-
-                          <div className="text-sm text-gray-600 mb-2 font-roboto">
-                            {listing.attributes?.property_type || 'Property'}
-                          </div>
-
-                          <div className="flex items-center gap-4 text-sm text-gray-700 mb-2 font-roboto">
-                            <span className="flex items-center gap-1">
-                              <Bed className="w-4 h-4" /> {bedrooms} beds
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Bath className="w-4 h-4" /> {bathrooms} baths
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Maximize className="w-4 h-4" /> {sqft} sqft
-                            </span>
-                          </div>
-
-                          <h3 className="font-medium text-black mb-2 group-hover:underline font-roboto">
-                            {listing.title}
-                          </h3>
-
-                          <div className="flex items-center gap-1 text-sm text-gray-500 font-roboto">
-                            <MapPin className="w-4 h-4" />
-                            {listing.location_details || 'Location not specified'}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                {listings.map((listing) => (
+                  <PropertyCard
+                    key={listing.id}
+                    listing={listing}
+                    onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
+                  />
+                ))}
               </div>
             )}
           </div>

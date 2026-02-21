@@ -9,10 +9,11 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { MarketplaceListing } from '@/types/marketplace';
 import { Search, MapPin, Briefcase, Clock, DollarSign } from 'lucide-react';
+import { JobCard } from '@/components/marketplace/SpecializedCards';
 
 export const JobsPage = () => {
   const navigate = useNavigate();
-  
+
   const [jobs, setJobs] = useState<MarketplaceListing[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -76,7 +77,7 @@ export const JobsPage = () => {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section 
+        <section
           className="relative h-64 flex items-center justify-center bg-gradient-to-r from-red-600 to-red-700"
         >
           <div className="relative z-10 text-center max-w-2xl mx-auto px-4">
@@ -99,8 +100,8 @@ export const JobsPage = () => {
               </Button>
             </div>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="absolute top-4 right-4 bg-white text-black hover:bg-gray-100 font-roboto"
           >
             I am a Recruiter
@@ -129,33 +130,11 @@ export const JobsPage = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {jobs.slice(0, 4).map((job) => (
-                  <div
+                  <JobCard
                     key={job.id}
+                    listing={job}
                     onClick={() => navigate(`/marketplace/listing/${job.id}`)}
-                    className="border border-gray-200 rounded-lg p-4 hover:border-black transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <Briefcase className="w-8 h-8 text-gray-400" />
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-roboto">
-                        Confidential
-                      </span>
-                    </div>
-                    <h3 className="font-bold text-black mb-1 font-roboto">
-                      {job.title}
-                    </h3>
-                    <div className="flex items-center gap-1 text-sm text-gray-600 mb-1 font-roboto">
-                      <Clock className="w-4 h-4" />
-                      {job.attributes?.employment_type || 'Full Time'}
-                    </div>
-                    <div className="flex items-center gap-1 text-sm text-gray-600 mb-1 font-roboto">
-                      <DollarSign className="w-4 h-4" />
-                      {job.price > 0 ? `${job.currency} ${job.price.toLocaleString()}` : 'Negotiable'}
-                    </div>
-                    <div className="flex items-center gap-1 text-sm text-gray-600 font-roboto">
-                      <MapPin className="w-4 h-4" />
-                      {job.location_details?.split(',')[0] || 'Location'}
-                    </div>
-                  </div>
+                  />
                 ))}
               </div>
             )}

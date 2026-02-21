@@ -10,30 +10,31 @@ import { useBusinessById } from "@/hooks/useBusinesses";
 import { Business } from "@/lib/businessService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UltraSimpleMap } from "@/components/UltraSimpleMap";
+import { ClaimListingModal } from "@/components/ClaimListingModal";
 
 export const BusinessDetailPage = () => {
   const { city, category, categorySlug, businessId } = useParams();
   const navigate = useNavigate();
-  
+
   // Determine which category slug to use
   const actualCategorySlug = categorySlug || category;
-  
+
   // Fetch business data
-  const { 
-    data: business, 
-    isLoading, 
-    error 
+  const {
+    data: business,
+    isLoading,
+    error
   } = useBusinessById(businessId || "");
-  
+
   const formatTitle = (str: string) => {
-    return str?.split('-').map(word => 
+    return str?.split('-').map(word =>
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ') || '';
   };
 
   const cityName = formatTitle(city || '');
   const categoryName = formatTitle(actualCategorySlug || '');
-  
+
   // Handle back navigation - always go to category listings page
   const handleBackClick = () => {
     navigate(`/listings/category/${actualCategorySlug}`);
@@ -63,7 +64,7 @@ export const BusinessDetailPage = () => {
             <Skeleton className="h-12 w-96 mb-6" />
             <Skeleton className="h-6 w-64" />
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <Skeleton className="h-64 w-full mb-6" />
@@ -76,7 +77,7 @@ export const BusinessDetailPage = () => {
               <Skeleton className="h-12 w-full mb-4" />
               <Skeleton className="h-8 w-full" />
             </div>
-        </div>
+          </div>
         </div>
         <BottomBannerAd />
         <Footer />
@@ -86,15 +87,15 @@ export const BusinessDetailPage = () => {
 
   // Error state
   if (error || !business) {
-  return (
-    <div className="min-h-screen bg-background font-roboto">
-      <Header />
-      <TopBannerAd />
+    return (
+      <div className="min-h-screen bg-background font-roboto">
+        <Header />
+        <TopBannerAd />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Building className="w-8 h-8 text-red-600" />
-          </div>
+            </div>
             <h2 className="text-2xl font-comfortaa font-bold text-yp-dark mb-4">
               Business Not Found
             </h2>
@@ -103,9 +104,9 @@ export const BusinessDetailPage = () => {
             </p>
             <Button onClick={handleBackClick} className="bg-brand-blue">
               Go Back
-                </Button>
-              </div>
-            </div>
+            </Button>
+          </div>
+        </div>
         <BottomBannerAd />
         <Footer />
       </div>
@@ -119,24 +120,24 @@ export const BusinessDetailPage = () => {
     <div className="min-h-screen bg-background font-roboto">
       <Header />
       <TopBannerAd />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleBackClick}
             className="p-1 h-auto text-gray-600"
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
             Back to {categoryName}
-              </Button>
+          </Button>
           <ChevronRight className="w-4 h-4" />
           <span className="text-yp-dark font-medium">{business.name}</span>
-          </div>
+        </div>
 
-            {/* Business Header */}
+        {/* Business Header */}
         <div className="mb-8">
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
@@ -146,21 +147,20 @@ export const BusinessDetailPage = () => {
               <p className="text-lg text-gray-600 mb-3">
                 {business.category?.name || 'Business'}
               </p>
-              
+
               {/* Rating and Reviews */}
               {reviewCount > 0 && (
                 <div className="flex items-center mb-4">
                   <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Crown
-                      key={i}
-                      className={`w-5 h-5 ${
-                          i < Math.floor(avgRating)
+                    {[...Array(5)].map((_, i) => (
+                      <Crown
+                        key={i}
+                        className={`w-5 h-5 ${i < Math.floor(avgRating)
                           ? 'text-yellow-400 fill-current'
                           : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
+                          }`}
+                      />
+                    ))}
                   </div>
                   <span className="ml-2 text-lg text-gray-600">
                     {avgRating.toFixed(1)} ({reviewCount} reviews)
@@ -183,9 +183,9 @@ export const BusinessDetailPage = () => {
                   </Badge>
                 )}
               </div>
-              </div>
-              </div>
             </div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
@@ -196,8 +196,8 @@ export const BusinessDetailPage = () => {
                 <div className="grid grid-cols-2 gap-4">
                   {business.images.slice(0, 4).map((image, index) => (
                     <div key={index} className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
-                      <img 
-                        src={image} 
+                      <img
+                        src={image}
                         alt={`${business.name} - Image ${index + 1}`}
                         className="w-full h-full object-contain bg-gray-100"
                       />
@@ -212,9 +212,9 @@ export const BusinessDetailPage = () => {
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-yp-dark mb-3">About</h3>
                 <p className="text-gray-700 leading-relaxed">
-                    {business.description}
-                  </p>
-                </div>
+                  {business.description}
+                </p>
+              </div>
             )}
 
             {/* Services */}
@@ -222,20 +222,20 @@ export const BusinessDetailPage = () => {
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-yp-dark mb-3">Services</h3>
                 <div className="flex flex-wrap gap-2">
-                  {Array.isArray(business.services) 
+                  {Array.isArray(business.services)
                     ? business.services.map((service, index) => (
-                        <Badge key={index} variant="outline">
-                          {service}
-                        </Badge>
-                      ))
+                      <Badge key={index} variant="outline">
+                        {service}
+                      </Badge>
+                    ))
                     : Object.entries(business.services).map(([key, value]) => (
-                        <Badge key={key} variant="outline">
-                          {key}: {String(value)}
-                        </Badge>
-                      ))
+                      <Badge key={key} variant="outline">
+                        {key}: {String(value)}
+                      </Badge>
+                    ))
                   }
-                  </div>
                 </div>
+              </div>
             )}
 
             {/* Reviews Section */}
@@ -248,11 +248,10 @@ export const BusinessDetailPage = () => {
                       {[...Array(5)].map((_, i) => (
                         <Crown
                           key={i}
-                          className={`w-4 h-4 ${
-                            i < Math.floor(getAverageRating(business))
-                              ? 'text-yellow-400 fill-current'
-                              : 'text-gray-300'
-                          }`}
+                          className={`w-4 h-4 ${i < Math.floor(getAverageRating(business))
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-gray-300'
+                            }`}
                         />
                       ))}
                     </div>
@@ -261,7 +260,7 @@ export const BusinessDetailPage = () => {
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   {business.reviews.slice(0, 5).map((review) => (
                     <div key={review.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
@@ -270,11 +269,10 @@ export const BusinessDetailPage = () => {
                           {[...Array(5)].map((_, i) => (
                             <Crown
                               key={i}
-                              className={`w-4 h-4 ${
-                                i < review.rating
-                                  ? 'text-yellow-400 fill-current'
-                                  : 'text-gray-300'
-                              }`}
+                              className={`w-4 h-4 ${i < review.rating
+                                ? 'text-yellow-400 fill-current'
+                                : 'text-gray-300'
+                                }`}
                             />
                           ))}
                           <span className="ml-2 text-sm text-gray-500">
@@ -311,7 +309,7 @@ export const BusinessDetailPage = () => {
                     </div>
                   ))}
                 </div>
-                
+
                 {business.reviews.length > 5 && (
                   <div className="mt-4 text-center">
                     <Button variant="outline" className="mr-4">
@@ -324,7 +322,7 @@ export const BusinessDetailPage = () => {
                     </Link>
                   </div>
                 )}
-                
+
                 {business.reviews.length <= 5 && (
                   <div className="mt-4">
                     <Link to={`/write-review/${business.id}`}>
@@ -336,14 +334,14 @@ export const BusinessDetailPage = () => {
                 )}
               </div>
             )}
-            </div>
+          </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
             {/* Contact Information */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
               <h3 className="text-lg font-semibold text-yp-dark mb-4">Contact Information</h3>
-              
+
               <div className="space-y-3">
                 {business.phone && (
                   <div className="flex items-center">
@@ -353,35 +351,35 @@ export const BusinessDetailPage = () => {
                     </a>
                   </div>
                 )}
-                
+
                 {business.email && (
                   <div className="flex items-center">
                     <Users className="w-4 h-4 text-gray-500 mr-3" />
                     <a href={`mailto:${business.email}`} className="text-brand-blue hover:underline">
                       {business.email}
                     </a>
-                </div>
+                  </div>
                 )}
-                
+
                 {business.website && (
                   <div className="flex items-center">
                     <Globe className="w-4 h-4 text-gray-500 mr-3" />
-                    <a 
-                      href={`https://${business.website}`} 
+                    <a
+                      href={`https://${business.website}`}
                       className="text-brand-blue hover:underline"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       {business.website}
                     </a>
-              </div>
+                  </div>
                 )}
-                
+
                 {business.address && (
                   <div className="flex items-start">
                     <MapPin className="w-4 h-4 text-gray-500 mr-3 mt-0.5" />
                     <span className="text-gray-700">{business.address}</span>
-                </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -432,9 +430,9 @@ export const BusinessDetailPage = () => {
                   Write Review
                 </Button>
               </Link>
-              
+
               {business.website && (
-                <a 
+                <a
                   href={`https://${business.website}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -447,7 +445,7 @@ export const BusinessDetailPage = () => {
               )}
 
               {business.order_online_url && (
-                <a 
+                <a
                   href={business.order_online_url}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -458,9 +456,13 @@ export const BusinessDetailPage = () => {
                   </Button>
                 </a>
               )}
-              
+
+              {!business.is_verified && (
+                <ClaimListingModal business={business} />
+              )}
+
               {(business.latitude && business.longitude) ? (
-                <a 
+                <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${business.latitude},${business.longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -471,7 +473,7 @@ export const BusinessDetailPage = () => {
                   </Button>
                 </a>
               ) : business.address ? (
-                <a 
+                <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`}
                   target="_blank"
                   rel="noopener noreferrer"

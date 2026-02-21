@@ -107,6 +107,9 @@ import SportsScores from "./pages/sports/SportsScores";
 import MatchCenter from "./pages/sports/MatchCenter";
 import TeamPage from "./pages/sports/TeamPage";
 import LeagueTablePage from "./pages/sports/LeagueTablePage";
+import SportsSchedule from "./pages/sports/SportsSchedule";
+import SportsStats from "./pages/sports/SportsStats";
+import SportsTeams from "./pages/sports/SportsTeams";
 import StreamsHome from "./pages/streams/StreamsHome";
 import PlaylistPage from "./pages/streams/PlaylistPage";
 import ArtistPage from "./pages/streams/ArtistPage";
@@ -182,6 +185,15 @@ const AppRoutes = () => {
           <Route path="match/:id" element={<MatchCenter />} />
           <Route path="team/:id" element={<TeamPage />} />
           <Route path="table/:id" element={<LeagueTablePage />} />
+
+          {/* Dynamic Sport Routes */}
+          <Route path=":sport" element={<SportsHome />} />
+          <Route path=":sport/scores" element={<SportsScores />} />
+          <Route path=":sport/schedule" element={<SportsSchedule />} />
+          <Route path=":sport/standings" element={<LeagueTablePage />} />
+          <Route path=":sport/teams" element={<SportsTeams />} />
+          <Route path=":sport/stats" element={<SportsStats />} />
+
           <Route path="*" element={<SportsHome />} />
         </Route>
 

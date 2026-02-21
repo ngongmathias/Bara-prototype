@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
-import { Loader2, Play, Pause } from 'lucide-react';
+import { Loader2, Play, Pause, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function StreamsHome() {
@@ -10,6 +10,7 @@ export default function StreamsHome() {
     const [trendingSongs, setTrendingSongs] = useState<Song[]>([]);
     const [popularArtists, setPopularArtists] = useState<any[]>([]);
     const [newReleases, setNewReleases] = useState<any[]>([]);
+    const [recentlyPlayed, setRecentlyPlayed] = useState<Song[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -54,6 +55,44 @@ export default function StreamsHome() {
                     .limit(10);
                 setNewReleases(albumsData || []);
 
+                // Fetch Recently Played (from play_history)
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        const { data: historyData } = await supabase
+                            .from('play_history')
+                            .select('song_id, played_at, songs(*, artists(name))')
+                            .eq('user_id', user.id)
+                            .order('played_at', { ascending: false })
+                            .limit(20);
+
+                        if (historyData) {
+                            // Deduplicate: keep only the most recent play of each song
+                            const seen = new Set<string>();
+                            const unique: Song[] = [];
+                            for (const entry of historyData) {
+                                const song = (entry as any).songs;
+                                if (song && !seen.has(song.id)) {
+                                    seen.add(song.id);
+                                    unique.push({
+                                        id: song.id,
+                                        title: song.title,
+                                        artist: song.artists?.name || 'Unknown Artist',
+                                        file_url: song.file_url,
+                                        cover_url: song.cover_url || '/placeholder-music.png',
+                                        duration: song.duration,
+                                        artist_id: song.artist_id,
+                                        album_id: song.album_id,
+                                    });
+                                }
+                            }
+                            setRecentlyPlayed(unique.slice(0, 10));
+                        }
+                    }
+                } catch {
+                    // Silently fail - recently played is not critical
+                }
+
             } catch (error) {
                 console.error('Error fetching streams data:', error);
             } finally {
@@ -72,18 +111,18 @@ export default function StreamsHome() {
         <StreamsLayout>
             <div className="min-h-screen pb-24">
                 {/* Main Content */}
-                <main className="p-8 max-w-[1400px] mx-auto">
+                <main className="p-4 sm:p-8 max-w-[1400px] mx-auto">
                     {/* Greeting */}
-                    <h1 className="text-4xl font-bold mb-8 tracking-tight">Good evening</h1>
+                    <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 tracking-tight text-white">Good evening</h1>
 
                     {loading ? (
                         <div className="flex justify-center py-20">
                             <Loader2 className="w-10 h-10 animate-spin text-purple-500" />
                         </div>
                     ) : (
-                        <div className="space-y-12">
+                        <div className="space-y-8 sm:space-y-12">
                             {/* Quick Access Tiles */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                                 <QuickAccessTile
                                     title="Liked Songs"
                                     gradient="from-purple-900 to-purple-800"
@@ -129,6 +168,35 @@ export default function StreamsHome() {
                                     </div>
                                 ))}
                             </Section>
+
+                            {/* Recently Played */}
+                            {recentlyPlayed.length > 0 && (
+                                <Section title="Recently played">
+                                    {recentlyPlayed.map(song => (
+                                        <div key={song.id} className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
+                                            <div className="relative mb-4 aspect-square shadow-2xl">
+                                                <img
+                                                    src={song.cover_url}
+                                                    alt={song.title}
+                                                    className="w-full h-full object-cover rounded-md shadow-lg"
+                                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }}
+                                                />
+                                                <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                    <Clock size={10} /> Played
+                                                </div>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
+                                                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                                >
+                                                    {currentSong?.id === song.id && isPlaying ? <Pause size={24} fill="black" /> : <Play size={24} fill="black" className="ml-1" />}
+                                                </button>
+                                            </div>
+                                            <h3 className="font-bold truncate text-white mb-1 text-sm tracking-tight">{song.title}</h3>
+                                            <p className="text-xs text-gray-400 truncate mt-auto">{song.artist}</p>
+                                        </div>
+                                    ))}
+                                </Section>
+                            )}
 
                             {/* Trending Songs */}
                             <Section title="Trending songs" showAllLink="/streams/trending">

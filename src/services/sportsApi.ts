@@ -1,8 +1,15 @@
-// Sports API Service using API-Football
 import type { ApiResponse, Match, Standing, MatchEvent, MatchStatistic, Lineup, Team, Player } from '../types/sports';
 
 const API_KEY = import.meta.env.VITE_API_FOOTBALL_KEY || 'demo-key';
-const BASE_URL = import.meta.env.VITE_API_FOOTBALL_BASE_URL || 'https://v3.football.api-sports.io';
+
+const SPORT_BASE_URLS: Record<string, string> = {
+    football: 'https://v3.football.api-sports.io',
+    basketball: 'https://v1.basketball.api-sports.io',
+    baseball: 'https://v1.baseball.api-sports.io',
+    'american-football': 'https://v1.american-football.api-sports.io',
+    rugby: 'https://v1.rugby.api-sports.io',
+    cricket: 'https://v1.cricket.api-sports.io',
+};
 
 class SportsApiService {
     private headers: HeadersInit;
@@ -14,12 +21,17 @@ class SportsApiService {
         };
     }
 
-    private async fetch<T>(endpoint: string, params: Record<string, any> = {}): Promise<ApiResponse<T>> {
+    private getBaseUrl(sport: string = 'football'): string {
+        return SPORT_BASE_URLS[sport] || SPORT_BASE_URLS.football;
+    }
+
+    private async fetch<T>(endpoint: string, params: Record<string, any> = {}, sport: string = 'football'): Promise<ApiResponse<T>> {
         const queryString = new URLSearchParams(
             Object.entries(params).filter(([_, v]) => v != null)
         ).toString();
 
-        const url = `${BASE_URL}${endpoint}${queryString ? `?${queryString}` : ''}`;
+        const baseUrl = this.getBaseUrl(sport);
+        const url = `${baseUrl}${endpoint}${queryString ? `?${queryString}` : ''}`;
 
         try {
             const response = await fetch(url, {
@@ -33,7 +45,7 @@ class SportsApiService {
 
             const data = await response.json();
 
-            if (data.errors && data.errors.length > 0) {
+            if (data.errors && (Array.isArray(data.errors) ? data.errors.length > 0 : Object.keys(data.errors).length > 0)) {
                 throw new Error(`API returned errors: ${JSON.stringify(data.errors)}`);
             }
 
@@ -48,20 +60,21 @@ class SportsApiService {
     async getFixtures(params: {
         league?: number;
         season?: number;
+        team?: number;
         date?: string; // YYYY-MM-DD
         live?: 'all' | string;
         timezone?: string;
-    }): Promise<Match[]> {
-        const response = await this.fetch<Match[]>('/fixtures', params);
+    }, sport: string = 'football'): Promise<Match[]> {
+        const response = await this.fetch<Match[]>('/fixtures', params, sport);
         return response.response;
     }
 
     // Get live scores across all leagues
-    async getLiveScores(league?: number): Promise<Match[]> {
+    async getLiveScores(league?: number, sport: string = 'football'): Promise<Match[]> {
         const params: any = { live: 'all' };
         if (league) params.league = league;
 
-        const response = await this.fetch<Match[]>('/fixtures', params);
+        const response = await this.fetch<Match[]>('/fixtures', params, sport);
         return response.response;
     }
 
@@ -104,9 +117,13 @@ class SportsApiService {
     }
 
     // Get team information
-    async getTeam(teamId: number): Promise<Team> {
-        const response = await this.fetch<Team[]>('/teams', { id: teamId });
-        return response.response[0];
+    async getTeam(teamId: number): Promise<any> {
+        const response = await this.fetch<any[]>('/teams', { id: teamId });
+        if (response.response.length > 0) {
+            const { team, venue } = response.response[0];
+            return { ...team, venue };
+        }
+        return null;
     }
 
     // Get team statistics for a season
@@ -149,16 +166,51 @@ class SportsApiService {
     }
 
     // Helper: Get fixtures for today
-    async getTodayFixtures(league?: number): Promise<Match[]> {
+    async getTodayFixtures(league?: number, sport: string = 'football'): Promise<Match[]> {
         return this.getFixtures({
             date: this.getTodayDate(),
             league,
             timezone: 'Africa/Johannesburg',
-        });
+        }, sport);
     }
 
-    // Helper: Get popular leagues (Premier League, La Liga, etc.)
+    // Helper: Get popular leagues (European + African)
     getPopularLeagues() {
+        return {
+            // European
+            PREMIER_LEAGUE: 39,
+            LA_LIGA: 140,
+            BUNDESLIGA: 78,
+            SERIE_A: 135,
+            LIGUE_1: 61,
+            CHAMPIONS_LEAGUE: 2,
+            EUROPA_LEAGUE: 3,
+            // African
+            CAF_CHAMPIONS_LEAGUE: 17,
+            AFCON: 6,
+            NPFL_NIGERIA: 332,
+            PSL_SOUTH_AFRICA: 288,
+            EGYPTIAN_PREMIER: 233,
+            GHANAIAN_PREMIER: 330,
+            KENYAN_PREMIER: 276,
+        };
+    }
+
+    // Helper: Get only African leagues
+    getAfricanLeagues() {
+        return {
+            CAF_CHAMPIONS_LEAGUE: 17,
+            AFCON: 6,
+            NPFL_NIGERIA: 332,
+            PSL_SOUTH_AFRICA: 288,
+            EGYPTIAN_PREMIER: 233,
+            GHANAIAN_PREMIER: 330,
+            KENYAN_PREMIER: 276,
+        };
+    }
+
+    // Helper: Get only European leagues
+    getEuropeanLeagues() {
         return {
             PREMIER_LEAGUE: 39,
             LA_LIGA: 140,

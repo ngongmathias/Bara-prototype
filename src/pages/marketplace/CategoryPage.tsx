@@ -16,12 +16,13 @@ import {
 import { supabase } from '@/lib/supabase';
 import { MarketplaceListing, MarketplaceCategory, MarketplaceSubcategory } from '@/types/marketplace';
 import { Search, MapPin, Calendar, DollarSign } from 'lucide-react';
+import { PropertyCard, VehicleCard, JobCard } from '@/components/marketplace/SpecializedCards';
 
 export const CategoryPage = () => {
   const { categorySlug } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  
+
   const [category, setCategory] = useState<MarketplaceCategory | null>(null);
   const [subcategories, setSubcategories] = useState<MarketplaceSubcategory[]>([]);
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
@@ -270,14 +271,30 @@ export const CategoryPage = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {listings.map((listing) => {
-                  const primaryImage = listing.images?.find((img: any) => img.is_primary)?.image_url || 
-                                     listing.images?.[0]?.image_url || 
-                                     '/placeholder.jpg';
+                  const props = {
+                    key: listing.id,
+                    listing,
+                    onClick: () => navigate(`/marketplace/listing/${listing.id}`)
+                  };
+
+                  if (categorySlug?.includes('property')) {
+                    return <PropertyCard {...props} />;
+                  }
+                  if (categorySlug === 'motors') {
+                    return <VehicleCard {...props} />;
+                  }
+                  if (categorySlug === 'jobs') {
+                    return <JobCard {...props} />;
+                  }
+
+                  const primaryImage = listing.images?.find((img: any) => img.is_primary)?.image_url ||
+                    listing.images?.[0]?.image_url ||
+                    '/placeholder.jpg';
 
                   return (
                     <div
                       key={listing.id}
-                      onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
+                      onClick={props.onClick}
                       className="border border-gray-200 rounded-lg overflow-hidden hover:border-black transition-colors cursor-pointer group"
                     >
                       <div className="relative h-48 bg-gray-100">

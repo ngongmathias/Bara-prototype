@@ -67,3 +67,20 @@ export function useTopScorers(params: {
         staleTime: 60 * 60 * 1000, // 1 hour
     });
 }
+/**
+ * Hook to get fixtures for a specific team
+ */
+export function useTeamFixtures(params: {
+    teamId: number | undefined;
+    season: number;
+    enabled?: boolean;
+}) {
+    const { teamId, season, enabled = true } = params;
+
+    return useQuery({
+        queryKey: ['teamFixtures', teamId, season],
+        queryFn: () => sportsApi.getFixtures({ team: teamId, season }),
+        enabled: enabled && !!teamId,
+        staleTime: 60 * 60 * 1000, // 1 hour
+    });
+}

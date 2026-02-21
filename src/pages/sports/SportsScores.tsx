@@ -1,60 +1,59 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
 import { SportsSubNav } from '../../components/sports/SportsSubNav';
+import { useFixtures } from '../../hooks/useLiveScores';
+import type { Match } from '../../types/sports';
+import { ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 
-interface Match {
-    id: string;
-    homeTeam: string;
-    awayTeam: string;
-    homeScore: number;
-    awayScore: number;
-    status: 'LIVE' | 'FT' | 'HT';
-    minute?: number;
-    league: string;
-    venue: string;
-    homeTeamLogo?: string;
-    awayTeamLogo?: string;
-}
-
-const mockMatches: Match[] = [
+const mockMatches: any[] = [
     {
-        id: '1',
-        league: 'English League Championship',
-        homeTeam: 'Coventry City',
-        awayTeam: 'Middlesbrough',
-        homeScore: 2,
-        awayScore: 1,
-        status: 'FT',
-        venue: 'The Coventry Building Society Arena, Coventry, England',
-    },
-    {
-        id: '2',
-        league: 'Spanish LALIGA',
-        homeTeam: 'Girona',
-        awayTeam: 'Barcelona',
-        homeScore: 1,
-        awayScore: 1,
-        status: 'FT',
-        venue: 'Estadi Montilivi, Girona, Spain',
-    },
-    {
-        id: '3',
-        league: 'Italian Serie A',
-        homeTeam: 'Cagliari',
-        awayTeam: 'Lecce',
-        homeScore: 0,
-        awayScore: 2,
-        status: 'FT',
-        venue: 'Unipol Domus, Cagliari, Italy',
-    },
+        fixture: { id: 1, date: '2024-02-21T20:00:00Z', status: { short: 'FT' } },
+        league: { id: 1, name: 'English League Championship', logo: '' },
+        teams: { home: { name: 'Coventry City', logo: '' }, away: { name: 'Middlesbrough', logo: '' } },
+        goals: { home: 2, away: 1 }
+    }
 ];
 
 export default function SportsScores() {
-    const [selectedDate, setSelectedDate] = useState('MON');
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
-    const days = ['FRI', 'SAT', 'SUN', 'MON', 'TUE', 'WED', 'THU'];
-    const dates = ['12 FEB', '13 FEB', '14 FEB', '16 FEB', '17 FEB', '18 FEB', '19 FEB'];
+    // Generate last 2 days and next 4 days for the selector
+    const getDates = () => {
+        const result = [];
+        for (let i = -2; i <= 4; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() + i);
+            result.push({
+                full: d.toISOString().split('T')[0],
+                day: d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
+                date: d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }).toUpperCase()
+            });
+        }
+        return result;
+    };
+
+    const dateOptions = getDates();
+
+    const { data: fixtures, isLoading } = useFixtures({
+        date: selectedDate
+    });
+
+    // Group fixtures by league
+    const groupedFixtures = fixtures?.reduce((acc: Record<string, { league: any, matches: Match[] }>, match: Match) => {
+        const leagueId = match.league.id;
+        if (!acc[leagueId]) {
+            acc[leagueId] = {
+                league: match.league,
+                matches: []
+            };
+        }
+        acc[leagueId].matches.push(match);
+        return acc;
+    }, {});
+
+    const leagueGroups = groupedFixtures ? Object.values(groupedFixtures) : [];
 
     return (
         <MainLayout>
@@ -64,20 +63,20 @@ export default function SportsScores() {
                 <SportsSubNav />
 
                 {/* Date Selector */}
-                <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
+                <div className="bg-white border-b sticky top-[104px] z-30 shadow-sm">
                     <div className="max-w-7xl mx-auto px-4">
-                        <div className="flex gap-2 overflow-x-auto py-4">
-                            {days.map((day, index) => (
+                        <div className="flex gap-2 overflow-x-auto py-3 no-scrollbar">
+                            {dateOptions.map((opt) => (
                                 <button
-                                    key={day}
-                                    onClick={() => setSelectedDate(day)}
-                                    className={`flex-shrink-0 px-6 py-3 rounded-lg font-semibold transition ${selectedDate === day
-                                        ? 'bg-black text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    key={opt.full}
+                                    onClick={() => setSelectedDate(opt.full)}
+                                    className={`flex-shrink-0 min-w-[100px] px-4 py-2 rounded-md transition-all border ${selectedDate === opt.full
+                                        ? 'bg-black text-white border-black shadow-md scale-105'
+                                        : 'bg-white text-gray-700 border-gray-200 hover:border-black'
                                         }`}
                                 >
-                                    <div className="text-sm">{day}</div>
-                                    <div className="text-xs mt-1">{dates[index]}</div>
+                                    <div className="text-[10px] font-bold tracking-tighter opacity-70">{opt.day}</div>
+                                    <div className="text-xs font-black">{opt.date}</div>
                                 </button>
                             ))}
                         </div>
@@ -88,10 +87,37 @@ export default function SportsScores() {
                 <div className="max-w-7xl mx-auto px-4 py-6">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Main Content */}
-                        <div className="lg:col-span-2 space-y-6">
-                            {mockMatches.map((match) => (
-                                <MatchRow key={match.id} match={match} />
-                            ))}
+                        <div className="lg:col-span-2 space-y-8">
+                            {isLoading ? (
+                                <div className="space-y-4">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className="h-40 bg-white rounded-lg animate-pulse border border-gray-100 shadow-sm"></div>
+                                    ))}
+                                </div>
+                            ) : leagueGroups.length > 0 ? (
+                                leagueGroups.map((group: any) => (
+                                    <div key={group.league.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                        <div className="bg-gray-50 px-4 py-3 border-b flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <img src={group.league.logo} alt="" className="w-5 h-5 object-contain" />
+                                                <h2 className="text-xs font-black uppercase tracking-widest text-gray-800">{group.league.name}</h2>
+                                            </div>
+                                            <ChevronRight className="w-4 h-4 text-gray-400" />
+                                        </div>
+                                        <div className="divide-y divide-gray-100">
+                                            {group.matches.map((match: Match) => (
+                                                <MatchRow key={match.fixture.id} match={match} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="bg-white rounded-xl p-12 text-center border-2 border-dashed border-gray-200">
+                                    <div className="text-4xl mb-4">📅</div>
+                                    <h3 className="font-black text-xl text-gray-900 uppercase tracking-tighter">No Events Scheduled</h3>
+                                    <p className="text-gray-500 mt-2">There are no matches currently scheduled for this date.</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Sidebar */}
@@ -125,54 +151,64 @@ export default function SportsScores() {
 }
 
 function MatchRow({ match }: { match: Match }) {
+    const isLive = ['1H', '2H', 'HT', 'LIVE', 'ET', 'P'].includes(match.fixture.status.short);
+    const isFinished = match.fixture.status.short === 'FT';
+
     return (
-        <div className="bg-white rounded-lg shadow-sm border hover:shadow-md transition cursor-pointer">
-            {/* League Header */}
-            <div className="bg-gray-50 px-4 py-2 border-b">
-                <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-700">{match.league}</span>
-                    <span className={`text-xs px-2 py-1 rounded font-semibold ${match.status === 'LIVE' ? 'bg-red-100 text-red-700' :
-                        match.status === 'FT' ? 'bg-gray-200 text-gray-700' :
-                            'bg-yellow-100 text-yellow-700'
-                        }`}>
-                        {match.status}
+        <Link
+            to={`/sports/match/${match.fixture.id}`}
+            className="block p-4 hover:bg-gray-50 transition-colors group"
+        >
+            <div className="flex items-center">
+                {/* Time/Status Column */}
+                <div className="w-20 shrink-0 border-r border-gray-100 pr-4 mr-4 text-center">
+                    <span className={`text-[10px] font-black uppercase tracking-tighter ${isLive ? 'text-red-500 animate-pulse' : 'text-gray-500'}`}>
+                        {isLive ? `${match.fixture.status.elapsed}'` : match.fixture.status.short}
                     </span>
-                </div>
-            </div>
-
-            {/* Match Details */}
-            <div className="p-4">
-                <div className="flex items-center justify-between">
-                    {/* Home Team */}
-                    <div className="flex items-center gap-3 flex-1">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold">
-                            {match.homeTeam.substring(0, 3).toUpperCase()}
+                    {!isLive && !isFinished && (
+                        <div className="text-[10px] font-bold text-gray-400 mt-0.5">
+                            {new Date(match.fixture.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
-                        <span className="font-semibold">{match.homeTeam}</span>
-                    </div>
+                    )}
+                </div>
 
-                    {/* Score */}
-                    <div className="flex items-center gap-4 px-6">
-                        <span className="text-2xl font-bold">{match.homeScore}</span>
-                        <span className="text-gray-400">-</span>
-                        <span className="text-2xl font-bold">{match.awayScore}</span>
+                {/* Teams & Scores */}
+                <div className="flex-grow space-y-2">
+                    {/* Home Team */}
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <img src={match.teams.home.logo} alt="" className="w-5 h-5 object-contain" />
+                            <span className={`text-sm font-bold tracking-tight ${isFinished && match.goals.home! < match.goals.away! ? 'text-gray-500' : 'text-gray-900'}`}>
+                                {match.teams.home.name}
+                            </span>
+                        </div>
+                        <span className={`text-lg font-black ${isFinished && match.goals.home! < match.goals.away! ? 'text-gray-500' : 'text-gray-900'}`}>
+                            {match.goals.home ?? '-'}
+                        </span>
                     </div>
 
                     {/* Away Team */}
-                    <div className="flex items-center gap-3 flex-1 justify-end">
-                        <span className="font-semibold">{match.awayTeam}</span>
-                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold">
-                            {match.awayTeam.substring(0, 3).toUpperCase()}
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <img src={match.teams.away.logo} alt="" className="w-5 h-5 object-contain" />
+                            <span className={`text-sm font-bold tracking-tight ${isFinished && match.goals.away! < match.goals.home! ? 'text-gray-500' : 'text-gray-900'}`}>
+                                {match.teams.away.name}
+                            </span>
                         </div>
+                        <span className={`text-lg font-black ${isFinished && match.goals.away! < match.goals.home! ? 'text-gray-500' : 'text-gray-900'}`}>
+                            {match.goals.away ?? '-'}
+                        </span>
                     </div>
                 </div>
 
-                {/* Venue */}
-                <div className="mt-3 text-xs text-gray-500 text-center">
-                    {match.venue}
+                {/* Details Link */}
+                <div className="ml-6 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block">
+                    <div className="bg-gray-100 p-1.5 rounded-full">
+                        <ChevronRight className="w-4 h-4 text-gray-600" />
+                    </div>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
 

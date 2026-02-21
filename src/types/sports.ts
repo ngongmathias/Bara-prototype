@@ -5,8 +5,9 @@ export interface Team {
     name: string;
     code: string;
     country: string;
-    founded: number;
+    founded?: number;
     logo: string;
+    venue?: Venue;
 }
 
 export interface League {

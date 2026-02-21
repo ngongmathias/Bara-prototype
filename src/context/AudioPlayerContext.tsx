@@ -129,6 +129,29 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         // Update queue index
         const index = queue.findIndex(s => s.id === song.id);
         if (index !== -1) setQueueIndex(index);
+
+        // Track play count & history (fire-and-forget)
+        trackPlay(song.id);
+    };
+
+    // Record play count and play history
+    const trackPlay = async (songId: string) => {
+        try {
+            // Increment the play count via RPC
+            await supabase.rpc('increment_play_count', { p_song_id: songId });
+
+            // Record in play history for "Recently Played"
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                await supabase.from('play_history').insert({
+                    user_id: user.id,
+                    song_id: songId,
+                });
+            }
+        } catch (error) {
+            // Non-blocking: don't interrupt playback if tracking fails
+            console.warn('Play tracking failed:', error);
+        }
     };
 
     const pause = () => setIsPlaying(false);

@@ -3,6 +3,7 @@ import sportsApi from '../services/sportsApi';
 import type { Match } from '../types/sports';
 
 interface UseLiveScoresOptions {
+    sport?: string;
     league?: number;
     enabled?: boolean;
     refetchInterval?: number;
@@ -13,11 +14,11 @@ interface UseLiveScoresOptions {
  * Automatically refetches every minute
  */
 export function useLiveScores(options: UseLiveScoresOptions = {}) {
-    const { league, enabled = true, refetchInterval = 60000 } = options;
+    const { sport = 'football', league, enabled = true, refetchInterval = 60000 } = options;
 
     return useQuery({
-        queryKey: ['liveScores', league],
-        queryFn: () => sportsApi.getLiveScores(league),
+        queryKey: ['liveScores', sport, league],
+        queryFn: () => sportsApi.getLiveScores(league, sport),
         enabled,
         staleTime: 30000, // Consider data stale after 30 seconds
         refetchInterval: refetchInterval, // Refetch every minute
@@ -29,16 +30,17 @@ export function useLiveScores(options: UseLiveScoresOptions = {}) {
  * Hook to fetch fixtures for a specific date and league
  */
 export function useFixtures(params: {
+    sport?: string;
     league?: number;
     season?: number;
     date?: string;
     enabled?: boolean;
 }) {
-    const { league, season, date, enabled = true } = params;
+    const { sport = 'football', league, season, date, enabled = true } = params;
 
     return useQuery({
-        queryKey: ['fixtures', league, season, date],
-        queryFn: () => sportsApi.getFixtures({ league, season, date }),
+        queryKey: ['fixtures', sport, league, season, date],
+        queryFn: () => sportsApi.getFixtures({ league, season, date }, sport),
         enabled,
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
@@ -47,10 +49,10 @@ export function useFixtures(params: {
 /**
  * Hook to fetch today's fixtures
  */
-export function useTodayFixtures(league?: number) {
+export function useTodayFixtures(league?: number, sport: string = 'football') {
     return useQuery({
-        queryKey: ['todayFixtures', league],
-        queryFn: () => sportsApi.getTodayFixtures(league),
+        queryKey: ['todayFixtures', sport, league],
+        queryFn: () => sportsApi.getTodayFixtures(league, sport),
         staleTime: 2 * 60 * 1000, // 2 minutes
         refetchOnWindowFocus: true,
     });

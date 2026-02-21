@@ -1,143 +1,158 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
 import { SportsSubNav } from '../../components/sports/SportsSubNav';
-
-// Mock team data
-const mockTeam = {
-    id: 1,
-    name: "Manchester United",
-    shortName: "Man United",
-    league: "Premier League",
-    stadium: "Old Trafford",
-    position: 5,
-    points: 58,
-    wins: 17,
-    draws: 7,
-    losses: 9,
-    form: ["W", "L", "W", "W", "D"],
-    topScorers: [
-        { name: "Marcus Rashford", goals: 18, assists: 5 },
-        { name: "Bruno Fernandes", goals: 12, assists: 10 },
-        { name: "Anthony Martial", goals: 8, assists: 3 }
-    ],
-    nextFixture: {
-        opponent: "Arsenal",
-        date: "March 15, 2024",
-        time: "17:30",
-        venue: "Emirates Stadium",
-        competition: "Premier League"
-    },
-    squad: [
-        { number: 1, name: "David De Gea", position: "Goalkeeper", nationality: "ESP" },
-        { number: 8, name: "Bruno Fernandes", position: "Midfielder", nationality: "POR" },
-        { number: 10, name: "Marcus Rashford", position: "Forward", nationality: "ENG" },
-        { number: 14, name: "Christian Eriksen", position: "Midfielder", nationality: "DEN" },
-        { number: 18, name: "Casemiro", position: "Midfielder", nationality: "BRA" },
-        { number: 25, name: "Jadon Sancho", position: "Forward", nationality: "ENG" }
-    ],
-    fixtures: [
-        { opponent: "Arsenal", date: "March 15", competition: "Premier League", venue: "Away" },
-        { opponent: "Brighton", date: "March 22", competition: "Premier League", venue: "Home" },
-        { opponent: "Liverpool", date: "March 29", competition: "FA Cup", venue: "Home" }
-    ]
-};
+import { useTeam, useTeamStatistics, useTeamFixtures } from '../../hooks/useTeamData';
+import { ChevronRight, Calendar, MapPin, Users, BarChart3, Clock, Trophy, Heart } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { useUser } from '@clerk/clerk-react';
+import type { Match, Team, Lineup } from '../../types/sports';
 
 export default function TeamPage() {
     const { id } = useParams();
-    const [activeTab, setActiveTab] = useState<'overview' | 'squad' | 'fixtures' | 'results' | 'stats'>('overview');
+    const teamId = id ? parseInt(id) : undefined;
+    const [activeTab, setActiveTab] = useState<'overview' | 'squad' | 'fixtures' | 'stats'>('overview');
+
+    const { data: team, isLoading: teamLoading } = useTeam(teamId);
+    const { data: fixtures, isLoading: fixturesLoading } = useTeamFixtures({ teamId, season: 2024 });
+    const { data: stats, isLoading: statsLoading } = useTeamStatistics({ teamId, league: 39, season: 2024 });
+    const { user, isSignedIn } = useUser();
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [followLoading, setFollowLoading] = useState(false);
+
+    const isLoading = teamLoading || fixturesLoading || statsLoading;
+
+    // Check if user follows this team
+    useEffect(() => {
+        if (!isSignedIn || !teamId) return;
+        const checkFollow = async () => {
+            const { data } = await supabase
+                .from('user_favorite_teams')
+                .select('id')
+                .eq('user_id', user!.id)
+                .eq('team_id', teamId)
+                .maybeSingle();
+            setIsFollowing(!!data);
+        };
+        checkFollow();
+    }, [isSignedIn, teamId, user]);
+
+    const toggleFollow = async () => {
+        if (!isSignedIn || !teamId || !team) return;
+        setFollowLoading(true);
+        try {
+            if (isFollowing) {
+                await supabase
+                    .from('user_favorite_teams')
+                    .delete()
+                    .eq('user_id', user!.id)
+                    .eq('team_id', teamId);
+                setIsFollowing(false);
+            } else {
+                await supabase
+                    .from('user_favorite_teams')
+                    .insert({
+                        user_id: user!.id,
+                        team_id: teamId,
+                        team_name: team.name,
+                        team_logo: team.logo,
+                    });
+                setIsFollowing(true);
+            }
+        } catch (err) {
+            console.error('Follow toggle failed:', err);
+        } finally {
+            setFollowLoading(false);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <MainLayout>
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                    <div className="animate-spin text-4xl">⚽</div>
+                </div>
+            </MainLayout>
+        );
+    }
+
+    if (!team) {
+        return (
+            <MainLayout>
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                    <div className="text-center">
+                        <h2 className="text-2xl font-black uppercase tracking-tighter">Team Not Found</h2>
+                        <Link to="/sports" className="text-red-600 font-bold hover:underline mt-4 block">Back to Sports</Link>
+                    </div>
+                </div>
+            </MainLayout>
+        );
+    }
+
+    const nextMatch = fixtures?.find(f => new Date(f.fixture.date) > new Date());
+    const pastMatches = fixtures?.filter(f => new Date(f.fixture.date) <= new Date()).reverse().slice(0, 5);
 
     return (
         <MainLayout>
             <div className="min-h-screen bg-gray-50">
                 <SportsTopBanner />
                 <SportsSubNav />
-                {/* Team Header */}
-                <div className="bg-white border-b">
-                    <div className="max-w-7xl mx-auto px-4 py-6">
-                        <div className="flex items-start gap-6">
-                            {/* Team Logo */}
-                            <div className="w-24 h-24 rounded-full bg-red-600 flex items-center justify-center text-white text-3xl font-bold flex-shrink-0">
-                                MUN
-                            </div>
 
-                            {/* Team Info */}
-                            <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <h1 className="text-4xl font-comfortaa font-semibold">{mockTeam.name}</h1>
-                                    <span className="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-semibold rounded">
-                                        {mockTeam.league}
+                {/* Team Header - High Fidelity */}
+                <div className="bg-[#121212] text-white relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-transparent"></div>
+                    <div className="max-w-7xl mx-auto px-4 py-12 relative z-10">
+                        <div className="flex flex-col md:flex-row items-center gap-8">
+                            <div className="w-32 h-32 md:w-40 md:h-40 bg-white/10 rounded-full flex items-center justify-center p-6 backdrop-blur-sm border border-white/10">
+                                <img src={team.logo} alt={team.name} className="w-full h-full object-contain" />
+                            </div>
+                            <div className="text-center md:text-left flex-1">
+                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
+                                    <span className="bg-red-600 text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded">Club Profile</span>
+                                    <span className="text-gray-400 text-xs font-bold uppercase tracking-widest flex items-center gap-1">
+                                        <MapPin className="w-3 h-3" /> {team.country}
                                     </span>
                                 </div>
-                                <div className="flex gap-6 text-sm">
+                                <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-4 leading-none">
+                                    {team.name}
+                                </h1>
+                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-sm text-gray-300">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-gray-500">Stadium:</span>
-                                        <span className="font-semibold">{mockTeam.stadium}</span>
+                                        <Trophy className="w-4 h-4 text-yellow-500" />
+                                        <span className="font-bold">Est. {team.founded || 'N/A'}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-gray-500">Position:</span>
-                                        <span className="font-bold text-lg">{mockTeam.position}th</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-gray-500">Points:</span>
-                                        <span className="font-bold text-lg">{mockTeam.points}</span>
+                                        <MapPin className="w-4 h-4 text-red-500" />
+                                        <span className="font-bold">{team.venue?.name || 'Home Stadium'}</span>
                                     </div>
                                 </div>
-
-                                {/* Form */}
-                                <div className="mt-4 flex items-center gap-2">
-                                    <span className="text-gray-500 text-sm font-semibold">Form:</span>
-                                    <div className="flex gap-1">
-                                        {mockTeam.form.map((result, index) => (
-                                            <div
-                                                key={index}
-                                                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${result === 'W' ? 'bg-green-600 text-white' :
-                                                    result === 'L' ? 'bg-red-600 text-white' :
-                                                        'bg-gray-400 text-white'
-                                                    }`}
-                                            >
-                                                {result}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Quick Stats */}
-                            <div className="flex gap-8 text-center">
-                                <div>
-                                    <div className="text-3xl font-bold text-green-600">{mockTeam.wins}</div>
-                                    <div className="text-xs text-gray-500 uppercase">Wins</div>
-                                </div>
-                                <div>
-                                    <div className="text-3xl font-bold text-gray-600">{mockTeam.draws}</div>
-                                    <div className="text-xs text-gray-500 uppercase">Draws</div>
-                                </div>
-                                <div>
-                                    <div className="text-3xl font-bold text-red-600">{mockTeam.losses}</div>
-                                    <div className="text-xs text-gray-500 uppercase">Losses</div>
-                                </div>
+                                {/* Follow Team Button */}
+                                <button
+                                    onClick={toggleFollow}
+                                    disabled={followLoading || !isSignedIn}
+                                    className={`mt-4 flex items-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 ${isFollowing
+                                            ? 'bg-white text-black hover:bg-gray-200'
+                                            : 'bg-red-600 text-white hover:bg-red-700'
+                                        } ${!isSignedIn ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <Heart size={16} className={isFollowing ? 'fill-red-500 text-red-500' : ''} />
+                                    {isFollowing ? 'Following' : 'Follow Team'}
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Tab Navigation */}
-                <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
+                <div className="bg-white border-b sticky top-[104px] z-30 shadow-sm">
                     <div className="max-w-7xl mx-auto px-4">
-                        <div className="flex gap-8">
+                        <div className="flex gap-8 overflow-x-auto no-scrollbar">
                             <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>
                                 Overview
                             </TabButton>
-                            <TabButton active={activeTab === 'squad'} onClick={() => setActiveTab('squad')}>
-                                Squad
-                            </TabButton>
                             <TabButton active={activeTab === 'fixtures'} onClick={() => setActiveTab('fixtures')}>
-                                Fixtures
-                            </TabButton>
-                            <TabButton active={activeTab === 'results'} onClick={() => setActiveTab('results')}>
-                                Results
+                                Schedule
                             </TabButton>
                             <TabButton active={activeTab === 'stats'} onClick={() => setActiveTab('stats')}>
                                 Stats
@@ -147,12 +162,139 @@ export default function TeamPage() {
                 </div>
 
                 {/* Tab Content */}
-                <div className="max-w-7xl mx-auto px-4 py-6">
-                    {activeTab === 'overview' && <OverviewTab team={mockTeam} />}
-                    {activeTab === 'squad' && <SquadTab squad={mockTeam.squad} />}
-                    {activeTab === 'fixtures' && <FixturesTab fixtures={mockTeam.fixtures} />}
-                    {activeTab === 'results' && <ResultsTab />}
-                    {activeTab === 'stats' && <StatsTab />}
+                <div className="max-w-7xl mx-auto px-4 py-8">
+                    {activeTab === 'overview' && (
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <div className="lg:col-span-2 space-y-8">
+                                {/* Next Match Card */}
+                                {nextMatch && (
+                                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                        <div className="bg-gray-50 px-6 py-3 border-b border-gray-100">
+                                            <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Next Match</h3>
+                                        </div>
+                                        <div className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
+                                            <div className="flex items-center gap-6">
+                                                <div className="text-center md:text-right">
+                                                    <div className="text-xl font-black uppercase tracking-tighter">{nextMatch.teams.home.name}</div>
+                                                    <div className="text-xs text-gray-500 font-bold uppercase tracking-widest">Home</div>
+                                                </div>
+                                                <img src={nextMatch.teams.home.logo} alt="" className="w-16 h-16 object-contain" />
+                                            </div>
+                                            <div className="text-center">
+                                                <div className="text-3xl font-black italic text-red-600 mb-1 uppercase tracking-tighter">VS</div>
+                                                <div className="text-xs font-black bg-gray-100 px-3 py-1 rounded-full">{new Date(nextMatch.fixture.date).toLocaleDateString()}</div>
+                                            </div>
+                                            <div className="flex items-center gap-6">
+                                                <img src={nextMatch.teams.away.logo} alt="" className="w-16 h-16 object-contain" />
+                                                <div className="text-center md:text-left">
+                                                    <div className="text-xl font-black uppercase tracking-tighter">{nextMatch.teams.away.name}</div>
+                                                    <div className="text-xs text-gray-500 font-bold uppercase tracking-widest">Away</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="bg-gray-50 p-4 text-center border-t border-gray-100">
+                                            <Link to={`/sports/match/${nextMatch.fixture.id}`} className="text-xs font-black uppercase tracking-widest text-red-600 hover:text-red-700 transition-colors flex items-center justify-center gap-2">
+                                                Game Details <ChevronRight className="w-4 h-4" />
+                                            </Link>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Recent Results */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-800 border-l-4 border-red-600 pl-3">Recent Results</h3>
+                                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 divide-y divide-gray-100">
+                                        {pastMatches?.map(m => (
+                                            <div key={m.fixture.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                                                <div className="flex items-center gap-4 flex-1">
+                                                    <span className="text-[10px] font-black text-gray-400 w-12">{new Date(m.fixture.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <img src={m.teams.home.id === team.id ? m.teams.away.logo : m.teams.home.logo} alt="" className="w-5 h-5 object-contain" />
+                                                        <span className="text-sm font-bold tracking-tight">{m.teams.home.id === team.id ? m.teams.away.name : m.teams.home.name}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`px-2 py-1 rounded text-xs font-black ${(m.teams.home.id === team.id && m.goals.home! > m.goals.away!) || (m.teams.away.id === team.id && m.goals.away! > m.goals.home!) ? 'bg-green-100 text-green-700' :
+                                                        m.goals.home === m.goals.away ? 'bg-gray-100 text-gray-700' : 'bg-red-100 text-red-700'
+                                                        }`}>
+                                                        {m.goals.home} - {m.goals.away}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Sidebar Stats */}
+                            <div className="space-y-6">
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                    <div className="flex items-center gap-2 mb-6">
+                                        <BarChart3 className="w-5 h-5 text-red-600" />
+                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Season Summary</h3>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <StatItem label="Games Played" value={stats?.fixtures?.played?.total || '0'} />
+                                        <StatItem label="Goals For" value={stats?.goals?.for?.total?.total || '0'} />
+                                        <StatItem label="Goals Against" value={stats?.goals?.against?.total?.total || '0'} />
+                                        <StatItem label="Clean Sheets" value={stats?.clean_sheet?.total || '0'} />
+                                    </div>
+                                </div>
+
+                                <div className="bg-[#121212] rounded-xl shadow-xl border border-white/5 p-6 text-white text-center">
+                                    <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Users className="w-8 h-8 text-red-500" />
+                                    </div>
+                                    <h3 className="text-xl font-black uppercase tracking-tighter mb-2 italic">Official Store</h3>
+                                    <p className="text-xs text-gray-400 mb-6">Support the club with the latest official kits and merchandise.</p>
+                                    <button className="w-full bg-red-600 hover:bg-red-700 py-3 rounded text-xs font-black uppercase tracking-widest transition-colors">
+                                        Shop Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'fixtures' && (
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+                            <div className="divide-y divide-gray-100">
+                                {fixtures?.filter(f => new Date(f.fixture.date) > new Date()).map(f => (
+                                    <div key={f.fixture.id} className="p-6 flex flex-col md:flex-row items-center justify-between gap-4 hover:bg-gray-50 transition-colors">
+                                        <div className="flex items-center gap-6">
+                                            <div className="text-center pr-6 border-r border-gray-100">
+                                                <div className="text-sm font-black uppercase tracking-tighter">{new Date(f.fixture.date).toLocaleDateString([], { weekday: 'short' })}</div>
+                                                <div className="text-xs text-gray-400 font-bold">{new Date(f.fixture.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</div>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <img src={f.teams.home.logo} alt="" className="w-8 h-8 object-contain" />
+                                                <span className="text-base font-bold tracking-tight">{f.teams.home.name}</span>
+                                                <span className="text-xs font-black text-gray-400 mx-2">VS</span>
+                                                <img src={f.teams.away.logo} alt="" className="w-8 h-8 object-contain" />
+                                                <span className="text-base font-bold tracking-tight">{f.teams.away.name}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-6">
+                                            <div className="flex items-center gap-2 text-gray-500">
+                                                <Clock className="w-4 h-4" />
+                                                <span className="text-xs font-bold">{new Date(f.fixture.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
+                                            <Link to={`/sports/match/${f.fixture.id}`} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-[10px] font-black uppercase tracking-widest text-gray-900 transition-colors">
+                                                Preview
+                                            </Link>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'stats' && (
+                        <div className="p-20 text-center bg-white rounded-xl border-2 border-dashed border-gray-200">
+                            <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                            <h3 className="text-2xl font-black uppercase tracking-tighter text-gray-900">Advanced Analytics Coming Soon</h3>
+                            <p className="text-gray-500 mt-2 max-w-md mx-auto">We are currently integrating deeper Opta-style statistics for individual player performances and tactical analysis.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </MainLayout>
@@ -163,9 +305,9 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
     return (
         <button
             onClick={onClick}
-            className={`py-4 px-2 font-semibold border-b-4 transition ${active
-                ? 'border-black text-black'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+            className={`py-4 px-2 text-xs font-black uppercase tracking-widest border-b-4 transition whitespace-nowrap ${active
+                ? 'border-red-600 text-black'
+                : 'border-transparent text-gray-400 hover:text-black'
                 }`}
         >
             {children}
@@ -173,178 +315,11 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
     );
 }
 
-function OverviewTab({ team }: { team: typeof mockTeam }) {
+function StatItem({ label, value }: { label: string; value: any }) {
     return (
-        <div className="grid grid-cols-3 gap-6">
-            {/* Main Column */}
-            <div className="col-span-2 space-y-6">
-                {/* Next Fixture */}
-                <div className="bg-white rounded-lg p-6 shadow-sm border">
-                    <h2 className="text-xl font-comfortaa font-semibold mb-4">Next Fixture</h2>
-                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6">
-                        <div className="text-sm text-gray-600 mb-2">{team.nextFixture.competition}</div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-lg">
-                                    MUN
-                                </div>
-                                <div className="text-2xl font-bold">vs</div>
-                                <div className="w-16 h-16 rounded-full bg-red-700 flex items-center justify-center text-white font-bold text-lg">
-                                    ARS
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-2xl font-bold">{team.nextFixture.date}</div>
-                                <div className="text-gray-600">{team.nextFixture.time}</div>
-                                <div className="text-sm text-gray-500">{team.nextFixture.venue}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Team News */}
-                <div className="bg-white rounded-lg p-6 shadow-sm border">
-                    <h2 className="text-xl font-comfortaa font-semibold mb-4">Team News</h2>
-                    <div className="space-y-3">
-                        <NewsItem
-                            title="Rashford returns to training ahead of Arsenal clash"
-                            time="2 hours ago"
-                        />
-                        <NewsItem
-                            title="Ten Hag discusses tactics for crucial match"
-                            time="5 hours ago"
-                        />
-                        <NewsItem
-                            title="Injury update: Varane expected back next week"
-                            time="1 day ago"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-                {/* Top Scorers */}
-                <div className="bg-white rounded-lg p-6 shadow-sm border">
-                    <h2 className="text-lg font-comfortaa font-semibold mb-4">Top Scorers</h2>
-                    <div className="space-y-3">
-                        {team.topScorers.map((player, index) => (
-                            <div key={index} className="flex items-center justify-between pb-3 border-b last:border-0">
-                                <div>
-                                    <div className="font-semibold">{player.name}</div>
-                                    <div className="text-xs text-gray-500">{player.assists} assists</div>
-                                </div>
-                                <div className="text-2xl font-bold text-black">{player.goals}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Quick Stats */}
-                <div className="bg-white rounded-lg p-6 shadow-sm border">
-                    <h2 className="text-lg font-comfortaa font-semibold mb-4">Season Stats</h2>
-                    <div className="space-y-3">
-                        <StatRow label="Goals Scored" value="54" />
-                        <StatRow label="Goals Conceded" value="38" />
-                        <StatRow label="Clean Sheets" value="12" />
-                        <StatRow label="Yellow Cards" value="47" />
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function SquadTab({ squad }: { squad: typeof mockTeam.squad }) {
-    const groupedByPosition = {
-        Goalkeeper: squad.filter(p => p.position === 'Goalkeeper'),
-        Midfielder: squad.filter(p => p.position === 'Midfielder'),
-        Forward: squad.filter(p => p.position === 'Forward')
-    };
-
-    return (
-        <div className="bg-white rounded-lg shadow-sm border">
-            {Object.entries(groupedByPosition).map(([position, players]) => (
-                <div key={position} className="border-b last:border-0">
-                    <div className="bg-gray-50 px-6 py-3 font-comfortaa font-semibold text-gray-700 border-b">
-                        {position}s
-                    </div>
-                    <div className="divide-y">
-                        {players.map((player) => (
-                            <div key={player.number} className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 cursor-pointer">
-                                <div className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center font-bold">
-                                    {player.number}
-                                </div>
-                                <div className="flex-1">
-                                    <div className="font-semibold">{player.name}</div>
-                                    <div className="text-sm text-gray-500">{player.position}</div>
-                                </div>
-                                <div className="text-sm text-gray-500">{player.nationality}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-}
-
-function FixturesTab({ fixtures }: { fixtures: typeof mockTeam.fixtures }) {
-    return (
-        <div className="bg-white rounded-lg shadow-sm border divide-y">
-            {fixtures.map((fixture, index) => (
-                <div key={index} className="px-6 py-4 hover:bg-gray-50 cursor-pointer">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="text-gray-500 min-w-[80px]">{fixture.date}</div>
-                            <div className="flex items-center gap-3">
-                                <span className="font-semibold">vs {fixture.opponent}</span>
-                                <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded">
-                                    {fixture.competition}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="text-sm text-gray-500">{fixture.venue}</div>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-}
-
-function ResultsTab() {
-    return (
-        <div className="bg-white rounded-lg shadow-sm border p-8 text-center text-gray-500">
-            <div className="text-lg">No recent results to display</div>
-        </div>
-    );
-}
-
-function StatsTab() {
-    return (
-        <div className="bg-white rounded-lg shadow-sm border p-8 text-center text-gray-500">
-            <div className="text-lg">Detailed stats coming soon</div>
-        </div>
-    );
-}
-
-function NewsItem({ title, time }: { title: string; time: string }) {
-    return (
-        <div className="flex items-start gap-3 pb-3 border-b last:border-0 cursor-pointer hover:bg-gray-50 p-2 rounded">
-            <div className="w-2 h-2 rounded-full bg-black mt-2 flex-shrink-0"></div>
-            <div className="flex-1">
-                <div className="font-semibold text-sm leading-snug">{title}</div>
-                <div className="text-xs text-gray-500 mt-1">{time}</div>
-            </div>
-        </div>
-    );
-}
-
-function StatRow({ label, value }: { label: string; value: string }) {
-    return (
-        <div className="flex justify-between items-center pb-2 border-b last:border-0">
-            <span className="text-sm text-gray-600">{label}</span>
-            <span className="font-bold">{value}</span>
+        <div className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{label}</span>
+            <span className="text-xl font-black italic text-gray-900 leading-none">{value}</span>
         </div>
     );
 }

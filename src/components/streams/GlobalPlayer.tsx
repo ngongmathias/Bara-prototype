@@ -1,5 +1,5 @@
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
-import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List } from 'lucide-react';
+import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { QueueDrawer } from './QueueDrawer';
 
@@ -71,11 +71,11 @@ export function GlobalPlayer() {
                 </div>
 
                 {/* Player Controls */}
-                <div className="flex flex-col items-center gap-2 flex-[2] max-w-[600px]">
-                    <div className="flex items-center gap-6">
+                <div className="flex flex-col items-center gap-1 md:gap-2 flex-[2] max-w-[600px]">
+                    <div className="flex items-center gap-4 md:gap-6">
                         <button
                             onClick={toggleShuffle}
-                            className={`transition-colors ${isShuffle ? 'text-[#1DB954]' : 'text-gray-400 hover:text-white'}`}
+                            className={`transition-colors hidden md:block ${isShuffle ? 'text-[#1DB954]' : 'text-gray-400 hover:text-white'}`}
                             title="Shuffle"
                         >
                             <Shuffle size={18} />
@@ -94,7 +94,7 @@ export function GlobalPlayer() {
                         </button>
                         <button
                             onClick={() => setRepeatMode(repeatMode === 'none' ? 'all' : repeatMode === 'all' ? 'one' : 'none')}
-                            className={`transition-colors relative ${repeatMode !== 'none' ? 'text-[#1DB954]' : 'text-gray-400 hover:text-white'}`}
+                            className={`transition-colors relative hidden md:block ${repeatMode !== 'none' ? 'text-[#1DB954]' : 'text-gray-400 hover:text-white'}`}
                         >
                             <Repeat size={18} />
                             {repeatMode === 'one' && (
@@ -104,8 +104,8 @@ export function GlobalPlayer() {
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="flex items-center gap-3 w-full group/progress">
-                        <span className="text-[10px] text-gray-500 w-10 text-right tabular-nums">{formatTime(progress)}</span>
+                    <div className="flex items-center gap-2 md:gap-3 w-full group/progress">
+                        <span className="text-[10px] text-gray-500 w-8 md:w-10 text-right tabular-nums">{formatTime(progress)}</span>
                         <div className="relative flex-1 h-1 bg-white/10 rounded-full overflow-hidden cursor-pointer group-hover/progress:h-1.5 transition-all">
                             <input
                                 type="range"
@@ -121,12 +121,12 @@ export function GlobalPlayer() {
                                 style={{ width: `${(progress / (duration || 1)) * 100}%` }}
                             />
                         </div>
-                        <span className="text-[10px] text-gray-500 w-10 tabular-nums">{formatTime(duration)}</span>
+                        <span className="text-[10px] text-gray-500 w-8 md:w-10 tabular-nums">{formatTime(duration)}</span>
                     </div>
                 </div>
 
                 {/* Volume & Extra Controls */}
-                <div className="flex items-center gap-4 flex-1 justify-end min-w-[200px]">
+                <div className="flex items-center gap-4 flex-1 justify-end min-w-0 md:min-w-[200px]">
                     <button
                         onClick={() => setIsQueueOpen(!isQueueOpen)}
                         className={`transition-colors ${isQueueOpen ? 'text-[#1DB954]' : 'text-gray-400 hover:text-white'}`}
@@ -134,7 +134,21 @@ export function GlobalPlayer() {
                     >
                         <List size={20} />
                     </button>
-                    <div className="flex items-center gap-2 group/volume w-32">
+                    <button
+                        onClick={async () => {
+                            const shareUrl = `${window.location.origin}/streams/song/${currentSong.id}`;
+                            const shareData = { title: currentSong.title, text: `Listen to ${currentSong.title} by ${currentSong.artist} on Bara Streams`, url: shareUrl };
+                            try {
+                                if (navigator.share) { await navigator.share(shareData); }
+                                else { await navigator.clipboard.writeText(shareUrl); alert('Link copied to clipboard!'); }
+                            } catch { /* User cancelled */ }
+                        }}
+                        className="text-gray-400 hover:text-white transition-colors hidden md:block"
+                        title="Share"
+                    >
+                        <Share2 size={18} />
+                    </button>
+                    <div className="hidden md:flex items-center gap-2 group/volume w-32">
                         <Volume2 size={18} className="text-gray-400 group-hover/volume:text-white transition-colors" />
                         <div className="relative flex-1 h-1 bg-white/10 rounded-full overflow-hidden cursor-pointer group-hover/volume:h-1.5 transition-all">
                             <input

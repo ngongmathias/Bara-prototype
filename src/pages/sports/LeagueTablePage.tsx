@@ -70,86 +70,90 @@ export default function LeagueTablePage() {
                 {/* League Table */}
                 <div className="max-w-7xl mx-auto px-4 py-6">
                     <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                        {/* Table Header */}
-                        <div className="grid grid-cols-[60px_1fr_60px_60px_60px_60px_80px_80px_80px_70px_120px] gap-2 px-4 py-3 bg-gray-50 border-b font-semibold text-xs text-gray-600 uppercase">
-                            <div className="text-center">Pos</div>
-                            <div>Team</div>
-                            <div className="text-center">PL</div>
-                            <div className="text-center">W</div>
-                            <div className="text-center">D</div>
-                            <div className="text-center">L</div>
-                            <div className="text-center">GF</div>
-                            <div className="text-center">GA</div>
-                            <div className="text-center">GD</div>
-                            <div className="text-center">Pts</div>
-                            <div className="text-center">Form</div>
-                        </div>
+                        <div className="overflow-x-auto">
+                            <div className="min-w-[1000px]">
+                                {/* Table Header */}
+                                <div className="grid grid-cols-[60px_1fr_60px_60px_60px_60px_80px_80px_80px_70px_120px] gap-2 px-4 py-3 bg-gray-50 border-b font-semibold text-xs text-gray-600 uppercase">
+                                    <div className="text-center">Pos</div>
+                                    <div>Team</div>
+                                    <div className="text-center">PL</div>
+                                    <div className="text-center">W</div>
+                                    <div className="text-center">D</div>
+                                    <div className="text-center">L</div>
+                                    <div className="text-center">GF</div>
+                                    <div className="text-center">GA</div>
+                                    <div className="text-center">GD</div>
+                                    <div className="text-center">Pts</div>
+                                    <div className="text-center">Form</div>
+                                </div>
 
-                        {/* Table Rows */}
-                        <div>
-                            {teams.map((team) => {
-                                // Parse form string into array (e.g., "WWDLW" -> ["W","W","D","L","W"])
-                                const formArray = team.form ? team.form.split('').slice(-5) : [];
+                                {/* Table Rows */}
+                                <div>
+                                    {teams.map((team) => {
+                                        // Parse form string into array (e.g., "WWDLW" -> ["W","W","D","L","W"])
+                                        const formArray = team.form ? team.form.split('').slice(-5) : [];
 
-                                return (
-                                    <div
-                                        key={team.rank}
-                                        className={`grid grid-cols-[60px_1fr_60px_60px_60px_60px_80px_80px_80px_70px_120px] gap-2 px-4 py-4 border-b hover:bg-gray-50 cursor-pointer transition ${team.rank <= 4 ? 'border-l-4 border-l-blue-500' :
-                                            team.rank >= 18 ? 'border-l-4 border-l-red-500' :
-                                                ''
-                                            }`}
-                                    >
-                                        {/* Position */}
-                                        <div className="flex items-center justify-center font-bold text-gray-700">
-                                            {team.rank}
-                                        </div>
+                                        return (
+                                            <div
+                                                key={team.rank}
+                                                className={`grid grid-cols-[60px_1fr_60px_60px_60px_60px_80px_80px_80px_70px_120px] gap-2 px-4 py-4 border-b hover:bg-gray-50 cursor-pointer transition ${team.rank <= 4 ? 'border-l-4 border-l-blue-500' :
+                                                    team.rank >= 18 ? 'border-l-4 border-l-red-500' :
+                                                        ''
+                                                    }`}
+                                            >
+                                                {/* Position */}
+                                                <div className="flex items-center justify-center font-bold text-gray-700">
+                                                    {team.rank}
+                                                </div>
 
-                                        {/* Team Name */}
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <img
-                                                src={team.team.logo}
-                                                alt={team.team.name}
-                                                className="w-8 h-8 object-contain flex-shrink-0"
-                                            />
-                                            <span className="font-semibold truncate">{team.team.name}</span>
-                                        </div>
+                                                {/* Team Name */}
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <img
+                                                        src={team.team.logo}
+                                                        alt={team.team.name}
+                                                        className="w-8 h-8 object-contain flex-shrink-0"
+                                                    />
+                                                    <span className="font-semibold truncate">{team.team.name}</span>
+                                                </div>
 
-                                        {/* Stats */}
-                                        <div className="flex items-center justify-center text-gray-600">{team.all.played}</div>
-                                        <div className="flex items-center justify-center text-gray-600">{team.all.win}</div>
-                                        <div className="flex items-center justify-center text-gray-600">{team.all.draw}</div>
-                                        <div className="flex items-center justify-center text-gray-600">{team.all.lose}</div>
-                                        <div className="flex items-center justify-center text-gray-600">{team.all.goals.for}</div>
-                                        <div className="flex items-center justify-center text-gray-600">{team.all.goals.against}</div>
-                                        <div className={`flex items-center justify-center font-semibold ${team.goalsDiff > 0 ? 'text-green-600' :
-                                            team.goalsDiff < 0 ? 'text-red-600' :
-                                                'text-gray-600'
-                                            }`}>
-                                            {team.goalsDiff > 0 ? '+' : ''}{team.goalsDiff}
-                                        </div>
-                                        <div className="flex items-center justify-center font-bold text-lg">{team.points}</div>
+                                                {/* Stats */}
+                                                <div className="flex items-center justify-center text-gray-600">{team.all.played}</div>
+                                                <div className="flex items-center justify-center text-gray-600">{team.all.win}</div>
+                                                <div className="flex items-center justify-center text-gray-600">{team.all.draw}</div>
+                                                <div className="flex items-center justify-center text-gray-600">{team.all.lose}</div>
+                                                <div className="flex items-center justify-center text-gray-600">{team.all.goals.for}</div>
+                                                <div className="flex items-center justify-center text-gray-600">{team.all.goals.against}</div>
+                                                <div className={`flex items-center justify-center font-semibold ${team.goalsDiff > 0 ? 'text-green-600' :
+                                                    team.goalsDiff < 0 ? 'text-red-600' :
+                                                        'text-gray-600'
+                                                    }`}>
+                                                    {team.goalsDiff > 0 ? '+' : ''}{team.goalsDiff}
+                                                </div>
+                                                <div className="flex items-center justify-center font-bold text-lg">{team.points}</div>
 
-                                        {/* Form */}
-                                        <div className="flex items-center justify-center gap-1">
-                                            {formArray.length > 0 ? (
-                                                formArray.map((result, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${result === 'W' ? 'bg-green-600 text-white' :
-                                                            result === 'L' ? 'bg-red-600 text-white' :
-                                                                'bg-gray-400 text-white'
-                                                            }`}
-                                                    >
-                                                        {result}
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <span className="text-xs text-gray-400">N/A</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                                                {/* Form */}
+                                                <div className="flex items-center justify-center gap-1">
+                                                    {formArray.length > 0 ? (
+                                                        formArray.map((result, index) => (
+                                                            <div
+                                                                key={index}
+                                                                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${result === 'W' ? 'bg-green-600 text-white' :
+                                                                    result === 'L' ? 'bg-red-600 text-white' :
+                                                                        'bg-gray-400 text-white'
+                                                                    }`}
+                                                            >
+                                                                {result}
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400">N/A</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         </div>
                     </div>
 

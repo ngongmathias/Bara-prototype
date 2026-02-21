@@ -15,12 +15,13 @@ import {
 import { supabase } from '@/lib/supabase';
 import { MarketplaceListing, MarketplaceCategory, MarketplaceSubcategory } from '@/types/marketplace';
 import { MapPin, Gauge, Calendar } from 'lucide-react';
+import { VehicleCard } from '@/components/marketplace/SpecializedCards';
 
 export const MotorsPage = () => {
   const { categorySlug } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  
+
   const [category, setCategory] = useState<MarketplaceCategory | null>(null);
   const [subcategories, setSubcategories] = useState<MarketplaceSubcategory[]>([]);
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
@@ -74,10 +75,10 @@ export const MotorsPage = () => {
         .order('name');
 
       setCountries(countriesData || []);
-      
+
       // Popular makes
       setPopularMakes(['Mercedes-Benz', 'Toyota', 'BMW', 'Nissan', 'Land Rover', 'Ford', 'Porsche', 'Audi']);
-      
+
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -305,77 +306,13 @@ export const MotorsPage = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4">
-                {listings.map((listing) => {
-                  const primaryImage = listing.images?.find((img: any) => img.is_primary)?.image_url || 
-                                     listing.images?.[0]?.image_url || 
-                                     '/placeholder.jpg';
-                  const make = listing.attributes?.make || '';
-                  const model = listing.attributes?.model || '';
-                  const year = listing.attributes?.year || '';
-                  const kilometers = listing.attributes?.kilometers || '';
-                  const transmission = listing.attributes?.transmission || '';
-
-                  return (
-                    <div
-                      key={listing.id}
-                      onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
-                      className="border border-gray-200 rounded-lg overflow-hidden hover:border-black transition-colors cursor-pointer group"
-                    >
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        {/* Image */}
-                        <div className="relative w-full sm:w-64 h-48 bg-gray-100 flex-shrink-0">
-                          <img
-                            src={primaryImage}
-                            alt={listing.title}
-                            className="w-full h-full object-cover"
-                          />
-                          {listing.is_featured && (
-                            <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
-                              CAR OF THE WEEK
-                            </div>
-                          )}
-                          <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                            📷 {listing.images?.length || 1}
-                          </div>
-                        </div>
-
-                        {/* Details */}
-                        <div className="flex-1 p-4">
-                          <div className="text-2xl font-bold text-black mb-2 font-comfortaa">
-                            {listing.currency} {listing.price?.toLocaleString()}
-                          </div>
-
-                          <div className="text-sm text-gray-700 mb-2 font-roboto">
-                            {make} • {model} • {listing.attributes?.fuel_type || 'Petrol'}
-                          </div>
-
-                          <h3 className="font-medium text-black mb-2 group-hover:underline font-roboto">
-                            {listing.title}
-                          </h3>
-
-                          <div className="flex items-center gap-4 text-sm text-gray-600 mb-2 font-roboto">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" /> {year}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Gauge className="w-4 h-4" /> {kilometers ? `${parseInt(kilometers).toLocaleString()} km` : 'N/A'}
-                            </span>
-                            <span>⚙️ {transmission}</span>
-                          </div>
-
-                          <div className="flex items-center gap-1 text-sm text-gray-500 font-roboto">
-                            <MapPin className="w-4 h-4" />
-                            {listing.location_details || 'Location not specified'}
-                          </div>
-
-                          <div className="mt-3 text-sm text-gray-600 font-roboto">
-                            Listed by <span className="font-medium">{listing.seller_name}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                {listings.map((listing) => (
+                  <VehicleCard
+                    key={listing.id}
+                    listing={listing}
+                    onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
+                  />
+                ))}
               </div>
             )}
           </div>
