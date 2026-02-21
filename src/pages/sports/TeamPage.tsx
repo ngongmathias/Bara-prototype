@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
+import { SportsSubNav } from '../../components/sports/SportsSubNav';
 
 // Mock team data
 const mockTeam = {
@@ -49,6 +51,8 @@ export default function TeamPage() {
     return (
         <MainLayout>
             <div className="min-h-screen bg-gray-50">
+                <SportsTopBanner />
+                <SportsSubNav />
                 {/* Team Header */}
                 <div className="bg-white border-b">
                     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -89,8 +93,8 @@ export default function TeamPage() {
                                             <div
                                                 key={index}
                                                 className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${result === 'W' ? 'bg-green-600 text-white' :
-                                                        result === 'L' ? 'bg-red-600 text-white' :
-                                                            'bg-gray-400 text-white'
+                                                    result === 'L' ? 'bg-red-600 text-white' :
+                                                        'bg-gray-400 text-white'
                                                     }`}
                                             >
                                                 {result}

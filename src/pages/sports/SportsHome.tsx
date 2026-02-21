@@ -4,15 +4,18 @@ import { useLiveScores } from '../../hooks/useLiveScores';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { supabase } from '@/lib/supabase';
 import { Play, Calendar, User, ChevronRight } from 'lucide-react';
+import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
+import { SportsSubNav } from '../../components/sports/SportsSubNav';
 
 export default function SportsHome() {
     return (
         <MainLayout>
             <div className="min-h-screen bg-gray-100 font-sans">
-                {/* Score Ticker - Dark Mode for Contrast */}
-                <div className="bg-[#2D2D2D] text-white border-b border-gray-700">
-                    <LiveScoreTicker />
-                </div>
+                {/* High-Fidelity ESPN Ticker */}
+                <SportsTopBanner />
+
+                {/* Sport-Specific Sub-Navigation */}
+                <SportsSubNav />
 
                 {/* Main Content Helper */}
                 <div className="max-w-[1440px] mx-auto p-4">
@@ -50,45 +53,6 @@ export default function SportsHome() {
     );
 }
 
-// Live Score Ticker Component
-function LiveScoreTicker() {
-    const { data: liveMatches, isLoading } = useLiveScores({
-        enabled: true,
-        refetchInterval: 60000
-    });
-
-    if (isLoading) return <div className="h-12 flex items-center justify-center text-xs text-gray-400">Loading live scores...</div>;
-
-    if (!liveMatches || liveMatches.length === 0) {
-        return (
-            <div className="h-12 flex items-center px-4 text-xs text-gray-400">
-                <span className="font-bold mr-2">MATCH CENTER:</span> No live matches currently.
-            </div>
-        );
-    }
-
-    return (
-        <div className="flex items-center gap-4 px-4 py-2 overflow-x-auto scrollbar-hide">
-            <span className="font-bold text-xs uppercase text-gray-400 whitespace-nowrap">Live Scores:</span>
-            {liveMatches.map((match) => {
-                const isLive = ['1H', '2H', 'HT', 'LIVE'].includes(match.fixture.status.short);
-                return (
-                    <Link key={match.fixture.id} to={`/sports/match/${match.fixture.id}`} className="flex-shrink-0 hover:bg-white/10 rounded px-2 py-1 transition group">
-                        <div className="flex items-center gap-2 text-xs">
-                            <span className={`font-bold ${isLive ? 'text-red-500' : 'text-gray-400'}`}>
-                                {match.fixture.status.short} {isLive && '•'}
-                            </span>
-                            <div className="flex flex-col">
-                                <span className="font-semibold">{match.teams.home.code} <span className="text-gray-400">{match.goals.home ?? 0}</span></span>
-                                <span className="font-semibold">{match.teams.away.code} <span className="text-gray-400">{match.goals.away ?? 0}</span></span>
-                            </div>
-                        </div>
-                    </Link>
-                );
-            })}
-        </div>
-    );
-}
 
 // Sidebar
 function LeftSidebar() {

@@ -3,16 +3,14 @@ import { useParams } from 'react-router-dom';
 import { useMatchDetails } from '../../hooks/useLiveScores';
 import type { Match, MatchEvent, MatchStatistic, Lineup } from '../../types/sports';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
+import { SportsSubNav } from '../../components/sports/SportsSubNav';
 
 export default function MatchCenter() {
     const { id } = useParams();
     const [activeTab, setActiveTab] = useState<'summary' | 'stats' | 'lineups'>('summary');
 
-    const { data: matchData, isLoading, error } = useMatchDetails(id ? parseInt(id) : 0);
-    const match = matchData?.fixture;
-    const events = matchData?.events;
-    const statistics = matchData?.statistics;
-    const lineups = matchData?.lineups;
+    const { match, events, statistics, lineups, isLoading, error } = useMatchDetails(id ? parseInt(id) : 0);
 
     if (isLoading) {
         return (
@@ -51,6 +49,8 @@ export default function MatchCenter() {
     return (
         <MainLayout>
             <div className="min-h-screen bg-gray-50">
+                <SportsTopBanner />
+                <SportsSubNav />
                 {/* Match Header */}
                 <div className="bg-white border-b">
                     <div className="max-w-6xl mx-auto px-4 py-6">
@@ -70,9 +70,9 @@ export default function MatchCenter() {
                                 <div className="text-5xl font-bold mb-2">
                                     {match.goals.home} - {match.goals.away}
                                 </div>
-                                <div className="text-sm text-gray-600">{match.status.long}</div>
-                                {match.status.elapsed && (
-                                    <div className="text-sm font-semibold text-black">{match.status.elapsed}'</div>
+                                <div className="text-sm text-gray-600">{match.fixture.status.long}</div>
+                                {match.fixture.status.elapsed && (
+                                    <div className="text-sm font-semibold text-black">{match.fixture.status.elapsed}'</div>
                                 )}
                             </div>
 
@@ -304,9 +304,9 @@ function LineupsTab({ lineups }: { lineups: Lineup[] | undefined }) {
                         <div className="space-y-2">
                             {lineup.startXI.map((player, pIdx) => (
                                 <div key={pIdx} className="flex items-center gap-2 text-sm p-2 bg-gray-50 rounded">
-                                    <span className="font-semibold text-gray-600 w-6">{player.player.number}</span>
+                                    <span className="font-semibold text-gray-600 w-6">{player.number}</span>
                                     <span>{player.player.name}</span>
-                                    <span className="text-xs text-gray-500 ml-auto">{player.player.pos}</span>
+                                    <span className="text-xs text-gray-500 ml-auto">{player.pos}</span>
                                 </div>
                             ))}
                         </div>
@@ -319,9 +319,9 @@ function LineupsTab({ lineups }: { lineups: Lineup[] | undefined }) {
                             <div className="space-y-2">
                                 {lineup.substitutes.map((player, pIdx) => (
                                     <div key={pIdx} className="flex items-center gap-2 text-sm p-2 bg-gray-50 rounded opacity-75">
-                                        <span className="font-semibold text-gray-600 w-6">{player.player.number}</span>
+                                        <span className="font-semibold text-gray-600 w-6">{player.number}</span>
                                         <span>{player.player.name}</span>
-                                        <span className="text-xs text-gray-500 ml-auto">{player.player.pos}</span>
+                                        <span className="text-xs text-gray-500 ml-auto">{player.pos}</span>
                                     </div>
                                 ))}
                             </div>

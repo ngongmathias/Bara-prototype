@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
+import { SportsSubNav } from '../../components/sports/SportsSubNav';
 
 interface Match {
     id: string;
@@ -57,12 +59,9 @@ export default function SportsScores() {
     return (
         <MainLayout>
             <div className="min-h-screen bg-gray-50">
-                {/* Page Header */}
-                <div className="bg-white border-b">
-                    <div className="max-w-7xl mx-auto px-4 py-6">
-                        <h1 className="text-3xl font-comfortaa font-semibold">Scores & Fixtures</h1>
-                    </div>
-                </div>
+                {/* High-Fidelity Navigation Tier */}
+                <SportsTopBanner />
+                <SportsSubNav />
 
                 {/* Date Selector */}
                 <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
@@ -73,8 +72,8 @@ export default function SportsScores() {
                                     key={day}
                                     onClick={() => setSelectedDate(day)}
                                     className={`flex-shrink-0 px-6 py-3 rounded-lg font-semibold transition ${selectedDate === day
-                                            ? 'bg-black text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        ? 'bg-black text-white'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                         }`}
                                 >
                                     <div className="text-sm">{day}</div>
@@ -133,8 +132,8 @@ function MatchRow({ match }: { match: Match }) {
                 <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-700">{match.league}</span>
                     <span className={`text-xs px-2 py-1 rounded font-semibold ${match.status === 'LIVE' ? 'bg-red-100 text-red-700' :
-                            match.status === 'FT' ? 'bg-gray-200 text-gray-700' :
-                                'bg-yellow-100 text-yellow-700'
+                        match.status === 'FT' ? 'bg-gray-200 text-gray-700' :
+                            'bg-yellow-100 text-yellow-700'
                         }`}>
                         {match.status}
                     </span>

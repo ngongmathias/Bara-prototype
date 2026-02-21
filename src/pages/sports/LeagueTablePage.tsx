@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useStandings } from '../../hooks/useTeamData';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
+import { SportsSubNav } from '../../components/sports/SportsSubNav';
 
 export default function LeagueTablePage() {
     const { id } = useParams();
@@ -14,26 +16,26 @@ export default function LeagueTablePage() {
     });
 
     // Fallback Mock Data for when API limit is reached
-    const mockStandings = [{
-        league: {
-            id: leagueId,
-            name: "Premier League",
-            season: 2024,
-            standings: [[
-                { rank: 1, team: { name: "Liverpool", logo: "https://media.api-sports.io/football/teams/40.png" }, points: 60, goalsDiff: 40, form: "WWDWW", all: { played: 25, win: 18, draw: 6, lose: 1, goals: { for: 55, against: 15 } } },
-                { rank: 2, team: { name: "Manchester City", logo: "https://media.api-sports.io/football/teams/50.png" }, points: 58, goalsDiff: 35, form: "DWWWW", all: { played: 25, win: 17, draw: 7, lose: 1, goals: { for: 52, against: 17 } } },
-                { rank: 3, team: { name: "Arsenal", logo: "https://media.api-sports.io/football/teams/42.png" }, points: 55, goalsDiff: 30, form: "WWLWW", all: { played: 25, win: 16, draw: 7, lose: 2, goals: { for: 48, against: 18 } } },
-                { rank: 4, team: { name: "Aston Villa", logo: "https://media.api-sports.io/football/teams/66.png" }, points: 49, goalsDiff: 15, form: "LDWWW", all: { played: 25, win: 14, draw: 7, lose: 4, goals: { for: 45, against: 30 } } },
-            ]]
-        }
-    }];
+    const mockTeams: any[] = [
+        { rank: 1, team: { name: "Liverpool", logo: "https://media.api-sports.io/football/teams/40.png" }, points: 60, goalsDiff: 40, form: "WWDWW", all: { played: 25, win: 18, draw: 6, lose: 1, goals: { for: 55, against: 15 } } },
+        { rank: 2, team: { name: "Manchester City", logo: "https://media.api-sports.io/football/teams/50.png" }, points: 58, goalsDiff: 35, form: "DWWWW", all: { played: 25, win: 17, draw: 7, lose: 1, goals: { for: 52, against: 17 } } },
+        { rank: 3, team: { name: "Arsenal", logo: "https://media.api-sports.io/football/teams/42.png" }, points: 55, goalsDiff: 30, form: "WWLWW", all: { played: 25, win: 16, draw: 7, lose: 2, goals: { for: 48, against: 18 } } },
+        { rank: 4, team: { name: "Aston Villa", logo: "https://media.api-sports.io/football/teams/66.png" }, points: 49, goalsDiff: 15, form: "LDWWW", all: { played: 25, win: 14, draw: 7, lose: 4, goals: { for: 45, against: 30 } } },
+    ];
 
     // Use real data if available, otherwise use mock data
-    // This prevents the "API Error" screen from showing up on the demo site
-    const displayStandings = (error || !standings || standings.length === 0) ? mockStandings : standings;
+    const teams = (error || !standings || standings.length === 0) ? mockTeams : standings;
 
-    const leagueStandings = displayStandings[0];
-    const teams = leagueStandings.league.standings[0]; // Get main standings
+    const getLeagueName = (id: number) => {
+        switch (id) {
+            case 39: return "Premier League";
+            case 140: return "La Liga";
+            case 135: return "Serie A";
+            case 78: return "Bundesliga";
+            case 61: return "Ligue 1";
+            default: return "League Table";
+        }
+    };
 
     if (isLoading) {
         return (
@@ -48,18 +50,18 @@ export default function LeagueTablePage() {
         );
     }
 
-
-
     return (
         <MainLayout>
             <div className="min-h-screen bg-gray-50">
+                <SportsTopBanner />
+                <SportsSubNav />
                 {/* Page Header */}
                 <div className="bg-white border-b shadow-sm">
                     <div className="max-w-7xl mx-auto px-4 py-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h1 className="text-3xl font-comfortaa font-semibold mb-1">{leagueStandings.league.name}</h1>
-                                <div className="text-gray-600">Season {leagueStandings.league.season}</div>
+                                <h1 className="text-3xl font-comfortaa font-semibold mb-1">{getLeagueName(leagueId)}</h1>
+                                <div className="text-gray-600">Season 2024</div>
                             </div>
                         </div>
                     </div>
