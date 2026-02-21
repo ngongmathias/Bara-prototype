@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
+import { SEO } from '@/components/SEO';
 import { Loader2, Play, Pause, BadgeCheck } from 'lucide-react';
 
 export default function ArtistPage() {
@@ -94,8 +95,34 @@ export default function ArtistPage() {
         );
     }
 
+    const artistSchema = {
+        "@context": "https://schema.org",
+        "@type": "MusicGroup",
+        "name": artist.name,
+        "image": artist.banner_url || artist.image_url,
+        "description": artist.bio || `Listen to ${artist.name} on Bara Afrika Streams.`,
+        "track": topTracks.map(track => ({
+            "@type": "MusicRecording",
+            "name": track.title,
+            "url": `${window.location.origin}/streams/artist/${id}`
+        })),
+        "album": albums.map(album => ({
+            "@type": "MusicAlbum",
+            "name": album.title,
+            "image": album.cover_url
+        }))
+    };
+
     return (
         <StreamsLayout>
+            <SEO
+                title={artist.name}
+                description={`Explore ${artist.name}'s music, top tracks, and albums on Bara Afrika. Discover the best of African sounds.`}
+                image={artist.banner_url}
+                type="music.song" // Or just keep as website/article if music.group isn't standard OG type
+                keywords={[artist.name, 'African Music', 'Bara Streams', 'African Artist']}
+                schemaData={artistSchema}
+            />
             <div className="min-h-screen bg-black text-white pb-24">
                 {/* Hero Header */}
                 <div className="bg-gradient-to-b from-gray-700 to-[#121212] pt-20 pb-6 px-8 relative">

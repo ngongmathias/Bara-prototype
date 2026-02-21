@@ -2,6 +2,7 @@ import { Home, Search, Library, Plus, Heart, Globe, Mic2, Loader2 } from 'lucide
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useState } from 'react';
+import { XPProgressBar } from '../gamification/XPProgressBar';
 
 export function StreamsSidebar({ className = "" }: { className?: string }) {
     const location = useLocation();
@@ -51,6 +52,7 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
         <div className={`bg-black text-gray-400 flex flex-col gap-2 p-2 ${className}`}>
             {/* Top Navigation Card */}
             <div className="bg-[#121212] rounded-lg p-4 space-y-4">
+                <XPProgressBar />
                 <SidebarLink to="/streams" icon={<Home size={24} />} label="Home" active={isActive('/streams')} />
                 <SidebarLink to="/streams/search" icon={<Search size={24} />} label="Search" active={isActive('/streams/search')} />
                 <SidebarLink to="/streams/creator" icon={<Mic2 size={24} className="text-[#1DB954]" />} label="Creator Portal" active={isActive('/streams/creator')} />

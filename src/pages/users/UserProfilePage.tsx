@@ -15,12 +15,14 @@ import {
   CheckCircle,
   AlertCircle,
   Save,
-  Camera
+  Camera,
+  Trophy
 } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { useToast } from '@/hooks/use-toast';
 import { VerificationBadge, VerificationStatus } from '@/components/ui/verification-badge';
 import { EventsService } from '@/lib/eventsService';
+import { BadgeGrid } from '@/components/gamification/BadgeGrid';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -250,6 +252,22 @@ export const UserProfilePage = () => {
               Your email is automatically verified through our authentication system
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Achievements & Badges */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Trophy className="mr-2 h-5 w-5 text-orange-500" />
+            Achievements & Badges
+          </CardTitle>
+          <p className="text-gray-600">
+            Earn badges by interacting with the community, marketplace, and streams
+          </p>
+        </CardHeader>
+        <CardContent>
+          <BadgeGrid />
         </CardContent>
       </Card>
 

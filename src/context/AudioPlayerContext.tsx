@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
 
 // Types
 export interface Song {
@@ -52,6 +53,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const [isShuffle, setIsShuffle] = useState(false);
     const [repeatMode, setRepeatMode] = useState<'none' | 'one' | 'all'>('none');
     const [likedSongs, setLikedSongs] = useState<string[]>([]);
+    const hasAwardedXP = useRef<string | null>(null);
 
     // Initialize Audio Object
     useEffect(() => {
@@ -60,7 +62,21 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
         const audio = audioRef.current;
 
-        const handleTimeUpdate = () => setProgress(audio.currentTime);
+        const handleTimeUpdate = () => {
+            setProgress(audio.currentTime);
+
+            // Award XP after 30 seconds of playback
+            if (audio.currentTime >= 30 && currentSong && hasAwardedXP.current !== currentSong.id) {
+                const awardXP = async () => {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        await GamificationService.addXP(user.id, XP_REWARDS.SONG_LISTEN, `Listened to ${currentSong.title}`);
+                        hasAwardedXP.current = currentSong.id;
+                    }
+                };
+                awardXP();
+            }
+        };
         const handleDurationChange = () => setDuration(audio.duration || 0);
         const handleEnded = () => {
             if (repeatMode === 'one') {

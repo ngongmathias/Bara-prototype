@@ -22,6 +22,7 @@ import { useEvents, useEventCategories } from '@/hooks/useEvents';
 import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { supabase } from '@/lib/supabase';
+import { SEO } from '@/components/SEO';
 
 export const EventsPage = () => {
   const navigate = useNavigate();
@@ -372,11 +373,45 @@ export const EventsPage = () => {
     }
   }, [selectedEvent, navigate]);
 
+  const eventSchema = selectedEvent ? {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": selectedEvent.title,
+    "startDate": selectedEvent.start_date,
+    "endDate": selectedEvent.end_date,
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+    "location": {
+      "@type": "Place",
+      "name": selectedEvent.venue_name,
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": selectedEvent.city_name,
+        "addressCountry": selectedEvent.country_name
+      }
+    },
+    "image": selectedEvent.event_image_url || (selectedEvent.event_images && selectedEvent.event_images[0]),
+    "description": selectedEvent.description,
+    "offers": {
+      "@type": "Offer",
+      "url": window.location.href,
+      "price": selectedEvent.entry_fee,
+      "priceCurrency": selectedEvent.currency || "GHS",
+      "availability": "https://schema.org/InStock"
+    }
+  } : undefined;
 
-
+  // Selected event view
   if (selectedEvent) {
     return (
       <div className="min-h-screen bg-gray-50">
+        <SEO
+          title={`${selectedEvent.title} | Events`}
+          description={selectedEvent.description?.substring(0, 160)}
+          image={selectedEvent.event_image_url || (selectedEvent.event_images && selectedEvent.event_images[0])}
+          type="event"
+          schemaData={eventSchema}
+        />
         <Header />
         <div className="container mx-auto px-4 py-8">
           <EventDetail
@@ -414,6 +449,11 @@ export const EventsPage = () => {
 
   return (
     <div className="relative min-h-screen bg-white">
+      <SEO
+        title="Bara Events"
+        description="Discover upcoming events in Africa. Concerts, festivals, business conferences, and more on Bara Afrika."
+        keywords={['Africa', 'Events', 'Concerts', 'Conferences', 'Festivals']}
+      />
 
       {/* Header */}
       <div className="relative z-20">

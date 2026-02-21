@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Globe, Crown, Clock, Building, ChevronRight, Camera, Users, ArrowLeft, Award, CheckCircle, Map, Navigation, ExternalLink } from "lucide-react";
@@ -116,8 +117,35 @@ export const BusinessDetailPage = () => {
   const avgRating = getAverageRating(business);
   const reviewCount = getReviewCount(business);
 
+  const businessSchema = {
+    "@context": "https://schema.org/",
+    "@type": "LocalBusiness",
+    "name": business.name,
+    "image": (business.images && business.images.length > 0) ? business.images[0] : (business.logo_url || ""),
+    "description": business.description || "",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": city,
+      "addressCountry": business.country
+    },
+    "telephone": business.phone || "",
+    "url": business.website || "",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": getAverageRating(business) || 0,
+      "reviewCount": getReviewCount(business) || 0
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background font-roboto">
+      <SEO
+        title={`${business.name} | ${categoryName} in ${cityName}`}
+        description={business.description?.substring(0, 160)}
+        image={(business.images && business.images.length > 0) ? business.images[0] : (business.logo_url || undefined)}
+        type="business.business"
+        schemaData={businessSchema}
+      />
       <Header />
       <TopBannerAd />
 
@@ -155,10 +183,10 @@ export const BusinessDetailPage = () => {
                     {[...Array(5)].map((_, i) => (
                       <Crown
                         key={i}
-                        className={`w-5 h-5 ${i < Math.floor(avgRating)
+                        className={`w - 5 h - 5 ${i < Math.floor(avgRating)
                           ? 'text-yellow-400 fill-current'
                           : 'text-gray-300'
-                          }`}
+                          } `}
                       />
                     ))}
                   </div>
@@ -198,7 +226,7 @@ export const BusinessDetailPage = () => {
                     <div key={index} className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
                       <img
                         src={image}
-                        alt={`${business.name} - Image ${index + 1}`}
+                        alt={`${business.name} - Image ${index + 1} `}
                         className="w-full h-full object-contain bg-gray-100"
                       />
                     </div>
@@ -248,10 +276,10 @@ export const BusinessDetailPage = () => {
                       {[...Array(5)].map((_, i) => (
                         <Crown
                           key={i}
-                          className={`w-4 h-4 ${i < Math.floor(getAverageRating(business))
+                          className={`w - 4 h - 4 ${i < Math.floor(getAverageRating(business))
                             ? 'text-yellow-400 fill-current'
                             : 'text-gray-300'
-                            }`}
+                            } `}
                         />
                       ))}
                     </div>
@@ -269,10 +297,10 @@ export const BusinessDetailPage = () => {
                           {[...Array(5)].map((_, i) => (
                             <Crown
                               key={i}
-                              className={`w-4 h-4 ${i < review.rating
+                              className={`w - 4 h - 4 ${i < review.rating
                                 ? 'text-yellow-400 fill-current'
                                 : 'text-gray-300'
-                                }`}
+                                } `}
                             />
                           ))}
                           <span className="ml-2 text-sm text-gray-500">
@@ -295,7 +323,7 @@ export const BusinessDetailPage = () => {
                             <img
                               key={index}
                               src={image}
-                              alt={`Review image ${index + 1}`}
+                              alt={`Review image ${index + 1} `}
                               className="w-16 h-16 object-cover rounded border"
                             />
                           ))}
@@ -315,7 +343,7 @@ export const BusinessDetailPage = () => {
                     <Button variant="outline" className="mr-4">
                       View All Reviews ({business.reviews.length})
                     </Button>
-                    <Link to={`/write-review/${business.id}`}>
+                    <Link to={`/ write - review / ${business.id} `}>
                       <Button className="bg-brand-blue text-white">
                         Write a Review
                       </Button>
@@ -325,7 +353,7 @@ export const BusinessDetailPage = () => {
 
                 {business.reviews.length <= 5 && (
                   <div className="mt-4">
-                    <Link to={`/write-review/${business.id}`}>
+                    <Link to={`/ write - review / ${business.id} `}>
                       <Button variant="outline" className="w-full">
                         Write a Review
                       </Button>
@@ -346,7 +374,7 @@ export const BusinessDetailPage = () => {
                 {business.phone && (
                   <div className="flex items-center">
                     <Phone className="w-4 h-4 text-gray-500 mr-3" />
-                    <a href={`tel:${business.phone}`} className="text-brand-blue hover:underline">
+                    <a href={`tel:${business.phone} `} className="text-brand-blue hover:underline">
                       {business.phone}
                     </a>
                   </div>
@@ -355,7 +383,7 @@ export const BusinessDetailPage = () => {
                 {business.email && (
                   <div className="flex items-center">
                     <Users className="w-4 h-4 text-gray-500 mr-3" />
-                    <a href={`mailto:${business.email}`} className="text-brand-blue hover:underline">
+                    <a href={`mailto:${business.email} `} className="text-brand-blue hover:underline">
                       {business.email}
                     </a>
                   </div>
@@ -371,57 +399,63 @@ export const BusinessDetailPage = () => {
                       rel="noopener noreferrer"
                     >
                       {business.website}
-                    </a>
-                  </div>
+                    </a >
+                  </div >
                 )}
 
-                {business.address && (
-                  <div className="flex items-start">
-                    <MapPin className="w-4 h-4 text-gray-500 mr-3 mt-0.5" />
-                    <span className="text-gray-700">{business.address}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+                {
+                  business.address && (
+                    <div className="flex items-start">
+                      <MapPin className="w-4 h-4 text-gray-500 mr-3 mt-0.5" />
+                      <span className="text-gray-700">{business.address}</span>
+                    </div>
+                  )
+                }
+              </div >
+            </div >
 
             {/* Location Map */}
-            {business.latitude && business.longitude && (
-              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <h3 className="text-lg font-semibold text-yp-dark mb-4">Location</h3>
-                <div className="rounded-lg overflow-hidden border border-gray-200 mb-3" style={{ height: '200px' }}>
-                  <UltraSimpleMap
-                    cityName={business.name}
-                    latitude={business.latitude}
-                    longitude={business.longitude}
-                  />
-                </div>
-                {business.address && (
-                  <p className="text-sm text-gray-600 flex items-start gap-2">
-                    <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    {business.address}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Business Hours */}
-            {business.hours_of_operation && (
-              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <h3 className="text-lg font-semibold text-yp-dark mb-4">Business Hours</h3>
-                <div className="space-y-2">
-                  {typeof business.hours_of_operation === 'string' ? (
-                    <p className="text-gray-700">{business.hours_of_operation}</p>
-                  ) : (
-                    Object.entries(business.hours_of_operation).map(([day, hours]) => (
-                      <div key={day} className="flex justify-between">
-                        <span className="font-medium text-gray-700">{day}</span>
-                        <span className="text-gray-600">{hours as string}</span>
-                      </div>
-                    ))
+            {
+              business.latitude && business.longitude && (
+                <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                  <h3 className="text-lg font-semibold text-yp-dark mb-4">Location</h3>
+                  <div className="rounded-lg overflow-hidden border border-gray-200 mb-3" style={{ height: '200px' }}>
+                    <UltraSimpleMap
+                      cityName={business.name}
+                      latitude={business.latitude}
+                      longitude={business.longitude}
+                    />
+                  </div>
+                  {business.address && (
+                    <p className="text-sm text-gray-600 flex items-start gap-2">
+                      <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      {business.address}
+                    </p>
                   )}
                 </div>
-              </div>
-            )}
+              )
+            }
+
+            {/* Business Hours */}
+            {
+              business.hours_of_operation && (
+                <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                  <h3 className="text-lg font-semibold text-yp-dark mb-4">Business Hours</h3>
+                  <div className="space-y-2">
+                    {typeof business.hours_of_operation === 'string' ? (
+                      <p className="text-gray-700">{business.hours_of_operation}</p>
+                    ) : (
+                      Object.entries(business.hours_of_operation).map(([day, hours]) => (
+                        <div key={day} className="flex justify-between">
+                          <span className="font-medium text-gray-700">{day}</span>
+                          <span className="text-gray-600">{hours as string}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )
+            }
 
             {/* Actions */}
             <div className="space-y-3">
@@ -485,11 +519,11 @@ export const BusinessDetailPage = () => {
                 </a>
               ) : null}
             </div>
-          </div>
-        </div>
-      </div>
+          </div >
+        </div >
+      </div >
       <BottomBannerAd />
       <Footer />
-    </div>
+    </div >
   );
 };

@@ -5,6 +5,7 @@ import { DancingBaraLogo } from '@/components/landing/DancingBaraLogo';
 import { RSSFeeds } from '@/components/landing/RSSFeeds';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
+import { SEO } from '@/components/SEO';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import {
   Globe,
@@ -137,7 +138,12 @@ export const LandingPageFinal = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      <SEO
+        title="Welcome"
+        description="Bara Afrika is your gateway to discovery across the continent. Find businesses, listen to music, track sports, and connect with communities."
+        keywords={['Africa', 'Discovery', 'Community', 'Business', 'Music', 'Sports']}
+      />
       <div className="relative z-20">
         <Header />
       </div>

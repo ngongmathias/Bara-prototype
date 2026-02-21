@@ -40,6 +40,7 @@ import { db } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { fetchWikipediaCountryInfo } from "@/lib/wikipedia";
+import { XPProgressBar } from "./gamification/XPProgressBar";
 import { scrollToTop } from "@/lib/scrollToTop";
 import { useCountrySelection } from "@/context/CountrySelectionContext";
 
@@ -358,6 +359,9 @@ export const Header = () => {
                       <p className="text-sm font-medium truncate">{user?.fullName || 'User'}</p>
                       <p className="text-xs text-gray-500 truncate">{user?.primaryEmailAddress?.emailAddress}</p>
                     </div>
+                  </div>
+                  <div className="px-4 py-2">
+                    <XPProgressBar />
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/users/dashboard')}>

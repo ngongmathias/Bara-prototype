@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { TopBannerAd } from '@/components/TopBannerAd';
 import { BottomBannerAd } from '@/components/BottomBannerAd';
+import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
@@ -279,8 +280,31 @@ export const ListingDetailPage = () => {
 
   const primaryImage = listing.images?.[currentImageIndex]?.image_url || listing.images?.[0]?.image_url;
 
+  const productSchema = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": listing.title,
+    "image": listing.images?.map((img: any) => img.image_url) || [],
+    "description": listing.description,
+    "offers": {
+      "@type": "Offer",
+      "url": window.location.href,
+      "priceCurrency": listing.currency,
+      "price": listing.price,
+      "availability": "https://schema.org/InStock",
+      "itemCondition": listing.condition === 'new' ? "https://schema.org/NewCondition" : "https://schema.org/UsedCondition"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 font-roboto">
+      <SEO
+        title={`${listing.title} | ${listing.category?.name}`}
+        description={listing.description?.substring(0, 160)}
+        image={primaryImage}
+        type="website"
+        schemaData={productSchema}
+      />
       <TopBannerAd />
       <Header />
 
