@@ -12,6 +12,7 @@ import { ContactFormConfirmationEmail } from "../_shared/emails/ContactFormConfi
 import { AchievementUnlockedEmail } from "../_shared/emails/AchievementUnlockedEmail.tsx";
 import { StreakWarningEmail } from "../_shared/emails/StreakWarningEmail.tsx";
 import { EventReminderEmail } from "../_shared/emails/EventReminderEmail.tsx";
+import { WeeklyDigestEmail } from "../_shared/emails/WeeklyDigestEmail.tsx";
 import React from "npm:react@18.2.0";
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -133,6 +134,9 @@ Deno.serve(async (req) => {
                     break;
                 case 'event_reminder':
                     html = await renderAsync(React.createElement(EventReminderEmail, templateData));
+                    break;
+                case 'weekly_digest':
+                    html = await renderAsync(React.createElement(WeeklyDigestEmail, templateData));
                     break;
                 case 'INSERT':
                 case 'UPDATE':

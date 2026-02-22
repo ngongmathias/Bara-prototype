@@ -166,10 +166,10 @@ There are **4 parallel workstreams**. Each maps to a detailed sub-plan document.
 | P0 | **Integrate payment** (Stripe or Paystack) for subscriptions + coin purchases | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 8, Problem 2 | ⏳ Placeholder — mailto fallback, needs Stripe/Paystack keys |
 | P1 | Add coin balance to Header for signed-in users | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 9, Touchpoint 1 | ✅ Done — yellow pill badge links to /store |
 | P1 | Add premium upsell card to user dashboard sidebar | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 9, Touchpoint 2 | ✅ Done — gradient card with "View Plans — from $5/mo" |
-| P1 | Add "Not enough coins? Buy more" fallback in marketplace boost | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 9, Touchpoint 3 | ⏳ Deferred to Phase 4 |
+| P1 | Add "Not enough coins? Buy more" fallback in marketplace boost | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 9, Touchpoint 3 | ✅ Done — link in PostListing.tsx |
 | P1 | Create unified pricing page (`/pricing`) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 11 | ✅ Done — Free/Pro/Elite, annual toggle, FAQ, coin CTA |
 | P2 | Restructure Advertise page as a hub with sub-pages | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 9, Touchpoint 6 | ⏳ Deferred |
-| P2 | Add event reminder emails (24h before) | C | `EMAIL_IMPLEMENTATION_PLAN.md` → Item 4.10 | ⏳ Deferred |
+| P2 | Add event reminder emails (24h before) | C | `EMAIL_IMPLEMENTATION_PLAN.md` → Item 4.10 | ✅ Done — `EventReminderEmail.tsx`, `queue_event_reminder()` SQL function, `events_needing_reminders` view |
 | P2 | Uncomment "Advertise With Us" in footer | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 11 | ✅ Done — also added Pricing + Coin Store links |
 
 <details>
@@ -193,7 +193,7 @@ There are **4 parallel workstreams**. Each maps to a detailed sub-plan document.
 | P1 | Add daily mission widget to user dashboard home | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 11 | ✅ Done — embedded in UserDashboardHome |
 | P1 | Add referral system + invite page (`/invite`) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Sections 10–11 | ✅ Done — referral link, email invite, milestones, FAQ |
 | P1 | Add cross-feature discovery widgets (events ↔ streams ↔ marketplace) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 10 | ✅ Done — DiscoverMore component on Events + Marketplace |
-| P1 | Create achievement unlocked + streak warning emails | C | `EMAIL_IMPLEMENTATION_PLAN.md` → Items 4.12–4.13 | ⏳ Deferred to Phase 5 |
+| P1 | Create achievement unlocked + streak warning emails | C | `EMAIL_IMPLEMENTATION_PLAN.md` → Items 4.12–4.13 | ✅ Done — `AchievementUnlockedEmail.tsx`, `StreakWarningEmail.tsx`, DB trigger + batch function |
 | P2 | Add daily spin wheel to dashboard | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 10 | ✅ Done — canvas wheel, probability-weighted, 1 spin/day |
 | P2 | Add sports prediction game (coin bets) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 10 | ⏳ Deferred to Phase 5 |
 | P2 | Add weekly leaderboard page (`/leaderboard`) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 11 | ✅ Done — XP/Coins/Streak tabs, prestige tiers |
