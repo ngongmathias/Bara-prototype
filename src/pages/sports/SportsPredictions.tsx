@@ -67,10 +67,12 @@ export default function SportsPredictions() {
   const [activeTab, setActiveTab] = useState<'predict' | 'my-bets' | 'leaderboard'>('predict');
   const [predictionLeaderboard, setPredictionLeaderboard] = useState<any[]>([]);
 
-  const { data: fixtures, isLoading } = useFixtures({
+  const { data: fixtures, isLoading, error: fixturesError } = useFixtures({
     date: selectedDate,
     enabled: true,
   });
+
+  const isApiSuspended = fixturesError?.message?.includes('SUSPENDED') || fixturesError?.message?.includes('suspended');
 
   // Fetch user's predictions
   useEffect(() => {
@@ -309,7 +311,18 @@ export default function SportsPredictions() {
                 ))}
               </div>
 
-              {isLoading ? (
+              {isApiSuspended || (fixturesError && !isLoading) ? (
+                <div className="text-center py-16 bg-white rounded-2xl border border-orange-200">
+                  <Zap className="w-12 h-12 text-orange-400 mx-auto mb-3" />
+                  <h3 className="font-bold text-gray-700 mb-2">Sports Data Temporarily Unavailable</h3>
+                  <p className="text-sm text-gray-500 max-w-md mx-auto mb-4">
+                    {isApiSuspended
+                      ? 'Our sports data provider account is being upgraded. Match predictions will be back shortly!'
+                      : 'Unable to load match data right now. Please try again later.'}
+                  </p>
+                  <p className="text-xs text-gray-400">You can still view your existing bets in the "My Bets" tab.</p>
+                </div>
+              ) : isLoading ? (
                 <div className="text-center py-16">
                   <Loader2 className="w-8 h-8 animate-spin mx-auto text-gray-400 mb-3" />
                   <p className="text-gray-500">Loading matches...</p>

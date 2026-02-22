@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/supabase';
+import { GamificationService } from '@/lib/gamificationService';
+import { useToast } from '@/hooks/use-toast';
 import {
     Trophy,
     Coins,
@@ -10,7 +14,10 @@ import {
     Activity,
     Award,
     ShieldAlert,
-    BarChart3
+    BarChart3,
+    Search,
+    Send,
+    Loader2
 } from 'lucide-react';
 import {
     BarChart,
@@ -26,6 +33,7 @@ import {
 } from 'recharts';
 
 const AdminGamification = () => {
+    const { toast } = useToast();
     const [stats, setStats] = useState({
         totalUsers: 0,
         totalCoins: 0,
@@ -33,6 +41,44 @@ const AdminGamification = () => {
         totalSpent: 0
     });
     const [loading, setLoading] = useState(true);
+
+    // God Mode: Grant Coins
+    const [grantUserId, setGrantUserId] = useState('');
+    const [grantAmount, setGrantAmount] = useState('');
+    const [grantReason, setGrantReason] = useState('Admin grant');
+    const [granting, setGranting] = useState(false);
+    const [userSearch, setUserSearch] = useState('');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [searching, setSearching] = useState(false);
+
+    const handleSearchUsers = async () => {
+        if (!userSearch.trim()) return;
+        setSearching(true);
+        const { data } = await supabase
+            .from('clerk_users')
+            .select('id, full_name, email')
+            .or(`full_name.ilike.%${userSearch}%,email.ilike.%${userSearch}%`)
+            .limit(10);
+        setSearchResults(data || []);
+        setSearching(false);
+    };
+
+    const handleGrantCoins = async () => {
+        if (!grantUserId || !grantAmount || Number(grantAmount) <= 0) {
+            toast({ title: 'Invalid input', description: 'Please select a user and enter a valid coin amount.', variant: 'destructive' });
+            return;
+        }
+        setGranting(true);
+        const success = await GamificationService.addCoins(grantUserId, Number(grantAmount), grantReason);
+        if (success) {
+            toast({ title: 'Coins Granted!', description: `${grantAmount} coins sent to ${grantUserId}` });
+            setGrantAmount('');
+            setGrantReason('Admin grant');
+        } else {
+            toast({ title: 'Failed', description: 'Could not grant coins. Check the user ID.', variant: 'destructive' });
+        }
+        setGranting(false);
+    };
 
     useEffect(() => {
         const fetchGlobals = async () => {
@@ -191,6 +237,109 @@ const AdminGamification = () => {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* God Mode: Grant Coins */}
+            <Card className="border-2 border-yellow-300 bg-yellow-50/30">
+                <CardHeader>
+                    <CardTitle className="text-lg font-black font-comfortaa flex items-center gap-2">
+                        <ShieldAlert className="w-5 h-5 text-yellow-600" />
+                        God Mode: Grant Coins
+                    </CardTitle>
+                    <CardDescription>Directly add Bara Coins to any user's wallet.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {/* User Search */}
+                    <div>
+                        <Label className="text-xs font-bold uppercase text-gray-500">Find User</Label>
+                        <div className="flex gap-2 mt-1">
+                            <Input
+                                placeholder="Search by name or email..."
+                                value={userSearch}
+                                onChange={(e) => setUserSearch(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSearchUsers()}
+                            />
+                            <Button onClick={handleSearchUsers} variant="outline" disabled={searching}>
+                                {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                            </Button>
+                        </div>
+                        {searchResults.length > 0 && (
+                            <div className="mt-2 border rounded-lg divide-y max-h-40 overflow-y-auto">
+                                {searchResults.map((u) => (
+                                    <button
+                                        key={u.id}
+                                        onClick={() => { setGrantUserId(u.id); setSearchResults([]); setUserSearch(u.full_name || u.email); }}
+                                        className={`w-full text-left px-3 py-2 hover:bg-yellow-50 text-sm ${grantUserId === u.id ? 'bg-yellow-100' : ''}`}
+                                    >
+                                        <span className="font-bold">{u.full_name || 'Unknown'}</span>
+                                        <span className="text-gray-400 ml-2 text-xs">{u.email}</span>
+                                        <span className="text-gray-300 ml-2 text-[10px] font-mono">{u.id.slice(0, 15)}...</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Or paste User ID directly */}
+                    <div>
+                        <Label className="text-xs font-bold uppercase text-gray-500">User ID (Clerk)</Label>
+                        <Input
+                            placeholder="user_xxxxx or select from search above"
+                            value={grantUserId}
+                            onChange={(e) => setGrantUserId(e.target.value)}
+                            className="mt-1 font-mono text-sm"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label className="text-xs font-bold uppercase text-gray-500">Coins to Grant</Label>
+                            <Input
+                                type="number"
+                                placeholder="100"
+                                value={grantAmount}
+                                onChange={(e) => setGrantAmount(e.target.value)}
+                                className="mt-1"
+                            />
+                        </div>
+                        <div>
+                            <Label className="text-xs font-bold uppercase text-gray-500">Reason</Label>
+                            <Input
+                                placeholder="Admin grant"
+                                value={grantReason}
+                                onChange={(e) => setGrantReason(e.target.value)}
+                                className="mt-1"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Quick amounts */}
+                    <div className="flex gap-2 flex-wrap">
+                        {[50, 100, 250, 500, 1000, 5000].map((amt) => (
+                            <Button
+                                key={amt}
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setGrantAmount(String(amt))}
+                                className={`text-xs font-bold ${grantAmount === String(amt) ? 'bg-yellow-100 border-yellow-400' : ''}`}
+                            >
+                                {amt} coins
+                            </Button>
+                        ))}
+                    </div>
+
+                    <Button
+                        onClick={handleGrantCoins}
+                        disabled={granting || !grantUserId || !grantAmount}
+                        className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-5"
+                    >
+                        {granting ? (
+                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Granting...</>
+                        ) : (
+                            <><Send className="w-4 h-4 mr-2" /> Grant {grantAmount || '0'} Coins</>
+                        )}
+                    </Button>
+                </CardContent>
+            </Card>
 
             {/* Achievement Activity */}
             <Card>

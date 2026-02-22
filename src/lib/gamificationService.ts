@@ -88,6 +88,31 @@ export class GamificationService {
             .eq('user_id', userId)
             .single();
 
+        if (error && error.code === 'PGRST116') {
+            // No profile found — auto-create one for this Clerk user
+            const { data: newProfile, error: insertError } = await supabase
+                .from('gamification_profiles')
+                .insert({
+                    user_id: userId,
+                    total_xp: 0,
+                    current_level: 1,
+                    bara_coins: 50,
+                    daily_streak: 0,
+                    consecutive_days: 0,
+                    multiplier: 1.0,
+                    trust_rank: 1.0,
+                    last_activity_at: new Date().toISOString(),
+                })
+                .select()
+                .single();
+
+            if (insertError) {
+                console.error('Error creating gamification profile:', insertError);
+                return null;
+            }
+            return newProfile;
+        }
+
         if (error) {
             console.error('Error fetching gamification profile:', error);
             return null;
