@@ -65,6 +65,14 @@ const AdminGamification = () => {
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [searching, setSearching] = useState(false);
 
+    // Edit Balance
+    const [editingProfile, setEditingProfile] = useState<any>(null);
+    const [editCoins, setEditCoins] = useState(0);
+    const [editXP, setEditXP] = useState(0);
+    const [editLevel, setEditLevel] = useState(1);
+    const [editStreak, setEditStreak] = useState(0);
+    const [saving, setSaving] = useState(false);
+
     // Missions
     const [missions, setMissions] = useState<any[]>([]);
     const [newMission, setNewMission] = useState({ key: '', title: '', description: '', goal: 1, xp_reward: 0, coin_reward: 0, type: 'daily', category: 'general' });
@@ -172,6 +180,49 @@ const AdminGamification = () => {
         await GamificationService.addXP(userId, amount, 'Admin XP boost');
         toast({ title: 'XP Added', description: `${amount} XP granted.` });
         fetchProfiles();
+    };
+
+    const openEditBalance = (profile: any) => {
+        setEditingProfile(profile);
+        setEditCoins(profile.bara_coins || 0);
+        setEditXP(profile.total_xp || 0);
+        setEditLevel(profile.current_level || 1);
+        setEditStreak(profile.daily_streak || 0);
+    };
+
+    const handleSetBalance = async () => {
+        if (!editingProfile) return;
+        setSaving(true);
+        try {
+            const { error } = await supabase
+                .from('gamification_profiles')
+                .update({
+                    bara_coins: editCoins,
+                    total_xp: editXP,
+                    current_level: editLevel,
+                    daily_streak: editStreak,
+                    consecutive_days: editStreak,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('user_id', editingProfile.user_id);
+            if (error) throw error;
+
+            await supabase.from('gamification_history').insert({
+                user_id: editingProfile.user_id,
+                type: 'admin_adjustment',
+                amount: editCoins - (editingProfile.bara_coins || 0),
+                reason: `Admin set balance: ${editCoins} coins, ${editXP} XP, Lv.${editLevel}`
+            });
+
+            toast({ title: 'Balance Updated', description: `${editingProfile.user_name}'s profile updated.` });
+            setEditingProfile(null);
+            fetchStats();
+            fetchProfiles();
+        } catch (err: any) {
+            toast({ title: 'Error', description: err.message || 'Failed to update balance.', variant: 'destructive' });
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleCreateMission = async () => {
@@ -392,6 +443,9 @@ const AdminGamification = () => {
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex gap-1">
+                                                        <Button size="sm" variant="outline" className="text-xs h-7 px-2" onClick={() => openEditBalance(p)}>
+                                                            <Star className="w-3 h-3 mr-1" /> Edit
+                                                        </Button>
                                                         <Button size="sm" variant="outline" className="text-xs h-7 px-2" onClick={() => { setGrantUserId(p.user_id); setActiveTab('grant'); }}>
                                                             <Coins className="w-3 h-3 mr-1" /> Give
                                                         </Button>
@@ -408,6 +462,47 @@ const AdminGamification = () => {
                             {filteredProfiles.length === 0 && <p className="text-center text-gray-400 py-8">No profiles found. Users get profiles automatically on first visit.</p>}
                         </CardContent>
                     </Card>
+
+                    {/* Edit Balance Dialog */}
+                    {editingProfile && (
+                        <Card className="border-2 border-blue-300 bg-blue-50/30">
+                            <CardHeader>
+                                <CardTitle className="text-sm font-black flex items-center gap-2">
+                                    <Star className="w-4 h-4 text-blue-600" /> Edit Balance: {editingProfile.user_name}
+                                </CardTitle>
+                                <CardDescription className="font-mono text-xs">{editingProfile.user_id}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div>
+                                        <Label className="text-xs font-bold">Bara Coins</Label>
+                                        <Input type="number" value={editCoins} onChange={e => setEditCoins(Number(e.target.value))} className="mt-1" />
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs font-bold">Total XP</Label>
+                                        <Input type="number" value={editXP} onChange={e => setEditXP(Number(e.target.value))} className="mt-1" />
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs font-bold">Level</Label>
+                                        <Input type="number" value={editLevel} onChange={e => setEditLevel(Number(e.target.value))} className="mt-1" />
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs font-bold">Daily Streak</Label>
+                                        <Input type="number" value={editStreak} onChange={e => setEditStreak(Number(e.target.value))} className="mt-1" />
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button onClick={handleSetBalance} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white font-bold">
+                                        {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : <><CheckCircle className="w-4 h-4 mr-2" /> Save Changes</>}
+                                    </Button>
+                                    <Button onClick={() => setEditingProfile(null)} variant="outline">Cancel</Button>
+                                    <Button onClick={() => { setEditCoins(50); setEditXP(0); setEditLevel(1); setEditStreak(0); }} variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                                        Reset to Default
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
                 </TabsContent>
 
                 {/* ===== GRANT COINS TAB ===== */}
