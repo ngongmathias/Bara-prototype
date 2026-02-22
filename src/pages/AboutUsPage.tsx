@@ -7,13 +7,13 @@ import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
-import { 
-  Building, 
-  Target, 
-  Users, 
-  Globe, 
-  Phone, 
-  Mail, 
+import {
+  Building,
+  Target,
+  Users,
+  Globe,
+  Phone,
+  Mail,
   MapPin,
   CheckCircle,
   Star,
@@ -93,9 +93,9 @@ const AboutUsPage = () => {
               </div>
               <div className="relative">
                 <div className="w-full h-80 rounded-2xl overflow-hidden">
-                  <img 
-                    src="/aboutBara.jpg" 
-                    alt="About BARA" 
+                  <img
+                    src="/aboutBara.jpg"
+                    alt="About BARA"
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -105,24 +105,24 @@ const AboutUsPage = () => {
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 bg-white">
+        <section className="py-20 bg-gray-50 mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-              <div className="space-y-4">
-                <div className="text-4xl font-bold text-black">100K+</div>
-                <p className="text-gray-600 font-roboto">{t('about.stats.users')}</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+              <div className="space-y-2">
+                <div className="text-5xl font-black text-black tracking-tighter">100K+</div>
+                <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">{t('about.stats.users')}</p>
               </div>
-              <div className="space-y-4">
-                <div className="text-4xl font-bold text-black">5K+</div>
-                <p className="text-gray-600 font-roboto">{t('about.stats.businesses')}</p>
+              <div className="space-y-2">
+                <div className="text-5xl font-black text-black tracking-tighter">5K+</div>
+                <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">{t('about.stats.businesses')}</p>
               </div>
-              <div className="space-y-4">
-                <div className="text-4xl font-bold text-black">50+</div>
-                <p className="text-gray-600 font-roboto">{t('about.stats.cities')}</p>
+              <div className="space-y-2">
+                <div className="text-5xl font-black text-black tracking-tighter">50+</div>
+                <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">{t('about.stats.cities')}</p>
               </div>
-              <div className="space-y-4">
-                <div className="text-4xl font-bold text-black">98%</div>
-                <p className="text-gray-600 font-roboto">{t('about.stats.satisfaction')}</p>
+              <div className="space-y-2">
+                <div className="text-5xl font-black text-black tracking-tighter">98%</div>
+                <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">{t('about.stats.satisfaction')}</p>
               </div>
             </div>
           </div>
@@ -282,7 +282,7 @@ const AboutUsPage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto transition-transform hover:scale-110">
                   <Phone className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold font-comfortaa">{t('about.contact.phone.title')}</h3>
@@ -291,7 +291,7 @@ const AboutUsPage = () => {
               </div>
 
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto transition-transform hover:scale-110">
                   <Mail className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold font-comfortaa">{t('about.contact.email.title')}</h3>
@@ -300,7 +300,7 @@ const AboutUsPage = () => {
               </div>
 
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-brand-blue rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto transition-transform hover:scale-110">
                   <MapPin className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold font-comfortaa">{t('about.contact.location.title')}</h3>

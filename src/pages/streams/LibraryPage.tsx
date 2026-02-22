@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
+import { CreatePlaylistModal } from '@/components/streams/CreatePlaylistModal';
 
 interface LibraryItem {
     id: string;
@@ -19,55 +20,60 @@ export default function LibraryPage() {
     const [items, setItems] = useState<LibraryItem[]>([]);
     const [filter, setFilter] = useState<'all' | 'playlists' | 'artists'>('all');
     const [loading, setLoading] = useState(true);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+    const fetchLibrary = async () => {
+        setLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                setLoading(false);
+                return;
+            }
+
+            // Fetch Liked Playlists
+            const { data: playlistsData } = await supabase
+                .from('user_playlist_likes')
+                .select('*, playlists(*, artists(name))')
+                .eq('user_id', user.id);
+
+            // Fetch Followed Artists
+            const { data: artistsData } = await supabase
+                .from('user_artist_follows')
+                .select('*, artists(*)')
+                .eq('user_id', user.id);
+
+            const formattedPlaylists: LibraryItem[] = (playlistsData || []).map(p => ({
+                id: p.playlists.id,
+                type: 'playlist',
+                title: p.playlists.title,
+                subtitle: `Playlist • ${p.playlists.artists?.name || 'Various Artists'}`,
+                image_url: p.playlists.cover_url || '/placeholder-playlist.png'
+            }));
+
+            const formattedArtists: LibraryItem[] = (artistsData || []).map(a => ({
+                id: a.artists.id,
+                type: 'artist',
+                title: a.artists.name,
+                subtitle: 'Artist',
+                image_url: a.artists.image_url || '/placeholder-artist.png'
+            }));
+
+            setItems([...formattedPlaylists, ...formattedArtists]);
+        } catch (err) {
+            console.error('Error fetching library:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchLibrary = async () => {
-            setLoading(true);
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                    setLoading(false);
-                    return;
-                }
-
-                // Fetch Liked Playlists
-                const { data: playlistsData } = await supabase
-                    .from('user_playlist_likes')
-                    .select('*, playlists(*, artists(name))')
-                    .eq('user_id', user.id);
-
-                // Fetch Followed Artists
-                const { data: artistsData } = await supabase
-                    .from('user_artist_follows')
-                    .select('*, artists(*)')
-                    .eq('user_id', user.id);
-
-                const formattedPlaylists: LibraryItem[] = (playlistsData || []).map(p => ({
-                    id: p.playlists.id,
-                    type: 'playlist',
-                    title: p.playlists.title,
-                    subtitle: `Playlist • ${p.playlists.artists?.name || 'Various Artists'}`,
-                    image_url: p.playlists.cover_url || '/placeholder-playlist.png'
-                }));
-
-                const formattedArtists: LibraryItem[] = (artistsData || []).map(a => ({
-                    id: a.artists.id,
-                    type: 'artist',
-                    title: a.artists.name,
-                    subtitle: 'Artist',
-                    image_url: a.artists.image_url || '/placeholder-artist.png'
-                }));
-
-                setItems([...formattedPlaylists, ...formattedArtists]);
-            } catch (err) {
-                console.error('Error fetching library:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchLibrary();
     }, []);
+
+    const handleCreateSuccess = () => {
+        fetchLibrary();
+    };
 
     const filteredItems = items.filter(item => {
         if (filter === 'all') return true;
@@ -86,10 +92,19 @@ export default function LibraryPage() {
                             <FilterPill label="Playlists" active={filter === 'playlists'} onClick={() => setFilter(filter === 'playlists' ? 'all' : 'playlists')} />
                             <FilterPill label="Artists" active={filter === 'artists'} onClick={() => setFilter(filter === 'artists' ? 'all' : 'artists')} />
                         </div>
-                        <Button className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors">
+                        <Button
+                            onClick={() => setIsCreateModalOpen(true)}
+                            className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+                        >
                             <Plus size={24} />
                         </Button>
                     </div>
+
+                    <CreatePlaylistModal
+                        isOpen={isCreateModalOpen}
+                        onClose={() => setIsCreateModalOpen(false)}
+                        onSuccess={handleCreateSuccess}
+                    />
 
                     <h1 className="text-3xl font-black text-white mb-8 tracking-tighter">Your Library</h1>
 

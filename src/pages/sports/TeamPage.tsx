@@ -4,6 +4,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
 import { SportsSubNav } from '../../components/sports/SportsSubNav';
 import { useTeam, useTeamStatistics, useTeamFixtures } from '../../hooks/useTeamData';
+import { SEO } from '@/components/SEO';
 import { ChevronRight, Calendar, MapPin, Users, BarChart3, Clock, Trophy, Heart } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useUser } from '@clerk/clerk-react';
@@ -93,8 +94,28 @@ export default function TeamPage() {
     const nextMatch = fixtures?.find(f => new Date(f.fixture.date) > new Date());
     const pastMatches = fixtures?.filter(f => new Date(f.fixture.date) <= new Date()).reverse().slice(0, 5);
 
+    const teamSchema = {
+        "@context": "https://schema.org",
+        "@type": "SportsTeam",
+        "name": team.name,
+        "logo": team.logo,
+        "sport": "Soccer",
+        "location": {
+            "@type": "Place",
+            "name": team.venue.name,
+            "address": team.venue.city
+        }
+    };
+
     return (
         <MainLayout>
+            <SEO
+                title={`${team.name} - News, Stats & Fixtures`}
+                description={`Stay updated with ${team.name} scores, upcoming matches, squad details, and performance statistics on Bara Afrika Sports.`}
+                image={team.logo}
+                type="website"
+                schemaData={teamSchema}
+            />
             <div className="min-h-screen bg-gray-50">
                 <SportsTopBanner />
                 <SportsSubNav />
@@ -132,8 +153,8 @@ export default function TeamPage() {
                                     onClick={toggleFollow}
                                     disabled={followLoading || !isSignedIn}
                                     className={`mt-4 flex items-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 ${isFollowing
-                                            ? 'bg-white text-black hover:bg-gray-200'
-                                            : 'bg-red-600 text-white hover:bg-red-700'
+                                        ? 'bg-white text-black hover:bg-gray-200'
+                                        : 'bg-red-600 text-white hover:bg-red-700'
                                         } ${!isSignedIn ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <Heart size={16} className={isFollowing ? 'fill-red-500 text-red-500' : ''} />

@@ -22,7 +22,8 @@ import {
   ShoppingBag,
   Plus,
   Heart,
-  Ticket
+  Ticket,
+  BarChart
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -158,6 +159,16 @@ export const UserDashboard = () => {
                     >
                       <Image className="mr-3 h-4 w-4" />
                       Banner Submissions
+                    </Button>
+                  </Link>
+
+                  <Link to="/users/dashboard/analytics">
+                    <Button
+                      variant={isActive('/users/dashboard/analytics') ? 'default' : 'ghost'}
+                      className="w-full justify-start"
+                    >
+                      <BarChart className="mr-3 h-4 w-4" />
+                      View Analytics
                     </Button>
                   </Link>
 
@@ -315,12 +326,12 @@ export const UserDashboardHome = () => {
               </Button>
             </Link>
 
-            <Link to="/user/profile">
+            <Link to="/users/dashboard/analytics">
               <Button variant="outline" className="w-full h-16 text-left justify-start">
-                <Settings className="mr-3 h-6 w-6" />
+                <BarChart className="mr-3 h-6 w-6" />
                 <div>
-                  <div className="font-medium">Update Profile</div>
-                  <div className="text-sm opacity-75">Manage account settings</div>
+                  <div className="font-medium">View Detailed Analytics</div>
+                  <div className="text-sm opacity-75">Check content engagement metrics</div>
                 </div>
               </Button>
             </Link>

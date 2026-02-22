@@ -117,7 +117,7 @@ const AdvertisePage = () => {
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="text-center">
                   <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Star className="w-8 h-8 text-yellow-400" />
+                    <Star className="w-8 h-8 text-blue-500" />
                   </div>
                   <CardTitle className="text-xl font-comfortaa">{t('advertise.services.premium.title')}</CardTitle>
                   <CardDescription className="font-roboto">{t('advertise.services.premium.description')}</CardDescription>
@@ -211,14 +211,14 @@ const AdvertisePage = () => {
         {/* CTA Section — FULLY FUNCTIONAL BUTTONS */}
         <section className="py-20 bg-black text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 font-comfortaa text-yellow-400">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 font-comfortaa text-blue-400">
               {t('advertise.cta.title')}
             </h2>
             <p className="text-xl mb-10 max-w-3xl mx-auto font-roboto text-gray-300">
               {t('advertise.cta.description')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="font-roboto bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-8" asChild>
+              <Button size="lg" className="font-roboto bg-blue-600 hover:bg-blue-700 text-white font-bold px-8" asChild>
                 <Link to="/advertise/checkout">🚀 Start Advertising Today</Link>
               </Button>
               <Button

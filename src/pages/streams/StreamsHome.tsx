@@ -3,10 +3,13 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { Loader2, Play, Pause, Clock } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
+import { SEO } from '@/components/SEO';
 
 export default function StreamsHome() {
-    const { play, currentSong, isPlaying } = useAudioPlayer();
+    const { toast } = useToast();
+    const { play, currentSong, isPlaying, playAlbum } = useAudioPlayer();
     const [trendingSongs, setTrendingSongs] = useState<Song[]>([]);
     const [popularArtists, setPopularArtists] = useState<any[]>([]);
     const [newReleases, setNewReleases] = useState<any[]>([]);
@@ -107,8 +110,64 @@ export default function StreamsHome() {
         play(song);
     };
 
+    const handlePlayArtist = async (artistId: string) => {
+        try {
+            const { data: songsData } = await supabase
+                .from('songs')
+                .select('*, artists(name)')
+                .eq('artist_id', artistId)
+                .order('plays', { ascending: false })
+                .limit(1);
+
+            if (songsData && songsData.length > 0) {
+                const song = songsData[0];
+                play({
+                    id: song.id,
+                    title: song.title,
+                    artist: song.artists?.name || 'Unknown Artist',
+                    file_url: song.file_url,
+                    cover_url: song.cover_url || '/placeholder-music.png',
+                    duration: song.duration,
+                });
+            }
+        } catch (error) {
+            console.error('Error playing artist top song:', error);
+        }
+    };
+
+    const handlePlayAlbum = async (albumId: string) => {
+        try {
+            const { data: songsData } = await supabase
+                .from('songs')
+                .select('*, artists(name)')
+                .eq('album_id', albumId)
+                .order('track_number', { ascending: true });
+
+            if (songsData && songsData.length > 0) {
+                const songs: Song[] = songsData.map(song => ({
+                    id: song.id,
+                    title: song.title,
+                    artist: song.artists?.name || 'Unknown Artist',
+                    file_url: song.file_url,
+                    cover_url: song.cover_url || '/placeholder-music.png',
+                    duration: song.duration,
+                }));
+                // Using playAlbum from context if available, otherwise just play first song
+                // Based on AudioPlayerContext, playAlbum exists
+                playAlbum(songs, 0);
+            }
+        } catch (error) {
+            console.error('Error playing album:', error);
+        }
+    };
+
     return (
         <StreamsLayout>
+            <SEO
+                title="Music Streams"
+                description="Listen to the latest trending African music, explore popular artists, and discover new releases on Bara Afrika Streams."
+                keywords={['African Music', 'Music Streaming', 'Bara Streams', 'Afrobeats', 'Highlife']}
+            />
             <div className="min-h-screen pb-24">
                 {/* Main Content */}
                 <main className="p-4 sm:p-8 max-w-[1400px] mx-auto">
@@ -159,7 +218,15 @@ export default function StreamsHome() {
                                                 alt={mix.title}
                                                 className="w-full h-full object-cover rounded-md shadow-xl"
                                             />
-                                            <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
+                                            <button
+                                                onClick={() => {
+                                                    toast({
+                                                        title: 'Coming Soon',
+                                                        description: 'Personalized mixes are still in development.',
+                                                    });
+                                                }}
+                                                className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                            >
                                                 <Play size={24} fill="black" className="ml-1" />
                                             </button>
                                         </div>
@@ -241,7 +308,10 @@ export default function StreamsHome() {
                                                         className="w-full h-full object-cover rounded-full shadow-lg"
                                                         onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop'; }}
                                                     />
-                                                    <button className="absolute bottom-6 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
+                                                    <button
+                                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePlayArtist(artist.id); }}
+                                                        className="absolute bottom-6 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                                    >
                                                         <Play size={24} fill="black" className="ml-1" />
                                                     </button>
                                                 </div>
@@ -267,7 +337,10 @@ export default function StreamsHome() {
                                                     className="w-full h-full object-cover rounded-md shadow-lg"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&h=300&fit=crop'; }}
                                                 />
-                                                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handlePlayAlbum(album.id); }}
+                                                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                                >
                                                     <Play size={24} fill="black" className="ml-1" />
                                                 </button>
                                             </div>

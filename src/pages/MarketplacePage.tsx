@@ -6,6 +6,7 @@ import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SEO } from '@/components/SEO';
 import {
   Search,
   Car,
@@ -217,6 +218,11 @@ const MarketplacePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-roboto">
+      <SEO
+        title="Marketplace"
+        description="Buy and sell cars, properties, phones, and more on Bara Afrika. Your trusted local marketplace."
+        keywords={['Marketplace', 'Buy and Sell', 'Africa Classifieds', 'Cars for Sale', 'Real Estate Africa']}
+      />
       <Header />
       <TopBannerAd />
 

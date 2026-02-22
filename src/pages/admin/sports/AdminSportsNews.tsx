@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/lib/supabase";
-import { Loader2, Trash2, Plus } from "lucide-react";
+import { Loader2, Trash2, Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminSportsNews() {
@@ -16,6 +16,8 @@ export default function AdminSportsNews() {
     const [category, setCategory] = useState("General");
     const [author, setAuthor] = useState("Bara Sports");
     const [submitting, setSubmitting] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filterCategory, setFilterCategory] = useState("All");
 
     useEffect(() => {
         fetchNews();
@@ -36,6 +38,12 @@ export default function AdminSportsNews() {
         }
         setLoading(false);
     };
+
+    const filteredNews = news.filter(item => {
+        const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = filterCategory === "All" || item.category === filterCategory;
+        return matchesSearch && matchesCategory;
+    });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -123,16 +131,41 @@ export default function AdminSportsNews() {
                 {/* List */}
                 <Card className="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle>Recent News</CardTitle>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <CardTitle>Recent News</CardTitle>
+                            <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                                <div className="relative">
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                                    <Input
+                                        placeholder="Search news..."
+                                        className="pl-9 w-full md:w-64"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <select
+                                    value={filterCategory}
+                                    onChange={(e) => setFilterCategory(e.target.value)}
+                                    className="p-2 border rounded-md bg-transparent text-sm"
+                                >
+                                    <option value="All">All Categories</option>
+                                    <option value="General">General</option>
+                                    <option value="PSL">PSL</option>
+                                    <option value="EPL">EPL</option>
+                                    <option value="UCL">UCL</option>
+                                    <option value="Transfers">Transfers</option>
+                                </select>
+                            </div>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         {loading ? (
                             <div className="flex justify-center p-4"><Loader2 className="animate-spin" /></div>
-                        ) : news.length === 0 ? (
-                            <p className="text-gray-500 text-center py-4">No news articles yet.</p>
+                        ) : filteredNews.length === 0 ? (
+                            <p className="text-gray-500 text-center py-4">No news articles found.</p>
                         ) : (
                             <div className="space-y-4">
-                                {news.map((item) => (
+                                {filteredNews.map((item) => (
                                     <div key={item.id} className="flex items-start justify-between p-4 border rounded-lg hover:bg-gray-50">
                                         <div>
                                             <h3 className="font-semibold">{item.title}</h3>

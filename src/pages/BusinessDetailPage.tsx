@@ -125,8 +125,8 @@ export const BusinessDetailPage = () => {
     "description": business.description || "",
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": city,
-      "addressCountry": business.country
+      "addressLocality": cityName,
+      "addressCountry": business.country?.name || ""
     },
     "telephone": business.phone || "",
     "url": business.website || "",

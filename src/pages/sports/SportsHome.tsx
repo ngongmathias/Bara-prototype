@@ -7,6 +7,7 @@ import { Play, Calendar, User, ChevronRight, Trophy } from 'lucide-react';
 import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
 import { SportsSubNav } from '../../components/sports/SportsSubNav';
 import { SPORTS_CONFIG } from '@/config/sportsConfig';
+import { SEO } from '@/components/SEO';
 
 export default function SportsHome() {
     const { sport: sportSlug } = useParams();
@@ -14,6 +15,11 @@ export default function SportsHome() {
 
     return (
         <MainLayout>
+            <SEO
+                title={`${activeSport.name} Scores & News`}
+                description={`Get the latest ${activeSport.name} live scores, match schedules, standings, and top stories on Bara Afrika Sports.`}
+                keywords={[activeSport.name, 'Live Scores', 'Sports News', 'League Table', 'Match Schedule']}
+            />
             <div className="min-h-screen bg-gray-100 font-sans text-left">
                 {/* High-Fidelity ESPN Ticker */}
                 <SportsTopBanner />

@@ -2,6 +2,8 @@ import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { QueueDrawer } from './QueueDrawer';
+import { FullScreenPlayer } from './FullScreenPlayer';
+import { Maximize2 } from 'lucide-react';
 
 export function GlobalPlayer() {
     const {
@@ -24,6 +26,7 @@ export function GlobalPlayer() {
     } = useAudioPlayer();
 
     const [isQueueOpen, setIsQueueOpen] = useState(false);
+    const [isFullScreen, setIsFullScreen] = useState(false);
 
     if (!currentSong) return null;
 
@@ -45,8 +48,9 @@ export function GlobalPlayer() {
                         <img
                             src={currentSong.cover_url}
                             alt={currentSong.title}
-                            className="w-14 h-14 rounded shadow-lg object-cover bg-gray-800 transition-transform group-hover:scale-105"
+                            className="w-14 h-14 rounded shadow-lg object-cover bg-gray-800 transition-transform group-hover:scale-105 cursor-pointer"
                             onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}
+                            onClick={() => setIsFullScreen(true)}
                         />
                         {isPlaying && (
                             <div className="absolute inset-0 flex items-center justify-center gap-[2px] bg-black/20 rounded">
@@ -56,9 +60,14 @@ export function GlobalPlayer() {
                             </div>
                         )}
                     </div>
-                    <div className="min-w-0 mr-4">
-                        <div className="font-bold truncate text-white hover:underline cursor-pointer tracking-tight">{currentSong.title}</div>
-                        <div className="text-xs text-gray-400 truncate hover:text-white cursor-pointer transition-colors font-medium">
+                    <div
+                        className="min-w-0 mr-4 cursor-pointer group"
+                        onClick={() => setIsFullScreen(true)}
+                    >
+                        <div className="font-bold truncate text-white hover:underline tracking-tight transition-colors group-hover:text-[#1DB954]">
+                            {currentSong.title}
+                        </div>
+                        <div className="text-xs text-gray-400 truncate hover:text-white transition-colors font-medium">
                             {currentSong.artist}
                         </div>
                     </div>
@@ -135,6 +144,13 @@ export function GlobalPlayer() {
                         <List size={20} />
                     </button>
                     <button
+                        onClick={() => setIsFullScreen(true)}
+                        className="text-gray-400 hover:text-white transition-colors"
+                        title="Full Screen"
+                    >
+                        <Maximize2 size={18} />
+                    </button>
+                    <button
                         onClick={async () => {
                             const shareUrl = `${window.location.origin}/streams/song/${currentSong.id}`;
                             const shareData = { title: currentSong.title, text: `Listen to ${currentSong.title} by ${currentSong.artist} on Bara Streams`, url: shareUrl };
@@ -171,6 +187,8 @@ export function GlobalPlayer() {
 
             {/* Logic for QueueDrawer would be triggered by isQueueOpen */}
             <QueueDrawer isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} />
+
+            <FullScreenPlayer isOpen={isFullScreen} onClose={() => setIsFullScreen(false)} />
         </div>
     );
 }

@@ -6,6 +6,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
 import { SportsSubNav } from '../../components/sports/SportsSubNav';
 import { SponsorshipBanner } from '../../components/sports/SponsorshipBanner';
+import { SEO } from '@/components/SEO';
 
 export default function MatchCenter() {
     const { id } = useParams();
@@ -71,8 +72,38 @@ export default function MatchCenter() {
         awayScore = match.goals?.away ?? match.scores?.away?.total ?? 0;
     }
 
+    const matchSchema = {
+        "@context": "https://schema.org",
+        "@type": "SportsEvent",
+        "name": `${match.teams.home.name} vs ${match.teams.away.name}`,
+        "homeTeam": {
+            "@type": "SportsTeam",
+            "name": match.teams.home.name,
+            "logo": match.teams.home.logo
+        },
+        "awayTeam": {
+            "@type": "SportsTeam",
+            "name": match.teams.away.name,
+            "logo": match.teams.away.logo
+        },
+        "startDate": match.fixture.date,
+        "location": {
+            "@type": "Place",
+            "name": match.fixture.venue.name || "TBD",
+            "address": match.fixture.venue.city || ""
+        },
+        "eventStatus": match.fixture.status.short === 'FT' ? "https://schema.org/EventPostponed" : "https://schema.org/EventScheduled"
+    };
+
     return (
         <MainLayout>
+            <SEO
+                title={`${match.teams.home.name} ${homeScore} - ${awayScore} ${match.teams.away.name} | ${match.league.name}`}
+                description={`Live scores, stats, and lineups for ${match.teams.home.name} vs ${match.teams.away.name} in the ${match.league.name}. Catch the action on Bara Afrika Sports.`}
+                image={match.teams.home.logo}
+                type="website"
+                schemaData={matchSchema}
+            />
             <div className="min-h-screen bg-gray-50">
                 <SportsTopBanner />
                 <SportsSubNav />

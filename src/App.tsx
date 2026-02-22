@@ -124,6 +124,7 @@ import PodcastsPage from "./pages/streams/PodcastsPage";
 import SearchPage from "./pages/SearchPage";
 import TestSportsApi from "./pages/TestSportsApi";
 import { UserTicketsPage } from "./pages/users/UserTicketsPage";
+import { UserAnalytics } from "./pages/users/UserAnalytics";
 import { OrganizerRegistrationsPage } from "./pages/users/OrganizerRegistrationsPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
@@ -293,6 +294,7 @@ const AppRoutes = () => {
             <Route path="events" element={<UserEventsPage />} />
             <Route path="events/:eventId/registrations" element={<OrganizerRegistrationsPage />} />
             <Route path="tickets" element={<UserTicketsPage />} />
+            <Route path="analytics" element={<UserAnalytics />} />
             <Route path="banner-submissions" element={<UserBannerSubmission />} />
             <Route path="profile" element={<UserProfilePage />} />
           </Route>
@@ -301,6 +303,13 @@ const AppRoutes = () => {
 
         <Route path="/tools" element={<ToolsPage />} />
         <Route path="/about" element={<AboutUsPage />} />
+        <Route path="/listings" element={<ListingsPage />} />
+        <Route path="/contact-us" element={<ContactUsPage />} />
+        <Route path="/faq" element={<FaqPage />} />
+        <Route path="/ask-question" element={<AskQuestionPage />} />
+        <Route path="/claim-listing" element={<ClaimListingPage />} />
+        <Route path="/terms" element={<TermsOfServicePage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
 
         {/* Advertise Routes */}
         <Route path="/advertise" element={<AdvertisePage />} />
@@ -391,11 +400,3 @@ const App = () => (
 );
 
 export default App;
-
-
-
-
-
-
-
-

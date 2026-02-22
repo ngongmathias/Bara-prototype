@@ -12,8 +12,10 @@ import {
   XCircle,
   Loader2,
   Globe,
-  Calendar
+  Calendar,
+  Search
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 export const AdminRSSFeeds = () => {
   const { toast } = useToast();
@@ -22,6 +24,8 @@ export const AdminRSSFeeds = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({ totalSources: 0, totalFeeds: 0, activeSources: 0 });
+  const [sourceSearch, setSourceSearch] = useState('');
+  const [articleSearch, setArticleSearch] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -135,6 +139,17 @@ export const AdminRSSFeeds = () => {
     return new Date(dateString).toLocaleString();
   };
 
+  const filteredSources = sources.filter(source =>
+    source.name.toLowerCase().includes(sourceSearch.toLowerCase()) ||
+    (source.country_name && source.country_name.toLowerCase().includes(sourceSearch.toLowerCase()))
+  );
+
+  const filteredFeeds = feeds.filter(feed =>
+    feed.title.toLowerCase().includes(articleSearch.toLowerCase()) ||
+    feed.source.toLowerCase().includes(articleSearch.toLowerCase()) ||
+    (feed.description && feed.description.toLowerCase().includes(articleSearch.toLowerCase()))
+  );
+
   return (
     <AdminLayout title="RSS Feeds Management" subtitle="Manage news sources and feeds">
       <div className="space-y-6">
@@ -211,10 +226,23 @@ export const AdminRSSFeeds = () => {
         {/* RSS Sources */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-comfortaa">RSS Feed Sources</CardTitle>
-            <CardDescription className="font-roboto">
-              Manage news sources by country
-            </CardDescription>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="font-comfortaa">RSS Feed Sources</CardTitle>
+                <CardDescription className="font-roboto">
+                  Manage news sources by country
+                </CardDescription>
+              </div>
+              <div className="relative w-full md:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search sources..."
+                  className="pl-9 font-roboto"
+                  value={sourceSearch}
+                  onChange={(e) => setSourceSearch(e.target.value)}
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -224,7 +252,7 @@ export const AdminRSSFeeds = () => {
               </div>
             ) : (
               <div className="space-y-2">
-                {sources.map((source) => (
+                {filteredSources.map((source) => (
                   <div
                     key={source.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
@@ -267,10 +295,23 @@ export const AdminRSSFeeds = () => {
         {/* Recent Feeds */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-comfortaa">Recent Articles</CardTitle>
-            <CardDescription className="font-roboto">
-              Latest cached news articles
-            </CardDescription>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="font-comfortaa">Recent Articles</CardTitle>
+                <CardDescription className="font-roboto">
+                  Latest cached news articles
+                </CardDescription>
+              </div>
+              <div className="relative w-full md:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search articles..."
+                  className="pl-9 font-roboto"
+                  value={articleSearch}
+                  onChange={(e) => setArticleSearch(e.target.value)}
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -289,7 +330,7 @@ export const AdminRSSFeeds = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {feeds.slice(0, 20).map((feed) => (
+                {filteredFeeds.slice(0, 50).map((feed) => (
                   <div
                     key={feed.id}
                     className="p-4 border rounded-lg hover:bg-gray-50"
