@@ -477,12 +477,22 @@ export class GamificationService {
 
             if (!mission) return;
 
-            const { data: userMission } = await supabase
+            let { data: userMission } = await supabase
                 .from('user_missions')
                 .select('current_progress, is_completed')
                 .eq('user_id', userId)
                 .eq('mission_id', mission.id)
                 .single();
+
+            // Auto-create user_missions row if it doesn't exist
+            if (!userMission) {
+                const { data: created } = await supabase
+                    .from('user_missions')
+                    .insert({ user_id: userId, mission_id: mission.id, current_progress: 0, is_completed: false })
+                    .select('current_progress, is_completed')
+                    .single();
+                userMission = created;
+            }
 
             if (!userMission || userMission.is_completed) return;
 

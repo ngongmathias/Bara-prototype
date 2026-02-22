@@ -328,14 +328,21 @@ export const WriteReviewPage = () => {
     }
   };
 
+  // Auto-search as user types (debounced)
+  useEffect(() => {
+    if (searchTerm.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(() => {
+      handleSearch();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // Search businesses
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
-      toast({
-        title: t('reviews.searchError'),
-        description: t('reviews.businessName') + " is required.",
-        variant: "destructive"
-      });
       return;
     }
 
@@ -348,33 +355,15 @@ export const WriteReviewPage = () => {
           city:cities(name)
         `)
         .ilike('name', `%${searchTerm}%`)
-        .eq('status', 'active')
         .limit(10);
 
       if (error) {
         console.error('Search error:', error);
-        toast({
-          title: t('reviews.searchError'),
-          description: t('reviews.searchFailed'),
-          variant: "destructive"
-        });
       } else {
         setSearchResults(data || []);
-        if (data && data.length === 0) {
-          toast({
-            title: t('reviews.noResults'),
-            description: t('reviews.noResults'),
-            variant: "default"
-          });
-        }
       }
     } catch (error) {
       console.error('Search error:', error);
-      toast({
-        title: t('reviews.searchError'),
-        description: t('reviews.searchFailed'),
-        variant: "destructive"
-      });
     } finally {
       setIsSearching(false);
     }

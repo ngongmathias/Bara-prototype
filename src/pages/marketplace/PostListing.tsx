@@ -108,7 +108,7 @@ export const PostListing = () => {
           description: 'Please sign in to post a listing',
           variant: 'destructive',
         });
-        navigate('/user/sign-in?redirect=/marketplace/post');
+        navigate('/user/sign-in?redirect_url=/marketplace/post');
         return;
       }
 
