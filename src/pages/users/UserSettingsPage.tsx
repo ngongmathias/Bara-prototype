@@ -177,16 +177,16 @@ const UserSettingsPage = () => {
               </div>
               <div>
                 <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address</Label>
-                {isEditing ? (
-                  <Input id="email" type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} className="mt-1" />
-                ) : (
-                  <p className="mt-1 text-gray-900 font-medium">{user?.primaryEmailAddress?.emailAddress}</p>
-                )}
+                <p className="mt-1 text-gray-900 font-medium">{user?.primaryEmailAddress?.emailAddress}</p>
+                {isEditing && <p className="text-xs text-gray-400 mt-1">Email cannot be changed here. Contact support if you need to update it.</p>}
               </div>
               <div>
                 <Label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number</Label>
-                <p className="mt-1 text-gray-900 font-medium">{user?.phoneNumbers?.[0]?.phoneNumber || 'Not provided'}</p>
-                <p className="text-xs text-gray-400 mt-1">Phone numbers are managed through your Clerk account settings.</p>
+                {isEditing ? (
+                  <Input id="phone" type="tel" placeholder="+1 234 567 8900" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} className="mt-1" />
+                ) : (
+                  <p className="mt-1 text-gray-900 font-medium">{user?.phoneNumbers?.[0]?.phoneNumber || 'Not provided'}</p>
+                )}
               </div>
               {isEditing && (
                 <div className="flex gap-2 pt-2">

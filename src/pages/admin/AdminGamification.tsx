@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -115,10 +116,10 @@ const AdminGamification = () => {
         if (data) {
             // Enrich with user names
             const userIds = data.map(p => p.user_id);
-            const { data: users } = await supabase.from('clerk_users').select('id, full_name, email').in('id', userIds);
+            const { data: users } = await supabase.from('clerk_users').select('clerk_user_id, full_name, email').in('clerk_user_id', userIds);
             const userMap: Record<string, any> = {};
-            users?.forEach(u => userMap[u.id] = u);
-            setProfiles(data.map(p => ({ ...p, user_name: userMap[p.user_id]?.full_name || 'Unknown', user_email: userMap[p.user_id]?.email || '' })));
+            users?.forEach(u => userMap[u.clerk_user_id] = u);
+            setProfiles(data.map(p => ({ ...p, user_name: userMap[p.user_id]?.full_name || p.user_id?.slice(0, 15) + '...', user_email: userMap[p.user_id]?.email || '' })));
         }
     };
 
@@ -136,10 +137,10 @@ const AdminGamification = () => {
         const { data } = await supabase.from('user_verifications').select('*').order('created_at', { ascending: false }).limit(100);
         if (data) {
             const userIds = data.map(v => v.user_id);
-            const { data: users } = await supabase.from('clerk_users').select('id, full_name, email').in('id', userIds);
+            const { data: users } = await supabase.from('clerk_users').select('clerk_user_id, full_name, email').in('clerk_user_id', userIds);
             const userMap: Record<string, any> = {};
-            users?.forEach(u => userMap[u.id] = u);
-            setVerifications(data.map(v => ({ ...v, user_name: userMap[v.user_id]?.full_name || 'Unknown', user_email: userMap[v.user_id]?.email || '' })));
+            users?.forEach(u => userMap[u.clerk_user_id] = u);
+            setVerifications(data.map(v => ({ ...v, user_name: userMap[v.user_id]?.full_name || v.user_id?.slice(0, 15) + '...', user_email: userMap[v.user_id]?.email || '' })));
         }
     };
 
@@ -147,9 +148,9 @@ const AdminGamification = () => {
         const { data } = await supabase.from('gamification_history').select('*').order('created_at', { ascending: false }).limit(50);
         if (data && data.length > 0) {
             const userIds = [...new Set(data.map(h => h.user_id))];
-            const { data: users } = await supabase.from('clerk_users').select('id, full_name, email').in('id', userIds);
+            const { data: users } = await supabase.from('clerk_users').select('clerk_user_id, full_name, email').in('clerk_user_id', userIds);
             const userMap: Record<string, any> = {};
-            users?.forEach(u => userMap[u.id] = u);
+            users?.forEach(u => userMap[u.clerk_user_id] = u);
             setHistory(data.map(h => ({ ...h, user_name: userMap[h.user_id]?.full_name || '', user_email: userMap[h.user_id]?.email || '' })));
         } else {
             setHistory([]);
@@ -287,6 +288,7 @@ const AdminGamification = () => {
     const COLORS = ['#3b82f6', '#10b981'];
 
     return (
+        <AdminLayout>
         <div className="p-4 md:p-8 space-y-6 bg-gray-50 min-h-screen">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -831,6 +833,7 @@ const AdminGamification = () => {
                 </TabsContent>
             </Tabs>
         </div>
+        </AdminLayout>
     );
 };
 
