@@ -28,8 +28,21 @@ const AdvertisePage = () => {
       <Header />
       <TopBannerAd />
 
+      {/* Launch Period Banner */}
+      <section className="max-w-7xl mx-auto px-4 pt-8">
+        <div className="flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl px-6 py-4">
+          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <Rocket className="w-5 h-5 text-green-600" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-green-800">🎉 Launch Period — All Features Free!</p>
+            <p className="text-xs text-green-600">During our launch, all Bara Prime advertising features are available at no cost. Set up your campaigns now and lock in early-adopter benefits before paid plans go live.</p>
+          </div>
+        </div>
+      </section>
+
       {/* Hero Section - Super Premium */}
-      <section className="relative pt-20 pb-32 overflow-hidden">
+      <section className="relative pt-12 pb-32 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-50 via-white to-white opacity-70 -z-10" />
 
         <div className="max-w-7xl mx-auto px-4 text-center">
@@ -152,7 +165,7 @@ const AdvertisePage = () => {
                 <p className="text-gray-500 text-sm">Best for growing creators & shops.</p>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="text-4xl font-black text-black mb-8">$19<span className="text-sm font-normal text-gray-500">/mo</span></div>
+                <div className="text-4xl font-black text-black mb-8">$5<span className="text-sm font-normal text-gray-500">/mo</span></div>
                 <ul className="space-y-4 mb-8">
                   <li className="flex items-center gap-2 text-sm font-bold"><TrendingUp size={16} className="text-blue-600" /> 2x Engagement Multiplier</li>
                   <li className="flex items-center gap-2 text-sm font-bold"><ShieldCheck size={16} className="text-blue-600" /> Verified "Pro" Badge</li>
@@ -173,7 +186,7 @@ const AdvertisePage = () => {
                 <p className="text-gray-500 text-sm">Enterprise-grade domination.</p>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="text-4xl font-black text-white mb-8">$79<span className="text-sm font-normal text-gray-500">/mo</span></div>
+                <div className="text-4xl font-black text-white mb-8">$20<span className="text-sm font-normal text-gray-500">/mo</span></div>
                 <ul className="space-y-4 mb-8">
                   <li className="flex items-center gap-2 text-sm"><ShieldCheck size={16} className="text-yellow-500" /> All Pro features</li>
                   <li className="flex items-center gap-2 text-sm"><ShieldCheck size={16} className="text-yellow-500" /> Zero Ad Commission</li>
@@ -182,6 +195,43 @@ const AdvertisePage = () => {
                 <Button className="w-full h-12 bg-white text-black hover:bg-gray-100 rounded-xl font-bold" onClick={() => window.location.href = 'mailto:business@baraafrika.com?subject=Bara Elite Inquiry'}>Contact Sales</Button>
               </CardContent>
             </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Hub Navigation */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl font-black font-comfortaa text-center mb-8">Explore More</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link to="/advertise/checkout" className="group">
+              <Card className="border-none shadow-sm hover:shadow-md transition-shadow rounded-2xl p-6 text-center">
+                <Rocket className="mx-auto mb-3 text-blue-600" size={28} />
+                <h4 className="font-bold text-sm">Start Campaign</h4>
+                <p className="text-xs text-gray-500 mt-1">Set up your Bara Prime ad campaign</p>
+              </Card>
+            </Link>
+            <Link to="/pricing" className="group">
+              <Card className="border-none shadow-sm hover:shadow-md transition-shadow rounded-2xl p-6 text-center">
+                <Crown className="mx-auto mb-3 text-yellow-500" size={28} />
+                <h4 className="font-bold text-sm">Pricing Plans</h4>
+                <p className="text-xs text-gray-500 mt-1">Compare Free, Pro & Elite tiers</p>
+              </Card>
+            </Link>
+            <Link to="/partners" className="group">
+              <Card className="border-none shadow-sm hover:shadow-md transition-shadow rounded-2xl p-6 text-center">
+                <Globe className="mx-auto mb-3 text-green-600" size={28} />
+                <h4 className="font-bold text-sm">Partner Program</h4>
+                <p className="text-xs text-gray-500 mt-1">Earn commissions as an affiliate</p>
+              </Card>
+            </Link>
+            <Link to="/sponsor-country" className="group">
+              <Card className="border-none shadow-sm hover:shadow-md transition-shadow rounded-2xl p-6 text-center">
+                <Target className="mx-auto mb-3 text-purple-600" size={28} />
+                <h4 className="font-bold text-sm">Sponsor a Country</h4>
+                <p className="text-xs text-gray-500 mt-1">Premium country page sponsorship</p>
+              </Card>
+            </Link>
           </div>
         </div>
       </section>
