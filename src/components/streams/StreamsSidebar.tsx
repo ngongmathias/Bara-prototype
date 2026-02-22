@@ -2,12 +2,14 @@ import { Home, Search, Library, Plus, Heart, Globe, Mic2, Loader2 } from 'lucide
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useState } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import { GamificationService, XP_REWARDS, COIN_REWARDS } from '@/lib/gamificationService';
 import { XPProgressBar } from '../gamification/XPProgressBar';
 
 export function StreamsSidebar({ className = "" }: { className?: string }) {
     const location = useLocation();
     const navigate = useNavigate();
+    const { user: clerkUser, isSignedIn } = useUser();
     const [creating, setCreating] = useState(false);
 
     const isActive = (path: string) => location.pathname === path;
@@ -15,21 +17,20 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
     const handleCreatePlaylist = async () => {
         try {
             setCreating(true);
-            const { data: { user } } = await supabase.auth.getUser();
 
-            if (!user) {
-                navigate('/sign-in');
+            if (!isSignedIn || !clerkUser) {
+                navigate('/user/sign-in?redirect_url=/streams');
                 return;
             }
 
-            // Create a new playlist
+            // Create a new playlist using Clerk user ID
             const { data: newPlaylist, error } = await supabase
                 .from('playlists')
                 .insert([
                     {
                         title: 'My Playlist',
                         description: 'My new playlist',
-                        user_id: user.id
+                        user_id: clerkUser.id
                     }
                 ])
                 .select()
@@ -39,12 +40,9 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
 
             if (newPlaylist) {
                 // Gamification: Award XP for curation
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    await GamificationService.addXP(user.id, XP_REWARDS.PLAYLIST_CREATE, 'Created a new playlist');
-                    await GamificationService.addCoins(user.id, COIN_REWARDS.PLAYLIST_CREATE, 'Created a new playlist');
-                    await GamificationService.awardAchievement(user.id, 'playlist_creator');
-                }
+                await GamificationService.addXP(clerkUser.id, XP_REWARDS.PLAYLIST_CREATE, 'Created a new playlist');
+                await GamificationService.addCoins(clerkUser.id, COIN_REWARDS.PLAYLIST_CREATE, 'Created a new playlist');
+                await GamificationService.awardAchievement(clerkUser.id, 'playlist_creator');
                 navigate(`/streams/playlist/${newPlaylist.id}`);
             }
         } catch (err) {

@@ -21,11 +21,12 @@ import { MonetizationService } from "@/lib/monetizationService";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/clerk-react";
 import { supabase } from "@/lib/supabase";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function ArtistDashboard() {
     const { user } = useUser();
     const { toast } = useToast();
+    const navigate = useNavigate();
     const [stats, setStats] = useState({
         tracks: 0,
         albums: 0,
@@ -115,20 +116,22 @@ export default function ArtistDashboard() {
                                 <h2 className="text-2xl font-bold text-white">Quick Actions</h2>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <Link to="/admin/streams/songs">
-                                    <div className="bg-gradient-to-br from-[#1DB954] to-[#1aa34a] p-6 rounded-xl cursor-pointer hover:scale-[1.02] transition-transform group shadow-lg">
-                                        <Upload className="text-white mb-4 group-hover:bounce" size={32} />
-                                        <h3 className="font-bold text-xl text-white">Upload music</h3>
-                                        <p className="text-white/80 text-sm">Release a new single or track</p>
-                                    </div>
-                                </Link>
-                                <Link to="/admin/streams/albums">
-                                    <div className="bg-[#282828] p-6 rounded-xl cursor-pointer hover:bg-[#333333] transition-colors group border border-white/5 shadow-lg">
-                                        <Plus className="text-[#1DB954] mb-4" size={32} />
-                                        <h3 className="font-bold text-xl text-white">Create Album</h3>
-                                        <p className="text-gray-400 text-sm">Organize your tracks into EP or Album</p>
-                                    </div>
-                                </Link>
+                                <div
+                                    onClick={() => toast({ title: 'Upload Coming Soon', description: 'Artist uploads are being finalized. Contact us to get your music on the platform now!' })}
+                                    className="bg-gradient-to-br from-[#1DB954] to-[#1aa34a] p-6 rounded-xl cursor-pointer hover:scale-[1.02] transition-transform group shadow-lg"
+                                >
+                                    <Upload className="text-white mb-4 group-hover:bounce" size={32} />
+                                    <h3 className="font-bold text-xl text-white">Upload music</h3>
+                                    <p className="text-white/80 text-sm">Release a new single or track</p>
+                                </div>
+                                <div
+                                    onClick={() => toast({ title: 'Albums Coming Soon', description: 'Album creation is being finalized. Contact us to get your album listed!' })}
+                                    className="bg-[#282828] p-6 rounded-xl cursor-pointer hover:bg-[#333333] transition-colors group border border-white/5 shadow-lg"
+                                >
+                                    <Plus className="text-[#1DB954] mb-4" size={32} />
+                                    <h3 className="font-bold text-xl text-white">Create Album</h3>
+                                    <p className="text-gray-400 text-sm">Organize your tracks into EP or Album</p>
+                                </div>
                             </div>
                         </section>
 
@@ -177,7 +180,7 @@ export default function ArtistDashboard() {
                             </div>
                             <CardContent className="pt-4">
                                 <p className="text-sm text-gray-400 mb-4">Get the blue checkmark and unlock advanced creator tools.</p>
-                                <Button className="w-full bg-white text-black hover:bg-gray-200 font-bold">Apply Now</Button>
+                                <Button className="w-full bg-white text-black hover:bg-gray-200 font-bold" onClick={() => navigate('/streams/verification')}>Apply Now</Button>
                             </CardContent>
                         </Card>
 

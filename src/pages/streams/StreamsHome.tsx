@@ -202,13 +202,13 @@ export default function StreamsHome() {
                                 />
                             </div>
 
-                            {/* Made For You - Curated Mixes */}
+                            {/* Made For You - Curated Mixes (plays shuffled trending songs) */}
                             <Section title="Made For You">
                                 {[
-                                    { id: '1', title: 'Discover Weekly', artist: 'Personalized for you', cover: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=300&h=300&fit=crop', gradient: 'from-blue-600 to-blue-800' },
-                                    { id: '2', title: 'Daily Mix 1', artist: 'Afrobeats & Highlife', cover: 'https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=300&h=300&fit=crop', gradient: 'from-green-600 to-green-800' },
-                                    { id: '3', title: 'Daily Mix 2', artist: 'Amapiano Beats', cover: 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=300&h=300&fit=crop', gradient: 'from-orange-600 to-orange-800' },
-                                    { id: '4', title: 'Release Radar', artist: 'New from artists you follow', cover: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop', gradient: 'from-purple-600 to-purple-800' }
+                                    { id: '1', title: 'Discover Weekly', artist: 'Personalized for you', cover: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=300&h=300&fit=crop', gradient: 'from-blue-600 to-blue-800', offset: 0 },
+                                    { id: '2', title: 'Daily Mix 1', artist: 'Afrobeats & Highlife', cover: 'https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=300&h=300&fit=crop', gradient: 'from-green-600 to-green-800', offset: 3 },
+                                    { id: '3', title: 'Daily Mix 2', artist: 'Amapiano Beats', cover: 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=300&h=300&fit=crop', gradient: 'from-orange-600 to-orange-800', offset: 6 },
+                                    { id: '4', title: 'Release Radar', artist: 'New from artists you follow', cover: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop', gradient: 'from-purple-600 to-purple-800', offset: 9 }
                                 ].map(mix => (
                                     <div key={mix.id} className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl border border-white/5">
                                         <div className="relative mb-4 aspect-square shadow-2xl">
@@ -220,10 +220,13 @@ export default function StreamsHome() {
                                             />
                                             <button
                                                 onClick={() => {
-                                                    toast({
-                                                        title: 'Coming Soon',
-                                                        description: 'Personalized mixes are still in development.',
-                                                    });
+                                                    if (trendingSongs.length > 0) {
+                                                        const startIdx = mix.offset % trendingSongs.length;
+                                                        const shuffled = [...trendingSongs.slice(startIdx), ...trendingSongs.slice(0, startIdx)];
+                                                        playAlbum(shuffled, 0);
+                                                    } else {
+                                                        toast({ title: 'No songs available', description: 'Check back soon for new music!' });
+                                                    }
                                                 }}
                                                 className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
                                             >

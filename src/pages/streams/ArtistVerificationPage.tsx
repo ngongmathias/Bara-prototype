@@ -48,7 +48,7 @@ export default function ArtistVerificationPage() {
 
   const handleSubscribe = () => {
     if (!isSignedIn) {
-      navigate('/user/sign-in');
+      navigate('/user/sign-in?redirect_url=/streams/verification');
       return;
     }
     setLoading(true);
