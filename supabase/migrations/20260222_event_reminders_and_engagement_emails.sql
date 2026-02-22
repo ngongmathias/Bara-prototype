@@ -216,6 +216,158 @@ WHERE start_date BETWEEN NOW() + INTERVAL '23 hours' AND NOW() + INTERVAL '25 ho
   AND status = 'approved';
 
 -- ============================================================
+-- STEP 5: Function to send weekly digest emails
+-- Call this once per week via pg_cron or Supabase scheduled function
+-- Gathers each user's weekly stats and queues a digest email
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.queue_weekly_digest_emails()
+RETURNS INTEGER AS $$
+DECLARE
+  v_profile RECORD;
+  v_user_email TEXT;
+  v_user_name TEXT;
+  v_xp_earned INTEGER;
+  v_coins_earned INTEGER;
+  v_missions_completed INTEGER;
+  v_total_missions INTEGER;
+  v_achievements_unlocked INTEGER;
+  v_top_event RECORD;
+  v_new_listings INTEGER;
+  v_count INTEGER := 0;
+  v_week_start TIMESTAMPTZ := date_trunc('week', NOW()) - INTERVAL '7 days';
+  v_week_label TEXT := to_char(v_week_start, 'FMMonth FMDD') || ' – ' || to_char(v_week_start + INTERVAL '6 days', 'FMMonth FMDD, YYYY');
+BEGIN
+  FOR v_profile IN
+    SELECT gp.user_id, gp.level, gp.consecutive_days, gp.bara_coins, gp.total_xp
+    FROM public.gamification_profiles gp
+    WHERE gp.last_activity_at > NOW() - INTERVAL '30 days'
+  LOOP
+    -- Get user email
+    BEGIN
+      SELECT email, first_name
+      INTO v_user_email, v_user_name
+      FROM public.clerk_users
+      WHERE clerk_id = v_profile.user_id
+      LIMIT 1;
+    EXCEPTION WHEN OTHERS THEN
+      v_user_email := NULL;
+      v_user_name := NULL;
+    END;
+
+    IF v_user_email IS NULL THEN
+      CONTINUE;
+    END IF;
+
+    -- Skip if already sent this week
+    IF EXISTS (
+      SELECT 1 FROM public.email_queue
+      WHERE to_email = v_user_email
+        AND type = 'weekly_digest'
+        AND created_at > v_week_start + INTERVAL '7 days'
+    ) THEN
+      CONTINUE;
+    END IF;
+
+    -- XP earned this week
+    SELECT COALESCE(SUM(amount), 0) INTO v_xp_earned
+    FROM public.gamification_history
+    WHERE user_id = v_profile.user_id
+      AND type IN ('xp_gain', 'mission_xp')
+      AND created_at >= v_week_start
+      AND created_at < v_week_start + INTERVAL '7 days';
+
+    -- Coins earned this week
+    SELECT COALESCE(SUM(amount), 0) INTO v_coins_earned
+    FROM public.gamification_history
+    WHERE user_id = v_profile.user_id
+      AND type IN ('coin_gain', 'coin_purchase', 'mission_coins')
+      AND amount > 0
+      AND created_at >= v_week_start
+      AND created_at < v_week_start + INTERVAL '7 days';
+
+    -- Missions completed this week
+    SELECT COUNT(*) INTO v_missions_completed
+    FROM public.mission_history
+    WHERE user_id = v_profile.user_id
+      AND completed_at >= v_week_start
+      AND completed_at < v_week_start + INTERVAL '7 days';
+
+    -- Total available missions
+    SELECT COUNT(*) INTO v_total_missions
+    FROM public.user_missions
+    WHERE user_id = v_profile.user_id;
+
+    -- Achievements unlocked this week
+    SELECT COUNT(*) INTO v_achievements_unlocked
+    FROM public.user_achievements
+    WHERE user_id = v_profile.user_id
+      AND unlocked_at >= v_week_start
+      AND unlocked_at < v_week_start + INTERVAL '7 days';
+
+    -- Top upcoming event the user is registered for
+    BEGIN
+      SELECT e.title, e.start_date, e.id::TEXT
+      INTO v_top_event
+      FROM public.event_registrations er
+      JOIN public.events e ON e.id = er.event_id
+      WHERE er.attendee_email = v_user_email
+        AND e.start_date > NOW()
+        AND e.status = 'approved'
+      ORDER BY e.start_date ASC
+      LIMIT 1;
+    EXCEPTION WHEN OTHERS THEN
+      v_top_event := NULL;
+    END;
+
+    -- New marketplace listings this week
+    SELECT COUNT(*) INTO v_new_listings
+    FROM public.marketplace_listings
+    WHERE created_at >= v_week_start
+      AND created_at < v_week_start + INTERVAL '7 days'
+      AND status = 'active';
+
+    -- Queue the digest email
+    INSERT INTO public.email_queue (
+      to_email,
+      subject,
+      type,
+      status,
+      metadata
+    ) VALUES (
+      v_user_email,
+      'Your Bara Afrika Weekly Digest — ' || v_week_label,
+      'weekly_digest',
+      'pending',
+      jsonb_build_object(
+        'type', 'weekly_digest',
+        'data', jsonb_build_object(
+          'userFirstname', COALESCE(v_user_name, 'Explorer'),
+          'weekOf', v_week_label,
+          'xpEarned', v_xp_earned,
+          'coinsEarned', v_coins_earned,
+          'currentLevel', COALESCE(v_profile.level, 1),
+          'currentStreak', COALESCE(v_profile.consecutive_days, 0),
+          'missionsCompleted', v_missions_completed,
+          'totalMissions', v_total_missions,
+          'achievementsUnlocked', v_achievements_unlocked,
+          'topEventTitle', COALESCE(v_top_event.title, ''),
+          'topEventDate', CASE WHEN v_top_event.start_date IS NOT NULL
+            THEN to_char(v_top_event.start_date AT TIME ZONE 'UTC', 'FMDay, FMMonth FMDD, YYYY')
+            ELSE '' END,
+          'topEventId', COALESCE(v_top_event.id, ''),
+          'newListingsCount', v_new_listings,
+          'leaderboardRank', 0
+        )
+      )
+    );
+    v_count := v_count + 1;
+  END LOOP;
+
+  RETURN v_count;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================
 -- NOTES FOR SETUP:
 -- 
 -- To enable daily event reminders, set up a Supabase scheduled function
@@ -227,6 +379,10 @@ WHERE start_date BETWEEN NOW() + INTERVAL '23 hours' AND NOW() + INTERVAL '25 ho
 --
 --   SELECT queue_streak_warning_emails();
 --
--- Both functions write to email_queue, which is processed by the
+-- To enable weekly digest emails (run once per week, e.g. Sunday 9am):
+--
+--   SELECT queue_weekly_digest_emails();
+--
+-- All functions write to email_queue, which is processed by the
 -- tr_process_email_queue trigger → send-email edge function.
 -- ============================================================

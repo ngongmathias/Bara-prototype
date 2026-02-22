@@ -13,6 +13,7 @@ import { AchievementUnlockedEmail } from "../_shared/emails/AchievementUnlockedE
 import { StreakWarningEmail } from "../_shared/emails/StreakWarningEmail.tsx";
 import { EventReminderEmail } from "../_shared/emails/EventReminderEmail.tsx";
 import { WeeklyDigestEmail } from "../_shared/emails/WeeklyDigestEmail.tsx";
+import { MonthlyAnalyticsEmail } from "../_shared/emails/MonthlyAnalyticsEmail.tsx";
 import React from "npm:react@18.2.0";
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -137,6 +138,9 @@ Deno.serve(async (req) => {
                     break;
                 case 'weekly_digest':
                     html = await renderAsync(React.createElement(WeeklyDigestEmail, templateData));
+                    break;
+                case 'monthly_analytics':
+                    html = await renderAsync(React.createElement(MonthlyAnalyticsEmail, templateData));
                     break;
                 case 'INSERT':
                 case 'UPDATE':

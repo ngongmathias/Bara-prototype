@@ -195,12 +195,12 @@ There are **4 parallel workstreams**. Each maps to a detailed sub-plan document.
 | P1 | Add cross-feature discovery widgets (events ↔ streams ↔ marketplace) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 10 | ✅ Done — DiscoverMore component on Events + Marketplace |
 | P1 | Create achievement unlocked + streak warning emails | C | `EMAIL_IMPLEMENTATION_PLAN.md` → Items 4.12–4.13 | ✅ Done — `AchievementUnlockedEmail.tsx`, `StreakWarningEmail.tsx`, DB trigger + batch function |
 | P2 | Add daily spin wheel to dashboard | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 10 | ✅ Done — canvas wheel, probability-weighted, 1 spin/day |
-| P2 | Add sports prediction game (coin bets) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 10 | ⏳ Deferred to Phase 5 |
+| P2 | Add sports prediction game (coin bets) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 10 | ✅ Done — `SportsPredictions.tsx` at `/sports/predictions` |
 | P2 | Add weekly leaderboard page (`/leaderboard`) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 11 | ✅ Done — XP/Coins/Streak tabs, prestige tiers |
-| P2 | Create weekly digest email | C | `EMAIL_IMPLEMENTATION_PLAN.md` → Item 4.11 | ⏳ Deferred to Phase 5 |
-| P2 | Add ad-free browsing with coins (20 coins = 24h ad-free) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 12 | ⏳ Deferred to Phase 5 |
+| P2 | Create weekly digest email | C | `EMAIL_IMPLEMENTATION_PLAN.md` → Item 4.11 | ✅ Done — `WeeklyDigestEmail.tsx`, stats grid, streak, missions, events, marketplace |
+| P2 | Add ad-free browsing with coins (20 coins = 24h ad-free) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 12 | ✅ Done — `useAdFree.ts` hook, integrated into all 3 banner components |
 | P2 | Add "Not enough coins? Buy more" in marketplace boost | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 9 | ✅ Done — link in PostListing.tsx |
-| P3 | Custom profile themes purchasable with coins | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 12 | ⏳ Deferred to Phase 5 |
+| P3 | Custom profile themes purchasable with coins | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 12 | ✅ Done — `ProfileThemesPage.tsx` at `/users/dashboard/themes`, 8 themes |
 
 <details>
 <summary>Phase 4 Changes (click to expand)</summary>
@@ -226,8 +226,8 @@ There are **4 parallel workstreams**. Each maps to a detailed sub-plan document.
 | P1 | Add event ticket commission | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 2, Stream 4 | ✅ Done — `recordTicketCommission()` in MonetizationService (3%) |
 | P2 | Artist verification badge subscription ($10/mo) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 12 | ✅ Done — `/streams/verification` with benefits, comparison, FAQ |
 | P2 | Business directory premium tiers | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 12 | ✅ Done — `/business-premium` with Free/Pro $15/Elite $40 tiers |
-| P2 | Monthly analytics report emails | C | `EMAIL_IMPLEMENTATION_PLAN.md` → Item 4.16 | ⏳ Deferred — requires Resend integration |
-| P3 | Affiliate links (remittance, travel, fintech) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 2, Stream 12 | ⏳ Deferred |
+| P2 | Monthly analytics report emails | C | `EMAIL_IMPLEMENTATION_PLAN.md` → Item 4.16 | ✅ Done — `MonthlyAnalyticsEmail.tsx` with full stats, activity breakdown, achievements |
+| P3 | Affiliate links (remittance, travel, fintech) | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 2, Stream 12 | ✅ Done — `AffiliatePage.tsx` at `/partners`, 10 curated partners |
 | P3 | Data/analytics product for brands | D | `MONETIZATION_AND_RETENTION_STRATEGY.md` → Section 2, Stream 10 | ⏳ Deferred |
 
 <details>
