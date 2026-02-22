@@ -59,6 +59,17 @@ const AdvertiseCheckoutPage = () => {
           Back to Overview
         </Link>
 
+        {/* Launch Period Banner */}
+        <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl px-6 py-4 mb-8">
+          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <Zap className="w-5 h-5 text-blue-600" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-blue-800">Early Access — Free Setup!</p>
+            <p className="text-xs text-blue-600">During our launch period, Bara Prime features are available at no cost. Stripe payment integration is coming soon for full subscription management.</p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Configuration side */}
           <div className="lg:col-span-2 space-y-6">

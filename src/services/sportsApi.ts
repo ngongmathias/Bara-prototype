@@ -1,6 +1,10 @@
 import type { ApiResponse, Match, Standing, MatchEvent, MatchStatistic, Lineup, Team, Player } from '../types/sports';
 
-const API_KEY = import.meta.env.VITE_API_FOOTBALL_KEY || 'demo-key';
+const API_KEY = import.meta.env.VITE_API_FOOTBALL_KEY || '';
+
+if (!API_KEY) {
+    console.warn('[SportsAPI] VITE_API_FOOTBALL_KEY is not set. Sports features will not work.');
+}
 
 const SPORT_BASE_URLS: Record<string, string> = {
     football: 'https://v3.football.api-sports.io',
@@ -64,6 +68,10 @@ class SportsApiService {
         const baseUrl = this.getBaseUrl(sport);
         const url = `${baseUrl}${endpoint}${queryString ? `?${queryString}` : ''}`;
 
+        if (!API_KEY) {
+            throw new Error('SPORTS_API_NO_KEY');
+        }
+
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -71,23 +79,45 @@ class SportsApiService {
             });
 
             if (!response.ok) {
+                if (response.status === 403) {
+                    throw new Error('SPORTS_API_FORBIDDEN');
+                }
+                if (response.status === 429) {
+                    throw new Error('SPORTS_API_RATE_LIMITED');
+                }
                 throw new Error(`API error: ${response.status} ${response.statusText}`);
             }
 
             const data = await response.json();
 
-            if (data.errors && (Array.isArray(data.errors) ? data.errors.length > 0 : Object.keys(data.errors).length > 0)) {
-                const errorStr = JSON.stringify(data.errors);
-                if (errorStr.toLowerCase().includes('suspended')) {
-                    throw new Error('SPORTS_API_SUSPENDED');
+            // Check for API-level errors in the response body
+            if (data.errors) {
+                const errorKeys = Array.isArray(data.errors) ? data.errors : Object.keys(data.errors);
+                if (errorKeys.length > 0) {
+                    const errorStr = JSON.stringify(data.errors);
+                    console.warn('[SportsAPI] API returned errors:', errorStr);
+                    if (errorStr.toLowerCase().includes('suspended')) {
+                        throw new Error('SPORTS_API_SUSPENDED');
+                    }
+                    if (errorStr.toLowerCase().includes('token') || errorStr.toLowerCase().includes('key')) {
+                        throw new Error('SPORTS_API_INVALID_KEY');
+                    }
+                    throw new Error(`API returned errors: ${errorStr}`);
                 }
-                throw new Error(`API returned errors: ${errorStr}`);
             }
 
             return data;
         } catch (error: any) {
-            if (error.message === 'SPORTS_API_SUSPENDED') throw error;
-            console.error('Sports API fetch error:', error);
+            // Re-throw known error types
+            if (error.message?.startsWith('SPORTS_API_')) throw error;
+
+            // Handle CORS / network errors gracefully
+            if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+                console.error('[SportsAPI] Network/CORS error — the API may be blocked by browser CORS policy. Consider using a proxy.');
+                throw new Error('SPORTS_API_NETWORK_ERROR');
+            }
+
+            console.error('[SportsAPI] Fetch error:', error);
             throw error;
         }
     }

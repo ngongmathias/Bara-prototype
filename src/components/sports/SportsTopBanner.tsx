@@ -22,7 +22,7 @@ export const SportsTopBanner = () => {
         enabled: true
     });
 
-    const isSuspended = (error as any)?.message === 'SPORTS_API_SUSPENDED';
+    const hasApiError = !!error && !isLoading;
 
     const scrollRef = React.useRef<HTMLDivElement>(null);
 
@@ -115,11 +115,11 @@ export const SportsTopBanner = () => {
                 ref={scrollRef}
                 className="flex items-center space-x-0 overflow-x-auto scrollbar-hide h-full snap-x snap-mandatory flex-1"
             >
-                {isSuspended ? (
-                    <div className="px-6 flex items-center gap-3 border-r border-white/10 h-full bg-red-950/20">
-                        <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.8)]"></span>
-                        <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.15em] whitespace-nowrap">
-                            API Suspension Notification
+                {hasApiError ? (
+                    <div className="px-6 flex items-center gap-3 border-r border-white/10 h-full bg-orange-950/20">
+                        <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.8)]"></span>
+                        <span className="text-[10px] font-black text-orange-400 uppercase tracking-[0.15em] whitespace-nowrap">
+                            Sports Data Temporarily Unavailable
                         </span>
                     </div>
                 ) : matches && matches.length > 0 ? (

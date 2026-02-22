@@ -24,7 +24,17 @@ export default function SportsScores() {
         enabled: true
     });
 
-    const isSuspended = (error as any)?.message === 'SPORTS_API_SUSPENDED';
+    const errorMsg = (error as any)?.message || '';
+    const hasApiError = !!error && !isLoading;
+
+    const getErrorInfo = () => {
+        if (errorMsg.includes('NO_KEY')) return { title: 'Sports API Not Configured', desc: 'The API key has not been set up yet. Contact the admin.' };
+        if (errorMsg.includes('SUSPENDED')) return { title: 'Sports Data Service Interrupted', desc: 'The API subscription is currently suspended. Service will resume shortly.' };
+        if (errorMsg.includes('NETWORK_ERROR')) return { title: 'Connection Issue', desc: 'Unable to reach the sports data server. This may be a temporary network issue.' };
+        if (errorMsg.includes('FORBIDDEN') || errorMsg.includes('INVALID_KEY')) return { title: 'Access Denied', desc: 'The sports API key may be invalid or expired.' };
+        if (errorMsg.includes('RATE_LIMITED')) return { title: 'Rate Limited', desc: 'We\'ve hit the daily request limit. Check back tomorrow!' };
+        return { title: 'Sports Data Unavailable', desc: 'Unable to load match data right now. Please try again later.' };
+    };
 
     // Group fixtures by league
     const groupedFixtures = fixtures?.reduce((acc: Record<string, { league: any, matches: Match[] }>, match: Match) => {
@@ -94,19 +104,19 @@ export default function SportsScores() {
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                         {/* Main Content */}
                         <div className="lg:col-span-3 space-y-8">
-                            {isSuspended ? (
-                                <div className="bg-[#fff3f3] border border-[#ffcccc] rounded-lg p-6 flex items-start gap-4">
-                                    <div className="bg-[#cc0000] p-2 rounded-full shrink-0">
+                            {hasApiError ? (
+                                <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 flex items-start gap-4">
+                                    <div className="bg-orange-500 p-2 rounded-full shrink-0">
                                         <Trophy size={20} className="text-white" />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="text-sm font-black uppercase tracking-tight text-[#cc0000]">Sports Data Service Interrupted</h3>
-                                        <p className="text-xs text-[#660000] mt-1 font-medium leading-relaxed">
-                                            The API subscription is currently suspended. Please visit <a href="https://dashboard.api-football.com" target="_blank" className="font-black underline mx-0.5">dashboard.api-football.com</a> to resume service.
+                                        <h3 className="text-sm font-black uppercase tracking-tight text-orange-700">{getErrorInfo().title}</h3>
+                                        <p className="text-xs text-orange-600 mt-1 font-medium leading-relaxed">
+                                            {getErrorInfo().desc}
                                         </p>
                                         <button
                                             onClick={() => window.location.reload()}
-                                            className="mt-3 px-4 py-1.5 bg-[#cc0000] text-white text-[10px] font-black uppercase tracking-widest rounded hover:bg-red-700 transition-colors"
+                                            className="mt-3 px-4 py-1.5 bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest rounded hover:bg-orange-600 transition-colors"
                                         >
                                             Retry
                                         </button>

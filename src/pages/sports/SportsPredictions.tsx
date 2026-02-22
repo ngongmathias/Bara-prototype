@@ -72,7 +72,27 @@ export default function SportsPredictions() {
     enabled: true,
   });
 
-  const isApiSuspended = fixturesError?.message?.includes('SUSPENDED') || fixturesError?.message?.includes('suspended');
+  const errorType = fixturesError?.message?.startsWith('SPORTS_API_') ? fixturesError.message : null;
+  const isApiUnavailable = !!errorType || !!fixturesError;
+
+  const getErrorMessage = () => {
+    switch (errorType) {
+      case 'SPORTS_API_NO_KEY':
+        return { title: 'Sports API Not Configured', desc: 'The sports data API key has not been set up yet. Contact the admin to configure VITE_API_FOOTBALL_KEY.' };
+      case 'SPORTS_API_SUSPENDED':
+        return { title: 'Account Being Upgraded', desc: 'Our sports data provider account is being upgraded. Match predictions will be back shortly!' };
+      case 'SPORTS_API_NETWORK_ERROR':
+        return { title: 'Connection Issue', desc: 'Unable to reach the sports data server. This may be a temporary network issue — please try again in a moment.' };
+      case 'SPORTS_API_FORBIDDEN':
+        return { title: 'Access Denied', desc: 'The sports API key may be invalid or expired. Please contact support.' };
+      case 'SPORTS_API_RATE_LIMITED':
+        return { title: 'Too Many Requests', desc: 'We\'ve hit the daily request limit. Predictions will refresh tomorrow — check back soon!' };
+      case 'SPORTS_API_INVALID_KEY':
+        return { title: 'Invalid API Key', desc: 'The sports data API key is not recognized. Please contact the admin.' };
+      default:
+        return { title: 'Sports Data Temporarily Unavailable', desc: 'Unable to load match data right now. Please try again later.' };
+    }
+  };
 
   // Fetch user's predictions
   useEffect(() => {
@@ -311,14 +331,12 @@ export default function SportsPredictions() {
                 ))}
               </div>
 
-              {isApiSuspended || (fixturesError && !isLoading) ? (
+              {isApiUnavailable && !isLoading ? (
                 <div className="text-center py-16 bg-white rounded-2xl border border-orange-200">
                   <Zap className="w-12 h-12 text-orange-400 mx-auto mb-3" />
-                  <h3 className="font-bold text-gray-700 mb-2">Sports Data Temporarily Unavailable</h3>
+                  <h3 className="font-bold text-gray-700 mb-2">{getErrorMessage().title}</h3>
                   <p className="text-sm text-gray-500 max-w-md mx-auto mb-4">
-                    {isApiSuspended
-                      ? 'Our sports data provider account is being upgraded. Match predictions will be back shortly!'
-                      : 'Unable to load match data right now. Please try again later.'}
+                    {getErrorMessage().desc}
                   </p>
                   <p className="text-xs text-gray-400">You can still view your existing bets in the "My Bets" tab.</p>
                 </div>
