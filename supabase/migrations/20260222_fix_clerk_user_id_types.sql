@@ -1,42 +1,12 @@
 -- Fix: Gamification tables use UUID for user_id but Clerk IDs are TEXT strings
 -- like 'user_39EUqrQ4of91lQx8RnwkSZOTiQF'. This migration converts them to TEXT.
 -- IMPORTANT: All RLS policies referencing user_id must be dropped BEFORE altering column types.
+-- NOTE: DROP POLICY IF EXISTS requires the TABLE to exist, so we create missing tables first.
 
 -- ============================================================
--- STEP 1: DROP ALL RLS POLICIES that reference user_id columns
--- ============================================================
-
--- gamification_profiles policies
-DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.gamification_profiles;
-DROP POLICY IF EXISTS "Users can update own profile" ON public.gamification_profiles;
-DROP POLICY IF EXISTS "Anyone can read gamification profiles" ON public.gamification_profiles;
-DROP POLICY IF EXISTS "Anyone can insert gamification profiles" ON public.gamification_profiles;
-DROP POLICY IF EXISTS "Anyone can update gamification profiles" ON public.gamification_profiles;
-
--- gamification_history policies
-DROP POLICY IF EXISTS "Users can view own history" ON public.gamification_history;
-DROP POLICY IF EXISTS "Anyone can read gamification history" ON public.gamification_history;
-DROP POLICY IF EXISTS "Anyone can insert gamification history" ON public.gamification_history;
-
--- user_achievements policies
-DROP POLICY IF EXISTS "User achievements are viewable by everyone" ON public.user_achievements;
-DROP POLICY IF EXISTS "Anyone can read user achievements" ON public.user_achievements;
-DROP POLICY IF EXISTS "Anyone can insert user achievements" ON public.user_achievements;
-
--- user_missions policies
-DROP POLICY IF EXISTS "Users can view own mission progress" ON public.user_missions;
-DROP POLICY IF EXISTS "Anyone can read user missions" ON public.user_missions;
-DROP POLICY IF EXISTS "Anyone can insert user missions" ON public.user_missions;
-DROP POLICY IF EXISTS "Anyone can update user missions" ON public.user_missions;
-
--- mission_history policies
-DROP POLICY IF EXISTS "Users can view own mission history" ON public.mission_history;
-DROP POLICY IF EXISTS "Anyone can read mission history" ON public.mission_history;
-DROP POLICY IF EXISTS "Anyone can insert mission history" ON public.mission_history;
-
--- ============================================================
--- STEP 2: CREATE MISSING TABLES (missions, user_missions, mission_history)
--- These tables are expected by the gamification service but may not exist yet.
+-- STEP 1: CREATE MISSING TABLES (missions, user_missions, mission_history)
+-- Must come BEFORE DROP POLICY because PostgreSQL requires the table to exist
+-- even when using DROP POLICY IF EXISTS.
 -- ============================================================
 
 -- missions: master list of all available missions
@@ -95,6 +65,39 @@ SELECT * FROM (VALUES
   ('week_streak_7', '7-Day Streak', 'Maintain a 7-day login streak', 7, 200, 100, 5, 'achievement', 'engagement')
 ) AS v(key, title, description, goal, xp_reward, coin_reward, reputation_reward, type, category)
 WHERE NOT EXISTS (SELECT 1 FROM public.missions LIMIT 1);
+
+-- ============================================================
+-- STEP 2: DROP ALL RLS POLICIES that reference user_id columns
+-- (Tables now guaranteed to exist from STEP 1 above)
+-- ============================================================
+
+-- gamification_profiles policies
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.gamification_profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.gamification_profiles;
+DROP POLICY IF EXISTS "Anyone can read gamification profiles" ON public.gamification_profiles;
+DROP POLICY IF EXISTS "Anyone can insert gamification profiles" ON public.gamification_profiles;
+DROP POLICY IF EXISTS "Anyone can update gamification profiles" ON public.gamification_profiles;
+
+-- gamification_history policies
+DROP POLICY IF EXISTS "Users can view own history" ON public.gamification_history;
+DROP POLICY IF EXISTS "Anyone can read gamification history" ON public.gamification_history;
+DROP POLICY IF EXISTS "Anyone can insert gamification history" ON public.gamification_history;
+
+-- user_achievements policies
+DROP POLICY IF EXISTS "User achievements are viewable by everyone" ON public.user_achievements;
+DROP POLICY IF EXISTS "Anyone can read user achievements" ON public.user_achievements;
+DROP POLICY IF EXISTS "Anyone can insert user achievements" ON public.user_achievements;
+
+-- user_missions policies
+DROP POLICY IF EXISTS "Users can view own mission progress" ON public.user_missions;
+DROP POLICY IF EXISTS "Anyone can read user missions" ON public.user_missions;
+DROP POLICY IF EXISTS "Anyone can insert user missions" ON public.user_missions;
+DROP POLICY IF EXISTS "Anyone can update user missions" ON public.user_missions;
+
+-- mission_history policies
+DROP POLICY IF EXISTS "Users can view own mission history" ON public.mission_history;
+DROP POLICY IF EXISTS "Anyone can read mission history" ON public.mission_history;
+DROP POLICY IF EXISTS "Anyone can insert mission history" ON public.mission_history;
 
 -- ============================================================
 -- STEP 3: DROP FK CONSTRAINTS and ALTER COLUMN TYPES
