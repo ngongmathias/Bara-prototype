@@ -2,7 +2,7 @@ import { Home, Search, Library, Plus, Heart, Globe, Mic2, Loader2 } from 'lucide
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useState } from 'react';
-import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
+import { GamificationService, XP_REWARDS, COIN_REWARDS } from '@/lib/gamificationService';
 import { XPProgressBar } from '../gamification/XPProgressBar';
 
 export function StreamsSidebar({ className = "" }: { className?: string }) {
@@ -42,6 +42,7 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
                     await GamificationService.addXP(user.id, XP_REWARDS.PLAYLIST_CREATE, 'Created a new playlist');
+                    await GamificationService.addCoins(user.id, COIN_REWARDS.PLAYLIST_CREATE, 'Created a new playlist');
                     await GamificationService.awardAchievement(user.id, 'playlist_creator');
                 }
                 navigate(`/streams/playlist/${newPlaylist.id}`);

@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@clerk/clerk-react';
 import { EventsService, EventRegistration } from '@/lib/eventsService';
 import { supabase } from '@/lib/supabase';
-import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
+import { GamificationService, COIN_REWARDS } from '@/lib/gamificationService';
 import {
     X,
     Ticket,
@@ -88,9 +88,9 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
 
             setRegistration(reg);
 
-            // Gamification: Award XP and check for achievement
+            // Gamification: Award coins (not XP) for registration + check achievement
             try {
-                await GamificationService.addXP(user.id, XP_REWARDS.TICKET_PURCHASE, `Registered for event: ${event.title}`);
+                await GamificationService.addCoins(user.id, COIN_REWARDS.EVENT_RSVP, `Registered for event: ${event.title}`);
                 await GamificationService.awardAchievement(user.id, 'event_goer');
             } catch (gamifyErr) {
                 console.warn('Gamification update failed:', gamifyErr);
@@ -135,9 +135,9 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
 
             setRegistration(reg);
 
-            // Gamification: Award XP and check for achievement
+            // Gamification: Award coins (not XP) for registration + check achievement
             try {
-                await GamificationService.addXP(user.id, XP_REWARDS.TICKET_PURCHASE, `Registered for event: ${event.title}`);
+                await GamificationService.addCoins(user.id, COIN_REWARDS.EVENT_RSVP, `Reserved ticket for event: ${event.title}`);
                 await GamificationService.awardAchievement(user.id, 'event_goer');
             } catch (gamifyErr) {
                 console.warn('Gamification update failed:', gamifyErr);

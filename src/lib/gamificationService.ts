@@ -43,12 +43,34 @@ export interface Achievement {
 }
 
 export const XP_REWARDS = {
-    SONG_LISTEN: 10,
-    PLAYLIST_CREATE: 100,
-    LISTING_CREATE: 200,
-    TICKET_PURCHASE: 500,
-    DAILY_STREAK_BONUS: 20,
-    SIGN_IN_BONUS: 50,
+    // Engagement actions (drive platform value)
+    SONG_LISTEN: 5,
+    PLAYLIST_CREATE: 50,
+    LISTING_CREATE: 150,
+    SHARE_EVENT: 50,
+    LEAVE_REVIEW: 75,
+    COMPLETE_PROFILE: 200,
+    REFER_FRIEND: 300,
+    EVENT_CHECK_IN: 100,
+    FIRST_EVENT_RSVP: 100,
+    // Retention
+    DAILY_LOGIN: 25,
+    DAILY_STREAK_BONUS: 10, // multiplied by streak day, capped at 300
+    SIGN_IN_BONUS: 25,
+};
+
+export const COIN_REWARDS = {
+    DAILY_LOGIN: 5,
+    SONG_LISTEN: 1,
+    PLAYLIST_CREATE: 10,
+    LISTING_CREATE: 30,
+    SHARE_EVENT: 10,
+    LEAVE_REVIEW: 15,
+    COMPLETE_PROFILE: 50,
+    REFER_FRIEND: 100,
+    EVENT_RSVP: 10,       // small thank-you for registering, NOT XP
+    EVENT_CHECK_IN: 20,
+    FIRST_EVENT_RSVP: 25,
 };
 
 export const LEVEL_BASE_XP = 1000;

@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
-import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
+import { GamificationService, XP_REWARDS, COIN_REWARDS } from '@/lib/gamificationService';
 import {
   Upload,
   X,
@@ -368,6 +368,7 @@ export const PostListing = () => {
       // Gamification: Award XP and check for first listing achievement
       try {
         await GamificationService.addXP(userId, XP_REWARDS.LISTING_CREATE, `Posted listing: ${formData.title}`);
+        await GamificationService.addCoins(userId, COIN_REWARDS.LISTING_CREATE, `Posted listing: ${formData.title}`);
         await GamificationService.awardAchievement(userId, 'market_entry');
 
         // If premium, spend coins

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
+import { GamificationService, XP_REWARDS, COIN_REWARDS } from '@/lib/gamificationService';
 
 // Types
 export interface Song {
@@ -71,6 +71,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
                     const { data: { user } } = await supabase.auth.getUser();
                     if (user) {
                         await GamificationService.addXP(user.id, XP_REWARDS.SONG_LISTEN, `Listened to ${currentSong.title}`);
+                        await GamificationService.addCoins(user.id, COIN_REWARDS.SONG_LISTEN, `Listened to ${currentSong.title}`);
                         hasAwardedXP.current = currentSong.id;
                     }
                 };
