@@ -9,6 +9,9 @@ import { TicketPurchasedEmail } from "../_shared/emails/TicketPurchasedEmail.tsx
 import { EventApprovedEmail } from "../_shared/emails/EventApprovedEmail.tsx";
 import { EventRejectedEmail } from "../_shared/emails/EventRejectedEmail.tsx";
 import { ContactFormConfirmationEmail } from "../_shared/emails/ContactFormConfirmationEmail.tsx";
+import { AchievementUnlockedEmail } from "../_shared/emails/AchievementUnlockedEmail.tsx";
+import { StreakWarningEmail } from "../_shared/emails/StreakWarningEmail.tsx";
+import { EventReminderEmail } from "../_shared/emails/EventReminderEmail.tsx";
 import React from "npm:react@18.2.0";
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -121,6 +124,15 @@ Deno.serve(async (req) => {
                     break;
                 case 'contact_form_confirmation':
                     html = await renderAsync(React.createElement(ContactFormConfirmationEmail, templateData));
+                    break;
+                case 'achievement_unlocked':
+                    html = await renderAsync(React.createElement(AchievementUnlockedEmail, templateData));
+                    break;
+                case 'streak_warning':
+                    html = await renderAsync(React.createElement(StreakWarningEmail, templateData));
+                    break;
+                case 'event_reminder':
+                    html = await renderAsync(React.createElement(EventReminderEmail, templateData));
                     break;
                 case 'INSERT':
                 case 'UPDATE':

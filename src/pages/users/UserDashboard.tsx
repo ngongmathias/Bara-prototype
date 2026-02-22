@@ -498,14 +498,26 @@ export const UserDashboardHome = () => {
                 <p className="text-sm text-green-700">Your email has been verified</p>
               </div>
             </div>
-            <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-              <AlertCircle className="h-5 w-5 text-gray-400 mr-3" />
-              <div>
-                <h4 className="font-medium text-gray-700">Verify Phone Number</h4>
-                <p className="text-sm text-gray-600">Add your phone number for better account security</p>
+            {user?.phoneNumbers && user.phoneNumbers.length > 0 ? (
+              <div className="flex items-center p-4 bg-green-50 rounded-lg">
+                <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                <div>
+                  <h4 className="font-medium text-green-900">Phone Number Verified</h4>
+                  <p className="text-sm text-green-700">{user.phoneNumbers[0].phoneNumber}</p>
+                </div>
               </div>
-              <Button variant="outline" size="sm" className="ml-auto">Verify</Button>
-            </div>
+            ) : (
+              <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-gray-400 mr-3" />
+                <div>
+                  <h4 className="font-medium text-gray-700">Verify Phone Number</h4>
+                  <p className="text-sm text-gray-600">Add your phone number for better account security</p>
+                </div>
+                <Link to="/users/dashboard/settings" className="ml-auto">
+                  <Button variant="outline" size="sm">Add Phone</Button>
+                </Link>
+              </div>
+            )}
             <div className="flex items-center p-4 bg-gray-50 rounded-lg">
               <AlertCircle className="h-5 w-5 text-gray-400 mr-3" />
               <div>
