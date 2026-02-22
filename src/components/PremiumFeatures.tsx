@@ -65,17 +65,13 @@ export const PremiumFeatures = () => {
   const { toast } = useToast();
 
   const handleSelectPlan = (plan: Plan) => {
-    if (plan === 'normal') {
-      // Free plan - show activation message
-      toast({
-        title: "Free Plan Active",
-        description: "You're using the free plan. All basic features are available!",
-      });
-    } else {
-      // Paid plans - show coming soon message
-      setSelectedPlan(plan);
-      setIsPaymentOpen(true);
-    }
+    const planName = plan === 'normal' ? 'Free' : plan === 'pro' ? 'Pro' : 'Premium';
+    toast({
+      title: `${planName} Plan Activated!`,
+      description: plan === 'normal'
+        ? "You're using the free plan. All basic features are available!"
+        : `All ${planName} features are free during our launch period. Enjoy!`,
+    });
   };
 
   const handleContactSales = () => {

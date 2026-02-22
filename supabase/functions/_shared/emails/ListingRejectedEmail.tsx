@@ -55,6 +55,14 @@ export const ListingRejectedEmail = ({
                 </Section>
                 <Text style={footer}>
                     &copy; 2026 Bara Afrika. All rights reserved.
+                    <br />
+                    <Link href={`${baseUrl}/users/dashboard/settings`} style={{ color: "#8898aa" }}>
+                        Email Preferences
+                    </Link>
+                    {" · "}
+                    <Link href={`${baseUrl}/contact-us`} style={{ color: "#8898aa" }}>
+                        Contact Us
+                    </Link>
                 </Text>
             </Container>
         </Body>

@@ -120,16 +120,31 @@ const Footer = () => {
                   {t('footer.contactUs')}
                 </Link>
               </li>
-              {/* <li>
-                <Link to="/advertise" className="text-gray-700 hover:text-black transition-colors font-roboto">
+              <li>
+                <Link to="/advertise" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
                   {t('footer.advertiseWithUs')}
                 </Link>
-              </li> 
+              </li>
               <li>
-                <Link to="/blog" className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
+                <Link to="/blog" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
                   {t('footer.corporateBlog')}
                 </Link>
-              </li>*/}
+              </li>
+              <li>
+                <Link to="/pricing" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
+                  Pricing
+                </Link>
+              </li>
+              <li>
+                <Link to="/store" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
+                  Coin Store
+                </Link>
+              </li>
+              <li>
+                <Link to="/partners" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
+                  Partners
+                </Link>
+              </li>
               <li>
                 <Link to="/advertise" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
                   {t('footer.advertisingChoices')}

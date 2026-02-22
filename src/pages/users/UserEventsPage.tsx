@@ -24,7 +24,6 @@ import {
   X,
   Eye,
   Upload,
-  Upload,
   Images,
   Users
 } from 'lucide-react';

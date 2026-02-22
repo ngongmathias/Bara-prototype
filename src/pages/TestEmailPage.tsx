@@ -157,6 +157,11 @@ export const TestEmailPage = () => {
                                     <p className="text-sm text-blue-600 mt-2">
                                         <strong>Tip:</strong> Use this to verify that your Supabase edge function can reach your target address.
                                     </p>
+                                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
+                                        <p className="text-sm text-yellow-800">
+                                            <strong>⚠️ Test Domain Limitation:</strong> Resend's test domain (<code>onboarding@resend.dev</code>) can only deliver emails to the address registered on your Resend account. To send to any address, upgrade to a production domain.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </CardContent>

@@ -5,6 +5,7 @@ import { BottomBannerAd } from "@/components/BottomBannerAd";
 import { GlobalPlayer } from "@/components/streams/GlobalPlayer";
 import { GlobalGamification } from "@/components/gamification/GlobalGamification";
 import { DailyMissions } from "@/components/gamification/DailyMissions";
+import { DailySpinWheel } from "@/components/gamification/DailySpinWheel";
 import { useEffect } from "react";
 import { useToast } from '@/hooks/use-toast';
 import { Zap } from "lucide-react";
@@ -40,6 +41,7 @@ export const MainLayout = ({ children, hideHeader = false, hideFooter = false }:
       </main>
       <GlobalGamification />
       <DailyMissions />
+      <DailySpinWheel />
       <GlobalPlayer />
       <BottomBannerAd />
       <Footer />

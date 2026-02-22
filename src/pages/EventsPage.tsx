@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
+import { DiscoverMore } from '@/components/DiscoverMore';
 import { EventCard } from "@/components/EventCard";
 import { EventGalleryModal } from "@/components/EventGalleryModal";
 import { ScrollReveal, SkeletonCard } from "@/components/animations";
@@ -1085,6 +1086,8 @@ export const EventsPage = () => {
           </div>
         </main>
       </div>
+
+      <DiscoverMore exclude={['Events']} />
 
       {/* Bottom Banner Ad */}
       <div className="relative z-10">

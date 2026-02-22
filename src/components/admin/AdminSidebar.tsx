@@ -188,6 +188,12 @@ const adminMenuItems = [
     description: "Manage points, rewards, and economy"
   },
   {
+    title: "Revenue Dashboard",
+    icon: BarChart3,
+    path: "/admin/revenue",
+    description: "Monetization analytics and revenue"
+  },
+  {
     title: "Reports & Exports",
     icon: FileText,
     path: "/admin/reports",

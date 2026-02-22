@@ -6,9 +6,16 @@ import { BannerRequestEmail } from "../_shared/emails/BannerRequestEmail.tsx";
 import { ListingApprovedEmail } from "../_shared/emails/ListingApprovedEmail.tsx";
 import { ListingRejectedEmail } from "../_shared/emails/ListingRejectedEmail.tsx";
 import { TicketPurchasedEmail } from "../_shared/emails/TicketPurchasedEmail.tsx";
+import { EventApprovedEmail } from "../_shared/emails/EventApprovedEmail.tsx";
+import { EventRejectedEmail } from "../_shared/emails/EventRejectedEmail.tsx";
+import { ContactFormConfirmationEmail } from "../_shared/emails/ContactFormConfirmationEmail.tsx";
 import React from "npm:react@18.2.0";
 
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -17,6 +24,7 @@ const corsHeaders = {
 };
 
 interface EmailPayload {
+    id?: string;
     to_email?: string;
     subject?: string;
     html_content?: string;
@@ -25,6 +33,7 @@ interface EmailPayload {
     metadata?: any;
     to?: string | string[];
     from?: string;
+    retry_count?: number;
 }
 
 Deno.serve(async (req) => {
@@ -43,6 +52,7 @@ Deno.serve(async (req) => {
         // Detect if this is a Supabase Webhook (it has 'record' and 'type' like 'INSERT')
         const isWebhook = !!body.record;
         const payload: EmailPayload = body.record || body;
+        const queueId = isWebhook ? payload.id : null;
 
         // Extract basic fields
         // Note: For queue records, fields are in the record itself (payload)
@@ -103,6 +113,15 @@ Deno.serve(async (req) => {
                 case 'banner_submission':
                     html = await renderAsync(React.createElement(BannerRequestEmail, templateData));
                     break;
+                case 'event_approved':
+                    html = await renderAsync(React.createElement(EventApprovedEmail, templateData));
+                    break;
+                case 'event_rejected':
+                    html = await renderAsync(React.createElement(EventRejectedEmail, templateData));
+                    break;
+                case 'contact_form_confirmation':
+                    html = await renderAsync(React.createElement(ContactFormConfirmationEmail, templateData));
+                    break;
                 case 'INSERT':
                 case 'UPDATE':
                     // If we get here, it means we didn't find a template type in metadata
@@ -132,6 +151,32 @@ Deno.serve(async (req) => {
         });
 
         const responseData = await res.json();
+
+        // Update email_queue status after send attempt
+        if (queueId && SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+            try {
+                const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+                if (res.ok) {
+                    await supabaseAdmin
+                        .from("email_queue")
+                        .update({ status: "sent", sent_at: new Date().toISOString() })
+                        .eq("id", queueId);
+                    console.log(`Queue row ${queueId} marked as sent`);
+                } else {
+                    await supabaseAdmin
+                        .from("email_queue")
+                        .update({
+                            status: "failed",
+                            error_message: JSON.stringify(responseData),
+                            retry_count: payload.retry_count ? payload.retry_count + 1 : 1,
+                        })
+                        .eq("id", queueId);
+                    console.log(`Queue row ${queueId} marked as failed`);
+                }
+            } catch (updateErr: any) {
+                console.error("Failed to update email_queue status:", updateErr.message);
+            }
+        }
 
         if (!res.ok) {
             console.error("Resend API Error:", responseData);

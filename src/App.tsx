@@ -47,6 +47,7 @@ import { AdminRSSFeeds } from "./pages/admin/AdminRSSFeeds";
 import { AdminSettings } from "./pages/admin/AdminSettings";
 import ContactMessagesPage from "./pages/admin/ContactMessagesPage";
 import AdminGamification from "./pages/admin/AdminGamification";
+import AdminRevenue from "./pages/admin/AdminRevenue";
 import { AdminBannerAds } from "./pages/admin/AdminBannerAds";
 import { AdminAuthGuard } from "./components/admin/AdminAuthGuard";
 import { UserAuthGuard } from "./components/users/UserAuthGuard";
@@ -75,11 +76,12 @@ import EditListing from "./pages/marketplace/EditListing";
 import { CommunityPage } from "./pages/communities/CommunityPage";
 import UserSignInPage from "./pages/user/UserSignInPage";
 import UserSignUpPage from "./pages/user/UserSignUpPage";
-import { UserDashboard } from "./pages/users/UserDashboard";
+import { UserDashboard, UserDashboardHome } from "./pages/users/UserDashboard";
 import { UserEventsPage } from "./pages/users/UserEventsPage";
 import { UserProfilePage } from "./pages/users/UserProfilePage";
 import { UserBannerSubmission } from "./pages/users/UserBannerSubmission";
 import UserSettingsPage from "./pages/users/UserSettingsPage";
+import ProfileThemesPage from "./pages/users/ProfileThemesPage";
 import AdvertiseCheckoutPage from "./pages/AdvertiseCheckoutPage";
 import { SponsorCountryPage } from "./pages/SponsorCountryPage";
 import { AdminSponsoredBanners } from "./pages/admin/AdminSponsoredBanners";
@@ -101,6 +103,12 @@ import BlogPostDetail from "./pages/BlogPostDetail";
 import UserBlogEditor from "./pages/UserBlogEditor";
 import AdminBlog from "./pages/admin/AdminBlog";
 import TestEmailPage from "./pages/TestEmailPage";
+import PricingPage from "./pages/PricingPage";
+import CoinStorePage from "./pages/CoinStorePage";
+import InvitePage from "./pages/InvitePage";
+import LeaderboardPage from "./pages/LeaderboardPage";
+import BusinessPremiumPage from "./pages/BusinessPremiumPage";
+import AffiliatePage from "./pages/AffiliatePage";
 import AdminBlogEditor from "./pages/admin/AdminBlogEditor";
 import AuthFinishPage from "./pages/auth/AuthFinishPage";
 import SSOCallbackPage from "./pages/auth/SSOCallbackPage";
@@ -111,7 +119,9 @@ import TeamPage from "./pages/sports/TeamPage";
 import LeagueTablePage from "./pages/sports/LeagueTablePage";
 import SportsSchedule from "./pages/sports/SportsSchedule";
 import SportsStats from "./pages/sports/SportsStats";
+import SportsPredictions from "./pages/sports/SportsPredictions";
 import SportsTeams from "./pages/sports/SportsTeams";
+import SportsNewsDetail from "./pages/sports/SportsNewsDetail";
 import StreamsHome from "./pages/streams/StreamsHome";
 import PlaylistPage from "./pages/streams/PlaylistPage";
 import ArtistPage from "./pages/streams/ArtistPage";
@@ -121,6 +131,7 @@ import NewReleasesPage from "./pages/streams/NewReleasesPage";
 import LikedSongsPage from "./pages/streams/LikedSongsPage";
 import LibraryPage from "./pages/streams/LibraryPage";
 import ArtistDashboard from "@/pages/streams/ArtistDashboard";
+import ArtistVerificationPage from "./pages/streams/ArtistVerificationPage";
 import PodcastsPage from "./pages/streams/PodcastsPage";
 import SearchPage from "./pages/SearchPage";
 import TestSportsApi from "./pages/TestSportsApi";
@@ -178,15 +189,18 @@ const AppRoutes = () => {
           <Route path="library" element={<UserAuthGuard><LibraryPage /></UserAuthGuard>} />
           <Route path="podcasts" element={<PodcastsPage />} />
           <Route path="creator" element={<UserAuthGuard><ArtistDashboard /></UserAuthGuard>} />
+          <Route path="verification" element={<ArtistVerificationPage />} />
           <Route path="*" element={<StreamsHome />} /> {/* Fallback within streams context */}
         </Route>
 
         <Route path="/sports/*">
           <Route index element={<SportsHome />} />
           <Route path="scores" element={<SportsScores />} />
+          <Route path="news/:id" element={<SportsNewsDetail />} />
           <Route path="game/:id" element={<MatchCenter />} />
           <Route path="match/:id" element={<MatchCenter />} />
           <Route path="team/:id" element={<TeamPage />} />
+          <Route path="predictions" element={<SportsPredictions />} />
           <Route path="table/:id" element={<LeagueTablePage />} />
 
           {/* Dynamic Sport Routes */}
@@ -291,13 +305,15 @@ const AppRoutes = () => {
         {/* User Dashboard Routes - Isolated */}
         <Route path="/users/*">
           <Route path="dashboard" element={<UserAuthGuard><UserDashboard /></UserAuthGuard>}>
-            <Route index element={<div className="p-6"><h2 className="text-2xl font-bold mb-4">Dashboard Home</h2><p>Welcome to your dashboard!</p></div>} />
+            <Route index element={<UserDashboardHome />} />
             <Route path="events" element={<UserEventsPage />} />
             <Route path="events/:eventId/registrations" element={<OrganizerRegistrationsPage />} />
             <Route path="tickets" element={<UserTicketsPage />} />
             <Route path="analytics" element={<UserAnalytics />} />
             <Route path="banner-submissions" element={<UserBannerSubmission />} />
             <Route path="profile" element={<UserProfilePage />} />
+            <Route path="settings" element={<UserSettingsPage />} />
+            <Route path="themes" element={<ProfileThemesPage />} />
           </Route>
           <Route path="*" element={<UserAuthGuard><UserDashboard /></UserAuthGuard>} />
         </Route>
@@ -308,6 +324,7 @@ const AppRoutes = () => {
         <Route path="/contact-us" element={<ContactUsPage />} />
         <Route path="/faq" element={<FaqPage />} />
         <Route path="/ask-question" element={<AskQuestionPage />} />
+        <Route path="/writeareview" element={<WriteReviewPage />} />
         <Route path="/claim-listing" element={<ClaimListingPage />} />
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
@@ -315,6 +332,12 @@ const AppRoutes = () => {
         {/* Advertise Routes */}
         <Route path="/advertise" element={<AdvertisePage />} />
         <Route path="/advertise/checkout" element={<AdvertiseCheckoutPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/store" element={<CoinStorePage />} />
+        <Route path="/invite" element={<InvitePage />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
+        <Route path="/business-premium" element={<BusinessPremiumPage />} />
+        <Route path="/partners" element={<AffiliatePage />} />
         <Route path="/sponsor-country" element={<SponsorCountryPage />} />
 
         {/* Authentication Routes - Extremely specific */}
@@ -346,6 +369,7 @@ const AppRoutes = () => {
           <Route path="rss-feeds" element={<AdminAuthGuard><AdminRSSFeeds /></AdminAuthGuard>} />
           <Route path="settings" element={<AdminAuthGuard><AdminSettings /></AdminAuthGuard>} />
           <Route path="gamification" element={<AdminAuthGuard><AdminGamification /></AdminAuthGuard>} />
+          <Route path="revenue" element={<AdminAuthGuard><AdminRevenue /></AdminAuthGuard>} />
           <Route path="contact-messages" element={<AdminAuthGuard><ContactMessagesPage /></AdminAuthGuard>} />
           <Route path="banner-ads" element={<AdminAuthGuard><AdminBannerAds /></AdminAuthGuard>} />
           <Route path="blog" element={<AdminAuthGuard><AdminBlog /></AdminAuthGuard>} />

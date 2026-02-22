@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,7 +24,9 @@ import {
 
 const ContactUsPage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { submitContactMessage, loading } = useContactMessages();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<ContactMessage>({
     first_name: '',
     last_name: '',
@@ -84,7 +87,7 @@ const ContactUsPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Form */}
-            <div>
+            <div ref={formRef}>
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-2xl font-comfortaa flex items-center">
@@ -289,7 +292,7 @@ const ContactUsPage = () => {
                       <p className="text-sm text-gray-500 font-roboto">{t('contact.info.business.description')}</p>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full font-roboto">
+                  <Button variant="outline" className="w-full font-roboto" onClick={() => navigate('/advertise')}>
                     {t('contact.info.business.learnMore')}
                   </Button>
                 </CardContent>
@@ -369,10 +372,10 @@ const ContactUsPage = () => {
             {t('contact.cta.description')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="font-roboto">
+            <Button size="lg" className="font-roboto" onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth' })}>
               {t('contact.cta.primaryButton')}
             </Button>
-            <Button size="lg" variant="outline" className="bg-transparent border-2 border-black text-black hover:bg-gray-100 font-roboto">
+            <Button size="lg" variant="outline" className="bg-transparent border-2 border-black text-black hover:bg-gray-100 font-roboto" onClick={() => navigate('/faq')}>
               {t('contact.cta.secondaryButton')}
             </Button>
           </div>

@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useTranslation } from 'react-i18next';
+import { MonetizationService } from '@/lib/monetizationService';
+import { useAdFree } from '@/hooks/useAdFree';
 
 interface BannerAdProps {
   className?: string;
@@ -12,12 +14,14 @@ interface SponsoredBannerRow {
   banner_alt_text: string | null;
   company_website: string | null;
   company_name?: string;
+  bid_per_click?: number;
 }
 
 let bannerAdInstanceCounter = 0;
 
 export const BannerAd: React.FC<BannerAdProps> = ({ className = "" }) => {
   const { t } = useTranslation();
+  const { isAdFree } = useAdFree();
   const [banners, setBanners] = useState<SponsoredBannerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
@@ -177,25 +181,33 @@ export const BannerAd: React.FC<BannerAdProps> = ({ className = "" }) => {
     return banners[currentBannerIndex];
   }, [banners, currentBannerIndex]);
 
-  // Track banner click (simplified without analytics service)
-  const handleBannerClick = (bannerId: string, event: React.MouseEvent) => {
-    // Simple click tracking - you can add analytics here later if needed
-    console.log('Banner clicked:', bannerId);
+  // Track impression whenever the banner changes
+  useEffect(() => {
+    if (bannerToShow) {
+      MonetizationService.trackInteraction(bannerToShow.id, 'banner', 'impression');
+    }
+  }, [bannerToShow?.id]);
+
+  // Track banner click
+  const handleBannerClick = async (bannerId: string, _event: React.MouseEvent) => {
+    try {
+      await supabase
+        .from('sponsored_banner_analytics')
+        .insert({
+          banner_id: bannerId,
+          event_type: 'click',
+          user_agent: navigator.userAgent,
+        });
+
+      const bidValue = banners.find(b => b.id === bannerId)?.bid_per_click || 0.05;
+      await MonetizationService.trackInteraction(bannerId, 'banner', 'click', bidValue);
+    } catch (error) {
+      console.error('Error tracking banner click:', error);
+    }
   };
 
   const targetUrl = ensureProtocol(bannerToShow?.company_website || null);
   
-  // Debug: Log the target URL to help troubleshoot
-  useEffect(() => {
-    if (bannerToShow && targetUrl) {
-      console.log('Banner URL Debug:', {
-        bannerId: bannerToShow.id,
-        companyName: bannerToShow.company_name,
-        originalUrl: bannerToShow.company_website,
-        processedUrl: targetUrl
-      });
-    }
-  }, [bannerToShow, targetUrl]);
   const sponsorHost = useMemo(() => {
     if (!targetUrl) return null;
     try {
@@ -205,6 +217,8 @@ export const BannerAd: React.FC<BannerAdProps> = ({ className = "" }) => {
       return null;
     }
   }, [targetUrl]);
+
+  if (isAdFree) return null;
 
   return (
     <div 
@@ -226,7 +240,6 @@ export const BannerAd: React.FC<BannerAdProps> = ({ className = "" }) => {
                   className="block overflow-hidden hover:opacity-95 transition-opacity cursor-pointer"
                   aria-label={`Visit ${bannerToShow.company_name} - ${bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}`}
                   onClick={(e) => {
-                    console.log('Banner clicked, navigating to:', targetUrl);
                     bannerToShow?.id && handleBannerClick(bannerToShow.id, e);
                   }}
                 >

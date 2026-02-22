@@ -24,7 +24,8 @@ import {
   ChevronLeft,
   MapPin,
   Wrench,
-  LayoutDashboard
+  LayoutDashboard,
+  Coins
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -318,6 +319,18 @@ export const Header = () => {
             <div className="hidden sm:block">
               <GoogleTranslate />
             </div>
+
+            {/* Bara Coins Balance */}
+            {isSignedIn && profile && (
+              <Link
+                to="/store"
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-full text-sm font-bold text-yellow-800 transition-colors mr-1"
+                title="Bara Coins — Visit Store"
+              >
+                <Coins className="w-3.5 h-3.5 text-yellow-600" />
+                {profile.bara_coins.toLocaleString()}
+              </Link>
+            )}
 
             {/* Notification Bell */}
             {isSignedIn && (

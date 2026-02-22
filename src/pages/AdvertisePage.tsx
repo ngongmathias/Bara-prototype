@@ -55,7 +55,7 @@ const AdvertisePage = () => {
                   <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="h-14 px-8 rounded-full font-bold text-lg border-2">
+              <Button size="lg" variant="outline" className="h-14 px-8 rounded-full font-bold text-lg border-2" onClick={() => window.location.href = 'mailto:business@baraafrika.com?subject=Media Kit Request'}>
                 Download Media Kit
               </Button>
             </div>
@@ -109,7 +109,7 @@ const AdvertisePage = () => {
                     </div>
                   ))}
                 </div>
-                <Button className="w-full mt-8 bg-blue-600 hover:bg-blue-500 text-white font-bold h-12">Set Your Bid</Button>
+                <Button className="w-full mt-8 bg-blue-600 hover:bg-blue-500 text-white font-bold h-12" asChild><Link to="/advertise/checkout">Set Your Bid</Link></Button>
               </Card>
             </div>
           </div>
@@ -138,7 +138,7 @@ const AdvertisePage = () => {
                   <li className="flex items-center gap-2 text-sm"><ShieldCheck size={16} className="text-gray-400" /> Public Profile</li>
                   <li className="flex items-center gap-2 text-sm text-gray-400 line-through"><Circle size={16} /> Verified Badge</li>
                 </ul>
-                <Button className="w-full h-12 bg-white text-black border-2 border-gray-200 hover:bg-gray-100 rounded-xl font-bold">Get Started</Button>
+                <Button className="w-full h-12 bg-white text-black border-2 border-gray-200 hover:bg-gray-100 rounded-xl font-bold" asChild><Link to="/user/sign-up">Get Started</Link></Button>
               </CardContent>
             </Card>
 
@@ -159,7 +159,7 @@ const AdvertisePage = () => {
                   <li className="flex items-center gap-2 text-sm font-bold"><BarChart3 size={16} className="text-blue-600" /> Marketing Dashboard</li>
                   <li className="flex items-center gap-2 text-sm font-bold"><Globe size={16} className="text-blue-600" /> Global Priority Search</li>
                 </ul>
-                <Button className="w-full h-12 bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200 rounded-xl font-bold">Claim Pro Status</Button>
+                <Button className="w-full h-12 bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200 rounded-xl font-bold" asChild><Link to="/advertise/checkout">Claim Pro Status</Link></Button>
               </CardContent>
             </Card>
 
@@ -179,7 +179,7 @@ const AdvertisePage = () => {
                   <li className="flex items-center gap-2 text-sm"><ShieldCheck size={16} className="text-yellow-500" /> Zero Ad Commission</li>
                   <li className="flex items-center gap-2 text-sm font-bold"><Crown size={16} className="text-yellow-500" /> Featured Homepage Spot</li>
                 </ul>
-                <Button className="w-full h-12 bg-white text-black hover:bg-gray-100 rounded-xl font-bold">Contact Sales</Button>
+                <Button className="w-full h-12 bg-white text-black hover:bg-gray-100 rounded-xl font-bold" onClick={() => window.location.href = 'mailto:business@baraafrika.com?subject=Bara Elite Inquiry'}>Contact Sales</Button>
               </CardContent>
             </Card>
           </div>

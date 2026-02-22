@@ -78,7 +78,7 @@ const AdvertiseCheckoutPage = () => {
                     >
                       <Crown className={`mb-3 ${plan === 'pro' ? 'text-blue-600' : 'text-gray-400'}`} />
                       <div className="font-bold text-lg">Bara Pro</div>
-                      <div className="text-xl font-black text-blue-600">$19/mo</div>
+                      <div className="text-xl font-black text-blue-600">$5/mo</div>
                     </button>
                     <button
                       onClick={() => setPlan('elite')}
@@ -86,7 +86,7 @@ const AdvertiseCheckoutPage = () => {
                     >
                       <Zap className={`mb-3 ${plan === 'elite' ? 'text-yellow-500' : 'text-gray-400'}`} />
                       <div className="font-bold text-lg">Bara Elite</div>
-                      <div className="text-xl font-black text-yellow-600">$79/mo</div>
+                      <div className="text-xl font-black text-yellow-600">$20/mo</div>
                     </button>
                   </div>
                 </div>

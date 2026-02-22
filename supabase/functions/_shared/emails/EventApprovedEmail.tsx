@@ -12,18 +12,22 @@ import {
 } from "npm:@react-email/components@1.0.7";
 import * as React from "npm:react@18.3.1";
 
-interface WelcomeEmailProps {
-    userFirstname?: string;
+interface EventApprovedEmailProps {
+    organizerName?: string;
+    eventName?: string;
+    eventId?: string;
 }
 
 const baseUrl = "https://baraafrika.com";
 
-export const WelcomeEmail = ({
-    userFirstname = "Apps",
-}: WelcomeEmailProps) => (
+export const EventApprovedEmail = ({
+    organizerName = "Organizer",
+    eventName = "Your Event",
+    eventId = "",
+}: EventApprovedEmailProps) => (
     <Html>
         <Head />
-        <Preview>Welcome to Bara Afrika!</Preview>
+        <Preview>Your event has been approved and is now live!</Preview>
         <Body style={main}>
             <Container style={container}>
                 <Img
@@ -33,18 +37,21 @@ export const WelcomeEmail = ({
                     alt="Bara Afrika"
                     style={logo}
                 />
-                <Heading style={h1}>Welcome to Bara Afrika!</Heading>
-                <Text style={text}>Hi {userFirstname},</Text>
+                <Heading style={h1}>🎉 Event Approved!</Heading>
+                <Text style={text}>Hi {organizerName},</Text>
                 <Text style={text}>
-                    Thank you for joining Bara Afrika, the heartbeat of African commerce and community.
+                    Great news! <strong>{eventName}</strong> has been approved and is now live on the Bara Afrika Events Calendar.
+                </Text>
+                <Text style={text}>
+                    Your event is now visible to thousands of users across the platform. Share the link below to spread the word!
                 </Text>
                 <Section style={btnContainer}>
-                    <Link style={button} href={baseUrl}>
-                        Go to Dashboard
+                    <Link style={button} href={`${baseUrl}/events`}>
+                        View Your Event
                     </Link>
                 </Section>
                 <Text style={text}>
-                    If you have any questions, feel free to reply to this email.
+                    You can manage registrations and event details from your dashboard.
                 </Text>
                 <Text style={footer}>
                     &copy; 2026 Bara Afrika. All rights reserved.
@@ -62,7 +69,7 @@ export const WelcomeEmail = ({
     </Html>
 );
 
-export default WelcomeEmail;
+export default EventApprovedEmail;
 
 const main = {
     backgroundColor: "#ffffff",
@@ -105,7 +112,7 @@ const btnContainer = {
 const button = {
     backgroundColor: "#000000",
     borderRadius: "100px",
-    color: "#FFD700", // Bara Yellow text
+    color: "#FFD700",
     fontSize: "16px",
     textDecoration: "none",
     textAlign: "center" as const,
@@ -120,4 +127,3 @@ const footer = {
     marginBottom: "24px",
     textAlign: "center" as const,
 };
-

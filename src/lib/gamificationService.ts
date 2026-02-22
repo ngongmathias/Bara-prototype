@@ -212,6 +212,35 @@ export class GamificationService {
         }
     }
 
+    static async addCoins(userId: string, amount: number, reason: string): Promise<boolean> {
+        try {
+            const profile = await this.getProfile(userId);
+            if (!profile) return false;
+
+            const { error } = await supabase
+                .from('gamification_profiles')
+                .update({
+                    bara_coins: Number(profile.bara_coins) + amount,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('user_id', userId);
+
+            if (error) throw error;
+
+            await supabase.from('gamification_history').insert({
+                user_id: userId,
+                type: 'coin_purchase',
+                amount,
+                reason
+            });
+
+            return true;
+        } catch (error) {
+            console.error('Error adding coins:', error);
+            return false;
+        }
+    }
+
     static async spendCoins(userId: string, amount: number, reason: string): Promise<boolean> {
         try {
             const profile = await this.getProfile(userId);

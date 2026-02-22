@@ -467,6 +467,9 @@ export const PostListing = () => {
                         <Label htmlFor="is-premium" className="font-bold text-sm">Boost for 50 Coins</Label>
                       </div>
                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Bara Elite Model</p>
+                      <a href="/store" className="text-[10px] text-yellow-600 hover:text-yellow-700 font-bold underline">
+                        Not enough coins? Buy more →
+                      </a>
                     </div>
                   </div>
                 </div>

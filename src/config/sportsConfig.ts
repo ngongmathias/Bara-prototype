@@ -42,6 +42,7 @@ export const SPORTS_CONFIG: Record<string, SportConfig> = {
             { label: 'Transfers', path: 'transfers' },
             { label: 'Leagues & Cups', path: 'leagues' },
             { label: 'Teams', path: 'teams' },
+            { label: 'Predictions', path: '../predictions' },
         ],
         featuredLeagues: [
             { id: 39, name: "Premier League", logo: "https://media.api-sports.io/football/leagues/39.png" },

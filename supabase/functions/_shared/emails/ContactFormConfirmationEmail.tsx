@@ -12,18 +12,20 @@ import {
 } from "npm:@react-email/components@1.0.7";
 import * as React from "npm:react@18.3.1";
 
-interface WelcomeEmailProps {
-    userFirstname?: string;
+interface ContactFormConfirmationEmailProps {
+    userName?: string;
+    subject?: string;
 }
 
 const baseUrl = "https://baraafrika.com";
 
-export const WelcomeEmail = ({
-    userFirstname = "Apps",
-}: WelcomeEmailProps) => (
+export const ContactFormConfirmationEmail = ({
+    userName = "User",
+    subject = "your inquiry",
+}: ContactFormConfirmationEmailProps) => (
     <Html>
         <Head />
-        <Preview>Welcome to Bara Afrika!</Preview>
+        <Preview>We received your message!</Preview>
         <Body style={main}>
             <Container style={container}>
                 <Img
@@ -33,19 +35,19 @@ export const WelcomeEmail = ({
                     alt="Bara Afrika"
                     style={logo}
                 />
-                <Heading style={h1}>Welcome to Bara Afrika!</Heading>
-                <Text style={text}>Hi {userFirstname},</Text>
+                <Heading style={h1}>Message Received</Heading>
+                <Text style={text}>Hi {userName},</Text>
                 <Text style={text}>
-                    Thank you for joining Bara Afrika, the heartbeat of African commerce and community.
+                    Thank you for reaching out! We've received your message regarding <strong>{subject}</strong>.
+                </Text>
+                <Text style={text}>
+                    Our team typically responds within 24–48 hours. In the meantime, you may find answers to common questions on our FAQ page.
                 </Text>
                 <Section style={btnContainer}>
-                    <Link style={button} href={baseUrl}>
-                        Go to Dashboard
+                    <Link style={button} href={`${baseUrl}/faq`}>
+                        Visit FAQ
                     </Link>
                 </Section>
-                <Text style={text}>
-                    If you have any questions, feel free to reply to this email.
-                </Text>
                 <Text style={footer}>
                     &copy; 2026 Bara Afrika. All rights reserved.
                     <br />
@@ -62,7 +64,7 @@ export const WelcomeEmail = ({
     </Html>
 );
 
-export default WelcomeEmail;
+export default ContactFormConfirmationEmail;
 
 const main = {
     backgroundColor: "#ffffff",
@@ -105,7 +107,7 @@ const btnContainer = {
 const button = {
     backgroundColor: "#000000",
     borderRadius: "100px",
-    color: "#FFD700", // Bara Yellow text
+    color: "#FFD700",
     fontSize: "16px",
     textDecoration: "none",
     textAlign: "center" as const,
@@ -120,4 +122,3 @@ const footer = {
     marginBottom: "24px",
     textAlign: "center" as const,
 };
-

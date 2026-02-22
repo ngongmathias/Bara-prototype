@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { MonetizationService } from '@/lib/monetizationService';
+import { useAdFree } from '@/hooks/useAdFree';
 
 interface TopBannerAdProps {
   className?: string;
@@ -23,6 +24,7 @@ let topBannerAdInstanceCounter = 0;
 export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
   const { t } = useTranslation();
   const { selectedCountry } = useCountrySelection();
+  const { isAdFree } = useAdFree();
   const [allBanners, setAllBanners] = useState<SponsoredBannerRow[]>([]);
   const [banners, setBanners] = useState<SponsoredBannerRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,10 +161,8 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
     if (countrySpecificBanners.length > 0) {
       // Show country-specific ads
       setBanners(countrySpecificBanners);
-      console.log(`Showing ${countrySpecificBanners.length} ads for ${selectedCountry.name}`);
     } else {
       // Fallback: show all banners if no country-specific ads exist
-      console.log(`No ads for ${selectedCountry.name}, showing all ${allBanners.length} ads`);
       setBanners(allBanners);
     }
 
@@ -247,9 +247,7 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
   }, [bannerToShow?.id]);
 
   // Track banner click
-  const handleBannerClick = (bannerId: string, event: React.MouseEvent) => {
-    console.log('Top banner clicked:', bannerId);
-    // Track click analytics
+  const handleBannerClick = (bannerId: string, _event: React.MouseEvent) => {
     trackBannerClick(bannerId);
   };
 
@@ -274,18 +272,6 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
 
   const targetUrl = ensureProtocol(bannerToShow?.company_website || null);
 
-  // Debug: Log the target URL to help troubleshoot
-  useEffect(() => {
-    if (bannerToShow && targetUrl) {
-      console.log('Top Banner URL Debug:', {
-        bannerId: bannerToShow.id,
-        companyName: bannerToShow.company_name,
-        originalUrl: bannerToShow.company_website,
-        processedUrl: targetUrl
-      });
-    }
-  }, [bannerToShow, targetUrl]);
-
   const sponsorHost = useMemo(() => {
     if (!targetUrl) return null;
     try {
@@ -295,6 +281,10 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
       return null;
     }
   }, [targetUrl]);
+
+  if (isAdFree) {
+    return null; // User has ad-free browsing active
+  }
 
   if (loading) {
     return null; // Don't show anything while loading
@@ -331,7 +321,6 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
                 className="block overflow-hidden hover:opacity-95 transition-opacity cursor-pointer"
                 aria-label={`Visit ${bannerToShow.company_name} - ${bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}`}
                 onClick={(e) => {
-                  console.log('Top banner clicked, navigating to:', targetUrl);
                   bannerToShow?.id && handleBannerClick(bannerToShow.id, e);
                 }}
               >

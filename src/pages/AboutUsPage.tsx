@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,8 @@ const aboutSlides: string[] = [
 
 const AboutUsPage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const overviewRef = useRef<HTMLElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -58,10 +61,10 @@ const AboutUsPage = () => {
               {t('about.hero.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="font-roboto">
+              <Button size="lg" className="font-roboto" onClick={() => overviewRef.current?.scrollIntoView({ behavior: 'smooth' })}>
                 {t('about.hero.learnMore')}
               </Button>
-              <Button size="lg" variant="outline" className="font-roboto">
+              <Button size="lg" variant="outline" className="font-roboto" onClick={() => navigate('/contact-us')}>
                 {t('about.hero.contactUs')}
               </Button>
             </div>
@@ -69,7 +72,7 @@ const AboutUsPage = () => {
         </section>
 
         {/* Company Overview */}
-        <section className="py-16 bg-white">
+        <section ref={overviewRef} className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>

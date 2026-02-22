@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
+import { MonetizationService } from '@/lib/monetizationService';
+import { useAdFree } from '@/hooks/useAdFree';
 
 interface BottomBannerAdProps {
   className?: string;
@@ -14,6 +16,7 @@ interface SponsoredBannerRow {
   company_website: string | null;
   company_name?: string;
   country_ids?: string[];  // Array of targeted country IDs
+  bid_per_click?: number;
 }
 
 let bottomBannerAdInstanceCounter = 0;
@@ -21,6 +24,7 @@ let bottomBannerAdInstanceCounter = 0;
 export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }) => {
   const { t } = useTranslation();
   const { selectedCountry } = useCountrySelection();
+  const { isAdFree } = useAdFree();
   const [allBanners, setAllBanners] = useState<SponsoredBannerRow[]>([]);
   const [banners, setBanners] = useState<SponsoredBannerRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -223,15 +227,21 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
     return banners[currentBannerIndex];
   }, [banners, currentBannerIndex]);
 
+  // Track impression whenever the banner changes
+  useEffect(() => {
+    if (bannerToShow) {
+      MonetizationService.trackInteraction(bannerToShow.id, 'banner', 'impression');
+    }
+  }, [bannerToShow?.id]);
+
   // Track banner click
-  const handleBannerClick = (bannerId: string, event: React.MouseEvent) => {
-    console.log('Bottom banner clicked:', bannerId);
-    // Track click analytics
+  const handleBannerClick = (bannerId: string, _event: React.MouseEvent) => {
     trackBannerClick(bannerId);
   };
 
   const trackBannerClick = async (bannerId: string) => {
     try {
+      // Legacy tracking
       await supabase
         .from('sponsored_banner_analytics')
         .insert({
@@ -239,6 +249,10 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
           event_type: 'click',
           user_agent: navigator.userAgent,
         });
+
+      // Bara Prime ROI tracking
+      const bidValue = banners.find(b => b.id === bannerId)?.bid_per_click || 0.05;
+      await MonetizationService.trackInteraction(bannerId, 'banner', 'click', bidValue);
     } catch (error) {
       console.error('Error tracking bottom banner click:', error);
     }
@@ -246,17 +260,6 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
 
   const targetUrl = ensureProtocol(bannerToShow?.company_website || null);
 
-  // Debug: Log the target URL to help troubleshoot
-  useEffect(() => {
-    if (bannerToShow && targetUrl) {
-      console.log('Bottom Banner URL Debug:', {
-        bannerId: bannerToShow.id,
-        companyName: bannerToShow.company_name,
-        originalUrl: bannerToShow.company_website,
-        processedUrl: targetUrl
-      });
-    }
-  }, [bannerToShow, targetUrl]);
 
   const sponsorHost = useMemo(() => {
     if (!targetUrl) return null;
@@ -267,6 +270,10 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
       return null;
     }
   }, [targetUrl]);
+
+  if (isAdFree) {
+    return null; // User has ad-free browsing active
+  }
 
   if (loading) {
     return null; // Don't show anything while loading
@@ -303,7 +310,6 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
                 className="block overflow-hidden hover:opacity-95 transition-opacity cursor-pointer"
                 aria-label={`Visit ${bannerToShow.company_name} - ${bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}`}
                 onClick={(e) => {
-                  console.log('Bottom banner clicked, navigating to:', targetUrl);
                   bannerToShow?.id && handleBannerClick(bannerToShow.id, e);
                 }}
               >
