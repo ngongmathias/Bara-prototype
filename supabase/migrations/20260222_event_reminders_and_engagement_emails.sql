@@ -15,12 +15,12 @@ DECLARE
   v_registrations RECORD;
 BEGIN
   -- Fetch event details
-  SELECT id, title, start_date, location, organizer_name
+  SELECT id, title, start_date, venue_name, venue_address, organizer_name
   INTO v_event
   FROM public.events
   WHERE id = p_event_id
     AND start_date BETWEEN NOW() + INTERVAL '23 hours' AND NOW() + INTERVAL '25 hours'
-    AND status = 'approved';
+    AND event_status = 'upcoming';
 
   IF NOT FOUND THEN
     RETURN;
@@ -52,7 +52,7 @@ BEGIN
           'eventTitle', v_event.title,
           'eventDate', to_char(v_event.start_date AT TIME ZONE 'UTC', 'FMDay, FMMonth FMDD, YYYY'),
           'eventTime', to_char(v_event.start_date AT TIME ZONE 'UTC', 'FMHH12:MI AM TZ'),
-          'eventLocation', COALESCE(v_event.location, ''),
+          'eventLocation', COALESCE(v_event.venue_name || ' — ' || v_event.venue_address, v_event.venue_name, ''),
           'eventId', v_event.id::TEXT,
           'ticketType', COALESCE(v_registrations.ticket_type, 'General Admission'),
           'organizerName', COALESCE(v_event.organizer_name, 'the organizer')
@@ -87,10 +87,10 @@ BEGIN
 
   -- Try to get user email from clerk_users table if it exists
   BEGIN
-    SELECT email, first_name
+    SELECT email, split_part(COALESCE(full_name, ''), ' ', 1)
     INTO v_user_email, v_user_name
     FROM public.clerk_users
-    WHERE clerk_id = NEW.user_id
+    WHERE clerk_user_id = NEW.user_id
     LIMIT 1;
   EXCEPTION WHEN OTHERS THEN
     v_user_email := NULL;
@@ -158,47 +158,46 @@ BEGIN
   LOOP
     -- Try to get user email
     BEGIN
-      SELECT email, first_name
+      SELECT email, split_part(COALESCE(full_name, ''), ' ', 1)
       INTO v_user_email, v_user_name
       FROM public.clerk_users
-      WHERE clerk_id = v_profile.user_id
+      WHERE clerk_user_id = v_profile.user_id
       LIMIT 1;
     EXCEPTION WHEN OTHERS THEN
       v_user_email := NULL;
       v_user_name := NULL;
     END;
 
-    IF v_user_email IS NOT NULL THEN
-      -- Check we haven't already sent a streak warning today
-      IF NOT EXISTS (
-        SELECT 1 FROM public.email_queue
-        WHERE to_email = v_user_email
-          AND type = 'streak_warning'
-          AND created_at > NOW() - INTERVAL '20 hours'
-      ) THEN
-        INSERT INTO public.email_queue (
-          to_email,
-          subject,
-          type,
-          status,
-          metadata
-        ) VALUES (
-          v_user_email,
-          '🔥 Don''t break your ' || v_profile.consecutive_days || '-day streak!',
-          'streak_warning',
-          'pending',
-          jsonb_build_object(
-            'type', 'streak_warning',
-            'data', jsonb_build_object(
-              'userFirstname', COALESCE(v_user_name, 'Explorer'),
-              'currentStreak', v_profile.consecutive_days,
-              'lastActivityDate', to_char(v_profile.last_activity_at AT TIME ZONE 'UTC', 'FMDay, FMMonth FMDD')
-            )
-          )
-        );
-        v_count := v_count + 1;
-      END IF;
+    IF v_user_email IS NULL THEN
+      CONTINUE;
     END IF;
+
+    -- Skip users who logged in today (they don't need a warning)
+    IF v_profile.last_activity_at::DATE = CURRENT_DATE THEN
+      CONTINUE;
+    END IF;
+
+    INSERT INTO public.email_queue (
+      to_email,
+      subject,
+      type,
+      status,
+      metadata
+    ) VALUES (
+      v_user_email,
+      '🔥 Don''t break your ' || v_profile.consecutive_days || '-day streak!',
+      'streak_warning',
+      'pending',
+      jsonb_build_object(
+        'type', 'streak_warning',
+        'data', jsonb_build_object(
+          'userFirstname', COALESCE(v_user_name, 'Explorer'),
+          'currentStreak', v_profile.consecutive_days,
+          'lastActivityDate', to_char(v_profile.last_activity_at AT TIME ZONE 'UTC', 'FMDay, FMMonth FMDD')
+        )
+      )
+    );
+    v_count := v_count + 1;
   END LOOP;
 
   RETURN v_count;
@@ -210,10 +209,10 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Run queue_event_reminder(id) for each row in this view daily
 -- ============================================================
 CREATE OR REPLACE VIEW public.events_needing_reminders AS
-SELECT id, title, start_date, location
+SELECT id, title, start_date, venue_name, venue_address
 FROM public.events
 WHERE start_date BETWEEN NOW() + INTERVAL '23 hours' AND NOW() + INTERVAL '25 hours'
-  AND status = 'approved';
+  AND event_status = 'upcoming';
 
 -- ============================================================
 -- STEP 5: Function to send weekly digest emails
@@ -244,10 +243,10 @@ BEGIN
   LOOP
     -- Get user email
     BEGIN
-      SELECT email, first_name
+      SELECT email, split_part(COALESCE(full_name, ''), ' ', 1)
       INTO v_user_email, v_user_name
       FROM public.clerk_users
-      WHERE clerk_id = v_profile.user_id
+      WHERE clerk_user_id = v_profile.user_id
       LIMIT 1;
     EXCEPTION WHEN OTHERS THEN
       v_user_email := NULL;
@@ -312,7 +311,7 @@ BEGIN
       JOIN public.events e ON e.id = er.event_id
       WHERE er.attendee_email = v_user_email
         AND e.start_date > NOW()
-        AND e.status = 'approved'
+        AND e.event_status IN ('upcoming', 'ongoing')
       ORDER BY e.start_date ASC
       LIMIT 1;
     EXCEPTION WHEN OTHERS THEN
