@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Loader2, Music } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,6 +19,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
     const [loading, setLoading] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const { user, isLoaded } = useUser();
 
     if (!isOpen) return null;
 
@@ -32,9 +34,10 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
             return;
         }
 
+        if (!isLoaded) return;
+
         setLoading(true);
         try {
-            const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('User not authenticated');
 
             const { error } = await supabase

@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import { CreatePlaylistModal } from '@/components/streams/CreatePlaylistModal';
+import { useUser } from '@clerk/clerk-react';
 
 interface LibraryItem {
     id: string;
@@ -22,10 +23,12 @@ export default function LibraryPage() {
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+    const { user, isLoaded } = useUser();
+
     const fetchLibrary = async () => {
+        if (!isLoaded) return;
         setLoading(true);
         try {
-            const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
                 setLoading(false);
                 return;

@@ -1,0 +1,19 @@
+{
+  "projectName": "Bara-Prototype",
+  "projectPath": "c:/Users/Hp/Bara-Prototype",
+  "testingType": "Frontend",
+  "mode": "Codebase",
+  "frontendUrl": "http://localhost:8080",
+  "backendUrl": "",
+  "testAccountUsername": "",
+  "testAccountPassword": "",
+  "executionArgs": {
+    "projectName": "Bara-Prototype",
+    "projectPath": "c:/Users/Hp/Bara-Prototype",
+    "testIds": [],
+    "additionalInstruction": "",
+    "envs": {
+      "API_KEY": "sk-user-d46BPHW_0YvpHKHCibUq2Ui2Nysu938qFt60JYWFVeJgkvPzLmwu1wWs0IONkTcET5WbZ0FN4gutcx1qprMOpvAJa0MYRNBRHtSsyZMxGqbNxqIJlU5vjIoMRmwNgG41bWk"
+    }
+  }
+}
