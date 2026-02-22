@@ -7,6 +7,7 @@ import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
 import { SportsSubNav } from '../../components/sports/SportsSubNav';
 import { SponsorshipBanner } from '../../components/sports/SponsorshipBanner';
 import { SEO } from '@/components/SEO';
+import { ExternalLink } from 'lucide-react';
 
 export default function MatchCenter() {
     const { id } = useParams();
@@ -165,6 +166,13 @@ export default function MatchCenter() {
 
                 {/* Sponsorship Section */}
                 <div className="max-w-6xl mx-auto px-4 py-8">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xs font-black uppercase tracking-tighter text-gray-400">Match Sponsorship</h3>
+                        <a href={`/advertise?item_id=${id}&item_type=match`} className="text-[10px] font-bold text-blue-600 hover:underline flex items-center gap-1">
+                            <ExternalLink size={10} />
+                            Sponsor This Page
+                        </a>
+                    </div>
                     <SponsorshipBanner />
                 </div>
 

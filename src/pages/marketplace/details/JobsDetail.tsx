@@ -7,9 +7,9 @@ import { BottomBannerAd } from '@/components/BottomBannerAd';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
-import { 
-  ChevronRight, 
-  Share2, 
+import {
+  ChevronRight,
+  Share2,
   Flag,
   MapPin,
   Calendar,
@@ -34,24 +34,36 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaWhatsapp } from 'react-icons/fa';
+import { MonetizationService } from '@/lib/monetizationService';
+import { GamificationService } from '@/lib/gamificationService';
+import { useUser } from '@clerk/clerk-react';
 
 export const JobsDetail = () => {
   const { listingId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [listing, setListing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [relatedListings, setRelatedListings] = useState<any[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
 
+  const { user } = useUser();
+
   useEffect(() => {
     if (listingId) {
       fetchListing();
       incrementViewCount();
+      // Phase 7: Track as a 'click' interaction for ROI analytics
+      MonetizationService.trackInteraction(listingId, 'listing', 'click');
+
+      // Phase 8: Daily Mission progress
+      if (user) {
+        GamificationService.trackMissionProgress(user.id, 'daily_market_view');
+      }
     }
-  }, [listingId]);
+  }, [listingId, user?.id]);
 
   const fetchListing = async () => {
     setLoading(true);
@@ -77,7 +89,7 @@ export const JobsDetail = () => {
       };
 
       setListing(transformedListing);
-      
+
       if (data.category_id) {
         fetchRelatedListings(data.category_id, data.id);
       }
@@ -568,7 +580,7 @@ export const JobsDetail = () => {
                 const itemCompany = item.attributes?.company_name || item.seller_name;
                 const itemType = item.attributes?.job_type || 'Full-time';
                 const itemSalary = item.price ? `${item.currency} ${parseFloat(item.price).toLocaleString()}` : 'Negotiable';
-                
+
                 return (
                   <div
                     key={item.id}

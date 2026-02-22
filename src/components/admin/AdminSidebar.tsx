@@ -182,6 +182,12 @@ const adminMenuItems = [
     description: "Manage news sources and feeds"
   },
   {
+    title: "Economy & Points",
+    icon: BarChart3,
+    path: "/admin/gamification",
+    description: "Manage points, rewards, and economy"
+  },
+  {
     title: "Reports & Exports",
     icon: FileText,
     path: "/admin/reports",

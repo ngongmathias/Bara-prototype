@@ -1,15 +1,19 @@
--- Migration to nullify people groups map coordinates to ensure data accuracy for the base table
--- This affects the 'global_africa' table which represents the diaspora/people groups data
+-- Migration to nullify people groups map coordinates in country_info
+-- This targets entries linked to 'global_africa' diaspora/people groups
 
-UPDATE public.global_africa
+UPDATE public.country_info ci
 SET latitude = NULL,
     longitude = NULL
-WHERE name ILIKE '%American%'
-   OR name ILIKE '%British%'
-   OR name ILIKE '%European%'
-   OR name ILIKE '%Brazilians%'
-   OR name ILIKE '%HBCU%'
-   OR name ILIKE '%Diaspora%';
+FROM public.global_africa ga
+WHERE ci.country_id = ga.id
+  AND (
+    ga.name ILIKE '%American%'
+    OR ga.name ILIKE '%British%'
+    OR ga.name ILIKE '%European%'
+    OR ga.name ILIKE '%Brazilians%'
+    OR ga.name ILIKE '%HBCU%'
+    OR ga.name ILIKE '%Diaspora%'
+  );
 
-COMMENT ON COLUMN public.global_africa.latitude IS 'Nullified during technical update 20260222';
-COMMENT ON COLUMN public.global_africa.longitude IS 'Nullified during technical update 20260222';
+COMMENT ON COLUMN public.country_info.latitude IS 'Nullified for diaspora groups during technical update 20260222';
+COMMENT ON COLUMN public.country_info.longitude IS 'Nullified for diaspora groups during technical update 20260222';

@@ -10,13 +10,22 @@ import {
     Plus,
     Upload,
     BarChart3,
-    Play
+    Play,
+    Zap,
+    Share2,
+    Star
 } from "lucide-react";
-import { db } from "@/lib/supabase";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { GamificationService } from "@/lib/gamificationService";
+import { MonetizationService } from "@/lib/monetizationService";
+import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@clerk/clerk-react";
+import { supabase } from "@/lib/supabase";
+import { Link } from "react-router-dom";
 
 export default function ArtistDashboard() {
+    const { user } = useUser();
+    const { toast } = useToast();
     const [stats, setStats] = useState({
         tracks: 0,
         albums: 0,
@@ -24,6 +33,8 @@ export default function ArtistDashboard() {
         fans: 0
     });
     const [loading, setLoading] = useState(true);
+    const [isBoosting, setIsBoosting] = useState(false);
+    const [latestTrackId, setLatestTrackId] = useState<string | null>(null);
 
     useEffect(() => {
         // In a real app, we'd fetch for the logged in artist
@@ -33,10 +44,17 @@ export default function ArtistDashboard() {
 
     const fetchStats = async () => {
         try {
-            const { count: trackCount } = await db.songs().select('*', { count: 'exact', head: true });
-            const { count: albumCount } = await db.albums().select('*', { count: 'exact', head: true });
-            const { data: songs } = await db.songs().select('plays');
+            const { data: songs, count: trackCount } = await supabase.from('songs').select('*', { count: 'exact' });
+            const { count: albumCount } = await supabase.from('albums').select('*', { count: 'exact', head: true });
             const totalPlays = songs?.reduce((acc, s) => acc + (s.plays || 0), 0) || 0;
+
+            if (songs && songs.length > 0) {
+                // Get the most recent track for the "Boost Now" shortcut
+                const sorted = [...songs].sort((a, b) =>
+                    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                );
+                setLatestTrackId(sorted[0].id);
+            }
 
             setStats({
                 tracks: trackCount || 0,
@@ -160,6 +178,65 @@ export default function ArtistDashboard() {
                             <CardContent className="pt-4">
                                 <p className="text-sm text-gray-400 mb-4">Get the blue checkmark and unlock advanced creator tools.</p>
                                 <Button className="w-full bg-white text-black hover:bg-gray-200 font-bold">Apply Now</Button>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-[#181818] border-none border-l-4 border-yellow-500 overflow-hidden">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-white flex items-center gap-2 text-lg">
+                                    <Zap className="text-yellow-500" size={20} />
+                                    Promote Your Track
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm text-gray-400 mb-4">Boost your latest release to the top of the "Trending" feed for 24 hours.</p>
+                                <div className="space-y-2">
+                                    <Button
+                                        className="w-full bg-yellow-500 text-black hover:bg-yellow-400 font-bold flex items-center gap-2"
+                                        disabled={isBoosting || !latestTrackId}
+                                        onClick={async () => {
+                                            if (!user || !latestTrackId) return;
+                                            setIsBoosting(true);
+                                            try {
+                                                const success = await GamificationService.spendCoins(user.id, 50, "Track Boost: " + latestTrackId);
+                                                if (success) {
+                                                    // Mark as premium in DB
+                                                    await supabase.from('songs').update({
+                                                        is_premium: true,
+                                                        boosted_until: new Date(Date.now() + 86400000).toISOString()
+                                                    }).eq('id', latestTrackId);
+
+                                                    // Track the interaction for ROI
+                                                    await MonetizationService.trackInteraction(latestTrackId, 'song', 'click', 0.50); // $0.50 eqv cost
+
+                                                    toast({
+                                                        title: "Success",
+                                                        description: `Track promoted! -50 Coins.`
+                                                    });
+                                                } else {
+                                                    toast({
+                                                        title: "Error",
+                                                        description: "Insufficient Bara Coins!",
+                                                        variant: 'destructive'
+                                                    });
+                                                }
+                                            } catch (err) {
+                                                console.error(err);
+                                                toast({
+                                                    title: "Error",
+                                                    description: "Not enough coins to promote track.",
+                                                    variant: 'destructive'
+                                                });
+                                            } finally {
+                                                setIsBoosting(false);
+                                            }
+                                        }}
+                                    >
+                                        <Star size={18} className={isBoosting ? "animate-spin" : ""} />
+                                        {isBoosting ? "Boosting..." : "Boost Now (50 Coins)"}
+                                    </Button>
+                                    <p className="text-[10px] text-center text-gray-500 uppercase tracking-tighter">Powered by Bara Elite</p>
+                                </div>
                             </CardContent>
                         </Card>
                     </div>

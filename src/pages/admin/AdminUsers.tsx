@@ -16,7 +16,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -25,13 +25,16 @@ import {
 } from "@/components/ui/select";
 import { useUser } from '@clerk/clerk-react';
 import { UserLogService, AdminUser, UserLog, DatabaseUser, PaginatedUsers, PaginatedUserLogs } from '@/lib/userLogService';
+import { GamificationService, GamificationProfile } from '@/lib/gamificationService';
+import { supabase } from '@/lib/supabase';
 import { useTranslation } from 'react-i18next';
-import { 
-  Users, 
-  Activity, 
-  Shield, 
-  Mail, 
-  Calendar, 
+import { useToast } from '@/hooks/use-toast';
+import {
+  Users,
+  Activity,
+  Shield,
+  Mail,
+  Calendar,
   Search,
   RefreshCw,
   Plus,
@@ -47,12 +50,16 @@ import {
   MapPin,
   ChevronDown,
   ChevronUp,
-  HelpCircle
+  HelpCircle,
+  Coins,
+  Trophy,
+  Zap
 } from 'lucide-react';
 
 export const AdminUsers = () => {
   const { t } = useTranslation();
   const { user } = useUser();
+  const { toast } = useToast();
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [databaseUsers, setDatabaseUsers] = useState<DatabaseUser[]>([]);
   const [userLogs, setUserLogs] = useState<UserLog[]>([]);
@@ -62,7 +69,13 @@ export const AdminUsers = () => {
   const [activeTab, setActiveTab] = useState('users');
   const [userType, setUserType] = useState<'all' | 'admin' | 'database'>('all');
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
-  
+  const [economyData, setEconomyData] = useState<Record<string, GamificationProfile>>({});
+  const [isEconomyDialogOpen, setIsEconomyDialogOpen] = useState(false);
+  const [selectedUserForEconomy, setSelectedUserForEconomy] = useState<any>(null);
+  const [editingCoins, setEditingCoins] = useState<number>(0);
+  const [editingTrust, setEditingTrust] = useState<number>(1.0);
+  const [economyHistory, setEconomyHistory] = useState<any[]>([]);
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -70,7 +83,7 @@ export const AdminUsers = () => {
   const [pageSize, setPageSize] = useState(15);
   const [sortField, setSortField] = useState<string>("created_at");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  
+
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -94,9 +107,9 @@ export const AdminUsers = () => {
     try {
       setLoading(true);
       setFilterLoading(true);
-      
+
       let usersData: PaginatedUsers;
-      
+
       if (userType === 'admin') {
         usersData = await UserLogService.getAdminUsers(currentPage, pageSize, searchTerm);
       } else if (userType === 'database') {
@@ -107,16 +120,31 @@ export const AdminUsers = () => {
 
       // Get user logs for the activity tab
       const logsData = await UserLogService.getUserLogsPaginated(1, 100, searchTerm);
-      
+
       // Filter users by type
       const adminUsersData = usersData.users.filter(u => 'role' in u && u.role) as AdminUser[];
       const databaseUsersData = usersData.users.filter(u => !('role' in u && u.role)) as DatabaseUser[];
-      
+
       setAdminUsers(adminUsersData);
       setDatabaseUsers(databaseUsersData);
       setUserLogs(logsData.users);
       setTotalCount(usersData.total);
       setTotalPages(usersData.totalPages);
+
+      // Phase 7: Fetch gamification stats for all displayed users
+      const allUserIds = usersData.users.map(u => u.id);
+      if (allUserIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('gamification_profiles')
+          .select('*')
+          .in('user_id', allUserIds);
+
+        if (profiles) {
+          const econMap: any = {};
+          profiles.forEach(p => econMap[p.user_id] = p);
+          setEconomyData(econMap);
+        }
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -222,7 +250,7 @@ export const AdminUsers = () => {
   const exportToCSV = () => {
     const allUsers = [...adminUsers, ...databaseUsers];
     const csvContent = UserLogService.exportUsersToCSV(allUsers);
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -260,7 +288,7 @@ export const AdminUsers = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
@@ -272,7 +300,7 @@ export const AdminUsers = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
@@ -284,7 +312,7 @@ export const AdminUsers = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
@@ -296,7 +324,7 @@ export const AdminUsers = () => {
               </div>
             </CardContent>
           </Card>
-          
+
 
         </div>
 
@@ -307,7 +335,7 @@ export const AdminUsers = () => {
               {t('admin.users.title')}
             </h2>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
@@ -336,15 +364,15 @@ export const AdminUsers = () => {
         <Card>
           <CardContent className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            placeholder={t('admin.users.searchPlaceholder')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder={t('admin.users.searchPlaceholder')}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
               <Select value={userType} onValueChange={handleUserTypeChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by user type" />
@@ -399,13 +427,13 @@ export const AdminUsers = () => {
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-4">
             <div ref={printRef}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Shield className="w-5 h-5 text-blue-600" />
-                  <span>{t('admin.users.adminUsers')}</span>
-                </CardTitle>
-              </CardHeader>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Shield className="w-5 h-5 text-blue-600" />
+                    <span>{t('admin.users.adminUsers')}</span>
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="p-0">
                   {filterLoading && (
                     <div className="flex items-center justify-center p-8">
@@ -414,10 +442,10 @@ export const AdminUsers = () => {
                     </div>
                   )}
                   {!filterLoading && (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                          <TableHead 
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead
                             className="cursor-pointer hover:bg-gray-50"
                             onClick={() => handleSort('email')}
                           >
@@ -428,8 +456,9 @@ export const AdminUsers = () => {
                               )}
                             </div>
                           </TableHead>
+                          <TableHead>Economy & Status</TableHead>
                           <TableHead>Role & Permissions</TableHead>
-                          <TableHead 
+                          <TableHead
                             className="cursor-pointer hover:bg-gray-50"
                             onClick={() => handleSort('created_at')}
                           >
@@ -441,12 +470,12 @@ export const AdminUsers = () => {
                             </div>
                           </TableHead>
                           {/* <TableHead>Actions</TableHead> */}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {[...adminUsers, ...databaseUsers].map((user) => (
                           <TableRow key={user.id} className="hover:bg-gray-50">
-                        <TableCell>
+                            <TableCell>
                               <div className="flex items-center space-x-3">
                                 <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                                   {('avatar_url' in user && user.avatar_url) ? (
@@ -455,28 +484,54 @@ export const AdminUsers = () => {
                                     <User className="w-5 h-5 text-gray-500" />
                                   )}
                                 </div>
-                          <div>
-                            <div className="font-medium">
-                                    {('full_name' in user && user.full_name) || 
-                                     ('first_name' in user && user.last_name ? `${user.first_name} ${user.last_name}` : user.email.split('@')[0])}
-                            </div>
+                                <div>
+                                  <div className="font-medium">
+                                    {('full_name' in user && user.full_name) ||
+                                      ('first_name' in user && user.last_name ? `${user.first_name} ${user.last_name}` : user.email.split('@')[0])}
+                                  </div>
                                   <div className="text-sm text-gray-500">{user.email}</div>
                                   <div className="text-xs text-gray-400">ID: {user.id}</div>
-                          </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <Coins className="w-4 h-4 text-yellow-600" />
+                                  <span className="font-bold">{economyData[user.id]?.bara_coins || 0}</span>
+                                  <span className="text-xs text-gray-500 italic">Bara Coins</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Zap className="w-4 h-4 text-orange-500" />
+                                  <span className="font-medium text-xs">Trust: {economyData[user.id]?.trust_rank || 1.0}</span>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6"
+                                    onClick={() => {
+                                      setSelectedUserForEconomy(user);
+                                      setEditingCoins(economyData[user.id]?.bara_coins || 0);
+                                      setEditingTrust(economyData[user.id]?.trust_rank || 1.0);
+                                      setIsEconomyDialogOpen(true);
+                                    }}
+                                  >
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
                               <div className="space-y-2">
                                 <Badge variant={getRoleBadgeVariant('role' in user ? user.role : 'user')}>
                                   {'role' in user ? user.role : 'user'}
-                          </Badge>
+                                </Badge>
                                 {'permissions' in user && user.permissions && (
-                          <div className="flex flex-wrap gap-1">
+                                  <div className="flex flex-wrap gap-1">
                                     {user.permissions.map((permission) => (
-                              <Badge key={permission} variant="outline" className="text-xs">
-                                {permission}
-                              </Badge>
-                            ))}
+                                      <Badge key={permission} variant="outline" className="text-xs">
+                                        {permission}
+                                      </Badge>
+                                    ))}
                                   </div>
                                 )}
                               </div>
@@ -503,7 +558,7 @@ export const AdminUsers = () => {
                                 )}
                           </div>
                         </TableCell> */}
-                        <TableCell>
+                            <TableCell>
                               <div className="space-y-1">
                                 <div className="text-sm">
                                   <Calendar className="w-4 h-4 inline mr-1 text-gray-400" />
@@ -512,11 +567,11 @@ export const AdminUsers = () => {
                                 {('last_login' in user && user.last_login) && (
                                   <div className="text-xs text-gray-500">
                                     Last login: {formatDate(user.last_login)}
-                            </div>
-                          )}
+                                  </div>
+                                )}
                               </div>
-                        </TableCell>
-                        {/* <TableCell>
+                            </TableCell>
+                            {/* <TableCell>
                           <div className="flex items-center space-x-2">
                             <Button variant="outline" size="sm">
                               <Edit className="w-4 h-4" />
@@ -526,10 +581,10 @@ export const AdminUsers = () => {
                             </Button>
                           </div>
                         </TableCell> */}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   )}
                 </CardContent>
               </Card>
@@ -546,12 +601,12 @@ export const AdminUsers = () => {
                     <Pagination>
                       <PaginationContent>
                         <PaginationItem>
-                          <PaginationPrevious 
+                          <PaginationPrevious
                             onClick={() => handlePageChange(currentPage - 1)}
                             className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                           />
                         </PaginationItem>
-                        
+
                         {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                           let pageNum;
                           if (totalPages <= 5) {
@@ -563,7 +618,7 @@ export const AdminUsers = () => {
                           } else {
                             pageNum = currentPage - 2 + i;
                           }
-                          
+
                           return (
                             <PaginationItem key={pageNum}>
                               <PaginationLink
@@ -576,15 +631,15 @@ export const AdminUsers = () => {
                             </PaginationItem>
                           );
                         })}
-                        
+
                         {totalPages > 5 && currentPage < totalPages - 2 && (
                           <PaginationItem>
                             <PaginationEllipsis />
                           </PaginationItem>
                         )}
-                        
+
                         <PaginationItem>
-                          <PaginationNext 
+                          <PaginationNext
                             onClick={() => handlePageChange(currentPage + 1)}
                             className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                           />
@@ -592,8 +647,8 @@ export const AdminUsers = () => {
                       </PaginationContent>
                     </Pagination>
                   </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
 
@@ -707,6 +762,102 @@ export const AdminUsers = () => {
               className="bg-blue-600 hover:bg-blue-700 font-roboto"
             >
               View Full Admin Guide
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEconomyDialogOpen} onOpenChange={setIsEconomyDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-comfortaa">
+              <Shield className="w-5 h-5 text-blue-600" />
+              Economy God-Mode
+            </DialogTitle>
+            <DialogDescription>
+              Override economy balances and trust rankings for <strong>{selectedUserForEconomy?.email}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-bold flex items-center gap-2">
+                <Coins className="w-4 h-4 text-yellow-600" />
+                Bara Coins Balance
+              </label>
+              <Input
+                type="number"
+                value={editingCoins}
+                onChange={(e) => setEditingCoins(parseInt(e.target.value))}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold flex items-center gap-2">
+                <Zap className="w-4 h-4 text-orange-500" />
+                Trust Rank Multiplier
+              </label>
+              <div className="flex items-center gap-4">
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={editingTrust}
+                  onChange={(e) => setEditingTrust(parseFloat(e.target.value))}
+                />
+                <div className="flex flex-col text-[10px] text-gray-500 uppercase font-black">
+                  <span>Low: 1.0</span>
+                  <span>High: 10.0</span>
+                </div>
+              </div>
+              <p className="text-[10px] text-gray-500 italic mt-1 max-w-[300px]">Higher rank increases ad visibility in GSP auctions.</p>
+            </div>
+
+            <div className="pt-4 border-t border-gray-100">
+              <h4 className="text-sm font-bold font-comfortaa mb-2 text-gray-700">Recent Transactions</h4>
+              <div className="max-h-[150px] overflow-y-auto space-y-2 pr-2 border rounded-lg bg-gray-50/50 p-2 custom-scrollbar">
+                {economyHistory.length === 0 ? (
+                  <p className="text-xs text-gray-500 italic text-center py-2">No recent activity.</p>
+                ) : (
+                  economyHistory.map((hist, i) => (
+                    <div key={hist.id || i} className="flex justify-between items-center text-xs p-2 bg-white rounded border shadow-sm">
+                      <div className="flex flex-col">
+                        <span className="font-bold">{hist.reason || hist.type}</span>
+                        <span className="text-[10px] text-gray-400">{new Date(hist.created_at).toLocaleDateString()} {new Date(hist.created_at).toLocaleTimeString()}</span>
+                      </div>
+                      <span className={`font-black ${hist.type === 'coin_spend' ? 'text-red-500' : 'text-green-500'}`}>
+                        {hist.type === 'coin_spend' ? '-' : '+'}{hist.amount} {hist.type.includes('coin') ? 'Coins' : 'XP'}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+
+            <Button variant="outline" onClick={() => setIsEconomyDialogOpen(false)}>Cancel</Button>
+            <Button
+              className="bg-blue-600 text-white hover:bg-blue-700"
+              onClick={async () => {
+                const success = await GamificationService.updateUserEconomy(selectedUserForEconomy.id, {
+                  bara_coins: editingCoins,
+                  trust_rank: editingTrust
+                });
+                if (success) {
+                  toast({
+                    title: "Success",
+                    description: "Economy updated!",
+                  });
+                  setIsEconomyDialogOpen(false);
+                  handleRefresh();
+                } else {
+                  toast({
+                    title: "Error",
+                    description: "Update failed.",
+                    variant: "destructive",
+                  });
+                }
+              }}
+            >
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>

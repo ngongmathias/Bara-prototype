@@ -1,333 +1,198 @@
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from 'react-router-dom';
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TopBannerAd } from "@/components/TopBannerAd";
-import { BottomBannerAd } from "@/components/BottomBannerAd";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
 import {
+  Zap,
   Target,
-  Users,
   TrendingUp,
-  Globe,
-  Phone,
-  Mail,
-  MapPin,
-  CheckCircle,
-  Star,
+  Crown,
+  MousePointer2,
+  ShieldCheck,
   BarChart3,
-  Eye,
-  X,
-  Loader2,
-  Calendar,
+  Rocket,
+  ArrowRight,
+  Globe
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const AdvertisePage = () => {
   const { t } = useTranslation();
-  const { toast } = useToast();
-  const [showConsultationModal, setShowConsultationModal] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', business: '', message: '' });
-
-  const handleConsultationSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name || !form.email) {
-      toast({ title: 'Please fill in your name and email.', variant: 'destructive' });
-      return;
-    }
-    setSubmitting(true);
-    try {
-      // Confirmation email to the user
-      await supabase.from('email_queue').insert({
-        to_email: form.email,
-        subject: '📅 Consultation Request Received - Bara Afrika',
-        html_content: `<p>Hi ${form.name},</p><p>Thank you for reaching out! We have received your consultation request and will get back to you within 24 hours.</p><p><strong>Business:</strong> ${form.business || 'N/A'}<br><strong>Message:</strong> ${form.message || 'N/A'}</p><p>— The Bara Afrika Team</p>`,
-        metadata: { type: 'consultation_request', business: form.business }
-      });
-      // Admin notification
-      await supabase.from('email_queue').insert({
-        to_email: 'advertise@baraafrika.com',
-        subject: `📅 New Consultation Request from ${form.name}`,
-        html_content: `<p><strong>Name:</strong> ${form.name}<br><strong>Email:</strong> ${form.email}<br><strong>Business:</strong> ${form.business || 'N/A'}</p><p><strong>Message:</strong><br>${form.message || 'N/A'}</p>`,
-        metadata: { type: 'consultation_admin_notify' }
-      });
-      toast({ title: '✅ Request Sent!', description: "We'll be in touch within 24 hours." });
-      setShowConsultationModal(false);
-      setForm({ name: '', email: '', business: '', message: '' });
-    } catch (err) {
-      console.error(err);
-      toast({ title: 'Failed to send. Please try again.', variant: 'destructive' });
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   return (
-    <>
+    <div className="bg-white min-h-screen">
       <Header />
       <TopBannerAd />
-      <div className="relative min-h-screen bg-white">
 
-        {/* Hero / Stats */}
-        <section className="py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold font-comfortaa text-black mb-4">
-              {t('advertise.hero.title')}
+      {/* Hero Section - Super Premium */}
+      <section className="relative pt-20 pb-32 overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-50 via-white to-white opacity-70 -z-10" />
+
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/10 border border-blue-600/20 text-blue-600 text-xs font-black uppercase tracking-widest mb-8">
+              <Rocket size={14} />
+              Bara Prime Ecosystem
+            </div>
+            <h1 className="text-5xl md:text-7xl font-black font-comfortaa tracking-tighter text-black mb-8 leading-[1.1]">
+              Dominate the <span className="text-blue-600">African Diaspora</span> Market.
             </h1>
-            <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto font-roboto mb-12">
-              {t('advertise.hero.subtitle')}
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-              <div className="space-y-2">
-                <div className="text-4xl font-bold text-black">100K+</div>
-                <p className="text-gray-600 font-roboto">{t('advertise.stats.monthlyVisitors')}</p>
-              </div>
-              <div className="space-y-2">
-                <div className="text-4xl font-bold text-black">1K+</div>
-                <p className="text-gray-600 font-roboto">{t('advertise.stats.businesses')}</p>
-              </div>
-              <div className="space-y-2">
-                <div className="text-4xl font-bold text-black">95%</div>
-                <p className="text-gray-600 font-roboto">{t('advertise.stats.satisfaction')}</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Services */}
-        <section className="py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 font-comfortaa">
-                {t('advertise.services.title')}
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto font-roboto">
-                {t('advertise.services.subtitle')}
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {/* Premium Listing */}
-              <Card className="hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Star className="w-8 h-8 text-blue-500" />
-                  </div>
-                  <CardTitle className="text-xl font-comfortaa">{t('advertise.services.premium.title')}</CardTitle>
-                  <CardDescription className="font-roboto">{t('advertise.services.premium.description')}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 text-black mr-2" />{t('advertise.services.premium.feature1')}</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 text-black mr-2" />{t('advertise.services.premium.feature2')}</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 text-black mr-2" />{t('advertise.services.premium.feature3')}</li>
-                  </ul>
-                  <Button className="w-full font-roboto bg-black hover:bg-gray-800" asChild>
-                    <Link to="/claim-listing">{t('advertise.services.premium.cta')}</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Targeted Advertising */}
-              <Card className="hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Target className="w-8 h-8 text-white" />
-                  </div>
-                  <CardTitle className="text-xl font-comfortaa">{t('advertise.services.targeted.title')}</CardTitle>
-                  <CardDescription className="font-roboto">{t('advertise.services.targeted.description')}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 text-black mr-2" />{t('advertise.services.targeted.feature1')}</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 text-black mr-2" />{t('advertise.services.targeted.feature2')}</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 text-black mr-2" />{t('advertise.services.targeted.feature3')}</li>
-                  </ul>
-                  <Button className="w-full font-roboto" variant="outline" onClick={() => setShowConsultationModal(true)}>
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {t('advertise.services.targeted.cta')}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Analytics & Insights */}
-              <Card className="hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-                    <BarChart3 className="w-8 h-8 text-white" />
-                  </div>
-                  <CardTitle className="text-xl font-comfortaa">{t('advertise.services.analytics.title')}</CardTitle>
-                  <CardDescription className="font-roboto">{t('advertise.services.analytics.description')}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 text-black mr-2" />{t('advertise.services.analytics.feature1')}</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 text-black mr-2" />{t('advertise.services.analytics.feature2')}</li>
-                    <li className="flex items-center"><CheckCircle className="w-4 h-4 text-black mr-2" />{t('advertise.services.analytics.feature3')}</li>
-                  </ul>
-                  <Button className="w-full font-roboto" variant="outline" asChild>
-                    <Link to="/users/dashboard">{t('advertise.services.analytics.cta')}</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Why Choose Us */}
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 font-comfortaa">
-                {t('advertise.whyChoose.title')}
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto font-roboto">
-                {t('advertise.whyChoose.subtitle')}
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {[
-                { icon: <Users className="w-8 h-8 text-white" />, title: t('advertise.whyChoose.reach.title'), desc: t('advertise.whyChoose.reach.description') },
-                { icon: <TrendingUp className="w-8 h-8 text-white" />, title: t('advertise.whyChoose.growth.title'), desc: t('advertise.whyChoose.growth.description') },
-                { icon: <Globe className="w-8 h-8 text-white" />, title: t('advertise.whyChoose.local.title'), desc: t('advertise.whyChoose.local.description') },
-                { icon: <Eye className="w-8 h-8 text-white" />, title: t('advertise.whyChoose.visibility.title'), desc: t('advertise.whyChoose.visibility.description') },
-              ].map((item, i) => (
-                <div key={i} className="text-center space-y-4">
-                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto">{item.icon}</div>
-                  <h3 className="text-lg font-semibold font-comfortaa">{item.title}</h3>
-                  <p className="text-gray-600 text-sm font-roboto">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section — FULLY FUNCTIONAL BUTTONS */}
-        <section className="py-20 bg-black text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 font-comfortaa text-blue-400">
-              {t('advertise.cta.title')}
-            </h2>
-            <p className="text-xl mb-10 max-w-3xl mx-auto font-roboto text-gray-300">
-              {t('advertise.cta.description')}
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-roboto mb-12">
+              Stop guessing. Start growing. Access high-fidelity targeting, auction-based bidding, and real-time ROI tracking.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="font-roboto bg-blue-600 hover:bg-blue-700 text-white font-bold px-8" asChild>
-                <Link to="/advertise/checkout">🚀 Start Advertising Today</Link>
+              <Button size="lg" className="h-14 px-8 bg-black text-white hover:bg-gray-900 rounded-full font-bold text-lg group" asChild>
+                <Link to="/advertise/checkout">
+                  Start Promoting Now
+                  <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-black font-roboto px-8"
-                onClick={() => setShowConsultationModal(true)}
-              >
-                <Calendar className="w-5 h-5 mr-2" />
-                Schedule a Consultation
+              <Button size="lg" variant="outline" className="h-14 px-8 rounded-full font-bold text-lg border-2">
+                Download Media Kit
               </Button>
             </div>
-          </div>
-        </section>
+          </motion.div>
+        </div>
+      </section>
 
-        {/* Contact */}
-        <section className="py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 font-comfortaa">
-                {t('advertise.contact.title')}
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto font-roboto">
-                {t('advertise.contact.subtitle')}
+      {/* The Auction Model Explainer */}
+      <section className="py-24 bg-black text-white rounded-[3rem] mx-4 my-8">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-4xl font-black font-comfortaa mb-6">The MIT Auction Model</h2>
+              <p className="text-gray-400 text-lg mb-8 leading-relaxed">
+                We've moved beyond static, boring ads. Our dynamic bidding system matches your message with the right audience at the right price.
               </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto">
-                  <Phone className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold font-comfortaa">{t('advertise.contact.phone.title')}</h3>
-                <a href="tel:+250791568519" className="text-gray-600 font-roboto hover:text-black block">(+250) 791 568 519</a>
-                <p className="text-sm text-gray-500 font-roboto">{t('advertise.contact.phone.hours')}</p>
-              </div>
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto">
-                  <Mail className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold font-comfortaa">{t('advertise.contact.email.title')}</h3>
-                <a href="mailto:advertise@baraafrika.com" className="text-gray-600 font-roboto hover:text-black block">advertise@baraafrika.com</a>
-                <p className="text-sm text-gray-500 font-roboto">{t('advertise.contact.email.response')}</p>
-              </div>
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto">
-                  <MapPin className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold font-comfortaa">{t('advertise.contact.location.title')}</h3>
-                <p className="text-gray-600 font-roboto">{t('advertise.contact.location.address')}</p>
-                <p className="text-sm text-gray-500 font-roboto">{t('advertise.contact.location.visit')}</p>
+              <div className="space-y-6">
+                {[
+                  { icon: MousePointer2, title: "Pay for Performance", desc: "Only pay when a potential customer actually clicks your ad." },
+                  { icon: Target, title: "Bid-Weighted Probability", desc: "Higher bids get premium slots automatically through our algorithm." },
+                  { icon: BarChart3, title: "Full Transparency", desc: "Track every impression and click with your personal ROI dashboard." }
+                ].map((item, idx) => (
+                  <div key={idx} className="flex gap-4">
+                    <div className="mt-1 p-2 bg-blue-600 rounded-lg">
+                      <item.icon size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg">{item.title}</h4>
+                      <p className="text-gray-500 text-sm">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-        </section>
-      </div>
-      <BottomBannerAd />
-      <Footer />
-
-      {/* Consultation Modal */}
-      {showConsultationModal && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setShowConsultationModal(false)}
-        >
-          <div
-            className="bg-white rounded-2xl max-w-md w-full shadow-2xl p-8"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold font-comfortaa">Schedule a Consultation</h2>
-                <p className="text-gray-500 text-sm mt-1">We'll get back to you within 24 hours</p>
-              </div>
-              <button onClick={() => setShowConsultationModal(false)} className="p-2 hover:bg-gray-100 rounded-full">
-                <X className="w-5 h-5" />
-              </button>
+            <div className="relative">
+              <div className="aspect-square bg-gradient-to-tr from-blue-600/20 to-purple-600/20 rounded-full blur-3xl absolute -z-10 w-full h-full" />
+              <Card className="bg-zinc-900 border-zinc-800 text-white p-8">
+                <h4 className="text-xs font-black uppercase tracking-widest text-blue-500 mb-6">Live Auction Pulse</h4>
+                <div className="space-y-4">
+                  {[
+                    { name: "Safaricom Ads", bid: "$0.45", weight: "92%" },
+                    { name: "Kigali Coffee", bid: "$0.15", weight: "45%" },
+                    { name: "Your Brand", bid: "$----", weight: "--%" }
+                  ].map((bid, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 bg-black/50 rounded-xl border border-white/5">
+                      <div className="font-bold">{bid.name}</div>
+                      <div className="flex gap-4 text-sm">
+                        <span className="text-green-500 font-mono">{bid.bid}</span>
+                        <span className="text-gray-500">{bid.weight}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Button className="w-full mt-8 bg-blue-600 hover:bg-blue-500 text-white font-bold h-12">Set Your Bid</Button>
+              </Card>
             </div>
-            <form onSubmit={handleConsultationSubmit} className="space-y-4">
-              <div>
-                <Label>Your Name *</Label>
-                <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. John Doe" />
-              </div>
-              <div>
-                <Label>Email Address *</Label>
-                <Input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" />
-              </div>
-              <div>
-                <Label>Business / Brand Name</Label>
-                <Input value={form.business} onChange={e => setForm({ ...form, business: e.target.value })} placeholder="Your business name" />
-              </div>
-              <div>
-                <Label>What are you looking for?</Label>
-                <Textarea
-                  value={form.message}
-                  onChange={e => setForm({ ...form, message: e.target.value })}
-                  placeholder="Tell us your advertising goals..."
-                  rows={3}
-                />
-              </div>
-              <Button type="submit" className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3" disabled={submitting}>
-                {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Calendar className="w-4 h-4 mr-2" />}
-                {submitting ? 'Sending...' : 'Send Request'}
-              </Button>
-            </form>
           </div>
         </div>
-      )}
-    </>
+      </section>
+
+      {/* The Prime Tiers */}
+      <section className="py-24">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-black font-comfortaa text-black mb-4">Choose Your Ecosystem Tier</h2>
+            <p className="text-gray-600">Upgrade your brand status and unlock powerful platform utilities.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Standard */}
+            <Card className="border-none shadow-none bg-gray-50 p-8 rounded-3xl">
+              <CardHeader className="p-0 mb-6">
+                <CardTitle className="text-2xl font-bold font-comfortaa">Standard</CardTitle>
+                <p className="text-gray-500 text-sm">Basic presence for local sellers.</p>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="text-4xl font-black text-black mb-8">$0<span className="text-sm font-normal text-gray-500">/forever</span></div>
+                <ul className="space-y-4 mb-8">
+                  <li className="flex items-center gap-2 text-sm"><ShieldCheck size={16} className="text-gray-400" /> Basic Marketplace Listings</li>
+                  <li className="flex items-center gap-2 text-sm"><ShieldCheck size={16} className="text-gray-400" /> Public Profile</li>
+                  <li className="flex items-center gap-2 text-sm text-gray-400 line-through"><Circle size={16} /> Verified Badge</li>
+                </ul>
+                <Button className="w-full h-12 bg-white text-black border-2 border-gray-200 hover:bg-gray-100 rounded-xl font-bold">Get Started</Button>
+              </CardContent>
+            </Card>
+
+            {/* Pro */}
+            <Card className="border-none shadow-2xl bg-white p-8 rounded-3xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4">
+                <Crown className="text-blue-600" size={24} />
+              </div>
+              <CardHeader className="p-0 mb-6">
+                <CardTitle className="text-2xl font-bold font-comfortaa text-blue-600">Bara Pro</CardTitle>
+                <p className="text-gray-500 text-sm">Best for growing creators & shops.</p>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="text-4xl font-black text-black mb-8">$19<span className="text-sm font-normal text-gray-500">/mo</span></div>
+                <ul className="space-y-4 mb-8">
+                  <li className="flex items-center gap-2 text-sm font-bold"><TrendingUp size={16} className="text-blue-600" /> 2x Engagement Multiplier</li>
+                  <li className="flex items-center gap-2 text-sm font-bold"><ShieldCheck size={16} className="text-blue-600" /> Verified "Pro" Badge</li>
+                  <li className="flex items-center gap-2 text-sm font-bold"><BarChart3 size={16} className="text-blue-600" /> Marketing Dashboard</li>
+                  <li className="flex items-center gap-2 text-sm font-bold"><Globe size={16} className="text-blue-600" /> Global Priority Search</li>
+                </ul>
+                <Button className="w-full h-12 bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200 rounded-xl font-bold">Claim Pro Status</Button>
+              </CardContent>
+            </Card>
+
+            {/* Elite */}
+            <Card className="border-none shadow-none bg-zinc-900 p-8 rounded-3xl text-white">
+              <CardHeader className="p-0 mb-6">
+                <CardTitle className="text-2xl font-bold font-comfortaa text-yellow-500 flex items-center gap-2">
+                  Elite
+                  <Zap size={20} fill="#eab308" />
+                </CardTitle>
+                <p className="text-gray-500 text-sm">Enterprise-grade domination.</p>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="text-4xl font-black text-white mb-8">$79<span className="text-sm font-normal text-gray-500">/mo</span></div>
+                <ul className="space-y-4 mb-8">
+                  <li className="flex items-center gap-2 text-sm"><ShieldCheck size={16} className="text-yellow-500" /> All Pro features</li>
+                  <li className="flex items-center gap-2 text-sm"><ShieldCheck size={16} className="text-yellow-500" /> Zero Ad Commission</li>
+                  <li className="flex items-center gap-2 text-sm font-bold"><Crown size={16} className="text-yellow-500" /> Featured Homepage Spot</li>
+                </ul>
+                <Button className="w-full h-12 bg-white text-black hover:bg-gray-100 rounded-xl font-bold">Contact Sales</Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
   );
 };
+
+const Circle = ({ size, className }: { size: number, className?: string }) => (
+  <div style={{ width: size, height: size }} className={`border-2 rounded-full ${className}`} />
+);
 
 export default AdvertisePage;

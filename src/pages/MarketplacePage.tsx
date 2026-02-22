@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { supabase } from '@/lib/supabase';
+import { MonetizationService } from '@/lib/monetizationService';
 
 interface Category {
   id: string;
@@ -150,6 +151,7 @@ const MarketplacePage = () => {
         `)
         .eq('status', 'active')
         .eq('is_featured', true)
+        .order('is_premium', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(8);
 
@@ -162,6 +164,13 @@ const MarketplacePage = () => {
       if (error) throw error;
 
       setFeaturedListings(data || []);
+
+      // Track ROI impressions for premium listings
+      if (data) {
+        data.filter(l => l.is_premium).forEach(listing => {
+          MonetizationService.trackInteraction(listing.id, 'listing', 'impression');
+        });
+      }
     } catch (error) {
       console.error('Error fetching featured listings:', error);
     } finally {

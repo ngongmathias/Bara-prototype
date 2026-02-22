@@ -23,9 +23,11 @@ import {
   Upload,
   X,
   Image as ImageIcon,
-  AlertCircle,
   CheckCircle,
-  Loader2
+  Loader2,
+  Zap,
+  Star,
+  ShieldCheck
 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { uploadImage } from '@/lib/storage';
@@ -61,6 +63,7 @@ export const PostListing = () => {
     seller_website: '',
     seller_type: 'individual',
     location_details: '',
+    is_premium: false,
   });
 
   // Category-specific attributes
@@ -318,6 +321,7 @@ export const PostListing = () => {
           status: 'active',
           created_by: userId,
           attributes: attributes,
+          is_premium: formData.is_premium,
         })
         .select()
         .single();
@@ -365,6 +369,11 @@ export const PostListing = () => {
       try {
         await GamificationService.addXP(userId, XP_REWARDS.LISTING_CREATE, `Posted listing: ${formData.title}`);
         await GamificationService.awardAchievement(userId, 'market_entry');
+
+        // If premium, spend coins
+        if (formData.is_premium) {
+          await GamificationService.spendCoins(userId, 50, `Premium boost for: ${formData.title}`);
+        }
       } catch (gamifyErr) {
         console.warn('Gamification update failed:', gamifyErr);
       }
@@ -433,7 +442,36 @@ export const PostListing = () => {
                   placeholder="e.g., iPhone 13 Pro Max 256GB"
                   maxLength={100}
                 />
-                <p className="text-sm text-gray-500 mt-1">
+
+                {/* Elite Monetization: Boost Toggle */}
+                <div className="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
+                  <div className="flex items-start justify-between">
+                    <div className="flex gap-3">
+                      <div className="mt-1 p-2 bg-yellow-400 rounded-full">
+                        <Zap className="text-white w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 font-comfortaa">Elite Boost</h4>
+                        <p className="text-xs text-gray-600 max-w-sm">Bring your listing to the very top of all search results for 7 days.</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="is-premium"
+                          className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+                          checked={formData.is_premium}
+                          onChange={(e) => setFormData({ ...formData, is_premium: e.target.checked })}
+                        />
+                        <Label htmlFor="is-premium" className="font-bold text-sm">Boost for 50 Coins</Label>
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Bara Elite Model</p>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-500 mt-2">
                   {formData.title.length}/100 characters
                 </p>
               </div>

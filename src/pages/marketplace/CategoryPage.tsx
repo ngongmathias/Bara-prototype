@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { MarketplaceListing, MarketplaceCategory, MarketplaceSubcategory } from '@/types/marketplace';
+import { MonetizationService } from '@/lib/monetizationService';
 import { Search, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { PropertyCard, VehicleCard, JobCard } from '@/components/marketplace/SpecializedCards';
 
@@ -104,6 +105,7 @@ export const CategoryPage = () => {
         `)
         .eq('category_id', category.id)
         .eq('status', 'active')
+        .order('is_premium', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -132,6 +134,11 @@ export const CategoryPage = () => {
       }));
 
       setListings(transformedListings);
+
+      // Track ROI impressions for premium listings
+      transformedListings.filter(l => l.is_premium).forEach(listing => {
+        MonetizationService.trackInteraction(listing.id, 'listing', 'impression');
+      });
     } catch (error) {
       console.error('Error fetching listings:', error);
     } finally {

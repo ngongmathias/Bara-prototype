@@ -7,10 +7,10 @@ import { BottomBannerAd } from '@/components/BottomBannerAd';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Share2, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Share2,
   Flag,
   MapPin,
   Calendar,
@@ -30,12 +30,15 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaWhatsapp } from 'react-icons/fa';
+import { MonetizationService } from '@/lib/monetizationService';
+import { GamificationService } from '@/lib/gamificationService';
+import { useUser } from '@clerk/clerk-react';
 
 export const FurnitureDetail = () => {
   const { listingId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [listing, setListing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -44,12 +47,21 @@ export const FurnitureDetail = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
 
+  const { user } = useUser();
+
   useEffect(() => {
     if (listingId) {
       fetchListing();
       incrementViewCount();
+      // Phase 7: Track as a 'click' interaction for ROI analytics
+      MonetizationService.trackInteraction(listingId, 'listing', 'click');
+
+      // Phase 8: Daily Mission progress
+      if (user) {
+        GamificationService.trackMissionProgress(user.id, 'daily_market_view');
+      }
     }
-  }, [listingId]);
+  }, [listingId, user?.id]);
 
   const fetchListing = async () => {
     setLoading(true);
@@ -75,7 +87,7 @@ export const FurnitureDetail = () => {
       };
 
       setListing(transformedListing);
-      
+
       if (data.category_id) {
         fetchRelatedListings(data.category_id, data.id);
       }
@@ -128,13 +140,13 @@ export const FurnitureDetail = () => {
   };
 
   const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === 0 ? (listing?.images?.length || 1) - 1 : prev - 1
     );
   };
 
   const handleNextImage = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === (listing?.images?.length || 1) - 1 ? 0 : prev + 1
     );
   };
@@ -333,9 +345,8 @@ export const FurnitureDetail = () => {
                     <button
                       key={image.id}
                       onClick={() => setCurrentImageIndex(index)}
-                      className={`aspect-video rounded overflow-hidden border-2 ${
-                        index === currentImageIndex ? 'border-blue-600' : 'border-gray-200'
-                      }`}
+                      className={`aspect-video rounded overflow-hidden border-2 ${index === currentImageIndex ? 'border-blue-600' : 'border-gray-200'
+                        }`}
                     >
                       <img
                         src={image.image_url}
@@ -564,8 +575,8 @@ export const FurnitureDetail = () => {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
               {relatedListings.map((item) => {
                 const itemImage = item.images?.find((img: any) => img.is_primary)?.image_url ||
-                                item.images?.[0]?.image_url;
-                
+                  item.images?.[0]?.image_url;
+
                 return (
                   <div
                     key={item.id}

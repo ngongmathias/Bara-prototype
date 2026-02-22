@@ -46,6 +46,7 @@ import { AdminManagement } from "./pages/admin/AdminManagement";
 import { AdminRSSFeeds } from "./pages/admin/AdminRSSFeeds";
 import { AdminSettings } from "./pages/admin/AdminSettings";
 import ContactMessagesPage from "./pages/admin/ContactMessagesPage";
+import AdminGamification from "./pages/admin/AdminGamification";
 import { AdminBannerAds } from "./pages/admin/AdminBannerAds";
 import { AdminAuthGuard } from "./components/admin/AdminAuthGuard";
 import { UserAuthGuard } from "./components/users/UserAuthGuard";
@@ -344,6 +345,7 @@ const AppRoutes = () => {
           <Route path="admin-management" element={<AdminAuthGuard><AdminManagement /></AdminAuthGuard>} />
           <Route path="rss-feeds" element={<AdminAuthGuard><AdminRSSFeeds /></AdminAuthGuard>} />
           <Route path="settings" element={<AdminAuthGuard><AdminSettings /></AdminAuthGuard>} />
+          <Route path="gamification" element={<AdminAuthGuard><AdminGamification /></AdminAuthGuard>} />
           <Route path="contact-messages" element={<AdminAuthGuard><ContactMessagesPage /></AdminAuthGuard>} />
           <Route path="banner-ads" element={<AdminAuthGuard><AdminBannerAds /></AdminAuthGuard>} />
           <Route path="blog" element={<AdminAuthGuard><AdminBlog /></AdminAuthGuard>} />

@@ -1,9 +1,10 @@
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
-import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List, Share2 } from 'lucide-react';
-import { useState } from 'react';
+import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List, Share2, Maximize2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
+import { GamificationService } from '@/lib/gamificationService';
 import { QueueDrawer } from './QueueDrawer';
 import { FullScreenPlayer } from './FullScreenPlayer';
-import { Maximize2 } from 'lucide-react';
 
 export function GlobalPlayer() {
     const {
@@ -32,12 +33,36 @@ export function GlobalPlayer() {
 
     const isLiked = likedSongs.includes(currentSong.id);
 
+    const { user } = useUser();
+    const [lastTrackedSongId, setLastTrackedSongId] = useState<string | null>(null);
+
     const formatTime = (time: number) => {
         if (isNaN(time)) return '0:00';
         const minutes = Math.floor(time / 60);
         const seconds = Math.floor(time % 60);
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
+
+    // Phase 8: Mission Tracking for Song Listens
+    useEffect(() => {
+        if (user && currentSong && isPlaying) {
+            // If we've reached 50% of the song or 30 seconds
+            const isSignificantProgress = (progress / duration > 0.5) || (progress > 30);
+
+            if (isSignificantProgress && lastTrackedSongId !== currentSong.id) {
+                GamificationService.trackMissionProgress(user.id, 'daily_listen');
+                setLastTrackedSongId(currentSong.id);
+            }
+        }
+    }, [progress, duration, currentSong?.id, user?.id, isPlaying, lastTrackedSongId]);
+
+    // Reset tracked song id when song changes significantly
+    useEffect(() => {
+        if (currentSong?.id !== lastTrackedSongId && progress < 5) {
+            // If it's a new song and we're at the beginning, we might allow re-tracking later
+            // but usually we just want one listen per song per session or reset if they start over.
+        }
+    }, [currentSong?.id]);
 
     return (
         <div className="fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-xl border-t border-white/5 px-4 py-3 z-[100] text-white shadow-2xl">

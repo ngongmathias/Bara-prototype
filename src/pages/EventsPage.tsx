@@ -23,6 +23,7 @@ import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { supabase } from '@/lib/supabase';
 import { SEO } from '@/components/SEO';
+import { MonetizationService } from '@/lib/monetizationService';
 
 export const EventsPage = () => {
   const navigate = useNavigate();
@@ -172,6 +173,10 @@ export const EventsPage = () => {
 
   // Sort events
   const sortedEvents = [...filteredEvents].sort((a, b) => {
+    // Phase 7: Priority sorting for Premium/Paid events
+    if (a.is_premium && !b.is_premium) return -1;
+    if (!a.is_premium && b.is_premium) return 1;
+
     switch (sortBy) {
       case 'date':
         return (parseDate(a.start_date)?.getTime() ?? Number.POSITIVE_INFINITY) - (parseDate(b.start_date)?.getTime() ?? Number.POSITIVE_INFINITY);
@@ -352,6 +357,16 @@ export const EventsPage = () => {
       }))
     ];
   };
+
+  // Track impressions for primary events shown
+  useEffect(() => {
+    if (activeEvents.length > 0) {
+      const activePremium = activeEvents.filter(e => e.is_premium);
+      activePremium.forEach(event => {
+        MonetizationService.trackInteraction(event.id, 'event', 'impression');
+      });
+    }
+  }, [activeEventsStartIndex]); // Track on page change
 
   // Handle direct URL access to event details
   useEffect(() => {

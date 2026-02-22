@@ -6,7 +6,10 @@ import {
     TrendingUp,
     Calendar,
     ShoppingBag,
-    Loader2
+    Loader2,
+    Coins,
+    Award,
+    Shield
 } from 'lucide-react';
 import {
     BarChart,
@@ -19,6 +22,8 @@ import {
 } from 'recharts';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/lib/supabase';
+import { AchievementHall } from '@/components/gamification/AchievementHall';
+import { MarketingPerformance } from '@/components/monetization/MarketingPerformance';
 
 interface UserMetrics {
     totalViews: number;
@@ -27,6 +32,8 @@ interface UserMetrics {
     totalPosts: number;
     totalBusinesses: number;
     engagementRate: number;
+    coins: number;
+    tier: string;
 }
 
 export const UserAnalytics = () => {
@@ -38,7 +45,9 @@ export const UserAnalytics = () => {
         totalListings: 0,
         totalPosts: 0,
         totalBusinesses: 0,
-        engagementRate: 0
+        engagementRate: 0,
+        coins: 0,
+        tier: 'standard'
     });
 
     const [chartData, setChartData] = useState<{ name: string; items: number; views: number }[]>([]);
@@ -77,6 +86,20 @@ export const UserAnalytics = () => {
                 .select('views_count')
                 .eq('author_id', user.id);
 
+            // Fetch Gamification Data
+            const { data: gamify } = await supabase
+                .from('gamification_profiles')
+                .select('bara_coins')
+                .eq('user_id', user.id)
+                .single();
+
+            // Fetch Business Tier (assuming it's on businesses table as per migration)
+            const { data: bizData } = await supabase
+                .from('businesses')
+                .select('user_tier')
+                .eq('owner_id', user.id)
+                .limit(1);
+
             const evCount = events?.length || 0;
             const evViews = events?.reduce((acc: number, curr: any) => acc + (curr.view_count || 0), 0) || 0;
 
@@ -98,7 +121,9 @@ export const UserAnalytics = () => {
                 totalListings: listCount,
                 totalPosts: postCount,
                 totalBusinesses: bizCount,
-                engagementRate: totalItems > 0 ? parseFloat(((totalViews / totalItems) / 10).toFixed(1)) : 0
+                engagementRate: totalItems > 0 ? parseFloat(((totalViews / totalItems) / 10).toFixed(1)) : 0,
+                coins: gamify?.bara_coins || 0,
+                tier: bizData?.[0]?.user_tier || 'standard'
             });
 
             setChartData([
@@ -148,16 +173,36 @@ export const UserAnalytics = () => {
             value: `${metrics.engagementRate}%`,
             description: 'Average per-item reach',
             icon: TrendingUp
+        },
+        {
+            title: 'Bara Coins',
+            value: metrics.coins.toLocaleString(),
+            description: 'Your virtual balance',
+            icon: Coins
         }
     ];
 
+    const getTierColor = (tier: string) => {
+        switch (tier.toLowerCase()) {
+            case 'elite': return 'text-purple-500 border-purple-500 bg-purple-50';
+            case 'pro': return 'text-blue-500 border-blue-500 bg-blue-50';
+            default: return 'text-gray-500 border-gray-500 bg-gray-50';
+        }
+    };
+
     return (
         <div className="space-y-6">
-            <div>
-                <h2 className="text-3xl font-bold tracking-tight">Your Analytics</h2>
-                <p className="text-muted-foreground">
-                    Performance overview of your contributions to the platform.
-                </p>
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight">Your Analytics</h2>
+                    <p className="text-muted-foreground">
+                        Performance overview of your contributions to the platform.
+                    </p>
+                </div>
+                <div className={`flex items-center gap-2 px-4 py-2 border rounded-full font-bold uppercase tracking-wider text-sm ${getTierColor(metrics.tier)}`}>
+                    <Shield className="w-4 h-4" />
+                    {metrics.tier} Account
+                </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -229,6 +274,14 @@ export const UserAnalytics = () => {
                         </div>
                     </CardContent>
                 </Card>
+            </div>
+
+            <div className="mt-12 bg-gray-50/50 p-8 rounded-3xl border border-dashed border-gray-200">
+                {user?.id && <MarketingPerformance userId={user.id} />}
+            </div>
+
+            <div className="mt-12">
+                {user?.id && <AchievementHall userId={user.id} />}
             </div>
         </div>
     );

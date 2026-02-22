@@ -45,9 +45,11 @@ export interface MarketplaceListing {
   latitude?: number;
   longitude?: number;
   status: 'pending' | 'active' | 'sold' | 'expired' | 'rejected';
+  is_premium: boolean;
   is_featured: boolean;
   is_verified: boolean;
   verified_at?: string;
+  boosted_until?: string;
   views_count: number;
   favorites_count: number;
   expires_at?: string;
@@ -147,6 +149,23 @@ export interface FeaturedPricing {
   is_active: boolean;
   created_at: string;
 }
+
+export interface SponsoredBanner {
+  id: string;
+  company_name: string;
+  company_website: string;
+  banner_image_url: string;
+  banner_alt_text: string | null;
+  is_active: boolean;
+  payment_status: string;
+  bid_per_click: number;
+  daily_budget: number;
+  current_spend: number;
+  country_ids?: string[];
+  created_at: string;
+}
+
+export type UserTier = 'standard' | 'pro' | 'elite';
 
 export interface UserFavorite {
   id: string;

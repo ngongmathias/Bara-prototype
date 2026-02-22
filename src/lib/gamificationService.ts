@@ -9,6 +9,26 @@ export interface GamificationProfile {
     last_activity_at: string;
     consecutive_days: number;
     multiplier: number;
+    trust_rank: number;
+}
+
+export interface Mission {
+    id: string;
+    key: string;
+    title: string;
+    description: string;
+    goal: number;
+    xp_reward: number;
+    coin_reward: number;
+    reputation_reward: number;
+    type: 'daily' | 'weekly' | 'achievement';
+    category: string;
+}
+
+export interface UserMission extends Mission {
+    current_progress: number;
+    is_completed: boolean;
+    claimed_at: string | null;
 }
 
 export interface Achievement {
@@ -73,6 +93,21 @@ export class GamificationService {
             return null;
         }
         return data;
+    }
+
+    static async getUserEconomyHistory(userId: string, limit = 20): Promise<any[]> {
+        const { data, error } = await supabase
+            .from('gamification_history')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+        if (error) {
+            console.error('Error fetching economy history:', error);
+            return [];
+        }
+        return data || [];
     }
 
     static async addXP(userId: string, amount: number, reason: string): Promise<{ levelUp: boolean; newLevel: number } | null> {
@@ -297,6 +332,191 @@ export class GamificationService {
             return true;
         } catch (error) {
             console.error('Error awarding achievement:', error);
+            return false;
+        }
+    }
+
+    static async getMissions(userId: string): Promise<UserMission[]> {
+        try {
+            // First, ensure user has records in user_missions for all active missions
+            const { data: allMissions } = await supabase.from('missions').select('*');
+            if (!allMissions) return [];
+
+            const missionIds = allMissions.map(m => m.id);
+
+            // Check existing progress
+            const { data: userProgress } = await supabase
+                .from('user_missions')
+                .select('*')
+                .eq('user_id', userId);
+
+            const existingMissionIds = new Set(userProgress?.map(p => p.mission_id) || []);
+            const missingMissionIds = missionIds.filter(id => !existingMissionIds.has(id));
+
+            if (missingMissionIds.length > 0) {
+                const newRecords = missingMissionIds.map(id => ({
+                    user_id: userId,
+                    mission_id: id
+                }));
+                await supabase.from('user_missions').insert(newRecords);
+            }
+
+            // Fetch final combined data
+            const { data: finalData, error } = await supabase
+                .from('user_missions')
+                .select(`
+                    current_progress,
+                    is_completed,
+                    claimed_at,
+                    missions (*)
+                `)
+                .eq('user_id', userId);
+
+            if (error) throw error;
+
+            return finalData.map(item => ({
+                ...item.missions,
+                current_progress: item.current_progress,
+                is_completed: item.is_completed,
+                claimed_at: item.claimed_at
+            }));
+        } catch (error) {
+            console.error('Error fetching missions:', error);
+            return [];
+        }
+    }
+
+    static async trackMissionProgress(userId: string, missionKey: string, increment: number = 1): Promise<void> {
+        try {
+            const { data: mission } = await supabase
+                .from('missions')
+                .select('id, goal')
+                .eq('key', missionKey)
+                .single();
+
+            if (!mission) return;
+
+            const { data: userMission } = await supabase
+                .from('user_missions')
+                .select('current_progress, is_completed')
+                .eq('user_id', userId)
+                .eq('mission_id', mission.id)
+                .single();
+
+            if (!userMission || userMission.is_completed) return;
+
+            const newProgress = userMission.current_progress + increment;
+            const isNowCompleted = newProgress >= mission.goal;
+
+            await supabase
+                .from('user_missions')
+                .update({
+                    current_progress: newProgress,
+                    is_completed: isNowCompleted,
+                    completed_at: isNowCompleted ? new Date().toISOString() : null
+                })
+                .eq('user_id', userId)
+                .eq('mission_id', mission.id);
+
+            if (isNowCompleted) {
+                // Trigger visual feedback for completion
+                const event = new CustomEvent('bara_mission_completed', {
+                    detail: { missionKey, userId }
+                });
+                window.dispatchEvent(event);
+            }
+        } catch (error) {
+            console.error('Error tracking mission progress:', error);
+        }
+    }
+
+    static async claimMissionReward(userId: string, missionId: string): Promise<boolean> {
+        try {
+            const { data: userMission, error: fetchError } = await supabase
+                .from('user_missions')
+                .select('*, missions(*)')
+                .eq('user_id', userId)
+                .eq('mission_id', missionId)
+                .single();
+
+            if (fetchError || !userMission || !userMission.is_completed || userMission.claimed_at) {
+                return false;
+            }
+
+            const mission = userMission.missions;
+
+            // Mark as claimed
+            await supabase
+                .from('user_missions')
+                .update({ claimed_at: new Date().toISOString() })
+                .eq('id', userMission.id);
+
+            // Award XP
+            if (mission.xp_reward > 0) {
+                await this.addXP(userId, mission.xp_reward, `Mission: ${mission.title}`);
+            }
+
+            // Award Coins
+            if (mission.coin_reward > 0) {
+                const profile = await this.getProfile(userId);
+                if (profile) {
+                    await supabase
+                        .from('gamification_profiles')
+                        .update({
+                            bara_coins: Number(profile.bara_coins) + mission.coin_reward
+                        })
+                        .eq('user_id', userId);
+
+                    await supabase.from('gamification_history').insert({
+                        user_id: userId,
+                        type: 'coin_gain',
+                        amount: mission.coin_reward,
+                        reason: `Mission: ${mission.title}`
+                    });
+                }
+            }
+
+            // Award Reputation (Trust Rank)
+            if (mission.reputation_reward > 0) {
+                const profile = await this.getProfile(userId);
+                if (profile) {
+                    await this.updateUserEconomy(userId, {
+                        trust_rank: Number(profile.trust_rank || 1.0) + Number(mission.reputation_reward)
+                    });
+                }
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Error claiming mission reward:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Admin God-Mode: Directly override user economy stats
+     */
+    static async updateUserEconomy(userId: string, updates: { bara_coins?: number; trust_rank?: number }): Promise<boolean> {
+        try {
+            const { error } = await supabase
+                .from('gamification_profiles')
+                .update({
+                    ...updates,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('user_id', userId);
+
+            if (error) throw error;
+
+            await supabase.from('gamification_history').insert({
+                user_id: userId,
+                type: 'admin_override',
+                reason: `Admin override: ${JSON.stringify(updates)}`
+            });
+
+            return true;
+        } catch (error) {
+            console.error('Error updating user economy:', error);
             return false;
         }
     }

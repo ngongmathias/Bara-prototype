@@ -7,9 +7,9 @@ import { BottomBannerAd } from '@/components/BottomBannerAd';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
-import { 
-  ChevronRight, 
-  Share2, 
+import {
+  ChevronRight,
+  Share2,
   Flag,
   MapPin,
   Calendar,
@@ -30,24 +30,36 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaWhatsapp } from 'react-icons/fa';
+import { MonetizationService } from '@/lib/monetizationService';
+import { GamificationService } from '@/lib/gamificationService';
+import { useUser } from '@clerk/clerk-react';
 
 export const ServicesDetail = () => {
   const { listingId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [listing, setListing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [relatedListings, setRelatedListings] = useState<any[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
 
+  const { user } = useUser();
+
   useEffect(() => {
     if (listingId) {
       fetchListing();
       incrementViewCount();
+      // Phase 7: Track as a 'click' interaction for ROI analytics
+      MonetizationService.trackInteraction(listingId, 'listing', 'click');
+
+      // Phase 8: Daily Mission progress
+      if (user) {
+        GamificationService.trackMissionProgress(user.id, 'daily_market_view');
+      }
     }
-  }, [listingId]);
+  }, [listingId, user?.id]);
 
   const fetchListing = async () => {
     setLoading(true);
@@ -73,7 +85,7 @@ export const ServicesDetail = () => {
       };
 
       setListing(transformedListing);
-      
+
       if (data.category_id) {
         fetchRelatedListings(data.category_id, data.id);
       }
@@ -286,7 +298,7 @@ export const ServicesDetail = () => {
               <h1 className="text-3xl font-bold text-gray-900 mb-4 font-comfortaa">
                 {listing.title}
               </h1>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                   <Wrench className="w-6 h-6 text-blue-600" />
@@ -515,9 +527,9 @@ export const ServicesDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedListings.map((item) => {
                 const itemImage = item.images?.find((img: any) => img.is_primary)?.image_url ||
-                                item.images?.[0]?.image_url;
+                  item.images?.[0]?.image_url;
                 const itemServiceType = item.attributes?.service_type || '';
-                
+
                 return (
                   <div
                     key={item.id}

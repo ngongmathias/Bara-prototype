@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
+import { MonetizationService } from '@/lib/monetizationService';
 
 interface TopBannerAdProps {
   className?: string;
@@ -14,6 +15,7 @@ interface SponsoredBannerRow {
   company_website: string | null;
   company_name?: string;
   country_ids?: string[];  // Array of targeted country IDs
+  bid_per_click?: number;
 }
 
 let topBannerAdInstanceCounter = 0;
@@ -113,10 +115,24 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
           })
         );
 
-        const rows: SponsoredBannerRow[] = bannersWithCountries
-          .filter((b: SponsoredBannerRow) => !!b.banner_image_url);
+        // Elite Monetization Logic: GSP Ranking (Generalized Second Price theory)
+        // Ads are ranked by Rank = Bid * TrustRank. 
+        // This ensures the highest quality, highest-value ads occupy the top slots.
+        const scoredBanners = bannersWithCountries
+          .filter((b: any) => !!b.banner_image_url)
+          .map((banner: any) => {
+            const bid = banner.bid_per_click || 0.05;
+            const trustRank = 1.0; // Future: dynamic from user profile
+            // Slight stochastic jitter to prevent static ranking starvation
+            const competitiveScore = (bid * trustRank) * (0.8 + Math.random() * 0.4);
+            return { banner, competitiveScore };
+          });
 
-        setAllBanners(rows);
+        const winningRanks = scoredBanners
+          .sort((a, b) => b.competitiveScore - a.competitiveScore)
+          .map(item => item.banner);
+
+        setAllBanners(winningRanks);
       } catch (err) {
         console.error('Error fetching top banners for TopBannerAd:', err);
         setAllBanners([]);
@@ -223,6 +239,13 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
     return banners[currentBannerIndex];
   }, [banners, currentBannerIndex]);
 
+  // Track impression whenever the banner changes
+  useEffect(() => {
+    if (bannerToShow) {
+      MonetizationService.trackInteraction(bannerToShow.id, 'banner', 'impression');
+    }
+  }, [bannerToShow?.id]);
+
   // Track banner click
   const handleBannerClick = (bannerId: string, event: React.MouseEvent) => {
     console.log('Top banner clicked:', bannerId);
@@ -232,6 +255,7 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
 
   const trackBannerClick = async (bannerId: string) => {
     try {
+      // Legacy tracking
       await supabase
         .from('sponsored_banner_analytics')
         .insert({
@@ -239,6 +263,10 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
           event_type: 'click',
           user_agent: navigator.userAgent,
         });
+
+      // Bara Prime ROI tracking
+      const bidValue = banners.find(b => b.id === bannerId)?.bid_per_click || 0.05;
+      await MonetizationService.trackInteraction(bannerId, 'banner', 'click', bidValue);
     } catch (error) {
       console.error('Error tracking top banner click:', error);
     }
@@ -358,8 +386,8 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
                   <button
                     key={index}
                     className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentBannerIndex
-                        ? 'bg-white shadow-lg'
-                        : 'bg-white/50 hover:bg-white/70'
+                      ? 'bg-white shadow-lg'
+                      : 'bg-white/50 hover:bg-white/70'
                       }`}
                     onClick={() => {
                       setCurrentBannerIndex(index);

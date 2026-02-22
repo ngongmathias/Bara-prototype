@@ -136,6 +136,9 @@ export interface Event {
   payment_contact?: string;
   max_capacity?: number;
   current_registrations?: number;
+
+  // Monetization fields
+  is_premium?: boolean;
 }
 
 export interface EventRegistration {
