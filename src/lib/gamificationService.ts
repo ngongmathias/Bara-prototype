@@ -220,18 +220,23 @@ export class GamificationService {
             const diffTime = Math.abs(now.getTime() - lastActivity.getTime());
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
+            // Always track daily_login mission (even on same-day revisits)
+            await this.trackMissionProgress(userId, 'daily_login');
+
+            if (diffDays === 0) {
+                // Same day activity — mission tracked above, but no streak/XP update
+                return;
+            }
+
             let newStreak = profile.consecutive_days;
             let multiplier = profile.multiplier;
 
             if (diffDays === 1) {
                 // Streak continued
                 newStreak += 1;
-            } else if (diffDays > 1) {
-                // Streak broken
-                newStreak = 1;
             } else {
-                // Same day activity, no update needed to streak count
-                return;
+                // Streak broken (diffDays > 1)
+                newStreak = 1;
             }
 
             // MIT-level psychological scaling

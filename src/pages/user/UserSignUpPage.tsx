@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 export const UserSignUpPage = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const redirectUrl = searchParams.get('redirect_url') || '/user/settings';
+  const redirectUrl = searchParams.get('redirect_url') || '/users/dashboard';
   const signInUrl = `/user/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`;
   const finishUrl = `/auth/finish?mode=sign_up&redirect_url=${encodeURIComponent(redirectUrl)}`;
 

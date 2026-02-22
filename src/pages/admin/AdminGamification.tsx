@@ -145,7 +145,15 @@ const AdminGamification = () => {
 
     const fetchHistory = async () => {
         const { data } = await supabase.from('gamification_history').select('*').order('created_at', { ascending: false }).limit(50);
-        setHistory(data || []);
+        if (data && data.length > 0) {
+            const userIds = [...new Set(data.map(h => h.user_id))];
+            const { data: users } = await supabase.from('clerk_users').select('id, full_name, email').in('id', userIds);
+            const userMap: Record<string, any> = {};
+            users?.forEach(u => userMap[u.id] = u);
+            setHistory(data.map(h => ({ ...h, user_name: userMap[h.user_id]?.full_name || '', user_email: userMap[h.user_id]?.email || '' })));
+        } else {
+            setHistory([]);
+        }
     };
 
     // ============ ACTIONS ============
@@ -791,7 +799,7 @@ const AdminGamification = () => {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="text-xs font-black">User ID</TableHead>
+                                        <TableHead className="text-xs font-black">User</TableHead>
                                         <TableHead className="text-xs font-black">Type</TableHead>
                                         <TableHead className="text-xs font-black">Amount</TableHead>
                                         <TableHead className="text-xs font-black">Reason</TableHead>
@@ -801,7 +809,10 @@ const AdminGamification = () => {
                                 <TableBody>
                                     {history.map(h => (
                                         <TableRow key={h.id}>
-                                            <TableCell className="font-mono text-xs">{h.user_id?.slice(0, 20)}...</TableCell>
+                                            <TableCell>
+                                                <div className="font-bold text-sm">{h.user_name || 'Unknown'}</div>
+                                                <div className="text-[10px] text-gray-400">{h.user_email || h.user_id?.slice(0, 20) + '...'}</div>
+                                            </TableCell>
                                             <TableCell>
                                                 <Badge variant="outline" className={`text-xs ${h.type === 'coin_gain' || h.type === 'coin_purchase' ? 'text-green-600' : h.type === 'coin_spend' ? 'text-red-600' : 'text-blue-600'}`}>
                                                     {h.type}

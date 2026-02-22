@@ -370,6 +370,7 @@ export const PostListing = () => {
         await GamificationService.addXP(userId, XP_REWARDS.LISTING_CREATE, `Posted listing: ${formData.title}`);
         await GamificationService.addCoins(userId, COIN_REWARDS.LISTING_CREATE, `Posted listing: ${formData.title}`);
         await GamificationService.awardAchievement(userId, 'market_entry');
+        await GamificationService.trackMissionProgress(userId, 'daily_listing');
 
         // If premium, spend coins
         if (formData.is_premium) {

@@ -9,7 +9,7 @@ export const UserSignInPage = () => {
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
 
   const searchParams = new URLSearchParams(location.search);
-  const redirectUrl = searchParams.get('redirect_url') || '/user/settings';
+  const redirectUrl = searchParams.get('redirect_url') || '/users/dashboard';
   const signUpUrl = `/user/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`;
   const finishUrl = `/auth/finish?mode=sign_in&redirect_url=${encodeURIComponent(redirectUrl)}`;
 

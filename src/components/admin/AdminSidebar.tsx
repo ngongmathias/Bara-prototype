@@ -146,6 +146,12 @@ const adminMenuItems = [
     description: "Manage user accounts"
   },
   {
+    title: "Economy & Points",
+    icon: BarChart3,
+    path: "/admin/gamification",
+    description: "Manage points, rewards, and economy"
+  },
+  {
     title: "Streams",
     icon: Music,
     path: "/admin/streams",
@@ -180,12 +186,6 @@ const adminMenuItems = [
     icon: FileText,
     path: "/admin/rss-feeds",
     description: "Manage news sources and feeds"
-  },
-  {
-    title: "Economy & Points",
-    icon: BarChart3,
-    path: "/admin/gamification",
-    description: "Manage points, rewards, and economy"
   },
   {
     title: "Revenue Dashboard",

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserLogService, UserLog } from '@/lib/userLogService';
 import { useEffect, useRef, useState } from 'react';
-import { Calendar, User, Shield, Printer, Edit, X, Key, LogOut } from 'lucide-react';
+import { Calendar, User, Shield, Printer, Edit, X, Key, LogOut, Save, Loader2, CheckCircle } from 'lucide-react';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -17,6 +17,7 @@ const UserSettingsPage = () => {
   const [logs, setLogs] = useState<UserLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
@@ -24,6 +25,23 @@ const UserSettingsPage = () => {
     phone: user?.phoneNumbers?.[0]?.phoneNumber || ''
   });
   const printRef = useRef<HTMLDivElement>(null);
+
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      await user.update({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert('Failed to save profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -167,12 +185,19 @@ const UserSettingsPage = () => {
               </div>
               <div>
                 <Label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number</Label>
-                {isEditing ? (
-                  <Input id="phone" type="tel" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} className="mt-1" />
-                ) : (
-                  <p className="mt-1 text-gray-900 font-medium">{user?.phoneNumbers?.[0]?.phoneNumber || 'Not provided'}</p>
-                )}
+                <p className="mt-1 text-gray-900 font-medium">{user?.phoneNumbers?.[0]?.phoneNumber || 'Not provided'}</p>
+                <p className="text-xs text-gray-400 mt-1">Phone numbers are managed through your Clerk account settings.</p>
               </div>
+              {isEditing && (
+                <div className="flex gap-2 pt-2">
+                  <Button onClick={handleSave} disabled={saving} className="bg-[#e64600] hover:bg-[#cc3d00] text-white">
+                    {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : <><Save className="w-4 h-4 mr-2" /> Save Changes</>}
+                  </Button>
+                  <Button variant="outline" onClick={() => { setIsEditing(false); setFormData({ firstName: user?.firstName || '', lastName: user?.lastName || '', email: user?.primaryEmailAddress?.emailAddress || '', phone: user?.phoneNumbers?.[0]?.phoneNumber || '' }); }}>
+                    Cancel
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
