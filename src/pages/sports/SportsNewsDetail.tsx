@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { ArrowLeft, Calendar, User, Clock, Share2, Facebook, Twitter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEO } from '@/components/SEO';
+import { useToast } from '@/hooks/use-toast';
 
 interface NewsArticle {
     id: string;
@@ -23,6 +24,7 @@ interface NewsArticle {
 
 export default function SportsNewsDetail() {
     const { id } = useParams<{ id: string }>();
+    const { toast } = useToast();
     const [article, setArticle] = useState<NewsArticle | null>(null);
     const [relatedNews, setRelatedNews] = useState<NewsArticle[]>([]);
     const [loading, setLoading] = useState(true);
@@ -87,7 +89,7 @@ export default function SportsNewsDetail() {
             } catch { /* user cancelled */ }
         } else {
             await navigator.clipboard.writeText(url);
-            alert('Link copied to clipboard!');
+            toast({ title: "Copied", description: "Link copied to clipboard!" });
         }
     };
 

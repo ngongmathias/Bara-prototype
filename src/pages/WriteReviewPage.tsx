@@ -10,15 +10,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  MapPin, 
-  Search, 
-  Store, 
-  MessageSquare, 
-  FileText, 
-  Crown, 
-  Phone, 
-  Globe, 
+import {
+  MapPin,
+  Search,
+  Store,
+  MessageSquare,
+  FileText,
+  Crown,
+  Phone,
+  Globe,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -29,7 +29,8 @@ import {
   Edit,
   Save
 } from "lucide-react";
-import { db, auth } from "@/lib/supabase";
+import { db } from "@/lib/supabase";
+import { useUser } from "@clerk/clerk-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Business {
@@ -78,9 +79,10 @@ export const WriteReviewPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user: clerkUser } = useUser();
   const { businessId } = useParams();
   const [searchParams] = useSearchParams();
-  
+
   // State management
   const [searchTerm, setSearchTerm] = useState("");
   const [location, setLocation] = useState("Kigali, Rwanda");
@@ -89,11 +91,11 @@ export const WriteReviewPage = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingBusiness, setIsLoadingBusiness] = useState(false);
   const [currentStep, setCurrentStep] = useState<'search' | 'review'>('search');
-  
+
   // Business editing state
   const [isEditingBusiness, setIsEditingBusiness] = useState(false);
   const [editingBusinessData, setEditingBusinessData] = useState<Partial<Business>>({});
-  
+
   // Review form state
   const [reviewForm, setReviewForm] = useState<ReviewForm>({
     business_id: '',
@@ -179,7 +181,7 @@ export const WriteReviewPage = () => {
   const loadReviews = async (id: string) => {
     setLoadingReviews(true);
     console.log('Loading reviews for business:', id);
-    
+
     try {
       // Strategy 1: Use admin client first to bypass RLS and include ALL statuses
       let data: any[] | null = null; let error: any = null;
@@ -210,7 +212,7 @@ export const WriteReviewPage = () => {
       // Strategy 3: If still no data, try individual status queries
       if ((!data || data.length === 0) && !error) {
         console.log('Trying individual status queries...');
-        
+
         // Try approved first
         const approvedRes = await db.reviews()
           .select('*')
@@ -218,7 +220,7 @@ export const WriteReviewPage = () => {
           .eq('status', 'approved')
           .order('created_at', { ascending: false });
         console.log('Strategy 3a (approved):', approvedRes);
-        
+
         if (approvedRes.data && approvedRes.data.length > 0) {
           data = approvedRes.data;
           error = approvedRes.error;
@@ -230,7 +232,7 @@ export const WriteReviewPage = () => {
             .eq('status', 'pending')
             .order('created_at', { ascending: false });
           console.log('Strategy 3b (pending):', pendingRes);
-          
+
           if (pendingRes.data && pendingRes.data.length > 0) {
             data = pendingRes.data;
             error = pendingRes.error;
@@ -242,7 +244,7 @@ export const WriteReviewPage = () => {
               .not('status', 'in', '(approved,pending)')
               .order('created_at', { ascending: false });
             console.log('Strategy 3c (other statuses):', otherRes);
-            
+
             if (otherRes.data && otherRes.data.length > 0) {
               data = otherRes.data;
               error = otherRes.error;
@@ -269,7 +271,7 @@ export const WriteReviewPage = () => {
   // Load aggregated rating from business_review_stats with fallbacks
   const loadReviewStats = async (id: string) => {
     console.log('Loading review stats for business:', id);
-    
+
     try {
       // Strategy 1: Try business_review_stats view
       let { data, error } = await db.business_review_stats()
@@ -290,9 +292,9 @@ export const WriteReviewPage = () => {
             .eq('business_id', id)
             .order('total_count', { ascending: false })
             .limit(1);
-          
+
           console.log('Strategy 2 (admin business_review_stats):', { data: adminData, error: adminError });
-          
+
           if (adminData && adminData.length > 0) {
             data = adminData;
             error = adminError;
@@ -374,7 +376,7 @@ export const WriteReviewPage = () => {
     setSelectedBusiness(business);
     setReviewForm(prev => ({ ...prev, business_id: business.id }));
     setCurrentStep('review');
-    
+
     // Load reviews and stats for the selected business
     await Promise.all([
       loadReviews(business.id),
@@ -441,7 +443,7 @@ export const WriteReviewPage = () => {
           ...prev,
           ...editingBusinessData
         } : null);
-        
+
         setIsEditingBusiness(false);
         toast({
           title: 'Success',
@@ -508,17 +510,8 @@ export const WriteReviewPage = () => {
 
     setIsSubmitting(true);
     try {
-      // Try to get current user if available
-      let userId = null;
-      try {
-        const { data: { user } } = await auth.getUser();
-        if (user) {
-          userId = user.id;
-        }
-      } catch (error) {
-        // User not authenticated, continue with anonymous review
-        console.log('User not authenticated, submitting anonymous review');
-      }
+      // Get current user from Clerk
+      const userId = clerkUser?.id || null;
 
       // Submit review (with or without user authentication)
       const { error } = await db.reviews().insert({
@@ -544,7 +537,7 @@ export const WriteReviewPage = () => {
           description: t('reviews.reviewPending'),
           variant: "default"
         });
-        
+
         // Reset form and go back to search
         setReviewForm(prev => ({
           business_id: prev.business_id,
@@ -577,20 +570,20 @@ export const WriteReviewPage = () => {
   const handleBackToSearch = () => {
     setCurrentStep('search');
     setSelectedBusiness(null);
-            setReviewForm({
-          business_id: '',
-          rating: 0,
-          title: '',
-          content: '',
-          images: []
-        });
+    setReviewForm({
+      business_id: '',
+      rating: 0,
+      title: '',
+      content: '',
+      images: []
+    });
   };
 
   return (
     <div className="min-h-screen bg-background font-roboto">
       <Header />
       <TopBannerAd />
-      
+
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-gray-50 to-gray-100 py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -612,7 +605,7 @@ export const WriteReviewPage = () => {
               </div>
             </div>
           </div>
-          
+
           <h1 className="text-4xl font-bold text-yp-dark mb-4 font-comfortaa">
             <span className="text-brand-blue">{t('ReviewMessageOne')} </span>{t('reviewMessage')}</h1>
           <p className="text-xl text-gray-600 mb-2 font-roboto">
@@ -621,36 +614,36 @@ export const WriteReviewPage = () => {
           <p className="text-xl text-gray-600 mb-8 font-roboto">
             {t('reviews.writeShare')}
           </p>
-          
+
           {/* Search Form */}
           {currentStep === 'search' && (
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
-            <p className="text-sm text-gray-600 mb-4 font-roboto">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
+              <p className="text-sm text-gray-600 mb-4 font-roboto">
                 {t('reviews.searchBusiness')}
-            </p>
-            <div className="flex gap-3">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  type="text"
+              </p>
+              <div className="flex gap-3">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Input
+                    type="text"
                     placeholder={t('reviews.businessName')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="pl-10 h-12 text-base font-roboto"
-                />
-              </div>
-              <div className="flex-1 relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  type="text"
+                    className="pl-10 h-12 text-base font-roboto"
+                  />
+                </div>
+                <div className="flex-1 relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Input
+                    type="text"
                     placeholder={t('reviews.location')}
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                  className="pl-10 h-12 text-base font-roboto"
-                />
+                    className="pl-10 h-12 text-base font-roboto"
+                  />
                 </div>
-                <Button 
+                <Button
                   onClick={handleSearch}
                   disabled={isSearching}
                   className="bg-yp-yellow text-yp-dark px-8 h-12 font-roboto font-semibold"
@@ -675,8 +668,8 @@ export const WriteReviewPage = () => {
           </h2>
           <div className="grid gap-4">
             {searchResults.map((business) => (
-              <Card 
-                key={business.id} 
+              <Card
+                key={business.id}
                 className="cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => handleSelectBusiness(business)}
               >
@@ -729,15 +722,15 @@ export const WriteReviewPage = () => {
       {currentStep === 'review' && selectedBusiness && (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-6">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={handleBackToSearch}
               className="mb-4"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               {t('reviews.backToSearch')}
             </Button>
-            
+
             <Card className="mb-6">
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -879,7 +872,7 @@ export const WriteReviewPage = () => {
                       Avg: {avgRating ? avgRating.toFixed(1) : (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)} {t('reviews.outOf5')} ({reviews.length} reviews)
                     </span>
                   </div>
-                  
+
                   {/* Most recent review */}
                   <div className="bg-white border rounded p-4 shadow-sm">
                     <div className="flex items-center justify-between mb-2">
@@ -965,11 +958,10 @@ export const WriteReviewPage = () => {
                       className="focus:outline-none"
                     >
                       <Crown
-                        className={`w-8 h-8 ${
-                          star <= (hoveredRating || reviewForm.rating)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
+                        className={`w-8 h-8 ${star <= (hoveredRating || reviewForm.rating)
+                          ? 'text-yellow-400 fill-current'
+                          : 'text-gray-300'
+                          }`}
                       />
                     </button>
                   ))}
@@ -1013,14 +1005,14 @@ export const WriteReviewPage = () => {
 
               {/* Submit Button */}
               <div className="flex justify-end space-x-4 pt-4">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={handleBackToSearch}
                   disabled={isSubmitting}
                 >
                   {t('reviews.cancel')}
                 </Button>
-                <Button 
+                <Button
                   onClick={handleSubmitReview}
                   disabled={isSubmitting || reviewForm.rating === 0 || !reviewForm.content.trim()}
                   className="bg-yellow-900 hg:bg-yp-blue text-white font-roboto"
@@ -1037,55 +1029,55 @@ export const WriteReviewPage = () => {
               </div>
             </CardContent>
           </Card>
-      </div>
+        </div>
       )}
-      
+
       {/* Steps Section */}
       {currentStep === 'search' && (
-      <div className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Step 1 */}
-            <div className="text-center">
-              <div className="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                <Store className="w-10 h-10 text-brand-blue" />
+        <div className="py-16 bg-white">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Step 1 */}
+              <div className="text-center">
+                <div className="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                  <Store className="w-10 h-10 text-brand-blue" />
+                </div>
+                <h3 className="text-xl font-semibold text-yp-dark mb-3 font-comfortaa">
+                  {t('findBusiness')}
+                </h3>
+                <p className="text-gray-600 font-roboto">
+                  {t('lookForBusinesses')}
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-yp-dark mb-3 font-comfortaa">
-                {t('findBusiness')}
-              </h3>
-              <p className="text-gray-600 font-roboto">
-              {t('lookForBusinesses')}
-              </p>
-            </div>
-            
-            {/* Step 2 */}
-            <div className="text-center">
-              <div className="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="w-10 h-10 text-brand-blue" />
+
+              {/* Step 2 */}
+              <div className="text-center">
+                <div className="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="w-10 h-10 text-brand-blue" />
+                </div>
+                <h3 className="text-xl font-semibold text-yp-dark mb-3 font-comfortaa">
+                  {t('sentenceOne')}
+                </h3>
+                <p className="text-gray-600 font-roboto">
+                  {t('reviews.feedbackMessage')}
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-yp-dark mb-3 font-comfortaa">
-                {t('sentenceOne')}
-              </h3>
-              <p className="text-gray-600 font-roboto">
-                {t('reviews.feedbackMessage')}
-              </p>
-            </div>
-            
-            {/* Step 3 */}
-            <div className="text-center">
-              <div className="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                <FileText className="w-10 h-10 text-brand-blue" />
+
+              {/* Step 3 */}
+              <div className="text-center">
+                <div className="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-10 h-10 text-brand-blue" />
+                </div>
+                <h3 className="text-xl font-semibold text-yp-dark mb-3 font-comfortaa">
+                  {t('sentenceTwo')}
+                </h3>
+                <p className="text-gray-600 font-roboto">
+                  {t('reviews.shareMessage')}
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-yp-dark mb-3 font-comfortaa">
-                {t('sentenceTwo')}
-              </h3>
-              <p className="text-gray-600 font-roboto">
-                {t('reviews.shareMessage')}
-              </p>
             </div>
           </div>
         </div>
-      </div>
       )}
       <BottomBannerAd />
       <Footer />

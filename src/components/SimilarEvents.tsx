@@ -36,11 +36,13 @@ export const SimilarEvents = ({ events, currentEvent, onEventClick }: SimilarEve
                         className="cursor-pointer group"
                     >
                         <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                            <img
-                                src={similarEvent.event_image_url || 'https://via.placeholder.com/400x300?text=Event'}
-                                alt={similarEvent.title}
-                                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
+                            <div className="aspect-video relative overflow-hidden">
+                                <img
+                                    src={similarEvent.event_image_url || '/placeholder-event.jpg'}
+                                    alt={similarEvent.title}
+                                    className="w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                            </div>
                             <div className="p-4">
                                 <Badge variant="secondary" className="mb-2 text-xs">
                                     {similarEvent.category_name || similarEvent.category}

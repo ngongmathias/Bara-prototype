@@ -5,8 +5,10 @@ import { useUser } from '@clerk/clerk-react';
 import { GamificationService } from '@/lib/gamificationService';
 import { QueueDrawer } from './QueueDrawer';
 import { FullScreenPlayer } from './FullScreenPlayer';
+import { useToast } from '@/hooks/use-toast';
 
 export function GlobalPlayer() {
+    const { toast } = useToast();
     const {
         currentSong,
         isPlaying,
@@ -28,13 +30,12 @@ export function GlobalPlayer() {
 
     const [isQueueOpen, setIsQueueOpen] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
+    const { user } = useUser();
+    const [lastTrackedSongId, setLastTrackedSongId] = useState<string | null>(null);
 
     if (!currentSong) return null;
 
     const isLiked = likedSongs.includes(currentSong.id);
-
-    const { user } = useUser();
-    const [lastTrackedSongId, setLastTrackedSongId] = useState<string | null>(null);
 
     const formatTime = (time: number) => {
         if (isNaN(time)) return '0:00';
@@ -74,7 +75,11 @@ export function GlobalPlayer() {
                             src={currentSong.cover_url}
                             alt={currentSong.title}
                             className="w-14 h-14 rounded shadow-lg object-cover bg-gray-800 transition-transform group-hover:scale-105 cursor-pointer"
-                            onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.onerror = null;
+                                target.src = '/placeholder-music.png';
+                            }}
                             onClick={() => setIsFullScreen(true)}
                         />
                         {isPlaying && (
@@ -181,7 +186,7 @@ export function GlobalPlayer() {
                             const shareData = { title: currentSong.title, text: `Listen to ${currentSong.title} by ${currentSong.artist} on Bara Streams`, url: shareUrl };
                             try {
                                 if (navigator.share) { await navigator.share(shareData); }
-                                else { await navigator.clipboard.writeText(shareUrl); alert('Link copied to clipboard!'); }
+                                else { await navigator.clipboard.writeText(shareUrl); toast({ title: "Copied", description: "Link copied to clipboard!" }); }
                             } catch { /* User cancelled */ }
                         }}
                         className="text-gray-400 hover:text-white transition-colors hidden md:block"

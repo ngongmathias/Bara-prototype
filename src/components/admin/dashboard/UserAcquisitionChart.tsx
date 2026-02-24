@@ -39,9 +39,10 @@ export const UserAcquisitionChart = ({ className }: UserAcquisitionChartProps) =
       }
 
       const monthsData: UserData[] = (rows || []).map((row: any) => {
-        const monthDate = new Date(row.month_start);
+        const monthDate = new Date(row.month_start || new Date());
+        const isValid = !isNaN(monthDate.getTime());
         return {
-          month: format(monthDate, 'MMM yyyy'),
+          month: isValid ? format(monthDate, 'MMM yyyy') : 'Unknown',
           newUsers: Number(row.new_users || 0)
         };
       });
@@ -105,21 +106,21 @@ export const UserAcquisitionChart = ({ className }: UserAcquisitionChartProps) =
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="month" 
+              <XAxis
+                dataKey="month"
                 tick={{ fontSize: 12, fontFamily: 'Roboto' }}
                 stroke="#666"
               />
-              <YAxis 
+              <YAxis
                 tick={{ fontSize: 12, fontFamily: 'Roboto' }}
                 stroke="#666"
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend 
+              <Legend
                 wrapperStyle={{ fontFamily: 'Roboto', fontSize: 12 }}
               />
-              <Bar 
-                dataKey="newUsers" 
+              <Bar
+                dataKey="newUsers"
                 fill="#3b82f6"
                 radius={[8, 8, 0, 0]}
                 name="New Users"

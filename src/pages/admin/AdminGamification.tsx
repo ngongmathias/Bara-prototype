@@ -10,6 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { supabase } from '@/lib/supabase';
 import { GamificationService } from '@/lib/gamificationService';
 import { useToast } from '@/hooks/use-toast';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 import {
     Trophy,
     Coins,
@@ -293,7 +295,14 @@ const AdminGamification = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-black font-comfortaa">Gamification Command Center</h1>
+                    <div className="flex items-center"><h1 className="text-2xl md:text-3xl font-black font-comfortaa">Gamification Command Center</h1>
+                    <AdminPageGuide 
+                      title="Gamification & Coin Store"
+                      description="Control the economy of the platform. Adjust XP multipliers, daily missions, and wheel spin logic."
+                      features={["Edit Daily Mission goals and rewards", "Adjust Wheel of Fortune probabilities", "Manage Coin Store prices and items", "Grant manual spins or coins to users"]}
+                      workflow={["Review mission difficulty vs coin payouts.", "Adjust spin probabilities to keep the economy balanced.", "Gift coins to users for customer support resolutions."]}
+                    />
+                </div>
                     <p className="text-gray-500 text-sm">Manage coins, XP, missions, achievements, verifications, and boosts.</p>
                 </div>
                 <Button onClick={fetchAll} variant="outline" className="font-bold" disabled={loading}>

@@ -38,6 +38,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 export const AdminMarketplace = () => {
   const navigate = useNavigate();
@@ -346,9 +348,16 @@ export const AdminMarketplace = () => {
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-black mb-2 font-comfortaa">
+            <div className="flex items-center"><h1 className="text-3xl font-bold text-black mb-2 font-comfortaa">
               Marketplace Administration
             </h1>
+                    <AdminPageGuide 
+                      title="Marketplace Listings"
+                      description="Monitor user-to-user sales. Ensure no prohibited items, weapons, or illegal services are sold."
+                      features={["Review item images and descriptions", "Take down prohibited listings", "Feature high-quality items"]}
+                      workflow={["Scan the newest listings in the grid.", "Check the images for prohibited items.", "Immediately delete violations and warn the seller."]}
+                    />
+                </div>
             <p className="text-gray-600 font-roboto">
               Manage listings, review reports, and moderate content
             </p>

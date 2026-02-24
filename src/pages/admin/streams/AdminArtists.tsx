@@ -1,5 +1,15 @@
 import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +45,8 @@ import {
 } from "lucide-react";
 import { db } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface Artist {
     id: string;
@@ -52,6 +64,7 @@ export const AdminArtists = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingArtist, setEditingArtist] = useState<Artist | null>(null);
+    const [artistToDelete, setArtistToDelete] = useState<string | null>(null);
     const { toast } = useToast();
 
     // Form State
@@ -111,16 +124,18 @@ export const AdminArtists = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure? This will delete all their music too!")) return;
+    const confirmDelete = async () => {
+        if (!artistToDelete) return;
         try {
-            const { error } = await db.artists().delete().eq('id', id);
+            const { error } = await db.artists().delete().eq('id', artistToDelete);
             if (error) throw error;
             toast({ title: "Success", description: "Artist deleted" });
             fetchArtists();
         } catch (error) {
             console.error(error);
             toast({ title: "Error", description: "Failed to delete artist", variant: "destructive" });
+        } finally {
+            setArtistToDelete(null);
         }
     };
 
@@ -148,6 +163,14 @@ export const AdminArtists = () => {
 
     return (
         <AdminLayout title="Artists" subtitle="Manage artists and profiles">
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Bara Streams: Artists"
+            description="Verify and manage artist profiles."
+            features={["Grant Verified checkmarks", "Review bio and social links", "Disable rogue artists"]}
+            workflow={["Review pending verifications", "Check provided social proofs", "Approve to unlock streaming royalties"]}
+          />
+        </div>
             <div className="p-6 space-y-6">
                 <div className="flex justify-between items-center">
                     <div className="relative w-72">
@@ -270,7 +293,7 @@ export const AdminArtists = () => {
                                                 <Button variant="ghost" size="icon" onClick={() => openEdit(artist)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(artist.id)}>
+                                                <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => setArtistToDelete(artist.id)}>
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
@@ -282,6 +305,21 @@ export const AdminArtists = () => {
                     </Table>
                 </div>
             </div>
+
+            <AlertDialog open={!!artistToDelete} onOpenChange={(open) => !open && setArtistToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the artist and all their music.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </AdminLayout>
     );
 };

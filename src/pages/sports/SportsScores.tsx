@@ -15,7 +15,7 @@ export default function SportsScores() {
 
     // Filters from URL
     const selectedLeagueId = searchParams.get('league') ? parseInt(searchParams.get('league')!) : undefined;
-    const selectedDate = searchParams.get('date') || new Date().toISOString().split('T')[0];
+    const selectedDate = searchParams.get('date') || new Date().toLocaleDateString('en-CA');
 
     const { data: fixtures, isLoading, error } = useFixtures({
         sport: activeSport.slug,
@@ -62,7 +62,7 @@ export default function SportsScores() {
         const d = new Date();
         d.setDate(d.getDate() + i);
         dateOptions.push({
-            full: d.toISOString().split('T')[0],
+            full: d.toLocaleDateString('en-CA'),
             day: d.toLocaleDateString('en-US', { weekday: 'short' }),
             date: d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
         });
@@ -160,7 +160,7 @@ export default function SportsScores() {
                                     <h3 className="font-black text-2xl text-gray-900 uppercase tracking-tighter">No events found</h3>
                                     <p className="text-gray-500 mt-2 font-medium">There are no matches scheduled for the selected date and filters.</p>
                                     <button
-                                        onClick={() => setSearchParams({ date: new Date().toISOString().split('T')[0] })}
+                                        onClick={() => setSearchParams({ date: new Date().toLocaleDateString('en-CA') })}
                                         className="mt-6 px-6 py-2 bg-black text-white rounded font-black uppercase tracking-widest text-xs hover:bg-gray-800 transition-colors"
                                     >
                                         Go to Today
@@ -199,7 +199,7 @@ export default function SportsScores() {
                                 <Trophy size={20} className="mb-3 opacity-80" />
                                 <h3 className="font-black text-lg uppercase leading-tight mb-2">Track Your Favorites</h3>
                                 <p className="text-xs font-medium text-white/80 leading-relaxed">Sign in to follow your favorite teams and get personalized score notifications and news updates across all your devices.</p>
-                                <Link to="/sign-in" className="mt-4 inline-block bg-white text-[#cc0000] px-4 py-1.5 rounded text-[11px] font-black uppercase tracking-widest hover:bg-gray-100 transition-colors">Sign In Now</Link>
+                                <Link to="/user/sign-in" className="mt-4 inline-block bg-white text-[#cc0000] px-4 py-1.5 rounded text-[11px] font-black uppercase tracking-widest hover:bg-gray-100 transition-colors">Sign In Now</Link>
                             </div>
                         </div>
                     </div>

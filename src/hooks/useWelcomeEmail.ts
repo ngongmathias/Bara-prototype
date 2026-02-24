@@ -26,7 +26,7 @@ export const useWelcomeEmail = () => {
                             user_id: user.id,
                             email: user.primaryEmailAddress?.emailAddress,
                             full_name: user.fullName,
-                            welcome_email_sent: true,
+                            welcome_email_sent: false,
                             updated_at: new Date().toISOString()
                         });
                 }

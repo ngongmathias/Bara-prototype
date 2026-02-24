@@ -16,6 +16,8 @@ import {
   Search
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 export const AdminRSSFeeds = () => {
   const { toast } = useToast();
@@ -152,6 +154,14 @@ export const AdminRSSFeeds = () => {
 
   return (
     <AdminLayout title="RSS Feeds Management" subtitle="Manage news sources and feeds">
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="RSS Feed Aggregator"
+            description="Manage automated news sourcing from African outlets."
+            features={["Add new RSS urls", "Set fetch frequency", "Monitor parsing errors"]}
+            workflow={["Add the .xml or .rss link", "Test the fetcher", "Set active to start pulling articles"]}
+          />
+        </div>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

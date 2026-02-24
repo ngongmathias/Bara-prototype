@@ -122,12 +122,10 @@ export async function fetchAndParseRSSFeed(feedUrl: string, sourceName: string):
   try {
     // 1. Try rss2json.com first (Reliable JSON API, handles CORS)
     try {
-      console.log(`Fetching RSS via rss2json: ${feedUrl}`);
       const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'ok') {
-          console.log(`rss2json success for ${sourceName}: ${data.items.length} items`);
           return data.items.map((item: any) => ({
             title: item.title,
             link: item.link,
@@ -151,11 +149,9 @@ export async function fetchAndParseRSSFeed(feedUrl: string, sourceName: string):
       console.warn(`rss2json failed for ${sourceName}, trying fallbacks...`, error);
     }
 
-    // 2. Fallback: Try multiple CORS proxies for raw XML
     const proxies = [
       `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`,
-      `https://corsproxy.io/?${encodeURIComponent(feedUrl)}`,
-      `https://cors-anywhere.herokuapp.com/${feedUrl}`,
+      `https://corsproxy.io/?${encodeURIComponent(feedUrl)}`
     ];
 
     let xmlText = '';
@@ -257,9 +253,9 @@ export async function fetchAndParseRSSFeed(feedUrl: string, sourceName: string):
  * Strip HTML tags from text
  */
 function stripHtml(html: string): string {
-  const tmp = document.createElement('DIV');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
+  if (!html) return '';
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || '';
 }
 
 /**
@@ -271,6 +267,8 @@ const hasGNews = () => !!import.meta.env.VITE_GNEWS_KEY;
 const hasCurrents = () => !!import.meta.env.VITE_CURRENTS_KEY;
 
 // Fetch from News API (if configured)
+// FIXME: Security Risk (S8) - API keys appended to URLs in the client are visible in the Network tab.
+// Move these fetches to a secure backend like a Supabase Edge Function before launching.
 async function fetchFromNewsAPI(countryCode: string): Promise<RSSFeedItem[]> {
   const apiKey = import.meta.env.VITE_NEWSAPI_KEY;
   if (!apiKey) return [];
@@ -365,7 +363,6 @@ async function smartFetchNews(source: RSSFeedSource): Promise<RSSFeedItem[]> {
     if (hasNewsAPI()) {
       const items = await fetchFromNewsAPI(source.countryCode);
       if (items.length > 0) {
-        console.log(`✅ Fetched ${items.length} articles from NewsAPI for ${source.countryName}`);
         return items;
       }
     }
@@ -374,7 +371,6 @@ async function smartFetchNews(source: RSSFeedSource): Promise<RSSFeedItem[]> {
     if (hasGNews()) {
       const items = await fetchFromGNews(source.countryCode);
       if (items.length > 0) {
-        console.log(`✅ Fetched ${items.length} articles from GNews for ${source.countryName}`);
         return items;
       }
     }
@@ -383,14 +379,12 @@ async function smartFetchNews(source: RSSFeedSource): Promise<RSSFeedItem[]> {
     if (hasCurrents()) {
       const items = await fetchFromCurrents(source.countryCode);
       if (items.length > 0) {
-        console.log(`✅ Fetched ${items.length} articles from Currents for ${source.countryName}`);
         return items;
       }
     }
   }
 
   // Fallback to RSS (always works, free)
-  console.log(`ℹ️ Using RSS feed for ${source.name}`);
   return await fetchAndParseRSSFeed(source.url, source.name);
 }
 
@@ -406,9 +400,7 @@ export async function refreshRSSFeeds(forceRefresh = false): Promise<{ success: 
     if (hasCurrents()) configuredAPIs.push('Currents');
 
     if (configuredAPIs.length > 0) {
-      console.log(`🔑 Configured APIs: ${configuredAPIs.join(', ')}`);
     } else {
-      console.log(`ℹ️ No API keys configured, using RSS feeds only`);
     }
 
     for (const source of sources) {
@@ -418,12 +410,9 @@ export async function refreshRSSFeeds(forceRefresh = false): Promise<{ success: 
         const minutesSinceLastFetch = (now.getTime() - lastFetch.getTime()) / (1000 * 60);
 
         if (!forceRefresh && minutesSinceLastFetch < source.fetchIntervalMinutes) {
-          console.log(`⏭️ Skipping ${source.name} - fetched ${minutesSinceLastFetch.toFixed(0)} minutes ago`);
           continue;
         }
       }
-
-      console.log(`📰 Fetching news from ${source.name}...`);
 
       // Use smart fetch (APIs first, RSS fallback)
       const items = await smartFetchNews(source);
@@ -461,8 +450,6 @@ export async function refreshRSSFeeds(forceRefresh = false): Promise<{ success: 
       // Add a 5-second delay to avoid rate limiting (429 errors from rss2json)
       await new Promise(resolve => setTimeout(resolve, 5000));
     }
-
-    console.log(`✅ RSS refresh complete. Added ${totalItemsAdded} new items.`);
     return { success: true, itemsAdded: totalItemsAdded };
   } catch (error) {
     console.error('❌ Error refreshing RSS feeds:', error);

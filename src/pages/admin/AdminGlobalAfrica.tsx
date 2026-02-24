@@ -30,6 +30,8 @@ import {
 import { db } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { uploadImage } from '@/lib/storage';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface GlobalAfrica {
   id: string;
@@ -236,6 +238,14 @@ export const AdminGlobalAfrica: React.FC = () => {
   if (loading) {
     return (
       <AdminLayout>
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Global Africa Directory"
+            description="Manage diaspora businesses operating outside Africa."
+            features={["Approve diasporic businesses", "Manage destination countries", "Tag global regions"]}
+            workflow={["Review pending diaspora applications", "Verify business legality", "Approve listing"]}
+          />
+        </div>
         <div className="flex items-center justify-center h-64">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
         </div>

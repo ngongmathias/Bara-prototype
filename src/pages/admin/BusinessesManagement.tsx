@@ -42,6 +42,8 @@ import {
 } from "lucide-react";
 import { db } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface Business {
   id: string;
@@ -350,6 +352,14 @@ export const BusinessesManagement = () => {
   if (loading) {
     return (
       <AdminLayout>
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Business Management (Legacy)"
+            description="Old business UI."
+            features={["View businesses"]}
+            workflow={["Navigate to the standard Admin Businesses page."]}
+          />
+        </div>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yp-blue mx-auto mb-4"></div>

@@ -102,6 +102,20 @@ export const emitXPEvent = (amount: number, reason: string) => {
     window.dispatchEvent(event);
 };
 
+// Client-side Mutex to prevent race conditions during concurrent gamification updates
+class Mutex {
+    private queue: Promise<void> = Promise.resolve();
+    async lock(): Promise<() => void> {
+        let unlock: () => void = () => { };
+        const next = new Promise<void>(resolve => { unlock = resolve; });
+        const prev = this.queue;
+        this.queue = prev.then(() => next);
+        await prev;
+        return unlock;
+    }
+}
+const gamificationMutex = new Mutex();
+
 export class GamificationService {
     static async getProfile(userId: string): Promise<GamificationProfile | null> {
         const { data, error } = await supabase
@@ -158,9 +172,27 @@ export class GamificationService {
     }
 
     static async addXP(userId: string, amount: number, reason: string): Promise<{ levelUp: boolean; newLevel: number } | null> {
+        const unlock = await gamificationMutex.lock();
         try {
             const profile = await this.getProfile(userId);
             if (!profile) return null;
+
+            // ANTI-EXPLOIT: Check if this was a one-time or daily reward that was already granted
+            if (reason.includes('Daily') || reason.includes('Once')) {
+                const today = new Date().toLocaleDateString('en-CA');
+                const { data: existing } = await supabase
+                    .from('gamification_history')
+                    .select('id')
+                    .eq('user_id', userId)
+                    .eq('reason', reason)
+                    .gte('created_at', `${today}T00:00:00`)
+                    .limit(1);
+
+                if (existing && existing.length > 0) {
+                    console.warn(`[Anti-Exploit] Blocked duplicate XP grant for: ${reason}`);
+                    return null;
+                }
+            }
 
             // Apply multiplier (MIT-level incentive)
             const multipliedAmount = Math.round(amount * (profile.multiplier || 1));
@@ -207,10 +239,13 @@ export class GamificationService {
         } catch (error) {
             console.error('Error adding XP:', error);
             return null;
+        } finally {
+            unlock();
         }
     }
 
     static async checkDailyStreak(userId: string): Promise<void> {
+        const unlock = await gamificationMutex.lock();
         try {
             const profile = await this.getProfile(userId);
             if (!profile) return;
@@ -257,17 +292,42 @@ export class GamificationService {
             if (error) throw error;
 
             // Give a small daily bonus for returning
+            // We call addXP, but since addXP also locks, we must unlock first or we'll deadlock!
+            // Wait, we are calling addXP internally. We must unlock before calling addXP:
+            unlock();
             await this.addXP(userId, XP_REWARDS.SIGN_IN_BONUS, `Daily Streak: Day ${newStreak}`);
+            return; // Already unlocked
 
         } catch (error) {
             console.error('Error checking streak:', error);
+        } finally {
+            // Check if we already unlocked
+            try { unlock(); } catch (e) { }
         }
     }
 
     static async addCoins(userId: string, amount: number, reason: string): Promise<boolean> {
+        const unlock = await gamificationMutex.lock();
         try {
             const profile = await this.getProfile(userId);
             if (!profile) return false;
+
+            // ANTI-EXPLOIT: Check if this was a daily reward already granted
+            if (reason.includes('Daily') || reason.includes('Once')) {
+                const today = new Date().toLocaleDateString('en-CA');
+                const { data: existing } = await supabase
+                    .from('gamification_history')
+                    .select('id')
+                    .eq('user_id', userId)
+                    .eq('reason', reason)
+                    .gte('created_at', `${today}T00:00:00`)
+                    .limit(1);
+
+                if (existing && existing.length > 0) {
+                    console.warn(`[Anti-Exploit] Blocked duplicate coin grant for: ${reason}`);
+                    return false;
+                }
+            }
 
             const { error } = await supabase
                 .from('gamification_profiles')
@@ -290,10 +350,13 @@ export class GamificationService {
         } catch (error) {
             console.error('Error adding coins:', error);
             return false;
+        } finally {
+            unlock();
         }
     }
 
     static async spendCoins(userId: string, amount: number, reason: string): Promise<boolean> {
+        const unlock = await gamificationMutex.lock();
         try {
             const profile = await this.getProfile(userId);
             if (!profile || profile.bara_coins < amount) return false;
@@ -311,16 +374,21 @@ export class GamificationService {
             await supabase.from('gamification_history').insert({
                 user_id: userId,
                 type: 'coin_spend',
-                amount,
+                amount: -amount,
                 reason
             });
+
+            emitXPEvent(-amount, `Spent Coins: ${reason}`);
 
             return true;
         } catch (error) {
             console.error('Error spending coins:', error);
             return false;
+        } finally {
+            unlock();
         }
     }
+
 
     static async getAchievements(): Promise<Achievement[]> {
         const { data, error } = await supabase

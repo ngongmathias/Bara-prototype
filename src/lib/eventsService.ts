@@ -301,18 +301,14 @@ export class EventsService {
 
       // Only filter by is_public if not including private events (for admin)
       if (!include_private) {
-        console.log('⚠️ Filtering by is_public: true only');
         query = query.eq('is_public', true);
       } else {
-        console.log('✅ Including ALL events (public and private)');
       }
 
       // Only filter by status if not including all statuses (for public-facing pages)
       if (!include_all_statuses) {
-        console.log('⚠️ Filtering by status: upcoming, ongoing only');
         query = query.in('event_status', ['upcoming', 'ongoing']);
       } else {
-        console.log('✅ Including ALL statuses (no filter)');
       }
 
       query = query
@@ -594,7 +590,6 @@ export class EventsService {
   // Create new event
   static async createEvent(eventData: Partial<Event>): Promise<Event> {
     try {
-      console.log('Creating event with data:', eventData);
 
       // Remove hashtags field as it doesn't exist in the database schema
       const { hashtags, ...cleanEventData } = eventData as any;
@@ -609,8 +604,6 @@ export class EventsService {
         console.error('Supabase error:', error);
         throw error;
       }
-
-      console.log('Event created successfully:', data);
 
       // Get related data separately to avoid foreign key issues
       let countryData = null;

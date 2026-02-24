@@ -158,7 +158,9 @@ export default function LikedSongsPage() {
                                                 <Heart size={18} fill="currentColor" />
                                             </button>
                                             <span className="text-sm text-gray-500 font-mono w-10 text-right">
-                                                {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
+                                                {typeof song.duration === 'number' && !isNaN(song.duration)
+                                                    ? `${Math.floor(song.duration / 60)}:${Math.floor(song.duration % 60).toString().padStart(2, '0')}`
+                                                    : '--:--'}
                                             </span>
                                         </div>
                                     </div>

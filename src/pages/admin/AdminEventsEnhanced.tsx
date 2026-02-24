@@ -34,6 +34,8 @@ import { uploadEventImage, EventsService } from '@/lib/eventsService';
 import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { HashtagInput } from '@/components/ui/hashtag-input';
 import { MultiHashtagInput } from '@/components/ui/multi-hashtag-input';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface FormTicket {
   name: string;
@@ -426,7 +428,14 @@ export const AdminEventsEnhanced = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Events Management</h1>
+            <div className="flex items-center"><h1 className="text-3xl font-bold">Events Management</h1>
+                    <AdminPageGuide 
+                      title="Events Management"
+                      description="Create, edit, and moderate local and global events. Control ticketing, capacity, and cover images."
+                      features={["Full CRUD operations for all events", "Interactive image gallery & cover selection", "Capacity and entry-fee controls", "Hashtag and category assignments"]}
+                      workflow={["Click Add Event to draft a new listing.", "Upload high-quality images and set one as the Cover.", "Ensure accurate Venue details and coordinates.", "Set entry fees (or mark as Free) and publish."]}
+                    />
+                </div>
             <p className="text-gray-600">Manage events and event details</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

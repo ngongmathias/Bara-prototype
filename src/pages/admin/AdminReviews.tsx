@@ -50,6 +50,8 @@ import {
 } from "lucide-react";
 import { getAdminDb } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface Review {
   id: string;
@@ -310,7 +312,14 @@ export const AdminReviews = () => {
             </head>
             <body>
               <div class="header">
-                <h1>Reviews Management Report</h1>
+                <div className="flex items-center"><h1>Reviews Management Report</h1>
+                    <AdminPageGuide 
+                      title="Review Moderation"
+                      description="Oversee the integrity of community reviews on businesses and events."
+                      features={["Delete fake or spam reviews", "Approve flagged reviews", "Monitor average rating impacts"]}
+                      workflow={["Filter for flagged or pending reviews.", "Ensure the review is relevant and not a bot.", "Approve valid reviews or Delete spam."]}
+                    />
+                </div>
                 <p>Generated on: ${new Date().toLocaleDateString()}</p>
               </div>
               <div class="stats">
@@ -364,7 +373,7 @@ export const AdminReviews = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `reviews_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `reviews_${new Date().toLocaleDateString('en-CA')}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();

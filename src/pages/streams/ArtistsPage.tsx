@@ -48,7 +48,11 @@ export default function ArtistsPage() {
                                             src={artist.image_url}
                                             alt={artist.name}
                                             className="w-full h-full object-cover rounded-full shadow-lg"
-                                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop'; }}
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement;
+                                                target.onerror = null;
+                                                target.src = '/placeholder-artist.png';
+                                            }}
                                         />
                                         <button className="absolute bottom-6 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
                                             <Play size={24} fill="black" className="ml-1" />

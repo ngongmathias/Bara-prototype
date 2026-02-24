@@ -6,9 +6,11 @@ import { Loader2, Play, Pause, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 import { SEO } from '@/components/SEO';
+import { useUser } from '@clerk/clerk-react';
 
 export default function StreamsHome() {
     const { toast } = useToast();
+    const { user: clerkUser } = useUser();
     const { play, currentSong, isPlaying, playAlbum } = useAudioPlayer();
     const [trendingSongs, setTrendingSongs] = useState<Song[]>([]);
     const [popularArtists, setPopularArtists] = useState<any[]>([]);
@@ -58,14 +60,13 @@ export default function StreamsHome() {
                     .limit(10);
                 setNewReleases(albumsData || []);
 
-                // Fetch Recently Played (from play_history)
+                // Fetch Recently Played (using Clerk user ID)
                 try {
-                    const { data: { user } } = await supabase.auth.getUser();
-                    if (user) {
+                    if (clerkUser) {
                         const { data: historyData } = await supabase
                             .from('play_history')
                             .select('song_id, played_at, songs(*, artists(name))')
-                            .eq('user_id', user.id)
+                            .eq('user_id', clerkUser.id)
                             .order('played_at', { ascending: false })
                             .limit(20);
 
@@ -172,7 +173,14 @@ export default function StreamsHome() {
                 {/* Main Content */}
                 <main className="p-4 sm:p-8 max-w-[1400px] mx-auto">
                     {/* Greeting */}
-                    <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 tracking-tight text-white">Good evening</h1>
+                    <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 tracking-tight text-white">
+                        {(() => {
+                            const hour = new Date().getHours();
+                            if (hour < 12) return 'Good morning';
+                            if (hour < 18) return 'Good afternoon';
+                            return 'Good evening';
+                        })()}
+                    </h1>
 
                     {loading ? (
                         <div className="flex justify-center py-20">
@@ -205,10 +213,10 @@ export default function StreamsHome() {
                             {/* Made For You - Curated Mixes (plays shuffled trending songs) */}
                             <Section title="Made For You">
                                 {[
-                                    { id: '1', title: 'Discover Weekly', artist: 'Personalized for you', cover: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=300&h=300&fit=crop', gradient: 'from-blue-600 to-blue-800', offset: 0 },
-                                    { id: '2', title: 'Daily Mix 1', artist: 'Afrobeats & Highlife', cover: 'https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=300&h=300&fit=crop', gradient: 'from-green-600 to-green-800', offset: 3 },
-                                    { id: '3', title: 'Daily Mix 2', artist: 'Amapiano Beats', cover: 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=300&h=300&fit=crop', gradient: 'from-orange-600 to-orange-800', offset: 6 },
-                                    { id: '4', title: 'Release Radar', artist: 'New from artists you follow', cover: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop', gradient: 'from-purple-600 to-purple-800', offset: 9 }
+                                    { id: '1', title: 'Discover Weekly', artist: 'Personalized for you', cover: '/placeholder-playlist.png', gradient: 'from-blue-600 to-blue-800', offset: 0 },
+                                    { id: '2', title: 'Daily Mix 1', artist: 'Afrobeats & Highlife', cover: '/placeholder-playlist.png', gradient: 'from-green-600 to-green-800', offset: 3 },
+                                    { id: '3', title: 'Daily Mix 2', artist: 'Amapiano Beats', cover: '/placeholder-playlist.png', gradient: 'from-orange-600 to-orange-800', offset: 6 },
+                                    { id: '4', title: 'Release Radar', artist: 'New from artists you follow', cover: '/placeholder-playlist.png', gradient: 'from-purple-600 to-purple-800', offset: 9 }
                                 ].map(mix => (
                                     <div key={mix.id} className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl border border-white/5">
                                         <div className="relative mb-4 aspect-square shadow-2xl">
@@ -249,7 +257,11 @@ export default function StreamsHome() {
                                                     src={song.cover_url}
                                                     alt={song.title}
                                                     className="w-full h-full object-cover rounded-md shadow-lg"
-                                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }}
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        target.onerror = null;
+                                                        target.src = '/placeholder-music.png';
+                                                    }}
                                                 />
                                                 <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                                                     <Clock size={10} /> Played
@@ -278,7 +290,11 @@ export default function StreamsHome() {
                                                     src={song.cover_url}
                                                     alt={song.title}
                                                     className="w-full h-full object-cover rounded-md shadow-lg"
-                                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }}
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        target.onerror = null;
+                                                        target.src = '/placeholder-music.png';
+                                                    }}
                                                 />
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
@@ -309,7 +325,11 @@ export default function StreamsHome() {
                                                         src={artist.image_url}
                                                         alt={artist.name}
                                                         className="w-full h-full object-cover rounded-full shadow-lg"
-                                                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop'; }}
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.onerror = null;
+                                                            target.src = '/placeholder-artist.png';
+                                                        }}
                                                     />
                                                     <button
                                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePlayArtist(artist.id); }}
@@ -338,7 +358,11 @@ export default function StreamsHome() {
                                                     src={album.cover_url}
                                                     alt={album.title}
                                                     className="w-full h-full object-cover rounded-md shadow-lg"
-                                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&h=300&fit=crop'; }}
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        target.onerror = null;
+                                                        target.src = '/placeholder-album.png';
+                                                    }}
                                                 />
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handlePlayAlbum(album.id); }}
@@ -359,11 +383,11 @@ export default function StreamsHome() {
                             {/* Popular Radio */}
                             <Section title="Popular radio" showAllLink="/streams/radio">
                                 {[
-                                    { id: 'r1', title: 'Mike Kayihura', images: ['https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=200&h=200&fit=crop'], color: 'bg-[#509bf5]', footer: 'With Andy Bumuntu, Yvan Buravan, Igor...' },
-                                    { id: 'r2', title: 'Kivumbi King', images: ['https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-[#9b50f5]', footer: 'With Amalon, Nel Ngabo, Ish Kevin and more' },
-                                    { id: 'r3', title: 'The Ben', images: ['https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-[#f5509b]', footer: 'With Meddy, Bruce Melodie, Christopher...' },
-                                    { id: 'r4', title: 'Bruce Melodie', images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-[#50f59b]', footer: 'With Davis D, Chriss Eazy, Juno Kizigenza and more' },
-                                    { id: 'r5', title: 'Rema', images: ['https://plus.unsplash.com/premium_photo-1661601614051-9e7978280628?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-[#f59b50]', footer: 'With Shallipopi, ODUMODUBLVCK, Kizz...' }
+                                    { id: 'r1', title: 'Mike Kayihura', images: ['/placeholder-artist.png', '/placeholder-music.png', '/placeholder-album.png'], color: 'bg-[#509bf5]', footer: 'With Andy Bumuntu, Yvan Buravan, Igor...' },
+                                    { id: 'r2', title: 'Kivumbi King', images: ['/placeholder-artist.png', '/placeholder-music.png', '/placeholder-album.png'], color: 'bg-[#9b50f5]', footer: 'With Amalon, Nel Ngabo, Ish Kevin and more' },
+                                    { id: 'r3', title: 'The Ben', images: ['/placeholder-artist.png', '/placeholder-music.png', '/placeholder-album.png'], color: 'bg-[#f5509b]', footer: 'With Meddy, Bruce Melodie, Christopher...' },
+                                    { id: 'r4', title: 'Bruce Melodie', images: ['/placeholder-artist.png', '/placeholder-music.png', '/placeholder-album.png'], color: 'bg-[#50f59b]', footer: 'With Davis D, Chriss Eazy, Juno Kizigenza and more' },
+                                    { id: 'r5', title: 'Rema', images: ['/placeholder-artist.png', '/placeholder-music.png', '/placeholder-album.png'], color: 'bg-[#f59b50]', footer: 'With Shallipopi, ODUMODUBLVCK, Kizz...' }
                                 ].map(radio => (
                                     <RadioCard key={radio.id} {...radio} />
                                 ))}

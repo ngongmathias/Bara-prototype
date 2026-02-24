@@ -6,6 +6,8 @@ import { Trophy, Calendar, Users, Activity, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 // import { db } from "@/lib/supabase"; // Use if we add sports tables to db helper
 import { supabase } from "@/lib/supabase";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 export const AdminSportsDashboard = () => {
     const [stats, setStats] = useState({
@@ -49,6 +51,14 @@ export const AdminSportsDashboard = () => {
 
     return (
         <AdminLayout title="Sports Dashboard" subtitle="Manage leagues, teams, and matches">
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Sports Dashboard"
+            description="Monitor automated API polling for sports data."
+            features={["Check API-Sports quota", "View active matches syncing", "Monitor error logs"]}
+            workflow={["Verify daily quota is under limit", "Check that active matches are updating without errors"]}
+          />
+        </div>
             <div className="p-6 space-y-6">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

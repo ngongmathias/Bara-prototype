@@ -346,12 +346,12 @@ export const Header = () => {
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 overflow-visible ring-2 ring-white shadow-sm ring-offset-2 hover:opacity-90 transition-opacity">
                     {/* Elite Prestige Border - Trigger */}
                     <div className={`absolute inset-[-3px] rounded-full -z-10 ${profile ? (
-                        getPrestigeTier(profile.current_level) === 'Diamond' ? 'bg-gradient-to-tr from-blue-400 via-cyan-300 to-blue-400 animate-shimmer bg-[length:200%_100%]' :
-                          getPrestigeTier(profile.current_level) === 'Gold' ? 'bg-gradient-to-tr from-yellow-600 via-yellow-400 to-yellow-600 animate-shimmer bg-[length:200%_100%]' :
-                            getPrestigeTier(profile.current_level) === 'Silver' ? 'bg-gradient-to-tr from-slate-400 to-slate-200' :
-                              getPrestigeTier(profile.current_level) === 'Bronze' ? 'bg-gradient-to-tr from-amber-700 to-amber-500' :
-                                'bg-gray-200 opacity-50'
-                      ) : 'bg-transparent'
+                      getPrestigeTier(profile.current_level) === 'Diamond' ? 'bg-gradient-to-tr from-blue-400 via-cyan-300 to-blue-400 animate-shimmer bg-[length:200%_100%]' :
+                        getPrestigeTier(profile.current_level) === 'Gold' ? 'bg-gradient-to-tr from-yellow-600 via-yellow-400 to-yellow-600 animate-shimmer bg-[length:200%_100%]' :
+                          getPrestigeTier(profile.current_level) === 'Silver' ? 'bg-gradient-to-tr from-slate-400 to-slate-200' :
+                            getPrestigeTier(profile.current_level) === 'Bronze' ? 'bg-gradient-to-tr from-amber-700 to-amber-500' :
+                              'bg-gray-200 opacity-50'
+                    ) : 'bg-transparent'
                       }`} />
                     {user?.imageUrl ? (
                       <img
@@ -421,7 +421,7 @@ export const Header = () => {
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate('/sign-up')}
+                  onClick={() => navigate('/user/sign-up')}
                   className="font-roboto hidden xl:inline-flex"
                 >
                   <User className="w-4 h-4 mr-2" />
@@ -813,7 +813,7 @@ export const Header = () => {
                           variant="ghost"
                           className="w-full justify-start font-roboto h-12"
                           onClick={() => {
-                            navigate('/sign-up');
+                            navigate('/user/sign-up');
                             closeMobileMenu();
                             scrollToTop();
                           }}

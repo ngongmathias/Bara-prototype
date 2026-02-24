@@ -11,7 +11,7 @@ type PopupAdProps = {
 };
 
 export default function PopupAd({
-  intervalSeconds = 30,
+  intervalSeconds = 86400,
   imageUrl,
   linkUrl,
   frequencyKey = "popup_ad_default",
@@ -37,8 +37,6 @@ export default function PopupAd({
     if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(() => {
       if (canOpen()) setOpen(true);
-      // reschedule next popup
-      schedule(intervalSeconds);
     }, delaySec * 1000);
   };
 
@@ -52,8 +50,10 @@ export default function PopupAd({
 
   const handleClose = () => {
     try {
-      localStorage.setItem(frequencyKey, String(Date.now()));
-    } catch {}
+      localStorage.setItem(frequencyKey, Date.now().toString());
+    } catch (e) {
+      console.warn('Failed to save popup frequency cap to localStorage', e);
+    }
     setOpen(false);
   };
 
@@ -64,17 +64,17 @@ export default function PopupAd({
         <div className="relative flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-2 sm:p-4">
           {linkUrl ? (
             <a href={linkUrl} target="_blank" rel="noopener noreferrer" onClick={handleClose} className="flex items-center justify-center">
-              <img 
-                src={imageUrl} 
-                alt="Advertisement" 
-                className="max-w-full max-h-[70vh] sm:max-h-[600px] w-auto h-auto object-contain rounded-lg" 
+              <img
+                src={imageUrl}
+                alt="Advertisement"
+                className="max-w-full max-h-[70vh] sm:max-h-[600px] w-auto h-auto object-contain rounded-lg"
               />
             </a>
           ) : (
-            <img 
-              src={imageUrl} 
-              alt="Advertisement" 
-              className="max-w-full max-h-[70vh] sm:max-h-[600px] w-auto h-auto object-contain rounded-lg" 
+            <img
+              src={imageUrl}
+              alt="Advertisement"
+              className="max-w-full max-h-[70vh] sm:max-h-[600px] w-auto h-auto object-contain rounded-lg"
             />
           )}
           <button

@@ -30,6 +30,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useEvents, useEventCategories, useEventManagement } from '@/hooks/useEvents';
 import { useCitiesByCountry } from '@/hooks/useEvents';
 import { uploadImage, deleteImage } from '@/lib/storage';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface Event {
   id: string;
@@ -270,6 +272,14 @@ export const AdminEvents = () => {
 
   return (
     <AdminLayout>
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Basic Events"
+            description="Legacy event management dashboard."
+            features={["List events", "Basic CRUD operations"]}
+            workflow={["Use AdminEventsEnhanced for modern workflows."]}
+          />
+        </div>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>

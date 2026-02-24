@@ -6,6 +6,8 @@ import { GamificationService } from '@/lib/gamificationService';
 const AD_FREE_COST = 20;
 const AD_FREE_DURATION_HOURS = 24;
 
+let isActivating = false;
+
 export function useAdFree() {
   const { user } = useUser();
   const [isAdFree, setIsAdFree] = useState(false);
@@ -39,48 +41,58 @@ export function useAdFree() {
 
   const activateAdFree = async (): Promise<{ success: boolean; message: string }> => {
     if (!user) return { success: false, message: 'Please sign in first.' };
+    if (isActivating) return { success: false, message: 'Processing request...' };
 
+    isActivating = true;
     setLoading(true);
 
-    // Check if already ad-free
-    if (isAdFree) {
+    try {
+      // Check real DB status first to be extra safe
+      const { data: existing } = await supabase
+        .from('user_ad_free')
+        .select('id')
+        .eq('user_id', user.id)
+        .gt('expires_at', new Date().toISOString())
+        .limit(1);
+
+      if (isAdFree || (existing && existing.length > 0)) {
+        return { success: false, message: 'You already have ad-free browsing active!' };
+      }
+
+      // Spend coins
+      const spent = await GamificationService.spendCoins(
+        user.id,
+        AD_FREE_COST,
+        `Ad-free browsing (${AD_FREE_DURATION_HOURS}h)`
+      );
+
+      if (!spent) {
+        return { success: false, message: `Not enough coins. You need ${AD_FREE_COST} Bara Coins.` };
+      }
+
+      // Set expiry
+      const expires = new Date();
+      expires.setHours(expires.getHours() + AD_FREE_DURATION_HOURS);
+
+      const { error } = await supabase.from('user_ad_free').insert({
+        user_id: user.id,
+        expires_at: expires.toISOString(),
+        coins_spent: AD_FREE_COST,
+      });
+
+      if (error) {
+        // Refund
+        await GamificationService.addCoins(user.id, AD_FREE_COST, 'Ad-free refund (save failed)');
+        return { success: false, message: 'Failed to activate. Coins refunded.' };
+      }
+
+      setIsAdFree(true);
+      setExpiresAt(expires.toISOString());
+      return { success: true, message: `Ad-free browsing active for ${AD_FREE_DURATION_HOURS} hours!` };
+    } finally {
+      isActivating = false;
       setLoading(false);
-      return { success: false, message: 'You already have ad-free browsing active!' };
     }
-
-    // Spend coins
-    const spent = await GamificationService.spendCoins(
-      user.id,
-      AD_FREE_COST,
-      `Ad-free browsing (${AD_FREE_DURATION_HOURS}h)`
-    );
-
-    if (!spent) {
-      setLoading(false);
-      return { success: false, message: `Not enough coins. You need ${AD_FREE_COST} Bara Coins.` };
-    }
-
-    // Set expiry
-    const expires = new Date();
-    expires.setHours(expires.getHours() + AD_FREE_DURATION_HOURS);
-
-    const { error } = await supabase.from('user_ad_free').insert({
-      user_id: user.id,
-      expires_at: expires.toISOString(),
-      coins_spent: AD_FREE_COST,
-    });
-
-    if (error) {
-      // Refund
-      await GamificationService.addCoins(user.id, AD_FREE_COST, 'Ad-free refund (save failed)');
-      setLoading(false);
-      return { success: false, message: 'Failed to activate. Coins refunded.' };
-    }
-
-    setIsAdFree(true);
-    setExpiresAt(expires.toISOString());
-    setLoading(false);
-    return { success: true, message: `Ad-free browsing active for ${AD_FREE_DURATION_HOURS} hours!` };
   };
 
   const timeRemaining = () => {

@@ -54,7 +54,10 @@ export const CookieConsent = () => {
                                 Accept
                             </Button>
                             <button
-                                onClick={() => setIsVisible(false)}
+                                onClick={() => {
+                                    localStorage.setItem('cookie_consent', 'declined');
+                                    setIsVisible(false);
+                                }}
                                 className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 md:hidden"
                                 aria-label="Close"
                             >

@@ -31,7 +31,7 @@ export interface Business {
   created_at: string;
   updated_at: string;
   is_sponsored_ad: boolean;
-  
+
   // Joined fields
   category?: {
     id: string;
@@ -122,10 +122,10 @@ export class BusinessService {
     const R = 6371; // Earth's radius in kilometers
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
 
@@ -179,7 +179,6 @@ export class BusinessService {
    */
   static async getBusinesses(params: BusinessSearchParams = {}): Promise<Business[]> {
     try {
-      console.log('getBusinesses called with params:', params);
       // Use inner joins to ensure category/city filters work reliably
       let query = db.businesses()
         .select(`
@@ -193,37 +192,41 @@ export class BusinessService {
 
       // Apply category filter
       if (params.categorySlug) {
-        // filter via related table column
-        query = query.eq('categories.slug', params.categorySlug);
+        const { data: catData } = await db.categories().select('id').eq('slug', params.categorySlug).single();
+        if (catData) {
+          query = query.eq('category_id', catData.id);
+        } else {
+          // If category not found, return empty
+          return [];
+        }
       }
 
       // Apply city filter with proximity
       if (params.citySlug) {
         const nearbyCities = await this.getNearbyCities(params.citySlug);
-        if (nearbyCities.length > 1) {
-          // Use OR condition for multiple nearby cities
-          query = query.in('cities.name', nearbyCities);
-        } else {
-          query = query.eq('cities.name', params.citySlug);
+        if (nearbyCities.length > 0) {
+          const { data: cityIds } = await db.cities().select('id').in('name', nearbyCities);
+          if (cityIds && cityIds.length > 0) {
+            query = query.in('city_id', cityIds.map(c => c.id));
+          } else {
+            return [];
+          }
         }
       }
 
       // Apply country filter
       if (params.countryCode) {
-        console.log('Filtering by country code:', params.countryCode);
         // First get the country ID from the country code
         const { data: countryData, error: countryError } = await db.countries()
           .select('id, name, code')
           .eq('code', params.countryCode)
           .single();
-        
+
         if (countryError) {
           console.error('Error fetching country:', countryError);
         } else if (countryData) {
-          console.log('Found country:', countryData.name, 'ID:', countryData.id, 'for code:', params.countryCode);
           query = query.eq('country_id', countryData.id);
         } else {
-          console.log('No country found for code:', params.countryCode);
         }
       }
 
@@ -261,23 +264,19 @@ export class BusinessService {
 
       // Order by premium status and creation date
       query = query.order('is_premium', { ascending: false })
-                  .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       // Apply pagination
       if (params.page && params.limit) {
         const offset = (params.page - 1) * params.limit;
         query = query.range(offset, offset + params.limit - 1);
       }
-
-      console.log('Executing query for businesses...');
       const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching businesses:', error);
         throw error;
       }
-
-      console.log(`Found ${data?.length || 0} businesses`);
       return data || [];
     } catch (error) {
       console.error('Error in getBusinesses:', error);
@@ -319,8 +318,7 @@ export class BusinessService {
    */
   static async getBusinessesByCategory(categorySlug: string, citySlug?: string, countryId?: string): Promise<Business[]> {
     try {
-      console.log('Fetching businesses for category:', categorySlug, 'city:', citySlug, 'countryId:', countryId);
-      
+
       // First, get the category ID from the slug
       const { data: categoryData, error: categoryError } = await db.categories()
         .select('id, name, slug')
@@ -332,8 +330,6 @@ export class BusinessService {
         console.error('Category not found:', categorySlug, categoryError);
         return [];
       }
-
-      console.log('Found category:', categoryData);
 
       // Build the main query
       let query = db.businesses()
@@ -360,7 +356,7 @@ export class BusinessService {
           const { data: cityIds } = await db.cities()
             .select('id')
             .in('name', nearbyCities);
-          
+
           if (cityIds && cityIds.length > 0) {
             const cityIdArray = cityIds.map(city => city.id);
             query = query.in('city_id', cityIdArray);
@@ -371,7 +367,7 @@ export class BusinessService {
             .select('id')
             .eq('name', citySlug)
             .single();
-          
+
           if (cityData) {
             query = query.eq('city_id', cityData.id);
           }
@@ -386,8 +382,6 @@ export class BusinessService {
         console.error('Error fetching businesses by category:', error);
         throw error;
       }
-
-      console.log(`Found ${data?.length || 0} businesses for category ${categorySlug}${countryId ? ` in countryId ${countryId}` : ''}`);
       return data || [];
     } catch (error) {
       console.error('Error in getBusinessesByCategory:', error);
@@ -400,8 +394,7 @@ export class BusinessService {
    */
   static async searchBusinesses(searchTerm: string, filters: BusinessFilters = {}, limit: number = 50): Promise<Business[]> {
     try {
-      console.log('Searching businesses with term:', searchTerm, 'filters:', filters);
-      
+
       // Sanitize term for PostgREST logical tree (avoid commas/parentheses breaking or=)
       const sanitized = (searchTerm || '').replace(/[(),]/g, ' ').trim();
       const pattern = `*${sanitized}*`;
@@ -432,7 +425,7 @@ export class BusinessService {
           .eq('slug', filters.category)
           .eq('is_active', true)
           .single();
-        
+
         if (categoryData) {
           query = query.eq('category_id', categoryData.id);
         }
@@ -445,7 +438,7 @@ export class BusinessService {
           const { data: cityIds } = await db.cities()
             .select('id')
             .in('name', nearbyCities);
-          
+
           if (cityIds && cityIds.length > 0) {
             const cityIdArray = cityIds.map(city => city.id);
             query = query.in('city_id', cityIdArray);
@@ -456,7 +449,7 @@ export class BusinessService {
             .select('id')
             .eq('name', filters.city)
             .single();
-          
+
           if (cityData) {
             query = query.eq('city_id', cityData.id);
           }
@@ -522,8 +515,7 @@ export class BusinessService {
    */
   static async getCountriesByCategory(categorySlug: string): Promise<Array<{ id: string; name: string; code: string; business_count: number }>> {
     try {
-      console.log('Fetching countries for category:', categorySlug);
-      
+
       // First, get the category ID from the slug
       const { data: categoryData, error: categoryError } = await db.categories()
         .select('id, name, slug')
@@ -557,7 +549,7 @@ export class BusinessService {
 
       // Count businesses per country
       const countryCountMap: { [key: string]: { id: string; name: string; code: string; count: number } } = {};
-      
+
       data?.forEach((business: any) => {
         if (business.countries) {
           const countryId = business.countries.id;
@@ -585,8 +577,6 @@ export class BusinessService {
         }
         return a.name.localeCompare(b.name);
       });
-
-      console.log(`Found ${countriesWithCounts.length} countries with businesses in category ${categorySlug}`);
       return countriesWithCounts;
     } catch (error) {
       console.error('Error in getCountriesByCategory:', error);
@@ -638,8 +628,7 @@ export class BusinessService {
     business_count: number;
   }>> {
     try {
-      console.log('Getting cities for category:', categorySlug);
-      
+
       // First get the category ID
       const { data: categoryData, error: categoryError } = await db.categories()
         .select('id')
@@ -696,7 +685,6 @@ export class BusinessService {
       });
 
       const result = Array.from(cityMap.values()).sort((a, b) => b.business_count - a.business_count);
-      console.log(`Found ${result.length} cities for category ${categorySlug}`);
       return result;
     } catch (error) {
       console.error('Error in getCitiesByCategory:', error);
@@ -860,7 +848,7 @@ export class BusinessService {
    * Get sponsored businesses for a specific city/category
    */
   static async getSponsoredBusinesses(
-    citySlug?: string, 
+    citySlug?: string,
     categorySlug?: string
   ): Promise<Business[]> {
     try {

@@ -15,13 +15,14 @@ import { useToast } from '@/components/ui/use-toast';
 import { Upload, X, Loader2, AlertCircle } from 'lucide-react';
 import { categoryFieldConfigs, getCategoryConfig, type FieldConfig } from '@/config/categoryFieldConfigs';
 import { uploadImage } from '@/utils/imageUpload';
+import { useUser } from '@clerk/clerk-react';
 
 export const CategoryPostForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user: clerkUser, isSignedIn } = useUser();
 
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [countries, setCountries] = useState<any[]>([]);
 
@@ -51,25 +52,22 @@ export const CategoryPostForm = () => {
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
 
   useEffect(() => {
-    checkAuth();
-    fetchCategories();
-    fetchCountries();
-  }, []);
-
-  const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    if (!isSignedIn) {
       toast({
         title: 'Authentication Required',
         description: 'Please sign in to post a listing',
         variant: 'destructive',
       });
-      navigate('/signin');
+      navigate('/user/sign-in');
       return;
     }
-    setUser(user);
-    setSellerEmail(user.email || '');
-  };
+    if (clerkUser) {
+      setSellerEmail(clerkUser.primaryEmailAddress?.emailAddress || '');
+      setSellerName(`${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim());
+    }
+    fetchCategories();
+    fetchCountries();
+  }, [isSignedIn]);
 
   const fetchCategories = async () => {
     try {
@@ -234,7 +232,7 @@ export const CategoryPostForm = () => {
       const { data: listing, error: listingError } = await supabase
         .from('marketplace_listings')
         .insert({
-          user_id: user.id,
+          user_id: clerkUser?.id,
           category_id: selectedCategory,
           title: title.trim(),
           description: description.trim(),
@@ -659,8 +657,8 @@ export const CategoryPostForm = () => {
                         type="button"
                         onClick={() => setPrimaryImageIndex(index)}
                         className={`absolute bottom-2 left-2 text-xs px-2 py-1 rounded ${primaryImageIndex === index
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-white text-gray-700'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-white text-gray-700'
                           }`}
                       >
                         {primaryImageIndex === index ? 'Primary' : 'Set Primary'}

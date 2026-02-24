@@ -22,13 +22,17 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, FolderOpen, ChevronDown, ChevronRight } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { useToast } from '@/hooks/use-toast';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 export const AdminMarketplaceCategories = () => {
+  const { toast } = useToast();
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  
+
   // Hardcoded category slugs that cannot be edited or deleted
   const HARDCODED_CATEGORY_SLUGS = [
     'motors',
@@ -45,9 +49,9 @@ export const AdminMarketplaceCategories = () => {
     'business-industrial',
     'hobbies'
   ];
-  
+
   const isHardcodedCategory = (slug: string) => HARDCODED_CATEGORY_SLUGS.includes(slug);
-  
+
   // Category form state
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -118,20 +122,20 @@ export const AdminMarketplaceCategories = () => {
           .update(categoryForm)
           .eq('id', editingCategory.id);
         if (error) throw error;
-        alert('Category updated successfully');
+        toast({ title: "Success", description: "Category updated successfully" });
       } else {
         const { error } = await supabase
           .from('marketplace_categories')
           .insert([categoryForm]);
         if (error) throw error;
-        alert('Category created successfully');
+        toast({ title: "Success", description: "Category created successfully" });
       }
       setCategoryDialogOpen(false);
       resetCategoryForm();
       fetchData();
     } catch (error) {
       console.error('Error saving category:', error);
-      alert('Error saving category');
+      toast({ title: "Error", description: "Error saving category", variant: "destructive" });
     }
   };
 
@@ -144,54 +148,54 @@ export const AdminMarketplaceCategories = () => {
           .update(subcategoryForm)
           .eq('id', editingSubcategory.id);
         if (error) throw error;
-        alert('Subcategory updated successfully');
+        toast({ title: "Success", description: "Subcategory updated successfully" });
       } else {
         const { error } = await supabase
           .from('marketplace_subcategories')
           .insert([subcategoryForm]);
         if (error) throw error;
-        alert('Subcategory created successfully');
+        toast({ title: "Success", description: "Subcategory created successfully" });
       }
       setSubcategoryDialogOpen(false);
       resetSubcategoryForm();
       fetchData();
     } catch (error) {
       console.error('Error saving subcategory:', error);
-      alert('Error saving subcategory');
+      toast({ title: "Error", description: "Error saving subcategory", variant: "destructive" });
     }
   };
 
   const deleteCategory = async (categoryId: string) => {
     if (!confirm('Are you sure? This will also delete all subcategories and listings under this category.')) return;
-    
+
     try {
       const { error } = await supabase
         .from('marketplace_categories')
         .delete()
         .eq('id', categoryId);
       if (error) throw error;
-      alert('Category deleted successfully');
+      toast({ title: "Success", description: "Category deleted successfully" });
       fetchData();
     } catch (error) {
       console.error('Error deleting category:', error);
-      alert('Error deleting category');
+      toast({ title: "Error", description: "Error deleting category", variant: "destructive" });
     }
   };
 
   const deleteSubcategory = async (subcategoryId: string) => {
     if (!confirm('Are you sure? This will affect all listings under this subcategory.')) return;
-    
+
     try {
       const { error } = await supabase
         .from('marketplace_subcategories')
         .delete()
         .eq('id', subcategoryId);
       if (error) throw error;
-      alert('Subcategory deleted successfully');
+      toast({ title: "Success", description: "Subcategory deleted successfully" });
       fetchData();
     } catch (error) {
       console.error('Error deleting subcategory:', error);
-      alert('Error deleting subcategory');
+      toast({ title: "Error", description: "Error deleting subcategory", variant: "destructive" });
     }
   };
 
@@ -265,6 +269,14 @@ export const AdminMarketplaceCategories = () => {
 
   return (
     <AdminLayout>
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Marketplace Categories"
+            description="Manage taxonomy for user-to-user sales."
+            features={["Create peer-to-peer sale categories", "Set restricted item flags"]}
+            workflow={["Create category", "Define if items require manual review", "Save"]}
+          />
+        </div>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -378,8 +390,8 @@ export const AdminMarketplaceCategories = () => {
             <div className="flex-1">
               <h3 className="text-sm font-semibold text-blue-900 font-comfortaa mb-1">About Category Management</h3>
               <p className="text-sm text-blue-800 font-roboto">
-                <strong>Main Categories (12 total)</strong> are hardcoded in the frontend for consistent UI/UX and cannot be edited or deleted here. 
-                However, you have full control over <strong>subcategories</strong> - you can add, edit, and remove them as needed. 
+                <strong>Main Categories (12 total)</strong> are hardcoded in the frontend for consistent UI/UX and cannot be edited or deleted here.
+                However, you have full control over <strong>subcategories</strong> - you can add, edit, and remove them as needed.
                 Subcategories help organize listings within each main category (e.g., "Cars for Sale" and "Motorcycles" under Motors).
               </p>
             </div>
@@ -418,7 +430,7 @@ export const AdminMarketplaceCategories = () => {
                 categories.map((category) => {
                   const categorySubcats = getSubcategoriesForCategory(category.id);
                   const isExpanded = expandedCategories.has(category.id);
-                  
+
                   return (
                     <React.Fragment key={category.id}>
                       <TableRow>
@@ -482,7 +494,7 @@ export const AdminMarketplaceCategories = () => {
                           </div>
                         </TableCell>
                       </TableRow>
-                      
+
                       {/* Subcategories */}
                       {isExpanded && categorySubcats.map((subcat) => (
                         <TableRow key={subcat.id} className="bg-gray-50">

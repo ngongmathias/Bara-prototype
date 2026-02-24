@@ -61,7 +61,7 @@ export function useTodayFixtures(league?: number, sport: string = 'football') {
 /**
  * Hook to fetch match details with events, statistics, and lineups
  */
-export function useMatchDetails(fixtureId: number | undefined, enabled = true) {
+export function useMatchDetails(fixtureId: number | undefined, activeTab: string = 'all', enabled = true) {
     const matchQuery = useQuery({
         queryKey: ['match', fixtureId],
         queryFn: () => sportsApi.getMatchDetails(fixtureId!),
@@ -72,21 +72,21 @@ export function useMatchDetails(fixtureId: number | undefined, enabled = true) {
     const eventsQuery = useQuery({
         queryKey: ['matchEvents', fixtureId],
         queryFn: () => sportsApi.getMatchEvents(fixtureId!),
-        enabled: enabled && !!fixtureId,
+        enabled: enabled && !!fixtureId && (activeTab === 'all' || activeTab === 'summary'),
         staleTime: 30000,
     });
 
     const statsQuery = useQuery({
         queryKey: ['matchStats', fixtureId],
         queryFn: () => sportsApi.getMatchStatistics(fixtureId!),
-        enabled: enabled && !!fixtureId,
+        enabled: enabled && !!fixtureId && (activeTab === 'all' || activeTab === 'stats'),
         staleTime: 30000,
     });
 
     const lineupsQuery = useQuery({
         queryKey: ['matchLineups', fixtureId],
         queryFn: () => sportsApi.getMatchLineups(fixtureId!),
-        enabled: enabled && !!fixtureId,
+        enabled: enabled && !!fixtureId && (activeTab === 'all' || activeTab === 'lineups'),
         staleTime: 60000, // Lineups don't change, cache for 1 minute
     });
 
@@ -95,7 +95,10 @@ export function useMatchDetails(fixtureId: number | undefined, enabled = true) {
         events: eventsQuery.data,
         statistics: statsQuery.data,
         lineups: lineupsQuery.data,
-        isLoading: matchQuery.isLoading || eventsQuery.isLoading || statsQuery.isLoading || lineupsQuery.isLoading,
+        isLoading: matchQuery.isLoading ||
+            (eventsQuery.isLoading && eventsQuery.fetchStatus !== 'idle') ||
+            (statsQuery.isLoading && statsQuery.fetchStatus !== 'idle') ||
+            (lineupsQuery.isLoading && lineupsQuery.fetchStatus !== 'idle'),
         error: matchQuery.error || eventsQuery.error || statsQuery.error || lineupsQuery.error,
     };
 }

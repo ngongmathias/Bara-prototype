@@ -11,6 +11,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Plus,
   Edit,
   Trash2,
@@ -82,6 +92,7 @@ export const UserEventsPage = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [galleryUploadOpen, setGalleryUploadOpen] = useState(false);
   const [selectedEventForGallery, setSelectedEventForGallery] = useState<DatabaseEvent | null>(null);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
 
   const { toast } = useToast();
   const { events, loading, searchEvents } = useEvents();
@@ -234,13 +245,20 @@ export const UserEventsPage = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (eventId: string) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
-      await deleteEvent(eventId);
+  const confirmDelete = async () => {
+    if (!eventToDelete) return;
+    try {
+      await deleteEvent(eventToDelete);
       toast({
         title: 'Event deleted',
         description: 'The event has been successfully deleted.',
       });
+      // Refresh events list
+      searchEvents({ limit: 100 });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setEventToDelete(null);
     }
   };
 
@@ -891,7 +909,7 @@ Orange Money: *144*1*XXXX#"
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDelete(event.id)}
+                          onClick={() => setEventToDelete(event.id)}
                           className="text-red-600 hover:text-red-700"
                           title="Delete Event"
                         >
@@ -955,6 +973,21 @@ Orange Money: *144*1*XXXX#"
           }}
         />
       )}
+
+      <AlertDialog open={!!eventToDelete} onOpenChange={(open) => !open && setEventToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this event? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

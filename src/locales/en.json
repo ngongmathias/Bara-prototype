@@ -436,6 +436,12 @@
     "ClaimYourListing": "Claim Your Listing",
     "siteDirectory": "Site Directory",
     "articles": "Articles",
+    "pricing": "Pricing",
+    "coinStore": "Coin Store",
+    "partners": "Partners",
+    "baraTools": "Bara Tools",
+    "showAllLocations": "Show All {{count}} Locations",
+    "showLess": "Show Less",
     "findBusiness": "Find a Business",
     "ypMobileApp": "Bara Mobile App",
     "gasGuruMobileApp": "Gas Guru Mobile App",
@@ -464,11 +470,24 @@
     "subtitle": "Get your company banner displayed on any country page for just $25. Reach thousands of users interested in that specific country.",
     "benefits": {
       "title": "What You Get",
-      "banner": {"title": "Country Page Banner", "description": "Your banner displayed prominently on the chosen country page"},
-      "visibility": {"title": "Company Visibility", "description": "Increase brand awareness among country-specific users"},
-      "audience": {"title": "Targeted Audience", "description": "Reach users specifically interested in that country"}
+      "banner": {
+        "title": "Country Page Banner",
+        "description": "Your banner displayed prominently on the chosen country page"
+      },
+      "visibility": {
+        "title": "Company Visibility",
+        "description": "Increase brand awareness among country-specific users"
+      },
+      "audience": {
+        "title": "Targeted Audience",
+        "description": "Reach users specifically interested in that country"
+      }
     },
-    "price": {"label": "Price", "amount": "$25", "note": "One-time payment"},
+    "price": {
+      "label": "Price",
+      "amount": "$25",
+      "note": "One-time payment"
+    },
     "form": {
       "title": "Banner Submission Form",
       "companyInfo": "Company Information",
@@ -511,32 +530,92 @@
       "title": "General Questions",
       "subtitle": "Common questions about using BARA LISTINGS",
       "items": {
-        "0": {"q": "What is BARA LISTINGS?", "a": "BARA LISTINGS is a comprehensive business directory that helps you discover and connect with businesses across Africa and its diaspora communities. We provide detailed information about various businesses, including contact details, services, and customer reviews."},
-        "1": {"q": "How do I search for businesses?", "a": "You can search for businesses using the search bar at the top of any page. You can filter your search by location, category, or specific keywords to find exactly what you're looking for."},
-        "2": {"q": "Is BARA LISTINGS free to use?", "a": "Yes, BARA LISTINGS is completely free for users searching for businesses. Business owners can claim their listings for free, with optional premium features available."},
-        "3": {"q": "How can I contact a business?", "a": "Each business listing includes contact information such as phone numbers, email addresses, and website links. You can use these details to get in touch with the business directly."},
-        "4": {"q": "How do I leave a review?", "a": "To leave a review, navigate to the business's profile page and click on the 'Write a Review' button. You'll need to be logged in to submit a review."},
-        "5": {"q": "Can I suggest a business to be added?", "a": "Yes! If you can't find a business you're looking for, you can suggest it by clicking on the 'Add a Business' link in the navigation menu."},
-        "6": {"q": "How often is the business information updated?", "a": "Business information is updated in real-time when business owners update their listings. We also periodically verify information to ensure accuracy."},
-        "7": {"q": "How do I report incorrect information?", "a": "If you find incorrect information, you can report it by clicking the 'Report' button on the business listing. Our team will review and update the information as needed."},
-        "8": {"q": "Is my personal information secure?", "a": "Yes, we take your privacy seriously. Your personal information is protected according to our privacy policy and is never shared without your consent."},
-        "9": {"q": "Do you have a mobile app?", "a": "Yes, BARA LISTINGS is available as a mobile app on both iOS and Android platforms. You can download it from the App Store or Google Play Store."}
+        "0": {
+          "q": "What is BARA LISTINGS?",
+          "a": "BARA LISTINGS is a comprehensive business directory that helps you discover and connect with businesses across Africa and its diaspora communities. We provide detailed information about various businesses, including contact details, services, and customer reviews."
+        },
+        "1": {
+          "q": "How do I search for businesses?",
+          "a": "You can search for businesses using the search bar at the top of any page. You can filter your search by location, category, or specific keywords to find exactly what you're looking for."
+        },
+        "2": {
+          "q": "Is BARA LISTINGS free to use?",
+          "a": "Yes, BARA LISTINGS is completely free for users searching for businesses. Business owners can claim their listings for free, with optional premium features available."
+        },
+        "3": {
+          "q": "How can I contact a business?",
+          "a": "Each business listing includes contact information such as phone numbers, email addresses, and website links. You can use these details to get in touch with the business directly."
+        },
+        "4": {
+          "q": "How do I leave a review?",
+          "a": "To leave a review, navigate to the business's profile page and click on the 'Write a Review' button. You'll need to be logged in to submit a review."
+        },
+        "5": {
+          "q": "Can I suggest a business to be added?",
+          "a": "Yes! If you can't find a business you're looking for, you can suggest it by clicking on the 'Add a Business' link in the navigation menu."
+        },
+        "6": {
+          "q": "How often is the business information updated?",
+          "a": "Business information is updated in real-time when business owners update their listings. We also periodically verify information to ensure accuracy."
+        },
+        "7": {
+          "q": "How do I report incorrect information?",
+          "a": "If you find incorrect information, you can report it by clicking the 'Report' button on the business listing. Our team will review and update the information as needed."
+        },
+        "8": {
+          "q": "Is my personal information secure?",
+          "a": "Yes, we take your privacy seriously. Your personal information is protected according to our privacy policy and is never shared without your consent."
+        },
+        "9": {
+          "q": "Do you have a mobile app?",
+          "a": "Yes, BARA LISTINGS is available as a mobile app on both iOS and Android platforms. You can download it from the App Store or Google Play Store."
+        }
       }
     },
     "business": {
       "title": "For Business Owners",
       "subtitle": "Information for businesses listed on BARA LISTINGS",
       "items": {
-        "0": {"q": "How do I claim my business listing?", "a": "Search for your business on our platform, then click the 'Claim This Business' button. You'll need to verify your identity and complete the verification process."},
-        "1": {"q": "What are the benefits of claiming my business?", "a": "Claiming your business allows you to update information, respond to reviews, add photos, access analytics, and promote special offers to potential customers."},
-        "2": {"q": "How much does it cost to list my business?", "a": "Basic listings are free! We also offer premium plans with additional features. Visit our 'For Business' section for detailed pricing information."},
-        "3": {"q": "How can I improve my business's visibility?", "a": "Ensure your profile is complete with accurate information, high-quality photos, and encourage satisfied customers to leave positive reviews. Our premium plans also offer enhanced visibility options."},
-        "4": {"q": "Can I respond to customer reviews?", "a": "Yes, as a verified business owner, you can respond to all reviews. We encourage professional and courteous responses to all feedback."},
-        "5": {"q": "How do I update my business information?", "a": "Log in to your business account, navigate to your dashboard, and select 'Edit Business' to update your information. Changes may be subject to verification."},
-        "6": {"q": "What payment methods do you accept?", "a": "We accept all major credit cards, PayPal, and bank transfers for premium services. All transactions are secure and encrypted."},
-        "7": {"q": "Can I advertise special offers or events?", "a": "Yes, with a premium account, you can create and promote special offers, events, and announcements to reach more customers."},
-        "8": {"q": "How do I cancel my premium subscription?", "a": "You can manage your subscription in the 'Billing' section of your business dashboard. Cancellation can be done at any time."},
-        "9": {"q": "Who can I contact for business support?", "a": "Our business support team is available via email at business@baralistings.com or through the contact form in your business dashboard."}
+        "0": {
+          "q": "How do I claim my business listing?",
+          "a": "Search for your business on our platform, then click the 'Claim This Business' button. You'll need to verify your identity and complete the verification process."
+        },
+        "1": {
+          "q": "What are the benefits of claiming my business?",
+          "a": "Claiming your business allows you to update information, respond to reviews, add photos, access analytics, and promote special offers to potential customers."
+        },
+        "2": {
+          "q": "How much does it cost to list my business?",
+          "a": "Basic listings are free! We also offer premium plans with additional features. Visit our 'For Business' section for detailed pricing information."
+        },
+        "3": {
+          "q": "How can I improve my business's visibility?",
+          "a": "Ensure your profile is complete with accurate information, high-quality photos, and encourage satisfied customers to leave positive reviews. Our premium plans also offer enhanced visibility options."
+        },
+        "4": {
+          "q": "Can I respond to customer reviews?",
+          "a": "Yes, as a verified business owner, you can respond to all reviews. We encourage professional and courteous responses to all feedback."
+        },
+        "5": {
+          "q": "How do I update my business information?",
+          "a": "Log in to your business account, navigate to your dashboard, and select 'Edit Business' to update your information. Changes may be subject to verification."
+        },
+        "6": {
+          "q": "What payment methods do you accept?",
+          "a": "We accept all major credit cards, PayPal, and bank transfers for premium services. All transactions are secure and encrypted."
+        },
+        "7": {
+          "q": "Can I advertise special offers or events?",
+          "a": "Yes, with a premium account, you can create and promote special offers, events, and announcements to reach more customers."
+        },
+        "8": {
+          "q": "How do I cancel my premium subscription?",
+          "a": "You can manage your subscription in the 'Billing' section of your business dashboard. Cancellation can be done at any time."
+        },
+        "9": {
+          "q": "Who can I contact for business support?",
+          "a": "Our business support team is available via email at business@baralistings.com or through the contact form in your business dashboard."
+        }
       }
     },
     "cta": {
@@ -1023,8 +1102,7 @@
       "primaryButton": "Contact Support",
       "secondaryButton": "Browse Help Center"
     }
-  }
-  ,
+  },
   "premiumFeatures": {
     "hero": {
       "title": "Boost your business engagement",
@@ -1121,4 +1199,3 @@
     }
   }
 }
-

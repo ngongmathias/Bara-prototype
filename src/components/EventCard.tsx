@@ -70,7 +70,7 @@ export const EventCard = ({
   const toggleSave = (e: React.MouseEvent) => {
     e.stopPropagation();
     const savedEvents = JSON.parse(localStorage.getItem('savedEvents') || '[]');
-    
+
     if (isSaved) {
       // Remove from saved
       const updated = savedEvents.filter((eventId: string) => eventId !== id);
@@ -110,7 +110,7 @@ export const EventCard = ({
     e.stopPropagation();
     const eventUrl = `${window.location.origin}/events?event=${id}`;
     const text = `Check out this event: ${title}`;
-    
+
     let shareUrl = '';
     switch (platform) {
       case 'facebook':
@@ -126,7 +126,7 @@ export const EventCard = ({
         shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(eventUrl)}`;
         break;
     }
-    
+
     if (shareUrl) {
       window.open(shareUrl, '_blank', 'width=600,height=400');
     }
@@ -135,7 +135,7 @@ export const EventCard = ({
 
   return (
     <motion.div
-      whileHover={{ 
+      whileHover={{
         y: -8,
         transition: { duration: 0.2 }
       }}
@@ -143,7 +143,7 @@ export const EventCard = ({
     >
       <div className="h-48 bg-gray-200 overflow-hidden relative">
         <img
-          src={imageUrl || 'https://via.placeholder.com/400x300?text=Event+Image'}
+          src={imageUrl || '/placeholder-event.jpg'}
           alt={title}
           loading="lazy"
           decoding="async"
@@ -187,8 +187,8 @@ export const EventCard = ({
             className="bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
             title={isSaved ? "Remove from saved" : "Save event"}
           >
-            <Heart 
-              className={`w-4 h-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} 
+            <Heart
+              className={`w-4 h-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`}
             />
           </button>
           {/* Share Button */}
@@ -253,7 +253,7 @@ export const EventCard = ({
             )}
           </div>
         </div>
-        
+
         {/* Creator Information */}
         {createdBy && (
           <div className="mt-3 flex items-center justify-between">
@@ -262,30 +262,30 @@ export const EventCard = ({
               <span className="truncate max-w-[120px]">{createdBy.name}</span>
             </div>
             {createdBy.verification && (
-              <VerificationIcon 
-                verification={createdBy.verification} 
-                size="sm" 
+              <VerificationIcon
+                verification={createdBy.verification}
+                size="sm"
                 className="flex-shrink-0"
               />
             )}
           </div>
         )}
-        
+
         {/* Hashtags Preview */}
         {hashtags && hashtags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1">
             {hashtags.slice(0, 3).map((hashtag) => (
-              <Badge 
-                key={hashtag} 
-                variant="outline" 
+              <Badge
+                key={hashtag}
+                variant="outline"
                 className="text-xs px-1.5 py-0.5 bg-gray-50 text-gray-600 border-gray-200"
               >
                 #{hashtag}
               </Badge>
             ))}
             {hashtags.length > 3 && (
-              <Badge 
-                variant="outline" 
+              <Badge
+                variant="outline"
                 className="text-xs px-1.5 py-0.5 bg-gray-50 text-gray-600 border-gray-200"
               >
                 +{hashtags.length - 3}
@@ -293,7 +293,7 @@ export const EventCard = ({
             )}
           </div>
         )}
-        
+
         <div className="mt-4 space-y-2">
           {/* Gallery Button for Past Events with Images */}
           {isPastEvent && galleryImages && galleryImages.length > 0 && onViewGallery && (
@@ -310,7 +310,7 @@ export const EventCard = ({
               View Gallery ({galleryImages.length} photos)
             </motion.button>
           )}
-          
+
           {/* View Event Button */}
           <motion.button
             onClick={handleViewEvent}

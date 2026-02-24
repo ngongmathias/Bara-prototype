@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { Loader2, Trash2, Plus, Video } from "lucide-react";
 import { toast } from "sonner";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 export default function AdminSportsVideos() {
     const [videos, setVideos] = useState<any[]>([]);
@@ -81,6 +83,14 @@ export default function AdminSportsVideos() {
 
     return (
         <AdminLayout title="Manage Videos" subtitle="Add and manage sports highlights">
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Sports Highlights"
+            description="Manage YouTube and MP4 embeds for sports replays."
+            features={["Review video links", "Delete dead links", "Tag teams or leagues"]}
+            workflow={["Click broken link report", "Update URL or Delete the video entry"]}
+          />
+        </div>
             <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Form */}
                 <Card className="lg:col-span-1 h-fit">

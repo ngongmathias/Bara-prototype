@@ -235,7 +235,7 @@ class SportsApiService {
 
     // Helper: Get today's date in YYYY-MM-DD format
     getTodayDate(): string {
-        return new Date().toISOString().split('T')[0];
+        return new Date().toLocaleDateString('en-CA');
     }
 
     // Helper: Get fixtures for today

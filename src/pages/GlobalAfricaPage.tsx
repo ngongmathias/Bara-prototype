@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import DemographicProfile from '../components/demographics/DemographicProfile';
 import BrazilDemographicProfile from '../components/demographics/BrazilDemographicProfile';
 import HBCUProfile from '../components/demographics/HBCUProfile';
+import DOMPurify from 'dompurify';
 
 type CountryData = {
   id: string;
@@ -154,19 +155,19 @@ const GlobalAfricaPage = () => {
               {pageData.title}
             </h1>
           </div>
-          
+
           <p className="text-lg text-gray-700 mb-8">
             {pageData.description}
           </p>
-          
-          <div 
+
+          <div
             className="prose dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: pageData.content }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pageData.content) }}
           />
           {showDemographics && <DemographicProfile />}
           {showBrazilDemographics && <BrazilDemographicProfile />}
           {showHBCUDemographics && <HBCUProfile />}
-          
+
           <div className="mt-12 pt-6 border-t border-gray-200">
             <h3 className="text-lg font-semibold mb-4">Explore More</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

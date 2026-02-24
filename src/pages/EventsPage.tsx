@@ -25,9 +25,11 @@ import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { supabase } from '@/lib/supabase';
 import { SEO } from '@/components/SEO';
 import { MonetizationService } from '@/lib/monetizationService';
+import { useToast } from '@/hooks/use-toast';
 
 export const EventsPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [startDate, setStartDate] = useState('');
@@ -289,10 +291,10 @@ export const EventsPage = () => {
     const link = getCountrySpecificLink(countryName);
     try {
       await navigator.clipboard.writeText(link);
-      alert(`Link copied! Share this to show events in ${countryName || 'all countries'}`);
+      toast({ title: "Copied", description: `Link copied! Share this to show events in ${countryName || 'all countries'}` });
     } catch (err) {
       console.error('Failed to copy link:', err);
-      alert('Failed to copy link. Please try again.');
+      toast({ title: "Error", description: "Failed to copy link. Please try again.", variant: "destructive" });
     }
   };
 
@@ -1042,11 +1044,11 @@ export const EventsPage = () => {
                         // Days of month
                         for (let day = 1; day <= daysInMonth; day++) {
                           const date = new Date(currentYear, currentMonth, day);
-                          const dateStr = date.toISOString().split('T')[0];
+                          const dateStr = date.toLocaleDateString('en-CA');
                           const dayEvents = sortedEvents.filter(e => {
                             const eventDateStr = typeof e.start_date === 'string'
-                              ? e.start_date.split('T')[0]
-                              : (parseDate(String(e.start_date))?.toISOString().split('T')[0] ?? '');
+                              ? new Date(e.start_date).toLocaleDateString('en-CA')
+                              : (parseDate(String(e.start_date))?.toLocaleDateString('en-CA') ?? '');
                             return eventDateStr === dateStr;
                           });
 

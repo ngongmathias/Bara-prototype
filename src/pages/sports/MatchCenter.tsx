@@ -10,10 +10,10 @@ import { SEO } from '@/components/SEO';
 import { ExternalLink } from 'lucide-react';
 
 export default function MatchCenter() {
-    const { id } = useParams();
+    const { id, sport: sportSlug } = useParams();
     const [activeTab, setActiveTab] = useState<'summary' | 'stats' | 'lineups'>('summary');
 
-    const { match, events, statistics, lineups, isLoading, error } = useMatchDetails(id ? parseInt(id) : 0);
+    const { match, events, statistics, lineups, isLoading, error } = useMatchDetails(id ? parseInt(id) : 0, activeTab);
 
     if (isLoading) {
         return (
@@ -50,7 +50,6 @@ export default function MatchCenter() {
     }
 
     const isFootball = match.league.id !== 12 && match.league.id !== 1 && match.league.id !== 3 && match.league.id !== 2 && match.league.id !== 13; // Simple heuristic or use sport param
-    const { sport: sportSlug } = useParams();
     const isBasketball = sportSlug === 'nba' || sportSlug === 'basketball' || match.league.id === 12;
     const isCricket = sportSlug === 'cricket';
 

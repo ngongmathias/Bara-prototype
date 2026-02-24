@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { GamificationService, XP_REWARDS, COIN_REWARDS } from '@/lib/gamificationService';
+import { useUser } from '@clerk/clerk-react';
 
 // Types
 export interface Song {
@@ -42,6 +43,7 @@ interface AudioPlayerContextType {
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
 
 export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { user: clerkUser } = useUser();
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [currentSong, setCurrentSong] = useState<Song | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -68,10 +70,9 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
             // Award XP after 30 seconds of playback
             if (audio.currentTime >= 30 && currentSong && hasAwardedXP.current !== currentSong.id) {
                 const awardXP = async () => {
-                    const { data: { user } } = await supabase.auth.getUser();
-                    if (user) {
-                        await GamificationService.addXP(user.id, XP_REWARDS.SONG_LISTEN, `Listened to ${currentSong.title}`);
-                        await GamificationService.addCoins(user.id, COIN_REWARDS.SONG_LISTEN, `Listened to ${currentSong.title}`);
+                    if (clerkUser) {
+                        await GamificationService.addXP(clerkUser.id, XP_REWARDS.SONG_LISTEN, `Listened to ${currentSong.title}`);
+                        await GamificationService.addCoins(clerkUser.id, COIN_REWARDS.SONG_LISTEN, `Listened to ${currentSong.title}`);
                         hasAwardedXP.current = currentSong.id;
                     }
                 };
@@ -104,13 +105,12 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }, [repeatMode]); // Re-bind ended listener if repeatMode changes
 
     const fetchLikes = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!clerkUser) return;
 
         const { data } = await supabase
             .from('user_song_likes')
             .select('song_id')
-            .eq('user_id', user.id);
+            .eq('user_id', clerkUser.id);
 
         if (data) {
             setLikedSongs(data.map(l => l.song_id));
@@ -158,10 +158,9 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
             await supabase.rpc('increment_play_count', { p_song_id: songId });
 
             // Record in play history for "Recently Played"
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
+            if (clerkUser) {
                 await supabase.from('play_history').insert({
-                    user_id: user.id,
+                    user_id: clerkUser.id,
                     song_id: songId,
                 });
             }
@@ -239,8 +238,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const toggleShuffle = () => setIsShuffle(!isShuffle);
 
     const toggleLike = async (songId: string) => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!clerkUser) return;
 
         const isLiked = likedSongs.includes(songId);
 
@@ -248,7 +246,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
             const { error } = await supabase
                 .from('user_song_likes')
                 .delete()
-                .eq('user_id', user.id)
+                .eq('user_id', clerkUser.id)
                 .eq('song_id', songId);
 
             if (!error) {
@@ -257,7 +255,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         } else {
             const { error } = await supabase
                 .from('user_song_likes')
-                .insert({ user_id: user.id, song_id: songId });
+                .insert({ user_id: clerkUser.id, song_id: songId });
 
             if (!error) {
                 setLikedSongs(prev => [...prev, songId]);

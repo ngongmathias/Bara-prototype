@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { useUser } from '@clerk/clerk-react';
 import { Plus, Edit, Trash2, Eye, CheckCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export const MyListings = () => {
   const navigate = useNavigate();
   const { user } = useUser();
+  const { toast } = useToast();
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
@@ -70,11 +72,11 @@ export const MyListings = () => {
 
       if (error) throw error;
 
-      alert('Listing deleted successfully');
+      toast({ title: "Success", description: "Listing deleted successfully" });
       fetchMyListings();
     } catch (error) {
       console.error('Error deleting listing:', error);
-      alert('Error deleting listing');
+      toast({ title: "Error", description: "Error deleting listing", variant: "destructive" });
     }
   };
 
@@ -87,11 +89,11 @@ export const MyListings = () => {
 
       if (error) throw error;
 
-      alert('Listing marked as sold');
+      toast({ title: "Success", description: "Listing marked as sold" });
       fetchMyListings();
     } catch (error) {
       console.error('Error updating listing:', error);
-      alert('Error updating listing');
+      toast({ title: "Error", description: "Error updating listing", variant: "destructive" });
     }
   };
 
@@ -103,7 +105,7 @@ export const MyListings = () => {
           <div className="text-center">
             <h2 className="text-2xl font-bold text-black mb-4 font-comfortaa">Sign In Required</h2>
             <p className="text-gray-600 mb-6 font-roboto">Please sign in to view your listings</p>
-            <Button onClick={() => navigate('/sign-in')} className="bg-black hover:bg-gray-800">
+            <Button onClick={() => navigate('/user/sign-in')} className="bg-black hover:bg-gray-800">
               Sign In
             </Button>
           </div>
@@ -146,11 +148,10 @@ export const MyListings = () => {
               <button
                 key={tab.value}
                 onClick={() => setFilter(tab.value)}
-                className={`px-4 py-2 font-roboto text-sm border-b-2 transition-colors ${
-                  filter === tab.value
-                    ? 'border-black text-black font-medium'
-                    : 'border-transparent text-gray-600 hover:text-black'
-                }`}
+                className={`px-4 py-2 font-roboto text-sm border-b-2 transition-colors ${filter === tab.value
+                  ? 'border-black text-black font-medium'
+                  : 'border-transparent text-gray-600 hover:text-black'
+                  }`}
               >
                 {tab.label}
               </button>
@@ -178,8 +179,8 @@ export const MyListings = () => {
             <div className="grid grid-cols-1 gap-4">
               {listings.map((listing) => {
                 const primaryImage = listing.images?.find((img: any) => img.is_primary)?.image_url ||
-                                   listing.images?.[0]?.image_url ||
-                                   '/placeholder.jpg';
+                  listing.images?.[0]?.image_url ||
+                  '/placeholder.jpg';
 
                 return (
                   <div
@@ -194,12 +195,11 @@ export const MyListings = () => {
                           alt={listing.title}
                           className="w-full h-full object-cover"
                         />
-                        <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${
-                          listing.status === 'active' ? 'bg-green-500 text-white' :
+                        <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${listing.status === 'active' ? 'bg-green-500 text-white' :
                           listing.status === 'pending' ? 'bg-yellow-500 text-black' :
-                          listing.status === 'sold' ? 'bg-gray-500 text-white' :
-                          'bg-red-500 text-white'
-                        }`}>
+                            listing.status === 'sold' ? 'bg-gray-500 text-white' :
+                              'bg-red-500 text-white'
+                          }`}>
                           {listing.status.toUpperCase()}
                         </div>
                       </div>
@@ -245,7 +245,7 @@ export const MyListings = () => {
                             <Eye className="w-4 h-4 mr-2" />
                             View
                           </Button>
-                          
+
                           <Button
                             variant="outline"
                             size="sm"
@@ -255,7 +255,7 @@ export const MyListings = () => {
                             <Edit className="w-4 h-4 mr-2" />
                             Edit
                           </Button>
-                          
+
                           {listing.status === 'active' && (
                             <Button
                               variant="outline"

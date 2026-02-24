@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from "react";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
 import { useTranslation } from "react-i18next";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  DialogTrigger 
+  DialogTrigger
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -24,12 +25,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Building2, 
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Building2,
   MapPin,
   Globe,
   Crown,
@@ -155,23 +156,23 @@ export const AdminBusinesses = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [clickTotals, setClickTotals] = useState<Record<string, number>>({});
   const [monthlyClicks, setMonthlyClicks] = useState<Record<string, Array<{ month: string; clicks: number }>>>({});
-  
+
   // Dialog states
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState<Business | null>(null);
-  
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
-  
+
   // Image upload
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  
+
   // Form
   const form = useForm<BusinessFormData>({
     resolver: zodResolver(businessFormSchema),
@@ -213,7 +214,7 @@ export const AdminBusinesses = () => {
     if (searchTerm.trim()) {
       setIsSearching(true);
     }
-    
+
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
       setCurrentPage(1); // Reset to first page when searching
@@ -248,11 +249,11 @@ export const AdminBusinesses = () => {
         ...business,
         category_name: business.category_id ? categoriesMap.get(business.category_id)?.name : null,
         city_name: business.city_id ? citiesMap.get(business.city_id)?.name : null,
-        country_name: business.city_id ? 
-          (citiesMap.get(business.city_id)?.country_id ? 
+        country_name: business.city_id ?
+          (citiesMap.get(business.city_id)?.country_id ?
             countriesMap.get(citiesMap.get(business.city_id)?.country_id)?.name : null) : null
       })) || [];
-      
+
       setBusinesses(businessesWithDetails);
     } catch (error) {
       console.error('Error fetching businesses:', error);
@@ -291,12 +292,12 @@ export const AdminBusinesses = () => {
         .order('name');
 
       if (error) throw error;
-      
+
       const citiesWithCountries = data?.map(city => ({
         ...city,
         country_name: city.countries?.name
       })) || [];
-      
+
       setCities(citiesWithCountries);
     } catch (error) {
       console.error('Error fetching cities:', error);
@@ -360,7 +361,7 @@ export const AdminBusinesses = () => {
     // Enhanced search across multiple fields with better matching
     const searchLower = debouncedSearchTerm.toLowerCase().trim();
     const searchWords = searchLower.split(/\s+/).filter(word => word.length > 0);
-    
+
     // Search across multiple business fields
     const searchableFields = [
       business.name,
@@ -374,18 +375,18 @@ export const AdminBusinesses = () => {
       business.country_name,
       business.category_name
     ].filter(Boolean); // Remove null/undefined values
-    
+
     // Check if ALL search words are found in ANY of the searchable fields
-    const allWordsFound = searchWords.every(searchWord => 
-      searchableFields.some(field => 
+    const allWordsFound = searchWords.every(searchWord =>
+      searchableFields.some(field =>
         field.toLowerCase().includes(searchWord)
       )
     );
-    
+
     // Apply status and category filters
     const matchesStatus = statusFilter === "all" || business.status === statusFilter;
     const matchesCategory = categoryFilter === "all" || business.category_id === categoryFilter;
-    
+
     return allWordsFound && matchesStatus && matchesCategory;
   });
 
@@ -438,7 +439,7 @@ export const AdminBusinesses = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `businesses_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `businesses_${new Date().toLocaleDateString('en-CA')}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -460,7 +461,7 @@ export const AdminBusinesses = () => {
 
       // Upload business images
       if (imageFiles.length > 0) {
-        const uploadPromises = imageFiles.map(file => 
+        const uploadPromises = imageFiles.map(file =>
           uploadImage(file, 'business-images', 'businesses')
         );
         uploadedImageUrls = await Promise.all(uploadPromises);
@@ -511,7 +512,7 @@ export const AdminBusinesses = () => {
 
   const handleEditBusiness = async (data: BusinessFormData) => {
     if (!selectedBusiness) return;
-    
+
     try {
       // Handle image uploads for editing
       // uploadedImages contains both existing URLs and new preview URLs
@@ -521,11 +522,11 @@ export const AdminBusinesses = () => {
 
       // Upload new images if any
       if (imageFiles.length > 0) {
-        const uploadPromises = imageFiles.map(file => 
+        const uploadPromises = imageFiles.map(file =>
           uploadImage(file, 'business-images', 'businesses')
         );
         const newImageUrls = await Promise.all(uploadPromises);
-        
+
         // Combine existing images with new ones
         finalImages = [...finalImages, ...newImageUrls];
       }
@@ -587,7 +588,7 @@ export const AdminBusinesses = () => {
       });
       return;
     }
-    
+
     try {
       console.log('Deleting business with id:', businessId);
       const { error } = await adminDb
@@ -707,11 +708,11 @@ export const AdminBusinesses = () => {
     const files = event.target.files;
     if (files) {
       const fileArray = Array.from(files);
-      
+
       // Validate files
       const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
       const maxSize = 5 * 1024 * 1024; // 5MB
-      
+
       for (const file of fileArray) {
         if (!allowedTypes.includes(file.type)) {
           toast({
@@ -721,7 +722,7 @@ export const AdminBusinesses = () => {
           });
           return;
         }
-        
+
         if (file.size > maxSize) {
           toast({
             title: "File Too Large",
@@ -731,7 +732,7 @@ export const AdminBusinesses = () => {
           return;
         }
       }
-      
+
       // Create preview URLs for immediate display
       const newImages = fileArray.map(file => URL.createObjectURL(file));
       setUploadedImages(prev => [...prev, ...newImages]);
@@ -745,7 +746,7 @@ export const AdminBusinesses = () => {
       // Validate file
       const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
       const maxSize = 5 * 1024 * 1024; // 5MB
-      
+
       if (!allowedTypes.includes(file.type)) {
         toast({
           title: "Invalid File Type",
@@ -754,7 +755,7 @@ export const AdminBusinesses = () => {
         });
         return;
       }
-      
+
       if (file.size > maxSize) {
         toast({
           title: "File Too Large",
@@ -763,7 +764,7 @@ export const AdminBusinesses = () => {
         });
         return;
       }
-      
+
       setLogoFile(file);
     }
   };
@@ -776,19 +777,19 @@ export const AdminBusinesses = () => {
   // Function to highlight search terms in text
   const highlightSearchTerms = (text: string | null, searchTerm: string) => {
     if (!text || !searchTerm.trim()) return text;
-    
+
     const searchWords = searchTerm.toLowerCase().split(/\s+/).filter(word => word.length > 0);
     let highlightedText = text;
-    
+
     searchWords.forEach(word => {
       const regex = new RegExp(`(${word})`, 'gi');
       highlightedText = highlightedText.replace(regex, '<mark class="bg-yellow-200 px-1 rounded">$1</mark>');
     });
-    
+
     return highlightedText;
   };
 
-  
+
 
   if (loading) {
     return (
@@ -805,13 +806,31 @@ export const AdminBusinesses = () => {
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-comfortaa font-bold text-yp-dark">Businesses</h2>
+          <h2 className="text-2xl font-comfortaa font-bold text-yp-dark flex items-center gap-2">
+            Businesses
+            <AdminPageGuide
+              title="Business Directory Moderation"
+              description="Approve new business listings, verify ownership claims, and handle featured status."
+              features={[
+                'Approve/Reject pending listings',
+                'Verify official business owners',
+                'Toggle Premium/Featured status',
+                'Edit inappropriate business descriptions'
+              ]}
+              workflow={[
+                'Filter the table by Status: Pending.',
+                'Review the provided IDs or URLs for authenticity.',
+                'Approve the listing or Decline with a reason.',
+                'Verify ownership if requested by a user claiming the page.'
+              ]}
+            />
+          </h2>
           <p className="text-gray-600 font-roboto">Manage and moderate business listings</p>
         </div>
-        
+
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setIsHelpDialogOpen(true)}
             className="font-roboto"
             title="Admin Guide"
@@ -819,29 +838,29 @@ export const AdminBusinesses = () => {
             <HelpCircle className="w-4 h-4 mr-2" />
             Help
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={exportToCSV}
             className="font-roboto"
           >
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={exportToPDF}
             className="font-roboto"
           >
             <Download className="w-4 h-4 mr-2" />
             Export PDF
           </Button>
-          <Button 
+          <Button
             className="bg-yellow-900 hover:bg-blue-600"
             onClick={handleAddClick}
           >
-          <Plus className="w-4 h-4 mr-2 " />
-          Add Business
-        </Button>
+            <Plus className="w-4 h-4 mr-2 " />
+            Add Business
+          </Button>
         </div>
       </div>
 
@@ -855,9 +874,8 @@ export const AdminBusinesses = () => {
                 placeholder="Search businesses by name, description, address, phone, email, website, city, country, category..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`pl-10 text-sm font-roboto text-gray-900 ${
-                  searchTerm ? 'ring-2 ring-yp-blue/20 border-yp-blue' : ''
-                }`}
+                className={`pl-10 text-sm font-roboto text-gray-900 ${searchTerm ? 'ring-2 ring-yp-blue/20 border-yp-blue' : ''
+                  }`}
               />
 
               {isSearching && (
@@ -942,7 +960,7 @@ export const AdminBusinesses = () => {
                 </span>
               </div>
             </div>
-            
+
             {/* Search Statistics */}
             <div className="mt-3 pt-3 border-t border-gray-200">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-600">
@@ -983,8 +1001,8 @@ export const AdminBusinesses = () => {
                   <div className="flex-1">
                     <CardTitle className="text-lg font-comfortaa line-clamp-2">
                       {debouncedSearchTerm ? (
-                        <span dangerouslySetInnerHTML={{ 
-                          __html: highlightSearchTerms(business.name, debouncedSearchTerm) || business.name 
+                        <span dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(highlightSearchTerms(business.name, debouncedSearchTerm) || business.name, { ALLOWED_TAGS: ['mark'], ALLOWED_ATTR: ['class'] })
                         }} />
                       ) : (
                         business.name
@@ -1030,15 +1048,15 @@ export const AdminBusinesses = () => {
               {business.description && (
                 <p className="text-sm font-roboto text-gray-600 mb-3 line-clamp-2">
                   {debouncedSearchTerm ? (
-                    <span dangerouslySetInnerHTML={{ 
-                      __html: highlightSearchTerms(business.description, debouncedSearchTerm) || business.description 
+                    <span dangerouslySetInnerHTML={{
+                      __html: highlightSearchTerms(business.description, debouncedSearchTerm) || business.description
                     }} />
                   ) : (
                     business.description
                   )}
                 </p>
               )}
-              
+
               {/* Business Features Badges */}
               <div className="flex flex-wrap gap-1 mb-3">
                 {business.is_premium && (
@@ -1067,7 +1085,7 @@ export const AdminBusinesses = () => {
                   </Badge>
                 )}
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4 mb-3">
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <Crown className="w-4 h-4 text-yellow-500" />
@@ -1093,10 +1111,10 @@ export const AdminBusinesses = () => {
                   </div>
                 </div>
               )}
-              
+
               <div className="flex items-center justify-between">
-                <Badge 
-                  variant="outline" 
+                <Badge
+                  variant="outline"
                   className="font-roboto"
                 >
                   <span className="capitalize">{business.status}</span>
@@ -1180,8 +1198,8 @@ export const AdminBusinesses = () => {
               <div>• Country</div>
             </div>
             <div className="mt-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setSearchTerm("")}
                 className="font-roboto"
               >
@@ -1371,7 +1389,7 @@ export const AdminBusinesses = () => {
                     <p className="text-sm text-red-600 mt-1">{form.formState.errors.city_id.message}</p>
                   )}
                 </div>
-              
+
                 <div>
                   <Label htmlFor="status" className="font-roboto">Status</Label>
                   <Select value={form.watch("status")} onValueChange={(value) => form.setValue("status", value as 'pending' | 'active' | 'suspended')}>
@@ -1480,7 +1498,7 @@ export const AdminBusinesses = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Image Upload Section */}
             <div className="space-y-4">
               <div>
@@ -1547,7 +1565,7 @@ export const AdminBusinesses = () => {
                 )}
               </div>
             </div>
-            
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)} className="font-roboto">
                 Cancel
@@ -1740,7 +1758,7 @@ export const AdminBusinesses = () => {
                     <p className="text-sm text-red-600 mt-1">{form.formState.errors.city_id.message}</p>
                   )}
                 </div>
-                
+
                 <div>
                   <Label htmlFor="edit-status" className="font-roboto">Status</Label>
                   <Select value={form.watch("status")} onValueChange={(value) => form.setValue("status", value as 'pending' | 'active' | 'suspended')}>
@@ -1849,7 +1867,7 @@ export const AdminBusinesses = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Image Upload Section for Edit */}
             <div className="space-y-4">
               <div>
@@ -1916,7 +1934,7 @@ export const AdminBusinesses = () => {
                 )}
               </div>
             </div>
-            
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)} className="font-roboto">
                 Cancel
@@ -2037,7 +2055,7 @@ export const AdminBusinesses = () => {
                       <span className="font-roboto font-medium">Country:</span>
                       <span className="font-roboto">{selectedBusiness.country_name}</span>
                     </div>
-                  
+
                   </div>
                 </div>
               </div>
@@ -2093,7 +2111,7 @@ export const AdminBusinesses = () => {
               Close
             </Button>
             {selectedBusiness && (
-              <Button 
+              <Button
                 onClick={() => {
                   setIsViewDialogOpen(false);
                   handleEditClick(selectedBusiness);
@@ -2117,7 +2135,7 @@ export const AdminBusinesses = () => {
               Quick reference guide for managing business listings
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-6 font-roboto">
             {/* URLs Section */}
             <div>
@@ -2234,14 +2252,14 @@ export const AdminBusinesses = () => {
           </div>
 
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsHelpDialogOpen(false)}
               className="font-roboto"
             >
               Close
             </Button>
-            <Button 
+            <Button
               onClick={() => window.open('/ADMIN_GUIDE.md', '_blank')}
               className="bg-blue-600 hover:bg-blue-700 font-roboto"
             >

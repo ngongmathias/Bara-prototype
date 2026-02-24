@@ -10,6 +10,8 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { Plus, Trash2, Edit, Upload, RefreshCw, Eye, EyeOff, Calendar, Link, Image } from 'lucide-react';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 export type Popup = {
   id: string;
@@ -314,7 +316,14 @@ export default function AdminPopups() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Popups Management</h1>
+            <div className="flex items-center"><h1 className="text-3xl font-bold">Popups Management</h1>
+                    <AdminPageGuide 
+                      title="Interstitial Popup Ads"
+                      description="Configure full-screen popup advertisements that users see occasionally between page loads."
+                      features={["Upload high-conversion vertical ad creative", "Set display frequency and cooldowns", "Target specific country geos", "Track click-throughs"]}
+                      workflow={["Create a new popup campaign.", "Upload the creative and set the target redirect URL.", "Set the Active state to True to begin the ad rotation."]}
+                    />
+                </div>
             <p className="text-gray-600 mt-1">Manage popup advertisements and notifications</p>
           </div>
           <div className="flex gap-2">

@@ -98,34 +98,13 @@ export default function CoinStorePage() {
       return;
     }
 
-    const pack = coinPacks.find(p => p.id === packId);
-    if (!pack) return;
+    toast({
+      title: 'Store Under Maintenance',
+      description: 'Coin purchases are temporarily disabled while we upgrade our payment system. Please check back later.',
+    });
+    return;
 
-    setPurchasing(true);
-    setSelectedPack(packId);
-
-    const totalCoins = pack.coins + pack.bonus;
-    const success = await GamificationService.addCoins(
-      user.id,
-      totalCoins,
-      `Coin Store: ${pack.name} pack (${totalCoins} coins)`
-    );
-
-    if (success) {
-      toast({
-        title: `${totalCoins} Bara Coins Added! 🎉`,
-        description: `Your ${pack.name} pack has been credited to your account.`,
-      });
-    } else {
-      toast({
-        title: 'Error',
-        description: 'Failed to add coins. Please try again.',
-        variant: 'destructive',
-      });
-    }
-
-    setPurchasing(false);
-    setSelectedPack(null);
+    // TODO: Move coin granting to a secure Edge Function with Stripe webhook
   };
 
   return (

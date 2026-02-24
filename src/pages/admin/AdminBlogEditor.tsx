@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AdminPageGuide } from '../../components/admin/AdminPageGuide';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import {
@@ -303,18 +304,35 @@ export const AdminBlogEditor = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
-          <div>
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/admin/blog')}
-              className="mb-4"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Blog
-            </Button>
-            <h1 className="text-3xl font-bold text-gray-900 font-comfortaa">
-              {isEditMode ? 'Edit Post' : 'Create New Post'}
-            </h1>
+          <div className="flex items-center gap-4">
+            <div>
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/admin/blog')}
+                className="mb-4"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Blog
+              </Button>
+              <h1 className="text-3xl font-bold text-gray-900 font-comfortaa">
+                {isEditMode ? 'Edit Post' : 'Create New Post'}
+              </h1>
+            </div>
+            <AdminPageGuide
+              title="Blog Editor"
+              description="Draft and format blog articles."
+              features={[
+                'Rich text editor',
+                'Image uploads',
+                'SEO metadata'
+              ]}
+              workflow={[
+                'Write article title and body',
+                'Upload cover image',
+                'Set SEO description',
+                'Save changes'
+              ]}
+            />
           </div>
 
           <div className="flex gap-2">
@@ -562,17 +580,17 @@ export const AdminBlogEditor = () => {
                       id="scheduled_for"
                       type="datetime-local"
                       value={
-                        formData.scheduled_for 
+                        formData.scheduled_for
                           ? (() => {
-                              // Convert ISO timestamp to local datetime-local format
-                              const date = new Date(formData.scheduled_for);
-                              const year = date.getFullYear();
-                              const month = String(date.getMonth() + 1).padStart(2, '0');
-                              const day = String(date.getDate()).padStart(2, '0');
-                              const hours = String(date.getHours()).padStart(2, '0');
-                              const minutes = String(date.getMinutes()).padStart(2, '0');
-                              return `${year}-${month}-${day}T${hours}:${minutes}`;
-                            })()
+                            // Convert ISO timestamp to local datetime-local format
+                            const date = new Date(formData.scheduled_for);
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const hours = String(date.getHours()).padStart(2, '0');
+                            const minutes = String(date.getMinutes()).padStart(2, '0');
+                            return `${year}-${month}-${day}T${hours}:${minutes}`;
+                          })()
                           : ''
                       }
                       onChange={(e) => {

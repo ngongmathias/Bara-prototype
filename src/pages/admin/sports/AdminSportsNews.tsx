@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/lib/supabase";
 import { Loader2, Trash2, Plus, Search } from "lucide-react";
 import { toast } from "sonner";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 export default function AdminSportsNews() {
     const [news, setNews] = useState<any[]>([]);
@@ -82,6 +84,14 @@ export default function AdminSportsNews() {
 
     return (
         <AdminLayout title="Manage News" subtitle="Add and manage sports news articles">
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Sports Journalism"
+            description="Moderate user-submitted sports takes and official news."
+            features={["Approve pending articles", "Edit formatting", "Feature top stories"]}
+            workflow={["Review pending articles", "Check for plagiarism or toxicity", "Click Approve"]}
+          />
+        </div>
             <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Form */}
                 <Card className="lg:col-span-1 h-fit">

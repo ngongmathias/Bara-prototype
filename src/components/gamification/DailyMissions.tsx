@@ -16,7 +16,10 @@ export const DailyMissions = () => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (user) {
+        if (user && isOpen) {
+            fetchMissions();
+        } else if (user && missions.length === 0) {
+            // Initial fetch to get claimable count etc even if closed
             fetchMissions();
         }
     }, [user, isOpen]);
@@ -109,7 +112,7 @@ export const DailyMissions = () => {
                                             </div>
                                         </div>
                                         <div className="space-y-1">
-                                            <Progress value={(mission.current_progress / mission.goal) * 100} className="h-1.5" />
+                                            <Progress value={mission.goal > 0 ? Math.min(100, (mission.current_progress / mission.goal) * 100) : 0} className="h-1.5" />
                                             <div className="flex justify-between items-center">
                                                 <span className="text-[10px] text-gray-500 italic max-w-[70%] truncate">{mission.description}</span>
                                                 <div className="text-[10px] text-gray-400 font-bold">

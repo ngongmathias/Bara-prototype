@@ -60,7 +60,10 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
     const isUnlimited = !event.max_capacity || event.max_capacity === 0;
     const isSoldOut = !isUnlimited && (event.current_registrations || 0) >= (event.max_capacity || 0);
     const spotsLeft = isUnlimited ? null : (event.max_capacity || 0) - (event.current_registrations || 0);
-    const totalPrice = (event.entry_fee || 0) * quantity;
+    const rawFee = event.entry_fee || 0;
+    const parsedFee = typeof rawFee === 'string' ? parseFloat((rawFee as string).replace(/[^0-9.]/g, '')) : Number(rawFee);
+    const safeFee = isNaN(parsedFee) ? 0 : parsedFee;
+    const totalPrice = safeFee * quantity;
     const currencySymbol = event.currency === 'USD' ? '$' : event.currency === 'EUR' ? '€' : event.currency === 'GBP' ? '£' : '';
     const priceDisplay = currencySymbol
         ? `${currencySymbol}${totalPrice.toLocaleString()}`
@@ -219,8 +222,8 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                                 <div>
                                     <p className="text-sm text-gray-500 mb-1">Price per ticket</p>
                                     <p className="text-4xl font-bold text-gray-900">
-                                        {currencySymbol}{(event.entry_fee || 0).toLocaleString()}
-                                        {!currencySymbol && <span className="text-lg ml-1">{event.currency}</span>}
+                                        {currencySymbol}{safeFee.toLocaleString()}
+                                        {!currencySymbol && <span className="text-lg ml-1">{event.currency || ''}</span>}
                                     </p>
                                     <p className="text-xs text-gray-500 mt-2">
                                         Pay directly to the organizer. Details provided next.

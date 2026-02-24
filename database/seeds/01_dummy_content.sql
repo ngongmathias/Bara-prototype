@@ -25,7 +25,7 @@ SELECT
   na.artist_id, 
   na.id, 
   'Track ' || floor(random() * 10 + 1)::text || ' - ' || (SELECT name FROM new_artists WHERE id = na.artist_id), 
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', -- Dummy MP3
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-' || floor(random() * 16 + 1)::text || '.mp3',
   'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80',
   180 + floor(random() * 60)::int,
   floor(random() * 1000000)::int
@@ -47,11 +47,11 @@ INSERT INTO sports_news (title, category, image_url, author, content) VALUES
 
 -- 4. SEED SPORTS VIDEOS
 INSERT INTO sports_videos (title, video_url, duration, league, is_live) VALUES
-('Match Highlights: Chiefs vs Pirates', 'https://www.youtube.com/watch?v=dummy1', '10:24', 'Betway Premiership', false),
-('Rassie Erasmus Press Conference', 'https://www.youtube.com/watch?v=dummy2', '15:30', 'International Rugby', true),
-('Goal of the Month: Gaston Sirino', 'https://www.youtube.com/watch?v=dummy3', '03:12', 'Betway Premiership', false),
-('UFC 305 Embedded: Vlog Series', 'https://www.youtube.com/watch?v=dummy4', '09:45', 'UFC', false),
-('Bafana Bafana Training Session', 'https://www.youtube.com/watch?v=dummy5', '05:00', 'WC Qualifiers', false);
+('Match Highlights: Chiefs vs Pirates', 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', '10:24', 'Betway Premiership', false),
+('Rassie Erasmus Press Conference', 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', '15:30', 'International Rugby', true),
+('Goal of the Month: Gaston Sirino', 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', '03:12', 'Betway Premiership', false),
+('UFC 305 Embedded: Vlog Series', 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', '09:45', 'UFC', false),
+('Bafana Bafana Training Session', 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', '05:00', 'WC Qualifiers', false);
 
 -- 5. SEED LEAGUES & MATCHES (For Ticker)
 WITH new_leagues AS (

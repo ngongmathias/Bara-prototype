@@ -76,55 +76,33 @@ const AdvertisePage = () => {
         </div>
       </section>
 
-      {/* The Auction Model Explainer */}
+      {/* How It Works */}
       <section className="py-24 bg-black text-white rounded-[3rem] mx-4 my-8">
         <div className="max-w-7xl mx-auto px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-4xl font-black font-comfortaa mb-6">The MIT Auction Model</h2>
-              <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-                We've moved beyond static, boring ads. Our dynamic bidding system matches your message with the right audience at the right price.
-              </p>
-              <div className="space-y-6">
-                {[
-                  { icon: MousePointer2, title: "Pay for Performance", desc: "Only pay when a potential customer actually clicks your ad." },
-                  { icon: Target, title: "Bid-Weighted Probability", desc: "Higher bids get premium slots automatically through our algorithm." },
-                  { icon: BarChart3, title: "Full Transparency", desc: "Track every impression and click with your personal ROI dashboard." }
-                ].map((item, idx) => (
-                  <div key={idx} className="flex gap-4">
-                    <div className="mt-1 p-2 bg-blue-600 rounded-lg">
-                      <item.icon size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-lg">{item.title}</h4>
-                      <p className="text-gray-500 text-sm">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="relative">
-              <div className="aspect-square bg-gradient-to-tr from-blue-600/20 to-purple-600/20 rounded-full blur-3xl absolute -z-10 w-full h-full" />
-              <Card className="bg-zinc-900 border-zinc-800 text-white p-8">
-                <h4 className="text-xs font-black uppercase tracking-widest text-blue-500 mb-6">Live Auction Pulse</h4>
-                <div className="space-y-4">
-                  {[
-                    { name: "Safaricom Ads", bid: "$0.45", weight: "92%" },
-                    { name: "Kigali Coffee", bid: "$0.15", weight: "45%" },
-                    { name: "Your Brand", bid: "$----", weight: "--%" }
-                  ].map((bid, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-black/50 rounded-xl border border-white/5">
-                      <div className="font-bold">{bid.name}</div>
-                      <div className="flex gap-4 text-sm">
-                        <span className="text-green-500 font-mono">{bid.bid}</span>
-                        <span className="text-gray-500">{bid.weight}</span>
-                      </div>
-                    </div>
-                  ))}
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-black font-comfortaa mb-4">How Bara Ads Work</h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">Three simple steps to reach the African diaspora market.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            {[
+              { step: "1", icon: MousePointer2, title: "Create Your Campaign", desc: "Choose your ad type — sponsored listing, banner ad, or featured placement. Set your budget and target audience." },
+              { step: "2", icon: Target, title: "Reach the Right People", desc: "Your ad appears to users browsing businesses, events, and marketplace listings in your target categories and locations." },
+              { step: "3", icon: BarChart3, title: "Track Your Results", desc: "Monitor impressions, clicks, and conversions in real-time from your dashboard. Only pay for actual engagement." }
+            ].map((item, idx) => (
+              <div key={idx} className="text-center">
+                <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <item.icon size={28} />
                 </div>
-                <Button className="w-full mt-8 bg-blue-600 hover:bg-blue-500 text-white font-bold h-12" asChild><Link to="/advertise/checkout">Set Your Bid</Link></Button>
-              </Card>
-            </div>
+                <div className="text-xs font-black text-blue-400 uppercase tracking-widest mb-2">Step {item.step}</div>
+                <h4 className="font-bold text-xl mb-3">{item.title}</h4>
+                <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center">
+            <Button className="h-14 px-10 bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg rounded-full" asChild>
+              <Link to="/advertise/checkout">Start Your Campaign <ArrowRight className="ml-2" size={18} /></Link>
+            </Button>
           </div>
         </div>
       </section>

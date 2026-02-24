@@ -23,6 +23,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface AdminUser {
   id: string;
@@ -301,6 +303,14 @@ export const AdminManagement = () => {
   if (!isSuperAdmin) {
     return (
       <AdminLayout title="Admin Management" subtitle="Manage admin users and permissions">
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Admin Role Management"
+            description="Control access levels for other administrators."
+            features={["Invite new admins", "Revoke permissions", "View admin activity logs"]}
+            workflow={["Click Add Admin", "Select appropriate role scope", "Confirm invitation email"]}
+          />
+        </div>
         <Card>
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-12 h-12 text-orange-500 mx-auto mb-4" />

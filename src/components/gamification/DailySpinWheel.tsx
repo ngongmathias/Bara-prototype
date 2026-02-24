@@ -62,7 +62,7 @@ export function DailySpinWheel() {
     if (!user) return;
     setLoading(true);
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toLocaleDateString('en-CA');
       const { data } = await supabase
         .from('gamification_history')
         .select('id')

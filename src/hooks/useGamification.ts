@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 import { GamificationService, GamificationProfile, calculateLevel, getXPForLevel } from '@/lib/gamificationService';
 import { useUser } from '@clerk/clerk-react';
 
+let lastStreakCheckTime = 0;
+
 export const useGamification = () => {
     const { user } = useUser();
     const [profile, setProfile] = useState<GamificationProfile | null>(null);
@@ -27,9 +29,13 @@ export const useGamification = () => {
         setProfile(data);
         setLoading(false);
 
-        // Check streak on first load
+        // Check streak on first load (debounced globally)
         if (data) {
-            await GamificationService.checkDailyStreak(user.id);
+            const now = Date.now();
+            if (now - lastStreakCheckTime > 60000) { // 1 min debounce
+                lastStreakCheckTime = now;
+                await GamificationService.checkDailyStreak(user.id);
+            }
         }
     };
 

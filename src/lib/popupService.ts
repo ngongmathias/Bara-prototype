@@ -19,7 +19,6 @@ export type PopupAd = {
  */
 export const fetchActivePopups = async (): Promise<PopupAd[]> => {
   try {
-    console.log('🔄 Fetching active popups...');
     
     if (!supabase) {
       console.error('❌ Supabase client not available');
@@ -40,8 +39,6 @@ export const fetchActivePopups = async (): Promise<PopupAd[]> => {
       console.error('❌ Error fetching popups:', error);
       return [];
     }
-
-    console.log('✅ Active popups fetched:', data?.length || 0);
     return data || [];
     
   } catch (error) {
@@ -92,7 +89,6 @@ export const markPopupClosed = (popupId: string): void => {
   try {
     const key = `popup_closed_${popupId}`;
     localStorage.setItem(key, Date.now().toString());
-    console.log(`✅ Popup ${popupId} marked as closed`);
   } catch (error) {
     console.error('❌ Error marking popup as closed:', error);
   }

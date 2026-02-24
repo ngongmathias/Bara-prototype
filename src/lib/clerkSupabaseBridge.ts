@@ -96,14 +96,11 @@ export class ClerkSupabaseBridge {
     adminUser?: any;
   }> {
     try {
-      console.log('Checking admin status for Clerk user:', clerkUserId);
-
       // First, try to get admin user by Clerk user_id
       let adminUser = await this.getAdminUser(clerkUserId);
 
       // If not found by user_id, check by email (for newly added admins)
       if (!adminUser && userEmail) {
-        console.log('User not found by user_id, checking by email:', userEmail);
         const { data, error } = await supabase
           .from('admin_users')
           .select('*')
@@ -116,7 +113,6 @@ export class ClerkSupabaseBridge {
 
           // Update the user_id from temporary to actual Clerk user_id
           if (adminUser.user_id.startsWith('pending_')) {
-            console.log('Updating temporary user_id to actual Clerk user_id');
             await supabase
               .from('admin_users')
               .update({ user_id: clerkUserId })
@@ -128,17 +124,13 @@ export class ClerkSupabaseBridge {
       }
 
       if (!adminUser) {
-        console.log('User not found in admin_users table - access denied');
         return { isAdmin: false };
       }
 
       // Check if admin is active
       if (!adminUser.is_active) {
-        console.log('Admin user is inactive - access denied');
         return { isAdmin: false };
       }
-
-      console.log('Admin user found:', adminUser);
 
       // Log the admin check
       await UserLogService.logAdminAction(
@@ -168,8 +160,6 @@ export class ClerkSupabaseBridge {
    */
   static async upsertAdminUser(clerkUser: ClerkUser, role: string = 'admin', permissions: string[] = ['read', 'write']): Promise<boolean> {
     try {
-      console.log('Upserting admin user:', clerkUser);
-
       const { data, error } = await supabase
         .from('admin_users')
         .upsert({
@@ -203,7 +193,6 @@ export class ClerkSupabaseBridge {
         { role, permissions, action: 'upsert' }
       );
 
-      console.log('Successfully upserted admin user:', data);
       return true;
     } catch (error) {
       console.error('Error upserting admin user:', error);

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Users, Music, Disc, Mic2, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { db } from "@/lib/supabase";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 export const AdminStreamsDashboard = () => {
     const [stats, setStats] = useState({
@@ -45,6 +47,14 @@ export const AdminStreamsDashboard = () => {
 
     return (
         <AdminLayout title="Streams Dashboard" subtitle="Manage music content and metrics">
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Streams Dashboard"
+            description="High-level analytics for Bara Streams."
+            features={["Track total plays", "Monitor storage quotas", "View trending artists"]}
+            workflow={["Review total plays to gauge platform health", "Check storage alerts for database limits"]}
+          />
+        </div>
             <div className="p-6 space-y-6">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

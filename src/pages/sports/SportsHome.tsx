@@ -109,10 +109,7 @@ function HeroArticle({ activeSport }: { activeSport: any }) {
     return (
         <article className="relative bg-gray-900 h-[400px] rounded-lg overflow-hidden group cursor-pointer shadow-md text-left">
             <img
-                src={activeSport.id === 'football'
-                    ? "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2836&auto=format&fit=crop"
-                    : "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2836&auto=format&fit=crop"
-                }
+                src={"/placeholder.jpg"}
                 alt="Hero"
                 className="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition duration-500 grayscale-[20%] group-hover:grayscale-0"
             />
@@ -177,7 +174,7 @@ function NewsListItem({ item }: { item: any }) {
         <Link to={`/sports/news/${item.id}`} className="flex gap-4 p-4 bg-white border border-gray-100 rounded-lg hover:shadow-lg hover:border-blue-200 transition group">
             <div className="w-1/3 md:w-48 aspect-video bg-gray-200 rounded overflow-hidden flex-shrink-0 relative">
                 <img
-                    src={item.image_url || 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=500&auto=format&fit=crop'}
+                    src={item.image_url || '/placeholder.jpg'}
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                 />

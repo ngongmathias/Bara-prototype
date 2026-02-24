@@ -132,17 +132,17 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/pricing" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
-                  Pricing
+                  {t('footer.pricing')}
                 </Link>
               </li>
               <li>
                 <Link to="/store" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
-                  Coin Store
+                  {t('footer.coinStore')}
                 </Link>
               </li>
               <li>
                 <Link to="/partners" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
-                  Partners
+                  {t('footer.partners')}
                 </Link>
               </li>
               <li>
@@ -172,7 +172,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/tools" onClick={scrollToTop} className="text-gray-700 hover:text-black transition-colors font-roboto text-sm sm:text-base">
-                  Bara Tools
+                  {t('footer.baraTools')}
                 </Link>
               </li>
             </ul>
@@ -208,11 +208,11 @@ const Footer = () => {
                   >
                     {showAllCountries ? (
                       <>
-                        Show Less <ChevronUp className="w-4 h-4" />
+                        {t('footer.showLess')} <ChevronUp className="w-4 h-4" />
                       </>
                     ) : (
                       <>
-                        Show All {countries.length} Locations <ChevronDown className="w-4 h-4" />
+                        {t('footer.showAllLocations', { count: countries.length })} <ChevronDown className="w-4 h-4" />
                       </>
                     )}
                   </button>

@@ -79,7 +79,7 @@ export const MyFavorites = () => {
           <div className="text-center">
             <h2 className="text-2xl font-bold text-black mb-4 font-comfortaa">Sign In Required</h2>
             <p className="text-gray-600 mb-6 font-roboto">Please sign in to view your favorites</p>
-            <Button onClick={() => navigate('/sign-in')} className="bg-black hover:bg-gray-800">
+            <Button onClick={() => navigate('/user/sign-in')} className="bg-black hover:bg-gray-800">
               Sign In
             </Button>
           </div>
@@ -113,8 +113,8 @@ export const MyFavorites = () => {
             <div className="grid grid-cols-1 gap-4">
               {favorites.map((listing) => {
                 const primaryImage = listing.images?.find((img: any) => img.is_primary)?.image_url ||
-                                   listing.images?.[0]?.image_url ||
-                                   '/placeholder.jpg';
+                  listing.images?.[0]?.image_url ||
+                  '/placeholder.jpg';
 
                 return (
                   <div

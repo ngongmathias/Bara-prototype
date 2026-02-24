@@ -11,7 +11,7 @@ export default function SportsSchedule() {
     // Start from tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const [selectedDate, setSelectedDate] = useState(tomorrow.toISOString().split('T')[0]);
+    const [selectedDate, setSelectedDate] = useState(tomorrow.toLocaleDateString('en-CA'));
 
     // Generate next 7 days starting from tomorrow
     const getDates = () => {
@@ -20,7 +20,7 @@ export default function SportsSchedule() {
             const d = new Date();
             d.setDate(d.getDate() + i);
             result.push({
-                full: d.toISOString().split('T')[0],
+                full: d.toLocaleDateString('en-CA'),
                 day: d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
                 date: d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }).toUpperCase()
             });

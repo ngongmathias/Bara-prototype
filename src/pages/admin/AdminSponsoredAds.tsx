@@ -20,6 +20,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface Business {
   id: string;
@@ -280,7 +282,7 @@ export const AdminSponsoredAds = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `sponsored-ads-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `sponsored-ads-${new Date().toLocaleDateString('en-CA')}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -305,6 +307,14 @@ export const AdminSponsoredAds = () => {
   if (loading) {
     return (
       <AdminLayout title="Sponsored Ads Management" subtitle="Manage sponsored advertising status for businesses">
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Legacy Sponsored Ads"
+            description="Older ad system."
+            features={["Legacy ad management"]}
+            workflow={["Use AdminBannerAds for current campaigns."]}
+          />
+        </div>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yp-blue"></div>
         </div>

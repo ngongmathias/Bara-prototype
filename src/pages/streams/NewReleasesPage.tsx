@@ -46,7 +46,11 @@ export default function NewReleasesPage() {
                                         src={album.cover_url}
                                         alt={album.title}
                                         className="w-full h-full object-cover rounded-md shadow-lg"
-                                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&h=300&fit=crop'; }}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.onerror = null;
+                                            target.src = '/placeholder-album.png';
+                                        }}
                                     />
                                     <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
                                         <Play size={24} fill="black" className="ml-1" />

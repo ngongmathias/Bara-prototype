@@ -33,6 +33,8 @@ import {
 import { db } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { uploadImage } from '@/lib/storage';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface Country {
   id: string;
@@ -275,6 +277,14 @@ export const AdminCountryInfo: React.FC = () => {
   if (loading) {
     return (
       <AdminLayout>
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Country Information"
+            description="Detailed local intel for supported nations."
+            features={["Edit cultural information", "Set local emergency numbers", "Manage visa guides"]}
+            workflow={["Select country from dropdown", "Update the informational text blocks", "Save changes for travelers"]}
+          />
+        </div>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">Country Information</h1>

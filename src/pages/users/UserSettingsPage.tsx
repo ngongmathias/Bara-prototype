@@ -10,9 +10,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Calendar, User, Shield, Printer, Edit, X, Key, LogOut, Save, Loader2, CheckCircle } from 'lucide-react';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useToast } from '@/hooks/use-toast';
 
 const UserSettingsPage = () => {
   const { user } = useUser();
+  const { toast } = useToast();
   const { signOut } = useClerk();
   const [logs, setLogs] = useState<UserLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ const UserSettingsPage = () => {
       setIsEditing(false);
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('Failed to save profile. Please try again.');
+      toast({ title: "Error", description: "Failed to save profile. Please try again.", variant: "destructive" });
     } finally {
       setSaving(false);
     }

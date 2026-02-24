@@ -80,7 +80,6 @@ export class UserLogService {
    */
   static async logAction(logData: UserLog): Promise<boolean> {
     try {
-      console.log('Attempting to log user action:', logData);
       
       const { data, error } = await supabase
         .from('user_logs')
@@ -112,8 +111,6 @@ export class UserLogService {
         
         return false;
       }
-
-      console.log('Successfully logged user action:', data);
       return true;
     } catch (error) {
       console.error('Error logging user action:', error);

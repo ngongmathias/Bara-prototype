@@ -8,12 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { useTranslation } from 'react-i18next';
-import { 
-  User, 
-  Mail, 
-  Shield, 
-  Calendar, 
-  MapPin, 
+import {
+  User,
+  Mail,
+  Shield,
+  Calendar,
+  MapPin,
   Phone,
   Edit,
   Save,
@@ -24,6 +24,8 @@ import {
   LogOut
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 export const AdminSettings = () => {
   const { t } = useTranslation();
@@ -32,7 +34,7 @@ export const AdminSettings = () => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
@@ -53,16 +55,19 @@ export const AdminSettings = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Here you would typically update the user profile
-      // For now, we'll just simulate a successful update
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      if (user) {
+        await user.update({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+        });
+      }
+
       toast({
         title: "Profile Updated",
         description: "Your profile information has been updated successfully.",
         variant: "default"
       });
-      
+
       setIsEditing(false);
     } catch (error) {
       toast({
@@ -106,9 +111,9 @@ export const AdminSettings = () => {
             <div className="flex items-center space-x-4">
               <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
                 {user?.imageUrl ? (
-                  <img 
-                    src={user.imageUrl} 
-                    alt="Profile" 
+                  <img
+                    src={user.imageUrl}
+                    alt="Profile"
                     className="w-20 h-20 rounded-full object-cover"
                   />
                 ) : (
@@ -116,12 +121,19 @@ export const AdminSettings = () => {
                 )}
               </div>
               <div className="flex-1">
-                <h1 className="text-2xl font-comfortaa font-bold">
-                  {user?.firstName && user?.lastName 
-                    ? `${user.firstName} ${user.lastName}` 
+                <div className="flex items-center"><h1 className="text-2xl font-comfortaa font-bold">
+                  {user?.firstName && user?.lastName
+                    ? `${user.firstName} ${user.lastName}`
                     : user?.primaryEmailAddress?.emailAddress?.split('@')[0] || 'Admin User'
                   }
                 </h1>
+                    <AdminPageGuide 
+                      title="Global Settings"
+                      description="Platform-wide controls, API keys, and maintenance modes."
+                      features={["Toggle Maintenance Mode", "Manage global API keys", "Configure cache intervals"]}
+                      workflow={["Never toggle Maintenance Mode without developer approval.", "Do not expose API keys to third parties."]}
+                    />
+                </div>
                 <p className="text-white/80 font-roboto">
                   {user?.primaryEmailAddress?.emailAddress}
                 </p>
@@ -200,7 +212,7 @@ export const AdminSettings = () => {
                   )}
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="email" className="text-sm font-medium text-gray-700">
                   Email Address
@@ -304,7 +316,7 @@ export const AdminSettings = () => {
                 <h3 className="font-medium text-gray-900">Two-Factor Authentication</h3>
                 <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => toast({ title: "Managed via Clerk", description: "Security settings are managed through your main Clerk profile." })}>
                 Enable
               </Button>
             </div>
@@ -314,7 +326,7 @@ export const AdminSettings = () => {
                 <h3 className="font-medium text-gray-900">Password</h3>
                 <p className="text-sm text-gray-600">Change your password regularly</p>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => toast({ title: "Managed via Clerk", description: "Security settings are managed through your main Clerk profile." })}>
                 Change Password
               </Button>
             </div>
@@ -324,7 +336,7 @@ export const AdminSettings = () => {
                 <h3 className="font-medium text-gray-900">Login Sessions</h3>
                 <p className="text-sm text-gray-600">Manage your active sessions</p>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => toast({ title: "Managed via Clerk", description: "Security settings are managed through your main Clerk profile." })}>
                 View Sessions
               </Button>
             </div>
@@ -369,8 +381,8 @@ export const AdminSettings = () => {
                 <h3 className="font-medium text-red-900">Sign Out</h3>
                 <p className="text-sm text-red-600">Sign out of your account</p>
               </div>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 className="border-red-300 text-red-600 hover:bg-red-100"
                 onClick={async () => {

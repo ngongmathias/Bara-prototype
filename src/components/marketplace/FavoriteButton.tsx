@@ -40,9 +40,9 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
 
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     if (!user) {
-      navigate('/sign-in');
+      navigate('/user/sign-in');
       return;
     }
 

@@ -200,7 +200,9 @@ export default function SearchPage() {
                                                         <Heart size={18} fill={likedSongs.includes(song.id) ? "currentColor" : "none"} />
                                                     </button>
                                                     <div className="text-sm text-gray-500 w-12 text-right">
-                                                        {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
+                                                        {typeof song.duration === 'number' && !isNaN(song.duration)
+                                                            ? `${Math.floor(song.duration / 60)}:${Math.floor(song.duration % 60).toString().padStart(2, '0')}`
+                                                            : '--:--'}
                                                     </div>
                                                 </div>
                                             );

@@ -5,17 +5,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Globe, 
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Globe,
   MapPin,
   Filter,
   Flag
 } from "lucide-react";
 import { db } from "@/lib/supabase";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Country {
   id: string;
@@ -33,6 +45,7 @@ export const CountriesManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingCountry, setEditingCountry] = useState<Country | null>(null);
+  const [countryToDelete, setCountryToDelete] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -75,7 +88,7 @@ export const CountriesManagement = () => {
   const handleAddCountry = async () => {
     try {
       const { error } = await db.countries().insert([formData]);
-      
+
       if (error) {
         console.error('Error adding country:', error);
       } else {
@@ -95,7 +108,7 @@ export const CountriesManagement = () => {
       const { error } = await db.countries()
         .update(formData)
         .eq('id', editingCountry.id);
-      
+
       if (error) {
         console.error('Error updating country:', error);
       } else {
@@ -108,25 +121,26 @@ export const CountriesManagement = () => {
     }
   };
 
-  const handleDeleteCountry = async (countryId: string) => {
-    if (window.confirm('Are you sure you want to delete this country? This will also affect all cities associated with it.')) {
-      try {
-        const { error } = await db.countries()
-          .update({ is_active: false })
-          .eq('id', countryId);
-        
-        if (error) {
-          console.error('Error deleting country:', error);
-        } else {
-          fetchCountries();
-        }
-      } catch (error) {
+  const confirmDeleteCountry = async () => {
+    if (!countryToDelete) return;
+    try {
+      const { error } = await db.countries()
+        .update({ is_active: false })
+        .eq('id', countryToDelete);
+
+      if (error) {
         console.error('Error deleting country:', error);
+      } else {
+        fetchCountries();
       }
+    } catch (error) {
+      console.error('Error deleting country:', error);
+    } finally {
+      setCountryToDelete(null);
     }
   };
 
-  const filteredCountries = countries.filter(country => 
+  const filteredCountries = countries.filter(country =>
     country.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     country.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -140,6 +154,14 @@ export const CountriesManagement = () => {
   if (loading) {
     return (
       <AdminLayout>
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Countries Management (Legacy)"
+            description="Old countries UI."
+            features={["View countries"]}
+            workflow={["Use the primary AdminCountries page."]}
+          />
+        </div>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yp-blue"></div>
         </div>
@@ -160,7 +182,7 @@ export const CountriesManagement = () => {
               Manage countries and regions for your application
             </p>
           </div>
-          <Button 
+          <Button
             onClick={() => setShowAddForm(true)}
             className="bg-yp-blue"
           >
@@ -234,7 +256,7 @@ export const CountriesManagement = () => {
                 </label>
               </div>
               <div className="flex space-x-3 mt-6">
-                <Button 
+                <Button
                   onClick={editingCountry ? handleEditCountry : handleAddCountry}
                   className="bg-yp-blue"
                 >
@@ -317,7 +339,7 @@ export const CountriesManagement = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDeleteCountry(country.id)}
+                            onClick={() => setCountryToDelete(country.id)}
                             className="text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -337,8 +359,8 @@ export const CountriesManagement = () => {
                   No countries found
                 </h3>
                 <p className="text-gray-600 font-roboto">
-                  {searchTerm 
-                    ? 'Try adjusting your search criteria' 
+                  {searchTerm
+                    ? 'Try adjusting your search criteria'
                     : 'Get started by adding your first country'
                   }
                 </p>
@@ -398,6 +420,21 @@ export const CountriesManagement = () => {
           </Card>
         </div>
       </div>
+
+      <AlertDialog open={!!countryToDelete} onOpenChange={(open) => !open && setCountryToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this country? This will also affect all cities associated with it. This action will mark the country as inactive.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteCountry} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { db, getAdminDb, SUPABASE_URL, supabase } from '@/lib/supabase';
+import { db, SUPABASE_URL, supabase } from '@/lib/supabase';
 import { SponsoredBanner, CreateSponsoredBannerData, UpdateSponsoredBannerData } from '@/types/sponsoredBanner.types';
 
 export const useSponsoredBanners = () => {

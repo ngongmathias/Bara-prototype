@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { useUser } from '@clerk/clerk-react';
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  Eye, 
-  Bookmark, 
-  Share2, 
+import {
+  Calendar,
+  Clock,
+  User,
+  Eye,
+  Bookmark,
+  Share2,
   ArrowLeft,
   Facebook,
   Twitter,
@@ -21,10 +22,10 @@ import Footer from '../components/Footer';
 import { TopBannerAd } from '../components/TopBannerAd';
 import { BottomBannerAd } from '../components/BottomBannerAd';
 import { BlogCard } from '../components/BlogCard';
-import { 
-  blogPostsService, 
+import {
+  blogPostsService,
   blogCommentsService,
-  BlogPost, 
+  BlogPost,
   BlogComment,
   formatDate,
   formatRelativeTime
@@ -61,6 +62,13 @@ export const BlogPostDetail = () => {
       loadRelatedPosts();
       checkBookmarkStatus();
       incrementViewCount();
+
+      // Load saved like status from local storage for prototype persistence
+      const savedLike = localStorage.getItem(`blog_post_liked_${post.id}`);
+      if (savedLike === 'true') {
+        setIsLiked(true);
+        setLikesCount(1);
+      }
     }
   }, [post?.id]);
 
@@ -144,8 +152,8 @@ export const BlogPostDetail = () => {
       setIsBookmarked(bookmarked);
       toast({
         title: bookmarked ? 'Bookmarked' : 'Removed from Bookmarks',
-        description: bookmarked 
-          ? 'Post saved to your bookmarks' 
+        description: bookmarked
+          ? 'Post saved to your bookmarks'
           : 'Post removed from your bookmarks',
       });
     } catch (error) {
@@ -168,13 +176,17 @@ export const BlogPostDetail = () => {
     }
 
     try {
-      setIsLiked(!isLiked);
-      setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
-      
+      const newLikeStatus = !isLiked;
+      setIsLiked(newLikeStatus);
+      setLikesCount(prev => newLikeStatus ? prev + 1 : prev - 1);
+
+      // Persist to local storage for prototype
+      localStorage.setItem(`blog_post_liked_${post!.id}`, String(newLikeStatus));
+
       // TODO: Implement actual like/unlike API call when backend is ready
       toast({
-        title: isLiked ? 'Post Unliked' : 'Post Liked',
-        description: isLiked ? 'Removed from your liked posts' : 'Added to your liked posts',
+        title: newLikeStatus ? 'Post Liked' : 'Post Unliked',
+        description: newLikeStatus ? 'Added to your liked posts' : 'Removed from your liked posts',
       });
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -191,7 +203,7 @@ export const BlogPostDetail = () => {
   const handleShare = (platform: string) => {
     const url = window.location.href;
     const title = post?.title || '';
-    
+
     let shareUrl = '';
     switch (platform) {
       case 'facebook':
@@ -215,7 +227,7 @@ export const BlogPostDetail = () => {
         setShowShareMenu(false);
         return;
     }
-    
+
     if (shareUrl) {
       window.open(shareUrl, '_blank', 'width=600,height=400');
       setShowShareMenu(false);
@@ -224,7 +236,7 @@ export const BlogPostDetail = () => {
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       toast({
         title: 'Sign In Required',
@@ -279,7 +291,7 @@ export const BlogPostDetail = () => {
             <User className="w-5 h-5 text-gray-500" />
           </div>
         )}
-        
+
         <div className="flex-1">
           <div className="bg-gray-50 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
@@ -291,7 +303,7 @@ export const BlogPostDetail = () => {
             </div>
             <p className="text-gray-700 font-roboto">{comment.content}</p>
           </div>
-          
+
           <div className="flex items-center gap-4 mt-2 text-sm">
             <button
               onClick={() => setReplyTo(comment.id)}
@@ -355,7 +367,7 @@ export const BlogPostDetail = () => {
         {/* Article Header */}
         <article>
           {post.category && (
-            <div 
+            <div
               className="inline-block px-3 py-1 rounded-full text-sm font-medium text-white mb-4"
               style={{ backgroundColor: post.category.color || '#000000' }}
             >
@@ -390,19 +402,19 @@ export const BlogPostDetail = () => {
                 </div>
               </div>
             )}
-            
+
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               <span>{formatDate(post.published_at!)}</span>
             </div>
-            
+
             {post.reading_time && (
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 <span>{post.reading_time} min read</span>
               </div>
             )}
-            
+
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
               <span>{post.view_count} views</span>
@@ -411,11 +423,10 @@ export const BlogPostDetail = () => {
             <div className="ml-auto flex items-center gap-3">
               <button
                 onClick={handleLike}
-                className={`p-2 rounded-full transition-colors flex items-center gap-2 ${
-                  isLiked
-                    ? 'bg-red-100 text-red-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`p-2 rounded-full transition-colors flex items-center gap-2 ${isLiked
+                  ? 'bg-red-100 text-red-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 <Heart className="w-5 h-5" fill={isLiked ? 'currentColor' : 'none'} />
                 {likesCount > 0 && <span className="text-sm font-medium">{likesCount}</span>}
@@ -423,15 +434,14 @@ export const BlogPostDetail = () => {
 
               <button
                 onClick={handleBookmark}
-                className={`p-2 rounded-full transition-colors ${
-                  isBookmarked
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`p-2 rounded-full transition-colors ${isBookmarked
+                  ? 'bg-blue-100 text-blue-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 <Bookmark className="w-5 h-5" fill={isBookmarked ? 'currentColor' : 'none'} />
               </button>
-              
+
               <div className="relative">
                 <button
                   onClick={() => setShowShareMenu(!showShareMenu)}
@@ -439,7 +449,7 @@ export const BlogPostDetail = () => {
                 >
                   <Share2 className="w-5 h-5" />
                 </button>
-                
+
                 {showShareMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
                     <button
@@ -494,7 +504,7 @@ export const BlogPostDetail = () => {
 
           {/* Article Content */}
           <div className="prose prose-lg max-w-none mb-12 font-roboto">
-            <div dangerouslySetInnerHTML={{ __html: post.content }} />
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
           </div>
 
           {/* Tags */}

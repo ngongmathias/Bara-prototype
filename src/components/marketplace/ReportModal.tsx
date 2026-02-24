@@ -19,6 +19,7 @@ import {
 import { supabase } from '@/lib/supabase';
 import { useUser } from '@clerk/clerk-react';
 import { Flag } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface ReportModalProps {
   listingId: string;
@@ -26,6 +27,7 @@ interface ReportModalProps {
 
 export const ReportModal: React.FC<ReportModalProps> = ({ listingId }) => {
   const { user } = useUser();
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [description, setDescription] = useState('');
@@ -33,7 +35,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({ listingId }) => {
 
   const handleSubmit = async () => {
     if (!reason) {
-      alert('Please select a reason');
+      toast({ title: "Error", description: "Please select a reason", variant: "destructive" });
       return;
     }
 
@@ -51,13 +53,13 @@ export const ReportModal: React.FC<ReportModalProps> = ({ listingId }) => {
 
       if (error) throw error;
 
-      alert('Report submitted successfully. Our team will review it.');
+      toast({ title: "Success", description: "Report submitted successfully. Our team will review it." });
       setOpen(false);
       setReason('');
       setDescription('');
     } catch (error) {
       console.error('Error submitting report:', error);
-      alert('Error submitting report. Please try again.');
+      toast({ title: "Error", description: "Error submitting report. Please try again.", variant: "destructive" });
     } finally {
       setSubmitting(false);
     }

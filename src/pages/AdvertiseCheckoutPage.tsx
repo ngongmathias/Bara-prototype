@@ -164,8 +164,8 @@ const AdvertiseCheckoutPage = () => {
                   <span className="font-bold text-green-500">FREE</span>
                 </div>
                 <div className="pt-6 border-t border-white/10 flex justify-between items-center">
-                  <span className="font-bold">Total Now</span>
-                  <span className="text-3xl font-black text-blue-500">${plan === 'pro' ? '19.00' : '79.00'}</span>
+                  <span className="font-bold">Total Now (Early Access)</span>
+                  <span className="text-3xl font-black text-green-500">$0.00</span>
                 </div>
               </div>
 
@@ -175,7 +175,7 @@ const AdvertiseCheckoutPage = () => {
                 className="w-full h-14 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-lg flex items-center justify-center gap-2"
               >
                 {submitting ? <Loader2 className="animate-spin" /> : <CheckCircle size={20} />}
-                {submitting ? 'Processing...' : 'Secure Upgrade'}
+                {submitting ? 'Processing...' : 'Claim Free Early Access'}
               </Button>
 
               <p className="mt-4 text-[10px] text-center text-gray-500 uppercase font-bold tracking-widest">

@@ -56,7 +56,7 @@ const tiers = [
       { text: 'Pro badge', included: true },
       { text: 'Featured placement', included: false },
     ],
-    cta: 'Go Pro',
+    cta: 'Claim Free Early Access',
     ctaVariant: 'default' as const,
   },
   {
@@ -80,7 +80,7 @@ const tiers = [
       { text: 'Priority search ranking', included: true },
       { text: 'Lead generation form', included: true },
     ],
-    cta: 'Go Elite',
+    cta: 'Claim Free Early Access',
     ctaVariant: 'default' as const,
   },
 ];

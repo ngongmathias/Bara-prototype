@@ -89,7 +89,11 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                 src={currentSong.cover_url}
                                 alt={currentSong.title}
                                 className="w-full h-full object-cover"
-                                onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.onerror = null;
+                                    target.src = '/placeholder-music.png';
+                                }}
                             />
                         </motion.div>
 

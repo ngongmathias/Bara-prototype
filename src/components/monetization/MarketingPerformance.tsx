@@ -79,8 +79,11 @@ export const MarketingPerformance: React.FC<MarketingPerformanceProps> = ({ user
         <div className="space-y-6">
             <div className="flex items-center justify-between mb-4">
                 <div>
-                    <h3 className="text-xl font-bold font-comfortaa">Marketing Performance</h3>
-                    <p className="text-sm text-muted-foreground">Real-time ROI on your promoted listings and banners.</p>
+                    <h3 className="text-xl font-bold font-comfortaa flex items-center gap-2">
+                        Marketing Performance
+                        <span className="bg-orange-100 text-orange-600 px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase">Demo Data</span>
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Real-time ROI on your promoted listings and banners. (Waiting for backend integration)</p>
                 </div>
                 <div className="flex gap-2">
                     <div className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">Bara Prime</div>

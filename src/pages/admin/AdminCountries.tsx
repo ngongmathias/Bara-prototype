@@ -29,6 +29,8 @@ import {
 } from "lucide-react";
 import { getAdminDb } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface Country {
   id: string;
@@ -429,7 +431,7 @@ export const AdminCountries = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `countries_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `countries_${new Date().toLocaleDateString('en-CA')}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -439,6 +441,14 @@ export const AdminCountries = () => {
   if (loading) {
     return (
       <AdminLayout title="Countries Management" subtitle="Manage countries and regions">
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Countries Dictionary"
+            description="Manage supported countries."
+            features={["Add new countries", "Set ISO codes and phone prefixes", "Upload country flags"]}
+            workflow={["Verify ISO codes", "Set default language", "Save country"]}
+          />
+        </div>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yp-blue"></div>
         </div>

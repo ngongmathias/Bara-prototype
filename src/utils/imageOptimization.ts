@@ -29,49 +29,51 @@ export const optimizeImage = async (
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       const img = new Image();
-      
+
       img.onload = () => {
         // Calculate new dimensions while maintaining aspect ratio
         let width = img.width;
         let height = img.height;
-        
+
         if (width > maxWidth) {
           height = (height * maxWidth) / width;
           width = maxWidth;
         }
-        
+
         if (height > maxHeight) {
           width = (width * maxHeight) / height;
           height = maxHeight;
         }
-        
+
         // Create canvas and draw resized image
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
-        
+
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           reject(new Error('Failed to get canvas context'));
           return;
         }
-        
+
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         // Convert to blob with compression
+        const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+
         canvas.toBlob(
           (blob) => {
             if (!blob) {
               reject(new Error('Failed to create blob'));
               return;
             }
-            
+
             // Check if size is acceptable
             const sizeMB = blob.size / (1024 * 1024);
-            
+
             if (sizeMB > maxSizeMB) {
               // If still too large, reduce quality further
               const newQuality = Math.max(0.5, quality * (maxSizeMB / sizeMB));
@@ -81,39 +83,39 @@ export const optimizeImage = async (
                     reject(new Error('Failed to create compressed blob'));
                     return;
                   }
-                  
+
                   const optimizedFile = new File(
                     [newBlob],
                     file.name,
-                    { type: 'image/jpeg' }
+                    { type: outputType }
                   );
-                  
+
                   console.log(`Image optimized: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(optimizedFile.size / 1024 / 1024).toFixed(2)}MB`);
                   resolve(optimizedFile);
                 },
-                'image/jpeg',
+                outputType,
                 newQuality
               );
             } else {
               const optimizedFile = new File(
                 [blob],
                 file.name,
-                { type: 'image/jpeg' }
+                { type: outputType }
               );
-              
+
               console.log(`Image optimized: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(optimizedFile.size / 1024 / 1024).toFixed(2)}MB`);
               resolve(optimizedFile);
             }
           },
-          'image/jpeg',
+          outputType,
           quality
         );
       };
-      
+
       img.onerror = () => reject(new Error('Failed to load image'));
       img.src = e.target?.result as string;
     };
-    
+
     reader.onerror = () => reject(new Error('Failed to read file'));
     reader.readAsDataURL(file);
   });
@@ -140,16 +142,16 @@ export const createThumbnail = async (file: File): Promise<File> => {
  */
 export const validateImage = (file: File): string | true => {
   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-  
+
   if (!validTypes.includes(file.type)) {
     return 'Invalid file type. Please upload a JPEG, PNG, WebP, or GIF image.';
   }
-  
+
   const maxSize = 10 * 1024 * 1024; // 10MB before optimization
   if (file.size > maxSize) {
     return 'File too large. Maximum size is 10MB.';
   }
-  
+
   return true;
 };
 
@@ -163,5 +165,15 @@ export const optimizeImages = async (
   files: File[],
   options?: ImageOptimizationOptions
 ): Promise<File[]> => {
-  return Promise.all(files.map(file => optimizeImage(file, options)));
+  const optimizedFiles: File[] = [];
+  for (const file of files) {
+    try {
+      const optimized = await optimizeImage(file, options);
+      optimizedFiles.push(optimized);
+    } catch (e) {
+      console.error(`Failed to optimize ${file.name}, using original`, e);
+      optimizedFiles.push(file); // Fallback to original if optimization fails
+    }
+  }
+  return optimizedFiles;
 };

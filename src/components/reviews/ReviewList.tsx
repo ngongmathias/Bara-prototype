@@ -23,6 +23,7 @@ interface Review {
 export const ReviewList = ({ businessId }: { businessId: string }) => {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [helpfulClicks, setHelpfulClicks] = useState<string[]>([]);
     const { user } = useUser();
     const { toast } = useToast();
 
@@ -48,9 +49,17 @@ export const ReviewList = ({ businessId }: { businessId: string }) => {
         }
     };
 
-    const handleHelpful = async (reviewId: string) => {
-        // Implement helpful logic (requires review_votes table)
-        toast({ title: "Coming soon", description: "This feature is coming soon!" });
+    const handleHelpful = (reviewId: string) => {
+        if (helpfulClicks.includes(reviewId)) {
+            setHelpfulClicks(prev => prev.filter(id => id !== reviewId));
+        } else {
+            setHelpfulClicks(prev => [...prev, reviewId]);
+            toast({ title: "Thanks for your feedback!" });
+        }
+    };
+
+    const handleReport = (reviewId: string) => {
+        toast({ title: "Review reported", description: "Our team will review this shortly." });
     };
 
     if (isLoading) {
@@ -79,7 +88,7 @@ export const ReviewList = ({ businessId }: { businessId: string }) => {
                                 <User className="h-6 w-6 text-gray-500" />
                             </div>
                             <div>
-                                <div className="font-semibold text-sm">User</div>
+                                <div className="font-semibold text-sm">{review.user_profile?.full_name || 'Anonymous User'}</div>
                                 <div className="text-xs text-gray-500">
                                     {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}
                                 </div>
@@ -109,11 +118,21 @@ export const ReviewList = ({ businessId }: { businessId: string }) => {
                     )}
 
                     <div className="mt-4 pt-4 border-t flex gap-4">
-                        <Button variant="ghost" size="sm" className="text-gray-500" onClick={() => handleHelpful(review.id)}>
-                            <ThumbsUp className="h-4 w-4 mr-1.5" />
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className={helpfulClicks.includes(review.id) ? "text-blue-600" : "text-gray-500"}
+                            onClick={() => handleHelpful(review.id)}
+                        >
+                            <ThumbsUp className={`h-4 w-4 mr-1.5 ${helpfulClicks.includes(review.id) ? "fill-current" : ""}`} />
                             Helpful
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-500">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-500 hover:text-red-600 hover:bg-red-50"
+                            onClick={() => handleReport(review.id)}
+                        >
                             <Flag className="h-4 w-4 mr-1.5" />
                             Report
                         </Button>

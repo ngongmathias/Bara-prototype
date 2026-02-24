@@ -40,6 +40,8 @@ import {
 } from "lucide-react";
 import { db, supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface Song {
     id: string;
@@ -269,6 +271,14 @@ export const AdminSongs = () => {
 
     return (
         <AdminLayout title="Songs" subtitle="Manage music tracks and uploads">
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Bara Streams: Tracks"
+            description="Manage individual audio files hosted on the server."
+            features={["Delete prohibited audio", "Edit metadata (Title, Genre)", "Toggle Explicit warnings"]}
+            workflow={["Listen to flagged tracks", "Add Explicit tag if missing", "Delete if violating ToS"]}
+          />
+        </div>
             <div className="p-6 space-y-6">
                 <audio ref={audioRef} onEnded={() => setIsPlaying(null)} />
 
@@ -430,7 +440,9 @@ export const AdminSongs = () => {
                                         <TableCell>{song.artists?.name}</TableCell>
                                         <TableCell className="text-gray-500">{song.albums?.title || "Single"}</TableCell>
                                         <TableCell className="font-mono text-xs">
-                                            {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
+                                            {typeof song.duration === 'number' && !isNaN(song.duration)
+                                                ? `${Math.floor(song.duration / 60)}:${Math.floor(song.duration % 60).toString().padStart(2, '0')}`
+                                                : '--:--'}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-2">

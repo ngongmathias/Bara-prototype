@@ -170,7 +170,7 @@ const getCategoryAmenities = (categorySlug: string) => {
       { icon: Building, label: 'Support' }
     ]
   };
-  
+
   return amenitiesMap[categorySlug] || [
     { icon: Building, label: 'Services' },
     { icon: Heart, label: 'Support' }
@@ -181,7 +181,7 @@ export const CountryListingsPage = () => {
   const { t } = useTranslation();
   const { countrySlug } = useParams<{ countrySlug: string }>();
   const navigate = useNavigate();
-  
+
   // State for search and filters
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -218,13 +218,14 @@ export const CountryListingsPage = () => {
   useEffect(() => {
     const fetchCountry = async () => {
       if (!countrySlug) return;
-      
+
       try {
         setLoading(true);
         const { data, error } = await db.countries()
           .select('id, name, code, flag_url, description')
           .or(`name.ilike.%${countrySlug.replace(/-/g, ' ')}%,name.ilike.${countrySlug.replace(/-/g, ' ')}%,name.ilike.%${countrySlug.replace(/-/g, ' ')}`)
-          .single();
+          .limit(1)
+          .maybeSingle();
 
         if (error) throw error;
         console.log('Country fetched:', data);
@@ -240,10 +241,10 @@ export const CountryListingsPage = () => {
   }, [countrySlug]);
 
   // Get businesses in this country
-  const { 
-    data: searchResults = [], 
-    isLoading: isLoadingSearch, 
-    error: searchError 
+  const {
+    data: searchResults = [],
+    isLoading: isLoadingSearch,
+    error: searchError
   } = useBusinesses({
     countryCode: country?.code,
     searchTerm: debouncedSearchTerm.trim() || undefined
@@ -272,7 +273,7 @@ export const CountryListingsPage = () => {
   }, [itemsPerPage]);
 
   const formatTitle = (str: string) => {
-    return str?.split('-').map(word => 
+    return str?.split('-').map(word =>
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ') || '';
   };
@@ -287,8 +288,8 @@ export const CountryListingsPage = () => {
 
   // Handle filter toggle
   const toggleFilter = (filter: string) => {
-    setSelectedFilters(prev => 
-      prev.includes(filter) 
+    setSelectedFilters(prev =>
+      prev.includes(filter)
         ? prev.filter(f => f !== filter)
         : [...prev, filter]
     );
@@ -301,7 +302,7 @@ export const CountryListingsPage = () => {
     const log = BusinessService.logBusinessClick(business.id, {
       source: 'country-listings' // Using city field to track country context
     });
-    
+
     await Promise.race([
       Promise.allSettled([inc, log]),
       new Promise((resolve) => setTimeout(resolve, 120))
@@ -327,7 +328,7 @@ export const CountryListingsPage = () => {
     // First priority: sponsored ads
     if (a.is_sponsored_ad && !b.is_sponsored_ad) return -1;
     if (!a.is_sponsored_ad && b.is_sponsored_ad) return 1;
-    
+
     // Second priority: selected sort option
     switch (sortBy) {
       case 'rating': {
@@ -336,11 +337,11 @@ export const CountryListingsPage = () => {
         return sortOrder === 'asc' ? ratingA - ratingB : ratingB - ratingA;
       }
       case 'name':
-        return sortOrder === 'asc' 
+        return sortOrder === 'asc'
           ? a.name.localeCompare(b.name)
           : b.name.localeCompare(a.name);
       case 'distance':
-        return sortOrder === 'asc' 
+        return sortOrder === 'asc'
           ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
           : new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       default:
@@ -358,13 +359,13 @@ export const CountryListingsPage = () => {
 
   // Get businesses with valid coordinates for map view
   const businessesWithCoords = sortedBusinesses.filter(b => b.latitude && b.longitude);
-  
+
   // Calculate map center from businesses or use country default
   const mapCenter = businessesWithCoords.length > 0
     ? {
-        lat: businessesWithCoords.reduce((sum, b) => sum + (b.latitude || 0), 0) / businessesWithCoords.length,
-        lng: businessesWithCoords.reduce((sum, b) => sum + (b.longitude || 0), 0) / businessesWithCoords.length
-      }
+      lat: businessesWithCoords.reduce((sum, b) => sum + (b.latitude || 0), 0) / businessesWithCoords.length,
+      lng: businessesWithCoords.reduce((sum, b) => sum + (b.longitude || 0), 0) / businessesWithCoords.length
+    }
     : { lat: 0, lng: 20 }; // Default to Africa center
 
   // Calculate the display number for each business (considering pagination)
@@ -438,6 +439,27 @@ export const CountryListingsPage = () => {
     );
   }
 
+  // Country Not Found state
+  if (!loading && !country) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center font-roboto">
+        <div className="text-center">
+          <div className="w-16 h-16 border-slate-200 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Globe className="w-8 h-8 text-gray-400" />
+          </div>
+          <h1 className="text-4xl font-black text-black mb-4">Country Not Found</h1>
+          <p className="text-gray-600 mb-6">
+            We couldn't find a country matching "{countryName}".
+          </p>
+          <Button onClick={() => navigate('/countries')} variant="outline">
+            <ChevronLeft className="w-4 h-4 mr-2" />
+            Back to Countries
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   // Error state
   if (searchError) {
     return (
@@ -490,7 +512,7 @@ export const CountryListingsPage = () => {
               )}
             </div>
 
-            <Button 
+            <Button
               onClick={handleSearch}
               className="bg-yp-blue text-white px-6 sm:px-8 font-roboto w-full sm:w-auto text-sm sm:text-base h-10 sm:h-auto"
             >
@@ -506,8 +528,8 @@ export const CountryListingsPage = () => {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex items-center space-x-4">
             {country?.flag_url && (
-              <img 
-                src={country.flag_url} 
+              <img
+                src={country.flag_url}
                 alt={`${country.name} flag`}
                 className="w-8 h-6 rounded shadow-sm"
               />
@@ -529,9 +551,9 @@ export const CountryListingsPage = () => {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-3 lg:space-y-0 lg:space-x-4">
             <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-              <Button 
-                variant={selectedFilters.length === 0 ? 'default' : 'outline'} 
-                size="sm" 
+              <Button
+                variant={selectedFilters.length === 0 ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setSelectedFilters([])}
                 className="font-roboto text-xs sm:text-sm"
               >
@@ -539,10 +561,10 @@ export const CountryListingsPage = () => {
                 <span className="hidden sm:inline">{t('listings.all')}</span>
                 <span className="sm:hidden">{t('listings.all')}</span>
               </Button>
-              
-              <Button 
-                variant={selectedFilters.includes('order-online') ? 'default' : 'outline'} 
-                size="sm" 
+
+              <Button
+                variant={selectedFilters.includes('order-online') ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => toggleFilter('order-online')}
                 className="font-roboto text-xs sm:text-sm"
               >
@@ -550,10 +572,10 @@ export const CountryListingsPage = () => {
                 <span className="hidden sm:inline">{t('listings.orderOnline')}</span>
                 <span className="sm:hidden">Order</span>
               </Button>
-              
-              <Button 
-                variant={selectedFilters.includes('kid-friendly') ? 'default' : 'outline'} 
-                size="sm" 
+
+              <Button
+                variant={selectedFilters.includes('kid-friendly') ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => toggleFilter('kid-friendly')}
                 className="font-roboto text-xs sm:text-sm"
               >
@@ -561,10 +583,10 @@ export const CountryListingsPage = () => {
                 <span className="hidden sm:inline">{t('listings.kidFriendly')}</span>
                 <span className="sm:hidden">Kids</span>
               </Button>
-              
-              <Button 
-                variant={selectedFilters.includes('coupons') ? 'default' : 'outline'} 
-                size="sm" 
+
+              <Button
+                variant={selectedFilters.includes('coupons') ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => toggleFilter('coupons')}
                 className="font-roboto text-xs sm:text-sm"
               >
@@ -572,10 +594,10 @@ export const CountryListingsPage = () => {
                 <span className="hidden sm:inline">{t('listings.coupons')}</span>
                 <span className="sm:hidden">{t('listings.coupons')}</span>
               </Button>
-              
-              <Button 
-                variant={selectedFilters.includes('verified') ? 'default' : 'outline'} 
-                size="sm" 
+
+              <Button
+                variant={selectedFilters.includes('verified') ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => toggleFilter('verified')}
                 className="font-roboto text-xs sm:text-sm"
               >
@@ -584,7 +606,7 @@ export const CountryListingsPage = () => {
                 <span className="sm:hidden">{t('listings.verified')}</span>
               </Button>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full lg:w-auto lg:ml-auto">
               <div className="flex items-center space-x-2">
                 <span className="text-xs sm:text-sm text-gray-600 font-roboto">{t('listings.sort')}</span>
@@ -592,9 +614,9 @@ export const CountryListingsPage = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="font-roboto text-xs sm:text-sm">
                       <span className="font-semibold truncate">
-                        {sortBy === 'default' ? t('listings.default') : 
-                         sortBy === 'distance' ? t('listings.distance') : 
-                         sortBy === 'rating' ? t('listings.rating') : t('listings.nameAZ')}
+                        {sortBy === 'default' ? t('listings.default') :
+                          sortBy === 'distance' ? t('listings.distance') :
+                            sortBy === 'rating' ? t('listings.rating') : t('listings.nameAZ')}
                       </span>
                       <ChevronDown className="w-4 h-4 ml-1 flex-shrink-0" />
                     </Button>
@@ -615,11 +637,11 @@ export const CountryListingsPage = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              
+
               <span className="text-xs sm:text-sm text-gray-600 font-roboto">
                 {sortedBusinesses.length} {t('listings.businessesFound')}
               </span>
-              
+
               {/* View Toggle */}
               <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
                 <button
@@ -662,13 +684,13 @@ export const CountryListingsPage = () => {
                   {t('listings.noBusinessesFound')}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  {searchTerm 
+                  {searchTerm
                     ? `${t('listings.noBusinessesMatching')} "${searchTerm}" in ${countryName}`
                     : `No businesses found in ${countryName}`
                   }
                 </p>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => {
                     setSearchTerm("");
                     setSelectedFilters([]);
@@ -706,7 +728,7 @@ export const CountryListingsPage = () => {
                     <p className="text-gray-400">Businesses in this country don't have location data yet</p>
                   </div>
                 )}
-                
+
                 {/* Business list below map */}
                 <div className="mt-6 space-y-3">
                   <h3 className="font-semibold text-gray-700">{sortedBusinesses.length} Results</h3>
@@ -754,17 +776,16 @@ export const CountryListingsPage = () => {
                         const reviewCount = getReviewCount(business);
                         const businessImage = business.images?.[0] || business.logo_url;
                         const listingNumber = getDisplayNumber(index);
-                        
+
                         return (
                           <div
                             key={business.id}
-                            className={`border-b border-gray-200 py-4 ${
-                              business.is_sponsored_ad ? 'bg-blue-50' : ''
-                            }`}
+                            className={`border-b border-gray-200 py-4 ${business.is_sponsored_ad ? 'bg-blue-50' : ''
+                              }`}
                           >
                             <div className="flex gap-4">
                               {/* Image */}
-                              <div 
+                              <div
                                 className="w-28 h-28 flex-shrink-0 bg-gray-100 rounded overflow-hidden cursor-pointer"
                                 onClick={() => handleBusinessClick(business)}
                               >
@@ -776,7 +797,7 @@ export const CountryListingsPage = () => {
                                   </div>
                                 )}
                               </div>
-                              
+
                               {/* Middle: Business Info */}
                               <div className="flex-1 min-w-0">
                                 {/* Business Name */}
@@ -784,7 +805,7 @@ export const CountryListingsPage = () => {
                                   {!business.is_sponsored_ad && (
                                     <span className="text-gray-500 font-medium">{listingNumber}.</span>
                                   )}
-                                  <h3 
+                                  <h3
                                     className="text-blue-600 hover:underline font-semibold cursor-pointer text-lg"
                                     onClick={() => handleBusinessClick(business)}
                                   >
@@ -794,18 +815,18 @@ export const CountryListingsPage = () => {
                                     <Badge className="bg-blue-600 text-white text-xs ml-2">Ad</Badge>
                                   )}
                                 </div>
-                                
+
                                 {/* Category Tags */}
                                 <p className="text-sm text-gray-600 mt-1">
                                   {business.category?.name}
                                   {business.has_coupons && ', Coupons Available'}
                                   {business.is_kid_friendly && ', Kid Friendly'}
                                 </p>
-                                
+
                                 {/* Action Links - YP Style */}
                                 <div className="flex items-center gap-3 mt-2 text-sm">
                                   {business.website && (
-                                    <a 
+                                    <a
                                       href={`https://${business.website}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
@@ -816,7 +837,7 @@ export const CountryListingsPage = () => {
                                     </a>
                                   )}
                                   {business.address && (
-                                    <a 
+                                    <a
                                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
@@ -826,22 +847,22 @@ export const CountryListingsPage = () => {
                                       Directions
                                     </a>
                                   )}
-                                  <span 
+                                  <span
                                     className="text-blue-600 hover:underline cursor-pointer"
                                     onClick={() => handleBusinessClick(business)}
                                   >
                                     More Info
                                   </span>
                                 </div>
-                                
+
                                 {/* Rating */}
                                 {reviewCount > 0 && (
                                   <div className="flex items-center gap-1 mt-2">
                                     <div className="flex">
                                       {[...Array(5)].map((_, i) => (
-                                        <Crown 
-                                          key={i} 
-                                          className={`w-4 h-4 ${i < Math.floor(avgRating) ? 'text-orange-500 fill-current' : 'text-gray-300'}`} 
+                                        <Crown
+                                          key={i}
+                                          className={`w-4 h-4 ${i < Math.floor(avgRating) ? 'text-orange-500 fill-current' : 'text-gray-300'}`}
                                         />
                                       ))}
                                     </div>
@@ -849,11 +870,11 @@ export const CountryListingsPage = () => {
                                   </div>
                                 )}
                               </div>
-                              
+
                               {/* Right Side: Phone & Address */}
                               <div className="text-right flex-shrink-0 w-48">
                                 {business.phone && (
-                                  <a 
+                                  <a
                                     href={`tel:${business.phone}`}
                                     className="text-xl font-bold text-black hover:text-gray-700 block border-b-2 border-black pb-1"
                                     onClick={(e) => e.stopPropagation()}
@@ -885,10 +906,10 @@ export const CountryListingsPage = () => {
                         const avgRating = getAverageRating(business);
                         const reviewCount = getReviewCount(business);
                         const businessImage = business.images?.[0] || business.logo_url;
-                        
+
                         return (
-                          <div 
-                            key={business.id} 
+                          <div
+                            key={business.id}
                             className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer"
                             onClick={() => handleBusinessClick(business)}
                           >
@@ -897,7 +918,7 @@ export const CountryListingsPage = () => {
                                 <Badge className="bg-blue-600 text-white text-xs">Ad</Badge>
                               </div>
                             )}
-                            
+
                             <div className="bg-gray-100 h-48 flex items-center justify-center relative">
                               {businessImage ? (
                                 <img src={businessImage} alt={business.name} className="w-full h-full object-cover" />
@@ -910,7 +931,7 @@ export const CountryListingsPage = () => {
                                 </div>
                               )}
                             </div>
-                            
+
                             <div className="p-4">
                               <div className="flex items-start justify-between gap-2">
                                 <h3 className="font-bold text-lg text-black line-clamp-1">{business.name}</h3>
@@ -918,21 +939,21 @@ export const CountryListingsPage = () => {
                                   <Badge variant="secondary" className="text-xs flex-shrink-0">✓ Verified</Badge>
                                 )}
                               </div>
-                              
+
                               {reviewCount > 0 && (
                                 <div className="flex items-center gap-1 mt-2">
                                   <div className="flex">
                                     {[...Array(5)].map((_, i) => (
-                                      <Crown 
-                                        key={i} 
-                                        className={`w-4 h-4 ${i < Math.floor(avgRating) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
+                                      <Crown
+                                        key={i}
+                                        className={`w-4 h-4 ${i < Math.floor(avgRating) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
                                       />
                                     ))}
                                   </div>
                                   <span className="text-sm text-gray-400">({reviewCount})</span>
                                 </div>
                               )}
-                              
+
                               <div className="mt-3 space-y-1">
                                 {business.address && (
                                   <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -954,7 +975,7 @@ export const CountryListingsPage = () => {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Right Sidebar - YP Style (only in list view) */}
                 {viewMode === 'list' && (
                   <div className="w-72 flex-shrink-0 hidden lg:block">
@@ -963,7 +984,7 @@ export const CountryListingsPage = () => {
                       <h3 className="font-semibold text-gray-800 mb-3">Popular in {country?.name}</h3>
                       <div className="space-y-2">
                         {sortedBusinesses.slice(0, 3).map((biz) => (
-                          <div 
+                          <div
                             key={biz.id}
                             className="text-sm text-blue-600 hover:underline cursor-pointer"
                             onClick={() => handleBusinessClick(biz)}
@@ -973,26 +994,26 @@ export const CountryListingsPage = () => {
                         ))}
                       </div>
                     </div>
-                    
+
                     {/* Manage Listing CTA */}
                     <div className="border border-gray-200 rounded-lg p-4 mb-4 text-center">
                       <h3 className="font-semibold text-gray-800 mb-2">Manage your</h3>
                       <p className="text-2xl font-black text-black mb-2 underline decoration-2">FREE LISTING</p>
                       <p className="text-sm text-gray-600 mb-4">Update your business information in a few steps.</p>
-                      <Button 
+                      <Button
                         className="w-full bg-black hover:bg-gray-800 text-white"
                         onClick={() => navigate('/claim-listing')}
                       >
                         Claim Your Listing
                       </Button>
                     </div>
-                    
+
                     {/* Featured Businesses */}
                     <div className="border border-gray-200 rounded-lg p-4">
                       <h3 className="font-semibold text-gray-800 mb-3">Featured Businesses</h3>
                       <div className="space-y-3">
                         {sortedBusinesses.filter(b => b.is_premium).slice(0, 3).map((biz) => (
-                          <div 
+                          <div
                             key={biz.id}
                             className="cursor-pointer hover:bg-gray-50 p-2 rounded -mx-2"
                             onClick={() => handleBusinessClick(biz)}
@@ -1024,7 +1045,7 @@ export const CountryListingsPage = () => {
                       <span className="ml-2">• Page {currentPage} of {totalPages}</span>
                     )}
                   </div>
-                  
+
                   {/* Items Per Page Dropdown */}
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600 font-roboto">Show:</span>
@@ -1092,7 +1113,7 @@ export const CountryListingsPage = () => {
                       } else {
                         pageNum = currentPage - 2 + i;
                       }
-                      
+
                       if (pageNum > 0 && pageNum <= totalPages) {
                         return (
                           <Button

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -386,7 +387,24 @@ export const AdminDashboard = () => {
       {/* Header with refresh button */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-comfortaa font-bold text-gray-900">Dashboard Overview</h2>
+          <h2 className="text-2xl font-comfortaa font-bold text-gray-900 flex items-center gap-2">
+            Dashboard Overview
+            <AdminPageGuide
+              title="Admin Dashboard Hub"
+              description="The central command center for Bara Afrika. Monitor high-level KPIs, system health, and recent operations."
+              features={[
+                'Real-time revenue tracking',
+                'User & business growth charts',
+                'Quick-action alerts for pending approvals',
+                'System error and log monitoring'
+              ]}
+              workflow={[
+                'Start your day by reviewing the Pending Approvals badge.',
+                'Check the Error Count for system health.',
+                'Monitor the Revenue and Growth charts for anomalies.'
+              ]}
+            />
+          </h2>
           <p className="text-gray-600 font-roboto">Real-time metrics and system insights</p>
         </div>
         <Button

@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 import {
   DollarSign,
   Coins,
@@ -202,7 +204,14 @@ export default function AdminRevenue() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Revenue Dashboard</h1>
+          <div className="flex items-center"><h1 className="text-2xl font-bold">Revenue Dashboard</h1>
+                    <AdminPageGuide 
+                      title="Revenue Analytics"
+                      description="Track global financial operations across the entire application."
+                      features={["Stripe webhook logs", "Live Subscription tracking", "Ad revenue estimates"]}
+                      workflow={["Review the dashboard weekly.", "Ensure Stripe logs are active with 0 errors.", "Process any failed payments if required."]}
+                    />
+                </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (

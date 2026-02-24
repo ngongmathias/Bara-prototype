@@ -5,17 +5,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  MapPin, 
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  MapPin,
   Globe,
   Filter,
-  MoreHorizontal
 } from "lucide-react";
 import { db } from "@/lib/supabase";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface City {
   id: string;
@@ -41,6 +52,7 @@ export const CitiesManagement = () => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingCity, setEditingCity] = useState<City | null>(null);
+  const [cityToDelete, setCityToDelete] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -96,7 +108,7 @@ export const CitiesManagement = () => {
   const handleAddCity = async () => {
     try {
       const { error } = await db.cities().insert([formData]);
-      
+
       if (error) {
         console.error('Error adding city:', error);
       } else {
@@ -116,7 +128,7 @@ export const CitiesManagement = () => {
       const { error } = await db.cities()
         .update(formData)
         .eq('id', editingCity.id);
-      
+
       if (error) {
         console.error('Error updating city:', error);
       } else {
@@ -129,21 +141,22 @@ export const CitiesManagement = () => {
     }
   };
 
-  const handleDeleteCity = async (cityId: string) => {
-    if (window.confirm('Are you sure you want to delete this city?')) {
-      try {
-        const { error } = await db.cities()
-          .update({ is_active: false })
-          .eq('id', cityId);
-        
-        if (error) {
-          console.error('Error deleting city:', error);
-        } else {
-          fetchCities();
-        }
-      } catch (error) {
+  const confirmDeleteCity = async () => {
+    if (!cityToDelete) return;
+    try {
+      const { error } = await db.cities()
+        .update({ is_active: false })
+        .eq('id', cityToDelete);
+
+      if (error) {
         console.error('Error deleting city:', error);
+      } else {
+        fetchCities();
       }
+    } catch (error) {
+      console.error('Error deleting city:', error);
+    } finally {
+      setCityToDelete(null);
     }
   };
 
@@ -162,6 +175,14 @@ export const CitiesManagement = () => {
   if (loading) {
     return (
       <AdminLayout>
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Cities Management (Legacy)"
+            description="Old cities UI."
+            features={["View cities"]}
+            workflow={["Use the primary AdminCities page."]}
+          />
+        </div>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yp-blue"></div>
         </div>
@@ -182,7 +203,7 @@ export const CitiesManagement = () => {
               Manage cities and locations across all countries
             </p>
           </div>
-          <Button 
+          <Button
             onClick={() => setShowAddForm(true)}
             className="bg-yp-blue"
           >
@@ -274,7 +295,7 @@ export const CitiesManagement = () => {
                 </label>
               </div>
               <div className="flex space-x-3 mt-6">
-                <Button 
+                <Button
                   onClick={editingCity ? handleEditCity : handleAddCity}
                   className="bg-yp-blue"
                 >
@@ -351,7 +372,7 @@ export const CitiesManagement = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDeleteCity(city.id)}
+                            onClick={() => setCityToDelete(city.id)}
                             className="text-red-600"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -371,8 +392,8 @@ export const CitiesManagement = () => {
                   No cities found
                 </h3>
                 <p className="text-gray-600 font-roboto">
-                  {searchTerm || selectedCountry 
-                    ? 'Try adjusting your search criteria' 
+                  {searchTerm || selectedCountry
+                    ? 'Try adjusting your search criteria'
                     : 'Get started by adding your first city'
                   }
                 </p>
@@ -381,6 +402,21 @@ export const CitiesManagement = () => {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={!!cityToDelete} onOpenChange={(open) => !open && setCityToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this city? This action will mark the city as inactive.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteCity} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };

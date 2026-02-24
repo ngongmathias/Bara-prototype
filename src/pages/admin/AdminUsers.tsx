@@ -29,6 +29,8 @@ import { GamificationService, GamificationProfile } from '@/lib/gamificationServ
 import { supabase } from '@/lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 import {
   Users,
   Activity,
@@ -219,7 +221,14 @@ export const AdminUsers = () => {
             </head>
             <body>
               <div class="header">
-                <h1>Users Management Report</h1>
+                <div className="flex items-center"><h1>Users Management Report</h1>
+                    <AdminPageGuide 
+                      title="User Moderation"
+                      description="Manage the user base, roles, and safety. Disable malicious accounts and grant administrative privileges."
+                      features={["Search users by email or ID", "Promote users to Admins", "Ban or Suspend toxic accounts", "Force password resets"]}
+                      workflow={["Search for the user using their email.", "Review their history or reports.", "Use the action menu to Suspend or Ban.", "Never grant Admin access unless authorized by the core team."]}
+                    />
+                </div>
                 <p>Generated on: ${new Date().toLocaleDateString()}</p>
               </div>
               <div class="stats">
@@ -255,7 +264,7 @@ export const AdminUsers = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `users_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `users_${new Date().toLocaleDateString('en-CA')}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();

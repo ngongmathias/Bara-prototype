@@ -104,8 +104,8 @@ export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => 
                     <div className="relative h-80 md:h-full">
                         <img
                             className="h-full w-full object-cover cursor-zoom-in"
-                            src={images[currentImageIndex] || 'https://via.placeholder.com/600x400?text=Event+Image'}
-                            alt={event.title}
+                            src={images[currentImageIndex] || '/placeholder-event.jpg'}
+                            alt={`${event.title} - Image ${currentImageIndex + 1}`}
                             onClick={() => openLightboxAt(0)}
                         />
                         {images.length > 1 && (

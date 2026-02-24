@@ -59,7 +59,7 @@ export default function SportsPredictions() {
   const { profile } = useGamification();
   const { toast } = useToast();
 
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('en-CA'));
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [activeBets, setActiveBets] = useState<Record<number, { choice: PredictionChoice; amount: number }>>({});
   const [submitting, setSubmitting] = useState<number | null>(null);
@@ -236,7 +236,7 @@ export default function SportsPredictions() {
     const d = new Date();
     d.setDate(d.getDate() + i);
     dateOptions.push({
-      full: d.toISOString().split('T')[0],
+      full: d.toLocaleDateString('en-CA'),
       day: d.toLocaleDateString('en-US', { weekday: 'short' }),
       date: d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }),
     });

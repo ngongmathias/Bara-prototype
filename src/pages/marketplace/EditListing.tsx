@@ -15,18 +15,20 @@ import {
 import { supabase } from '@/lib/supabase';
 import { useUser } from '@clerk/clerk-react';
 import { ChevronLeft, X } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export const EditListing = () => {
   const { listingId } = useParams();
   const navigate = useNavigate();
   const { user } = useUser();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [listing, setListing] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
   const [countries, setCountries] = useState<any[]>([]);
-  
+
   const [formData, setFormData] = useState({
     category_id: '',
     subcategory_id: '',
@@ -65,9 +67,13 @@ export const EditListing = () => {
 
       if (listingError) throw listingError;
 
-      // Note: Removed ownership check to allow admins to edit any listing
-      // Users can only access edit page from their own listings anyway
-      
+      // Ensure user owns the listing or is an admin
+      if (listingData.user_id !== user?.id && user?.publicMetadata?.role !== 'admin') {
+        toast({ title: "Error", description: "You do not have permission to edit this listing.", variant: "destructive" });
+        navigate('/marketplace');
+        return;
+      }
+
       setListing(listingData);
       setFormData({
         category_id: listingData.category_id,
@@ -103,7 +109,7 @@ export const EditListing = () => {
 
     } catch (error) {
       console.error('Error fetching data:', error);
-      alert('Error loading listing');
+      toast({ title: "Error", description: "Error loading listing", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -147,11 +153,11 @@ export const EditListing = () => {
 
       if (error) throw error;
 
-      alert('Listing updated successfully!');
+      toast({ title: "Success", description: "Listing updated successfully!" });
       navigate('/marketplace/my-listings');
     } catch (error) {
       console.error('Error updating listing:', error);
-      alert('Error updating listing. Please try again.');
+      toast({ title: "Error", description: "Error updating listing. Please try again.", variant: "destructive" });
     } finally {
       setSaving(false);
     }

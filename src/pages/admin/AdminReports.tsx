@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -7,9 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { 
-  FileText, Download, Building2, Users, MessageSquare, 
-  Calendar as CalendarIcon, DollarSign, Target, FileSpreadsheet, 
+import {
+  FileText, Download, Building2, Users, MessageSquare,
+  Calendar as CalendarIcon, DollarSign, Target, FileSpreadsheet,
   FileJson, Filter, Eye, Loader2, ShoppingBag, BarChart3, Package
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +21,13 @@ import { format, subMonths } from 'date-fns';
 
 type ReportType = 'businesses' | 'users' | 'reviews' | 'events' | 'financial' | 'ads' | 'products' | 'analytics';
 type ExportFormat = 'csv' | 'excel' | 'json';
+
+const safeFormatDate = (dateString: string | null | undefined, formatStr: string) => {
+  if (!dateString) return 'N/A';
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return 'Invalid Date';
+  return format(d, formatStr);
+};
 
 interface FieldConfig {
   id: string;
@@ -34,11 +42,11 @@ export const AdminReports = () => {
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [showPreview, setShowPreview] = useState(false);
-  
+
   // Date filters
   const [dateFrom, setDateFrom] = useState(format(subMonths(new Date(), 1), 'yyyy-MM-dd'));
   const [dateTo, setDateTo] = useState(format(new Date(), 'yyyy-MM-dd'));
-  
+
   // Field configurations for each report type
   const [businessFields, setBusinessFields] = useState<FieldConfig[]>([
     { id: 'id', label: 'Business ID', selected: true },
@@ -155,7 +163,7 @@ export const AdminReports = () => {
 
   const toggleField = (fieldId: string) => {
     const currentFields = getCurrentFields();
-    const updated = currentFields.map(f => 
+    const updated = currentFields.map(f =>
       f.id === fieldId ? { ...f, selected: !f.selected } : f
     );
     setCurrentFields(updated);
@@ -176,7 +184,7 @@ export const AdminReports = () => {
       setLoading(true);
       const db = getAdminDb();
       const selectedFields = getCurrentFields().filter(f => f.selected);
-      
+
       if (selectedFields.length === 0) {
         toast({
           title: 'No fields selected',
@@ -199,9 +207,9 @@ export const AdminReports = () => {
             `)
             .gte('created_at', dateFrom)
             .lte('created_at', dateTo + 'T23:59:59');
-          
+
           if (error) throw error;
-          
+
           data = businesses?.map(b => ({
             id: b.id,
             name: b.name,
@@ -216,7 +224,7 @@ export const AdminReports = () => {
             is_verified: b.is_verified ? 'Yes' : 'No',
             is_premium: b.is_premium ? 'Yes' : 'No',
             view_count: b.view_count || 0,
-            created_at: format(new Date(b.created_at), 'yyyy-MM-dd HH:mm:ss'),
+            created_at: safeFormatDate(b.created_at, 'yyyy-MM-dd HH:mm:ss'),
           })) || [];
           break;
         }
@@ -227,15 +235,15 @@ export const AdminReports = () => {
             .select('*')
             .gte('created_at', dateFrom)
             .lte('created_at', dateTo + 'T23:59:59');
-          
+
           if (error) throw error;
-          
+
           data = users?.map(u => ({
             id: u.id,
             email: u.email,
             full_name: u.full_name || 'N/A',
             role: u.role || 'user',
-            created_at: format(new Date(u.created_at), 'yyyy-MM-dd HH:mm:ss'),
+            created_at: safeFormatDate(u.created_at, 'yyyy-MM-dd HH:mm:ss'),
           })) || [];
           break;
         }
@@ -250,9 +258,9 @@ export const AdminReports = () => {
             `)
             .gte('created_at', dateFrom)
             .lte('created_at', dateTo + 'T23:59:59');
-          
+
           if (error) throw error;
-          
+
           data = reviews?.map(r => ({
             id: r.id,
             title: r.title,
@@ -260,7 +268,7 @@ export const AdminReports = () => {
             status: r.status,
             user_email: r.users?.email,
             business_name: r.businesses?.name,
-            created_at: format(new Date(r.created_at), 'yyyy-MM-dd HH:mm:ss'),
+            created_at: safeFormatDate(r.created_at, 'yyyy-MM-dd HH:mm:ss'),
           })) || [];
           break;
         }
@@ -271,16 +279,16 @@ export const AdminReports = () => {
             .select('*')
             .gte('created_at', dateFrom)
             .lte('created_at', dateTo + 'T23:59:59');
-          
+
           if (error) throw error;
-          
+
           data = payments?.map(p => ({
             id: p.id,
             amount: p.amount,
             status: p.status,
             payment_method: p.payment_method || 'N/A',
             user_email: p.user_email || 'N/A',
-            created_at: format(new Date(p.created_at), 'yyyy-MM-dd HH:mm:ss'),
+            created_at: safeFormatDate(p.created_at, 'yyyy-MM-dd HH:mm:ss'),
           })) || [];
           break;
         }
@@ -294,16 +302,16 @@ export const AdminReports = () => {
             `)
             .gte('created_at', dateFrom)
             .lte('created_at', dateTo + 'T23:59:59');
-          
+
           if (error) throw error;
-          
+
           data = events?.map(e => ({
             id: e.id,
             title: e.title,
             description: e.description || 'N/A',
             event_type: e.event_type || 'N/A',
-            start_date: e.start_date ? format(new Date(e.start_date), 'yyyy-MM-dd') : 'N/A',
-            end_date: e.end_date ? format(new Date(e.end_date), 'yyyy-MM-dd') : 'N/A',
+            start_date: safeFormatDate(e.start_date, 'yyyy-MM-dd'),
+            end_date: safeFormatDate(e.end_date, 'yyyy-MM-dd'),
             location: e.location || 'N/A',
             city: e.cities?.name || 'N/A',
             country: e.cities?.countries?.name || 'N/A',
@@ -312,7 +320,7 @@ export const AdminReports = () => {
             is_active: e.is_active ? 'Yes' : 'No',
             is_featured: e.is_featured ? 'Yes' : 'No',
             ticket_price: e.ticket_price || 0,
-            created_at: format(new Date(e.created_at), 'yyyy-MM-dd HH:mm:ss'),
+            created_at: safeFormatDate(e.created_at, 'yyyy-MM-dd HH:mm:ss'),
           })) || [];
           break;
         }
@@ -327,9 +335,9 @@ export const AdminReports = () => {
             `)
             .gte('created_at', dateFrom)
             .lte('created_at', dateTo + 'T23:59:59');
-          
+
           if (error) throw error;
-          
+
           data = products?.map(p => ({
             id: p.id,
             name: p.name,
@@ -341,7 +349,7 @@ export const AdminReports = () => {
             is_active: p.is_active ? 'Yes' : 'No',
             is_featured: p.is_featured ? 'Yes' : 'No',
             view_count: p.view_count || 0,
-            created_at: format(new Date(p.created_at), 'yyyy-MM-dd HH:mm:ss'),
+            created_at: safeFormatDate(p.created_at, 'yyyy-MM-dd HH:mm:ss'),
           })) || [];
           break;
         }
@@ -357,7 +365,7 @@ export const AdminReports = () => {
               cities(name, countries(name)),
               categories(name)
             `);
-          
+
           if (error) throw error;
 
           // Fetch click data
@@ -425,7 +433,7 @@ export const AdminReports = () => {
 
   const handleExport = async () => {
     const data = await fetchReportData();
-    
+
     if (data.length === 0) {
       toast({
         title: 'No data',
@@ -443,7 +451,7 @@ export const AdminReports = () => {
         const headers = Object.keys(data[0]);
         const csvContent = [
           headers.join(','),
-          ...data.map(row => 
+          ...data.map(row =>
             headers.map(h => `"${String(row[h]).replace(/"/g, '""')}"`).join(',')
           )
         ].join('\n');
@@ -495,8 +503,26 @@ export const AdminReports = () => {
     <AdminLayout title="Reports & Exports" subtitle="Generate and export comprehensive data reports">
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h2 className="text-2xl font-comfortaa font-bold text-yp-dark mb-2">Data Reports & Exports</h2>
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <h2 className="text-2xl font-comfortaa font-bold text-yp-dark">Data Reports & Exports</h2>
+            <AdminPageGuide
+              title="Reports & Safety Tickets"
+              description="Resolve user-submitted flags regarding offensive content, spam, or harassment."
+              features={[
+                'View flagged reviews, listings, and messages',
+                'Directly delete offending content',
+                'Suspend the offending user',
+                'Resolve and close tickets'
+              ]}
+              workflow={[
+                'Open the oldest unresolved report.',
+                'Review the attached context and offensive material.',
+                'Delete the material if it violates rules.',
+                'Suspend the user and mark the report as Resolved.'
+              ]}
+            />
+          </div>
           <p className="text-gray-600 font-roboto">
             Select report type, customize fields, and export data in your preferred format
           </p>
@@ -546,7 +572,7 @@ export const AdminReports = () => {
                   Deselect All
                 </Button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {getCurrentFields().map((field) => (
                   <div key={field.id} className="flex items-center space-x-2">
@@ -640,7 +666,7 @@ export const AdminReports = () => {
                   )}
                   Preview Data
                 </Button>
-                
+
                 <Button
                   onClick={handleExport}
                   className="w-full bg-green-600 hover:bg-green-700"

@@ -9,14 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { 
-  Building, 
-  Globe, 
-  Eye, 
-  MousePointer, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+import {
+  Building,
+  Globe,
+  Eye,
+  MousePointer,
+  CheckCircle,
+  XCircle,
+  Clock,
   AlertCircle,
   Search,
   Filter,
@@ -36,24 +36,37 @@ import { deleteImage, uploadImage } from '@/lib/storage';
 import { SponsoredBanner } from '@/types/sponsoredBanner.types';
 import { supabase } from '@/lib/supabase';
 import { Switch } from '@/components/ui/switch';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const AdminSponsoredBanners: React.FC = () => {
   const { toast } = useToast();
-  const { 
-    banners, 
-    loading, 
-    error, 
-    fetchBanners, 
-    updateBanner, 
+  const {
+    banners,
+    loading,
+    error,
+    fetchBanners,
+    updateBanner,
     deleteBanner,
     createBanner
   } = useSponsoredBanners();
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedBanner, setSelectedBanner] = useState<SponsoredBanner | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [adminNotes, setAdminNotes] = useState('');
+  const [bannerToDelete, setBannerToDelete] = useState<string | null>(null);
 
   // Add Banner dialog state
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -83,9 +96,9 @@ export const AdminSponsoredBanners: React.FC = () => {
   }>>({});
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
-  
+
   // Store banner countries (banner_id -> array of country objects)
-  const [bannerCountries, setBannerCountries] = useState<Record<string, Array<{id: string; name: string; flag_url?: string}>>>({});
+  const [bannerCountries, setBannerCountries] = useState<Record<string, Array<{ id: string; name: string; flag_url?: string }>>>({});
 
   const [rowUpdating, setRowUpdating] = useState<Record<string, boolean>>({});
 
@@ -122,12 +135,12 @@ export const AdminSponsoredBanners: React.FC = () => {
       fetchBannerCountries();
     }
   }, [banners]);
-  
+
   // Fetch targeted countries for each banner from junction table
   const fetchBannerCountries = async () => {
     try {
-      const countriesMap: Record<string, Array<{id: string; name: string; flag_url?: string}>> = {};
-      
+      const countriesMap: Record<string, Array<{ id: string; name: string; flag_url?: string }>> = {};
+
       for (const banner of banners) {
         const { data, error } = await supabase
           .from('sponsored_banner_countries')
@@ -136,7 +149,7 @@ export const AdminSponsoredBanners: React.FC = () => {
             countries!inner(id, name, flag_url)
           `)
           .eq('banner_id', banner.id);
-        
+
         if (!error && data) {
           countriesMap[banner.id] = data.map((item: any) => ({
             id: item.countries.id,
@@ -145,7 +158,7 @@ export const AdminSponsoredBanners: React.FC = () => {
           }));
         }
       }
-      
+
       setBannerCountries(countriesMap);
     } catch (error) {
       console.error('Error fetching banner countries:', error);
@@ -156,7 +169,7 @@ export const AdminSponsoredBanners: React.FC = () => {
     setLoadingAnalytics(true);
     try {
       const analyticsData: Record<string, any> = {};
-      
+
       // Simplified analytics - use data from the banner itself
       banners.forEach((banner) => {
         analyticsData[banner.id] = {
@@ -167,7 +180,7 @@ export const AdminSponsoredBanners: React.FC = () => {
           recent_clicks: 0, // Can be implemented later
         };
       });
-      
+
       setBannerAnalytics(analyticsData);
     } catch (error) {
       console.error('Error fetching banner analytics:', error);
@@ -188,13 +201,13 @@ export const AdminSponsoredBanners: React.FC = () => {
   }, []);
 
   const filteredBanners = banners.filter(banner => {
-    const matchesSearch = 
+    const matchesSearch =
       banner.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       banner.contact_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       banner.country_name?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter === 'all' || banner.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -258,7 +271,7 @@ export const AdminSponsoredBanners: React.FC = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `sponsored_banners_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `sponsored_banners_${new Date().toLocaleDateString('en-CA')}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -268,14 +281,14 @@ export const AdminSponsoredBanners: React.FC = () => {
   const handleStatusChange = async (bannerId: string, newStatus: string) => {
     try {
       const updates: any = { status: newStatus };
-      
+
       if (newStatus === 'approved' || newStatus === 'active') {
         updates.approved_at = new Date().toISOString();
         updates.approved_by = 'admin'; // In real implementation, get from auth
       }
-      
+
       await updateBanner(bannerId, updates);
-      
+
       toast({
         title: "Status Updated",
         description: `Banner status changed to ${newStatus}`,
@@ -313,7 +326,7 @@ export const AdminSponsoredBanners: React.FC = () => {
       setRowUpdating((prev) => ({ ...prev, [banner.id]: true }));
 
       await updateBanner(banner.id, { is_active: newValue } as any);
-      
+
       toast({
         title: newValue ? 'Activated' : 'Deactivated',
         description: `Banner ${newValue ? 'is now active' : 'has been deactivated'}`,
@@ -371,7 +384,7 @@ export const AdminSponsoredBanners: React.FC = () => {
       await updateBanner(bannerId, { admin_notes: adminNotes } as any);
       setAdminNotes('');
       setShowDetails(false);
-      
+
       toast({
         title: "Notes Added",
         description: "Admin notes have been saved",
@@ -404,11 +417,11 @@ export const AdminSponsoredBanners: React.FC = () => {
     });
     setEditBannerImageUrl(banner.banner_image_url || '');
     setEditBannerImage(null);
-    
+
     // Get country IDs for this banner
     const countryIds = getBannerCountryIds(banner);
     setEditCountryIds(countryIds);
-    
+
     setShowEditDialog(true);
   };
 
@@ -423,7 +436,7 @@ export const AdminSponsoredBanners: React.FC = () => {
       // Upload new image if selected
       if (editBannerImage) {
         imageUrl = await uploadImage(editBannerImage, 'sponsored-banners', 'banners');
-        
+
         // Delete old image if it exists and is different
         if (editingBanner.banner_image_url && editingBanner.banner_image_url !== imageUrl) {
           try {
@@ -442,7 +455,7 @@ export const AdminSponsoredBanners: React.FC = () => {
 
       // Update banner countries if changed
       const currentCountryIds = getBannerCountryIds(editingBanner);
-      const hasCountryChanges = 
+      const hasCountryChanges =
         editCountryIds.length !== currentCountryIds.length ||
         editCountryIds.some(id => !currentCountryIds.includes(id));
 
@@ -486,35 +499,36 @@ export const AdminSponsoredBanners: React.FC = () => {
     }
   };
 
-  const handleDeleteBanner = async (bannerId: string) => {
-    if (window.confirm('Are you sure you want to delete this banner?')) {
-      try {
-        // Find the banner to get the image path
-        const banner = banners.find(b => b.id === bannerId);
-        
-        // Delete the banner from database
-        await deleteBanner(bannerId);
-        
-        // Delete the image from storage if it exists
-        if (banner?.banner_image_url) {
-          // Extract path from URL (remove domain part)
-          const url = new URL(banner.banner_image_url);
-          const path = url.pathname.split('/').slice(3).join('/'); // Remove /storage/v1/object/public/
-          await deleteImage(path, 'sponsored-banners');
-        }
-        
-        toast({
-          title: "Banner Deleted",
-          description: "The sponsored banner and its image have been deleted",
-        });
-      } catch (error) {
-        console.error('Error deleting banner:', error);
-        toast({
-          title: "Error",
-          description: "Failed to delete banner",
-          variant: "destructive",
-        });
+  const confirmDeleteBanner = async () => {
+    if (!bannerToDelete) return;
+    try {
+      // Find the banner to get the image path
+      const banner = banners.find(b => b.id === bannerToDelete);
+
+      // Delete the banner from database
+      await deleteBanner(bannerToDelete);
+
+      // Delete the image from storage if it exists
+      if (banner?.banner_image_url) {
+        // Extract path from URL (remove domain part)
+        const url = new URL(banner.banner_image_url);
+        const path = url.pathname.split('/').slice(3).join('/'); // Remove /storage/v1/object/public/
+        await deleteImage(path, 'sponsored-banners');
       }
+
+      toast({
+        title: "Banner Deleted",
+        description: "The sponsored banner and its image have been deleted",
+      });
+    } catch (error) {
+      console.error('Error deleting banner:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete banner",
+        variant: "destructive",
+      });
+    } finally {
+      setBannerToDelete(null);
     }
   };
 
@@ -523,7 +537,7 @@ export const AdminSponsoredBanners: React.FC = () => {
     if (!status) {
       status = 'pending';
     }
-    
+
     const statusConfig = {
       pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock },
       approved: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
@@ -531,10 +545,10 @@ export const AdminSponsoredBanners: React.FC = () => {
       active: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
       inactive: { color: 'bg-gray-100 text-gray-800', icon: XCircle },
     };
-    
+
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
     const Icon = config.icon;
-    
+
     return (
       <Badge className={config.color}>
         <Icon className="w-3 h-3 mr-1" />
@@ -548,16 +562,16 @@ export const AdminSponsoredBanners: React.FC = () => {
     if (!status) {
       status = 'pending';
     }
-    
+
     const statusConfig = {
       pending: { color: 'bg-yellow-100 text-yellow-800' },
       paid: { color: 'bg-green-100 text-green-800' },
       failed: { color: 'bg-red-100 text-red-800' },
       refunded: { color: 'bg-gray-100 text-gray-800' },
     };
-    
+
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
-    
+
     return (
       <Badge className={config.color}>
         {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -568,6 +582,14 @@ export const AdminSponsoredBanners: React.FC = () => {
   if (loading) {
     return (
       <AdminLayout>
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Legacy Sponsored Banners"
+            description="Older banner system."
+            features={["Legacy banner management"]}
+            workflow={["Use AdminBannerAds for current campaigns."]}
+          />
+        </div>
         <div className="space-y-6">
           <div className="h-8 bg-gray-300 rounded w-full animate-pulse"></div>
           <div className="h-64 bg-gray-300 rounded animate-pulse"></div>
@@ -588,25 +610,25 @@ export const AdminSponsoredBanners: React.FC = () => {
             <div className="text-sm text-gray-500">
               {filteredBanners.length} banner{filteredBanners.length !== 1 ? 's' : ''}
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsHelpDialogOpen(true)}
               title="Ad System Guide"
             >
               <HelpCircle className="w-4 h-4 mr-2" />
               Help
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={exportToCSV}
               className="flex justify-center items-center"
             >
               <Download className="w-4 h-4 mr-2" />
               Export CSV
             </Button>
-            <Button 
-              onClick={fetchBannerAnalytics} 
-              variant="outline" 
+            <Button
+              onClick={fetchBannerAnalytics}
+              variant="outline"
               disabled={loadingAnalytics}
               className="flex justify-center items-center"
             >
@@ -636,7 +658,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-2">Status</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -653,7 +675,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="flex items-end">
                 <Button
                   variant="outline"
@@ -689,8 +711,8 @@ export const AdminSponsoredBanners: React.FC = () => {
                 <Building className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No banners found</h3>
                 <p className="text-gray-600">
-                  {searchTerm || statusFilter !== 'all' 
-                    ? 'Try adjusting your search criteria' 
+                  {searchTerm || statusFilter !== 'all'
+                    ? 'Try adjusting your search criteria'
                     : 'No sponsored banners have been submitted yet'
                   }
                 </p>
@@ -724,7 +746,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                             </div>
                           </div>
                         </TableCell>
-                        
+
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {bannerCountries[banner.id] && bannerCountries[banner.id].length > 0 ? (
@@ -737,8 +759,8 @@ export const AdminSponsoredBanners: React.FC = () => {
                             ) : (
                               <div className="flex items-center space-x-2">
                                 {banner.country_flag_url && (
-                                  <img 
-                                    src={banner.country_flag_url} 
+                                  <img
+                                    src={banner.country_flag_url}
                                     alt={banner.country_name}
                                     className="w-4 h-3"
                                   />
@@ -748,7 +770,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                             )}
                           </div>
                         </TableCell>
-                        
+
                         <TableCell>
                           <div>
                             <div className="font-medium">{banner.contact_name || 'N/A'}</div>
@@ -764,7 +786,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                             )}
                           </div>
                         </TableCell>
-                        
+
                         <TableCell>
                           <div>
                             {getPaymentStatusBadge(banner.payment_status)}
@@ -774,7 +796,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                             </div>
                           </div>
                         </TableCell>
-                        
+
                         <TableCell>
                           {getStatusBadge(banner.status)}
                         </TableCell>
@@ -815,7 +837,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                             </span>
                           </div>
                         </TableCell>
-                        
+
                         <TableCell>
                           <div className="text-sm">
                             {loadingAnalytics ? (
@@ -825,24 +847,24 @@ export const AdminSponsoredBanners: React.FC = () => {
                               </div>
                             ) : (
                               <>
-                            <div className="flex items-center text-gray-600">
-                              <Eye className="w-3 h-3 mr-1" />
+                                <div className="flex items-center text-gray-600">
+                                  <Eye className="w-3 h-3 mr-1" />
                                   {bannerAnalytics[banner.id]?.total_views || 0} views
-                            </div>
-                            <div className="flex items-center text-gray-600">
-                              <MousePointer className="w-3 h-3 mr-1" />
+                                </div>
+                                <div className="flex items-center text-gray-600">
+                                  <MousePointer className="w-3 h-3 mr-1" />
                                   {bannerAnalytics[banner.id]?.total_clicks || 0} clicks
                                 </div>
                                 {bannerAnalytics[banner.id]?.click_through_rate > 0 && (
                                   <div className="text-xs text-blue-600 font-medium">
                                     {bannerAnalytics[banner.id].click_through_rate}% CTR
-                            </div>
+                                  </div>
                                 )}
                               </>
                             )}
                           </div>
                         </TableCell>
-                        
+
                         <TableCell>
                           <div className="flex space-x-2">
                             <Button
@@ -856,7 +878,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                             >
                               View
                             </Button>
-                            
+
                             <Button
                               size="sm"
                               variant="outline"
@@ -865,7 +887,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                               <Edit className="w-3 h-3 mr-1" />
                               Edit
                             </Button>
-                            
+
                             <Button
                               size="sm"
                               variant="destructive"
@@ -904,8 +926,8 @@ export const AdminSponsoredBanners: React.FC = () => {
                 {/* Banner Image */}
                 <div>
                   <h4 className="font-medium mb-2">Banner Image</h4>
-                  <img 
-                    src={selectedBanner.banner_image_url} 
+                  <img
+                    src={selectedBanner.banner_image_url}
                     alt={selectedBanner.banner_alt_text || selectedBanner.company_name}
                     className="w-full h-32 object-cover rounded-lg"
                   />
@@ -921,13 +943,13 @@ export const AdminSponsoredBanners: React.FC = () => {
                       <div><strong>Alt Text:</strong> {selectedBanner.banner_alt_text || 'None'}</div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h4 className="font-medium mb-2">Target Country</h4>
                     <div className="flex items-center space-x-2">
                       {selectedBanner.country_flag_url && (
-                        <img 
-                          src={selectedBanner.country_flag_url} 
+                        <img
+                          src={selectedBanner.country_flag_url}
                           alt={selectedBanner.country_name}
                           className="w-6 h-4"
                         />
@@ -1104,7 +1126,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                         onChange={(e) => {
                           const file = e.target.files?.[0] || null;
                           if (!file) return;
-                          const allowed = ['image/jpeg','image/png','image/gif','image/webp'];
+                          const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
                           if (!allowed.includes(file.type)) {
                             toast({ title: 'Invalid File Type', description: 'Upload JPEG, PNG, GIF, or WebP.', variant: 'destructive' });
                             return;
@@ -1204,7 +1226,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                 </div>
                 <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
                   <p className="text-xs text-blue-900">
-                    💡 <strong>Tip:</strong> For maximum visibility, enable both "Display on Top" and "Display on Bottom". 
+                    💡 <strong>Tip:</strong> For maximum visibility, enable both "Display on Top" and "Display on Bottom".
                     For country-specific tourism ads (e.g., "Visit Rwanda"), you can target specific countries using the multi-country selector above.
                   </p>
                 </div>
@@ -1225,7 +1247,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                     try {
                       setAdding(true);
                       const bannerImageUrl = await uploadImage(newBannerImage, 'sponsored-banners', 'banners');
-                      
+
                       // Create banner with first country (backward compatibility)
                       const payload: any = {
                         country_id: newForm.country_ids[0],  // Use first country for backward compatibility
@@ -1239,9 +1261,9 @@ export const AdminSponsoredBanners: React.FC = () => {
                       };
                       if (typeof newForm.payment_amount === 'number') payload.payment_amount = newForm.payment_amount;
                       if (newForm.status) payload.status = newForm.status;
-                      
+
                       const createdBanner = await createBanner(payload);
-                      
+
                       // Insert all selected countries into junction table
                       if (createdBanner) {
                         const { error: junctionError } = await supabase
@@ -1252,13 +1274,13 @@ export const AdminSponsoredBanners: React.FC = () => {
                               country_id: countryId
                             }))
                           );
-                        
+
                         if (junctionError) {
                           console.error('Error inserting banner countries:', junctionError);
                           toast({ title: 'Warning', description: 'Banner created but country associations may be incomplete.', variant: 'destructive' });
                         }
                       }
-                      
+
                       toast({ title: 'Banner Added', description: `Sponsored banner created for ${newForm.country_ids.length} ${newForm.country_ids.length === 1 ? 'country' : 'countries'}.` });
                       setShowAddDialog(false);
                       setNewForm({ company_name: '', company_website: '', banner_alt_text: '', country_ids: [], payment_status: 'paid', status: 'pending', payment_amount: 25, display_on_top: true, display_on_bottom: false });
@@ -1291,12 +1313,12 @@ export const AdminSponsoredBanners: React.FC = () => {
                 Edit Banner
               </DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-6 py-4">
               {/* Company Information */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg">Company Information</h3>
-                
+
                 <div>
                   <label className="block text-sm font-medium mb-1">Company Name *</label>
                   <Input
@@ -1328,7 +1350,7 @@ export const AdminSponsoredBanners: React.FC = () => {
               {/* Contact Information */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg">Contact Information</h3>
-                
+
                 <div>
                   <label className="block text-sm font-medium mb-1">Contact Name</label>
                   <Input
@@ -1361,7 +1383,7 @@ export const AdminSponsoredBanners: React.FC = () => {
               {/* Banner Image */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg">Banner Image</h3>
-                
+
                 {editBannerImageUrl && !editBannerImage && (
                   <div className="border rounded p-2">
                     <img src={editBannerImageUrl} alt="Current banner" className="max-h-32 mx-auto" />
@@ -1389,7 +1411,7 @@ export const AdminSponsoredBanners: React.FC = () => {
               {/* Target Countries */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg">Target Countries</h3>
-                
+
                 <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2">
                   {countries.map((country) => (
                     <label key={country.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
@@ -1459,7 +1481,7 @@ export const AdminSponsoredBanners: React.FC = () => {
               {/* Display Settings */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg">Display Settings</h3>
-                
+
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={editForm.display_on_top}
@@ -1519,7 +1541,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                 Sponsored Banner Ads - Complete Guide
               </DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-6 font-roboto text-sm">
               {/* Overview */}
               <div>
@@ -1527,7 +1549,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                   🎯 System Overview
                 </h3>
                 <p className="text-gray-700">
-                  Sponsored banners allow you to display <strong>country-specific ads</strong> across the platform. 
+                  Sponsored banners allow you to display <strong>country-specific ads</strong> across the platform.
                   Advertisers pay to promote tourism, businesses, or services on targeted pages.
                 </p>
               </div>
@@ -1539,13 +1561,13 @@ export const AdminSponsoredBanners: React.FC = () => {
                 </h3>
                 <p className="text-gray-700 mb-2"><strong>What does "Country" mean?</strong></p>
                 <p className="text-gray-700 mb-3">
-                  Each ad is linked to a specific country (e.g., Rwanda, Kenya). This allows targeted campaigns 
+                  Each ad is linked to a specific country (e.g., Rwanda, Kenya). This allows targeted campaigns
                   like "Visit Rwanda" to show specifically on Rwanda-related pages.
                 </p>
                 <div className="bg-blue-50 border border-blue-200 rounded p-3">
                   <p className="text-sm text-blue-900">
-                    <strong>💡 Example:</strong> A "Visit Rwanda" ad with country = Rwanda will show on 
-                    <code className="mx-1 px-1 bg-blue-100">/countries/rwanda</code> page when 
+                    <strong>💡 Example:</strong> A "Visit Rwanda" ad with country = Rwanda will show on
+                    <code className="mx-1 px-1 bg-blue-100">/countries/rwanda</code> page when
                     "Show on Country Detail" is enabled.
                   </p>
                 </div>
@@ -1622,9 +1644,9 @@ export const AdminSponsoredBanners: React.FC = () => {
                   <div>
                     <p className="font-semibold text-gray-900">Payment Status</p>
                     <p className="text-gray-600 text-sm">
-                      <code className="bg-gray-100 px-1">pending</code> | 
-                      <code className="bg-green-100 px-1 mx-1">paid</code> | 
-                      <code className="bg-red-100 px-1">failed</code> | 
+                      <code className="bg-gray-100 px-1">pending</code> |
+                      <code className="bg-green-100 px-1 mx-1">paid</code> |
+                      <code className="bg-red-100 px-1">failed</code> |
                       <code className="bg-gray-100 px-1 ml-1">refunded</code>
                     </p>
                     <p className="text-gray-600 text-xs mt-1">Tracks advertiser payment. Mark as "paid" after receiving payment.</p>
@@ -1632,9 +1654,9 @@ export const AdminSponsoredBanners: React.FC = () => {
                   <div>
                     <p className="font-semibold text-gray-900">Status</p>
                     <p className="text-gray-600 text-sm">
-                      <code className="bg-gray-100 px-1">pending</code> | 
-                      <code className="bg-blue-100 px-1 mx-1">approved</code> | 
-                      <code className="bg-green-100 px-1">active</code> | 
+                      <code className="bg-gray-100 px-1">pending</code> |
+                      <code className="bg-blue-100 px-1 mx-1">approved</code> |
+                      <code className="bg-green-100 px-1">active</code> |
                       <code className="bg-red-100 px-1 ml-1">rejected</code>
                     </p>
                     <p className="text-gray-600 text-xs mt-1">Approval workflow. Review ad → Approve → Activate.</p>
@@ -1689,8 +1711,8 @@ export const AdminSponsoredBanners: React.FC = () => {
               <Button variant="outline" onClick={() => setIsHelpDialogOpen(false)}>
                 Close
               </Button>
-              <Button 
-                onClick={() => window.open('https://github.com/DLOADIN/Bara-Prototype/blob/main/AD_SYSTEM_GUIDE.md', '_blank')} 
+              <Button
+                onClick={() => window.open('https://github.com/DLOADIN/Bara-Prototype/blob/main/AD_SYSTEM_GUIDE.md', '_blank')}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 View Full Guide on GitHub

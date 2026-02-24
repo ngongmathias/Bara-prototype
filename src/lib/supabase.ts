@@ -3,9 +3,6 @@ import { createClient } from '@supabase/supabase-js'
 export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-console.log('Supabase URL:', SUPABASE_URL ? 'Set' : 'Missing');
-console.log('Supabase Anon Key:', supabaseAnonKey ? 'Set' : 'Missing');
-
 if (!SUPABASE_URL || !supabaseAnonKey) {
   console.warn('Missing Supabase environment variables - check your .env file or Vercel project settings', {
     VITE_SUPABASE_URL: !!SUPABASE_URL,
@@ -28,8 +25,6 @@ try {
       schema: 'public'
     }
   });
-
-  console.log('✅ Supabase client created successfully');
 } catch (error) {
   console.error('❌ Failed to create Supabase client:', error);
   throw new Error('Failed to initialize Supabase client');
@@ -46,12 +41,10 @@ if (!supabase) {
 // Test the connection with better error handling
 const testConnection = async () => {
   try {
-    console.log('🔍 Testing Supabase connection...');
     const { data, error } = await supabase.from('popup_ads').select('count').limit(1);
     if (error) {
       console.error('❌ Supabase connection test failed:', error);
     } else {
-      console.log('✅ Supabase connection test successful');
     }
   } catch (error) {
     console.error('❌ Supabase connection test error:', error);
@@ -96,14 +89,14 @@ export const getAuthenticatedDb = async () => {
   }
 };
 
-// For now, let's use the regular client but with proper error handling
-// This is a temporary solution until we can properly configure JWT authentication
+// Admin DB client — uses the anon key with RLS.
+// For truly privileged operations, use server-side Supabase Edge Functions.
 export const getAdminDb = () => {
   if ((getAdminDb as any)._cachedDb) return (getAdminDb as any)._cachedDb;
 
   const adminSupabase = createClient(
     SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey,
+    supabaseAnonKey,
     {
       auth: {
         autoRefreshToken: false,
@@ -474,34 +467,6 @@ export const db = {
   songs: () => supabase.from('songs')
 }
 
-// Auth helper functions
-export const auth = {
-  // Get current user
-  getUser: () => supabase.auth.getUser(),
-
-  // Sign up
-  signUp: (email: string, password: string) =>
-    supabase.auth.signUp({ email, password }),
-
-  // Sign in
-  signIn: (email: string, password: string) =>
-    supabase.auth.signInWithPassword({ email, password }),
-
-  // Sign out
-  signOut: () => supabase.auth.signOut(),
-
-  // Reset password
-  resetPassword: (email: string) =>
-    supabase.auth.resetPasswordForEmail(email),
-
-  // Update password
-  updatePassword: (password: string) =>
-    supabase.auth.updateUser({ password }),
-
-  // Get session
-  getSession: () => supabase.auth.getSession(),
-
-  // Listen to auth changes
-  onAuthStateChange: (callback: (event: string, session: any) => void) =>
-    supabase.auth.onAuthStateChange(callback)
-} 
+// NOTE: This app uses Clerk for authentication, NOT Supabase Auth.
+// Do NOT use supabase.auth.getUser() — it will always return null.
+// Use useUser() from @clerk/clerk-react instead. 

@@ -13,7 +13,7 @@ export const SportsTopBanner = () => {
 
     // Sync filters from URL
     const selectedLeagueId = searchParams.get('league') ? parseInt(searchParams.get('league')!) : undefined;
-    const selectedDate = searchParams.get('date') || new Date().toISOString().split('T')[0];
+    const selectedDate = searchParams.get('date') || new Date().toLocaleDateString('en-CA');
 
     const { data: matches, isLoading, error } = useFixtures({
         sport: activeSport.slug,

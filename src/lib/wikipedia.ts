@@ -94,7 +94,6 @@ export const fetchWikipediaCountryInfo = async (countryName: string): Promise<Wi
       if (searchData.query?.search?.[0]) {
         pageId = searchData.query.search[0].pageid;
         pageTitle = searchData.query.search[0].title;
-        console.log(`Found Wikipedia page for ${searchTerm}: ${pageTitle}`);
         break;
       }
     }

@@ -3,7 +3,6 @@ import { supabase } from './supabase';
 
 export async function testSupabaseConnection() {
   try {
-    console.log('Testing Supabase connection...');
     
     // Test basic connection
     const { data, error } = await supabase
@@ -15,8 +14,6 @@ export async function testSupabaseConnection() {
       console.error('Supabase connection test failed:', error);
       return false;
     }
-    
-    console.log('Supabase connection test successful:', data);
     return true;
   } catch (error) {
     console.error('Supabase connection test error:', error);

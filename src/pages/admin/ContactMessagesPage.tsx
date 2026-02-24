@@ -20,12 +20,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useContactMessages, ContactMessage } from "@/hooks/useContactMessages";
-import { 
-  Search, 
-  MoreHorizontal, 
-  Eye, 
-  CheckCircle, 
-  MessageSquare, 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Search,
+  MoreHorizontal,
+  Eye,
+  CheckCircle,
+  MessageSquare,
   Archive,
   Trash2,
   RefreshCw,
@@ -36,6 +46,8 @@ import {
   Clock
 } from "lucide-react";
 import { toast } from "sonner";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 const ContactMessagesPage = () => {
   const { t } = useTranslation();
@@ -46,6 +58,7 @@ const ContactMessagesPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMessages();
@@ -68,8 +81,8 @@ const ContactMessagesPage = () => {
     try {
       const success = await updateContactMessageStatus(messageId, newStatus);
       if (success) {
-        setMessages(prev => 
-          prev.map(msg => 
+        setMessages(prev =>
+          prev.map(msg =>
             msg.id === messageId ? { ...msg, status: newStatus } : msg
           )
         );
@@ -81,31 +94,32 @@ const ContactMessagesPage = () => {
     }
   };
 
-  const handleDeleteMessage = async (messageId: string) => {
-    if (window.confirm('Are you sure you want to delete this message?')) {
-      try {
-        const success = await deleteContactMessage(messageId);
-        if (success) {
-          setMessages(prev => prev.filter(msg => msg.id !== messageId));
-          toast.success('Message deleted successfully');
-        }
-      } catch (error) {
-        console.error('Error deleting message:', error);
-        toast.error('Failed to delete message');
+  const confirmDeleteMessage = async () => {
+    if (!messageToDelete) return;
+    try {
+      const success = await deleteContactMessage(messageToDelete);
+      if (success) {
+        setMessages(prev => prev.filter(msg => msg.id !== messageToDelete));
+        toast.success('Message deleted successfully');
       }
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      toast.error('Failed to delete message');
+    } finally {
+      setMessageToDelete(null);
     }
   };
 
   const filteredMessages = messages.filter(message => {
-    const matchesSearch = 
+    const matchesSearch =
       message.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       message.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       message.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
       message.message.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter === "all" || message.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -138,10 +152,18 @@ const ContactMessagesPage = () => {
   };
 
   return (
-    <AdminLayout 
-      title="Contact Messages" 
+    <AdminLayout
+      title="Contact Messages"
       subtitle="Manage and respond to customer inquiries"
     >
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Contact Support Tickets"
+            description="Respond to messages sent via the public Contact Us form."
+            features={["Read user messages", "Mark as resolved", "Reply via mapped email client"]}
+            workflow={["Read oldest unresolved message", "Copy user email to reply", "Mark ticket as resolved"]}
+          />
+        </div>
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Actions */}
@@ -315,7 +337,9 @@ const ContactMessagesPage = () => {
                                 Mark as Closed
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleDeleteMessage(message.id!)}
+                                onClick={() => {
+                                  if (message.id) setMessageToDelete(message.id);
+                                }}
                                 className="cursor-pointer text-red-600"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
@@ -351,7 +375,7 @@ const ContactMessagesPage = () => {
                   ✕
                 </Button>
               </div>
-              
+
               <div className="space-y-6">
                 {/* Contact Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -458,7 +482,7 @@ const ContactMessagesPage = () => {
                   </Button>
                   <Button
                     onClick={() => {
-                      handleDeleteMessage(selectedMessage.id!);
+                      if (selectedMessage.id) setMessageToDelete(selectedMessage.id);
                       setShowMessageModal(false);
                     }}
                     variant="destructive"
@@ -473,6 +497,21 @@ const ContactMessagesPage = () => {
           </div>
         </div>
       )}
+
+      <AlertDialog open={!!messageToDelete} onOpenChange={(open) => !open && setMessageToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this message? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteMessage} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };

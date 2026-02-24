@@ -7,27 +7,27 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
 } from '@/components/ui/dialog';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
   MousePointer,
   Globe,
   Building2,
@@ -36,6 +36,8 @@ import {
 import { supabase, getAdminDb } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 import { cn } from '@/lib/utils';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 type BannerAd = Database['public']['Tables']['banner_ads']['Row'];
 
@@ -98,7 +100,7 @@ export const AdminBannerAds = () => {
   const fetchBannerAds = async () => {
     try {
       console.log('Attempting to fetch banner ads...');
-      
+
       const { data, error } = await supabase
         .from('banner_ads')
         .select('*')
@@ -171,31 +173,31 @@ export const AdminBannerAds = () => {
       // Validate image dimensions
       const img = new Image();
       const imageUrl = URL.createObjectURL(file);
-      
+
       await new Promise((resolve, reject) => {
         img.onload = () => {
           const width = img.width;
           const height = img.height;
           const aspectRatio = width / height;
-          
+
           // Recommended: 1200x200 (6:1 ratio)
           // Accept 5:1 to 7:1 ratio, min width 800px
           if (width < 800) {
             reject(new Error(`Image width must be at least 800px. Your image is ${width}px wide.`));
             return;
           }
-          
+
           if (aspectRatio < 5 || aspectRatio > 7) {
             reject(new Error(`Banner ads should have a 6:1 aspect ratio (width:height). Recommended: 1200x200px. Your image is ${width}x${height}px (${aspectRatio.toFixed(1)}:1 ratio).`));
             return;
           }
-          
+
           resolve(true);
         };
         img.onerror = () => reject(new Error('Failed to load image'));
         img.src = imageUrl;
       });
-      
+
       URL.revokeObjectURL(imageUrl);
 
       // Upload image to Supabase Storage
@@ -233,7 +235,7 @@ export const AdminBannerAds = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.image_url) {
       toast({
         title: 'Error',
@@ -242,10 +244,10 @@ export const AdminBannerAds = () => {
       });
       return;
     }
-    
+
     try {
       console.log('Attempting to save banner ad:', formData);
-      
+
       const adData: BannerAdInsert = {
         title: formData.title,
         image_url: formData.image_url,
@@ -268,7 +270,7 @@ export const AdminBannerAds = () => {
           .update(adData as BannerAdUpdate)
           .eq('id', editingAd.id)
           .select();
-        
+
         result = { data, error };
       } else {
         // For insert
@@ -276,7 +278,7 @@ export const AdminBannerAds = () => {
           .from('banner_ads')
           .insert(adData as BannerAdInsert)
           .select();
-        
+
         result = { data, error };
       }
 
@@ -377,8 +379,8 @@ export const AdminBannerAds = () => {
       redirect_url: ad.redirect_url,
       alt_text: ad.alt_text || '',
       is_active: ad.is_active,
-      start_date: ad.start_date ? ad.start_date.split('T')[0] : '',
-      end_date: ad.end_date ? ad.end_date.split('T')[0] : ''
+      start_date: ad.start_date ? new Date(ad.start_date).toLocaleDateString('en-CA') : '',
+      end_date: ad.end_date ? new Date(ad.end_date).toLocaleDateString('en-CA') : ''
     });
     setIsDialogOpen(true);
   };
@@ -392,10 +394,10 @@ export const AdminBannerAds = () => {
   const toggleCountryDetailDisplay = async (bannerId: string, currentStatus: boolean) => {
     try {
       setUpdatingBanner(bannerId);
-      
+
       const { error } = await supabase
         .from('sponsored_banners')
-        .update({ 
+        .update({
           show_on_country_detail: !currentStatus,
           updated_at: new Date().toISOString()
         })
@@ -412,12 +414,12 @@ export const AdminBannerAds = () => {
       }
 
       // Update local state
-      setSponsoredBanners(prev => prev.map(banner => 
-        banner.id === bannerId 
+      setSponsoredBanners(prev => prev.map(banner =>
+        banner.id === bannerId
           ? { ...banner, show_on_country_detail: !currentStatus }
           : banner
       ));
-    
+
       toast({
         title: 'Success',
         description: `Country detail display ${!currentStatus ? 'enabled' : 'disabled'} for ${sponsoredBanners.find(b => b.id === bannerId)?.company_name}`,
@@ -450,10 +452,17 @@ export const AdminBannerAds = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Banner Ads Management</h1>
+            <div className="flex items-center"><h1 className="text-3xl font-bold">Banner Ads Management</h1>
+                    <AdminPageGuide 
+                      title="Sponsored Banner Ads"
+                      description="Manage the monetization pipeline. Approve paid advertisements and schedule their global display."
+                      features={["Review ad creatives and landing pages", "Approve pending campaigns", "Set explicit Start and End dates", "Track impression slots"]}
+                      workflow={["Review ads in the Pending tab.", "Check the image for compliance with community guidelines.", "Set the campaign duration if not already set.", "Click Approve to make the ad live across the platform."]}
+                    />
+                </div>
             <p className="text-gray-600">Manage banner advertisements and sponsored banners</p>
           </div>
-          
+
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={resetForm}>
@@ -470,7 +479,7 @@ export const AdminBannerAds = () => {
                   {editingAd ? 'Update the banner ad details' : 'Add a new banner advertisement'}
                 </DialogDescription>
               </DialogHeader>
-              
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
@@ -482,7 +491,7 @@ export const AdminBannerAds = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="col-span-2">
                     <Label htmlFor="image">Banner Image</Label>
                     <div className="space-y-2">
@@ -513,16 +522,16 @@ export const AdminBannerAds = () => {
                       />
                       {formData.image_url && (
                         <div className="border rounded p-2">
-                          <img 
-                            src={formData.image_url} 
-                            alt="Preview" 
+                          <img
+                            src={formData.image_url}
+                            alt="Preview"
                             className="max-h-20 object-contain"
                           />
                         </div>
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="col-span-2">
                     <Label htmlFor="redirect_url">Redirect URL</Label>
                     <Input
@@ -533,7 +542,7 @@ export const AdminBannerAds = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="col-span-2">
                     <Label htmlFor="alt_text">Alt Text</Label>
                     <Input
@@ -542,7 +551,7 @@ export const AdminBannerAds = () => {
                       onChange={(e) => setFormData(prev => ({ ...prev, alt_text: e.target.value }))}
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="start_date">Start Date (Optional)</Label>
                     <Input
@@ -552,7 +561,7 @@ export const AdminBannerAds = () => {
                       onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="end_date">End Date (Optional)</Label>
                     <Input
@@ -562,7 +571,7 @@ export const AdminBannerAds = () => {
                       onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
                     />
                   </div>
-                  
+
                   <div className="col-span-2 flex items-center space-x-2">
                     <Switch
                       id="is_active"
@@ -572,7 +581,7 @@ export const AdminBannerAds = () => {
                     <Label htmlFor="is_active">Active</Label>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-end space-x-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
@@ -590,22 +599,20 @@ export const AdminBannerAds = () => {
         <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
           <button
             onClick={() => setActiveTab('banner_ads')}
-            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'banner_ads'
+            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${activeTab === 'banner_ads'
                 ? 'bg-white text-blue-600 shadow-sm'
                 : 'text-gray-600 hover:text-blue-600'
-            }`}
+              }`}
           >
             <Eye className="w-4 h-4 inline mr-2" />
             Banner Ads ({bannerAds.length})
           </button>
           <button
             onClick={() => setActiveTab('sponsored_banners')}
-            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'sponsored_banners'
+            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${activeTab === 'sponsored_banners'
                 ? 'bg-white text-blue-600 shadow-sm'
                 : 'text-gray-600 hover:text-blue-600'
-            }`}
+              }`}
           >
             <Target className="w-4 h-4 inline mr-2" />
             Sponsored Banners ({sponsoredBanners.length})
@@ -616,125 +623,125 @@ export const AdminBannerAds = () => {
         {activeTab === 'banner_ads' ? (
           <>
             {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Ads</CardTitle>
-              <Plus className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{bannerAds.length}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Ads</CardTitle>
-              <Eye className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {bannerAds.filter(ad => ad.is_active).length}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Views</CardTitle>
-              <Eye className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {bannerAds.reduce((sum, ad) => sum + ad.total_views, 0)}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
-              <MousePointer className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {bannerAds.reduce((sum, ad) => sum + ad.total_clicks, 0)}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Ads</CardTitle>
+                  <Plus className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{bannerAds.length}</div>
+                </CardContent>
+              </Card>
 
-        {/* Banner Ads Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Banner Advertisements</CardTitle>
-            <CardDescription>
-              Manage your banner ads and track their performance
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Preview</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Views</TableHead>
-                  <TableHead>Clicks</TableHead>
-                  <TableHead>CTR</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bannerAds.map((ad) => (
-                  <TableRow key={ad.id}>
-                    <TableCell>
-                      <img 
-                        src={ad.image_url} 
-                        alt={ad.alt_text || ad.title}
-                        className="w-16 h-10 object-cover rounded"
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">{ad.title}</TableCell>
-                    <TableCell>
-                      <Badge variant={ad.is_active ? "default" : "secondary"}>
-                        {ad.is_active ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{ad.total_views}</TableCell>
-                    <TableCell>{ad.total_clicks}</TableCell>
-                    <TableCell>{calculateCTR(ad.total_views, ad.total_clicks)}</TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => toggleActive(ad.id, ad.is_active)}
-                        >
-                          {ad.is_active ? 'Deactivate' : 'Activate'}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEditDialog(ad)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(ad.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Active Ads</CardTitle>
+                  <Eye className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {bannerAds.filter(ad => ad.is_active).length}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+                  <Eye className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {bannerAds.reduce((sum, ad) => sum + ad.total_views, 0)}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
+                  <MousePointer className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {bannerAds.reduce((sum, ad) => sum + ad.total_clicks, 0)}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Banner Ads Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Banner Advertisements</CardTitle>
+                <CardDescription>
+                  Manage your banner ads and track their performance
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Preview</TableHead>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Views</TableHead>
+                      <TableHead>Clicks</TableHead>
+                      <TableHead>CTR</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {bannerAds.map((ad) => (
+                      <TableRow key={ad.id}>
+                        <TableCell>
+                          <img
+                            src={ad.image_url}
+                            alt={ad.alt_text || ad.title}
+                            className="w-16 h-10 object-cover rounded"
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium">{ad.title}</TableCell>
+                        <TableCell>
+                          <Badge variant={ad.is_active ? "default" : "secondary"}>
+                            {ad.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{ad.total_views}</TableCell>
+                        <TableCell>{ad.total_clicks}</TableCell>
+                        <TableCell>{calculateCTR(ad.total_views, ad.total_clicks)}</TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleActive(ad.id, ad.is_active)}
+                            >
+                              {ad.is_active ? 'Deactivate' : 'Activate'}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openEditDialog(ad)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(ad.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </>
         ) : (
           /* Sponsored Banners Tab */
@@ -779,8 +786,8 @@ export const AdminBannerAds = () => {
                           <tr key={banner.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
                               {banner.banner_image_url ? (
-                                <img 
-                                  src={banner.banner_image_url} 
+                                <img
+                                  src={banner.banner_image_url}
                                   alt={banner.banner_alt_text || 'Banner preview'}
                                   className="w-16 h-10 object-cover rounded border border-gray-200"
                                 />
@@ -796,7 +803,7 @@ export const AdminBannerAds = () => {
                                   {banner.company_name}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  <a 
+                                  <a
                                     href={banner.company_website.startsWith('http') ? banner.company_website : `https://${banner.company_website}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -833,8 +840,8 @@ export const AdminBannerAds = () => {
                                   disabled={updatingBanner === banner.id}
                                   className={cn(
                                     "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
-                                    banner.show_on_country_detail 
-                                      ? "data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300" 
+                                    banner.show_on_country_detail
+                                      ? "data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300"
                                       : "data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-red-500"
                                   )}
                                   style={{

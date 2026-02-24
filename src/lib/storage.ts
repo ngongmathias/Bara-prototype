@@ -23,7 +23,6 @@ export const uploadImage = async (
     // Optimize image before upload to reduce bandwidth
     let fileToUpload = file;
     if (optimize) {
-      console.log(`Optimizing image before upload...`);
       fileToUpload = await optimizeImage(file, {
         maxWidth: 1920,
         maxHeight: 1080,
@@ -36,8 +35,6 @@ export const uploadImage = async (
     const fileExt = fileToUpload.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `${folder}/${fileName}`;
-
-    console.log(`Uploading to bucket: ${bucket}, folder: ${folder}, file: ${fileName}`);
 
     // Upload file to Supabase Storage with extended cache
     const { data, error } = await supabase.storage
@@ -56,8 +53,6 @@ export const uploadImage = async (
     const { data: urlData } = supabase.storage
       .from(bucket)
       .getPublicUrl(filePath);
-
-    console.log(`Upload successful. Public URL: ${urlData.publicUrl}`);
     return urlData.publicUrl;
   } catch (error) {
     console.error('Upload error:', error);
@@ -85,21 +80,6 @@ export const deleteImage = async (path: string, bucket: string = 'sponsored-bann
 };
 
 export const createBucket = async (bucketName: string): Promise<boolean> => {
-  try {
-    const { data, error } = await supabase.storage.createBucket(bucketName, {
-      public: true,
-      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-      fileSizeLimit: 5242880 // 5MB
-    });
-
-    if (error) {
-      console.error('Bucket creation error:', error);
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Bucket creation error:', error);
-    return false;
-  }
+  console.error(`Attempted to create bucket '${bucketName}'. Bucket creation must be done securely via the Supabase Dashboard or an Admin backend API. Client-side bucket creation is disabled.`);
+  return false;
 };

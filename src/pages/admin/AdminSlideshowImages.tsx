@@ -9,22 +9,33 @@ import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { 
-  Image, 
-  Eye, 
-  EyeOff, 
-  Upload, 
-  Trash2, 
-  Edit, 
+import {
+  Image,
+  Eye,
+  EyeOff,
+  Upload,
+  Trash2,
+  Edit,
   Plus,
   ArrowUp,
   ArrowDown,
   AlertCircle,
   CheckCircle,
-  XCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from '@/lib/supabase';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface SlideshowImage {
   id: string;
@@ -44,14 +55,15 @@ export const AdminSlideshowImages: React.FC = () => {
   const [images, setImages] = useState<SlideshowImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+  const [deleteConfig, setDeleteConfig] = useState<{ type: 'single' | 'all', id?: string, url?: string } | null>(null);
+
   // Add/Edit dialog state
   const [showDialog, setShowDialog] = useState(false);
   const [editingImage, setEditingImage] = useState<SlideshowImage | null>(null);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     title: '',
@@ -86,7 +98,7 @@ export const AdminSlideshowImages: React.FC = () => {
   const uploadImage = async (file: File): Promise<string> => {
     const fileExt = file.name.split('.').pop();
     const fileName = `slideshow-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    
+
     const { data, error } = await supabase.storage
       .from('slideshow-images')
       .upload(fileName, file);
@@ -165,7 +177,7 @@ export const AdminSlideshowImages: React.FC = () => {
           .eq('id', editingImage.id);
 
         if (error) throw error;
-        
+
         toast({
           title: "Image updated",
           description: "Slideshow image has been updated successfully.",
@@ -177,7 +189,7 @@ export const AdminSlideshowImages: React.FC = () => {
           .insert(imageData);
 
         if (error) throw error;
-        
+
         toast({
           title: "Image uploaded",
           description: "New slideshow image has been uploaded successfully.",
@@ -199,52 +211,61 @@ export const AdminSlideshowImages: React.FC = () => {
     }
   };
 
-  const handleDelete = async (imageId: string, imageUrl?: string) => {
-    if (!window.confirm('Are you sure you want to delete this image? This action cannot be undone.')) return;
+  const processDelete = async (imageId: string, imageUrl?: string) => {
+    // Delete from database first
+    const { error: dbError } = await supabase
+      .from('slideshow_images')
+      .delete()
+      .eq('id', imageId);
+
+    if (dbError) throw dbError;
+
+    // If there's a storage URL, try to delete from storage as well
+    if (imageUrl && imageUrl.includes('storage/v1/object/public/slideshow-images/')) {
+      try {
+        // Extract filename from URL
+        const fileName = imageUrl.split('slideshow-images/')[1];
+        if (fileName) {
+          const { error: storageError } = await supabase.storage
+            .from('slideshow-images')
+            .remove([fileName]);
+
+          if (storageError) console.warn('Could not delete from storage:', storageError);
+        }
+      } catch (storageError) {
+        console.warn('Storage deletion failed:', storageError);
+      }
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfig) return;
 
     try {
-      // Delete from database first
-      const { error: dbError } = await supabase
-        .from('slideshow_images')
-        .delete()
-        .eq('id', imageId);
-
-      if (dbError) throw dbError;
-
-      // If there's a storage URL, try to delete from storage as well
-      if (imageUrl && imageUrl.includes('storage/v1/object/public/slideshow-images/')) {
-        try {
-          // Extract filename from URL
-          const fileName = imageUrl.split('slideshow-images/')[1];
-          if (fileName) {
-            const { error: storageError } = await supabase.storage
-              .from('slideshow-images')
-              .remove([fileName]);
-            
-            if (storageError) {
-              console.warn('Could not delete from storage:', storageError);
-              // Don't throw error here, database deletion was successful
-            }
-          }
-        } catch (storageError) {
-          console.warn('Storage deletion failed:', storageError);
-          // Continue anyway, database deletion was successful
-        }
+      if (deleteConfig.type === 'all') {
+        const deletePromises = images.map(img => processDelete(img.id, img.image_url));
+        await Promise.all(deletePromises);
+        toast({
+          title: "Images deleted",
+          description: "All slideshow images have been deleted successfully.",
+        });
+      } else if (deleteConfig.id) {
+        await processDelete(deleteConfig.id, deleteConfig.url);
+        toast({
+          title: "Image deleted",
+          description: "Slideshow image has been deleted successfully.",
+        });
       }
-
-      toast({
-        title: "Image deleted",
-        description: "Slideshow image has been deleted successfully.",
-      });
-
       fetchImages();
     } catch (error) {
-      console.error('Error deleting image:', error);
+      console.error('Error deleting image(s):', error);
       toast({
         title: "Error",
-        description: "Failed to delete image. Please try again.",
+        description: "Failed to delete image(s). Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setDeleteConfig(null);
     }
   };
 
@@ -340,20 +361,20 @@ export const AdminSlideshowImages: React.FC = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Slideshow Images</h1>
+            <div className="flex items-center"><h1 className="text-2xl font-bold text-gray-900">Slideshow Images</h1>
+                    <AdminPageGuide 
+                      title="Homepage Slideshow"
+                      description="Curate the massive rotating banners seen by every visitor on the main homepage."
+                      features={["Upload ultra-wide landscape images", "Set overlay text and Call-To-Action buttons", "Reorder slides (Drag & Drop)", "Toggle visibility per-slide"]}
+                      workflow={["Upload a WebP/JPEG image optimized for wide screens.", "Add a punchy title and brief subtitle.", "Add a destination URL for the massive button.", "Verify the preview looks good before publishing."]}
+                    />
+                </div>
             <p className="text-gray-600">Manage homepage slideshow images</p>
           </div>
           <div className="flex gap-2">
             {images.length > 0 && (
-              <Button 
-                onClick={() => {
-                  if (window.confirm(`Are you sure you want to delete ALL ${images.length} images? This action cannot be undone.`)) {
-                    // Delete all images
-                    images.forEach(image => {
-                      handleDelete(image.id, image.image_url);
-                    });
-                  }
-                }}
+              <Button
+                onClick={() => setDeleteConfig({ type: 'all' })}
                 variant="destructive"
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
@@ -411,7 +432,7 @@ export const AdminSlideshowImages: React.FC = () => {
                             />
                           </div>
                         </TableCell>
-                        
+
                         <TableCell>
                           <div>
                             <div className="font-medium">{image.title || 'Untitled'}</div>
@@ -422,7 +443,7 @@ export const AdminSlideshowImages: React.FC = () => {
                             )}
                           </div>
                         </TableCell>
-                        
+
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Switch
@@ -444,7 +465,7 @@ export const AdminSlideshowImages: React.FC = () => {
                             </Badge>
                           </div>
                         </TableCell>
-                        
+
                         <TableCell>
                           <div className="flex items-center gap-1">
                             <Button
@@ -467,13 +488,13 @@ export const AdminSlideshowImages: React.FC = () => {
                             </Button>
                           </div>
                         </TableCell>
-                        
+
                         <TableCell>
                           <div className="text-sm text-gray-600">
                             {new Date(image.created_at).toLocaleDateString()}
                           </div>
                         </TableCell>
-                        
+
                         <TableCell>
                           <div className="flex space-x-2">
                             <Button
@@ -486,7 +507,7 @@ export const AdminSlideshowImages: React.FC = () => {
                             <Button
                               size="sm"
                               variant="destructive"
-                              onClick={() => handleDelete(image.id, image.image_url)}
+                              onClick={() => setDeleteConfig({ type: 'single', id: image.id, url: image.image_url })}
                               className="hover:bg-red-600 hover:text-white"
                             >
                               <Trash2 className="w-3 h-3" />
@@ -510,7 +531,7 @@ export const AdminSlideshowImages: React.FC = () => {
                 {editingImage ? 'Edit Slideshow Image' : 'Add New Slideshow Image'}
               </DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-6">
               {/* Image Upload/Preview */}
               <div>
@@ -518,9 +539,9 @@ export const AdminSlideshowImages: React.FC = () => {
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                   {previewUrl ? (
                     <div className="space-y-3">
-                      <img 
-                        src={previewUrl} 
-                        alt="Preview" 
+                      <img
+                        src={previewUrl}
+                        alt="Preview"
                         className="max-h-48 mx-auto rounded-lg"
                       />
                       {!editingImage && (
@@ -627,6 +648,23 @@ export const AdminSlideshowImages: React.FC = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!deleteConfig} onOpenChange={(open) => !open && setDeleteConfig(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                {deleteConfig?.type === 'all'
+                  ? `Are you sure you want to delete ALL ${images.length} images? This action cannot be undone.`
+                  : 'Are you sure you want to delete this image? This action cannot be undone.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );

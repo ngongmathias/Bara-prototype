@@ -156,7 +156,6 @@ export const fetchNewsForCountry = async (
   if (NEWSAPI_KEY) {
     const articles = await fetchFromNewsAPI(countryCode);
     if (articles.length > 0) {
-      console.log(`✅ Fetched ${articles.length} articles from NewsAPI for ${countryName}`);
       return articles;
     }
   }
@@ -165,7 +164,6 @@ export const fetchNewsForCountry = async (
   if (GNEWS_KEY) {
     const articles = await fetchFromGNews(countryCode);
     if (articles.length > 0) {
-      console.log(`✅ Fetched ${articles.length} articles from GNews for ${countryName}`);
       return articles;
     }
   }
@@ -174,13 +172,11 @@ export const fetchNewsForCountry = async (
   if (CURRENTS_KEY) {
     const articles = await fetchFromCurrents(countryCode);
     if (articles.length > 0) {
-      console.log(`✅ Fetched ${articles.length} articles from Currents for ${countryName}`);
       return articles;
     }
   }
 
   // Fallback to Google News RSS (always free, always works)
-  console.log(`ℹ️ Using Google News RSS for ${countryName} (no API keys configured)`);
   return []; // Will use existing RSS service
 };
 
@@ -265,7 +261,6 @@ import { autoRefreshAllCountries } from '@/lib/newsApiService';
 
 const handleRefresh = async () => {
   const result = await autoRefreshAllCountries();
-  console.log(`Added ${result.articlesAdded} articles`);
 };
 
 // Example 2: Fetch specific country

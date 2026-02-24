@@ -1,6 +1,6 @@
-import { ReactNode, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useUser, useAuth } from "@clerk/clerk-react";
+import { ReactNode, useEffect, useState, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useUser, useAuth, useClerk } from "@clerk/clerk-react";
 import { ClerkSupabaseBridge } from "@/lib/clerkSupabaseBridge";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -10,40 +10,52 @@ interface AdminAuthGuardProps {
 
 export const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isSignedIn, user, isLoaded } = useUser();
   const { getToken } = useAuth();
+  const { openSignIn } = useClerk();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   const [adminInfo, setAdminInfo] = useState<any>(null);
-  const [hasShownWelcome, setHasShownWelcome] = useState(false);
+
+  // Use refs to prevent dependency-induced infinite loops
+  const hasCheckedRef = useRef(false);
+  const hasShownWelcomeRef = useRef(false);
   const { toast } = useToast();
 
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!isLoaded) return;
-      
+      if (!isLoaded || hasCheckedRef.current) return;
+      hasCheckedRef.current = true;
+
       if (!isSignedIn) {
-        // User is not signed in, redirect to sign-in
-        navigate('/sign-in');
+        // User is not signed in, prompt sign in and redirect to home
+        toast({
+          title: "Sign In Required",
+          description: "Please sign in to access the admin panel",
+        });
+        navigate('/');
+        openSignIn({ fallbackRedirectUrl: location.pathname });
         return;
       }
 
       try {
         // Get Clerk JWT token
         const token = await getToken();
-        
+
         if (!token) {
           toast({
             title: "Authentication Error",
             description: "Unable to verify authentication token",
             variant: "destructive"
           });
-          navigate('/sign-in');
+          navigate('/');
+          openSignIn({ fallbackRedirectUrl: location.pathname });
           return;
         }
 
         const userEmail = user.primaryEmailAddress?.emailAddress || '';
-        
+
         // Check admin status from database (NO AUTO-GRANT)
         const adminStatus = await ClerkSupabaseBridge.checkAdminStatus(user.id, userEmail);
 
@@ -52,34 +64,34 @@ export const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
           console.log('Access denied: User is not in admin_users table');
           setIsAdmin(false);
           setIsChecking(false);
-          
+
           toast({
             title: "Access Denied",
             description: "You don't have admin privileges. Contact a super admin for access.",
             variant: "destructive"
           });
-          
+
           // Show error but don't redirect - let the user see the message
           return;
         }
 
         // User is an admin - update last login and grant access
         await ClerkSupabaseBridge.updateLastLogin(user.id);
-        
+
         setAdminInfo(adminStatus.adminUser);
         setIsAdmin(true);
         setIsChecking(false);
 
         // Only show welcome message once after successful login
-        if (!hasShownWelcome) {
+        if (!hasShownWelcomeRef.current) {
           toast({
             title: "Access Granted",
             description: `Welcome, ${adminStatus.role || 'Admin'}!`,
             variant: "default"
           });
-          setHasShownWelcome(true);
+          hasShownWelcomeRef.current = true;
         }
-        
+
       } catch (error) {
         console.error('Error checking admin status:', error);
         toast({
@@ -87,12 +99,14 @@ export const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
           description: "Failed to verify admin status",
           variant: "destructive"
         });
-        navigate('/sign-in');
+        navigate('/');
       }
     };
 
     checkAdminStatus();
-  }, [isLoaded, isSignedIn, user, navigate, getToken, toast, hasShownWelcome]);
+    // We use hasCheckedRef.current to prevent infinite loops, so we only need it to run when user/isLoaded changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, isSignedIn, user?.id]);
 
   if (isChecking) {
     return (

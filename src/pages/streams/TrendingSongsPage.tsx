@@ -65,7 +65,11 @@ export default function TrendingSongsPage() {
                                         src={song.cover_url}
                                         alt={song.title}
                                         className="w-full h-full object-cover rounded-md shadow-lg"
-                                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.onerror = null;
+                                            target.src = '/placeholder-music.png';
+                                        }}
                                     />
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}

@@ -38,6 +38,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { getAdminDb } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface Category {
   id: string;
@@ -505,7 +507,7 @@ export const AdminCategories = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `categories-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `categories-${new Date().toLocaleDateString('en-CA')}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -558,6 +560,14 @@ export const AdminCategories = () => {
   if (loading) {
     return (
       <AdminLayout title="Categories Management" subtitle="Manage business categories">
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Categories Management"
+            description="Control the global business categories."
+            features={["Add new categories", "Edit category icons and colors", "Remove unused categories"]}
+            workflow={["Review proposed categories", "Assign a relevant standard icon", "Save to update the public directory"]}
+          />
+        </div>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yp-blue"></div>
         </div>

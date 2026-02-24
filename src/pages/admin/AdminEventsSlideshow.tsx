@@ -30,6 +30,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { useUser } from '@clerk/clerk-react';
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface EventSlideMedia {
   id: string;
@@ -280,6 +282,14 @@ export const AdminEventsSlideshow = () => {
 
   return (
     <AdminLayout>
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Events Slideshow"
+            description="Manage the rotating banner on the Events page."
+            features={["Upload wide-format promotional images", "Link to featured events", "Set active status"]}
+            workflow={["Upload 16:9 WebP image", "Add the URL of the event to feature", "Toggle Active to show to users"]}
+          />
+        </div>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { EventsService, Event, EventSearchParams, EventSearchResult, EventCategory, City } from '@/lib/eventsService';
 import { db } from '@/lib/supabase';
 
@@ -10,7 +11,7 @@ export const useEvents = () => {
   const searchEvents = useCallback(async (params: EventSearchParams = {}) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const result = await EventsService.searchEvents(params);
       setEvents(result.events);
@@ -27,7 +28,7 @@ export const useEvents = () => {
   const getEventsByCountry = useCallback(async (countryId: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const countryEvents = await EventsService.getEventsByCountry(countryId);
       setEvents(countryEvents);
@@ -44,7 +45,7 @@ export const useEvents = () => {
   const getFeaturedEvents = useCallback(async (limit: number = 6) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const featuredEvents = await EventsService.getFeaturedEvents(limit);
       setEvents(featuredEvents);
@@ -61,7 +62,7 @@ export const useEvents = () => {
   const getUpcomingEvents = useCallback(async (limit: number = 10) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const upcomingEvents = await EventsService.getUpcomingEvents(limit);
       setEvents(upcomingEvents);
@@ -95,7 +96,7 @@ export const useEvent = (eventId: string | null) => {
   const fetchEvent = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const eventData = await EventsService.getEventById(id);
       setEvent(eventData);
@@ -140,11 +141,11 @@ export const useEventCategories = () => {
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const categoriesData = await EventsService.getEventCategories();
       // Sort categories alphabetically by name
-      const sortedCategories = categoriesData.sort((a, b) => 
+      const sortedCategories = categoriesData.sort((a, b) =>
         a.name.localeCompare(b.name)
       );
       setCategories(sortedCategories);
@@ -178,7 +179,7 @@ export const useCitiesByCountry = (countryId: string | null) => {
   const fetchCities = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const citiesData = await EventsService.getCitiesByCountry(id);
       setCities(citiesData);
@@ -215,7 +216,7 @@ export const useEventManagement = () => {
   const createEvent = useCallback(async (eventData: Partial<Event>) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const newEvent = await EventsService.createEvent(eventData);
       return newEvent;
@@ -231,7 +232,7 @@ export const useEventManagement = () => {
   const updateEvent = useCallback(async (eventId: string, eventData: Partial<Event>) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const updatedEvent = await EventsService.updateEvent(eventId, eventData);
       return updatedEvent;
@@ -247,7 +248,7 @@ export const useEventManagement = () => {
   const deleteEvent = useCallback(async (eventId: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       await EventsService.deleteEvent(eventId);
     } catch (err) {
@@ -262,7 +263,7 @@ export const useEventManagement = () => {
   const updateEventTickets = useCallback(async (eventId: string, tickets: any[]) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const updatedTickets = await EventsService.updateEventTickets(eventId, tickets);
       return updatedTickets;
@@ -287,39 +288,29 @@ export const useEventManagement = () => {
 
 // Hook for fetching countries
 export const useCountries = () => {
-  const [countries, setCountries] = useState<Array<{id: string; name: string; code: string}>>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchCountries = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
+  const {
+    data: countries = [],
+    isLoading: loading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ['countries'],
+    queryFn: async () => {
       const { data, error } = await db.countries()
         .select('id, name, code')
         .eq('is_active', true)
         .order('name', { ascending: true });
 
       if (error) throw error;
-      setCountries(data || []);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch countries';
-      setError(errorMessage);
-      console.error('Error fetching countries:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchCountries();
-  }, [fetchCountries]);
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour
+  });
 
   return {
     countries,
     loading,
-    error,
-    refetch: fetchCountries
+    error: queryError ? (queryError as Error).message : null,
+    refetch,
   };
 };

@@ -39,6 +39,8 @@ import {
 } from "lucide-react";
 import { db, supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
 
 interface Album {
     id: string;
@@ -71,7 +73,7 @@ export const AdminAlbums = () => {
         title: "",
         artist_id: "",
         cover_url: "",
-        release_date: new Date().toISOString().split('T')[0],
+        release_date: new Date().toLocaleDateString('en-CA'),
         genre: ""
     });
 
@@ -189,7 +191,7 @@ export const AdminAlbums = () => {
             title: "",
             artist_id: "",
             cover_url: "",
-            release_date: new Date().toISOString().split('T')[0],
+            release_date: new Date().toLocaleDateString('en-CA'),
             genre: ""
         });
         setEditingAlbum(null);
@@ -202,7 +204,7 @@ export const AdminAlbums = () => {
             title: album.title,
             artist_id: album.artist_id,
             cover_url: album.cover_url || "",
-            release_date: album.release_date.split('T')[0],
+            release_date: new Date(album.release_date).toLocaleDateString('en-CA'),
             genre: album.genre || ""
         });
         setIsDialogOpen(true);
@@ -215,6 +217,14 @@ export const AdminAlbums = () => {
 
     return (
         <AdminLayout title="Albums" subtitle="Manage albums and EP releases">
+        <div className="mb-4 w-full flex justify-end">
+          <AdminPageGuide 
+            title="Bara Streams: Albums"
+            description="Moderate album releases by independent artists."
+            features={["Edit release dates", "Take down copyrighted material", "Feature new drops"]}
+            workflow={["Search for flagged albums", "Verify rights ownership", "Remove if an active DMCA is present"]}
+          />
+        </div>
             <div className="p-6 space-y-6">
                 <div className="flex justify-between items-center">
                     <div className="relative w-72">
