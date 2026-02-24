@@ -3,7 +3,9 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, MapPin, Star, ArrowLeft, Search, Grid, List, Phone, Globe, Crown, Users, Sparkles, Tag, Map, ChevronDown, UtensilsCrossed, Wine, Coffee, Car, Home, Scale, Bed, Plane, Building, Scissors, BookOpen, Film, Stethoscope, User, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, Zap, Wrench, Heart, Dumbbell, Laptop, Shield, Calculator, Megaphone, Briefcase, Camera, Calendar, Music } from "lucide-react";
+import {
+  Building2, MapPin, Star, ArrowLeft, Search, Grid, List, Phone, Globe, Crown, Users, Sparkles, Tag, Map, ChevronDown, UtensilsCrossed, Wine, Coffee, Car, Home, Scale, Bed, Plane, Building, Scissors, BookOpen, Film, Stethoscope, User, Church, Leaf, Palette, Landmark, Hospital, Book, ShoppingBag, Trees, Pill, Mail, Gamepad2, GraduationCap, Truck, Zap, Wrench, Heart, Dumbbell, Laptop, Shield, Calculator, Megaphone, Briefcase, Camera, Calendar, Music
+} from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { Header } from "@/components/Header";
@@ -97,6 +99,9 @@ interface Business {
   city: { name: string } | null;
   country: { name: string; code: string } | null;
   reviews: { rating: number }[];
+  status: string; // Added status field
+  category_id: string; // Added category_id field
+  country_id: string; // Added country_id field
 }
 
 type FilterType = 'all' | 'order-online' | 'kid-friendly' | 'coupons' | 'verified';
@@ -627,7 +632,7 @@ const CategoryListingsPage = () => {
                                 <div className="flex items-center gap-1 mt-2">
                                   <div className="flex">
                                     {[...Array(5)].map((_, i) => (
-                                      <Crown
+                                      <Star
                                         key={i}
                                         className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-orange-500 fill-current' : 'text-gray-300'}`}
                                       />
@@ -705,10 +710,10 @@ const CategoryListingsPage = () => {
                           transition={{ delay: Math.min(index * 0.05, 0.3) }}
                           onClick={() => handleBusinessClick(business)}
                           className={`bg-white border rounded-xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group relative ${business.is_sponsored_ad
-                              ? 'border-blue-400 ring-2 ring-blue-200'
-                              : business.is_premium
-                                ? 'border-blue-400 ring-1 ring-blue-100'
-                                : 'border-gray-200 hover:border-black'
+                            ? 'border-blue-400 ring-2 ring-blue-200'
+                            : business.is_premium
+                              ? 'border-blue-400 ring-1 ring-blue-100'
+                              : 'border-gray-200 hover:border-black'
                             }`}
                         >
                           {business.is_sponsored_ad && (
@@ -742,7 +747,7 @@ const CategoryListingsPage = () => {
                               <div className="flex items-center gap-1 mt-2">
                                 <div className="flex">
                                   {[...Array(5)].map((_, i) => (
-                                    <Crown
+                                    <Star
                                       key={i}
                                       className={`w-4 h-4 ${i < Math.floor(getAverageRating(business.reviews)) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
                                     />

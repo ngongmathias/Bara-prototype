@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { getAdminDb } from '@/lib/supabase';
 import { refreshRSSFeeds, getRSSFeedSources } from '@/lib/rssService';
 import {
   RefreshCw,
@@ -36,19 +36,18 @@ export const AdminRSSFeeds = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const db = getAdminDb();
 
       // Fetch sources
-      const { data: sourcesData, error: sourcesError } = await db
-        .rss_feed_sources()
+      const { data: sourcesData, error: sourcesError } = await supabase
+        .from('rss_feed_sources')
         .select('*')
         .order('country_name');
 
       if (sourcesError) throw sourcesError;
 
       // Fetch recent feeds
-      const { data: feedsData, error: feedsError } = await db
-        .rss_feeds()
+      const { data: feedsData, error: feedsError } = await supabase
+        .from('rss_feeds')
         .select('*')
         .order('pub_date', { ascending: false })
         .limit(50);
@@ -113,9 +112,8 @@ export const AdminRSSFeeds = () => {
 
   const toggleSourceActive = async (sourceId: string, currentStatus: boolean) => {
     try {
-      const db = getAdminDb();
-      const { error } = await db
-        .rss_feed_sources()
+      const { error } = await supabase
+        .from('rss_feed_sources')
         .update({ is_active: !currentStatus })
         .eq('id', sourceId);
 
@@ -154,14 +152,14 @@ export const AdminRSSFeeds = () => {
 
   return (
     <AdminLayout title="RSS Feeds Management" subtitle="Manage news sources and feeds">
-        <div className="mb-4 w-full flex justify-end">
-          <AdminPageGuide 
-            title="RSS Feed Aggregator"
-            description="Manage automated news sourcing from African outlets."
-            features={["Add new RSS urls", "Set fetch frequency", "Monitor parsing errors"]}
-            workflow={["Add the .xml or .rss link", "Test the fetcher", "Set active to start pulling articles"]}
-          />
-        </div>
+      <div className="mb-4 w-full flex justify-end">
+        <AdminPageGuide
+          title="RSS Feed Aggregator"
+          description="Manage automated news sourcing from African outlets."
+          features={["Add new RSS urls", "Set fetch frequency", "Monitor parsing errors"]}
+          workflow={["Add the .xml or .rss link", "Test the fetcher", "Set active to start pulling articles"]}
+        />
+      </div>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -12,7 +12,7 @@ export const uploadImage = async (
   bucket: string = 'sponsored-banners',
   folder: string = 'banners',
   optimize: boolean = true
-): Promise<UploadResult> => {
+): Promise<string> => {
   try {
     // Validate image
     const validation = validateImage(file);

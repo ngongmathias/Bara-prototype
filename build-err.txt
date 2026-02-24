@@ -1,0 +1,24 @@
+Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[31m✗[39m Build failed in 7.09s
+[31merror during build:
+[31m[vite]: Rollup failed to resolve import "next-themes" from "C:/Users/Hp/Bara-Prototype/src/components/ui/sonner.tsx".
+This is most likely unintended because it can break your application at runtime.
+If you do want to externalize this module explicitly add it to
+`build.rollupOptions.external`[31m
+    at viteLog (file:///C:/Users/Hp/Bara-Prototype/node_modules/vite/dist/node/chunks/dep-Bu492Fnd.js:46363:15)
+    at file:///C:/Users/Hp/Bara-Prototype/node_modules/vite/dist/node/chunks/dep-Bu492Fnd.js:46421:18
+    at onwarn (file:///C:/Users/Hp/Bara-Prototype/node_modules/@vitejs/plugin-react-swc/index.js:90:7)
+    at file:///C:/Users/Hp/Bara-Prototype/node_modules/vite/dist/node/chunks/dep-Bu492Fnd.js:46419:7
+    at onRollupLog (file:///C:/Users/Hp/Bara-Prototype/node_modules/vite/dist/node/chunks/dep-Bu492Fnd.js:46411:5)
+    at onLog (file:///C:/Users/Hp/Bara-Prototype/node_modules/vite/dist/node/chunks/dep-Bu492Fnd.js:46061:7)
+    at file:///C:/Users/Hp/Bara-Prototype/node_modules/rollup/dist/es/shared/node-entry.js:20906:32
+    at Object.logger [as onLog] (file:///C:/Users/Hp/Bara-Prototype/node_modules/rollup/dist/es/shared/node-entry.js:22792:9)
+    at ModuleLoader.handleInvalidResolvedId (file:///C:/Users/Hp/Bara-Prototype/node_modules/rollup/dist/es/shared/node-entry.js:21536:26)
+    at file:///C:/Users/Hp/Bara-Prototype/node_modules/rollup/dist/es/shared/node-entry.js:21494:26[39m
+
+---STDOUT---
+[36mvite v6.3.6 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 158 modules transformed.

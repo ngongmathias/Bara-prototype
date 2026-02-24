@@ -335,8 +335,8 @@ export const AdminBannerAds = () => {
 
   const toggleActive = async (id: string, currentStatus: boolean) => {
     try {
-      const adminDb = getAdminDb();
-      const { error } = await adminDb.banner_ads()
+      const { error } = await supabase
+        .from('banner_ads')
         .update({ is_active: !currentStatus })
         .eq('id', id);
 
@@ -453,13 +453,13 @@ export const AdminBannerAds = () => {
         <div className="flex justify-between items-center">
           <div>
             <div className="flex items-center"><h1 className="text-3xl font-bold">Banner Ads Management</h1>
-                    <AdminPageGuide 
-                      title="Sponsored Banner Ads"
-                      description="Manage the monetization pipeline. Approve paid advertisements and schedule their global display."
-                      features={["Review ad creatives and landing pages", "Approve pending campaigns", "Set explicit Start and End dates", "Track impression slots"]}
-                      workflow={["Review ads in the Pending tab.", "Check the image for compliance with community guidelines.", "Set the campaign duration if not already set.", "Click Approve to make the ad live across the platform."]}
-                    />
-                </div>
+              <AdminPageGuide
+                title="Sponsored Banner Ads"
+                description="Manage the monetization pipeline. Approve paid advertisements and schedule their global display."
+                features={["Review ad creatives and landing pages", "Approve pending campaigns", "Set explicit Start and End dates", "Track impression slots"]}
+                workflow={["Review ads in the Pending tab.", "Check the image for compliance with community guidelines.", "Set the campaign duration if not already set.", "Click Approve to make the ad live across the platform."]}
+              />
+            </div>
             <p className="text-gray-600">Manage banner advertisements and sponsored banners</p>
           </div>
 
@@ -600,8 +600,8 @@ export const AdminBannerAds = () => {
           <button
             onClick={() => setActiveTab('banner_ads')}
             className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${activeTab === 'banner_ads'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-blue-600'
+              ? 'bg-white text-blue-600 shadow-sm'
+              : 'text-gray-600 hover:text-blue-600'
               }`}
           >
             <Eye className="w-4 h-4 inline mr-2" />
@@ -610,8 +610,8 @@ export const AdminBannerAds = () => {
           <button
             onClick={() => setActiveTab('sponsored_banners')}
             className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${activeTab === 'sponsored_banners'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-blue-600'
+              ? 'bg-white text-blue-600 shadow-sm'
+              : 'text-gray-600 hover:text-blue-600'
               }`}
           >
             <Target className="w-4 h-4 inline mr-2" />

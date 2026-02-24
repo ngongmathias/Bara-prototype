@@ -2,15 +2,15 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Camera, 
-  Upload, 
-  X, 
+import {
+  Camera,
+  Upload,
+  X,
   Image as ImageIcon,
   Loader2,
   Trash2
 } from 'lucide-react';
-import { storageService, UploadResult } from '@/lib/storage';
+import { uploadImage, deleteImage } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 
 interface BusinessImageUploadProps {
@@ -20,11 +20,11 @@ interface BusinessImageUploadProps {
   className?: string;
 }
 
-export const BusinessImageUpload = ({ 
-  businessId, 
-  onImagesChange, 
+export const BusinessImageUpload = ({
+  businessId,
+  onImagesChange,
   maxImages = 5,
-  className = '' 
+  className = ''
 }: BusinessImageUploadProps) => {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
@@ -33,7 +33,7 @@ export const BusinessImageUpload = ({
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    
+
     if (files.length === 0) return;
 
     // Validate file count
@@ -49,7 +49,7 @@ export const BusinessImageUpload = ({
     // Validate file types
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     const invalidFiles = files.filter(file => !validTypes.includes(file.type));
-    
+
     if (invalidFiles.length > 0) {
       toast({
         title: "Invalid file type",
@@ -62,7 +62,7 @@ export const BusinessImageUpload = ({
     // Validate file sizes (5MB limit)
     const maxSize = 5 * 1024 * 1024; // 5MB
     const oversizedFiles = files.filter(file => file.size > maxSize);
-    
+
     if (oversizedFiles.length > 0) {
       toast({
         title: "File too large",
@@ -74,17 +74,25 @@ export const BusinessImageUpload = ({
 
     setUploading(true);
     try {
-      const results = await storageService.uploadMultipleImages(files, businessId, 'business');
-      
-      const successfulUploads = results
-        .filter(result => !result.error)
-        .map(result => result.url);
+      const successfulUploads: string[] = [];
+      const failedUploads: string[] = [];
+
+      for (const file of files) {
+        try {
+          // Note: using the standalone uploadImage function
+          const url = await uploadImage(file, 'businesses', `business-${businessId}`);
+          successfulUploads.push(url);
+        } catch (err) {
+          console.error(`Failed to upload ${file.name}:`, err);
+          failedUploads.push(file.name);
+        }
+      }
 
       if (successfulUploads.length > 0) {
         const newImages = [...images, ...successfulUploads];
         setImages(newImages);
         onImagesChange?.(newImages);
-        
+
         toast({
           title: "Upload successful",
           description: `${successfulUploads.length} image(s) uploaded successfully.`,
@@ -92,7 +100,6 @@ export const BusinessImageUpload = ({
         });
       }
 
-      const failedUploads = results.filter(result => result.error);
       if (failedUploads.length > 0) {
         toast({
           title: "Some uploads failed",
@@ -120,7 +127,7 @@ export const BusinessImageUpload = ({
     const newImages = images.filter((_, i) => i !== index);
     setImages(newImages);
     onImagesChange?.(newImages);
-    
+
     toast({
       title: "Image removed",
       description: "Image removed successfully.",
@@ -136,7 +143,7 @@ export const BusinessImageUpload = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       const event = { target: { files } } as any;
@@ -156,11 +163,10 @@ export const BusinessImageUpload = ({
         <CardContent className="space-y-4">
           {/* Upload Area */}
           <div
-            className={`border-2 border-dashed border-gray-300 rounded-lg p-6 text-center transition-colors ${
-              images.length >= maxImages 
-                ? 'border-gray-200 bg-gray-50' 
-                : 'border-[#e64600]/30 bg-[#e64600]/5 hover:border-blue-400 hover:bg-blue-50'
-            }`}
+            className={`border-2 border-dashed border-gray-300 rounded-lg p-6 text-center transition-colors ${images.length >= maxImages
+              ? 'border-gray-200 bg-gray-50'
+              : 'border-[#e64600]/30 bg-[#e64600]/5 hover:border-blue-400 hover:bg-blue-50'
+              }`}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
@@ -229,8 +235,8 @@ export const BusinessImageUpload = ({
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
-                  <Badge 
-                    variant="secondary" 
+                  <Badge
+                    variant="secondary"
                     className="absolute top-2 right-2 text-xs"
                   >
                     {index + 1}

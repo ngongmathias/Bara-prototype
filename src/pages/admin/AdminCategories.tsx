@@ -4,25 +4,25 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  DialogTrigger 
+  DialogTrigger
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  Search, 
+import {
+  Search,
   Download,
   ChevronLeft,
   ChevronRight,
@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
-import { getAdminDb } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
 
@@ -67,7 +67,7 @@ interface CategoryFormData {
 export const AdminCategories = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -77,7 +77,7 @@ export const AdminCategories = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -97,10 +97,9 @@ export const AdminCategories = () => {
   const fetchCategories = async (searchMode = false) => {
     try {
       setLoading(true);
-      
-      const db = getAdminDb();
-      let query = db
-        .categories()
+
+      let query = supabase
+        .from('categories')
         .select('*')
         .order('sort_order', { ascending: true })
         .order('name', { ascending: true });
@@ -109,10 +108,10 @@ export const AdminCategories = () => {
       if (searchMode && searchTerm.trim()) {
         // Server-side search using Supabase text search
         const searchQuery = searchTerm.trim();
-        
+
         // Use ilike for case-insensitive search across multiple fields
-        const { data, error } = await db
-          .categories()
+        const { data, error } = await supabase
+          .from('categories')
           .select('*')
           .or(`name.ilike.%${searchQuery}%,slug.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,icon.ilike.%${searchQuery}%`)
           .order('sort_order', { ascending: true })
@@ -134,14 +133,14 @@ export const AdminCategories = () => {
         // Get parent names for categories that have parents
         const categoriesWithParents = data?.filter(cat => cat.parent_id) || [];
         const parentIds = [...new Set(categoriesWithParents.map(cat => cat.parent_id))];
-        
+
         let parentCategories: { [key: string]: string } = {};
         if (parentIds.length > 0) {
-          const { data: parentData, error: parentError } = await db
-            .categories()
+          const { data: parentData, error: parentError } = await supabase
+            .from('categories')
             .select('id, name')
             .in('id', parentIds);
-          
+
           if (!parentError && parentData) {
             parentCategories = parentData.reduce((acc, parent) => {
               acc[parent.id] = parent.name;
@@ -177,14 +176,14 @@ export const AdminCategories = () => {
         // Get parent names for categories that have parents
         const categoriesWithParents = data?.filter(cat => cat.parent_id) || [];
         const parentIds = [...new Set(categoriesWithParents.map(cat => cat.parent_id))];
-        
+
         let parentCategories: { [key: string]: string } = {};
         if (parentIds.length > 0) {
-          const { data: parentData, error: parentError } = await db
-            .categories()
+          const { data: parentData, error: parentError } = await supabase
+            .from('categories')
             .select('id, name')
             .in('id', parentIds);
-          
+
           if (!parentError && parentData) {
             parentCategories = parentData.reduce((acc, parent) => {
               acc[parent.id] = parent.name;
@@ -203,8 +202,8 @@ export const AdminCategories = () => {
       } else {
         // For normal pagination mode
         // Get total count for pagination
-        const { count } = await db
-          .categories()
+        const { count } = await supabase
+          .from('categories')
           .select('id', { count: 'exact', head: true });
 
         setTotalCategories(count || 0);
@@ -226,14 +225,14 @@ export const AdminCategories = () => {
         // Get parent names for categories that have parents
         const categoriesWithParents = data?.filter(cat => cat.parent_id) || [];
         const parentIds = [...new Set(categoriesWithParents.map(cat => cat.parent_id))];
-        
+
         let parentCategories: { [key: string]: string } = {};
         if (parentIds.length > 0) {
-          const { data: parentData, error: parentError } = await getAdminDb()
-            .categories()
+          const { data: parentData, error: parentError } = await supabase
+            .from('categories')
             .select('id, name')
             .in('id', parentIds);
-          
+
           if (!parentError && parentData) {
             parentCategories = parentData.reduce((acc, parent) => {
               acc[parent.id] = parent.name;
@@ -265,7 +264,7 @@ export const AdminCategories = () => {
   // Filter categories based on search term (client-side fallback for parent names)
   const filteredCategories = categories.filter(category => {
     if (!searchTerm.trim()) return true;
-    
+
     // Since we're using server-side search, we only need to filter by parent_name
     // as the server-side search doesn't include parent names
     const searchLower = searchTerm.toLowerCase();
@@ -289,7 +288,7 @@ export const AdminCategories = () => {
   // Handle form data changes
   const handleFormChange = (field: keyof CategoryFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
+
     // Auto-generate slug when name changes
     if (field === 'name') {
       setFormData(prev => ({ ...prev, slug: generateSlug(value) }));
@@ -309,9 +308,8 @@ export const AdminCategories = () => {
 
     setIsSubmitting(true);
     try {
-      const db = getAdminDb();
-      const { error } = await db
-        .categories()
+      const { error } = await supabase
+        .from('categories')
         .insert([{
           name: formData.name.trim(),
           slug: formData.slug.trim(),
@@ -385,9 +383,8 @@ export const AdminCategories = () => {
         is_active: formData.is_active
       };
 
-      const db = getAdminDb();
-      const { error } = await db
-        .categories()
+      const { error } = await supabase
+        .from('categories')
         .update(updatePayload)
         .eq('id', selectedCategory.id);
 
@@ -428,9 +425,8 @@ export const AdminCategories = () => {
 
     setIsSubmitting(true);
     try {
-      const db = getAdminDb();
-      const { error } = await db
-        .categories()
+      const { error } = await supabase
+        .from('categories')
         .delete()
         .eq('id', selectedCategory.id);
 
@@ -561,7 +557,7 @@ export const AdminCategories = () => {
     return (
       <AdminLayout title="Categories Management" subtitle="Manage business categories">
         <div className="mb-4 w-full flex justify-end">
-          <AdminPageGuide 
+          <AdminPageGuide
             title="Categories Management"
             description="Control the global business categories."
             features={["Add new categories", "Edit category icons and colors", "Remove unused categories"]}
@@ -583,9 +579,9 @@ export const AdminCategories = () => {
           <h2 className="text-2xl font-comfortaa font-bold text-yp-dark">Categories</h2>
           <p className="text-gray-600 font-roboto">Manage business categories and subcategories</p>
         </div>
-        
+
         <div className="flex items-center space-x-2">
-          <Button 
+          <Button
             onClick={() => fetchCategories(isSearching)}
             variant="outline"
             size="sm"
@@ -594,7 +590,7 @@ export const AdminCategories = () => {
             <RefreshCw className={cn("w-4 h-4 mr-2", loading && "animate-spin")} />
             Refresh
           </Button>
-          
+
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-yellow-900 hover:bg-blue-600">
@@ -688,8 +684,8 @@ export const AdminCategories = () => {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          
-          <Button 
+
+          <Button
             onClick={downloadCategoriesData}
             variant="outline"
             className="bg-white hover:bg-gray-50"
@@ -777,7 +773,7 @@ export const AdminCategories = () => {
                           </Badge>
                         )}
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                           <p className="text-sm font-medium text-gray-600">Description</p>
@@ -817,7 +813,7 @@ export const AdminCategories = () => {
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
-                      
+
                       <div className="text-xs text-gray-500">
                         Created: {new Date(category.created_at).toLocaleDateString()}
                       </div>
@@ -835,7 +831,7 @@ export const AdminCategories = () => {
                     <div className="text-sm text-gray-600">
                       Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalCategories)} of {totalCategories.toLocaleString()} categories
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       <Button
                         variant="outline"
@@ -846,7 +842,7 @@ export const AdminCategories = () => {
                         <ChevronLeft className="w-4 h-4" />
                         Previous
                       </Button>
-                      
+
                       <div className="flex items-center space-x-1">
                         {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                           let pageNum;
@@ -859,7 +855,7 @@ export const AdminCategories = () => {
                           } else {
                             pageNum = currentPage - 2 + i;
                           }
-                          
+
                           return (
                             <Button
                               key={pageNum}
@@ -873,7 +869,7 @@ export const AdminCategories = () => {
                           );
                         })}
                       </div>
-                      
+
                       <Button
                         variant="outline"
                         size="sm"

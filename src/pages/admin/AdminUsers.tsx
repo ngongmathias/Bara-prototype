@@ -124,8 +124,8 @@ export const AdminUsers = () => {
       const logsData = await UserLogService.getUserLogsPaginated(1, 100, searchTerm);
 
       // Filter users by type
-      const adminUsersData = usersData.users.filter(u => 'role' in u && u.role) as AdminUser[];
-      const databaseUsersData = usersData.users.filter(u => !('role' in u && u.role)) as DatabaseUser[];
+      const adminUsersData = usersData.users.filter(u => 'role' in u) as AdminUser[];
+      const databaseUsersData = usersData.users.filter(u => !('role' in u)) as DatabaseUser[];
 
       setAdminUsers(adminUsersData);
       setDatabaseUsers(databaseUsersData);

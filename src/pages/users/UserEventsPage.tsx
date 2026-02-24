@@ -39,7 +39,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEvents, useEventCategories, useEventManagement, useCountries, useCitiesByCountry } from '@/hooks/useEvents';
-import { uploadEventImage, EventsService } from '@/lib/eventsService';
+import { uploadEventImage, EventsService, createEvent, updateEvent } from '@/lib/eventsService';
 import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { MultiHashtagInput } from '@/components/ui/multi-hashtag-input';
 import { EventGalleryUpload } from '@/components/EventGalleryUpload';
@@ -276,18 +276,42 @@ export const UserEventsPage = () => {
 
     try {
       // Exclude tickets from eventData as it has incompatible types
-      const { tickets, ...formDataWithoutTickets } = formData;
-
       const eventData = {
-        ...formDataWithoutTickets,
+        title: formData.title,
+        description: formData.description,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        venue_name: formData.venue_name,
+        venue_address: formData.venue_address,
         venue_latitude: formData.venue_latitude ? parseFloat(formData.venue_latitude) : null,
         venue_longitude: formData.venue_longitude ? parseFloat(formData.venue_longitude) : null,
+        category: formData.category,
+        organizer_name: formData.organizer_name,
+        organizer_handle: formData.organizer_handle,
+        organizer_email: formData.organizer_email,
+        organizer_phone: formData.organizer_phone,
+        event_image_url: formData.event_image_url,
+        event_images: formData.event_images, // Assuming this maps to gallery_images or similar
         capacity: formData.capacity ? parseInt(formData.capacity) : null,
-        tags: formData.hashtags,
+        website_url: formData.website_url,
+        facebook_url: formData.facebook_url,
+        twitter_url: formData.twitter_url,
+        instagram_url: formData.instagram_url,
+        country_id: formData.country_id,
+        city_id: formData.city_id,
+        tags: formData.hashtags, // Mapping hashtags to tags
+        is_free: formData.is_free,
+        entry_fee: formData.entry_fee ? parseFloat(formData.entry_fee) : null,
+        currency: formData.currency,
+        payment_instructions: formData.payment_instructions,
+        payment_contact: formData.payment_contact,
         created_by_user_id: user.id,
         created_by_email: user.primaryEmailAddress?.emailAddress || '',
-        created_by_name: user.fullName || ''
-      };
+        created_by_name: user.fullName || '',
+        // Tickets are handled separately or need a specific structure
+        // For now, assuming tickets are not directly part of the main event object for create/update
+        // If tickets need to be created/updated with the event, the API and types need to reflect that.
+      } as DatabaseEvent; // Type cast to DatabaseEvent
 
       if (editingEvent) {
         await updateEvent(editingEvent.id, eventData);
@@ -297,9 +321,6 @@ export const UserEventsPage = () => {
         });
       } else {
         await createEvent(eventData);
-
-        // Email is now handled by database trigger or admin approval process
-
         toast({
           title: 'Event created',
           description: 'Your event has been successfully created.',

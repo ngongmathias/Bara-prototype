@@ -9,11 +9,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { 
-  Building, 
-  Globe, 
-  Image as ImageIcon, 
-  MapPin, 
+import {
+  Building,
+  Globe,
+  Image as ImageIcon,
+  MapPin,
   Mail,
   CheckCircle,
   AlertCircle,
@@ -41,10 +41,10 @@ interface ContactDialogProps {
   countryName: string;
 }
 
-const ContactDialog: React.FC<ContactDialogProps> = ({ 
-  isOpen, 
-  onClose, 
-  amount, 
+const ContactDialog: React.FC<ContactDialogProps> = ({
+  isOpen,
+  onClose,
+  amount,
   companyName,
   countryName
 }) => {
@@ -116,7 +116,7 @@ export const SponsorCountryPage: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { createBanner } = useSponsoredBanners();
-  
+
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -124,7 +124,7 @@ export const SponsorCountryPage: React.FC = () => {
   const [selectedCountryName, setSelectedCountryName] = useState('');
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [bannerImageUrl, setBannerImageUrl] = useState<string>('');
-  
+
   const [formData, setFormData] = useState({
     company_name: '',
     company_website: '',
@@ -183,7 +183,7 @@ export const SponsorCountryPage: React.FC = () => {
       }
 
       setBannerImage(file);
-      
+
       // Create preview URL for immediate display
       const previewUrl = URL.createObjectURL(file);
       setBannerImageUrl(previewUrl);
@@ -192,7 +192,7 @@ export const SponsorCountryPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!bannerImage) {
       toast({
         title: "Image Required",
@@ -210,38 +210,34 @@ export const SponsorCountryPage: React.FC = () => {
 
   const handleContactSuccess = async () => {
     setSubmitting(true);
-    
+
     try {
       // Upload image to storage first
       if (!bannerImage) {
         throw new Error('No image to upload');
       }
 
-      const uploadResult = await uploadImage(bannerImage, 'sponsored-banners', 'banners');
-      
-      if (uploadResult.error) {
-        throw new Error(`Image upload failed: ${uploadResult.error}`);
-      }
+      const bannerImageUrl = await uploadImage(bannerImage, 'sponsored-banners', 'banners');
 
       // Create banner data with uploaded image URL
       const bannerData = {
         country_id: formData.country_id,
         company_name: formData.company_name,
         company_website: formData.company_website,
-        banner_image_url: uploadResult.url,
+        banner_image_url: bannerImageUrl,
         banner_alt_text: formData.banner_alt_text,
         payment_status: 'paid' as const,
         payment_id: `PAY_${Date.now()}`,
       };
 
       const result = await createBanner(bannerData);
-      
+
       if (result) {
         toast({
           title: "Success!",
           description: "Your sponsored banner has been submitted and will be reviewed by our team.",
         });
-        
+
         // Reset form
         setFormData({
           company_name: '',
@@ -251,7 +247,7 @@ export const SponsorCountryPage: React.FC = () => {
         });
         setBannerImage(null);
         setBannerImageUrl('');
-        
+
         navigate('/');
       }
     } catch (error) {
@@ -284,7 +280,7 @@ export const SponsorCountryPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-yp-gray-light">
       <Header />
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-yp-dark mb-4">
@@ -313,7 +309,7 @@ export const SponsorCountryPage: React.FC = () => {
                     <p className="text-sm text-gray-600">{t('sponsorCountry.benefits.banner.description')}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-3">
                   <Building className="w-5 h-5 text-blue-600 mt-1" />
                   <div>
@@ -321,7 +317,7 @@ export const SponsorCountryPage: React.FC = () => {
                     <p className="text-sm text-gray-600">{t('sponsorCountry.benefits.visibility.description')}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-3">
                   <MapPin className="w-5 h-5 text-blue-600 mt-1" />
                   <div>
@@ -329,7 +325,7 @@ export const SponsorCountryPage: React.FC = () => {
                     <p className="text-sm text-gray-600">{t('sponsorCountry.benefits.audience.description')}</p>
                   </div>
                 </div>
-                
+
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-blue-900">{t('sponsorCountry.price.label')}</span>
@@ -352,7 +348,7 @@ export const SponsorCountryPage: React.FC = () => {
                   {/* Company Information */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium">{t('sponsorCountry.form.companyInfo')}</h3>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-2">
@@ -365,7 +361,7 @@ export const SponsorCountryPage: React.FC = () => {
                           placeholder={t('sponsorCountry.form.companyNamePlaceholder')}
                         />
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium mb-2">
                           {t('sponsorCountry.form.website')} *
@@ -384,7 +380,7 @@ export const SponsorCountryPage: React.FC = () => {
                   {/* Banner Information */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium">{t('sponsorCountry.form.bannerInfo')}</h3>
-                    
+
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         {t('sponsorCountry.form.selectCountry')} *
@@ -401,8 +397,8 @@ export const SponsorCountryPage: React.FC = () => {
                             <SelectItem key={country.id} value={country.id}>
                               <div className="flex items-center space-x-2">
                                 {country.flag_url && (
-                                  <img 
-                                    src={country.flag_url} 
+                                  <img
+                                    src={country.flag_url}
                                     alt={country.name}
                                     className="w-4 h-3"
                                   />
@@ -414,7 +410,7 @@ export const SponsorCountryPage: React.FC = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         {t('sponsorCountry.form.bannerImage')} *
@@ -422,8 +418,8 @@ export const SponsorCountryPage: React.FC = () => {
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                         {bannerImageUrl ? (
                           <div className="space-y-4">
-                            <img 
-                              src={bannerImageUrl} 
+                            <img
+                              src={bannerImageUrl}
                               alt="Banner preview"
                               className="max-h-32 mx-auto rounded"
                             />
@@ -466,7 +462,7 @@ export const SponsorCountryPage: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         {t('sponsorCountry.form.altText')}
@@ -488,7 +484,7 @@ export const SponsorCountryPage: React.FC = () => {
                         {t('sponsorCountry.form.terms')}
                       </AlertDescription>
                     </Alert>
-                    
+
                     <div className="flex space-x-4">
                       <Button
                         type="button"
@@ -521,7 +517,7 @@ export const SponsorCountryPage: React.FC = () => {
         companyName={formData.company_name}
         countryName={selectedCountryName}
       />
-      
+
       <Footer />
     </div>
   );
