@@ -151,7 +151,7 @@ export const UserEventsPage = () => {
   });
 
   useEffect(() => {
-    searchEvents({ limit: 100 });
+    searchEvents({ limit: 100, include_all_statuses: true, include_private: true });
   }, [searchEvents]);
 
   useEffect(() => {
@@ -308,6 +308,8 @@ export const UserEventsPage = () => {
         created_by_user_id: user.id,
         created_by_email: user.primaryEmailAddress?.emailAddress || '',
         created_by_name: user.fullName || '',
+        event_status: 'upcoming',
+        is_public: true,
         // Tickets are handled separately or need a specific structure
         // For now, assuming tickets are not directly part of the main event object for create/update
         // If tickets need to be created/updated with the event, the API and types need to reflect that.
@@ -330,7 +332,7 @@ export const UserEventsPage = () => {
       setIsDialogOpen(false);
       resetForm();
       // Refresh events list
-      searchEvents({ limit: 100 });
+      searchEvents({ limit: 100, include_all_statuses: true, include_private: true });
     } catch (error) {
       toast({
         title: 'Error',
