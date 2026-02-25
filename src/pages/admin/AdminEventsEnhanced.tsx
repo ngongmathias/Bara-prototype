@@ -277,6 +277,27 @@ export const AdminEventsEnhanced = () => {
         const finalizedImages = await EventsService.finalizeEventImages(editingEvent.id, formData.event_images);
         const payload = { ...eventData, event_images: finalizedImages };
         await updateEvent(editingEvent.id, payload);
+        // Save ticket types
+        if (formData.tickets.length > 0) {
+          try {
+            const ticketRecords = formData.tickets
+              .filter(t => t.name.trim())
+              .map(t => ({
+                name: t.name,
+                description: t.description || '',
+                is_default: false,
+                is_active: true,
+                registered_quantity: 0,
+              }));
+            if (ticketRecords.length > 0) {
+              const { supabase } = await import('@/lib/supabase');
+              await supabase.from('event_tickets').delete().eq('event_id', editingEvent.id);
+              await EventsService.createEventTickets(editingEvent.id, ticketRecords);
+            }
+          } catch (ticketError) {
+            console.warn('Failed to update tickets:', ticketError);
+          }
+        }
         toast({
           title: "Event updated successfully",
           description: "The event has been updated.",
@@ -289,6 +310,25 @@ export const AdminEventsEnhanced = () => {
           console.warn('Some images could not be finalized');
         }
         await updateEvent(created.id, { event_images: finalizedImages, event_image_url: finalizedImages[0] || created.event_image_url });
+        // Save ticket types
+        if (formData.tickets.length > 0) {
+          try {
+            const ticketRecords = formData.tickets
+              .filter(t => t.name.trim())
+              .map(t => ({
+                name: t.name,
+                description: t.description || '',
+                is_default: false,
+                is_active: true,
+                registered_quantity: 0,
+              }));
+            if (ticketRecords.length > 0) {
+              await EventsService.createEventTickets(created.id, ticketRecords);
+            }
+          } catch (ticketError) {
+            console.warn('Failed to create tickets:', ticketError);
+          }
+        }
         toast({
           title: "Event created successfully",
           description: "The event has been added.",

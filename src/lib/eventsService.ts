@@ -399,7 +399,8 @@ export class EventsService {
         const categorySlugs = [...new Set(data.map(e => e.category).filter(Boolean))];
 
         // Batch fetch all related data
-        const [countriesResult, citiesResult, categoriesResult] = await Promise.all([
+        const eventIds = data.map(e => e.id);
+        const [countriesResult, citiesResult, categoriesResult, ticketsResult] = await Promise.all([
           countryIds.length > 0
             ? supabase.from('countries').select('id, name, code').in('id', countryIds)
             : Promise.resolve({ data: [] }),
@@ -408,6 +409,9 @@ export class EventsService {
             : Promise.resolve({ data: [] }),
           categorySlugs.length > 0
             ? supabase.from('event_categories').select('slug, name, icon, color').in('slug', categorySlugs)
+            : Promise.resolve({ data: [] }),
+          eventIds.length > 0
+            ? supabase.from('event_tickets').select('*').in('event_id', eventIds).eq('is_active', true)
             : Promise.resolve({ data: [] })
         ]);
 
@@ -415,6 +419,15 @@ export class EventsService {
         const countriesMap = new Map((countriesResult.data || []).map(c => [c.id, c]));
         const citiesMap = new Map((citiesResult.data || []).map(c => [c.id, c]));
         const categoriesMap = new Map((categoriesResult.data || []).map(c => [c.slug, c]));
+
+        // Group tickets by event_id
+        const ticketsMap = new Map<string, any[]>();
+        for (const ticket of (ticketsResult.data || [])) {
+          if (!ticketsMap.has(ticket.event_id)) {
+            ticketsMap.set(ticket.event_id, []);
+          }
+          ticketsMap.get(ticket.event_id)!.push(ticket);
+        }
 
         // Map events with related data
         for (const event of data) {
@@ -432,6 +445,7 @@ export class EventsService {
             category_name: category?.name,
             category_icon: category?.icon,
             category_color: category?.color,
+            tickets: ticketsMap.get(event.id) || [],
           });
         }
       }

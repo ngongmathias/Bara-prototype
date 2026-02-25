@@ -138,8 +138,13 @@ export const UserEventsPage = () => {
   const { cities, loading: citiesLoading } = useCitiesByCountry(formData.country_id || '');
 
   // Filter events to only show user's events
+  // Match by created_by_user_id, created_by_email, or organizer_email
+  // This ensures events created by the user AND events assigned by admin (via organizer_email) show up
+  const userEmail = user?.primaryEmailAddress?.emailAddress?.toLowerCase();
   const userEvents = events.filter(event =>
-    event.created_by_user_id === user?.id
+    event.created_by_user_id === user?.id ||
+    (userEmail && event.created_by_email?.toLowerCase() === userEmail) ||
+    (userEmail && event.organizer_email?.toLowerCase() === userEmail)
   );
 
   // Apply search and category filters to user's events
@@ -317,12 +322,53 @@ export const UserEventsPage = () => {
 
       if (editingEvent) {
         await updateEvent(editingEvent.id, eventData);
+        // Save ticket types
+        if (formData.tickets.length > 0) {
+          try {
+            const ticketRecords = formData.tickets
+              .filter(t => t.name.trim())
+              .map(t => ({
+                name: t.name,
+                description: t.description || '',
+                is_default: false,
+                is_active: true,
+                registered_quantity: 0,
+              }));
+            if (ticketRecords.length > 0) {
+              // Delete old tickets first, then create new ones
+              const { supabase } = await import('@/lib/supabase');
+              await supabase.from('event_tickets').delete().eq('event_id', editingEvent.id);
+              await EventsService.createEventTickets(editingEvent.id, ticketRecords);
+            }
+          } catch (ticketError) {
+            console.warn('Failed to update tickets:', ticketError);
+          }
+        }
         toast({
           title: 'Event updated',
           description: 'Your event has been successfully updated.',
         });
       } else {
-        await createEvent(eventData);
+        const created = await createEvent(eventData);
+        // Save ticket types for the new event
+        if (formData.tickets.length > 0 && created?.id) {
+          try {
+            const ticketRecords = formData.tickets
+              .filter(t => t.name.trim())
+              .map(t => ({
+                name: t.name,
+                description: t.description || '',
+                is_default: false,
+                is_active: true,
+                registered_quantity: 0,
+              }));
+            if (ticketRecords.length > 0) {
+              await EventsService.createEventTickets(created.id, ticketRecords);
+            }
+          } catch (ticketError) {
+            console.warn('Failed to create tickets:', ticketError);
+          }
+        }
         toast({
           title: 'Event created',
           description: 'Your event has been successfully created.',
@@ -559,9 +605,10 @@ export const UserEventsPage = () => {
                     <Input
                       id="organizer_name"
                       value={formData.organizer_name}
-                      onChange={(e) => handleInputChange('organizer_name', e.target.value)}
-                      required
+                      readOnly
+                      className="bg-gray-50 cursor-not-allowed"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Auto-filled from your profile</p>
                   </div>
                   <div>
                     <Label htmlFor="organizer_email">Email *</Label>
@@ -569,9 +616,10 @@ export const UserEventsPage = () => {
                       id="organizer_email"
                       type="email"
                       value={formData.organizer_email}
-                      onChange={(e) => handleInputChange('organizer_email', e.target.value)}
-                      required
+                      readOnly
+                      className="bg-gray-50 cursor-not-allowed"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Auto-filled from your account email</p>
                   </div>
                   <div>
                     <Label htmlFor="organizer_handle">Social Handle</Label>
