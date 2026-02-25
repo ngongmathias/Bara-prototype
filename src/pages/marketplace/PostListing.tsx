@@ -56,7 +56,9 @@ import {
 
   Star,
 
-  ShieldCheck
+  ShieldCheck,
+
+  AlertCircle
 
 } from 'lucide-react';
 

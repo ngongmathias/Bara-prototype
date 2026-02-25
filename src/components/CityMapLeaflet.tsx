@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
+import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 interface Business {
@@ -39,12 +39,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-export const CityMapLeaflet = ({ 
-  cityName, 
-  latitude, 
-  longitude, 
-  businesses, 
-  height = "500px" 
+export const CityMapLeaflet = ({
+  cityName,
+  latitude,
+  longitude,
+  businesses,
+  height = "500px"
 }: CityMapLeafletProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -105,17 +105,17 @@ export const CityMapLeaflet = ({
 
       // Add city center marker
       addCityMarker(map);
-      
+
       // Add business markers
       addBusinessMarkers(map);
-      
+
       // Fit map to show all markers
       fitMapToMarkers(map);
-      
+
       setMapLoaded(true);
       setIsLoading(false);
       console.log('🎉 Map setup completed successfully');
-      
+
     } catch (error) {
       console.error('❌ Error initializing Leaflet map:', error);
       setError(`Error initializing map: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -193,11 +193,11 @@ export const CityMapLeaflet = ({
   const addBusinessMarkers = (map: L.Map) => {
     try {
       console.log(`🏢 Adding ${businesses.length} business markers...`);
-      
+
       businesses.forEach((business, index) => {
         if (business.latitude && business.longitude) {
           console.log(`📍 Adding business marker ${index + 1}: ${business.name}`);
-          
+
           // Create custom business marker icon
           const businessIcon = L.divIcon({
             className: 'custom-business-marker',
@@ -222,8 +222,8 @@ export const CityMapLeaflet = ({
             iconAnchor: [18, 18],
           });
 
-          const businessMarker = L.marker([business.latitude, business.longitude], { 
-            icon: businessIcon 
+          const businessMarker = L.marker([business.latitude, business.longitude], {
+            icon: businessIcon
           }).addTo(map);
 
           // Create popup for business
@@ -276,7 +276,7 @@ export const CityMapLeaflet = ({
           markersRef.current.push(businessMarker);
         }
       });
-      
+
       console.log(`✅ Added ${businesses.filter(b => b.latitude && b.longitude).length} business markers`);
     } catch (error) {
       console.error('❌ Error adding business markers:', error);
@@ -299,8 +299,8 @@ export const CityMapLeaflet = ({
   // Show error state
   if (error) {
     return (
-      <div 
-        style={{ height }} 
+      <div
+        style={{ height }}
         className="bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200"
       >
         <div className="text-center p-6">
@@ -320,8 +320,8 @@ export const CityMapLeaflet = ({
   // Show loading state
   if (isLoading) {
     return (
-      <div 
-        style={{ height }} 
+      <div
+        style={{ height }}
         className="bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200"
       >
         <div className="text-center">
@@ -339,12 +339,12 @@ export const CityMapLeaflet = ({
   // Show map
   return (
     <div className="relative">
-      <div 
-        ref={mapRef} 
-        style={{ height, minHeight: '400px' }} 
+      <div
+        ref={mapRef}
+        style={{ height, minHeight: '400px' }}
         className="w-full rounded-lg border border-gray-200 shadow-sm"
       />
-      
+
       {/* Business count badge */}
       <div className="absolute top-4 right-4 bg-white bg-opacity-95 px-4 py-2 rounded-full shadow-lg border border-gray-200 z-[1000]">
         <div className="flex items-center space-x-2">

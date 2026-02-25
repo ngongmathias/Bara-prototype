@@ -14,7 +14,8 @@ import {
   Building2,
   Target,
   TrendingUp,
-  Plus
+  Plus,
+  MousePointer2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
@@ -308,7 +309,7 @@ export const AdminSponsoredAds = () => {
     return (
       <AdminLayout title="Sponsored Ads Management" subtitle="Manage sponsored advertising status for businesses">
         <div className="mb-4 w-full flex justify-end">
-          <AdminPageGuide 
+          <AdminPageGuide
             title="Legacy Sponsored Ads"
             description="Older ad system."
             features={["Legacy ad management"]}
@@ -346,8 +347,8 @@ export const AdminSponsoredAds = () => {
         <button
           onClick={() => setActiveTab('businesses')}
           className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${activeTab === 'businesses'
-              ? 'bg-white text-yp-dark shadow-sm'
-              : 'text-gray-600 hover:text-yp-dark'
+            ? 'bg-white text-yp-dark shadow-sm'
+            : 'text-gray-600 hover:text-yp-dark'
             }`}
         >
           <Building2 className="w-4 h-4 inline mr-2" />
@@ -356,8 +357,8 @@ export const AdminSponsoredAds = () => {
         <button
           onClick={() => setActiveTab('banners')}
           className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${activeTab === 'banners'
-              ? 'bg-white text-yp-dark shadow-sm'
-              : 'text-gray-600 hover:text-yp-dark'
+            ? 'bg-white text-yp-dark shadow-sm'
+            : 'text-gray-600 hover:text-yp-dark'
             }`}
         >
           <Target className="w-4 h-4 inline mr-2" />

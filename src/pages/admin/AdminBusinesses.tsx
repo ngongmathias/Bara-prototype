@@ -54,6 +54,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import DOMPurify from 'dompurify';
 
 interface Business {
   id: string;
@@ -240,9 +241,9 @@ export const AdminBusinesses = () => {
       const { data: countriesData } = await adminDb.countries().select('id, name');
 
       // Create lookup maps for better performance
-      const categoriesMap = new Map(categoriesData?.map(cat => [cat.id, cat]) || []);
-      const citiesMap = new Map(citiesData?.map(city => [city.id, city]) || []);
-      const countriesMap = new Map(countriesData?.map(country => [country.id, country]) || []);
+      const categoriesMap = new Map<string, any>(categoriesData?.map(cat => [cat.id, cat]) || []);
+      const citiesMap = new Map<string, any>(citiesData?.map(city => [city.id, city]) || []);
+      const countriesMap = new Map<string, any>(countriesData?.map(country => [country.id, country]) || []);
 
       // Combine the data
       const businessesWithDetails = businessesData?.map(business => ({

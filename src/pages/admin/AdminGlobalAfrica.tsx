@@ -4,19 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Search, 
-  Plus, 
-  Edit, 
-  Eye, 
-  Globe, 
-  MapPin, 
-  Users, 
-  Building, 
+import {
+  Search,
+  Plus,
+  Edit,
+  Eye,
+  Globe,
+  MapPin,
+  Users,
+  Building,
   Calendar,
   Star,
   FileText,
@@ -157,16 +157,16 @@ export const AdminGlobalAfrica: React.FC = () => {
         leader: 'global-africa-leaders',
         landmark: 'global-africa-landmarks'
       };
-      
+
       const imageUrl = await uploadImage(file, folderMap[imageType], 'images');
-      
+
       const fieldMap = {
         flag: 'flag_url',
         emblem: 'emblem_url',
         leader: 'leader_image_url',
         landmark: 'landmark_image_url'
       };
-      
+
       setFormData({ ...formData, [fieldMap[imageType]]: imageUrl });
       toast.success(`${imageType} uploaded successfully`);
     } catch (error) {
@@ -225,13 +225,13 @@ export const AdminGlobalAfrica: React.FC = () => {
 
   const filteredInfo = entriesInfo.filter(info => {
     const entry = entries.find(e => e.id === info.global_africa_id);
-    const matchesSearch = 
+    const matchesSearch =
       entry?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       info.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       info.leader_name?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesEntry = !selectedEntry || selectedEntry === "all" || info.global_africa_id === selectedEntry;
-    
+
     return matchesSearch && matchesEntry;
   });
 
@@ -239,7 +239,7 @@ export const AdminGlobalAfrica: React.FC = () => {
     return (
       <AdminLayout>
         <div className="mb-4 w-full flex justify-end">
-          <AdminPageGuide 
+          <AdminPageGuide
             title="Global Africa Directory"
             description="Manage diaspora businesses operating outside Africa."
             features={["Approve diasporic businesses", "Manage destination countries", "Tag global regions"]}
@@ -399,7 +399,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                             <span>{entry.name}</span>
                           </DialogTitle>
                         </DialogHeader>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {/* Basic Information */}
                           <div className="space-y-4">
@@ -469,19 +469,19 @@ export const AdminGlobalAfrica: React.FC = () => {
                       </DialogContent>
                     </Dialog>
 
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleEdit(info)}
                       className="flex-1"
                     >
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
-                    
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleDelete(info)}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
@@ -496,10 +496,10 @@ export const AdminGlobalAfrica: React.FC = () => {
 
         {/* Entries Without Information */}
         {(() => {
-          const entriesWithoutInfo = entries.filter(entry => 
+          const entriesWithoutInfo = entries.filter(entry =>
             !entriesInfo.some(info => info.global_africa_id === entry.id)
           );
-          
+
           if (entriesWithoutInfo.length > 0) {
             return (
               <>
@@ -517,7 +517,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                               <h3 className="text-lg font-semibold text-gray-900">{entry.name}</h3>
                               <p className="text-sm text-gray-500">Code: {entry.code}</p>
                             </div>
-                            <Button 
+                            <Button
                               onClick={() => {
                                 setEditingInfo(null);
                                 setFormData({ global_africa_id: entry.id });
@@ -560,17 +560,17 @@ export const AdminGlobalAfrica: React.FC = () => {
                 {editingInfo ? 'Edit Global Africa Information' : 'Add Global Africa Information'}
               </DialogTitle>
             </DialogHeader>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Basic Information */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Basic Information</h3>
-                
+
                 <div>
                   <Label htmlFor="global_africa_id">Entry *</Label>
-                  <Select 
-                    value={formData.global_africa_id || undefined} 
-                    onValueChange={(value) => setFormData({...formData, global_africa_id: value})}
+                  <Select
+                    value={formData.global_africa_id || undefined}
+                    onValueChange={(value) => setFormData({ ...formData, global_africa_id: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select an entry" />
@@ -590,7 +590,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                   <Textarea
                     id="description"
                     value={formData.description || ''}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Brief description..."
                     rows={3}
                   />
@@ -601,7 +601,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                   <Input
                     id="location"
                     value={formData.location || ''}
-                    onChange={(e) => setFormData({...formData, location: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     placeholder="e.g., United States, Brazil"
                   />
                 </div>
@@ -611,7 +611,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                   <Input
                     id="primary_language"
                     value={formData.primary_language || ''}
-                    onChange={(e) => setFormData({...formData, primary_language: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, primary_language: e.target.value })}
                     placeholder="Primary language"
                   />
                 </div>
@@ -622,7 +622,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                     id="population"
                     type="number"
                     value={formData.population || ''}
-                    onChange={(e) => setFormData({...formData, population: parseInt(e.target.value) || null})}
+                    onChange={(e) => setFormData({ ...formData, population: parseInt(e.target.value) || null })}
                     placeholder="Population"
                   />
                 </div>
@@ -631,13 +631,13 @@ export const AdminGlobalAfrica: React.FC = () => {
               {/* Organization & Leadership */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Organization & Leadership</h3>
-                
+
                 <div>
                   <Label htmlFor="leader_name">Leader/Representative</Label>
                   <Input
                     id="leader_name"
                     value={formData.leader_name || ''}
-                    onChange={(e) => setFormData({...formData, leader_name: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, leader_name: e.target.value })}
                     placeholder="Community leader or representative"
                   />
                 </div>
@@ -647,7 +647,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                   <Input
                     id="organization_type"
                     value={formData.organization_type || ''}
-                    onChange={(e) => setFormData({...formData, organization_type: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, organization_type: e.target.value })}
                     placeholder="e.g., Diaspora Community, Educational Network"
                   />
                 </div>
@@ -657,7 +657,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                   <Input
                     id="established_date"
                     value={formData.established_date || ''}
-                    onChange={(e) => setFormData({...formData, established_date: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, established_date: e.target.value })}
                     placeholder="e.g., 1865, 17th Century"
                   />
                 </div>
@@ -667,7 +667,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                   <Textarea
                     id="notable_institutions"
                     value={formData.notable_institutions || ''}
-                    onChange={(e) => setFormData({...formData, notable_institutions: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, notable_institutions: e.target.value })}
                     placeholder="List of important institutions..."
                     rows={3}
                   />
@@ -677,7 +677,7 @@ export const AdminGlobalAfrica: React.FC = () => {
               {/* Geographic Information */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Geographic Information</h3>
-                
+
                 <div>
                   <Label htmlFor="coordinates_combined">Coordinates (Combined Format)</Label>
                   <Input
@@ -693,7 +693,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                       if (match) {
                         const lat = parseFloat(match[1]) * (match[2].toUpperCase() === 'S' ? -1 : 1);
                         const lon = parseFloat(match[3]) * (match[4].toUpperCase() === 'W' ? -1 : 1);
-                        setFormData({...formData, latitude: lat, longitude: lon});
+                        setFormData({ ...formData, latitude: lat, longitude: lon });
                       }
                     }}
                     placeholder="e.g., 38.9072° N, 77.0369° W"
@@ -709,7 +709,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                       type="number"
                       step="any"
                       value={formData.latitude || ''}
-                      onChange={(e) => setFormData({...formData, latitude: parseFloat(e.target.value) || null})}
+                      onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) || null })}
                       placeholder="e.g., 38.9072"
                     />
                   </div>
@@ -721,7 +721,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                       type="number"
                       step="any"
                       value={formData.longitude || ''}
-                      onChange={(e) => setFormData({...formData, longitude: parseFloat(e.target.value) || null})}
+                      onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) || null })}
                       placeholder="e.g., -77.0369"
                     />
                   </div>
@@ -732,7 +732,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                   <Input
                     id="timezone"
                     value={formData.timezone || ''}
-                    onChange={(e) => setFormData({...formData, timezone: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
                     placeholder="e.g., EST, UTC-5"
                   />
                 </div>
@@ -742,7 +742,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                   <Input
                     id="largest_city"
                     value={formData.largest_city || ''}
-                    onChange={(e) => setFormData({...formData, largest_city: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, largest_city: e.target.value })}
                     placeholder="Largest city"
                   />
                 </div>
@@ -753,7 +753,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                     id="largest_city_population"
                     type="number"
                     value={formData.largest_city_population || ''}
-                    onChange={(e) => setFormData({...formData, largest_city_population: parseInt(e.target.value) || null})}
+                    onChange={(e) => setFormData({ ...formData, largest_city_population: parseInt(e.target.value) || null })}
                     placeholder="Population"
                   />
                 </div>
@@ -762,13 +762,13 @@ export const AdminGlobalAfrica: React.FC = () => {
               {/* Cultural Information */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Cultural Information</h3>
-                
+
                 <div>
                   <Label htmlFor="cultural_heritage">Cultural Heritage</Label>
                   <Textarea
                     id="cultural_heritage"
                     value={formData.cultural_heritage || ''}
-                    onChange={(e) => setFormData({...formData, cultural_heritage: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, cultural_heritage: e.target.value })}
                     placeholder="Cultural heritage description..."
                     rows={2}
                   />
@@ -779,7 +779,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                   <Textarea
                     id="historical_significance"
                     value={formData.historical_significance || ''}
-                    onChange={(e) => setFormData({...formData, historical_significance: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, historical_significance: e.target.value })}
                     placeholder="Historical significance..."
                     rows={2}
                   />
@@ -790,7 +790,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                   <Textarea
                     id="key_contributions"
                     value={formData.key_contributions || ''}
-                    onChange={(e) => setFormData({...formData, key_contributions: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, key_contributions: e.target.value })}
                     placeholder="Key contributions to society..."
                     rows={2}
                   />
@@ -801,7 +801,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                   <Textarea
                     id="notable_figures"
                     value={formData.notable_figures || ''}
-                    onChange={(e) => setFormData({...formData, notable_figures: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, notable_figures: e.target.value })}
                     placeholder="Notable historical figures..."
                     rows={2}
                   />
@@ -812,7 +812,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                   <Textarea
                     id="cultural_events"
                     value={formData.cultural_events || ''}
-                    onChange={(e) => setFormData({...formData, cultural_events: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, cultural_events: e.target.value })}
                     placeholder="Important cultural events..."
                     rows={2}
                   />
@@ -822,7 +822,7 @@ export const AdminGlobalAfrica: React.FC = () => {
               {/* Visual Assets */}
               <div className="space-y-6 md:col-span-2">
                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Visual Assets</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Flag */}
                   <div>
@@ -830,8 +830,8 @@ export const AdminGlobalAfrica: React.FC = () => {
                     <div className="space-y-2">
                       {formData.flag_url && (
                         <div className="relative">
-                          <img 
-                            src={formData.flag_url} 
+                          <img
+                            src={formData.flag_url}
                             alt="Flag preview"
                             className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
                           />
@@ -839,7 +839,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => setFormData({...formData, flag_url: null})}
+                            onClick={() => setFormData({ ...formData, flag_url: null })}
                             className="absolute -top-2 -right-2 bg-white border-red-300 text-red-600 hover:bg-red-50"
                           >
                             <X className="w-4 h-4" />
@@ -874,8 +874,8 @@ export const AdminGlobalAfrica: React.FC = () => {
                     <div className="space-y-2">
                       {formData.emblem_url && (
                         <div className="relative">
-                          <img 
-                            src={formData.emblem_url} 
+                          <img
+                            src={formData.emblem_url}
                             alt="Emblem preview"
                             className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
                           />
@@ -883,7 +883,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => setFormData({...formData, emblem_url: null})}
+                            onClick={() => setFormData({ ...formData, emblem_url: null })}
                             className="absolute -top-2 -right-2 bg-white border-red-300 text-red-600 hover:bg-red-50"
                           >
                             <X className="w-4 h-4" />
@@ -918,8 +918,8 @@ export const AdminGlobalAfrica: React.FC = () => {
                     <div className="space-y-2">
                       {formData.leader_image_url && (
                         <div className="relative">
-                          <img 
-                            src={formData.leader_image_url} 
+                          <img
+                            src={formData.leader_image_url}
                             alt="Leader preview"
                             className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
                           />
@@ -927,7 +927,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => setFormData({...formData, leader_image_url: null})}
+                            onClick={() => setFormData({ ...formData, leader_image_url: null })}
                             className="absolute -top-2 -right-2 bg-white border-red-300 text-red-600 hover:bg-red-50"
                           >
                             <X className="w-4 h-4" />
@@ -962,8 +962,8 @@ export const AdminGlobalAfrica: React.FC = () => {
                     <div className="space-y-2">
                       {formData.landmark_image_url && (
                         <div className="relative">
-                          <img 
-                            src={formData.landmark_image_url} 
+                          <img
+                            src={formData.landmark_image_url}
                             alt="Landmark preview"
                             className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
                           />
@@ -971,7 +971,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => setFormData({...formData, landmark_image_url: null})}
+                            onClick={() => setFormData({ ...formData, landmark_image_url: null })}
                             className="absolute -top-2 -right-2 bg-white border-red-300 text-red-600 hover:bg-red-50"
                           >
                             <X className="w-4 h-4" />
@@ -1000,7 +1000,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <p className="text-xs text-gray-500">
                   Supported formats: JPG, PNG, GIF. Max size: 5MB per image
                 </p>

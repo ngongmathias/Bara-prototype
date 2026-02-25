@@ -499,6 +499,10 @@ export const AdminSponsoredBanners: React.FC = () => {
     }
   };
 
+  const handleDeleteBanner = (id: string) => {
+    setBannerToDelete(id);
+  };
+
   const confirmDeleteBanner = async () => {
     if (!bannerToDelete) return;
     try {
@@ -583,7 +587,7 @@ export const AdminSponsoredBanners: React.FC = () => {
     return (
       <AdminLayout>
         <div className="mb-4 w-full flex justify-end">
-          <AdminPageGuide 
+          <AdminPageGuide
             title="Legacy Sponsored Banners"
             description="Older banner system."
             features={["Legacy banner management"]}

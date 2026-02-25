@@ -78,9 +78,9 @@ export class UserLogService {
   /**
    * Log a user action to the database
    */
-  static async logAction(logData: UserLog): Promise<boolean> {
+  static async logAction(logData: Omit<UserLog, 'id' | 'created_at'>): Promise<boolean> {
     try {
-      
+
       const { data, error } = await supabase
         .from('user_logs')
         .insert({
@@ -98,7 +98,7 @@ export class UserLogService {
 
       if (error) {
         console.error('Failed to log user action:', error);
-        
+
         // Handle specific error codes
         if (error.code === '42501') {
           console.error('RLS Policy Violation: The user_logs table has restrictive RLS policies');
@@ -108,7 +108,7 @@ export class UserLogService {
         } else if (error.code === '406') {
           console.error('Not Acceptable: There might be a content negotiation issue');
         }
-        
+
         return false;
       }
       return true;
@@ -310,7 +310,7 @@ export class UserLogService {
       // For now, we'll return empty data since we need a backend API
       // In a real implementation, this would call your backend endpoint
       console.warn('getClerkUsers requires a backend API endpoint to be implemented');
-      
+
       return {
         users: [],
         total: 0,
@@ -337,12 +337,12 @@ export class UserLogService {
 
       // Combine and deduplicate users
       const allUsers = [...dbUsers.users, ...adminUsers.users];
-      const uniqueUsers = allUsers.filter((user, index, self) => 
+      const uniqueUsers = allUsers.filter((user, index, self) =>
         index === self.findIndex(u => u.email === user.email)
       );
 
       // Sort by creation date
-      const sortedUsers = uniqueUsers.sort((a, b) => 
+      const sortedUsers = uniqueUsers.sort((a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
 
@@ -372,7 +372,7 @@ export class UserLogService {
    */
   static exportUsersToCSV(users: (DatabaseUser | AdminUser)[]): string {
     const headers = ['ID', 'Email', 'Name', 'Role', 'Phone', 'Country', 'City', 'Created Date', 'Last Updated'];
-    
+
     const csvContent = [
       headers.join(','),
       ...users.map(user => {

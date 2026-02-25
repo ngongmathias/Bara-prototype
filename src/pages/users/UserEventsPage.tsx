@@ -39,7 +39,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEvents, useEventCategories, useEventManagement, useCountries, useCitiesByCountry } from '@/hooks/useEvents';
-import { uploadEventImage, EventsService, createEvent, updateEvent } from '@/lib/eventsService';
+import { uploadEventImage, EventsService } from '@/lib/eventsService';
 import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { MultiHashtagInput } from '@/components/ui/multi-hashtag-input';
 import { EventGalleryUpload } from '@/components/EventGalleryUpload';

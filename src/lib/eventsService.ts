@@ -437,9 +437,9 @@ export class EventsService {
         ]);
 
         // Create lookup maps
-        const countriesMap = new Map((countriesResult.data || []).map(c => [c.id, c]));
-        const citiesMap = new Map((citiesResult.data || []).map(c => [c.id, c]));
-        const categoriesMap = new Map((categoriesResult.data || []).map(c => [c.slug, c]));
+        const countriesMap = new Map<string, any>((countriesResult.data || []).map(c => [c.id, c]));
+        const citiesMap = new Map<string, any>((citiesResult.data || []).map(c => [c.id, c]));
+        const categoriesMap = new Map<string, any>((categoriesResult.data || []).map(c => [c.slug, c]));
 
         // Group tickets by event_id
         const ticketsMap = new Map<string, any[]>();

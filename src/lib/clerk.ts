@@ -1,11 +1,9 @@
 import { ClerkProvider, ClerkLoaded, ClerkLoading } from '@clerk/clerk-react';
-import { dark } from '@clerk/themes';
 
 // Clerk configuration
 export const clerkConfig = {
   publishableKey: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '',
   appearance: {
-    baseTheme: dark,
     variables: {
       colorPrimary: '#3B82F6', // Blue color matching your theme
       colorBackground: '#ffffff',

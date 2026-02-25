@@ -495,8 +495,8 @@ export const AdminUsers = () => {
                                 </div>
                                 <div>
                                   <div className="font-medium">
-                                    {('full_name' in user && user.full_name) ||
-                                      ('first_name' in user && user.last_name ? `${user.first_name} ${user.last_name}` : user.email.split('@')[0])}
+                                    {String(('full_name' in user && user.full_name) ||
+                                      ('first_name' in user && user.last_name ? `${user.first_name} ${user.last_name}` : user.email.split('@')[0]))}
                                   </div>
                                   <div className="text-sm text-gray-500">{user.email}</div>
                                   <div className="text-xs text-gray-400">ID: {user.id}</div>

@@ -35,6 +35,7 @@ interface City {
   country_name?: string;
   is_active: boolean;
   created_at: string;
+  countries?: { name: string };
 }
 
 interface Country {
@@ -176,7 +177,7 @@ export const CitiesManagement = () => {
     return (
       <AdminLayout>
         <div className="mb-4 w-full flex justify-end">
-          <AdminPageGuide 
+          <AdminPageGuide
             title="Cities Management (Legacy)"
             description="Old cities UI."
             features={["View cities"]}

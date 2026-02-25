@@ -708,16 +708,7 @@ export const CountryListingsPage = () => {
                       cityName={country?.name || 'Businesses'}
                       latitude={mapCenter.lat}
                       longitude={mapCenter.lng}
-                      businesses={businessesWithCoords.map(b => ({
-                        id: b.id,
-                        name: b.name,
-                        latitude: b.latitude!,
-                        longitude: b.longitude!,
-                        address: b.address || '',
-                        category: b.category?.name || '',
-                        is_premium: b.is_premium,
-                        is_verified: b.is_verified
-                      }))}
+                      businesses={businessesWithCoords as any}
                       height="500px"
                     />
                   </div>
