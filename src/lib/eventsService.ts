@@ -150,6 +150,7 @@ export interface EventRegistration {
   user_name?: string;
   ticket_type: string;
   quantity: number;
+  total_amount?: number;
   payment_status: 'pending' | 'confirmed' | 'cancelled';
   payment_method?: string;
   payment_proof_url?: string;
