@@ -9,7 +9,12 @@ export const UnitConverterTool: React.FC = () => {
   const [fromUnit, setFromUnit] = useState('meter');
   const [toUnit, setToUnit] = useState('kilometer');
 
-  const units = {
+interface Unit {
+  name: string;
+  factor: number;
+}
+
+const units: Record<string, Record<string, Unit>> = {
     length: {
       meter: { name: 'Meter', factor: 1 },
       kilometer: { name: 'Kilometer', factor: 0.001 },

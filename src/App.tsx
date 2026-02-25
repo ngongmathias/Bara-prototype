@@ -1,4 +1,4 @@
-﻿import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/toaster";
 
 import { Toaster as Sonner } from "@/components/ui/sonner";
 
@@ -27,8 +27,6 @@ import { useTranslation } from "react-i18next";
 import "@/lib/testSupabase";
 
 import { LandingPageFinal as LandingPage } from "./pages/LandingPageFinal";
-
-import { TestRSSPage } from "./pages/TestRSSPage";
 
 import ListingsPage from "./pages/ListingsPage";
 
@@ -103,8 +101,6 @@ import { AdminBannerAds } from "./pages/admin/AdminBannerAds";
 import { AdminAuthGuard } from "./components/admin/AdminAuthGuard";
 
 import { UserAuthGuard } from "./components/users/UserAuthGuard";
-
-import { MapTestPage } from "./pages/MapTestPage";
 
 import FaqPage from "./pages/FaqPage";
 
@@ -206,8 +202,6 @@ import UserBlogEditor from "./pages/UserBlogEditor";
 
 import AdminBlog from "./pages/admin/AdminBlog";
 
-import TestEmailPage from "./pages/TestEmailPage";
-
 import PricingPage from "./pages/PricingPage";
 
 import CoinStorePage from "./pages/CoinStorePage";
@@ -269,8 +263,6 @@ import ArtistVerificationPage from "./pages/streams/ArtistVerificationPage";
 import PodcastsPage from "./pages/streams/PodcastsPage";
 
 import SearchPage from "./pages/SearchPage";
-
-import TestSportsApi from "./pages/TestSportsApi";
 
 import { UserTicketsPage } from "./pages/users/UserTicketsPage";
 
@@ -348,9 +340,7 @@ const AppRoutes = () => {
 
         <Route path="/" element={<LandingPage />} />
 
-        <Route path="/test-rss" element={<TestRSSPage />} />
-
-        <Route path="/test-email" element={<TestEmailPage />} />
+        <Route path="/" element={<LandingPage />} />
 
 
 
