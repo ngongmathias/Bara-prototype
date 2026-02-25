@@ -35,7 +35,7 @@ const AdminCities = lazy(() => import('./pages/admin/AdminCities').then(m => ({ 
 const AdminCountries = lazy(() => import('./pages/admin/AdminCountries').then(m => ({ default: m.AdminCountries })));
 const AdminCountryInfo = lazy(() => import('./pages/admin/AdminCountryInfo').then(m => ({ default: m.AdminCountryInfo })));
 const AdminBusinesses = lazy(() => import('./pages/admin/AdminBusinesses').then(m => ({ default: m.AdminBusinesses })));
-const AdminEvents = lazy(() => import('./pages/admin/AdminEvents').then(m => ({ default: m.AdminEvents })));
+const AdminEvents = lazy(() => import('./pages/admin/AdminEventsEnhanced').then(m => ({ default: m.AdminEventsEnhanced })));
 const AdminReviews = lazy(() => import('./pages/admin/AdminReviews').then(m => ({ default: m.AdminReviews })));
 const AdminSponsoredAds = lazy(() => import('./pages/admin/AdminSponsoredAds').then(m => ({ default: m.AdminSponsoredAds })));
 const AdminReports = lazy(() => import('./pages/admin/AdminReports').then(m => ({ default: m.AdminReports })));
