@@ -26,11 +26,15 @@ import {
   Eye,
   ExternalLink,
   Upload,
-  Camera
+  Camera,
+  Users,
+  CheckCircle,
+  XCircle,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEvents, useEventCategories, useEventManagement, useCountries, useCitiesByCountry } from '@/hooks/useEvents';
-import { uploadEventImage, EventsService } from '@/lib/eventsService';
+import { uploadEventImage, EventsService, EventRegistration } from '@/lib/eventsService';
 import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { HashtagInput } from '@/components/ui/hashtag-input';
 import { MultiHashtagInput } from '@/components/ui/multi-hashtag-input';
@@ -84,6 +88,13 @@ export const AdminEventsEnhanced = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 50;
+
+  // Registration management state
+  const [registrationDialogOpen, setRegistrationDialogOpen] = useState(false);
+  const [selectedEventForRegs, setSelectedEventForRegs] = useState<DatabaseEvent | null>(null);
+  const [registrations, setRegistrations] = useState<EventRegistration[]>([]);
+  const [regsLoading, setRegsLoading] = useState(false);
+  const [updatingRegId, setUpdatingRegId] = useState<string | null>(null);
 
   const { toast } = useToast();
   const { events, loading, searchEvents } = useEvents();
@@ -423,19 +434,55 @@ export const AdminEventsEnhanced = () => {
     }));
   };
 
+  // Registration management functions
+  const loadRegistrations = async (eventId: string) => {
+    setRegsLoading(true);
+    try {
+      const regs = await EventsService.getEventRegistrations(eventId);
+      setRegistrations(regs);
+    } catch (error) {
+      console.error('Error loading registrations:', error);
+      toast({ title: 'Error', description: 'Failed to load registrations', variant: 'destructive' });
+    } finally {
+      setRegsLoading(false);
+    }
+  };
+
+  const handleViewRegistrations = (event: DatabaseEvent) => {
+    setSelectedEventForRegs(event);
+    setRegistrationDialogOpen(true);
+    loadRegistrations(event.id);
+  };
+
+  const handleUpdateRegStatus = async (regId: string, status: 'confirmed' | 'cancelled') => {
+    setUpdatingRegId(regId);
+    try {
+      await EventsService.updateRegistrationStatus(regId, status);
+      toast({ title: `Registration ${status}`, description: `Payment has been ${status}.` });
+      if (selectedEventForRegs) {
+        await loadRegistrations(selectedEventForRegs.id);
+      }
+    } catch (error) {
+      console.error('Error updating registration:', error);
+      toast({ title: 'Error', description: 'Failed to update registration', variant: 'destructive' });
+    } finally {
+      setUpdatingRegId(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
             <div className="flex items-center"><h1 className="text-3xl font-bold">Events Management</h1>
-                    <AdminPageGuide 
-                      title="Events Management"
-                      description="Create, edit, and moderate local and global events. Control ticketing, capacity, and cover images."
-                      features={["Full CRUD operations for all events", "Interactive image gallery & cover selection", "Capacity and entry-fee controls", "Hashtag and category assignments"]}
-                      workflow={["Click Add Event to draft a new listing.", "Upload high-quality images and set one as the Cover.", "Ensure accurate Venue details and coordinates.", "Set entry fees (or mark as Free) and publish."]}
-                    />
-                </div>
+              <AdminPageGuide
+                title="Events Management"
+                description="Create, edit, and moderate local and global events. Control ticketing, capacity, and cover images."
+                features={["Full CRUD operations for all events", "Interactive image gallery & cover selection", "Capacity and entry-fee controls", "Hashtag and category assignments"]}
+                workflow={["Click Add Event to draft a new listing.", "Upload high-quality images and set one as the Cover.", "Ensure accurate Venue details and coordinates.", "Set entry fees (or mark as Free) and publish."]}
+              />
+            </div>
             <p className="text-gray-600">Manage events and event details</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -1056,6 +1103,14 @@ export const AdminEventsEnhanced = () => {
                             <Button
                               variant="outline"
                               size="icon"
+                              onClick={() => handleViewRegistrations(event)}
+                              title="View Registrations"
+                            >
+                              <Users className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
                               onClick={() => window.open(`/events/${event.id}`, '_blank')}
                             >
                               <Eye className="w-4 h-4" />
@@ -1118,6 +1173,134 @@ export const AdminEventsEnhanced = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Registration Management Dialog */}
+      <Dialog open={registrationDialogOpen} onOpenChange={setRegistrationDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Registrations — {selectedEventForRegs?.title}
+            </DialogTitle>
+          </DialogHeader>
+
+          {regsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin mr-2" />
+              <span>Loading registrations...</span>
+            </div>
+          ) : registrations.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">No registrations yet for this event.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Summary Stats */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-blue-50 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-blue-700">{registrations.length}</p>
+                  <p className="text-xs text-blue-600">Total</p>
+                </div>
+                <div className="bg-green-50 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-green-700">
+                    {registrations.filter(r => r.payment_status === 'confirmed').length}
+                  </p>
+                  <p className="text-xs text-green-600">Confirmed</p>
+                </div>
+                <div className="bg-amber-50 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-amber-700">
+                    {registrations.filter(r => r.payment_status === 'pending').length}
+                  </p>
+                  <p className="text-xs text-amber-600">Pending</p>
+                </div>
+              </div>
+
+              {/* Registrations Table */}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Attendee</TableHead>
+                    <TableHead>Ticket Type</TableHead>
+                    <TableHead>Qty</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {registrations.map((reg) => (
+                    <TableRow key={reg.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{reg.user_name || 'Guest'}</div>
+                          <div className="text-xs text-gray-500">{reg.user_email}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{reg.ticket_type}</Badge>
+                      </TableCell>
+                      <TableCell>{reg.quantity}</TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            reg.payment_status === 'confirmed'
+                              ? 'bg-green-100 text-green-800'
+                              : reg.payment_status === 'pending'
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-red-100 text-red-800'
+                          }
+                        >
+                          {reg.payment_status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-500">
+                        {new Date(reg.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          {reg.payment_status !== 'confirmed' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-green-600 hover:text-green-700"
+                              onClick={() => handleUpdateRegStatus(reg.id, 'confirmed')}
+                              disabled={updatingRegId === reg.id}
+                            >
+                              {updatingRegId === reg.id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                              )}
+                              Confirm
+                            </Button>
+                          )}
+                          {reg.payment_status !== 'cancelled' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => handleUpdateRegStatus(reg.id, 'cancelled')}
+                              disabled={updatingRegId === reg.id}
+                            >
+                              {updatingRegId === reg.id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <XCircle className="w-3 h-3 mr-1" />
+                              )}
+                              Cancel
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };
+

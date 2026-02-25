@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@clerk/clerk-react';
-import { EventsService, EventRegistration } from '@/lib/eventsService';
+import { EventsService, EventRegistration, EventTicket } from '@/lib/eventsService';
 import { supabase } from '@/lib/supabase';
 import { GamificationService, COIN_REWARDS } from '@/lib/gamificationService';
 import {
@@ -42,6 +42,7 @@ interface TicketPurchaseModalProps {
         organizer_phone?: string;
         max_capacity?: number;
         current_registrations?: number;
+        tickets?: EventTicket[];
     };
 }
 
@@ -52,6 +53,11 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
     const [step, setStep] = useState<'select' | 'pay' | 'confirm' | 'done'>('select');
     const [loading, setLoading] = useState(false);
     const [registration, setRegistration] = useState<EventRegistration | null>(null);
+    const [selectedTicketType, setSelectedTicketType] = useState<string>('general');
+
+    // Active ticket types from the event
+    const activeTickets = (event.tickets || []).filter(t => t.is_active !== false);
+    const hasTicketTypes = activeTickets.length > 0;
 
     if (!isOpen) return null;
 
@@ -82,7 +88,7 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                 user_id: user.id,
                 user_email: user.primaryEmailAddress?.emailAddress || '',
                 user_name: user.fullName || user.firstName || 'Guest',
-                ticket_type: 'general',
+                ticket_type: selectedTicketType,
                 quantity,
                 payment_status: 'confirmed',
                 payment_method: 'free',
@@ -129,7 +135,7 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                 user_id: user.id,
                 user_email: user.primaryEmailAddress?.emailAddress || '',
                 user_name: user.fullName || user.firstName || 'Guest',
-                ticket_type: 'general',
+                ticket_type: selectedTicketType,
                 quantity,
                 payment_status: 'pending',
                 payment_method: 'manual',
@@ -211,6 +217,46 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                             </div>
                         )}
 
+                        {/* Ticket Type Selector */}
+                        {hasTicketTypes && !isEffectivelyFree && (
+                            <div className="space-y-3">
+                                <p className="text-sm font-medium text-gray-700">Select Ticket Type</p>
+                                {activeTickets.map((ticket) => (
+                                    <button
+                                        key={ticket.id}
+                                        type="button"
+                                        onClick={() => setSelectedTicketType(ticket.name)}
+                                        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedTicketType === ticket.name
+                                                ? 'border-black bg-gray-50 shadow-sm'
+                                                : 'border-gray-200 hover:border-gray-300'
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedTicketType === ticket.name ? 'border-black' : 'border-gray-300'
+                                                    }`}>
+                                                    {selectedTicketType === ticket.name && (
+                                                        <div className="w-3 h-3 rounded-full bg-black" />
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-gray-900">{ticket.name}</p>
+                                                    {ticket.description && (
+                                                        <p className="text-xs text-gray-500 mt-0.5">{ticket.description}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            {ticket.max_quantity && (
+                                                <Badge variant="secondary" className="text-xs">
+                                                    {Math.max(0, ticket.max_quantity - ticket.registered_quantity)} left
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
                         {/* Price Display */}
                         <div className="text-center py-4">
                             {isEffectivelyFree ? (
@@ -225,6 +271,11 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                                         {currencySymbol}{safeFee.toLocaleString()}
                                         {!currencySymbol && <span className="text-lg ml-1">{event.currency || ''}</span>}
                                     </p>
+                                    {hasTicketTypes && selectedTicketType !== 'general' && (
+                                        <p className="text-sm text-gray-600 mt-1 font-medium">
+                                            Ticket: {selectedTicketType}
+                                        </p>
+                                    )}
                                     <p className="text-xs text-gray-500 mt-2">
                                         Pay directly to the organizer. Details provided next.
                                     </p>
