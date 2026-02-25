@@ -171,8 +171,16 @@ export const UserEventsPage = () => {
   });
 
   useEffect(() => {
-    searchEvents({ limit: 100, include_all_statuses: true, include_private: true });
-  }, [searchEvents]);
+    if (user?.id) {
+      searchEvents({
+        limit: 100,
+        include_all_statuses: true,
+        include_private: true,
+        created_by_user_id: user.id,
+        created_by_email: user.primaryEmailAddress?.emailAddress?.toLowerCase()
+      });
+    }
+  }, [searchEvents, user?.id, user?.primaryEmailAddress?.emailAddress]);
 
   useEffect(() => {
     if (user) {
@@ -393,7 +401,15 @@ export const UserEventsPage = () => {
       setIsDialogOpen(false);
       resetForm();
       // Refresh events list
-      searchEvents({ limit: 100, include_all_statuses: true, include_private: true });
+      if (user?.id) {
+        searchEvents({
+          limit: 100,
+          include_all_statuses: true,
+          include_private: true,
+          created_by_user_id: user.id,
+          created_by_email: user.primaryEmailAddress?.emailAddress?.toLowerCase()
+        });
+      }
     } catch (error) {
       toast({
         title: 'Error',

@@ -170,6 +170,8 @@ export interface EventSearchParams {
   offset?: number;
   include_all_statuses?: boolean; // For admin: include completed/cancelled events
   include_private?: boolean; // For admin: include non-public events
+  created_by_user_id?: string;
+  created_by_email?: string;
 }
 
 export interface EventSearchResult {
@@ -283,7 +285,9 @@ export class EventsService {
         limit = 20,
         offset = 0,
         include_all_statuses = false,
-        include_private = false
+        include_private = false,
+        created_by_user_id,
+        created_by_email
       } = params;
 
       console.log('🔧 [EventsService.searchEvents] Parameters:', {
@@ -318,6 +322,14 @@ export class EventsService {
       // Apply filters
       if (search_query) {
         query = query.or(`title.ilike.%${search_query}%,description.ilike.%${search_query}%,venue_name.ilike.%${search_query}%,organizer_name.ilike.%${search_query}%`);
+      }
+
+      if (created_by_user_id && created_by_email) {
+        query = query.or(`created_by_user_id.eq.${created_by_user_id},created_by_email.eq.${created_by_email},organizer_email.eq.${created_by_email}`);
+      } else if (created_by_user_id) {
+        query = query.eq('created_by_user_id', created_by_user_id);
+      } else if (created_by_email) {
+        query = query.or(`created_by_email.eq.${created_by_email},organizer_email.eq.${created_by_email}`);
       }
 
       if (country_id) {
@@ -365,6 +377,13 @@ export class EventsService {
         // Apply the same filters for count
         if (search_query) {
           countQuery.or(`title.ilike.%${search_query}%,description.ilike.%${search_query}%,venue_name.ilike.%${search_query}%,organizer_name.ilike.%${search_query}%`);
+        }
+        if (created_by_user_id && created_by_email) {
+          countQuery.or(`created_by_user_id.eq.${created_by_user_id},created_by_email.eq.${created_by_email},organizer_email.eq.${created_by_email}`);
+        } else if (created_by_user_id) {
+          countQuery.eq('created_by_user_id', created_by_user_id);
+        } else if (created_by_email) {
+          countQuery.or(`created_by_email.eq.${created_by_email},organizer_email.eq.${created_by_email}`);
         }
         if (country_id) {
           countQuery.eq('country_id', country_id);
