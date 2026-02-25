@@ -56,6 +56,7 @@ export interface EventTicket {
   event_id: string;
   name: string;
   description?: string;
+  price?: number;
   is_default: boolean;
   max_quantity?: number;
   registered_quantity: number;

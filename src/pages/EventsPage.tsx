@@ -419,6 +419,29 @@ export const EventsPage = () => {
     }
   } : undefined;
 
+  const getEventPriceDisplay = (eventObj: DatabaseEvent) => {
+    if (eventObj.is_free) return 'Free';
+    const activeTickets = (eventObj.tickets || []).filter((t: any) => t.is_active !== false);
+    if (activeTickets.length === 0) return undefined;
+
+    const prices = activeTickets.map((t: any) => t.price ? Number(t.price) : 0);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+
+    const currSymbol = eventObj.currency === 'USD' ? '$' : eventObj.currency === 'EUR' ? '€' : eventObj.currency === 'GBP' ? '£' : '';
+    const formatStr = (p: number) => {
+      const str = p.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return currSymbol ? `${currSymbol}${str}` : `${str} ${eventObj.currency || ''}`;
+    };
+
+    if (minPrice === maxPrice && minPrice > 0) return formatStr(minPrice);
+    if (minPrice < maxPrice) {
+      if (minPrice === 0) return `Free - ${formatStr(maxPrice)}`;
+      return `From ${formatStr(minPrice)}`;
+    }
+    return undefined;
+  };
+
   // Selected event view
   if (selectedEvent) {
     return (
@@ -814,6 +837,7 @@ export const EventsPage = () => {
                                     endDate={event.end_date}
                                     isFree={event.is_free}
                                     entryFee={event.entry_fee}
+                                    priceDisplay={getEventPriceDisplay(event)}
                                     currency={event.currency}
                                     onViewEvent={(id) => {
                                       const eventToView = events.find(e => e.id === id);
@@ -914,6 +938,7 @@ export const EventsPage = () => {
                                     endDate={event.end_date}
                                     isFree={event.is_free}
                                     entryFee={event.entry_fee}
+                                    priceDisplay={getEventPriceDisplay(event)}
                                     currency={event.currency}
                                     galleryImages={event.event_images}
                                     isPastEvent={true}

@@ -21,6 +21,7 @@ interface EventCardProps {
   endDate?: string; // ISO date string for timing badge
   isFree?: boolean;
   entryFee?: number;
+  priceDisplay?: string; // Optional pre-formatted price string (e.g., "From $10")
   currency?: string;
   createdBy?: {
     name: string;
@@ -50,6 +51,7 @@ export const EventCard = ({
   endDate,
   isFree,
   entryFee,
+  priceDisplay,
   currency = 'USD',
   createdBy,
   galleryImages,
@@ -163,11 +165,14 @@ export const EventCard = ({
             </span>
           </div>
         )}
-        {/* Price Badge - Bottom Left */}
         <div className="absolute bottom-3 left-3">
           {isFree ? (
             <span className="bg-green-500 text-white text-sm font-semibold px-3 py-1.5 rounded-full shadow-lg">
               FREE
+            </span>
+          ) : priceDisplay ? (
+            <span className="bg-blue-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full shadow-lg">
+              {priceDisplay}
             </span>
           ) : entryFee && entryFee > 0 ? (
             <span className="bg-blue-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full shadow-lg">

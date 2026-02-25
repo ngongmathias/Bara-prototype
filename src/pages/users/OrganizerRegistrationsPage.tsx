@@ -369,7 +369,7 @@ export const OrganizerRegistrationsPage = () => {
                                         </TableCell>
                                         <TableCell>
                                             <div className="font-medium">
-                                                {event.currency || 'USD'} {reg.total_amount.toFixed(2)}
+                                                {event.currency || 'USD'} {(reg.total_amount || 0).toFixed(2)}
                                             </div>
                                         </TableCell>
                                         <TableCell>

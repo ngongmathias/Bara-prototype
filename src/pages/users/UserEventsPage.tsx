@@ -48,6 +48,7 @@ import { useUser } from '@clerk/clerk-react';
 interface FormTicket {
   name: string;
   description: string;
+  price: string;
   selected: boolean;
 }
 
@@ -353,6 +354,7 @@ export const UserEventsPage = () => {
               .map(t => ({
                 name: t.name,
                 description: t.description || '',
+                price: t.price ? parseFloat(t.price) : 0,
                 is_default: false,
                 is_active: true,
                 registered_quantity: 0,
@@ -381,6 +383,7 @@ export const UserEventsPage = () => {
               .map(t => ({
                 name: t.name,
                 description: t.description || '',
+                price: t.price ? parseFloat(t.price) : 0,
                 is_default: false,
                 is_active: true,
                 registered_quantity: 0,
@@ -871,7 +874,7 @@ Orange Money: *144*1*XXXX#"
                       onClick={() => {
                         setFormData(prev => ({
                           ...prev,
-                          tickets: [...prev.tickets, { name: '', description: '', selected: true }]
+                          tickets: [...prev.tickets, { name: '', description: '', price: '', selected: true }]
                         }));
                       }}
                     >
@@ -886,15 +889,38 @@ Orange Money: *144*1*XXXX#"
                   {formData.tickets.map((ticket, index) => (
                     <div key={index} className="flex gap-3 items-start mb-3 p-3 bg-gray-50 rounded-lg">
                       <div className="flex-1 space-y-2">
-                        <Input
-                          placeholder="Ticket name (e.g., VIP, Regular, Early Bird)"
-                          value={ticket.name}
-                          onChange={(e) => {
-                            const updated = [...formData.tickets];
-                            updated[index] = { ...updated[index], name: e.target.value };
-                            setFormData(prev => ({ ...prev, tickets: updated }));
-                          }}
-                        />
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Ticket name (e.g., VIP, Regular, Early Bird)"
+                            value={ticket.name}
+                            onChange={(e) => {
+                              const updated = [...formData.tickets];
+                              updated[index] = { ...updated[index], name: e.target.value };
+                              setFormData(prev => ({ ...prev, tickets: updated }));
+                            }}
+                            className="flex-1"
+                          />
+                          {!formData.is_free && (
+                            <div className="w-1/3 relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+                                {formData.currency || '$'}
+                              </span>
+                              <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                placeholder="Price"
+                                value={ticket.price || ''}
+                                onChange={(e) => {
+                                  const updated = [...formData.tickets];
+                                  updated[index] = { ...updated[index], price: e.target.value };
+                                  setFormData(prev => ({ ...prev, tickets: updated }));
+                                }}
+                                className="pl-12"
+                              />
+                            </div>
+                          )}
+                        </div>
                         <Input
                           placeholder="Description (optional)"
                           value={ticket.description}

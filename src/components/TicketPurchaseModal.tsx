@@ -59,21 +59,28 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
     const activeTickets = (event.tickets || []).filter(t => t.is_active !== false);
     const hasTicketTypes = activeTickets.length > 0;
 
+    // React automatically handles this if we do it inline, but better to just calculate based on selection or fallback to first
+    const selectedTicket = hasTicketTypes
+        ? (activeTickets.find(t => t.name === selectedTicketType) || activeTickets[0])
+        : null;
+
+
     if (!isOpen) return null;
 
-    // An event is effectively free if is_free flag is set OR the entry fee is 0/null
-    const isEffectivelyFree = event.is_free || !event.entry_fee || event.entry_fee === 0;
+    const ticketPrice = selectedTicket?.price ?? event.entry_fee ?? 0;
+    const isEffectivelyFree = event.is_free || ticketPrice === 0;
     const isUnlimited = !event.max_capacity || event.max_capacity === 0;
     const isSoldOut = !isUnlimited && (event.current_registrations || 0) >= (event.max_capacity || 0);
     const spotsLeft = isUnlimited ? null : (event.max_capacity || 0) - (event.current_registrations || 0);
-    const rawFee = event.entry_fee || 0;
+
+    const rawFee = ticketPrice;
     const parsedFee = typeof rawFee === 'string' ? parseFloat((rawFee as string).replace(/[^0-9.]/g, '')) : Number(rawFee);
     const safeFee = isNaN(parsedFee) ? 0 : parsedFee;
     const totalPrice = safeFee * quantity;
     const currencySymbol = event.currency === 'USD' ? '$' : event.currency === 'EUR' ? '€' : event.currency === 'GBP' ? '£' : '';
     const priceDisplay = currencySymbol
-        ? `${currencySymbol}${totalPrice.toLocaleString()}`
-        : `${totalPrice.toLocaleString()} ${event.currency || ''}`;
+        ? `${currencySymbol}${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        : `${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${event.currency || ''}`;
 
     const handleRegisterFree = async () => {
         if (!isSignedIn || !user) {
@@ -226,16 +233,16 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                                         key={ticket.id}
                                         type="button"
                                         onClick={() => setSelectedTicketType(ticket.name)}
-                                        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedTicketType === ticket.name
-                                                ? 'border-black bg-gray-50 shadow-sm'
-                                                : 'border-gray-200 hover:border-gray-300'
+                                        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedTicket?.name === ticket.name
+                                            ? 'border-black bg-gray-50 shadow-sm'
+                                            : 'border-gray-200 hover:border-gray-300'
                                             }`}
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedTicketType === ticket.name ? 'border-black' : 'border-gray-300'
+                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedTicket?.name === ticket.name ? 'border-black' : 'border-gray-300'
                                                     }`}>
-                                                    {selectedTicketType === ticket.name && (
+                                                    {selectedTicket?.name === ticket.name && (
                                                         <div className="w-3 h-3 rounded-full bg-black" />
                                                     )}
                                                 </div>
@@ -246,11 +253,16 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                                                     )}
                                                 </div>
                                             </div>
-                                            {ticket.max_quantity && (
-                                                <Badge variant="secondary" className="text-xs">
-                                                    {Math.max(0, ticket.max_quantity - ticket.registered_quantity)} left
-                                                </Badge>
-                                            )}
+                                            <div className="text-right">
+                                                <p className="font-bold text-gray-900">
+                                                    {ticket.price ? `${currencySymbol}${Number(ticket.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Free'}
+                                                </p>
+                                                {ticket.max_quantity && (
+                                                    <Badge variant="secondary" className="text-xs mt-1">
+                                                        {Math.max(0, ticket.max_quantity - ticket.registered_quantity)} left
+                                                    </Badge>
+                                                )}
+                                            </div>
                                         </div>
                                     </button>
                                 ))}

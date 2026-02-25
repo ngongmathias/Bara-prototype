@@ -44,6 +44,7 @@ import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
 interface FormTicket {
   name: string;
   description: string;
+  price: string;
   selected: boolean;
 }
 
@@ -128,7 +129,7 @@ export const AdminEventsEnhanced = () => {
     city_id: '',
     hashtags: [],
 
-    tickets: [{ name: '', description: '', selected: true }],
+    tickets: [{ name: '', description: '', price: '', selected: true }],
     is_free: false,
     entry_fee: '',
     currency: 'USD',
@@ -285,6 +286,7 @@ export const AdminEventsEnhanced = () => {
               .map(t => ({
                 name: t.name,
                 description: t.description || '',
+                price: t.price ? parseFloat(t.price) : 0,
                 is_default: false,
                 is_active: true,
                 registered_quantity: 0,
@@ -318,6 +320,7 @@ export const AdminEventsEnhanced = () => {
               .map(t => ({
                 name: t.name,
                 description: t.description || '',
+                price: t.price ? parseFloat(t.price) : 0,
                 is_default: false,
                 is_active: true,
                 registered_quantity: 0,
@@ -431,7 +434,7 @@ export const AdminEventsEnhanced = () => {
       country_id: '',
       city_id: '',
       hashtags: [], // Reset hashtags
-      tickets: [{ name: '', description: '', selected: true }],
+      tickets: [{ name: '', description: '', price: '', selected: true }],
       is_free: false,
       entry_fee: '',
       currency: 'USD',
@@ -444,7 +447,7 @@ export const AdminEventsEnhanced = () => {
   const addTicket = () => {
     setFormData(prev => ({
       ...prev,
-      tickets: [...prev.tickets, { name: '', description: '', selected: false }]
+      tickets: [...prev.tickets, { name: '', description: '', price: '', selected: false }]
     }));
   };
 
@@ -455,7 +458,7 @@ export const AdminEventsEnhanced = () => {
     }));
   };
 
-  const updateTicket = (index: number, field: 'name' | 'description', value: string) => {
+  const updateTicket = (index: number, field: 'name' | 'description' | 'price', value: string) => {
     setFormData(prev => ({
       ...prev,
       tickets: prev.tickets.map((ticket, i) =>
@@ -951,6 +954,70 @@ export const AdminEventsEnhanced = () => {
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Ticket Types */}
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-base">Ticket Types</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addTicket}
+                    >
+                      <Plus className="mr-1 h-3 w-3" />
+                      Add Ticket Type
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-3">Add different ticket tiers (e.g., Regular, VIP, Early Bird)</p>
+                  {formData.tickets.length === 0 && (
+                    <p className="text-sm text-gray-400 italic">No ticket types added yet. Click "Add Ticket Type" to create tiers.</p>
+                  )}
+                  {formData.tickets.map((ticket, index) => (
+                    <div key={index} className="flex gap-3 items-start mb-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex-1 space-y-2">
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Ticket name (e.g., VIP, Regular, Early Bird)"
+                            value={ticket.name}
+                            onChange={(e) => updateTicket(index, 'name', e.target.value)}
+                            className="flex-1"
+                          />
+                          {!formData.is_free && (
+                            <div className="w-1/3 relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+                                {formData.currency || '$'}
+                              </span>
+                              <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                placeholder="Price"
+                                value={ticket.price || ''}
+                                onChange={(e) => updateTicket(index, 'price', e.target.value)}
+                                className="pl-12"
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <Input
+                          placeholder="Description (optional)"
+                          value={ticket.description}
+                          onChange={(e) => updateTicket(index, 'description', e.target.value)}
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700 mt-1"
+                        onClick={() => removeTicket(index)}
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Social Media Links */}
