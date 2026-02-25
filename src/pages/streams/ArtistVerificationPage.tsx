@@ -48,7 +48,7 @@ export default function ArtistVerificationPage() {
 
   const handleSubscribe = () => {
     if (!isSignedIn) {
-      navigate('/user/sign-in?redirect_url=/streams/verification');
+      navigate('/user/sign-in');
       return;
     }
     setLoading(true);
@@ -98,8 +98,8 @@ export default function ArtistVerificationPage() {
               </div>
               <CardTitle className="text-2xl font-black">Verified Artist</CardTitle>
               <div className="mt-3">
-                <span className="text-4xl font-black text-gray-900">Free</span>
-                <span className="text-gray-500 text-sm"> / Early Access</span>
+                <span className="text-4xl font-black text-gray-900">$10</span>
+                <span className="text-gray-500 text-sm">/month</span>
               </div>
             </CardHeader>
             <CardContent className="space-y-4 pb-8">
@@ -121,7 +121,7 @@ export default function ArtistVerificationPage() {
                   disabled={loading}
                   className="w-full py-6 bg-blue-600 hover:bg-blue-700 text-white font-black text-base rounded-xl"
                 >
-                  Claim Free Verification
+                  Get Verified
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               ) : (

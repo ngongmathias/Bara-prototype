@@ -59,7 +59,7 @@ export default function SportsPredictions() {
   const { profile } = useGamification();
   const { toast } = useToast();
 
-  const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('en-CA'));
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [activeBets, setActiveBets] = useState<Record<number, { choice: PredictionChoice; amount: number }>>({});
   const [submitting, setSubmitting] = useState<number | null>(null);
@@ -67,32 +67,10 @@ export default function SportsPredictions() {
   const [activeTab, setActiveTab] = useState<'predict' | 'my-bets' | 'leaderboard'>('predict');
   const [predictionLeaderboard, setPredictionLeaderboard] = useState<any[]>([]);
 
-  const { data: fixtures, isLoading, error: fixturesError } = useFixtures({
+  const { data: fixtures, isLoading } = useFixtures({
     date: selectedDate,
     enabled: true,
   });
-
-  const errorType = fixturesError?.message?.startsWith('SPORTS_API_') ? fixturesError.message : null;
-  const isApiUnavailable = !!errorType || !!fixturesError;
-
-  const getErrorMessage = () => {
-    switch (errorType) {
-      case 'SPORTS_API_NO_KEY':
-        return { title: 'Sports API Not Configured', desc: 'The sports data API key has not been set up yet. Contact the admin to configure VITE_API_FOOTBALL_KEY.' };
-      case 'SPORTS_API_SUSPENDED':
-        return { title: 'Account Being Upgraded', desc: 'Our sports data provider account is being upgraded. Match predictions will be back shortly!' };
-      case 'SPORTS_API_NETWORK_ERROR':
-        return { title: 'Connection Issue', desc: 'Unable to reach the sports data server. This may be a temporary network issue — please try again in a moment.' };
-      case 'SPORTS_API_FORBIDDEN':
-        return { title: 'Access Denied', desc: 'The sports API key may be invalid or expired. Please contact support.' };
-      case 'SPORTS_API_RATE_LIMITED':
-        return { title: 'Too Many Requests', desc: 'We\'ve hit the daily request limit. Predictions will refresh tomorrow — check back soon!' };
-      case 'SPORTS_API_INVALID_KEY':
-        return { title: 'Invalid API Key', desc: 'The sports data API key is not recognized. Please contact the admin.' };
-      default:
-        return { title: 'Sports Data Temporarily Unavailable', desc: 'Unable to load match data right now. Please try again later.' };
-    }
-  };
 
   // Fetch user's predictions
   useEffect(() => {
@@ -236,7 +214,7 @@ export default function SportsPredictions() {
     const d = new Date();
     d.setDate(d.getDate() + i);
     dateOptions.push({
-      full: d.toLocaleDateString('en-CA'),
+      full: d.toISOString().split('T')[0],
       day: d.toLocaleDateString('en-US', { weekday: 'short' }),
       date: d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }),
     });
@@ -331,16 +309,7 @@ export default function SportsPredictions() {
                 ))}
               </div>
 
-              {isApiUnavailable && !isLoading ? (
-                <div className="text-center py-16 bg-white rounded-2xl border border-orange-200">
-                  <Zap className="w-12 h-12 text-orange-400 mx-auto mb-3" />
-                  <h3 className="font-bold text-gray-700 mb-2">{getErrorMessage().title}</h3>
-                  <p className="text-sm text-gray-500 max-w-md mx-auto mb-4">
-                    {getErrorMessage().desc}
-                  </p>
-                  <p className="text-xs text-gray-400">You can still view your existing bets in the "My Bets" tab.</p>
-                </div>
-              ) : isLoading ? (
+              {isLoading ? (
                 <div className="text-center py-16">
                   <Loader2 className="w-8 h-8 animate-spin mx-auto text-gray-400 mb-3" />
                   <p className="text-gray-500">Loading matches...</p>

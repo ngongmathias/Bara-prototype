@@ -56,7 +56,7 @@ const tiers = [
       { text: 'Pro badge', included: true },
       { text: 'Featured placement', included: false },
     ],
-    cta: 'Claim Free Early Access',
+    cta: 'Go Pro',
     ctaVariant: 'default' as const,
   },
   {
@@ -80,7 +80,7 @@ const tiers = [
       { text: 'Priority search ranking', included: true },
       { text: 'Lead generation form', included: true },
     ],
-    cta: 'Claim Free Early Access',
+    cta: 'Go Elite',
     ctaVariant: 'default' as const,
   },
 ];
@@ -124,17 +124,6 @@ export default function PricingPage() {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto font-roboto">
             Start free. Upgrade when you're ready. No hidden fees.
           </p>
-
-          {/* Launch Period Banner */}
-          <div className="mt-6 inline-flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl px-6 py-4 max-w-2xl mx-auto">
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <Star className="w-5 h-5 text-green-600" />
-            </div>
-            <div className="text-left">
-              <p className="text-sm font-bold text-green-800">Launch Period — All Features Free!</p>
-              <p className="text-xs text-green-600">We're in early access. All Pro & Elite features are unlocked for everyone. Paid subscriptions via Stripe coming soon.</p>
-            </div>
-          </div>
 
           {/* Billing toggle */}
           <div className="mt-8 flex items-center justify-center gap-4">
@@ -252,8 +241,8 @@ export default function PricingPage() {
           <div className="space-y-6">
             {[
               { q: 'Can I switch plans anytime?', a: 'Yes! You can upgrade or downgrade at any time. Changes take effect at the start of your next billing cycle.' },
-              { q: 'What payment methods do you accept?', a: 'During our launch period, all features are completely free! When paid plans launch, we will accept credit/debit cards via Stripe and mobile money via Paystack. M-Pesa support coming soon.' },
-              { q: 'Is there a free trial for Pro or Elite?', a: 'Right now, everything is free during our launch period! Once paid plans go live, new users will get a 7-day free trial of Bara Pro.' },
+              { q: 'What payment methods do you accept?', a: 'We accept credit/debit cards via Stripe and mobile money via Paystack. M-Pesa support coming soon.' },
+              { q: 'Is there a free trial for Pro or Elite?', a: 'New users get a 7-day free trial of Bara Pro. No credit card required.' },
               { q: 'What are Bara Coins?', a: 'Bara Coins are our virtual currency. Earn them by being active on the platform or purchase them to boost listings, promote events, and unlock features.' },
             ].map((faq) => (
               <div key={faq.q} className="border-b border-gray-100 pb-4">

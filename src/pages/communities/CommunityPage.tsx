@@ -72,6 +72,7 @@ const communityData: Record<string, Omit<CommunityData, 'id'>> = {
   'kensential-kenya': {
     name: 'KenSential Kenya',
     description: 'Famous for its wildlife safaris, the Great Rift Valley, and the Maasai culture, Kenya offers breathtaking landscapes and incredible wildlife experiences. From the savannas of the Maasai Mara to the white sand beaches of the coast, Kenya is a land of contrasts and natural beauty.',
+    channelLink: 'https://whatsapp.com/channel/0029Vb8RoY211ulWvNjHLq0X',
     groups: [
       'https://chat.whatsapp.com/ERGTm2rfMGuAqMHeQMd339',
       'https://chat.whatsapp.com/KHw6dnedPr9KG5XkgUdVWj',
@@ -84,7 +85,14 @@ const communityData: Record<string, Omit<CommunityData, 'id'>> = {
 
     name: 'NigeriaYeah Nigeria',
 
-    description: 'Experience the giant of Africa, where diverse cultures, music, and cuisine come together in a vibrant celebration of life. Nigeria is home to Nollywood, Afrobeat music, and some of the most welcoming people on the continent.'
+    description: 'Experience the giant of Africa, where diverse cultures, music, and cuisine come together in a vibrant celebration of life. Nigeria is home to Nollywood, Afrobeat music, and some of the most welcoming people on the continent.',
+    channelLink: 'https://whatsapp.com/channel/0029Vb8RoY211ulWvNjHLq0X',
+    groups: [
+      'https://chat.whatsapp.com/HeeTMjEZZ2TK7MuiXJeA0P',
+      'https://chat.whatsapp.com/IUpLEaRp4yQAmsSAI9TIEE',
+      'https://chat.whatsapp.com/C4Q4RwxIbQOIxfjqBa4INp',
+      'https://chat.whatsapp.com/H0ugUT3o6rRKjwDCq3Cw4r'
+    ]
 
   },
 
@@ -218,15 +226,15 @@ export const CommunityPage = () => {
             This community page is being set up. We're working with local members to build a vibrant space for connection and collaboration.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link 
-              to="/communities" 
+            <Link
+              to="/communities"
               className="inline-flex items-center justify-center px-6 py-3 bg-[#70905a] text-white rounded-lg hover:bg-[#5a7549] transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Browse All Communities
             </Link>
-            <Link 
-              to="/ask-question" 
+            <Link
+              to="/ask-question"
               className="inline-flex items-center justify-center px-6 py-3 border border-[#70905a] text-[#70905a] rounded-lg hover:bg-[#70905a]/10 transition-colors"
             >
               <MessageCircle className="w-4 h-4 mr-2" />
@@ -243,14 +251,14 @@ export const CommunityPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Link 
-          to="/communities" 
+        <Link
+          to="/communities"
           className="inline-flex items-center text-[#70905a] hover:text-[#5a7549] mb-6 transition-colors font-medium"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Communities
         </Link>
-        
+
         <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 md:p-12 border border-gray-100">
           {/* Header with icon */}
           <div className="flex items-center gap-4 mb-8">
@@ -264,12 +272,12 @@ export const CommunityPage = () => {
               <p className="text-gray-500 mt-1">Community Hub</p>
             </div>
           </div>
-          
+
           {/* Description */}
           <div className="prose max-w-3xl text-gray-600 mb-12">
             <p className="text-lg leading-relaxed">{community.description}</p>
           </div>
-          
+
           {/* Stats or info if available from global_africa */}
           {globalAfricaData && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
@@ -287,7 +295,7 @@ export const CommunityPage = () => {
               )}
             </div>
           )}
-          
+
           {/* WhatsApp Links */}
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-green-50 rounded-xl p-6 border border-green-100">
@@ -296,7 +304,7 @@ export const CommunityPage = () => {
                 WhatsApp Channel
               </h2>
               {community.channelLink || globalAfricaData?.channel_link ? (
-                <a 
+                <a
                   href={community.channelLink || globalAfricaData?.channel_link}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -308,8 +316,8 @@ export const CommunityPage = () => {
               ) : (
                 <div className="text-gray-500">
                   <p className="mb-2">Channel coming soon</p>
-                  <Link 
-                    to="/ask-question" 
+                  <Link
+                    to="/ask-question"
                     className="text-sm text-green-600 hover:underline"
                   >
                     Want to help set this up?
@@ -317,7 +325,7 @@ export const CommunityPage = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="bg-green-50 rounded-xl p-6 border border-green-100">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-green-600" />
@@ -341,8 +349,8 @@ export const CommunityPage = () => {
               ) : (
                 <div className="text-gray-500">
                   <p className="mb-2">Groups coming soon</p>
-                  <Link 
-                    to="/ask-question" 
+                  <Link
+                    to="/ask-question"
                     className="text-sm text-green-600 hover:underline"
                   >
                     Express interest in joining
@@ -351,7 +359,7 @@ export const CommunityPage = () => {
               )}
             </div>
           </div>
-          
+
           {/* Additional info from database */}
           {globalAfricaData?.additional_info && (
             <div className="mt-10 pt-10 border-t border-gray-200">
