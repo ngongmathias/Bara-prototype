@@ -571,6 +571,15 @@ export const UserEventsPage = () => {
                       required
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="organizer_handle">Social Handle</Label>
+                    <Input
+                      id="organizer_handle"
+                      value={formData.organizer_handle}
+                      onChange={(e) => handleInputChange('organizer_handle', e.target.value)}
+                      placeholder="@yourhandle"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-4">
@@ -639,6 +648,53 @@ export const UserEventsPage = () => {
                     </Button>
                   </div>
                 </div>
+              </div>
+
+              {/* Event Gallery (Multi-Image Upload) */}
+              <div>
+                <Label>Event Gallery</Label>
+                <p className="text-xs text-gray-500 mb-2">Upload additional images for your event gallery</p>
+                {formData.event_images.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {formData.event_images.map((img, idx) => (
+                      <div key={idx} className="relative w-16 h-16">
+                        <img src={img} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover rounded-md border" />
+                        <button
+                          type="button"
+                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                          onClick={() => setFormData(prev => ({
+                            ...prev,
+                            event_images: prev.event_images.filter((_, i) => i !== idx)
+                          }))}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setGalleryUploadOpen(true)}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  {formData.event_images.length > 0 ? `Manage Gallery (${formData.event_images.length} images)` : 'Add Gallery Images'}
+                </Button>
+                <EventGalleryUpload
+                  isOpen={galleryUploadOpen}
+                  onClose={() => setGalleryUploadOpen(false)}
+                  eventId={editingEvent?.id || 'temp-' + Date.now()}
+                  eventTitle={formData.title || 'New Event'}
+                  existingImages={formData.event_images}
+                  onUploadComplete={() => {
+                    setGalleryUploadOpen(false);
+                    // Refresh gallery images from the event if editing
+                    if (editingEvent?.event_images) {
+                      setFormData(prev => ({ ...prev, event_images: editingEvent.event_images || [] }));
+                    }
+                  }}
+                />
               </div>
 
               {/* Pricing & Payment Instructions */}
@@ -722,6 +778,69 @@ Orange Money: *144*1*XXXX#"
                     </div>
                   </div>
                 )}
+
+                {/* Ticket Types */}
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-base">Ticket Types</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          tickets: [...prev.tickets, { name: '', description: '', selected: true }]
+                        }));
+                      }}
+                    >
+                      <Plus className="mr-1 h-3 w-3" />
+                      Add Ticket Type
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-3">Add different ticket tiers (e.g., Regular, VIP, Early Bird)</p>
+                  {formData.tickets.length === 0 && (
+                    <p className="text-sm text-gray-400 italic">No ticket types added yet. Click "Add Ticket Type" to create tiers.</p>
+                  )}
+                  {formData.tickets.map((ticket, index) => (
+                    <div key={index} className="flex gap-3 items-start mb-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex-1 space-y-2">
+                        <Input
+                          placeholder="Ticket name (e.g., VIP, Regular, Early Bird)"
+                          value={ticket.name}
+                          onChange={(e) => {
+                            const updated = [...formData.tickets];
+                            updated[index] = { ...updated[index], name: e.target.value };
+                            setFormData(prev => ({ ...prev, tickets: updated }));
+                          }}
+                        />
+                        <Input
+                          placeholder="Description (optional)"
+                          value={ticket.description}
+                          onChange={(e) => {
+                            const updated = [...formData.tickets];
+                            updated[index] = { ...updated[index], description: e.target.value };
+                            setFormData(prev => ({ ...prev, tickets: updated }));
+                          }}
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700 mt-1"
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            tickets: prev.tickets.filter((_, i) => i !== index)
+                          }));
+                        }}
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Social Media Links */}

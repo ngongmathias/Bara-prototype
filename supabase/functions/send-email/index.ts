@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
         // Note: For queue records, fields are in the record itself (payload)
         const to = payload.to_email || payload.to || payload.metadata?.to_email || body.to;
         const subject = payload.subject || payload.metadata?.subject || body.subject;
-        const from = payload.from || body.from || Deno.env.get("RESEND_FROM_EMAIL") || "Bara Afrika <onboarding@resend.dev>";
+        const from = payload.from || body.from || Deno.env.get("RESEND_FROM_EMAIL") || "Bara Afrika <noreply@mail.baraafrika.com>";
 
         if (!to || !subject) {
             console.error("Missing to/subject. Payload:", JSON.stringify(payload));
