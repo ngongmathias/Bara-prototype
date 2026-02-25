@@ -314,12 +314,12 @@ export const UserDashboardHome = () => {
       if (!user?.id) return;
       try {
         const email = user.primaryEmailAddress?.emailAddress || '';
-        
+
         // Fetch user's events
         const { data: events } = await supabase
           .from('events')
           .select('id, start_date, end_date')
-          .or(`organizer_email.eq.${email},clerk_user_id.eq.${user.id}`);
+          .or(`organizer_email.eq.${email},created_by_user_id.eq.${user.id},created_by_email.eq.${email}`);
 
         const now = new Date();
         const total = events?.length || 0;
