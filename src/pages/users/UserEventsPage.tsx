@@ -141,11 +141,26 @@ export const UserEventsPage = () => {
   // Match by created_by_user_id, created_by_email, or organizer_email
   // This ensures events created by the user AND events assigned by admin (via organizer_email) show up
   const userEmail = user?.primaryEmailAddress?.emailAddress?.toLowerCase();
+
+  // DEBUG: Log to trace filtering issue
+  console.log('🔍 [UserEventsPage] User ID:', user?.id, '| User Email:', userEmail);
+  console.log('🔍 [UserEventsPage] Total events from search:', events.length);
+  if (events.length > 0) {
+    console.log('🔍 [UserEventsPage] Sample event fields:', events.slice(0, 3).map(e => ({
+      title: e.title,
+      created_by_user_id: e.created_by_user_id,
+      created_by_email: e.created_by_email,
+      organizer_email: e.organizer_email,
+    })));
+  }
+
   const userEvents = events.filter(event =>
     event.created_by_user_id === user?.id ||
     (userEmail && event.created_by_email?.toLowerCase() === userEmail) ||
     (userEmail && event.organizer_email?.toLowerCase() === userEmail)
   );
+
+  console.log('🔍 [UserEventsPage] Matched user events:', userEvents.length);
 
   // Apply search and category filters to user's events
   const filteredEvents = userEvents.filter(event => {
