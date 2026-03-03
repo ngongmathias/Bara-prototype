@@ -260,6 +260,12 @@ import ArtistDashboard from "@/pages/streams/ArtistDashboard";
 
 import ArtistVerificationPage from "./pages/streams/ArtistVerificationPage";
 
+import UploadSongPage from "./pages/streams/UploadSongPage";
+
+import CreateAlbumPage from "./pages/streams/CreateAlbumPage";
+
+import SportsNewsList from "./pages/sports/SportsNewsList";
+
 import PodcastsPage from "./pages/streams/PodcastsPage";
 
 import SearchPage from "./pages/SearchPage";
@@ -370,6 +376,10 @@ const AppRoutes = () => {
 
           <Route path="creator" element={<UserAuthGuard><ArtistDashboard /></UserAuthGuard>} />
 
+          <Route path="creator/upload" element={<UserAuthGuard><UploadSongPage /></UserAuthGuard>} />
+
+          <Route path="creator/albums" element={<UserAuthGuard><CreateAlbumPage /></UserAuthGuard>} />
+
           <Route path="verification" element={<ArtistVerificationPage />} />
 
           <Route path="*" element={<StreamsHome />} /> {/* Fallback within streams context */}
@@ -398,6 +408,12 @@ const AppRoutes = () => {
 
 
 
+          <Route path="news" element={<SportsNewsList />} />
+
+          <Route path=":sport/news" element={<SportsNewsList />} />
+
+
+
           {/* Dynamic Sport Routes */}
 
           <Route path=":sport" element={<SportsHome />} />
@@ -420,31 +436,18 @@ const AppRoutes = () => {
 
           <Route path=":sport/stats" element={<SportsStats />} />
 
-          <Route path=":sport/transfers" element={<SportsHome />} />
 
-          <Route path=":sport/leagues" element={<SportsHome />} />
 
-          <Route path=":sport/series" element={<SportsHome />} />
 
-          <Route path=":sport/rankings" element={<SportsHome />} />
 
-          <Route path=":sport/p4p" element={<SportsHome />} />
 
-          <Route path=":sport/upcoming" element={<SportsHome />} />
 
-          <Route path=":sport/tournaments" element={<SportsHome />} />
 
-          <Route path=":sport/countries" element={<SportsHome />} />
 
-          <Route path=":sport/cricinfo" element={<SportsHome />} />
 
-          <Route path=":sport/bpi" element={<SportsHome />} />
 
-          <Route path=":sport/power-rankings" element={<SportsHome />} />
 
-          <Route path=":sport/draft" element={<SportsHome />} />
 
-          <Route path=":sport/fpi" element={<SportsHome />} />
 
 
 
@@ -633,6 +636,10 @@ const AppRoutes = () => {
         <Route path="/about" element={<AboutUsPage />} />
 
         <Route path="/listings" element={<ListingsPage />} />
+
+        <Route path="/listings/categories" element={<CategoriesPage />} />
+
+        <Route path="/listings/category/:categorySlug" element={<CategoryListingsPage />} />
 
         <Route path="/contact-us" element={<ContactUsPage />} />
 

@@ -14,6 +14,8 @@ import { Link } from 'react-router-dom';
 
 import { SEO } from '@/components/SEO';
 
+import { useUser } from '@clerk/clerk-react';
+
 
 
 export default function StreamsHome() {
@@ -21,6 +23,8 @@ export default function StreamsHome() {
     const { toast } = useToast();
 
     const { play, currentSong, isPlaying, playAlbum } = useAudioPlayer();
+
+    const { user: clerkUser } = useUser();
 
     const [trendingSongs, setTrendingSongs] = useState<Song[]>([]);
 
@@ -122,9 +126,7 @@ export default function StreamsHome() {
 
                 try {
 
-                    const { data: { user } } = await supabase.auth.getUser();
-
-                    if (user) {
+                    if (clerkUser) {
 
                         const { data: historyData } = await supabase
 
@@ -132,7 +134,7 @@ export default function StreamsHome() {
 
                             .select('song_id, played_at, songs(*, artists(name))')
 
-                            .eq('user_id', user.id)
+                            .eq('user_id', clerkUser.id)
 
                             .order('played_at', { ascending: false })
 
@@ -442,13 +444,15 @@ export default function StreamsHome() {
 
                                                 onClick={() => {
 
-                                                    toast({
-
-                                                        title: 'Coming Soon',
-
-                                                        description: 'Personalized mixes are still in development.',
-
-                                                    });
+                                                    // Play trending songs as mix
+                                                    if (trendingSongs.length > 0) {
+                                                        playAlbum(trendingSongs, 0);
+                                                    } else {
+                                                        toast({
+                                                            title: 'No songs yet',
+                                                            description: 'Check back soon for personalized mixes.',
+                                                        });
+                                                    }
 
                                                 }}
 
@@ -710,7 +714,7 @@ export default function StreamsHome() {
 
                             {/* Popular Radio */}
 
-                            <Section title="Popular radio" showAllLink="/streams/radio">
+                            <Section title="Popular radio" showAllLink="/streams/search?q=radio">
 
                                 {[
 
@@ -736,19 +740,19 @@ export default function StreamsHome() {
 
                             {/* Featured Charts */}
 
-                            <Section title="Featured Charts" showAllLink="/streams/charts">
+                            <Section title="Featured Charts" showAllLink="/streams/trending">
 
                                 {[
 
-                                    { id: 'c1', title: 'Top Songs Global', type: 'Weekly Music Charts', gradient: 'from-[#4e3c92] to-[#6a54bd]', footer: 'Your weekly update of the most played tracks...' },
+                                    { id: 'c1', title: 'Top Songs Africa', type: 'Weekly Music Charts', gradient: 'from-[#4e3c92] to-[#6a54bd]', footer: 'Your weekly update of the most played tracks...' },
 
-                                    { id: 'c2', title: 'Top Songs USA', type: 'Weekly Music Charts', gradient: 'from-[#e91e63] to-[#ff4081]', footer: 'Your weekly update of the most played tracks...' },
+                                    { id: 'c2', title: 'Top Songs Nigeria', type: 'Weekly Music Charts', gradient: 'from-[#e91e63] to-[#ff4081]', footer: 'Your weekly update of the most played tracks...' },
 
-                                    { id: 'c3', title: 'Top 50 Global', type: 'Daily Update', gradient: 'from-[#009688] to-[#26a69a]', footer: 'Your daily update of the most played tracks right...' },
+                                    { id: 'c3', title: 'Top 50 Africa', type: 'Daily Update', gradient: 'from-[#009688] to-[#26a69a]', footer: 'Your daily update of the most played tracks right...' },
 
-                                    { id: 'c4', title: 'Top 50 USA', type: 'Daily Update', gradient: 'from-[#f44336] to-[#ef5350]', footer: 'Your daily update of the most played tracks right...' },
+                                    { id: 'c4', title: 'Top 50 South Africa', type: 'Daily Update', gradient: 'from-[#f44336] to-[#ef5350]', footer: 'Your daily update of the most played tracks right...' },
 
-                                    { id: 'c5', title: 'Viral 50 Global', type: 'Daily Update', gradient: 'from-[#4caf50] to-[#66bb6a]', footer: 'Your daily update of the most viral tracks right...' }
+                                    { id: 'c5', title: 'Viral 50 Africa', type: 'Daily Update', gradient: 'from-[#4caf50] to-[#66bb6a]', footer: 'Your daily update of the most viral tracks right...' }
 
                                 ].map(chart => (
 

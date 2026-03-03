@@ -113,7 +113,10 @@ const ListingsPage = () => {
 
   const handleSearch = () => {
     if (searchTerm || location) {
-      navigate(`/listings/category/all?search=${searchTerm}&location=${location}`);
+      const params = new URLSearchParams();
+      if (searchTerm) params.set('search', searchTerm);
+      if (location) params.set('location', location);
+      navigate(`/listings/categories?${params.toString()}`);
     }
   };
 

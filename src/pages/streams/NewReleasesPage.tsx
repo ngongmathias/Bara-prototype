@@ -1,11 +1,37 @@
 import { useEffect, useState } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
-import { Loader2, Play } from 'lucide-react';
+import { Loader2, Play, Pause } from 'lucide-react';
+import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 
 export default function NewReleasesPage() {
     const [albums, setAlbums] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const { play, playAlbum, currentSong, isPlaying } = useAudioPlayer();
+
+    const handlePlayAlbum = async (albumId: string) => {
+        try {
+            const { data: songsData } = await supabase
+                .from('songs')
+                .select('*, artists(name)')
+                .eq('album_id', albumId)
+                .order('track_number', { ascending: true });
+
+            if (songsData && songsData.length > 0) {
+                const songs: Song[] = songsData.map(song => ({
+                    id: song.id,
+                    title: song.title,
+                    artist: song.artists?.name || 'Unknown Artist',
+                    file_url: song.file_url,
+                    cover_url: song.cover_url || '/placeholder-music.png',
+                    duration: song.duration,
+                }));
+                playAlbum(songs, 0);
+            }
+        } catch (error) {
+            console.error('Error playing album:', error);
+        }
+    };
 
     useEffect(() => {
         const fetchAlbums = async () => {
@@ -52,7 +78,10 @@ export default function NewReleasesPage() {
                                             target.src = '/placeholder-album.png';
                                         }}
                                     />
-                                    <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handlePlayAlbum(album.id); }}
+                                        className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                    >
                                         <Play size={24} fill="black" className="ml-1" />
                                     </button>
                                 </div>

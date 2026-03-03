@@ -3,7 +3,8 @@ import { useParams } from 'react-router-dom';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
-import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music } from 'lucide-react';
+import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music, Share2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface PlaylistData {
     id: string;
@@ -16,6 +17,7 @@ interface PlaylistData {
 export default function PlaylistPage() {
     const { id } = useParams();
     const { play, currentSong, isPlaying, togglePlay } = useAudioPlayer();
+    const { toast } = useToast();
     const [playlist, setPlaylist] = useState<PlaylistData | null>(null);
     const [tracks, setTracks] = useState<Song[]>([]);
     const [likedTracks, setLikedTracks] = useState<string[]>([]);
@@ -112,6 +114,32 @@ export default function PlaylistPage() {
         }
     };
 
+    const handleShare = async () => {
+        const shareUrl = window.location.href;
+        const shareData = {
+            title: playlist?.title || 'Playlist',
+            text: `Check out "${playlist?.title || 'this playlist'}" on Bara Streams!`,
+            url: shareUrl,
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(shareUrl);
+                toast({ title: 'Link copied!', description: 'Playlist link copied to clipboard.' });
+            }
+        } catch (err) {
+            // User cancelled share or clipboard failed
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                toast({ title: 'Link copied!', description: 'Playlist link copied to clipboard.' });
+            } catch {
+                toast({ title: 'Share', description: shareUrl });
+            }
+        }
+    };
+
     const formatDuration = (seconds: number | null) => {
         if (!seconds) return '0:00';
         const mins = Math.floor(seconds / 60);
@@ -182,6 +210,9 @@ export default function PlaylistPage() {
                         </button>
                         <button className="text-gray-400 hover:text-white transition">
                             <Heart className="w-7 h-7" />
+                        </button>
+                        <button onClick={handleShare} className="text-gray-400 hover:text-white transition" title="Share playlist">
+                            <Share2 className="w-7 h-7" />
                         </button>
                         <button className="text-gray-400 hover:text-white transition">
                             <MoreHorizontal className="w-7 h-7" />

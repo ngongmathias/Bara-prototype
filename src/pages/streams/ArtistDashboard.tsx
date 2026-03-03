@@ -232,7 +232,7 @@ export default function ArtistDashboard() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-                                <Link to="/admin/streams/songs">
+                                <Link to="/streams/creator/upload">
 
                                     <div className="bg-gradient-to-br from-[#1DB954] to-[#1aa34a] p-6 rounded-xl cursor-pointer hover:scale-[1.02] transition-transform group shadow-lg">
 
@@ -246,7 +246,7 @@ export default function ArtistDashboard() {
 
                                 </Link>
 
-                                <Link to="/admin/streams/albums">
+                                <Link to="/streams/creator/albums">
 
                                     <div className="bg-[#282828] p-6 rounded-xl cursor-pointer hover:bg-[#333333] transition-colors group border border-white/5 shadow-lg">
 
@@ -356,7 +356,7 @@ export default function ArtistDashboard() {
 
                                 <p className="text-sm text-gray-400 mb-4">Get the blue checkmark and unlock advanced creator tools.</p>
 
-                                <Button className="w-full bg-white text-black hover:bg-gray-200 font-bold">Apply Now</Button>
+                                <Button className="w-full bg-white text-black hover:bg-gray-200 font-bold" onClick={() => window.location.href = '/streams/verification'}>Apply Now</Button>
 
                             </CardContent>
 

@@ -8,6 +8,8 @@ import { useState } from 'react';
 
 import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
 
+import { useUser } from '@clerk/clerk-react';
+
 import { XPProgressBar } from '../gamification/XPProgressBar';
 
 
@@ -19,6 +21,8 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
     const navigate = useNavigate();
 
     const [creating, setCreating] = useState(false);
+
+    const { user: clerkUser } = useUser();
 
 
 
@@ -32,17 +36,15 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
 
             setCreating(true);
 
-            const { data: { user } } = await supabase.auth.getUser();
-
-
-
-            if (!user) {
+            if (!clerkUser) {
 
                 navigate('/sign-in');
 
                 return;
 
             }
+
+            const user = clerkUser;
 
 
 
@@ -80,9 +82,9 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
 
                 // Gamification: Award XP for curation
 
-                const { data: { user } } = await supabase.auth.getUser();
+                if (clerkUser) {
 
-                if (user) {
+                    const user = clerkUser;
 
                     await GamificationService.addXP(user.id, XP_REWARDS.PLAYLIST_CREATE, 'Created a new playlist');
 

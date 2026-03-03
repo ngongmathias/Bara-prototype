@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { db } from "@/lib/supabase";
 import { Header } from "@/components/Header";
@@ -90,7 +90,8 @@ export const CategoriesPage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [urlSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(urlSearchParams.get('search') || "");
 
   useEffect(() => {
     const fetchCategories = async () => {

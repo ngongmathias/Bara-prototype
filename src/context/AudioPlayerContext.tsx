@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabase';
 
 import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
 
+import { useUser } from '@clerk/clerk-react';
+
 
 
 // Types
@@ -110,6 +112,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     const hasAwardedXP = useRef<string | null>(null);
 
+    const { user: clerkUser } = useUser();
+
 
 
     // Initialize Audio Object
@@ -138,11 +142,9 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
                 const awardXP = async () => {
 
-                    const { data: { user } } = await supabase.auth.getUser();
+                    if (clerkUser) {
 
-                    if (user) {
-
-                        await GamificationService.addXP(user.id, XP_REWARDS.SONG_LISTEN, `Listened to ${currentSong.title}`);
+                        await GamificationService.addXP(clerkUser.id, XP_REWARDS.SONG_LISTEN, `Listened to ${currentSong.title}`);
 
                         hasAwardedXP.current = currentSong.id;
 
@@ -208,9 +210,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     const fetchLikes = async () => {
 
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) return;
+        if (!clerkUser) return;
 
 
 
@@ -220,7 +220,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
             .select('song_id')
 
-            .eq('user_id', user.id);
+            .eq('user_id', clerkUser.id);
 
 
 
@@ -316,13 +316,11 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
             // Record in play history for "Recently Played"
 
-            const { data: { user } } = await supabase.auth.getUser();
-
-            if (user) {
+            if (clerkUser) {
 
                 await supabase.from('play_history').insert({
 
-                    user_id: user.id,
+                    user_id: clerkUser.id,
 
                     song_id: songId,
 
@@ -478,9 +476,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     const toggleLike = async (songId: string) => {
 
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) return;
+        if (!clerkUser) return;
 
 
 
@@ -496,7 +492,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
                 .delete()
 
-                .eq('user_id', user.id)
+                .eq('user_id', clerkUser.id)
 
                 .eq('song_id', songId);
 
@@ -514,7 +510,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
                 .from('user_song_likes')
 
-                .insert({ user_id: user.id, song_id: songId });
+                .insert({ user_id: clerkUser.id, song_id: songId });
 
 
 
