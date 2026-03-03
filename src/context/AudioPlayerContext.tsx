@@ -278,11 +278,9 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
         setCurrentSong(song);
 
-        setIsPlaying(true);
-
         audioRef.current.src = song.file_url;
 
-        audioRef.current.play().catch(e => console.error("Playback failed:", e));
+        setIsPlaying(true);
 
 
 
