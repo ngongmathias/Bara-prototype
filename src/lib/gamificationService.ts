@@ -338,19 +338,25 @@ export class GamificationService {
 
 
 
+            // Reset daily missions for this user if they haven't been reset today
+            await this.resetDailyMissions(userId);
+
             const now = new Date();
 
             const lastActivity = new Date(profile.last_activity_at);
 
-            const diffTime = Math.abs(now.getTime() - lastActivity.getTime());
-
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            // Compare calendar dates (UTC) instead of raw ms diff
+            const nowDate = new Date(now.toISOString().slice(0, 10));
+            const lastDate = new Date(lastActivity.toISOString().slice(0, 10));
+            const diffDays = Math.round((nowDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
 
 
 
             let newStreak = profile.consecutive_days;
 
             let multiplier = profile.multiplier;
+
+            let streakChanged = false;
 
 
 
@@ -359,20 +365,17 @@ export class GamificationService {
                 // Streak continued
 
                 newStreak += 1;
+                streakChanged = true;
 
             } else if (diffDays > 1) {
 
                 // Streak broken
 
                 newStreak = 1;
-
-            } else {
-
-                // Same day activity, no update needed to streak count
-
-                return;
+                streakChanged = true;
 
             }
+            // diffDays === 0: same day, streak count unchanged but we still track the mission below
 
 
 
@@ -388,29 +391,38 @@ export class GamificationService {
 
 
 
-            const { error } = await supabase
+            if (streakChanged) {
+                const { error } = await supabase
 
-                .from('gamification_profiles')
+                    .from('gamification_profiles')
 
-                .update({
+                    .update({
 
-                    consecutive_days: newStreak,
+                        consecutive_days: newStreak,
 
-                    multiplier: multiplier,
+                        multiplier: multiplier,
 
-                    last_activity_at: now.toISOString()
+                        last_activity_at: now.toISOString()
 
-                })
+                    })
 
-                .eq('user_id', userId);
+                    .eq('user_id', userId);
 
 
 
-            if (error) throw error;
+                if (error) throw error;
 
-            // Give a small daily bonus for returning
-            await this.addXP(userId, XP_REWARDS.SIGN_IN_BONUS, `Daily Streak: Day ${newStreak}`);
-            // Also track the daily_login mission
+                // Give a small daily bonus for returning
+                await this.addXP(userId, XP_REWARDS.SIGN_IN_BONUS, `Daily Streak: Day ${newStreak}`);
+            } else {
+                // Same day — just update last_activity_at
+                await supabase
+                    .from('gamification_profiles')
+                    .update({ last_activity_at: now.toISOString() })
+                    .eq('user_id', userId);
+            }
+
+            // Always track the daily_login mission (trackMissionProgress is idempotent once completed)
             await this.trackMissionProgress(userId, 'daily_login', 1);
 
         } catch (error) {
@@ -731,6 +743,9 @@ export class GamificationService {
 
         try {
 
+            // Reset daily missions if they haven't been reset today
+            await this.resetDailyMissions(userId);
+
             // First, ensure user has records in user_missions for all active missions
 
             const { data: allMissions } = await supabase.from('missions').select('*');
@@ -1049,6 +1064,14 @@ export class GamificationService {
      * Admin God-Mode: Directly override user economy stats
 
      */
+
+    static async resetDailyMissions(userId: string): Promise<void> {
+        try {
+            await supabase.rpc('reset_daily_missions_for_user', { p_user_id: userId });
+        } catch (error) {
+            console.error('Error resetting daily missions:', error);
+        }
+    }
 
     static async updateUserEconomy(userId: string, updates: { bara_coins?: number; trust_rank?: number }): Promise<boolean> {
 

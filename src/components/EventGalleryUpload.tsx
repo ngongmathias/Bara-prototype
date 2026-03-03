@@ -5,6 +5,8 @@ import { Upload, X, Image as ImageIcon, Loader2, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { uploadEventImage } from '@/lib/eventsService';
 import { supabase } from '@/lib/supabase';
+import { useUser } from '@clerk/clerk-react';
+import { GamificationService } from '@/lib/gamificationService';
 
 interface EventGalleryUploadProps {
   isOpen: boolean;
@@ -23,6 +25,7 @@ export const EventGalleryUpload: React.FC<EventGalleryUploadProps> = ({
   existingImages = [],
   onUploadComplete
 }) => {
+  const { user } = useUser();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -142,6 +145,12 @@ export const EventGalleryUpload: React.FC<EventGalleryUploadProps> = ({
       
       // Notify parent component
       onUploadComplete();
+
+      // Gamification: reward for uploading event photos
+      if (user?.id) {
+        GamificationService.trackMissionProgress(user.id, 'event_photo_upload', uploadedUrls.length);
+        GamificationService.addXP(user.id, 25 * uploadedUrls.length, `Uploaded ${uploadedUrls.length} event photo(s)`);
+      }
 
     } catch (error) {
       console.error('Error uploading images:', error);

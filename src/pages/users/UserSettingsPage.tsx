@@ -28,7 +28,7 @@ const UserSettingsPage = () => {
 
   const { user } = useUser();
 
-  const { signOut } = useClerk();
+  const { signOut, openUserProfile } = useClerk();
 
   const [logs, setLogs] = useState<UserLog[]>([]);
 
@@ -342,7 +342,14 @@ const UserSettingsPage = () => {
 
                 ) : (
 
-                  <p className="mt-1 text-gray-900 font-medium">{user?.phoneNumbers?.[0]?.phoneNumber || 'Not provided'}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="mt-1 text-gray-900 font-medium">{user?.phoneNumbers?.[0]?.phoneNumber || 'Not provided'}</p>
+                    {!user?.phoneNumbers?.[0]?.phoneNumber && (
+                      <Button variant="outline" size="sm" onClick={() => openUserProfile()} className="text-xs">
+                        Verify Phone
+                      </Button>
+                    )}
+                  </div>
 
                 )}
 

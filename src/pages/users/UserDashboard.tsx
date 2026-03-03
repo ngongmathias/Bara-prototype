@@ -593,12 +593,15 @@ export const UserDashboardHome = () => {
 
   useEffect(() => {
 
-    const fetchMissions = async () => {
+    const initMissions = async () => {
 
       if (!user?.id) return;
 
       try {
 
+        // Trigger daily streak check + daily_login mission on dashboard visit
+        await GamificationService.checkDailyStreak(user.id);
+
         const data = await GamificationService.getMissions(user.id);
 
         setMissions(data);
@@ -615,7 +618,7 @@ export const UserDashboardHome = () => {
 
     };
 
-    fetchMissions();
+    initMissions();
 
   }, [user]);
 
