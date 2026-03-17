@@ -1,4 +1,4 @@
-import { Home, Search, Library, Plus, Heart, Globe, Mic2, Loader2 } from 'lucide-react';
+import { Home, Search, Library, Plus, Heart, Globe, Mic2, Loader2, Film, BookOpen, Headphones, Gamepad2 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useState } from 'react';
@@ -65,6 +65,16 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
                 <SidebarLink to="/streams" icon={<Home size={24} />} label="Home" active={isActive('/streams')} />
                 <SidebarLink to="/streams/search" icon={<Search size={24} />} label="Search" active={isActive('/streams/search')} />
                 <SidebarLink to="/streams/creator" icon={<Mic2 size={24} className="text-[#1DB954]" />} label="Creator Portal" active={isActive('/streams/creator')} />
+            </div>
+
+            {/* Browse Content Types */}
+            <div className="bg-gray-50 rounded-lg p-4 space-y-1">
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Browse</p>
+                <SidebarLink to="/streams/music" icon={<Home size={20} />} label="Music" active={location.pathname.includes('/streams/music')} />
+                <SidebarLink to="/streams/movies" icon={<Film size={20} />} label="Movies" active={location.pathname.includes('/streams/movies')} />
+                <SidebarLink to="/streams/ebooks" icon={<BookOpen size={20} />} label="Ebooks" active={location.pathname.includes('/streams/ebooks')} />
+                <SidebarLink to="/streams/podcasts" icon={<Headphones size={20} />} label="Podcasts" active={location.pathname.includes('/streams/podcasts')} />
+                <SidebarLink to="/streams/gaming" icon={<Gamepad2 size={20} />} label="Gaming" active={location.pathname.includes('/streams/gaming')} />
             </div>
 
             {/* Library Card */}

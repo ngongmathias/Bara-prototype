@@ -270,6 +270,10 @@ import SportsNewsList from "./pages/sports/SportsNewsList";
 
 import PodcastsPage from "./pages/streams/PodcastsPage";
 
+import MoviesPage from "./pages/streams/MoviesPage";
+
+import EbooksPage from "./pages/streams/EbooksPage";
+
 import SearchPage from "./pages/SearchPage";
 
 import { UserTicketsPage } from "./pages/users/UserTicketsPage";
@@ -379,6 +383,10 @@ const AppRoutes = () => {
           <Route path="library" element={<UserAuthGuard><LibraryPage /></UserAuthGuard>} />
 
           <Route path="podcasts" element={<PodcastsPage />} />
+
+          <Route path="movies" element={<MoviesPage />} />
+
+          <Route path="ebooks" element={<EbooksPage />} />
 
           <Route path="creator" element={<UserAuthGuard><ArtistDashboard /></UserAuthGuard>} />
 

@@ -20,7 +20,7 @@ export const UserSignInPage = () => {
 
   const searchParams = new URLSearchParams(location.search);
 
-  const redirectUrl = searchParams.get('redirect_url') || '/user/settings';
+  const redirectUrl = searchParams.get('redirect_url') || '/';
 
   const signUpUrl = `/user/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`;
 
@@ -106,7 +106,7 @@ export const UserSignInPage = () => {
 
           <p className="mt-2 text-sm text-gray-600">
 
-            Access your account to manage your settings
+            Access your BARA Afrika account
 
           </p>
 

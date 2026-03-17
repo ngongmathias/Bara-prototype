@@ -10,7 +10,7 @@ export const UserSignUpPage = () => {
 
   const searchParams = new URLSearchParams(location.search);
 
-  const redirectUrl = searchParams.get('redirect_url') || '/user/settings';
+  const redirectUrl = searchParams.get('redirect_url') || '/';
 
   const signInUrl = `/user/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`;
 

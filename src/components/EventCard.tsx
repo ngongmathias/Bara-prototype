@@ -143,13 +143,21 @@ export const EventCard = ({
       }}
       className="bg-white rounded-lg shadow-lg overflow-hidden transition-shadow hover:shadow-2xl"
     >
-      <div className="h-64 bg-gray-200 overflow-hidden relative">
+      <div className="h-72 bg-gray-900 overflow-hidden relative">
+        {/* Blurred backdrop fill — prevents empty bars on portrait flyers */}
+        <img
+          src={imageUrl || '/placeholder-event.jpg'}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-40"
+        />
+        {/* Actual flyer — full image, never cropped */}
         <img
           src={imageUrl || '/placeholder-event.jpg'}
           alt={title}
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover"
+          className="relative w-full h-full object-contain"
         />
         {/* Timing Badge - Top Left */}
         {startDate && (

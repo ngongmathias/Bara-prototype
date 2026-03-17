@@ -24,8 +24,8 @@ const STREAM_CATEGORIES = [
     gradient: 'from-red-500 to-rose-600',
     bgLight: 'bg-red-50',
     textColor: 'text-red-700',
-    available: false,
-    tag: 'Coming Soon',
+    available: true,
+    tag: 'Live',
   },
   {
     title: 'Ebooks',
@@ -35,8 +35,8 @@ const STREAM_CATEGORIES = [
     gradient: 'from-amber-500 to-orange-600',
     bgLight: 'bg-amber-50',
     textColor: 'text-amber-700',
-    available: false,
-    tag: 'Coming Soon',
+    available: true,
+    tag: 'Live',
   },
   {
     title: 'Podcasts',
@@ -170,7 +170,7 @@ export default function StreamsHub() {
             </h3>
             <p className="text-gray-500 max-w-2xl mx-auto text-sm leading-relaxed">
               BARA Streams brings together the best of African entertainment under one roof.
-              Start with Music and Podcasts today, with Movies, Ebooks, and Gaming launching soon.
+              Start with Music, Movies, Ebooks, and Podcasts today, with Gaming launching soon.
               All content is curated to celebrate African creativity and culture.
             </p>
           </div>

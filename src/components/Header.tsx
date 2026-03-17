@@ -62,12 +62,17 @@ const MINI_APPS = [
   { label: 'BARA Events', short: 'Events', to: '/events', icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50' },
   { label: 'BARA Streams', short: 'Streams', to: '/streams', icon: Music, color: 'text-purple-600', bg: 'bg-purple-50' },
   { label: 'BARA Listings', short: 'Listings', to: '/listings', icon: List, color: 'text-teal-600', bg: 'bg-teal-50' },
-  { label: 'BARA Marketplace', short: 'Marketplace', to: '/marketplace', icon: ShoppingBag, color: 'text-green-600', bg: 'bg-green-50' },
+  { label: 'BARA Marketplace', short: 'Market', to: '/marketplace', icon: ShoppingBag, color: 'text-green-600', bg: 'bg-green-50' },
   { label: 'BARA Sports', short: 'Sports', to: '/sports', icon: Trophy, color: 'text-orange-600', bg: 'bg-orange-50' },
   { label: 'BARA Blog', short: 'Blog', to: '/blog', icon: FileText, color: 'text-red-600', bg: 'bg-red-50' },
   { label: 'BARA Communities', short: 'Communities', to: '/communities', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
   { label: 'BARA Tools', short: 'Tools', to: '/tools', icon: Wrench, color: 'text-gray-600', bg: 'bg-gray-100' },
 ];
+
+// Primary apps shown directly in the nav bar (first 6)
+const PRIMARY_APPS = MINI_APPS.slice(0, 6);
+// Overflow apps shown in "More" dropdown
+const MORE_APPS = MINI_APPS.slice(6);
 
 export const Header = () => {
   const { t } = useTranslation();
@@ -141,43 +146,61 @@ export const Header = () => {
             <img src="/bara-1-removebg-preview.png" className="h-8 w-auto ml-1" alt="BARA Afrika" />
           </Link>
 
-          {/* ─── Desktop: Center — Mini-Apps Mega Menu ─── */}
-          <nav className="hidden lg:flex items-center flex-1 justify-center" ref={megaMenuRef}>
+          {/* ─── Desktop: Center — Primary nav links + More dropdown ─── */}
+          <nav className="hidden lg:flex items-center flex-1 justify-center gap-0.5" ref={megaMenuRef}>
+            {PRIMARY_APPS.map((app) => {
+              const Icon = app.icon;
+              const isActive = location.pathname.startsWith(app.to);
+              return (
+                <Link
+                  key={app.to}
+                  to={app.to}
+                  onClick={scrollToTop}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all whitespace-nowrap ${
+                    isActive
+                      ? 'bg-gray-100 text-gray-900'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? app.color : ''}`} />
+                  {app.short}
+                </Link>
+              );
+            })}
+
+            {/* More dropdown for overflow apps */}
             <div className="relative">
               <button
                 onClick={() => setMegaMenuOpen(!megaMenuOpen)}
-                className={`inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                className={`inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all ${
                   megaMenuOpen
                     ? 'bg-gray-100 text-gray-900'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
-                <LayoutGrid className="w-4 h-4" />
-                Mini-Apps
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${megaMenuOpen ? 'rotate-180' : ''}`} />
+                <LayoutGrid className="w-3.5 h-3.5" />
+                More
+                <ChevronDown className={`w-3 h-3 transition-transform ${megaMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {/* Mega Menu Panel */}
               {megaMenuOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[540px] bg-white rounded-xl shadow-xl border border-gray-200 p-4 z-50">
-                  <div className="grid grid-cols-3 gap-1">
-                    {MINI_APPS.map((app) => {
-                      const Icon = app.icon;
-                      return (
-                        <Link
-                          key={app.to}
-                          to={app.to}
-                          onClick={() => { setMegaMenuOpen(false); scrollToTop(); }}
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                        >
-                          <div className={`w-9 h-9 rounded-lg ${app.bg} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}>
-                            <Icon className={`w-[18px] h-[18px] ${app.color}`} />
-                          </div>
-                          <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{app.short}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
+                <div className="absolute top-full right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50">
+                  {MORE_APPS.map((app) => {
+                    const Icon = app.icon;
+                    return (
+                      <Link
+                        key={app.to}
+                        to={app.to}
+                        onClick={() => { setMegaMenuOpen(false); scrollToTop(); }}
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors group"
+                      >
+                        <div className={`w-8 h-8 rounded-lg ${app.bg} flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`w-4 h-4 ${app.color}`} />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{app.short}</span>
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </div>

@@ -416,13 +416,13 @@ export default function StreamsHome() {
 
                                 {[
 
-                                    { id: '1', title: 'Discover Weekly', artist: 'Personalized for you', cover: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=300&h=300&fit=crop', gradient: 'from-blue-600 to-blue-800' },
+                                    { id: '1', title: 'Discover Weekly', artist: 'Personalized for you', cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop', gradient: 'from-blue-600 to-blue-800' },
 
-                                    { id: '2', title: 'Daily Mix 1', artist: 'Afrobeats & Highlife', cover: 'https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=300&h=300&fit=crop', gradient: 'from-green-600 to-green-800' },
+                                    { id: '2', title: 'Daily Mix 1', artist: 'Afrobeats & Highlife', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop', gradient: 'from-green-600 to-green-800' },
 
-                                    { id: '3', title: 'Daily Mix 2', artist: 'Amapiano Beats', cover: 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=300&h=300&fit=crop', gradient: 'from-orange-600 to-orange-800' },
+                                    { id: '3', title: 'Daily Mix 2', artist: 'Amapiano Beats', cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop', gradient: 'from-orange-600 to-orange-800' },
 
-                                    { id: '4', title: 'Release Radar', artist: 'New from artists you follow', cover: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop', gradient: 'from-purple-600 to-purple-800' }
+                                    { id: '4', title: 'Release Radar', artist: 'New from artists you follow', cover: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300&h=300&fit=crop', gradient: 'from-purple-600 to-purple-800' }
 
                                 ].map(mix => (
 
@@ -439,6 +439,8 @@ export default function StreamsHome() {
                                                 alt={mix.title}
 
                                                 className="w-full h-full object-cover rounded-md shadow-xl"
+
+                                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
 
                                             />
 

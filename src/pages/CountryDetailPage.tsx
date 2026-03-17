@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 
-// Map removed per team directive — replaced with photo gallery
+import { UltraSimpleMap } from "@/components/UltraSimpleMap";
 
 import {
 
@@ -647,7 +647,7 @@ export const CountryDetailPage: React.FC = () => {
 
 
 
-              {/* Right: Photo Gallery (replaced map per team directive) */}
+              {/* Right: Map for countries, Photo Gallery for people groups */}
 
               <motion.div
 
@@ -661,37 +661,54 @@ export const CountryDetailPage: React.FC = () => {
 
               >
 
-                <div className="grid grid-cols-2 gap-1">
-                  {/* Main hero image */}
-                  <div className="col-span-2">
-                    <img
-                      src={countryInfo?.monument_image_url || country.flag_url || `https://source.unsplash.com/800x400/?${country.name},africa,landscape`}
-                      alt={`${country.name} landscape`}
-                      className="w-full h-56 object-cover"
-                      loading="lazy"
+                {country.population ? (
+                  /* Real country — show interactive map */
+                  <>
+                    <UltraSimpleMap
+                      countryName={country.name}
+                      countryData={{
+                        name: country.name,
+                        capital: countryInfo?.capital || country.capital || null,
+                      }}
                     />
-                  </div>
-                  {/* Gallery thumbnails */}
-                  <div>
-                    <img
-                      src={country.coat_of_arms_url || `https://source.unsplash.com/400x300/?${country.name},city`}
-                      alt={`${country.name} city`}
-                      className="w-full h-32 object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div>
-                    <img
-                      src={`https://source.unsplash.com/400x300/?${country.name},culture,people`}
-                      alt={`${country.name} culture`}
-                      className="w-full h-32 object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-                <div className="p-3 text-center">
-                  <p className="text-xs text-gray-500 font-medium">{country.name} · {countryInfo?.capital || country.capital || 'Africa'}</p>
-                </div>
+                    <div className="p-3 text-center">
+                      <p className="text-xs text-gray-500 font-medium">{country.name} · {countryInfo?.capital || country.capital || 'Africa'}</p>
+                    </div>
+                  </>
+                ) : (
+                  /* People group / community — show photo gallery */
+                  <>
+                    <div className="grid grid-cols-2 gap-1">
+                      <div className="col-span-2">
+                        <img
+                          src={countryInfo?.monument_image_url || `https://source.unsplash.com/800x400/?${country.name},africa,culture`}
+                          alt={`${country.name}`}
+                          className="w-full h-56 object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div>
+                        <img
+                          src={`https://source.unsplash.com/400x300/?${country.name},people,community`}
+                          alt={`${country.name} community`}
+                          className="w-full h-32 object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div>
+                        <img
+                          src={`https://source.unsplash.com/400x300/?${country.name},culture,heritage`}
+                          alt={`${country.name} heritage`}
+                          className="w-full h-32 object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                    <div className="p-3 text-center">
+                      <p className="text-xs text-gray-500 font-medium">{country.name} · Community</p>
+                    </div>
+                  </>
+                )}
 
               </motion.div>
 

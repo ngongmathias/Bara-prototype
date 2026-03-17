@@ -376,20 +376,126 @@ Once features are live, track these to measure success:
 | 7.20 | **Country defaults to Rwanda** — CountrySelectionContext updated with DEFAULT_COUNTRY | P0 | 1 | ✅ Done (Mar 17) |
 | 7.21 | **Seed Streams data** — Migration `20260317_seed_streams_data.sql` with 8 artists, 8 albums, 22 songs. Fixed: moved ALTER TABLE before INSERTs (genre column error) | P1 | 2 | ✅ Fixed (Mar 17) — re-run `supabase db push` |
 | 7.22 | **Streams: Create Playlist UX** — Fixed column mismatch (`user_id` → `created_by`), auto-numbered playlist names, private by default, contextual sign-in/create copy, removed broken demo redirect | P0 | 3 | ✅ Done (Mar 17) |
+| 7.23 | **BARA Global: Maps vs Gallery** — Restored `UltraSimpleMap` for actual country pages (have population data), kept photo gallery for people-group pages (resolved from `global_africa` table). Conditional rendering based on `country.population` | P0 | 4 | ✅ Done (Mar 17) |
+| 7.24 | **Header Nav: Direct Links** — Replaced single "Mini-Apps" mega-menu with 6 primary nav links inline (Global, Events, Streams, Listings, Market, Sports) + "More" dropdown for overflow (Blog, Communities, Tools). Active state highlighting. | P0 | 4 | ✅ Done (Mar 17) |
+| 7.25 | **Post-login redirect** — Fixed default redirect from `/user/settings` → `/` (homepage) in both `UserSignInPage.tsx` and `UserSignUpPage.tsx` | P0 | 4 | ✅ Done (Mar 17) |
+| 7.26 | **Streams Sidebar: Content Types** — Added "Browse" section with links to Music, Movies, Ebooks, Podcasts, Gaming in the left sidebar on every Streams page | P0 | 4 | ✅ Done (Mar 17) |
+| 7.27 | **BARA Movies page** — Full Netflix-style catalog page at `/streams/movies` with hero banner, genre browsing, trending section, editor's picks, filmmaker CTA | P0 | 4 | ✅ Done (Mar 17) |
+| 7.28 | **BARA Ebooks page** — Full Kindle-style digital library at `/streams/ebooks` with hero banner, category grid, featured books, new releases, author CTA | P0 | 4 | ✅ Done (Mar 17) |
+| 7.29 | **Events: Flyer display fix** — Changed from `object-cover` (crops) to `object-contain` with gradient bg, so full flyer is always visible without cutting top/bottom info | P0 | 4 | ✅ Done (Mar 17) |
+| 7.30 | **Supabase: Playlist RLS** — Playlists INSERT returns 401 (permission denied). Need SQL migration to add INSERT policy for authenticated users | P0 | 4 | ✅ Migration created (Mar 17) |
+| 7.31 | **Supabase: Daily missions RPC** — `reset_daily_missions_for_user` returns 400. Need to ensure migration `20260303_fix_missions_system.sql` is applied to remote Supabase | P0 | 4 | ✅ Migration created (Mar 17) |
+| 7.32 | **Daily Mix photos** — Fixed broken Unsplash image URLs for Discover Weekly / Daily Mix cards on StreamsHome | P0 | 4 | ✅ Done (Mar 17) |
+| 7.33 | **DPO Compliance** — Data Protection Officer requirements: privacy policy review, data processing records, user data export/deletion, consent management, breach notification process | P1 | 4 | ☐ |
+| 7.34 | **BARA Gaming** — Placeholder page at `/streams/gaming`, full implementation deferred to future sprint | P2 | Future | ☐ |
+
+---
+
+## PHASE 8: TESTING, COINS DESIGN & QA PROCESS — March 17, 2026
+
+### 8.1 Test Accounts & Real-Life Testing
+
+> **Goal:** Use three real test accounts to test all platform features end-to-end, including artist workflows, user engagement, and gamification.
+
+| Account | Email | Role | Purpose |
+|---------|-------|------|---------|
+| Test Artist | mathiasngongngai@gmail.com | Artist (verified) | Upload songs, manage artist page, test plays/likes/views counting |
+| Test User 1 | mathiasngongbi@gmail.com | Regular user | Test playlists, listening, liking, sharing, missions, coins |
+| Test User 2 | mathiasjunior@gmail.com | Regular user | Test social features, follow artists, view profiles |
+
+**SQL migrations needed:**
+- Seed `clerk_users` entries for all 3 accounts once Clerk user IDs are captured
+- Seed artist profile for mathiasngongngai with verified status, banner, bio
+- Seed test songs (5-10) under the test artist with real audio file URLs
+- Seed test albums (2-3) with cover art
+- Test play_history, liked_songs, playlist creation, XP/coins earning
+
+**What to test in real-life:**
+- Artist page shows songs, plays increase on listen, likes increase on click
+- Playlist creation, adding/removing songs, sharing playlists
+- Gamification: daily missions reset, XP earned, level-up, streak tracking
+- Coins: earned from missions, spent in store
+- Notifications: follow artist, new release alerts
+- Events: create, RSVP, share, flyer display
+- Blog: create post, like, share, comment
+
+### 8.2 QA Testing Process (Mandatory Before Every Push)
+
+> **Every feature must be tested before push. The engineer must:**
+
+1. **Build check** — Run `npm run build` to catch compile errors
+2. **Browser preview** — Open the app in the IDE browser and visually inspect every changed page
+3. **Click-through test** — Navigate to each changed page, click all buttons, verify no console errors
+4. **Screenshot review** — Take screenshots of changed UI and verify against design intent
+5. **Mobile check** — Resize browser to mobile width (375px) and verify responsive layout
+6. **Console check** — Open DevTools Console, verify no new errors (especially 400/401/500)
+7. **Cross-page check** — Ensure changes don't break other pages (especially shared components like Header, Footer)
+8. **Edge cases** — Test with: no data, lots of data, signed in, signed out, slow network
+
+### 8.3 BARA Coins System Design (Engineer's Proposal)
+
+> **Research-based design inspired by Duolingo, Reddit, Discord, WeChat, and gaming platforms.**
+
+#### Earning Coins
+| Action | Coins | Frequency |
+|--------|-------|-----------|
+| Daily login | 5 | Daily |
+| Listen to a song | 1 | Per song (max 20/day) |
+| Complete a playlist | 10 | Per playlist |
+| Share content (event/blog/song) | 3 | Per share (max 10/day) |
+| Write a blog post | 15 | Per post |
+| Create an event | 10 | Per event |
+| Leave a review (listing) | 5 | Per review |
+| Refer a friend (signs up) | 50 | Per referral |
+| 7-day login streak | 25 | Weekly bonus |
+| 30-day login streak | 100 | Monthly bonus |
+| Complete daily missions (all 4) | 20 | Daily bonus |
+| First purchase on marketplace | 30 | One-time |
+| Verify artist account | 100 | One-time |
+
+#### Spending Coins
+| Item | Cost | Notes |
+|------|------|-------|
+| Custom profile badge | 50-200 | Cosmetic, visible on profile |
+| Profile theme/color | 100 | Personalization |
+| Highlight listing (7 days) | 150 | Boost visibility in marketplace |
+| Featured event slot | 200 | Homepage featured section |
+| Ad-free browsing (30 days) | 500 | Remove platform ads |
+| Exclusive content access | 50-300 | Premium blog posts, early releases |
+| Gift coins to another user | Any | Social gifting |
+| Redeem for cash (min 1000) | 1000 = $1 | Real money cashout at scale |
+
+#### Engagement & Retention
+- **Leaderboard** — Monthly top earners displayed on homepage
+- **Prestige tiers** — Bronze → Silver → Gold → Diamond (already in gamification system)
+- **Streak protection** — Spend 50 coins to freeze a missed day
+- **Seasonal challenges** — Limited-time coin-earning events (e.g., "African Music Month")
+- **Direct purchase** — Buy coins with real money ($1 = 1000 coins) for users who want to skip earning
+
+> ⏳ **This proposal should be discussed with the team.** The engineer recommends implementing Earning + Spending first, then Leaderboard + Seasonal later.
+
+### 8.4 User Profiles Clarification
+
+> **Re: "User Profile decisions (visibility, connections)"** — The team likely discussed whether user profiles should be public (visible to other users) and whether users can follow/connect with each other like a social network.
+>
+> **Engineer's recommendation:** Profiles should be **private by default** with an option to make them public. Public profiles show: display name, avatar, prestige tier, coins earned, playlists, and activity (songs listened, events attended). No direct messaging between users initially — that's a Phase 9 feature. Following artists is already implemented; following users can be added later.
 
 ---
 
 ## HOW TO USE THIS PLAN
 
-1. **Phase 7 (team meeting directives) is now the active work.** All prior phases (1-6) are complete.
-2. **Use `STREAMS_SPORTS_BUILD_PLAN.md`** for the detailed sprint-by-sprint breakdown with per-task checklists.
-3. **Check off items** as you complete them (☐ → ✅).
-4. **Log bugs** found during testing with priority level (P0–P3).
-5. **Two items require team meetings** before implementation: BARA Coins review + User Profile decisions.
-6. **Country defaults to Rwanda, Language defaults to English** across the platform.
+1. **Phase 7 (team meeting directives) is the active work.** All prior phases (1-6) are complete.
+2. **Phase 8 (testing/QA/coins) is the next priority** after all Phase 7 items are done.
+3. **Use `STREAMS_SPORTS_BUILD_PLAN.md`** for the detailed sprint-by-sprint breakdown with per-task checklists.
+4. **Check off items** as you complete them (☐ → ✅).
+5. **Log bugs** found during testing with priority level (P0–P3).
+6. **BARA Coins proposal (8.3) needs team review** before implementation begins.
+7. **Test accounts (8.1) need Clerk user IDs** — will be captured on first sign-in.
+8. **QA process (8.2) is mandatory** for every push going forward.
+9. **Country defaults to Rwanda, Language defaults to English** across the platform.
 
 ---
 
 *Master Plan created: Feb 22, 2026*
-*Updated: March 17, 2026 — Sprint 1 complete, Sprint 2 complete, Sprint 3 complete (13 of 21 directives done)*
+*Updated: March 17, 2026 — Sprint 4 hotfixes in progress (21 of 34 directives done). Added Phase 8: Testing, Coins Design, QA.*
 *For Bara Afrika Platform — baraafrika.com*
