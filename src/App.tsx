@@ -242,6 +242,8 @@ import SportsNewsDetail from "./pages/sports/SportsNewsDetail";
 
 import StreamsHome from "./pages/streams/StreamsHome";
 
+import StreamsHub from "./pages/streams/StreamsHub";
+
 import PlaylistPage from "./pages/streams/PlaylistPage";
 
 import ArtistPage from "./pages/streams/ArtistPage";
@@ -354,7 +356,11 @@ const AppRoutes = () => {
 
         <Route path="/streams/*">
 
-          <Route index element={<StreamsHome />} />
+          <Route index element={<StreamsHub />} />
+
+          <Route path="music" element={<StreamsHome />} />
+
+          <Route path="music/*" element={<StreamsHome />} />
 
           <Route path="search" element={<SearchPage />} />
 
@@ -382,7 +388,7 @@ const AppRoutes = () => {
 
           <Route path="verification" element={<ArtistVerificationPage />} />
 
-          <Route path="*" element={<StreamsHome />} /> {/* Fallback within streams context */}
+          <Route path="*" element={<StreamsHub />} /> {/* Fallback within streams context */}
 
         </Route>
 

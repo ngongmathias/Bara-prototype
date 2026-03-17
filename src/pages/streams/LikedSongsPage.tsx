@@ -60,12 +60,12 @@ export default function LikedSongsPage() {
                 {/* Header */}
                 <div className="flex flex-col md:row items-end gap-6 mb-8 mt-12">
                     <div className="w-52 h-52 bg-gradient-to-br from-[#1DB954] to-[#15803d] shadow-2xl flex items-center justify-center rounded-lg relative group overflow-hidden">
-                        <Heart size={100} fill="white" className="text-white drop-shadow-lg" />
+                        <Heart size={100} fill="white" className="text-gray-900 drop-shadow-lg" />
                     </div>
                     <div className="flex flex-col gap-2 flex-1">
-                        <span className="text-sm font-black uppercase tracking-widest text-white/80">Playlist</span>
-                        <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter">Liked Songs</h1>
-                        <div className="flex items-center gap-2 text-white/90 text-sm mt-4 font-bold">
+                        <span className="text-sm font-black uppercase tracking-widest text-gray-900/80">Playlist</span>
+                        <h1 className="text-5xl md:text-8xl font-black text-gray-900 tracking-tighter">Liked Songs</h1>
+                        <div className="flex items-center gap-2 text-gray-900/90 text-sm mt-4 font-bold">
                             <span className="hover:underline cursor-pointer">Your Personal Collection</span>
                             <span>•</span>
                             <span>{songs.length} {songs.length === 1 ? 'song' : 'songs'}</span>
@@ -87,16 +87,16 @@ export default function LikedSongsPage() {
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20">
                         <Loader2 className="w-10 h-10 animate-spin text-[#1DB954]" />
-                        <p className="mt-4 text-gray-400 font-bold">Resonance incoming...</p>
+                        <p className="mt-4 text-gray-500 font-bold">Resonance incoming...</p>
                     </div>
                 ) : songs.length === 0 ? (
                     /* Empty State */
                     <div className="flex flex-col items-center justify-center py-24 text-center">
-                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-6">
+                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-6">
                             <Heart size={32} className="text-gray-500" />
                         </div>
-                        <h2 className="text-2xl font-black text-white mb-2">Songs you like will appear here</h2>
-                        <p className="text-gray-400 max-w-sm mx-auto font-medium">
+                        <h2 className="text-2xl font-black text-gray-900 mb-2">Songs you like will appear here</h2>
+                        <p className="text-gray-500 max-w-sm mx-auto font-medium">
                             Save songs by tapping the heart icon to build your personal selection.
                         </p>
                         <Link to="/streams">
@@ -108,7 +108,7 @@ export default function LikedSongsPage() {
                 ) : (
                     <div className="max-w-[1400px]">
                         {/* Content Table Header */}
-                        <div className="grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-3 border-b border-white/10 text-gray-400 text-xs font-black uppercase tracking-widest mb-4">
+                        <div className="grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-3 border-b border-gray-200 text-gray-500 text-xs font-black uppercase tracking-widest mb-4">
                             <span>#</span>
                             <span>Title</span>
                             <span>Artist</span>
@@ -122,10 +122,10 @@ export default function LikedSongsPage() {
                                 return (
                                     <div
                                         key={song.id}
-                                        className="grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 rounded-lg group hover:bg-white/10 transition-colors items-center cursor-pointer"
+                                        className="grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 rounded-lg group hover:bg-gray-100 transition-colors items-center cursor-pointer"
                                         onClick={() => play(song)}
                                     >
-                                        <div className="text-gray-400 flex items-center justify-center">
+                                        <div className="text-gray-500 flex items-center justify-center">
                                             {isCurrent && isPlaying ? (
                                                 <div className="flex items-end gap-[2px] h-3">
                                                     <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '60%' }}></div>
@@ -141,12 +141,12 @@ export default function LikedSongsPage() {
                                         <div className="flex items-center gap-3 min-w-0">
                                             <img src={song.cover_url} className="w-10 h-10 rounded shadow-md object-cover" alt="" />
                                             <div className="min-w-0">
-                                                <div className={`font-bold truncate ${isCurrent ? 'text-[#1DB954]' : 'text-white'}`}>{song.title}</div>
-                                                <div className="text-sm text-gray-400 truncate md:hidden">{song.artist}</div>
+                                                <div className={`font-bold truncate ${isCurrent ? 'text-[#1DB954]' : 'text-gray-900'}`}>{song.title}</div>
+                                                <div className="text-sm text-gray-500 truncate md:hidden">{song.artist}</div>
                                             </div>
                                         </div>
 
-                                        <div className="text-sm text-gray-400 truncate hidden md:block font-medium">
+                                        <div className="text-sm text-gray-500 truncate hidden md:block font-medium">
                                             {song.artist}
                                         </div>
 

@@ -89,7 +89,7 @@ export default function ArtistVerificationPage() {
         {/* Pricing Card */}
         <div className="max-w-md mx-auto mb-16">
           <Card className="border-2 border-blue-500 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
+            <div className="absolute top-0 right-0 bg-blue-500 text-gray-900 text-[10px] font-bold px-3 py-1 rounded-bl-lg">
               RECOMMENDED
             </div>
             <CardHeader className="text-center pt-8">
@@ -119,7 +119,7 @@ export default function ArtistVerificationPage() {
                 <Button
                   onClick={handleSubscribe}
                   disabled={loading}
-                  className="w-full py-6 bg-blue-600 hover:bg-blue-700 text-white font-black text-base rounded-xl"
+                  className="w-full py-6 bg-blue-600 hover:bg-blue-700 text-gray-900 font-black text-base rounded-xl"
                 >
                   Get Verified
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -127,14 +127,14 @@ export default function ArtistVerificationPage() {
               ) : (
                 <Button
                   onClick={() => navigate('/user/sign-in')}
-                  className="w-full py-6 bg-black hover:bg-gray-800 text-white font-black text-base rounded-xl"
+                  className="w-full py-6 bg-black hover:bg-gray-800 text-gray-900 font-black text-base rounded-xl"
                 >
                   Sign In to Subscribe
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               )}
 
-              <p className="text-[10px] text-gray-400 text-center">
+              <p className="text-[10px] text-gray-500 text-center">
                 Cancel anytime. No long-term commitment.
               </p>
             </CardContent>
@@ -167,7 +167,7 @@ export default function ArtistVerificationPage() {
                         row.free ? (
                           <Check className="w-4 h-4 text-green-500 mx-auto" />
                         ) : (
-                          <span className="text-gray-300">—</span>
+                          <span className="text-gray-600">—</span>
                         )
                       ) : (
                         <span className="text-gray-500">{row.free}</span>
@@ -178,7 +178,7 @@ export default function ArtistVerificationPage() {
                         row.verified ? (
                           <Check className="w-4 h-4 text-blue-600 mx-auto" />
                         ) : (
-                          <span className="text-gray-300">—</span>
+                          <span className="text-gray-600">—</span>
                         )
                       ) : (
                         <span className="font-bold text-gray-900">{row.verified}</span>

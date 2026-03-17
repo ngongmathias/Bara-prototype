@@ -64,14 +64,14 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between mb-8 md:mb-12">
-                        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                             <ChevronDown size={32} />
                         </button>
                         <div className="flex flex-col items-center">
                             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Now Playing</span>
                             <span className="text-sm font-bold truncate max-w-[200px]">{currentSong.title}</span>
                         </div>
-                        <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                             <MoreHorizontal size={24} />
                         </button>
                     </div>
@@ -120,7 +120,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
 
                             {/* Progress */}
                             <div className="mb-8">
-                                <div className="group/progress relative h-1.5 bg-white/10 rounded-full mb-2 cursor-pointer transition-all hover:h-2">
+                                <div className="group/progress relative h-1.5 bg-gray-100 rounded-full mb-2 cursor-pointer transition-all hover:h-2">
                                     <input
                                         type="range"
                                         min="0"
@@ -185,7 +185,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                 {/* Volume control at bottom for desktop */}
                                 <div className="hidden md:flex items-center gap-4 w-48 text-gray-400 hover:text-white transition-colors">
                                     <Volume2 size={20} />
-                                    <div className="relative flex-1 h-1 bg-white/10 rounded-full overflow-hidden cursor-pointer hover:h-1.5 transition-all">
+                                    <div className="relative flex-1 h-1 bg-gray-100 rounded-full overflow-hidden cursor-pointer hover:h-1.5 transition-all">
                                         <input
                                             type="range"
                                             min="0"
@@ -206,13 +206,13 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                     </div>
 
                     {/* Footer */}
-                    <div className="mt-auto flex items-center justify-between pt-8 border-t border-white/5">
+                    <div className="mt-auto flex items-center justify-between pt-8 border-t border-gray-200">
                         <button className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                             <ListMusic size={20} />
                             <span className="text-xs font-bold uppercase tracking-widest">Queue</span>
                         </button>
                         <div className="flex gap-4">
-                            <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                            <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-white transition-all">
                                 <Share2 size={18} />
                             </button>
                         </div>

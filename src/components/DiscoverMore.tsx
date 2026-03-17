@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Calendar, ShoppingBag, Music, Newspaper, Trophy, Gift } from 'lucide-react';
+import { Calendar, ShoppingBag, Music, Newspaper, Trophy, Gift, Globe, List, Users } from 'lucide-react';
 import { scrollToTop } from '@/lib/scrollToTop';
 
 interface DiscoverItem {
@@ -13,6 +13,14 @@ interface DiscoverItem {
 
 const ALL_ITEMS: DiscoverItem[] = [
   {
+    title: 'Global',
+    description: 'Explore African countries, cultures, and people groups',
+    to: '/countries',
+    icon: Globe,
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-50',
+  },
+  {
     title: 'Events',
     description: 'Find concerts, festivals, and community gatherings near you',
     to: '/events',
@@ -21,20 +29,28 @@ const ALL_ITEMS: DiscoverItem[] = [
     bg: 'bg-blue-50',
   },
   {
-    title: 'Marketplace',
-    description: 'Buy and sell cars, phones, fashion, and more',
-    to: '/marketplace',
-    icon: ShoppingBag,
-    color: 'text-green-600',
-    bg: 'bg-green-50',
-  },
-  {
     title: 'Streams',
     description: 'Listen to trending Afrobeats, Amapiano, and more',
     to: '/streams',
     icon: Music,
     color: 'text-purple-600',
     bg: 'bg-purple-50',
+  },
+  {
+    title: 'Listings',
+    description: 'Discover local businesses, services, and directories',
+    to: '/listings',
+    icon: List,
+    color: 'text-teal-600',
+    bg: 'bg-teal-50',
+  },
+  {
+    title: 'Marketplace',
+    description: 'Buy and sell cars, phones, fashion, and more',
+    to: '/marketplace',
+    icon: ShoppingBag,
+    color: 'text-green-600',
+    bg: 'bg-green-50',
   },
   {
     title: 'Sports',
@@ -51,6 +67,14 @@ const ALL_ITEMS: DiscoverItem[] = [
     icon: Newspaper,
     color: 'text-red-600',
     bg: 'bg-red-50',
+  },
+  {
+    title: 'Communities',
+    description: 'Join vibrant African community groups and connect',
+    to: '/communities',
+    icon: Users,
+    color: 'text-indigo-600',
+    bg: 'bg-indigo-50',
   },
   {
     title: 'Invite Friends',

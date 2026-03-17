@@ -97,7 +97,7 @@ export default function LibraryPage() {
                         </div>
                         <Button
                             onClick={() => setIsCreateModalOpen(true)}
-                            className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+                            className="w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-900 flex items-center justify-center transition-colors"
                         >
                             <Plus size={24} />
                         </Button>
@@ -109,7 +109,7 @@ export default function LibraryPage() {
                         onSuccess={handleCreateSuccess}
                     />
 
-                    <h1 className="text-3xl font-black text-white mb-8 tracking-tighter">Your Library</h1>
+                    <h1 className="text-3xl font-black text-gray-900 mb-8 tracking-tighter">Your Library</h1>
 
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20">
@@ -124,16 +124,16 @@ export default function LibraryPage() {
                                     className="col-span-2 bg-gradient-to-br from-[#450aef] to-[#8d67e1] rounded-lg p-6 hover:scale-[1.02] transition-transform shadow-xl relative overflow-hidden group h-[220px] flex flex-col justify-end"
                                 >
                                     <div className="flex-1 flex flex-col gap-4">
-                                        <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <Heart size={24} fill="white" className="text-white" />
+                                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <Heart size={24} fill="white" className="text-gray-900" />
                                         </div>
                                         <div className="space-y-1">
-                                            <h2 className="text-3xl font-black text-white tracking-widest leading-none">LIKED</h2>
-                                            <h2 className="text-3xl font-black text-white tracking-widest leading-none">SONGS</h2>
+                                            <h2 className="text-3xl font-black text-gray-900 tracking-widest leading-none">LIKED</h2>
+                                            <h2 className="text-3xl font-black text-gray-900 tracking-widest leading-none">SONGS</h2>
                                         </div>
                                     </div>
                                     <div className="mt-4">
-                                        <p className="text-white font-bold">{likedSongs.length} liked songs</p>
+                                        <p className="text-gray-900 font-bold">{likedSongs.length} liked songs</p>
                                     </div>
                                     <div className="absolute bottom-6 right-6 w-12 h-12 bg-[#1DB954] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl translate-y-2 group-hover:translate-y-0 text-black">
                                         <Play size={24} fill="black" className="ml-1" />
@@ -146,7 +146,7 @@ export default function LibraryPage() {
                                 <Link
                                     key={`${item.type}-${item.id}`}
                                     to={`/streams/${item.type}/${item.id}`}
-                                    className="bg-[#181818] p-4 rounded-xl hover:bg-[#282828] transition-all group flex flex-col shadow-lg"
+                                    className="bg-white border border-gray-100 p-4 rounded-xl hover:bg-gray-50 transition-all group flex flex-col shadow-lg"
                                 >
                                     <div className="relative mb-4 aspect-square">
                                         <img
@@ -159,8 +159,8 @@ export default function LibraryPage() {
                                             <Play size={24} fill="black" className="ml-1" />
                                         </div>
                                     </div>
-                                    <h3 className="font-black text-white truncate text-lg tracking-tight">{item.title}</h3>
-                                    <p className="text-sm text-gray-400 font-bold uppercase tracking-wider mt-1">{item.subtitle.split(' • ')[0]}</p>
+                                    <h3 className="font-black text-gray-900 truncate text-lg tracking-tight">{item.title}</h3>
+                                    <p className="text-sm text-gray-500 font-bold uppercase tracking-wider mt-1">{item.subtitle.split(' • ')[0]}</p>
                                 </Link>
                             ))}
                         </div>
@@ -169,11 +169,11 @@ export default function LibraryPage() {
                     {/* Empty State */}
                     {!loading && filteredItems.length === 0 && filter !== 'all' && (
                         <div className="flex flex-col items-center justify-center py-20 text-center">
-                            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-6">
+                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-6">
                                 <Music size={32} className="text-gray-500" />
                             </div>
-                            <h2 className="text-2xl font-black text-white mb-2">Build your collection</h2>
-                            <p className="text-gray-400 max-w-sm mx-auto font-medium">
+                            <h2 className="text-2xl font-black text-gray-900 mb-2">Build your collection</h2>
+                            <p className="text-gray-500 max-w-sm mx-auto font-medium">
                                 Save artists or playlists to see them here and access them quickly.
                             </p>
                             <Link to="/streams">
@@ -195,7 +195,7 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
             onClick={onClick}
             className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${active
                 ? 'bg-white text-black'
-                : 'bg-white/10 text-white hover:bg-white/20'
+                : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                 }`}
         >
             {label}

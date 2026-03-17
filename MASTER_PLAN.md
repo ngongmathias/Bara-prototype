@@ -11,10 +11,10 @@
 | # | Document | File | Purpose | Status |
 |---|----------|------|---------|--------|
 | 1 | **Master Plan** (this document) | `MASTER_PLAN.md` | High-level roadmap, priorities, and dependencies | Active |
-| 2 | **Monetization & Retention Strategy** | `MONETIZATION_AND_RETENTION_STRATEGY.md` | 12 revenue streams, gamification economy, user retention, conversion architecture, structural gaps | Complete |
-| 3 | **Full Platform Audit** | `PLATFORM_AUDIT_PLAN.md` | Page-by-page, button-by-button audit of every platform feature | ✅ Phase 1 Done |
-| 4 | **Sports & Streams Audit** | `SPORTS_STREAMS_AUDIT_PLAN.md` | Deep audit of the Sports and Music mini-applications | ✅ Phase 1 Done |
-| 5 | **Email Implementation** | `EMAIL_IMPLEMENTATION_PLAN.md` | Email trigger audit, missing emails, Resend verification, templates | ✅ Phase 1 Done |
+| 2 | **Full Build, Test & DPO Plan** | `STREAMS_SPORTS_BUILD_PLAN.md` | Consolidated plan incorporating March 1 meeting notes — Streams/Sports/Platform-wide changes | **Active — Current Sprint** |
+| 3 | **DPO Compliance** | `compliance/` (10 files) | Rwanda Data Protection compliance — privacy policy, breach playbook, cross-border authorization | Active |
+
+> **Note:** 74 obsolete `.md` files were removed on 2026-03-17 (old audit plans, status reports, implementation guides). All active work is now tracked in `STREAMS_SPORTS_BUILD_PLAN.md`.
 
 ---
 
@@ -52,36 +52,34 @@ A multi-feature African diaspora platform with:
 
 ## WORKSTREAM OVERVIEW
 
-There are **4 parallel workstreams**. Each maps to a detailed sub-plan document.
+There are **4 active sprint tracks**, all documented in `STREAMS_SPORTS_BUILD_PLAN.md`:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
-│  WORKSTREAM A              WORKSTREAM B                         │
-│  Platform Audit            Sports & Streams Audit               │
+│  SPRINT 1 (Week 1)         SPRINT 2 (Week 2)                   │
+│  Platform Foundation       Streams Overhaul                     │
 │  ───────────────           ───────────────────                  │
-│  PLATFORM_AUDIT_PLAN.md    SPORTS_STREAMS_AUDIT_PLAN.md         │
-│  • Public pages            • Music player & pages               │
-│  • Auth flows              • All 7 sports                       │
-│  • User dashboard          • Admin panels                       │
-│  • Admin dashboard         • API integrations                   │
-│  • Marketplace             • Database/seed data                 │
-│  • Events                                                       │
-│  • Communities & Blog                                           │
-│  • Navigation & Layout                                          │
-│  • Responsive & Edge cases                                      │
+│  • Nav bar redesign        • White theme (all Streams pages)    │
+│  • Footer cleanup          • StreamsHub landing page            │
+│  • Cross-device testing    • Artist banner + picks              │
+│  • Discover More on all    • Seed data + storage buckets        │
+│    pages                   • Full Streams testing               │
 │                                                                 │
-│  WORKSTREAM C              WORKSTREAM D                         │
-│  Email System              Monetization & Growth                │
+│  SPRINT 3 (Week 3)         SPRINT 4 (Week 4)                   │
+│  Sports + Mini-Apps        Polish & Compliance                  │
 │  ──────────────            ────────────────────                  │
-│  EMAIL_IMPLEMENTATION_     MONETIZATION_AND_RETENTION_          │
-│  PLAN.md                   STRATEGY.md                          │
-│  • Verify existing emails  • Revenue architecture               │
-│  • Fix email queue status  • Coin store page                    │
-│  • Add missing emails      • Unified pricing                    │
-│  • Resend domain setup     • Conversion touchpoints             │
-│  • Engagement emails       • User retention features            │
-│  • Template polish         • Platform magnetism                 │
+│  • Sports infrastructure   • Home tile flip animation           │
+│  • Full Sports testing     • Admin analytics verification       │
+│  • BARA News mini-app      • Email audit                        │
+│  • BARA Global fixes       • DPO compliance updates             │
+│  • Listings category fix   • Cross-device final pass            │
+│  • Events + Blog fixes     • Deployment                         │
+│                                                                 │
+│  PENDING (Needs Team Meeting)                                   │
+│  ─────────────────────────────                                  │
+│  • User Profile decisions (visibility, connections)             │
+│  • BARA Coins full review (Earn/Share/Redeem + payments)        │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -350,16 +348,48 @@ Once features are live, track these to measure success:
 
 ---
 
+## PHASE 7: TEAM MEETING DIRECTIVES — March 1, 2026
+
+> **All items below come from the March 1 team meeting. Full details in `STREAMS_SPORTS_BUILD_PLAN.md`.**
+
+| # | Directive | Priority | Sprint | Status |
+|---|-----------|----------|--------|--------|
+| 7.1 | **Nav bar redesign** — WeChat-style mega-menu dropdown, 9 mini-apps in correct order, Country/Language/Coins/Profile on right | P0 | 1 | ✅ Done (Mar 17) |
+| 7.2 | **Move "Advertise" + "Write a Review" to footer** — now in "Business" column | P0 | 1 | ✅ Done (Mar 17) |
+| 7.3 | **Cross-device testing** — "Testing is a HUGE deal" — mobile, tablet, laptop, desktop | P0 | 1-4 | ☐ |
+| 7.4 | **Streams → white theme** — StreamsLayout, StreamsSidebar, StreamsHome + 12 pages + 3 components converted | P0 | 2 | ✅ Done (Mar 17) |
+| 7.5 | **Streams hub page** — StreamsHub.tsx created with Music/Movies/Ebooks/Podcast/Gaming cards, `/streams` routes to hub, `/streams/music` routes to music player | P0 | 2 | ✅ Done (Mar 17) |
+| 7.6 | **Mimic Spotify** — white theme with Spotify-style sidebar, track lists, artist pages | P1 | 2 | ✅ Done (Mar 17) |
+| 7.7 | **Artist banner** + **Artist picks** — ArtistPage now has gradient banner with cover image + "Artist's Pick" featured track card | P1 | 2 | ✅ Done (Mar 17) |
+| 7.8 | **BARA News** — promote to mini-app with own tab, fix RSS HTML display | P1 | 3 | ☐ |
+| 7.9 | **BARA Global** — replaced UltraSimpleMap with photo gallery grid, added Read More/Show Less toggle for descriptions (300-char threshold), removed hard truncation | P0 | 3 | ✅ Done (Mar 17) |
+| 7.10 | **Listings** — removed `.slice(0,12)` cap so ALL categories display, added deduplication by slug to prevent repeats | P0 | 3 | ✅ Done (Mar 17) |
+| 7.11 | **Events** — EventCard flyer expanded from h-48 to h-64 for full visibility, venue name shown prominently below title, added Copy Link option to share menu | P1 | 3 | ✅ Done (Mar 17) |
+| 7.12 | **Blog** — BlogCard now has like (heart) button + share menu (Facebook/Twitter/WhatsApp/Copy Link), CategoryFilter converted from horizontal pills to dropdown selector | P1 | 3 | ✅ Done (Mar 17) |
+| 7.13 | **Footer cleanup** — Amazon-style 6-column layout: About, Mini-Apps, Business, Communities, BARA Global (2-col). Added Terms/Privacy/Advertising bottom bar | P1 | 1 | ✅ Done (Mar 17) |
+| 7.14 | **Home tile flip** — interactive Bara meaning reveal | P1 | 4 | ☐ |
+| 7.15 | **Admin analytics** — real-time, accurate | P0 | 4 | ☐ |
+| 7.16 | **Discover More** — added to Blog, Listings, Communities, Sports, Streams, Countries (6 pages total + Events/Marketplace already had it). Component updated with all 9 mini-apps | P1 | 1 | ✅ Done (Mar 17) |
+| 7.17 | **BARA Coins** — needs dedicated meeting (Earn/Share/Redeem/Store/Leaderboard/Purchase) | P0 | TBD | ⏳ Meeting needed |
+| 7.18 | **User Profile** — needs team decision (public? connections?) | P1 | TBD | ⏳ Meeting needed |
+| 7.19 | **Emails** — audit which @baraafrika.com addresses exist | P1 | 4 | ☐ |
+| 7.20 | **Country defaults to Rwanda** — CountrySelectionContext updated with DEFAULT_COUNTRY | P0 | 1 | ✅ Done (Mar 17) |
+| 7.21 | **Seed Streams data** — Migration `20260317_seed_streams_data.sql` with 8 artists, 8 albums, 22 songs. Fixed: moved ALTER TABLE before INSERTs (genre column error) | P1 | 2 | ✅ Fixed (Mar 17) — re-run `supabase db push` |
+| 7.22 | **Streams: Create Playlist UX** — Fixed column mismatch (`user_id` → `created_by`), auto-numbered playlist names, private by default, contextual sign-in/create copy, removed broken demo redirect | P0 | 3 | ✅ Done (Mar 17) |
+
+---
+
 ## HOW TO USE THIS PLAN
 
-1. **Start with Phase 1** — Stabilize. Work through the platform audit and email verification in parallel.
-2. **Check off items** in each sub-plan document as you complete them (☐ → ✅).
-3. **Log bugs** found during audits with the priority level (P0–P3).
-4. **Move to next phase** only when current phase P0 items are complete.
-5. **Update this document** when priorities shift or new workstreams are added.
-6. **Reference sub-plans** for detailed implementation steps — this master plan is for navigation and tracking only.
+1. **Phase 7 (team meeting directives) is now the active work.** All prior phases (1-6) are complete.
+2. **Use `STREAMS_SPORTS_BUILD_PLAN.md`** for the detailed sprint-by-sprint breakdown with per-task checklists.
+3. **Check off items** as you complete them (☐ → ✅).
+4. **Log bugs** found during testing with priority level (P0–P3).
+5. **Two items require team meetings** before implementation: BARA Coins review + User Profile decisions.
+6. **Country defaults to Rwanda, Language defaults to English** across the platform.
 
 ---
 
 *Master Plan created: Feb 22, 2026*
+*Updated: March 17, 2026 — Sprint 1 complete, Sprint 2 complete, Sprint 3 complete (13 of 21 directives done)*
 *For Bara Afrika Platform — baraafrika.com*

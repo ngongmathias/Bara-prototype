@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 
-import { UltraSimpleMap } from "@/components/UltraSimpleMap";
+// Map removed per team directive — replaced with photo gallery
 
 import {
 
@@ -151,6 +151,8 @@ export const CountryDetailPage: React.FC = () => {
   const [businesses, setBusinesses] = useState<Business[]>([]);
 
   const [loading, setLoading] = useState(true);
+
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
 
 
 
@@ -548,17 +550,26 @@ export const CountryDetailPage: React.FC = () => {
 
                 {/* Description - use database description first, then Wikipedia */}
 
-                {(countryInfo?.description || country.wikipedia_description) && (
-
-                  <p className="text-lg text-gray-600 leading-relaxed max-w-xl">
-
-                    {(countryInfo?.description || country.wikipedia_description || '').slice(0, 300)}
-
-                    {(countryInfo?.description || country.wikipedia_description || '').length > 300 && '...'}
-
-                  </p>
-
-                )}
+                {(countryInfo?.description || country.wikipedia_description) && (() => {
+                  const fullText = countryInfo?.description || country.wikipedia_description || '';
+                  const isLong = fullText.length > 300;
+                  const displayText = descriptionExpanded || !isLong ? fullText : fullText.slice(0, 300) + '...';
+                  return (
+                    <div className="max-w-xl">
+                      <p className="text-lg text-gray-600 leading-relaxed">
+                        {displayText}
+                      </p>
+                      {isLong && (
+                        <button
+                          onClick={() => setDescriptionExpanded(!descriptionExpanded)}
+                          className="mt-2 text-sm font-bold text-black hover:underline transition-colors"
+                        >
+                          {descriptionExpanded ? 'Show Less' : 'Read More'}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
 
 
 
@@ -636,7 +647,7 @@ export const CountryDetailPage: React.FC = () => {
 
 
 
-              {/* Right: Map */}
+              {/* Right: Photo Gallery (replaced map per team directive) */}
 
               <motion.div
 
@@ -646,27 +657,41 @@ export const CountryDetailPage: React.FC = () => {
 
                 transition={{ delay: 0.2 }}
 
-                className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm"
+                className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50"
 
               >
 
-                <UltraSimpleMap
-
-                  countryData={{
-
-                    name: country.name,
-
-                    capital: country.capital,
-
-                    latitude: getCoords().lat,
-
-                    longitude: getCoords().lng
-
-                  }}
-
-                  countryName={country.name}
-
-                />
+                <div className="grid grid-cols-2 gap-1">
+                  {/* Main hero image */}
+                  <div className="col-span-2">
+                    <img
+                      src={countryInfo?.monument_image_url || country.flag_url || `https://source.unsplash.com/800x400/?${country.name},africa,landscape`}
+                      alt={`${country.name} landscape`}
+                      className="w-full h-56 object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  {/* Gallery thumbnails */}
+                  <div>
+                    <img
+                      src={country.coat_of_arms_url || `https://source.unsplash.com/400x300/?${country.name},city`}
+                      alt={`${country.name} city`}
+                      className="w-full h-32 object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div>
+                    <img
+                      src={`https://source.unsplash.com/400x300/?${country.name},culture,people`}
+                      alt={`${country.name} culture`}
+                      className="w-full h-32 object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+                <div className="p-3 text-center">
+                  <p className="text-xs text-gray-500 font-medium">{country.name} · {countryInfo?.capital || country.capital || 'Africa'}</p>
+                </div>
 
               </motion.div>
 

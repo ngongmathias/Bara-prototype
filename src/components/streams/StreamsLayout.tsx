@@ -8,9 +8,9 @@ export function StreamsLayout({ children }: { children: React.ReactNode }) {
 
     return (
         <MainLayout>
-            <div className="flex min-h-[calc(100vh-64px)] bg-black overflow-hidden">
-                <StreamsSidebar className="w-64 flex-shrink-0 hidden lg:flex border-r border-white/5 sticky top-0 h-[calc(100vh-64px)] overflow-y-auto" />
-                <div className="flex-grow min-w-0 bg-gradient-to-b from-gray-900 to-black relative">
+            <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 overflow-hidden">
+                <StreamsSidebar className="w-64 flex-shrink-0 hidden lg:flex border-r border-gray-200 sticky top-0 h-[calc(100vh-64px)] overflow-y-auto" />
+                <div className="flex-grow min-w-0 bg-white relative">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={location.pathname}

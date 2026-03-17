@@ -18,15 +18,22 @@ const CountrySelectionContext = createContext<CountrySelectionContextValue | und
 
 const STORAGE_KEY = 'bara_selected_country';
 
+const DEFAULT_COUNTRY: SelectedCountry = {
+  id: 'rwanda',
+  name: 'Rwanda',
+  code: 'RW',
+  flag_url: null,
+};
+
 export const CountrySelectionProvider = ({ children }: { children: React.ReactNode }) => {
-  // Initialize from localStorage
+  // Initialize from localStorage, default to Rwanda
   const [selectedCountry, setSelectedCountryState] = useState<SelectedCountry | null>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : null;
+      return stored ? JSON.parse(stored) : DEFAULT_COUNTRY;
     } catch (error) {
       console.error('Error loading selected country from localStorage:', error);
-      return null;
+      return DEFAULT_COUNTRY;
     }
   });
 

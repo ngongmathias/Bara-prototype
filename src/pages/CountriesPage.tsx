@@ -10,6 +10,8 @@ import { supabase } from '@/lib/supabase';
 
 import { slugFromName } from '@/lib/locationSlug';
 
+import { DiscoverMore } from '@/components/DiscoverMore';
+
 
 
 interface Country {
@@ -654,6 +656,8 @@ export const CountriesPage = () => {
         </div>
 
       </div>
+
+      <DiscoverMore exclude={['Global']} maxItems={3} />
 
     </div>
 

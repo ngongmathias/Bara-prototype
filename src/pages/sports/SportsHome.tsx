@@ -8,6 +8,7 @@ import { SportsTopBanner } from '../../components/sports/SportsTopBanner';
 import { SportsSubNav } from '../../components/sports/SportsSubNav';
 import { SPORTS_CONFIG } from '@/config/sportsConfig';
 import { SEO } from '@/components/SEO';
+import { DiscoverMore } from '@/components/DiscoverMore';
 
 export default function SportsHome() {
     const { sport: sportSlug } = useParams();
@@ -63,6 +64,7 @@ export default function SportsHome() {
                     </div>
                 </div>
             </div>
+            <DiscoverMore exclude={['Sports']} maxItems={3} />
         </MainLayout>
     );
 }

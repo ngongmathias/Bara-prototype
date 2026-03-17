@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, MapPin, Hash, User, Share2, Heart, Image as ImageIcon } from 'lucide-react';
+import { Calendar, Clock, MapPin, Hash, User, Share2, Heart, Image as ImageIcon, Copy, Link2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { VerificationIcon, VerificationStatus } from '@/components/ui/verification-badge';
 import { EventTimingBadge } from '@/components/EventTimingBadge';
@@ -143,7 +143,7 @@ export const EventCard = ({
       }}
       className="bg-white rounded-lg shadow-lg overflow-hidden transition-shadow hover:shadow-2xl"
     >
-      <div className="h-48 bg-gray-200 overflow-hidden relative">
+      <div className="h-64 bg-gray-200 overflow-hidden relative">
         <img
           src={imageUrl || '/placeholder-event.jpg'}
           alt={title}
@@ -159,7 +159,7 @@ export const EventCard = ({
         )}
         {/* Category Badge - Below Timing Badge */}
         {category && (
-          <div className="absolute top-14 left-3">
+          <div className="absolute top-16 left-3">
             <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full">
               {category}
             </span>
@@ -230,14 +230,33 @@ export const EventCard = ({
               >
                 LinkedIn
               </button>
+              <hr className="my-1 border-gray-100" />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const eventUrl = `${window.location.origin}/events/${id}`;
+                  navigator.clipboard.writeText(eventUrl).then(() => {
+                    setShowShareMenu(false);
+                  }).catch(() => {});
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm flex items-center gap-2"
+              >
+                <Link2 className="w-3 h-3" /> Copy Link
+              </button>
             </div>
           )}
         </div>
       </div>
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-800 mb-3 line-clamp-2 h-14">
+        <h3 className="text-lg font-semibold text-gray-800 mb-1 line-clamp-2">
           {title}
         </h3>
+        {/* Venue Name — prominently shown */}
+        {location && (
+          <p className="text-sm font-medium text-gray-700 mb-2 line-clamp-1">
+            {location}
+          </p>
+        )}
         <div className="space-y-2 text-sm text-gray-600">
           <div className="flex items-center">
             <Calendar className="w-4 h-4 mr-2 text-black" />

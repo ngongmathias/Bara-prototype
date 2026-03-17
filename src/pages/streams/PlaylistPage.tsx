@@ -152,7 +152,7 @@ export default function PlaylistPage() {
     if (loading) {
         return (
             <StreamsLayout>
-                <div className="min-h-screen bg-black text-white flex items-center justify-center">
+                <div className="min-h-screen bg-black text-gray-900 flex items-center justify-center">
                     <Loader2 className="w-10 h-10 animate-spin text-[#1DB954]" />
                 </div>
             </StreamsLayout>
@@ -165,7 +165,7 @@ export default function PlaylistPage() {
 
     return (
         <StreamsLayout>
-            <div className="min-h-screen bg-black text-white pb-24">
+            <div className="min-h-screen bg-black text-gray-900 pb-24">
                 {/* Hero Header */}
                 <div className="bg-gradient-to-b from-blue-900/60 to-[#121212] pt-16 pb-6 px-8">
                     <div className="max-w-7xl mx-auto">
@@ -175,21 +175,21 @@ export default function PlaylistPage() {
                                 <img src={coverUrl} alt={playlistTitle} className="w-56 h-56 rounded shadow-2xl object-cover flex-shrink-0" />
                             ) : (
                                 <div className="w-56 h-56 rounded shadow-2xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center flex-shrink-0">
-                                    <Music size={100} className="text-gray-400" />
+                                    <Music size={100} className="text-gray-500" />
                                 </div>
                             )}
 
                             {/* Playlist Info */}
                             <div className="flex-1 pb-4">
                                 <div className="text-xs font-bold mb-2 uppercase tracking-tight">Playlist</div>
-                                <h1 className="text-5xl md:text-8xl font-black mb-6 leading-tight tracking-tighter text-white">{playlistTitle}</h1>
-                                <p className="text-gray-300 text-sm mb-4 font-medium">{playlistDesc}</p>
+                                <h1 className="text-5xl md:text-8xl font-black mb-6 leading-tight tracking-tighter text-gray-900">{playlistTitle}</h1>
+                                <p className="text-gray-600 text-sm mb-4 font-medium">{playlistDesc}</p>
                                 <div className="flex items-center gap-2 text-sm font-bold">
-                                    <span className="text-white hover:underline cursor-pointer">Bara Streams</span>
-                                    <span className="text-white/70">•</span>
-                                    <span className="text-white">{tracks.length} songs</span>
-                                    <span className="text-white/70">•</span>
-                                    <span className="text-gray-400 font-normal">{Math.floor(totalDuration / 3600) > 0 ? `${Math.floor(totalDuration / 3600)} hr ` : ''}{Math.floor((totalDuration % 3600) / 60)} min</span>
+                                    <span className="text-gray-900 hover:underline cursor-pointer">Bara Streams</span>
+                                    <span className="text-gray-900/70">•</span>
+                                    <span className="text-gray-900">{tracks.length} songs</span>
+                                    <span className="text-gray-900/70">•</span>
+                                    <span className="text-gray-500 font-normal">{Math.floor(totalDuration / 3600) > 0 ? `${Math.floor(totalDuration / 3600)} hr ` : ''}{Math.floor((totalDuration % 3600) / 60)} min</span>
                                 </div>
                             </div>
                         </div>
@@ -205,16 +205,16 @@ export default function PlaylistPage() {
                         >
                             <Play className="w-6 h-6 text-black ml-1" fill="black" />
                         </button>
-                        <button className="text-gray-400 hover:text-white transition">
+                        <button className="text-gray-500 hover:text-gray-900 transition">
                             <Shuffle className="w-7 h-7" />
                         </button>
-                        <button className="text-gray-400 hover:text-white transition">
+                        <button className="text-gray-500 hover:text-gray-900 transition">
                             <Heart className="w-7 h-7" />
                         </button>
-                        <button onClick={handleShare} className="text-gray-400 hover:text-white transition" title="Share playlist">
+                        <button onClick={handleShare} className="text-gray-500 hover:text-gray-900 transition" title="Share playlist">
                             <Share2 className="w-7 h-7" />
                         </button>
-                        <button className="text-gray-400 hover:text-white transition">
+                        <button className="text-gray-500 hover:text-gray-900 transition">
                             <MoreHorizontal className="w-7 h-7" />
                         </button>
                     </div>
@@ -224,7 +224,7 @@ export default function PlaylistPage() {
                 <div className="px-8 pt-4">
                     <div className="max-w-7xl mx-auto">
                         {/* Table Header */}
-                        <div className="grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 border-b border-gray-800 mb-2 text-sm text-gray-400 uppercase">
+                        <div className="grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 border-b border-gray-800 mb-2 text-sm text-gray-500 uppercase">
                             <div className="text-center">#</div>
                             <div>Title</div>
                             <div>Album</div>
@@ -232,7 +232,7 @@ export default function PlaylistPage() {
                         </div>
 
                         {tracks.length === 0 ? (
-                            <div className="text-gray-400 text-center py-12">
+                            <div className="text-gray-500 text-center py-12">
                                 <p className="text-lg mb-2">This playlist is empty</p>
                                 <p className="text-sm">Add songs from the Streams home page to get started.</p>
                             </div>
@@ -243,11 +243,11 @@ export default function PlaylistPage() {
                                     return (
                                         <div
                                             key={track.id}
-                                            className={`grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 rounded group hover:bg-white/10 cursor-pointer ${isCurrentTrack ? 'bg-white/5' : ''}`}
+                                            className={`grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 rounded group hover:bg-gray-100 cursor-pointer ${isCurrentTrack ? 'bg-gray-50' : ''}`}
                                             onClick={() => handlePlayTrack(track)}
                                         >
                                             {/* Track Number / Play Button */}
-                                            <div className="flex items-center justify-center text-gray-400 group-hover:text-white w-8">
+                                            <div className="flex items-center justify-center text-gray-500 group-hover:text-gray-900 w-8">
                                                 {isCurrentTrack && isPlaying ? (
                                                     <div className="flex items-end gap-[2px] h-3">
                                                         <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '60%' }}></div>
@@ -268,15 +268,15 @@ export default function PlaylistPage() {
                                                     className="w-10 h-10 rounded object-cover flex-shrink-0"
                                                 />
                                                 <div className="min-w-0 flex-1">
-                                                    <div className={`font-bold truncate transition text-sm ${isCurrentTrack ? 'text-[#1DB954]' : 'group-hover:text-white'}`}>
+                                                    <div className={`font-bold truncate transition text-sm ${isCurrentTrack ? 'text-[#1DB954]' : 'group-hover:text-gray-900'}`}>
                                                         {track.title}
                                                     </div>
-                                                    <div className="text-sm text-gray-400 truncate">{track.artist}</div>
+                                                    <div className="text-sm text-gray-500 truncate">{track.artist}</div>
                                                 </div>
                                             </div>
 
                                             {/* Album */}
-                                            <div className="flex items-center text-sm text-gray-400 truncate">
+                                            <div className="flex items-center text-sm text-gray-500 truncate">
                                                 {track.album_title || 'Single'}
                                             </div>
 
@@ -284,7 +284,7 @@ export default function PlaylistPage() {
                                             <div className="flex items-center justify-end gap-6 pr-4">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); toggleLike(track.id); }}
-                                                    className={`opacity-0 group-hover:opacity-100 transition ${likedTracks.includes(track.id) ? 'text-[#1DB954] !opacity-100' : 'text-gray-400 hover:text-white'}`}
+                                                    className={`opacity-0 group-hover:opacity-100 transition ${likedTracks.includes(track.id) ? 'text-[#1DB954] !opacity-100' : 'text-gray-500 hover:text-gray-900'}`}
                                                 >
                                                     <Heart size={18} fill={likedTracks.includes(track.id) ? "currentColor" : "none"} />
                                                 </button>

@@ -148,9 +148,9 @@ export default function ArtistDashboard() {
 
                 <div className="mb-8">
 
-                    <h1 className="text-4xl font-black text-white mb-2">Creator Portal</h1>
+                    <h1 className="text-4xl font-black text-gray-900 mb-2">Creator Portal</h1>
 
-                    <p className="text-gray-400">Manage your music, track your growth, and connect with fans.</p>
+                    <p className="text-gray-500">Manage your music, track your growth, and connect with fans.</p>
 
                 </div>
 
@@ -184,13 +184,13 @@ export default function ArtistDashboard() {
 
                         >
 
-                            <Card className="bg-[#181818] border-none hover:bg-[#282828] transition-colors group">
+                            <Card className="bg-white border border-gray-100 border-none hover:bg-gray-50 transition-colors group">
 
                                 <CardContent className="pt-6">
 
                                     <div className="flex justify-between items-start mb-4">
 
-                                        <div className={`p-2 rounded-lg bg-white/5 ${stat.color}`}>
+                                        <div className={`p-2 rounded-lg bg-gray-50 ${stat.color}`}>
 
                                             <stat.icon size={24} />
 
@@ -200,9 +200,9 @@ export default function ArtistDashboard() {
 
                                     </div>
 
-                                    <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
+                                    <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
 
-                                    <div className="text-sm text-gray-400 uppercase tracking-wider font-bold">{stat.label}</div>
+                                    <div className="text-sm text-gray-500 uppercase tracking-wider font-bold">{stat.label}</div>
 
                                 </CardContent>
 
@@ -226,7 +226,7 @@ export default function ArtistDashboard() {
 
                             <div className="flex items-center justify-between mb-6">
 
-                                <h2 className="text-2xl font-bold text-white">Quick Actions</h2>
+                                <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
 
                             </div>
 
@@ -236,11 +236,11 @@ export default function ArtistDashboard() {
 
                                     <div className="bg-gradient-to-br from-[#1DB954] to-[#1aa34a] p-6 rounded-xl cursor-pointer hover:scale-[1.02] transition-transform group shadow-lg">
 
-                                        <Upload className="text-white mb-4 group-hover:bounce" size={32} />
+                                        <Upload className="text-gray-900 mb-4 group-hover:bounce" size={32} />
 
-                                        <h3 className="font-bold text-xl text-white">Upload music</h3>
+                                        <h3 className="font-bold text-xl text-gray-900">Upload music</h3>
 
-                                        <p className="text-white/80 text-sm">Release a new single or track</p>
+                                        <p className="text-gray-900/80 text-sm">Release a new single or track</p>
 
                                     </div>
 
@@ -248,13 +248,13 @@ export default function ArtistDashboard() {
 
                                 <Link to="/streams/creator/albums">
 
-                                    <div className="bg-[#282828] p-6 rounded-xl cursor-pointer hover:bg-[#333333] transition-colors group border border-white/5 shadow-lg">
+                                    <div className="bg-gray-50 p-6 rounded-xl cursor-pointer hover:bg-[#333333] transition-colors group border border-gray-100 shadow-lg">
 
                                         <Plus className="text-[#1DB954] mb-4" size={32} />
 
-                                        <h3 className="font-bold text-xl text-white">Create Album</h3>
+                                        <h3 className="font-bold text-xl text-gray-900">Create Album</h3>
 
-                                        <p className="text-gray-400 text-sm">Organize your tracks into EP or Album</p>
+                                        <p className="text-gray-500 text-sm">Organize your tracks into EP or Album</p>
 
                                     </div>
 
@@ -270,9 +270,9 @@ export default function ArtistDashboard() {
 
                             <div className="flex items-center justify-between mb-6">
 
-                                <h2 className="text-2xl font-bold text-white">Performance</h2>
+                                <h2 className="text-2xl font-bold text-gray-900">Performance</h2>
 
-                                <Button variant="ghost" className="text-gray-400 hover:text-white">
+                                <Button variant="ghost" className="text-gray-500 hover:text-gray-900">
 
                                     <BarChart3 className="mr-2 h-4 w-4" />
 
@@ -282,7 +282,7 @@ export default function ArtistDashboard() {
 
                             </div>
 
-                            <Card className="bg-[#181818] border-none h-64 flex items-center justify-center">
+                            <Card className="bg-white border border-gray-100 border-none h-64 flex items-center justify-center">
 
                                 <div className="text-center">
 
@@ -306,7 +306,7 @@ export default function ArtistDashboard() {
 
                         <section>
 
-                            <h2 className="text-xl font-bold text-white mb-6">Artist Tips</h2>
+                            <h2 className="text-xl font-bold text-gray-900 mb-6">Artist Tips</h2>
 
                             <div className="space-y-4">
 
@@ -318,7 +318,7 @@ export default function ArtistDashboard() {
 
                                 ].map(tip => (
 
-                                    <div key={tip.title} className="bg-[#181818] p-4 rounded-lg flex gap-4">
+                                    <div key={tip.title} className="bg-white border border-gray-100 p-4 rounded-lg flex gap-4">
 
                                         <div className="flex-shrink-0 text-[#1DB954]">
 
@@ -328,9 +328,9 @@ export default function ArtistDashboard() {
 
                                         <div>
 
-                                            <h4 className="font-bold text-white text-sm mb-1">{tip.title}</h4>
+                                            <h4 className="font-bold text-gray-900 text-sm mb-1">{tip.title}</h4>
 
-                                            <p className="text-xs text-gray-400 leading-relaxed">{tip.text}</p>
+                                            <p className="text-xs text-gray-500 leading-relaxed">{tip.text}</p>
 
                                         </div>
 
@@ -344,17 +344,17 @@ export default function ArtistDashboard() {
 
 
 
-                        <Card className="bg-[#181818] border-none overflow-hidden">
+                        <Card className="bg-white border border-gray-100 border-none overflow-hidden">
 
                             <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4">
 
-                                <h3 className="font-bold text-white text-lg">Bara Stream Verification</h3>
+                                <h3 className="font-bold text-gray-900 text-lg">Bara Stream Verification</h3>
 
                             </div>
 
                             <CardContent className="pt-4">
 
-                                <p className="text-sm text-gray-400 mb-4">Get the blue checkmark and unlock advanced creator tools.</p>
+                                <p className="text-sm text-gray-500 mb-4">Get the blue checkmark and unlock advanced creator tools.</p>
 
                                 <Button className="w-full bg-white text-black hover:bg-gray-200 font-bold" onClick={() => window.location.href = '/streams/verification'}>Apply Now</Button>
 
@@ -364,11 +364,11 @@ export default function ArtistDashboard() {
 
 
 
-                        <Card className="bg-[#181818] border-none border-l-4 border-yellow-500 overflow-hidden">
+                        <Card className="bg-white border border-gray-100 border-none border-l-4 border-yellow-500 overflow-hidden">
 
                             <CardHeader className="pb-2">
 
-                                <CardTitle className="text-white flex items-center gap-2 text-lg">
+                                <CardTitle className="text-gray-900 flex items-center gap-2 text-lg">
 
                                     <Zap className="text-yellow-500" size={20} />
 
@@ -380,7 +380,7 @@ export default function ArtistDashboard() {
 
                             <CardContent>
 
-                                <p className="text-sm text-gray-400 mb-4">Boost your latest release to the top of the "Trending" feed for 24 hours.</p>
+                                <p className="text-sm text-gray-500 mb-4">Boost your latest release to the top of the "Trending" feed for 24 hours.</p>
 
                                 <div className="space-y-2">
 

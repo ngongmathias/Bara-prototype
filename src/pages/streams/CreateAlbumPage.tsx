@@ -136,23 +136,23 @@ export default function CreateAlbumPage() {
         <StreamsLayout>
             <div className="min-h-screen p-6 sm:p-8 pb-32 max-w-3xl mx-auto">
                 {/* Back button */}
-                <button onClick={() => navigate('/streams/creator')} className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors">
+                <button onClick={() => navigate('/streams/creator')} className="flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors">
                     <ArrowLeft size={20} />
                     <span className="text-sm font-bold">Back to Creator Portal</span>
                 </button>
 
-                <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">Create Album</h1>
-                <p className="text-gray-400 mb-8">Organize your tracks into an album, EP, or mixtape.</p>
+                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2">Create Album</h1>
+                <p className="text-gray-500 mb-8">Organize your tracks into an album, EP, or mixtape.</p>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Cover Art */}
                     <div className="space-y-2">
-                        <Label className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Album Cover</Label>
+                        <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Album Cover</Label>
                         <input ref={coverInputRef} type="file" accept="image/*" onChange={handleCoverSelect} className="hidden" />
                         <div className="flex items-start gap-6">
                             <div
                                 onClick={() => coverInputRef.current?.click()}
-                                className="w-48 h-48 rounded-lg border-2 border-dashed border-gray-700 hover:border-gray-500 bg-white/5 flex items-center justify-center cursor-pointer transition-all overflow-hidden flex-shrink-0"
+                                className="w-48 h-48 rounded-lg border-2 border-dashed border-gray-700 hover:border-gray-500 bg-gray-50 flex items-center justify-center cursor-pointer transition-all overflow-hidden flex-shrink-0"
                             >
                                 {coverPreview ? (
                                     <img src={coverPreview} alt="Cover" className="w-full h-full object-cover" />
@@ -164,7 +164,7 @@ export default function CreateAlbumPage() {
                                 )}
                             </div>
                             <div className="pt-4">
-                                <p className="text-gray-400 text-sm mb-1">Upload album cover art.</p>
+                                <p className="text-gray-500 text-sm mb-1">Upload album cover art.</p>
                                 <p className="text-gray-500 text-xs">Recommended: 1000×1000px, JPG or PNG</p>
                                 {coverFile && (
                                     <div className="flex items-center gap-2 mt-3 text-[#1DB954]">
@@ -178,26 +178,26 @@ export default function CreateAlbumPage() {
 
                     {/* Title */}
                     <div className="space-y-2">
-                        <Label className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Album Title *</Label>
+                        <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Album Title *</Label>
                         <Input
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Enter album title"
-                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] h-12"
+                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] h-12"
                             required
                         />
                     </div>
 
                     {/* Album Type */}
                     <div className="space-y-2">
-                        <Label className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Type</Label>
+                        <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Type</Label>
                         <Select value={albumType} onValueChange={setAlbumType}>
-                            <SelectTrigger className="bg-white/5 border-white/10 text-white h-12">
+                            <SelectTrigger className="bg-gray-50 border-gray-200 text-gray-900 h-12">
                                 <SelectValue placeholder="Select type" />
                             </SelectTrigger>
-                            <SelectContent className="bg-[#282828] border-white/10">
+                            <SelectContent className="bg-gray-50 border-gray-200">
                                 {ALBUM_TYPES.map((t) => (
-                                    <SelectItem key={t} value={t} className="text-white hover:bg-white/10">{t}</SelectItem>
+                                    <SelectItem key={t} value={t} className="text-gray-900 hover:bg-gray-100">{t}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -205,23 +205,23 @@ export default function CreateAlbumPage() {
 
                     {/* Release Date */}
                     <div className="space-y-2">
-                        <Label className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Release Date</Label>
+                        <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Release Date</Label>
                         <Input
                             type="date"
                             value={releaseDate}
                             onChange={(e) => setReleaseDate(e.target.value)}
-                            className="bg-white/5 border-white/10 text-white h-12 [color-scheme:dark]"
+                            className="bg-gray-50 border-gray-200 text-gray-900 h-12 [color-scheme:dark]"
                         />
                     </div>
 
                     {/* Description */}
                     <div className="space-y-2">
-                        <Label className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Description (Optional)</Label>
+                        <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Description (Optional)</Label>
                         <Textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Tell listeners about this album..."
-                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] min-h-[100px] resize-none"
+                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] min-h-[100px] resize-none"
                         />
                     </div>
 

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { DiscoverMore } from '@/components/DiscoverMore';
 
 // Community data matching the footer list
 const communities = [
@@ -57,6 +58,8 @@ export default function CommunitiesPage() {
           ))}
         </div>
       </div>
+
+      <DiscoverMore exclude={['Communities']} maxItems={3} />
     </div>
   );
 }

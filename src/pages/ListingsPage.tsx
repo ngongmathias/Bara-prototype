@@ -10,6 +10,7 @@ import { db } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
+import { DiscoverMore } from "@/components/DiscoverMore";
 
 // Icon mapping for categories - each category has a completely unique icon
 const iconMap: { [key: string]: any } = {
@@ -100,7 +101,11 @@ const ListingsPage = () => {
           .order("name", { ascending: true });
 
         if (error) throw error;
-        setCategories(data || []);
+        // Deduplicate categories by slug to prevent repeats
+        const unique = (data || []).filter((cat, idx, arr) =>
+          arr.findIndex(c => c.slug === cat.slug) === idx
+        );
+        setCategories(unique);
       } catch (error) {
         console.error("Error fetching categories:", error);
       } finally {
@@ -211,7 +216,7 @@ const ListingsPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {categories.slice(0, 12).map((cat, index) => {
+              {categories.map((cat, index) => {
                 const IconComponent = iconMap[cat.slug] || Building2;
                 return (
                   <motion.button
@@ -234,17 +239,6 @@ const ListingsPage = () => {
             </div>
           )}
 
-          {categories.length > 12 && (
-            <div className="text-center mt-8">
-              <Button
-                variant="outline"
-                onClick={() => navigate("/listings/categories")}
-                className="rounded-full px-8 bg-white hover:bg-gray-50"
-              >
-                View All Categories
-              </Button>
-            </div>
-          )}
         </motion.div>
 
         {/* Manage Listing - NO BACKGROUND, just white card */}
@@ -270,6 +264,8 @@ const ListingsPage = () => {
           </div>
         </motion.div>
       </div>
+
+      <DiscoverMore exclude={['Listings']} maxItems={3} />
 
       {/* Bottom Banner Ad */}
       <div className="relative z-10">

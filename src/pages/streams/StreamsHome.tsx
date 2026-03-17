@@ -14,6 +14,8 @@ import { Link } from 'react-router-dom';
 
 import { SEO } from '@/components/SEO';
 
+import { DiscoverMore } from '@/components/DiscoverMore';
+
 import { useUser } from '@clerk/clerk-react';
 
 
@@ -348,7 +350,7 @@ export default function StreamsHome() {
 
                     {/* Greeting */}
 
-                    <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 tracking-tight text-white">Good evening</h1>
+                    <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 tracking-tight text-gray-900">Good evening</h1>
 
 
 
@@ -372,7 +374,7 @@ export default function StreamsHome() {
 
                                     title="Liked Songs"
 
-                                    gradient="from-purple-900 to-purple-800"
+                                    gradient="from-purple-500 to-purple-600"
 
                                     icon="💜"
 
@@ -384,7 +386,7 @@ export default function StreamsHome() {
 
                                     title="Afrobeats Mix"
 
-                                    gradient="from-orange-900 to-orange-800"
+                                    gradient="from-orange-500 to-orange-600"
 
                                     icon="🌍"
 
@@ -396,7 +398,7 @@ export default function StreamsHome() {
 
                                     title="Amapiano Mix"
 
-                                    gradient="from-yellow-900 to-yellow-800"
+                                    gradient="from-yellow-500 to-yellow-600"
 
                                     icon="🎹"
 
@@ -424,7 +426,7 @@ export default function StreamsHome() {
 
                                 ].map(mix => (
 
-                                    <div key={mix.id} className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl border border-white/5">
+                                    <div key={mix.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl border border-gray-100">
 
                                         <div className="relative mb-4 aspect-square shadow-2xl">
 
@@ -466,7 +468,7 @@ export default function StreamsHome() {
 
                                         </div>
 
-                                        <h3 className="font-bold truncate text-white mb-1 text-sm tracking-tight">{mix.title}</h3>
+                                        <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{mix.title}</h3>
 
                                         <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{mix.artist}</p>
 
@@ -486,7 +488,7 @@ export default function StreamsHome() {
 
                                     {recentlyPlayed.map(song => (
 
-                                        <div key={song.id} className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
+                                        <div key={song.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
 
                                             <div className="relative mb-4 aspect-square shadow-2xl">
 
@@ -502,7 +504,7 @@ export default function StreamsHome() {
 
                                                 />
 
-                                                <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <div className="absolute top-2 left-2 bg-black/60 text-gray-900 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
 
                                                     <Clock size={10} /> Played
 
@@ -522,9 +524,9 @@ export default function StreamsHome() {
 
                                             </div>
 
-                                            <h3 className="font-bold truncate text-white mb-1 text-sm tracking-tight">{song.title}</h3>
+                                            <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
 
-                                            <p className="text-xs text-gray-400 truncate mt-auto">{song.artist}</p>
+                                            <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}</p>
 
                                         </div>
 
@@ -544,7 +546,7 @@ export default function StreamsHome() {
 
                                     trendingSongs.map(song => (
 
-                                        <div key={song.id} className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
+                                        <div key={song.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
 
                                             <div className="relative mb-4 aspect-square shadow-2xl">
 
@@ -574,9 +576,9 @@ export default function StreamsHome() {
 
                                             </div>
 
-                                            <h3 className="font-bold truncate text-white mb-1 text-sm tracking-tight">{song.title}</h3>
+                                            <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
 
-                                            <p className="text-xs text-gray-400 truncate mt-auto">{song.artist}</p>
+                                            <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}</p>
 
                                         </div>
 
@@ -606,7 +608,7 @@ export default function StreamsHome() {
 
                                         <Link key={artist.id} to={`/streams/artist/${artist.id}`} className="group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
 
-                                            <div className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 w-full text-center">
+                                            <div className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 w-full text-center">
 
                                                 <div className="relative mb-4 aspect-square shadow-2xl">
 
@@ -636,9 +638,9 @@ export default function StreamsHome() {
 
                                                 </div>
 
-                                                <h3 className="font-bold truncate text-white mb-1 text-sm">{artist.name}</h3>
+                                                <h3 className="font-bold truncate text-gray-900 mb-1 text-sm">{artist.name}</h3>
 
-                                                <p className="text-xs text-gray-400">Artist</p>
+                                                <p className="text-xs text-gray-500">Artist</p>
 
                                             </div>
 
@@ -664,7 +666,7 @@ export default function StreamsHome() {
 
                                     newReleases.map(album => (
 
-                                        <div key={album.id} className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
+                                        <div key={album.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
 
                                             <div className="relative mb-4 aspect-square shadow-2xl">
 
@@ -694,9 +696,9 @@ export default function StreamsHome() {
 
                                             </div>
 
-                                            <h3 className="font-bold truncate text-white mb-1 text-sm">{album.title}</h3>
+                                            <h3 className="font-bold truncate text-gray-900 mb-1 text-sm">{album.title}</h3>
 
-                                            <p className="text-xs text-gray-400 truncate mt-auto">{album.artists?.name}</p>
+                                            <p className="text-xs text-gray-500 truncate mt-auto">{album.artists?.name}</p>
 
                                         </div>
 
@@ -772,6 +774,8 @@ export default function StreamsHome() {
 
             </div>
 
+            <DiscoverMore exclude={['Streams']} maxItems={3} />
+
         </StreamsLayout>
 
     );
@@ -784,7 +788,7 @@ function QuickAccessTile({ title, gradient, icon, to }: { title: string; gradien
 
     return (
 
-        <Link to={to} className="bg-white/10 rounded-md flex items-center gap-4 cursor-pointer hover:bg-white/20 transition-all duration-300 group overflow-hidden relative">
+        <Link to={to} className="bg-gray-100 rounded-md flex items-center gap-4 cursor-pointer hover:bg-gray-200 transition-all duration-300 group overflow-hidden relative">
 
             <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 shadow-lg`}>
 
@@ -792,7 +796,7 @@ function QuickAccessTile({ title, gradient, icon, to }: { title: string; gradien
 
             </div>
 
-            <h3 className="font-bold text-sm sm:text-base text-white truncate pr-12">{title}</h3>
+            <h3 className="font-bold text-sm sm:text-base text-gray-900 truncate pr-12">{title}</h3>
 
             <button className="absolute right-2 w-10 h-10 rounded-full bg-[#1DB954] text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95">
 
@@ -812,11 +816,11 @@ function RadioCard({ title, images, color, footer }: { title: string; images: st
 
     return (
 
-        <div className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start border border-white/5">
+        <div className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start border border-gray-100">
 
             <div className={`relative mb-4 aspect-square shadow-2xl rounded-md overflow-hidden ${color}`}>
 
-                <div className="absolute top-2 right-2 text-[10px] font-black tracking-tighter text-white opacity-80 uppercase">Radio</div>
+                <div className="absolute top-2 right-2 text-[10px] font-black tracking-tighter text-gray-900 opacity-80 uppercase">Radio</div>
 
 
 
@@ -842,7 +846,7 @@ function RadioCard({ title, images, color, footer }: { title: string; images: st
 
                 <div className="absolute bottom-4 left-4 right-4">
 
-                    <h3 className="text-xl font-black text-white leading-tight tracking-tighter truncate">{title}</h3>
+                    <h3 className="text-xl font-black text-gray-900 leading-tight tracking-tighter truncate">{title}</h3>
 
                 </div>
 
@@ -856,7 +860,7 @@ function RadioCard({ title, images, color, footer }: { title: string; images: st
 
             </div>
 
-            <h3 className="font-bold truncate text-white mb-1 text-sm tracking-tight">{title} Radio</h3>
+            <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{title} Radio</h3>
 
             <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">{footer}</p>
 
@@ -872,7 +876,7 @@ function ChartCard({ title, type, gradient, footer }: { title: string; type: str
 
     return (
 
-        <div className="bg-[#181818] p-4 rounded-lg cursor-pointer hover:bg-[#282828] transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start border border-white/5">
+        <div className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start border border-gray-100">
 
             <div className={`relative mb-4 aspect-square shadow-2xl rounded-md overflow-hidden bg-gradient-to-br ${gradient}`}>
 
@@ -890,7 +894,7 @@ function ChartCard({ title, type, gradient, footer }: { title: string; type: str
 
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
 
-                    <h4 className="text-3xl font-black text-white leading-none tracking-tighter mb-2 overflow-hidden break-words">{title.split(' ').join('\n')}</h4>
+                    <h4 className="text-3xl font-black text-gray-900 leading-none tracking-tighter mb-2 overflow-hidden break-words">{title.split(' ').join('\n')}</h4>
 
                 </div>
 
@@ -900,7 +904,7 @@ function ChartCard({ title, type, gradient, footer }: { title: string; type: str
 
                     <div className="h-4 w-[2px] bg-white/40" />
 
-                    <span className="text-[10px] font-bold text-white uppercase tracking-widest opacity-80">{type}</span>
+                    <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest opacity-80">{type}</span>
 
                 </div>
 
@@ -914,9 +918,9 @@ function ChartCard({ title, type, gradient, footer }: { title: string; type: str
 
             </div>
 
-            <h3 className="font-bold truncate text-white mb-1 text-sm tracking-tight">{title}</h3>
+            <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{title}</h3>
 
-            <p className="text-[11px] text-gray-400 line-clamp-2 leading-relaxed">{footer}</p>
+            <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">{footer}</p>
 
         </div>
 
@@ -934,11 +938,11 @@ function Section({ title, children, showAllLink }: { title: string; children: Re
 
             <div className="flex items-center justify-between mb-4">
 
-                <h2 className="text-2xl font-bold text-white tracking-tight hover:underline cursor-pointer">{title}</h2>
+                <h2 className="text-2xl font-bold text-gray-900 tracking-tight hover:underline cursor-pointer">{title}</h2>
 
                 {showAllLink && (
 
-                    <Link to={showAllLink} className="text-sm font-bold text-gray-400 hover:text-white transition-colors hover:underline">
+                    <Link to={showAllLink} className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors hover:underline">
 
                         Show all
 

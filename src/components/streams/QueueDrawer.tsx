@@ -29,10 +29,10 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#121212] border-l border-white/5 z-[120] flex flex-col shadow-2xl"
+                        className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-gray-50 border-l border-gray-200 z-[120] flex flex-col shadow-2xl"
                     >
                         {/* Header */}
-                        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-black/20">
+                        <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-black/20">
                             <div>
                                 <h2 className="text-xl font-black text-white tracking-tight">Queue</h2>
                                 <p className="text-sm text-gray-400 font-bold uppercase tracking-widest mt-1">
@@ -41,7 +41,7 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                             </div>
                             <button
                                 onClick={onClose}
-                                className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+                                className="w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition-colors"
                             >
                                 <X size={20} />
                             </button>
@@ -87,7 +87,7 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                                                     initial={{ opacity: 0, y: 10 }}
                                                     animate={{ opacity: 1, y: 0 }}
                                                     transition={{ delay: index * 0.03 }}
-                                                    className="group flex items-center gap-4 p-2 rounded-xl hover:bg-white/5 transition-all cursor-pointer"
+                                                    className="group flex items-center gap-4 p-2 rounded-xl hover:bg-gray-50 transition-all cursor-pointer"
                                                     onClick={() => play(song)}
                                                 >
                                                     <div className="w-10 h-10 relative flex-shrink-0">
@@ -120,7 +120,7 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                         </div>
 
                         {/* Footer / Controls */}
-                        <div className="p-6 bg-black/40 border-t border-white/5">
+                        <div className="p-6 bg-black/40 border-t border-gray-200">
                             <button
                                 className="w-full py-3 bg-white text-black font-black uppercase text-xs tracking-widest rounded-full hover:scale-[1.02] transition-transform active:scale-95"
                                 onClick={onClose}

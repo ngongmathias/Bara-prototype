@@ -10,6 +10,7 @@ import { BlogHero } from '../components/BlogHero';
 import { BlogCard } from '../components/BlogCard';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { NewsletterSubscribe } from '../components/NewsletterSubscribe';
+import { DiscoverMore } from '../components/DiscoverMore';
 import { Button } from '../components/ui/button';
 import { 
   blogPostsService, 
@@ -234,6 +235,8 @@ export const BlogPage = () => {
         {/* Newsletter Subscribe Section */}
         <NewsletterSubscribe />
       </main>
+
+      <DiscoverMore exclude={['Blog']} maxItems={3} />
 
       <BottomBannerAd />
       <Footer />
