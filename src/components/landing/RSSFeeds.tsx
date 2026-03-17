@@ -3,6 +3,22 @@ import { motion } from 'framer-motion';
 import { Newspaper, ExternalLink, RefreshCw } from 'lucide-react';
 import { getRSSFeeds, refreshRSSFeeds, RSSFeedItem } from '@/lib/rssService';
 
+/** Strip HTML tags from RSS feed descriptions */
+function stripHtml(html: string): string {
+  if (!html) return '';
+  // Remove HTML tags, decode common entities, collapse whitespace
+  return html
+    .replace(/<[^>]*>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 interface RSSFeedsProps {
   countryName?: string;
   countryCode?: string;
@@ -147,7 +163,7 @@ export const RSSFeeds = ({ countryName, countryCode }: RSSFeedsProps) => {
               </h3>
 
               <p className="text-xs text-gray-600 mb-3 line-clamp-3">
-                {feed.description}
+                {stripHtml(feed.description)}
               </p>
 
               <div className="flex items-center justify-between text-xs text-gray-400">

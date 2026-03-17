@@ -52,21 +52,21 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                             {/* Currently Playing Section */}
                             {currentSong && (
                                 <div className="mb-8">
-                                    <h3 className="text-xs font-black text-purple-500 uppercase tracking-widest mb-4 px-2">Now Playing</h3>
-                                    <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3 flex items-center gap-4">
+                                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4 px-2">Now Playing</h3>
+                                    <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 flex items-center gap-4">
                                         <div className="relative group flex-shrink-0">
                                             <img src={currentSong.cover_url} className="w-12 h-12 rounded-lg object-cover" alt="" />
                                             {isPlaying && (
                                                 <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/40 rounded-lg">
-                                                    <div className="w-1 h-3 bg-purple-500 rounded-full animate-bars"></div>
-                                                    <div className="w-1 h-5 bg-purple-500 rounded-full animate-bars" style={{ animationDelay: '0.2s' }}></div>
-                                                    <div className="w-1 h-3 bg-purple-500 rounded-full animate-bars" style={{ animationDelay: '0.4s' }}></div>
+                                                    <div className="w-1 h-3 bg-gray-900 rounded-full animate-bars"></div>
+                                                    <div className="w-1 h-5 bg-gray-900 rounded-full animate-bars" style={{ animationDelay: '0.2s' }}></div>
+                                                    <div className="w-1 h-3 bg-gray-900 rounded-full animate-bars" style={{ animationDelay: '0.4s' }}></div>
                                                 </div>
                                             )}
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <div className="font-bold text-white truncate">{currentSong.title}</div>
-                                            <div className="text-sm text-purple-400 font-bold truncate">{currentSong.artist}</div>
+                                            <div className="text-sm text-gray-400 font-bold truncate">{currentSong.artist}</div>
                                         </div>
                                     </div>
                                 </div>

@@ -3,12 +3,12 @@ import { Mic2, Bell, Play, Clock, Headphones } from 'lucide-react';
 import { useState } from 'react';
 
 const SAMPLE_PODCASTS = [
-    { title: 'The African Dream', host: 'Amara Kone', category: 'Entrepreneurship', color: 'from-amber-600 to-orange-700', episodes: 48, desc: 'Stories of founders building across the continent' },
-    { title: 'Naija Tech Talk', host: 'Tunde Obi', category: 'Technology', color: 'from-blue-600 to-cyan-700', episodes: 112, desc: 'Africa\'s tech ecosystem — startups, funding & innovation' },
-    { title: 'Ubuntu Conversations', host: 'Thabo Mokoena', category: 'Culture', color: 'from-green-600 to-emerald-700', episodes: 67, desc: 'Pan-African dialogues on identity, culture & unity' },
-    { title: 'Accra After Dark', host: 'Ama Serwaa', category: 'True Crime', color: 'from-red-700 to-rose-800', episodes: 31, desc: 'Mysteries and untold stories from West Africa' },
-    { title: 'Laugh Out Loud Africa', host: 'Basket Mouth & Friends', category: 'Comedy', color: 'from-yellow-500 to-amber-600', episodes: 85, desc: 'The funniest comedians on the continent' },
-    { title: 'The Pitch Room', host: 'Keza Ngowi', category: 'Finance', color: 'from-purple-600 to-violet-700', episodes: 56, desc: 'Investment, wealth & personal finance for Africans' },
+    { title: 'The African Dream', host: 'Amara Kone', category: 'Entrepreneurship', color: 'from-gray-700 to-gray-800', episodes: 48, desc: 'Stories of founders building across the continent' },
+    { title: 'Naija Tech Talk', host: 'Tunde Obi', category: 'Technology', color: 'from-gray-600 to-gray-700', episodes: 112, desc: 'Africa\'s tech ecosystem — startups, funding & innovation' },
+    { title: 'Ubuntu Conversations', host: 'Thabo Mokoena', category: 'Culture', color: 'from-gray-600 to-gray-700', episodes: 67, desc: 'Pan-African dialogues on identity, culture & unity' },
+    { title: 'Accra After Dark', host: 'Ama Serwaa', category: 'True Crime', color: 'from-gray-700 to-gray-800', episodes: 31, desc: 'Mysteries and untold stories from West Africa' },
+    { title: 'Laugh Out Loud Africa', host: 'Basket Mouth & Friends', category: 'Comedy', color: 'from-gray-500 to-gray-600', episodes: 85, desc: 'The funniest comedians on the continent' },
+    { title: 'The Pitch Room', host: 'Keza Ngowi', category: 'Finance', color: 'from-gray-600 to-gray-800', episodes: 56, desc: 'Investment, wealth & personal finance for Africans' },
 ];
 
 export default function PodcastsPage() {
@@ -25,12 +25,12 @@ export default function PodcastsPage() {
             <div className="min-h-screen bg-gray-50 pb-24">
                 {/* Hero */}
                 <div className="relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-b from-purple-900/40 to-[#121212]" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-gray-900/40 to-[#121212]" />
                     <div className="relative max-w-4xl mx-auto px-6 pt-12 pb-8 text-center">
                         <div className="relative mx-auto w-24 h-24 mb-6">
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full animate-pulse opacity-20" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-gray-500 to-gray-600 rounded-full animate-pulse opacity-20" />
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/30">
+                                <div className="w-20 h-20 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center shadow-2xl shadow-gray-500/30">
                                     <Mic2 size={36} className="text-gray-900" />
                                 </div>
                             </div>
@@ -39,7 +39,7 @@ export default function PodcastsPage() {
                         <h1 className="text-4xl font-black text-gray-900 mb-3 tracking-tight">
                             Bara Podcasts
                         </h1>
-                        <p className="text-lg text-purple-300 mb-1 font-semibold">
+                        <p className="text-lg text-gray-300 mb-1 font-semibold">
                             Coming Soon
                         </p>
                         <p className="text-gray-500 mb-6 leading-relaxed max-w-lg mx-auto">
@@ -65,16 +65,16 @@ export default function PodcastsPage() {
                                     value={notifyEmail}
                                     onChange={(e) => setNotifyEmail(e.target.value)}
                                     required
-                                    className="flex-1 bg-gray-100 text-gray-900 py-3 px-4 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/50 border border-gray-200 transition-all"
+                                    className="flex-1 bg-gray-100 text-gray-900 py-3 px-4 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-500/50 border border-gray-200 transition-all"
                                 />
-                                <button type="submit" className="bg-gradient-to-r from-purple-600 to-pink-600 text-gray-900 py-3 px-6 rounded-full text-sm font-bold hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2">
+                                <button type="submit" className="bg-gray-900 text-white py-3 px-6 rounded-full text-sm font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-500/20 flex items-center gap-2">
                                     <Bell size={16} />
                                     Notify Me
                                 </button>
                             </form>
                         ) : (
-                            <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 max-w-sm mx-auto">
-                                <p className="text-green-400 font-bold text-sm flex items-center justify-center gap-2">
+                            <div className="bg-gray-100 border border-gray-200 rounded-xl p-4 max-w-sm mx-auto">
+                                <p className="text-gray-900 font-bold text-sm flex items-center justify-center gap-2">
                                     <Bell size={16} />
                                     You'll be notified when Podcasts launches!
                                 </p>
@@ -98,7 +98,7 @@ export default function PodcastsPage() {
                                     </div>
                                 </div>
                                 <div className="p-4">
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400">{pod.category}</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">{pod.category}</span>
                                     <h3 className="text-gray-900 font-bold text-sm mt-1 leading-tight">{pod.title}</h3>
                                     <p className="text-gray-500 text-xs mt-1">{pod.host}</p>
                                     <p className="text-gray-600 text-xs mt-2 line-clamp-2">{pod.desc}</p>
@@ -122,7 +122,7 @@ export default function PodcastsPage() {
                             { step: '3', title: 'Earn & Share', desc: 'Earn XP and coins for listening, share episodes with friends, and unlock achievements.' },
                         ].map((item) => (
                             <div key={item.step} className="bg-white border border-gray-100 rounded-xl p-5 border border-gray-100">
-                                <div className="w-8 h-8 rounded-full bg-purple-600/20 text-purple-400 font-black text-sm flex items-center justify-center mb-3">
+                                <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-900 font-black text-sm flex items-center justify-center mb-3">
                                     {item.step}
                                 </div>
                                 <h3 className="text-gray-900 font-bold text-sm mb-1">{item.title}</h3>

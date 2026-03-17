@@ -90,10 +90,10 @@ export default function EbooksPage() {
 
       <div className="min-h-screen pb-24">
         {/* Hero Banner */}
-        <div className="bg-gradient-to-br from-amber-600 via-orange-600 to-amber-700 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full blur-[100px]" />
-            <div className="absolute bottom-0 right-10 w-96 h-96 bg-yellow-300 rounded-full blur-[128px]" />
+            <div className="absolute bottom-0 right-10 w-96 h-96 bg-gray-400 rounded-full blur-[128px]" />
           </div>
           <div className="relative max-w-[1400px] mx-auto px-4 sm:px-8 py-12 sm:py-16">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8">
@@ -104,7 +104,7 @@ export default function EbooksPage() {
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 font-comfortaa leading-tight">
                   Your Digital<br />African Library
                 </h1>
-                <p className="text-amber-100 text-sm sm:text-base max-w-lg leading-relaxed mb-6">
+                <p className="text-gray-300 text-sm sm:text-base max-w-lg leading-relaxed mb-6">
                   Explore thousands of ebooks from African authors — fiction, non-fiction, academic, and more. Read anywhere, anytime.
                 </p>
                 <div className="relative max-w-md">
@@ -114,7 +114,7 @@ export default function EbooksPage() {
                     placeholder="Search books, authors, genres..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 shadow-lg"
+                    className="w-full pl-10 pr-4 py-3 bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 shadow-lg"
                   />
                 </div>
               </div>
@@ -142,10 +142,10 @@ export default function EbooksPage() {
               {BOOK_CATEGORIES.map((cat) => (
                 <div
                   key={cat.name}
-                  className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md hover:border-amber-200 transition-all cursor-pointer group"
+                  className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer group"
                 >
                   <span className="text-2xl mb-2 block">{cat.icon}</span>
-                  <h3 className="font-bold text-gray-900 text-sm group-hover:text-amber-700 transition-colors">{cat.name}</h3>
+                  <h3 className="font-bold text-gray-900 text-sm group-hover:text-gray-900 transition-colors">{cat.name}</h3>
                   <p className="text-xs text-gray-400">{cat.count} books</p>
                 </div>
               ))}
@@ -177,15 +177,15 @@ export default function EbooksPage() {
                     </div>
                     <p className="text-xs text-gray-400 line-clamp-2 mb-3 leading-relaxed">{book.description}</p>
                     <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
-                      <span className="flex items-center gap-0.5"><Star className="w-3 h-3 text-yellow-500" fill="currentColor" /> {book.rating}</span>
+                      <span className="flex items-center gap-0.5"><Star className="w-3 h-3 text-gray-900" fill="currentColor" /> {book.rating}</span>
                       <span>·</span>
                       <span>{book.pages} pages</span>
                       <span>·</span>
                       <span>{book.genre}</span>
                     </div>
                     <div className="mt-auto flex items-center gap-2">
-                      <span className="text-sm font-bold text-amber-600">{book.price}</span>
-                      <button className="ml-auto flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
+                      <span className="text-sm font-bold text-gray-900">{book.price}</span>
+                      <button className="ml-auto flex items-center gap-1.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
                         <BookOpen className="w-3.5 h-3.5" /> Read Now
                       </button>
                     </div>
@@ -199,7 +199,7 @@ export default function EbooksPage() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-amber-500" />
+                <TrendingUp className="w-5 h-5 text-gray-900" />
                 <h2 className="text-2xl font-bold text-gray-900 tracking-tight">New Releases</h2>
               </div>
               <button className="text-sm font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1">
@@ -217,7 +217,7 @@ export default function EbooksPage() {
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                     <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Star className="w-3 h-3 text-yellow-400" fill="currentColor" /> {book.rating}
+                      <Star className="w-3 h-3 text-white" fill="currentColor" /> {book.rating}
                     </div>
                   </div>
                   <h3 className="font-bold text-gray-900 text-xs truncate">{book.title}</h3>
@@ -229,14 +229,14 @@ export default function EbooksPage() {
           </section>
 
           {/* CTA Banner */}
-          <section className="bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl p-8 sm:p-12 text-white text-center">
+          <section className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-8 sm:p-12 text-white text-center">
             <h2 className="text-2xl sm:text-3xl font-bold mb-3 font-comfortaa">Are You an Author?</h2>
-            <p className="text-amber-100 mb-6 max-w-md mx-auto">
+            <p className="text-gray-300 mb-6 max-w-md mx-auto">
               Publish your work on BARA Ebooks and reach readers across Africa and the diaspora. Self-publish with ease.
             </p>
             <Link
               to="/streams/creator"
-              className="inline-flex items-center gap-2 bg-white text-amber-700 font-bold px-6 py-3 rounded-lg hover:bg-amber-50 transition-colors"
+              className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors"
             >
               Publish Your Book <ChevronRight className="w-4 h-4" />
             </Link>

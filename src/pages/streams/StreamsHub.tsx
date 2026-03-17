@@ -10,9 +10,9 @@ const STREAM_CATEGORIES = [
     description: 'Afrobeats, Amapiano, Highlife, Gospel, and more. Stream millions of tracks from African artists worldwide.',
     icon: Music,
     to: '/streams/music',
-    gradient: 'from-purple-500 to-indigo-600',
-    bgLight: 'bg-purple-50',
-    textColor: 'text-purple-700',
+    gradient: 'from-gray-700 to-gray-900',
+    bgLight: 'bg-gray-100',
+    textColor: 'text-gray-900',
     available: true,
     tag: 'Live',
   },
@@ -21,9 +21,9 @@ const STREAM_CATEGORIES = [
     description: 'Nollywood, African cinema, documentaries, and short films. Watch stories from the continent.',
     icon: Film,
     to: '/streams/movies',
-    gradient: 'from-red-500 to-rose-600',
-    bgLight: 'bg-red-50',
-    textColor: 'text-red-700',
+    gradient: 'from-gray-600 to-gray-800',
+    bgLight: 'bg-gray-100',
+    textColor: 'text-gray-900',
     available: true,
     tag: 'Live',
   },
@@ -32,9 +32,9 @@ const STREAM_CATEGORIES = [
     description: 'African literature, business, self-help, and academic resources. Read on any device.',
     icon: BookOpen,
     to: '/streams/ebooks',
-    gradient: 'from-amber-500 to-orange-600',
-    bgLight: 'bg-amber-50',
-    textColor: 'text-amber-700',
+    gradient: 'from-gray-500 to-gray-700',
+    bgLight: 'bg-gray-100',
+    textColor: 'text-gray-900',
     available: true,
     tag: 'Live',
   },
@@ -43,9 +43,9 @@ const STREAM_CATEGORIES = [
     description: 'Culture, politics, tech, and storytelling. Listen to voices from across the African diaspora.',
     icon: Headphones,
     to: '/streams/podcasts',
-    gradient: 'from-emerald-500 to-teal-600',
-    bgLight: 'bg-emerald-50',
-    textColor: 'text-emerald-700',
+    gradient: 'from-gray-600 to-gray-800',
+    bgLight: 'bg-gray-100',
+    textColor: 'text-gray-900',
     available: true,
     tag: 'Live',
   },
@@ -54,9 +54,9 @@ const STREAM_CATEGORIES = [
     description: 'Game streams, esports highlights, and African gaming community content.',
     icon: Gamepad2,
     to: '/streams/gaming',
-    gradient: 'from-blue-500 to-cyan-600',
-    bgLight: 'bg-blue-50',
-    textColor: 'text-blue-700',
+    gradient: 'from-gray-500 to-gray-700',
+    bgLight: 'bg-gray-100',
+    textColor: 'text-gray-900',
     available: false,
     tag: 'Coming Soon',
   },
@@ -75,17 +75,17 @@ export default function StreamsHub() {
         {/* Hero Section */}
         <div className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 left-0 w-96 h-96 bg-purple-500 rounded-full blur-[128px]" />
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500 rounded-full blur-[128px]" />
+            <div className="absolute top-0 left-0 w-96 h-96 bg-gray-500 rounded-full blur-[128px]" />
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gray-400 rounded-full blur-[128px]" />
           </div>
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-yellow-400" />
-              <span className="text-sm font-semibold text-yellow-400 uppercase tracking-wider">BARA Streams</span>
+              <Sparkles className="w-5 h-5 text-white" />
+              <span className="text-sm font-semibold text-white uppercase tracking-wider">BARA Streams</span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 font-comfortaa leading-tight">
               Your World of<br />
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+              <span className="text-white">
                 African Entertainment
               </span>
             </h1>
@@ -119,7 +119,7 @@ export default function StreamsHub() {
                       </div>
                       <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full ${
                         cat.available
-                          ? 'bg-green-100 text-green-700'
+                          ? 'bg-gray-900 text-white'
                           : 'bg-gray-100 text-gray-500'
                       }`}>
                         {cat.tag}

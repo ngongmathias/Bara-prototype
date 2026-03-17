@@ -58,15 +58,15 @@ interface Country {
 
 /** Mini-app navigation items in the order specified by the team (March 1 meeting) */
 const MINI_APPS = [
-  { label: 'BARA Global', short: 'Global', to: '/countries', icon: Globe, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  { label: 'BARA Events', short: 'Events', to: '/events', icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50' },
-  { label: 'BARA Streams', short: 'Streams', to: '/streams', icon: Music, color: 'text-purple-600', bg: 'bg-purple-50' },
-  { label: 'BARA Listings', short: 'Listings', to: '/listings', icon: List, color: 'text-teal-600', bg: 'bg-teal-50' },
-  { label: 'BARA Marketplace', short: 'Market', to: '/marketplace', icon: ShoppingBag, color: 'text-green-600', bg: 'bg-green-50' },
-  { label: 'BARA Sports', short: 'Sports', to: '/sports', icon: Trophy, color: 'text-orange-600', bg: 'bg-orange-50' },
-  { label: 'BARA Blog', short: 'Blog', to: '/blog', icon: FileText, color: 'text-red-600', bg: 'bg-red-50' },
-  { label: 'BARA Communities', short: 'Communities', to: '/communities', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-  { label: 'BARA Tools', short: 'Tools', to: '/tools', icon: Wrench, color: 'text-gray-600', bg: 'bg-gray-100' },
+  { label: 'BARA Global', short: 'Global', to: '/countries', icon: Globe, color: 'text-gray-900', bg: 'bg-gray-100' },
+  { label: 'BARA Events', short: 'Events', to: '/events', icon: Calendar, color: 'text-gray-900', bg: 'bg-gray-100' },
+  { label: 'BARA Streams', short: 'Streams', to: '/streams', icon: Music, color: 'text-gray-900', bg: 'bg-gray-100' },
+  { label: 'BARA Listings', short: 'Listings', to: '/listings', icon: List, color: 'text-gray-900', bg: 'bg-gray-100' },
+  { label: 'BARA Marketplace', short: 'Market', to: '/marketplace', icon: ShoppingBag, color: 'text-gray-900', bg: 'bg-gray-100' },
+  { label: 'BARA Sports', short: 'Sports', to: '/sports', icon: Trophy, color: 'text-gray-900', bg: 'bg-gray-100' },
+  { label: 'BARA Blog', short: 'Blog', to: '/blog', icon: FileText, color: 'text-gray-900', bg: 'bg-gray-100' },
+  { label: 'BARA Communities', short: 'Communities', to: '/communities', icon: Users, color: 'text-gray-900', bg: 'bg-gray-100' },
+  { label: 'BARA Tools', short: 'Tools', to: '/tools', icon: Wrench, color: 'text-gray-900', bg: 'bg-gray-100' },
 ];
 
 // Primary apps shown directly in the nav bar (first 6)
@@ -222,7 +222,7 @@ export const Header = () => {
                   <DropdownMenuItem
                     key={country.id}
                     onClick={() => handleCountrySelect(country)}
-                    className={selectedCountry?.id === country.id ? 'bg-blue-50 font-medium' : ''}
+                    className={selectedCountry?.id === country.id ? 'bg-gray-100 font-medium' : ''}
                   >
                     {country.name}
                   </DropdownMenuItem>
@@ -237,10 +237,10 @@ export const Header = () => {
             {isSignedIn && profile && (
               <Link
                 to="/store"
-                className="flex items-center gap-1 px-2.5 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-full text-sm font-bold text-yellow-800 transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-full text-sm font-bold text-gray-900 transition-colors"
                 title="Bara Coins"
               >
-                <Coins className="w-3.5 h-3.5 text-yellow-600" />
+                <Coins className="w-3.5 h-3.5 text-gray-700" />
                 {profile.bara_coins.toLocaleString()}
               </Link>
             )}
@@ -263,8 +263,8 @@ export const Header = () => {
                     {user?.imageUrl ? (
                       <img src={user.imageUrl} alt={user.fullName || 'User'} className="h-full w-full rounded-full object-cover" />
                     ) : (
-                      <div className="h-full w-full rounded-full bg-blue-50 flex items-center justify-center">
-                        <User className="h-4 w-4 text-blue-600" />
+                      <div className="h-full w-full rounded-full bg-gray-100 flex items-center justify-center">
+                        <User className="h-4 w-4 text-gray-700" />
                       </div>
                     )}
                   </Button>
@@ -274,8 +274,8 @@ export const Header = () => {
                     {user?.imageUrl ? (
                       <img src={user.imageUrl} alt={user.fullName || 'User'} className="h-10 w-10 rounded-full border-2 border-white ring-1 ring-black/5" />
                     ) : (
-                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                        <User className="h-5 w-5 text-blue-600" />
+                      <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                        <User className="h-5 w-5 text-gray-700" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
@@ -297,7 +297,7 @@ export const Header = () => {
                     <Settings className="w-4 h-4 mr-2" /> Profile
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()} className="text-red-600">
+                  <DropdownMenuItem onClick={() => signOut()} className="text-gray-700">
                     <LogOut className="w-4 h-4 mr-2" /> Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -319,9 +319,9 @@ export const Header = () => {
             {isSignedIn && profile && (
               <Link
                 to="/store"
-                className="flex items-center gap-1 px-2 py-1 bg-yellow-50 border border-yellow-200 rounded-full text-xs font-bold text-yellow-800"
+                className="flex items-center gap-1 px-2 py-1 bg-gray-100 border border-gray-300 rounded-full text-xs font-bold text-gray-900"
               >
-                <Coins className="w-3 h-3 text-yellow-600" />
+                <Coins className="w-3 h-3 text-gray-700" />
                 {profile.bara_coins.toLocaleString()}
               </Link>
             )}
@@ -414,7 +414,7 @@ export const Header = () => {
                         key={country.id}
                         onClick={() => { handleCountrySelect(country); setMobileCountriesExpanded(false); }}
                         className={`w-full text-left text-sm px-3 py-2 rounded-md transition-colors ${
-                          selectedCountry?.id === country.id ? 'bg-blue-100 font-medium text-blue-800' : 'hover:bg-gray-100 text-gray-700'
+                          selectedCountry?.id === country.id ? 'bg-gray-200 font-medium text-gray-900' : 'hover:bg-gray-100 text-gray-700'
                         }`}
                       >
                         {country.name}
@@ -468,7 +468,7 @@ export const Header = () => {
                       <button onClick={() => { navigate('/users/dashboard/profile'); closeMobileMenu(); }} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg hover:bg-gray-50 text-sm text-gray-700">
                         <Settings className="w-4 h-4" /> Profile & Settings
                       </button>
-                      <button onClick={() => { signOut(); closeMobileMenu(); }} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg hover:bg-gray-50 text-sm text-red-600">
+                      <button onClick={() => { signOut(); closeMobileMenu(); }} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg hover:bg-gray-50 text-sm text-gray-700">
                         <LogOut className="w-4 h-4" /> Sign Out
                       </button>
                     </div>

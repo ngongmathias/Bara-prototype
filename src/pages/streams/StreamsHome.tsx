@@ -358,7 +358,7 @@ export default function StreamsHome() {
 
                         <div className="flex justify-center py-20">
 
-                            <Loader2 className="w-10 h-10 animate-spin text-purple-500" />
+                            <Loader2 className="w-10 h-10 animate-spin text-gray-400" />
 
                         </div>
 
@@ -374,7 +374,7 @@ export default function StreamsHome() {
 
                                     title="Liked Songs"
 
-                                    gradient="from-purple-500 to-purple-600"
+                                    gradient="from-gray-700 to-gray-800"
 
                                     icon="💜"
 
@@ -386,7 +386,7 @@ export default function StreamsHome() {
 
                                     title="Afrobeats Mix"
 
-                                    gradient="from-orange-500 to-orange-600"
+                                    gradient="from-gray-600 to-gray-700"
 
                                     icon="🌍"
 
@@ -398,7 +398,7 @@ export default function StreamsHome() {
 
                                     title="Amapiano Mix"
 
-                                    gradient="from-yellow-500 to-yellow-600"
+                                    gradient="from-gray-500 to-gray-600"
 
                                     icon="🎹"
 
@@ -416,13 +416,13 @@ export default function StreamsHome() {
 
                                 {[
 
-                                    { id: '1', title: 'Discover Weekly', artist: 'Personalized for you', cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop', gradient: 'from-blue-600 to-blue-800' },
+                                    { id: '1', title: 'Discover Weekly', artist: 'Personalized for you', cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop', gradient: 'from-gray-700 to-gray-900' },
 
-                                    { id: '2', title: 'Daily Mix 1', artist: 'Afrobeats & Highlife', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop', gradient: 'from-green-600 to-green-800' },
+                                    { id: '2', title: 'Daily Mix 1', artist: 'Afrobeats & Highlife', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop', gradient: 'from-gray-600 to-gray-800' },
 
-                                    { id: '3', title: 'Daily Mix 2', artist: 'Amapiano Beats', cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop', gradient: 'from-orange-600 to-orange-800' },
+                                    { id: '3', title: 'Daily Mix 2', artist: 'Amapiano Beats', cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop', gradient: 'from-gray-500 to-gray-700' },
 
-                                    { id: '4', title: 'Release Radar', artist: 'New from artists you follow', cover: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300&h=300&fit=crop', gradient: 'from-purple-600 to-purple-800' }
+                                    { id: '4', title: 'Release Radar', artist: 'New from artists you follow', cover: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300&h=300&fit=crop', gradient: 'from-gray-600 to-gray-800' }
 
                                 ].map(mix => (
 
@@ -460,11 +460,11 @@ export default function StreamsHome() {
 
                                                 }}
 
-                                                className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                                className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
 
                                             >
 
-                                                <Play size={24} fill="black" className="ml-1" />
+                                                <Play size={24} fill="white" className="ml-1" />
 
                                             </button>
 
@@ -516,11 +516,11 @@ export default function StreamsHome() {
 
                                                     onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
 
-                                                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
 
                                                 >
 
-                                                    {currentSong?.id === song.id && isPlaying ? <Pause size={24} fill="black" /> : <Play size={24} fill="black" className="ml-1" />}
+                                                    {currentSong?.id === song.id && isPlaying ? <Pause size={24} fill="white" /> : <Play size={24} fill="white" className="ml-1" />}
 
                                                 </button>
 
@@ -568,11 +568,11 @@ export default function StreamsHome() {
 
                                                     onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
 
-                                                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
 
                                                 >
 
-                                                    {currentSong?.id === song.id && isPlaying ? <Pause size={24} fill="black" /> : <Play size={24} fill="black" className="ml-1" />}
+                                                    {currentSong?.id === song.id && isPlaying ? <Pause size={24} fill="white" /> : <Play size={24} fill="white" className="ml-1" />}
 
                                                 </button>
 
@@ -630,11 +630,11 @@ export default function StreamsHome() {
 
                                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePlayArtist(artist.id); }}
 
-                                                        className="absolute bottom-6 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                                        className="absolute bottom-6 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
 
                                                     >
 
-                                                        <Play size={24} fill="black" className="ml-1" />
+                                                        <Play size={24} fill="white" className="ml-1" />
 
                                                     </button>
 
@@ -688,11 +688,11 @@ export default function StreamsHome() {
 
                                                     onClick={(e) => { e.stopPropagation(); handlePlayAlbum(album.id); }}
 
-                                                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
 
                                                 >
 
-                                                    <Play size={24} fill="black" className="ml-1" />
+                                                    <Play size={24} fill="white" className="ml-1" />
 
                                                 </button>
 
@@ -800,9 +800,9 @@ function QuickAccessTile({ title, gradient, icon, to }: { title: string; gradien
 
             <h3 className="font-bold text-sm sm:text-base text-gray-900 truncate pr-12">{title}</h3>
 
-            <button className="absolute right-2 w-10 h-10 rounded-full bg-[#1DB954] text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95">
+            <button className="absolute right-2 w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95">
 
-                <Play size={20} fill="black" className="ml-1" />
+                <Play size={20} fill="white" className="ml-1" />
 
             </button>
 
@@ -854,9 +854,9 @@ function RadioCard({ title, images, color, footer }: { title: string; images: st
 
 
 
-                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20">
+                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20">
 
-                    <Play size={24} fill="black" className="ml-1" />
+                    <Play size={24} fill="white" className="ml-1" />
 
                 </button>
 
@@ -886,7 +886,7 @@ function ChartCard({ title, type, gradient, footer }: { title: string; type: str
 
                     <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
 
-                        <div className="w-3 h-3 bg-[#1DB954] rounded-full rotate-45" />
+                        <div className="w-3 h-3 bg-gray-900 rounded-full rotate-45" />
 
                     </div>
 
@@ -912,9 +912,9 @@ function ChartCard({ title, type, gradient, footer }: { title: string; type: str
 
 
 
-                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20">
+                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20">
 
-                    <Play size={24} fill="black" className="ml-1" />
+                    <Play size={24} fill="white" className="ml-1" />
 
                 </button>
 
