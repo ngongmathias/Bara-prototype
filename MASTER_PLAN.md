@@ -376,18 +376,27 @@ Once features are live, track these to measure success:
 | 7.20 | **Country defaults to Rwanda** — CountrySelectionContext updated with DEFAULT_COUNTRY | P0 | 1 | ✅ Done (Mar 17) |
 | 7.21 | **Seed Streams data** — Migration `20260317_seed_streams_data.sql` with 8 artists, 8 albums, 22 songs. Fixed: moved ALTER TABLE before INSERTs (genre column error) | P1 | 2 | ✅ Fixed (Mar 17) — re-run `supabase db push` |
 | 7.22 | **Streams: Create Playlist UX** — Fixed column mismatch (`user_id` → `created_by`), auto-numbered playlist names, private by default, contextual sign-in/create copy, removed broken demo redirect | P0 | 3 | ✅ Done (Mar 17) |
-| 7.23 | **BARA Global: Maps vs Gallery** — Restored `UltraSimpleMap` for actual country pages (have population data), kept photo gallery for people-group pages (resolved from `global_africa` table). Conditional rendering based on `country.population` | P0 | 4 | ✅ Done (Mar 17) |
+| 7.23 | **BARA Global: Maps vs Gallery** — Conditional rendering based on `country.population` added but **BUG: Angola (has population=39M) still shows gallery instead of map.** Root cause: the population check may be failing due to data type or null-ish value. Also need: Admin page toggle to choose map vs gallery per country entry. | P0 | 4 | 🐛 Bug — needs fix |
 | 7.24 | **Header Nav: Direct Links** — Replaced single "Mini-Apps" mega-menu with 6 primary nav links inline (Global, Events, Streams, Listings, Market, Sports) + "More" dropdown for overflow (Blog, Communities, Tools). Active state highlighting. | P0 | 4 | ✅ Done (Mar 17) |
 | 7.25 | **Post-login redirect** — Fixed default redirect from `/user/settings` → `/` (homepage) in both `UserSignInPage.tsx` and `UserSignUpPage.tsx` | P0 | 4 | ✅ Done (Mar 17) |
 | 7.26 | **Streams Sidebar: Content Types** — Added "Browse" section with links to Music, Movies, Ebooks, Podcasts, Gaming in the left sidebar on every Streams page | P0 | 4 | ✅ Done (Mar 17) |
 | 7.27 | **BARA Movies page** — Full Netflix-style catalog page at `/streams/movies` with hero banner, genre browsing, trending section, editor's picks, filmmaker CTA | P0 | 4 | ✅ Done (Mar 17) |
 | 7.28 | **BARA Ebooks page** — Full Kindle-style digital library at `/streams/ebooks` with hero banner, category grid, featured books, new releases, author CTA | P0 | 4 | ✅ Done (Mar 17) |
 | 7.29 | **Events: Flyer display fix** — Changed from `object-cover` (crops) to `object-contain` with gradient bg, so full flyer is always visible without cutting top/bottom info | P0 | 4 | ✅ Done (Mar 17) |
-| 7.30 | **Supabase: Playlist RLS** — Playlists INSERT returns 401 (permission denied). Need SQL migration to add INSERT policy for authenticated users | P0 | 4 | ✅ Migration created (Mar 17) |
-| 7.31 | **Supabase: Daily missions RPC** — `reset_daily_missions_for_user` returns 400. Need to ensure migration `20260303_fix_missions_system.sql` is applied to remote Supabase | P0 | 4 | ✅ Migration created (Mar 17) |
+| 7.30 | **Supabase: Playlist RLS** — Playlists INSERT returns 401 (permission denied). Migration `20260318_fix_playlist_rls_and_missions.sql` created and run on remote DB — **STILL FAILING.** Deep debug needed: verify policy was actually created, check if RLS is enabled, check if Supabase client is sending auth token correctly | P0 | 4 | 🐛 Still broken |
+| 7.31 | **Supabase: Daily missions RPC** — `reset_daily_missions_for_user` returns 400. Both migrations (`20260303_fix_missions_system.sql` + `20260318_fix_playlist_rls_and_missions.sql`) run on remote DB — **STILL FAILING.** Deep debug: check if function exists in DB, verify parameter name/type matches RPC call, check if `missions` and `user_missions` tables exist | P0 | 4 | 🐛 Still broken |
 | 7.32 | **Daily Mix photos** — Fixed broken Unsplash image URLs for Discover Weekly / Daily Mix cards on StreamsHome | P0 | 4 | ✅ Done (Mar 17) |
 | 7.33 | **DPO Compliance** — Data Protection Officer requirements: privacy policy review, data processing records, user data export/deletion, consent management, breach notification process | P1 | 4 | ☐ |
 | 7.34 | **BARA Gaming** — Placeholder page at `/streams/gaming`, full implementation deferred to future sprint | P2 | Future | ☐ |
+| 7.35 | **RSS News: Strip HTML** — RSS feed descriptions show raw HTML tags (e.g. `<a href=...>`) instead of clean text. Visible on Rwanda News and likely all country news feeds. Must sanitize/strip HTML from RSS content before rendering | P0 | 5 | ☐ |
+| 7.36 | **PLATFORM COLOR CODE: Black & White** — The entire platform must maintain a black & white color scheme. Currently broken in: nav bar icons (colored), Streams sidebar icons (colored), Liked Songs button, Afrobeats/Amapiano genre pills, coins icon, and various accent colors across pages. Must audit ALL pages and replace colored icons/buttons with monochrome (gray/black) variants | P0 | 5 | ☐ |
+| 7.37 | **Admin: Map/Gallery toggle** — When creating or editing a country in the admin panel, add a dropdown or toggle to choose between "Map" and "Gallery" display mode. Some entries are people groups without map coordinates, so they need the gallery option. This replaces the current population-based auto-detection which is unreliable | P1 | 5 | ☐ |
+| 7.38 | **React Error #310** — `useEffect` error on Streams/Music page. This is a "too many re-renders" or "update during render" error. Likely caused by a `setState` call inside a render path or an `useEffect` with missing/wrong dependencies in `StreamsHome.tsx` | P0 | 5 | ☐ |
+| 7.39 | **Streams: Music playback broken** — Songs don't play on the music page. Debug: check if `audio_url` column has valid URLs in seeded data, verify the audio player component, check if `increment_play_count` RPC works | P0 | 5 | ☐ |
+| 7.40 | **Gamification: Daily login not awarding points** — After signing in, the user's mission section does not credit the daily login mission. Root causes: (1) `reset_daily_missions_for_user` RPC fails, (2) `user_missions` PATCH fails, (3) `checkDailyStreak` may not be triggering. Need end-to-end fix of the gamification pipeline | P0 | 5 | ☐ |
+| 7.41 | **Supabase: user_missions PATCH 400** — PATCH to `user_missions` returns 400. Likely column type mismatch (user_id may still be UUID in remote DB despite migration). Need to verify remote table schema matches migration expectations | P0 | 5 | ☐ |
+| 7.42 | **Clerk: Production keys** — App is running with Clerk development keys. Must switch to production keys before launch. Note: dev keys have strict rate limits | P1 | Pre-launch | ☐ |
+| 7.43 | **Streams Nav Tabs** — Added sticky pill-style content-type tabs (Hub/Music/Movies/Ebooks/Podcasts/Gaming) to `StreamsLayout.tsx`, visible on all Streams pages including mobile | P0 | 4 | ✅ Done (Mar 18) |
 
 ---
 
@@ -474,7 +483,60 @@ Once features are live, track these to measure success:
 
 > ⏳ **This proposal should be discussed with the team.** The engineer recommends implementing Earning + Spending first, then Leaderboard + Seasonal later.
 
-### 8.4 User Profiles Clarification
+### 8.4 BARA Movies — Full Implementation Plan
+
+> **Current state:** Placeholder page with sample data. Needs full production features.
+
+**Phase A — Data Layer (Sprint 5)**
+1. Create `movies` table in Supabase: id, title, description, genre, year, duration_minutes, rating, poster_url, backdrop_url, video_url, trailer_url, director, cast (text[]), country, language, is_featured, is_free, view_count, created_at
+2. Create `movie_categories` table: id, name, slug, description, image_url
+3. Create `movie_watchlist` table: id, user_id (TEXT), movie_id, added_at
+4. Create `movie_watch_history` table: id, user_id (TEXT), movie_id, progress_seconds, completed, watched_at
+5. RLS policies: public read on movies/categories, authenticated read/write on watchlist/history
+6. Seed 20-30 sample movies with real poster images and trailers (YouTube embeds or direct URLs)
+
+**Phase B — UI & Features (Sprint 5-6)**
+1. Movie detail page: `/streams/movies/:id` — poster, description, cast, trailer embed, "Watch Now" button
+2. Video player component: full-screen capable, progress tracking, quality selector
+3. Genre filtering and search with real data from Supabase
+4. Watchlist: add/remove movies, persist to DB
+5. Continue watching: resume from last position
+6. Movie recommendations based on genre/watch history
+7. Rating/review system for movies
+
+**Phase C — Content Pipeline (Sprint 6+)**
+1. Admin panel: upload movies, manage categories, feature movies
+2. Creator portal: filmmakers can submit movies for review
+3. Integration with Supabase Storage for video file hosting
+4. Streaming optimization: adaptive bitrate if using external CDN
+
+### 8.5 BARA Ebooks — Full Implementation Plan
+
+> **Current state:** Placeholder page with sample data. Needs full production features.
+
+**Phase A — Data Layer (Sprint 5)**
+1. Create `ebooks` table: id, title, author, description, genre, year, pages, rating, cover_url, file_url, preview_url, language, is_featured, is_free, price_coins, download_count, created_at
+2. Create `ebook_categories` table: id, name, slug, description, icon
+3. Create `ebook_library` table: id, user_id (TEXT), ebook_id, added_at, reading_progress (0-100), last_read_at
+4. Create `ebook_reviews` table: id, user_id (TEXT), ebook_id, rating (1-5), review_text, created_at
+5. RLS policies: public read on ebooks/categories, authenticated read/write on library/reviews
+6. Seed 20-30 sample ebooks with real cover images and preview PDFs
+
+**Phase B — UI & Features (Sprint 5-6)**
+1. Ebook detail page: `/streams/ebooks/:id` — cover, description, reviews, "Read Now" / "Add to Library"
+2. PDF/EPUB reader component: in-browser reading, bookmarks, progress tracking
+3. Category filtering and search with real data
+4. My Library: personal bookshelf with reading progress
+5. Reviews and ratings
+6. Recommendations based on reading history
+
+**Phase C — Content Pipeline (Sprint 6+)**
+1. Admin panel: upload ebooks, manage categories, feature books
+2. Author portal: self-publishing workflow
+3. Integration with Supabase Storage for file hosting
+4. Coins integration: purchase premium ebooks with BARA Coins
+
+### 8.6 User Profiles Clarification
 
 > **Re: "User Profile decisions (visibility, connections)"** — The team likely discussed whether user profiles should be public (visible to other users) and whether users can follow/connect with each other like a social network.
 >
@@ -485,17 +547,20 @@ Once features are live, track these to measure success:
 ## HOW TO USE THIS PLAN
 
 1. **Phase 7 (team meeting directives) is the active work.** All prior phases (1-6) are complete.
-2. **Phase 8 (testing/QA/coins) is the next priority** after all Phase 7 items are done.
-3. **Use `STREAMS_SPORTS_BUILD_PLAN.md`** for the detailed sprint-by-sprint breakdown with per-task checklists.
-4. **Check off items** as you complete them (☐ → ✅).
-5. **Log bugs** found during testing with priority level (P0–P3).
-6. **BARA Coins proposal (8.3) needs team review** before implementation begins.
-7. **Test accounts (8.1) need Clerk user IDs** — will be captured on first sign-in.
-8. **QA process (8.2) is mandatory** for every push going forward.
-9. **Country defaults to Rwanda, Language defaults to English** across the platform.
+2. **Sprint 5 priority order:** (1) Fix all Supabase 400/401 errors end-to-end, (2) Platform color code audit (black & white), (3) Fix BARA Global map bug, (4) Fix RSS HTML stripping, (5) Fix React #310 + music playback, (6) Fix gamification pipeline
+3. **Phase 8 (testing/QA/coins) is the next priority** after all Phase 7 bugs are resolved.
+4. **Movies & Ebooks full implementation** (Phase 8.4 / 8.5) are Sprint 5-6 work.
+5. **Use `STREAMS_SPORTS_BUILD_PLAN.md`** for the detailed sprint-by-sprint breakdown with per-task checklists.
+6. **Check off items** as you complete them (☐ → ✅).
+7. **Log bugs** found during testing with priority level (P0–P3).
+8. **BARA Coins proposal (8.3) needs team review** before implementation begins.
+9. **Test accounts (8.1) need Clerk user IDs** — will be captured on first sign-in.
+10. **QA process (8.2) is mandatory** for every push going forward.
+11. **Country defaults to Rwanda, Language defaults to English** across the platform.
+12. **Color code: BLACK & WHITE everywhere.** No colored icons, buttons, or accent colors unless explicitly approved.
 
 ---
 
 *Master Plan created: Feb 22, 2026*
-*Updated: March 17, 2026 — Sprint 4 hotfixes in progress (21 of 34 directives done). Added Phase 8: Testing, Coins Design, QA.*
+*Updated: March 18, 2026 — Sprint 4 complete, Sprint 5 planned. 21 of 43 directives done, 7 bugs open. Added: RSS fix, color code audit, admin map toggle, React #310, music playback, gamification pipeline, Movies/Ebooks full plans.*
 *For Bara Afrika Platform — baraafrika.com*
