@@ -54,3 +54,11 @@ GRANT ALL ON public.user_missions TO service_role;
 -- Also grant on missions table for lookups
 GRANT SELECT ON public.missions TO anon;
 GRANT SELECT ON public.missions TO authenticated;
+
+-- ISSUE 4: user_song_likes missing INSERT/DELETE for anon
+-- Users can't like/unlike songs without this
+GRANT INSERT, DELETE ON public.user_song_likes TO anon;
+GRANT INSERT, DELETE ON public.user_song_likes TO authenticated;
+
+-- ISSUE 5: increment_play_count RPC needs explicit EXECUTE grant
+GRANT EXECUTE ON FUNCTION public.increment_play_count TO anon, authenticated;

@@ -661,7 +661,8 @@ export const CountryDetailPage: React.FC = () => {
 
               >
 
-                {(country.population || countryInfo?.population) ? (
+                {/* display_mode: 'map' forces map, 'gallery' forces gallery, 'auto' uses population heuristic */}
+                {(countryInfo?.display_mode === 'map' || (countryInfo?.display_mode !== 'gallery' && (country.population || countryInfo?.population))) ? (
                   /* Real country — show interactive map */
                   <>
                     <UltraSimpleMap
