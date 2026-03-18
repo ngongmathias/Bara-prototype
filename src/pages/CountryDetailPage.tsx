@@ -670,6 +670,8 @@ export const CountryDetailPage: React.FC = () => {
                       countryData={{
                         name: country.name,
                         capital: countryInfo?.capital || country.capital || null,
+                        latitude: countryInfo?.latitude || null,
+                        longitude: countryInfo?.longitude || null,
                       }}
                     />
                     <div className="p-3 text-center">
@@ -682,7 +684,7 @@ export const CountryDetailPage: React.FC = () => {
                     <div className="grid grid-cols-2 gap-1">
                       <div className="col-span-2">
                         <img
-                          src={countryInfo?.monument_image_url || `https://source.unsplash.com/800x400/?${country.name},africa,culture`}
+                          src={countryInfo?.monument_image_url || `https://images.unsplash.com/photo-1523365280197-f1783db9fe62?w=800&h=400&fit=crop`}
                           alt={`${country.name}`}
                           className="w-full h-56 object-cover"
                           loading="lazy"
@@ -690,7 +692,7 @@ export const CountryDetailPage: React.FC = () => {
                       </div>
                       <div>
                         <img
-                          src={`https://source.unsplash.com/400x300/?${country.name},people,community`}
+                          src={countryInfo?.gallery_image_1_url || `https://images.unsplash.com/photo-1504439468489-c8920d796a29?w=400&h=300&fit=crop`}
                           alt={`${country.name} community`}
                           className="w-full h-32 object-cover"
                           loading="lazy"
@@ -698,7 +700,7 @@ export const CountryDetailPage: React.FC = () => {
                       </div>
                       <div>
                         <img
-                          src={`https://source.unsplash.com/400x300/?${country.name},culture,heritage`}
+                          src={countryInfo?.gallery_image_2_url || `https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=300&fit=crop`}
                           alt={`${country.name} heritage`}
                           className="w-full h-32 object-cover"
                           loading="lazy"

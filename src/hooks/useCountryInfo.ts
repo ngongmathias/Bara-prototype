@@ -39,6 +39,9 @@ interface CountryInfo {
   natural_resources: string | null;
   main_industries: string | null;
   tourism_attractions: string | null;
+  display_mode: 'auto' | 'map' | 'gallery';
+  gallery_image_1_url: string | null;
+  gallery_image_2_url: string | null;
   geography: string | null;
   history: string | null;
   culture: string | null;
@@ -75,7 +78,7 @@ export const useCountryInfo = (countryId: string | null) => {
           .select('*')
           .eq('country_id', countryId)
           .eq('is_active', true)
-          .single();
+          .maybeSingle();
 
         if (error) {
           if (error.code === 'PGRST116') {

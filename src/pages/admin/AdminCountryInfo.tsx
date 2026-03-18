@@ -724,6 +724,24 @@ export const AdminCountryInfo: React.FC = () => {
                 </div>
 
                 <div>
+                  <Label htmlFor="display_mode">Country Page Display Mode</Label>
+                  <Select
+                    value={formData.display_mode || 'auto'}
+                    onValueChange={(value) => setFormData({...formData, display_mode: value as 'auto' | 'map' | 'gallery'})}
+                  >
+                    <SelectTrigger className="w-full mt-1">
+                      <SelectValue placeholder="Select display mode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="auto">Auto (map if population exists, gallery otherwise)</SelectItem>
+                      <SelectItem value="map">Always show Map</SelectItem>
+                      <SelectItem value="gallery">Always show Photo Gallery</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500 mt-1">Controls whether the country page shows an interactive map or a photo gallery.</p>
+                </div>
+
+                <div>
                   <Label htmlFor="description">Description</Label>
                   <Textarea
                     id="description"
@@ -1055,25 +1073,6 @@ export const AdminCountryInfo: React.FC = () => {
                     rows={2}
                   />
                 </div>
-              </div>
-
-              {/* Display Mode Toggle */}
-              <div className="md:col-span-2">
-                <Label htmlFor="display_mode">Country Page Display Mode</Label>
-                <Select
-                  value={formData.display_mode || 'auto'}
-                  onValueChange={(value) => setFormData({...formData, display_mode: value as 'auto' | 'map' | 'gallery'})}
-                >
-                  <SelectTrigger className="w-full mt-1">
-                    <SelectValue placeholder="Select display mode" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="auto">Auto (map if population exists, gallery otherwise)</SelectItem>
-                    <SelectItem value="map">Always show Map</SelectItem>
-                    <SelectItem value="gallery">Always show Photo Gallery</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-gray-500 mt-1">Controls whether the country page shows an interactive map or a photo gallery.</p>
               </div>
 
               {/* Visual Assets */}

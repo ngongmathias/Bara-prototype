@@ -390,13 +390,18 @@ Once features are live, track these to measure success:
 | 7.34 | **BARA Gaming** — Placeholder page at `/streams/gaming`, full implementation deferred to future sprint | P2 | Future | ☐ |
 | 7.35 | **RSS News: Strip HTML** — Added `stripHtml()` utility function to `RSSFeeds.tsx` that removes HTML tags, decodes entities, and collapses whitespace before rendering descriptions | P0 | 5 | ✅ Done (Mar 18) |
 | 7.36 | **PLATFORM COLOR CODE: Black & White** — Completed full audit of user-facing pages. Fixed: Header MINI_APPS (9 items), coins badge, user avatar, sign-out, country selector, StreamsHub (5 categories + hero), StreamsHome (all play buttons from Spotify green to gray-900, Quick Access tiles, Made For You gradients), MoviesPage, EbooksPage, PodcastsPage, DiscoverMore (9 items), QueueDrawer. All replaced with monochrome gray-900/gray-100 palette | P0 | 5 | ✅ Done (Mar 18) |
-| 7.37 | **Admin: Map/Gallery toggle** — Added `display_mode` column to `country_info` table (auto/map/gallery). Added Select dropdown to AdminCountryInfo form. Updated CountryDetailPage to respect admin override: 'map' forces map, 'gallery' forces gallery, 'auto' uses population heuristic (which now also checks `countryInfo.population` for Angola fix) | P1 | 5 | ✅ Done (Mar 18) |
-| 7.38 | **React Error #310** — Root cause: cascading Supabase RPC failures (`reset_daily_missions_for_user` 400 error) triggered error state loops in `useGamification` hook. Fixed by resolving all Supabase DB issues in migration `20260319_fix_all_supabase_errors.sql` | P0 | 5 | ✅ Done (Mar 18) |
-| 7.39 | **Streams: Music playback broken** — Verified: songs have valid `file_url` (SoundHelix MP3s), `increment_play_count` RPC exists and has EXECUTE grant, `play_history` has INSERT grant for anon, `user_song_likes` now has INSERT/DELETE grants. Audio player code is correct (`audioRef.current.src = song.file_url`). Playback was blocked by cascading DB errors; now fixed | P0 | 5 | ✅ Done (Mar 18) |
+| 7.37 | **Admin: Map/Gallery toggle** — `display_mode` column added to DB and CountryDetailPage logic updated, but **toggle is NOT visible in the admin form** (user confirmed). Need to verify the Select dropdown actually renders in AdminCountryInfo create/edit dialog. DB column exists (auto/map/gallery). | P1 | 5 | 🐛 Partially broken — toggle not visible in admin UI |
+| 7.38 | **React Error #310** — **STILL HAPPENING** in production build. Previous fix (migration 20260319) resolved some Supabase errors but the React re-render loop persists. Console also shows `businesses` 400 and `country_info` 406 errors which may be contributing. Need deeper investigation in dev mode (non-minified) to trace exact component causing the loop | P0 | 6 | 🐛 Still broken |
+| 7.39 | **Streams: Music playback broken** — **STILL BROKEN** despite DB grants being fixed. Songs have valid `file_url` (SoundHelix MP3s) and grants are in place, but clicking play does nothing in the deployed app. Likely blocked by the React #310 crash which kills the page before audio can initialize. Must fix #310 first, then re-test playback | P0 | 6 | 🐛 Still broken |
 | 7.40 | **Gamification: Daily login not awarding points** — Fixed all 3 root causes: (1) RPC rewritten with correct column refs, (2) added missing `completed_at`/`last_reset_at`/`updated_at` columns to `user_missions`, (3) verified `checkDailyStreak` triggers via `useGamification` hook (1min debounce). Full pipeline now: login → checkDailyStreak → resetDailyMissions → trackMissionProgress('daily_login') → addXP | P0 | 5 | ✅ Done (Mar 18) |
 | 7.41 | **Supabase: user_missions PATCH 400** — Root cause: client sent `completed_at` in UPDATE but column didn't exist. Fixed by adding `completed_at`, `last_reset_at`, `updated_at` columns + granting DELETE to anon/authenticated in migration `20260319_fix_all_supabase_errors.sql` | P0 | 5 | ✅ Done (Mar 18) |
 | 7.42 | **Clerk: Production keys** — App is running with Clerk development keys. Must switch to production keys before launch. Note: dev keys have strict rate limits | P1 | Pre-launch | ☐ |
 | 7.43 | **Streams Nav Tabs** — Added sticky pill-style content-type tabs (Hub/Music/Movies/Ebooks/Podcasts/Gaming) to `StreamsLayout.tsx`, visible on all Streams pages including mobile | P0 | 4 | ✅ Done (Mar 18) |
+| 7.44 | **BARA Global: Map coordinates** — Map displays for countries but does NOT use the latitude/longitude values stored in `country_info`. The `UltraSimpleMap` component needs to receive and center on the actual `countryInfo.latitude` / `countryInfo.longitude` coordinates instead of relying on country name geocoding | P0 | 6 | ☐ |
+| 7.45 | **BARA Global: People group gallery images** — People groups (e.g. "Black/African British") show empty broken image placeholders because no images exist in the DB. Fix: (1) Seed appropriate cultural/community images for all existing people groups in `country_info` (`monument_image_url` + 2 additional gallery fields), (2) Ensure admin can upload/replace these images from the AdminCountryInfo create/edit form, (3) Use quality fallback images so the gallery never looks empty | P0 | 6 | ☐ |
+| 7.46 | **Supabase: businesses 400 + country_info 406** — Console shows `GET businesses?...&country_id=eq.xxx 400` and `GET country_info?...&country_id=eq.xxx 406 (Not Acceptable)`. The 406 is likely a PostgREST content-type negotiation issue (possibly `.single()` on a query returning 0 or 2+ rows). The 400 on businesses may be a missing column or relationship. Both need investigation and fix | P0 | 6 | ☐ |
+| 7.47 | **Streams: Music architecture (admin vs creator songs)** — The platform needs two types of songs: (1) **Platform songs** uploaded by admin (e.g. Yemi Alade, Burna Boy) — not tied to any creator account, shown as "BARA Curated" or similar, admin can manage from admin panel. (2) **Creator songs** uploaded by verified artists via their creator dashboard — tied to their profile, they manage their own catalog. Need: `uploaded_by` field on songs (nullable FK to clerk_users), admin song management in admin panel, creator song management in creator dashboard. Also: seed realistic dummy songs with proper cover art and metadata for the platform, and add test songs to user's artist profile for testing | P0 | 6 | ☐ |
+| 7.48 | **Streams: Seed realistic dummy music** — Current songs are "Track 1 - Burna Boy" etc. with SoundHelix placeholder audio. Need: realistic song titles, proper cover art URLs (from Unsplash or similar), varied genres (Afrobeats, Amapiano, Afro-pop, Gospel, Hip-hop), multiple albums per artist, and a few songs seeded to the test artist account (`mathiasngongngai@gmail.com`) for end-to-end testing | P0 | 6 | ☐ |
 
 ---
 
@@ -547,20 +552,22 @@ Once features are live, track these to measure success:
 ## HOW TO USE THIS PLAN
 
 1. **Phase 7 (team meeting directives) is the active work.** All prior phases (1-6) are complete.
-2. **Sprint 5 priority order:** (1) Fix all Supabase 400/401 errors end-to-end, (2) Platform color code audit (black & white), (3) Fix BARA Global map bug, (4) Fix RSS HTML stripping, (5) Fix React #310 + music playback, (6) Fix gamification pipeline
-3. **Phase 8 (testing/QA/coins) is the next priority** after all Phase 7 bugs are resolved.
-4. **Movies & Ebooks full implementation** (Phase 8.4 / 8.5) are Sprint 5-6 work.
-5. **Use `STREAMS_SPORTS_BUILD_PLAN.md`** for the detailed sprint-by-sprint breakdown with per-task checklists.
-6. **Check off items** as you complete them (☐ → ✅).
-7. **Log bugs** found during testing with priority level (P0–P3).
-8. **BARA Coins proposal (8.3) needs team review** before implementation begins.
-9. **Test accounts (8.1) need Clerk user IDs** — will be captured on first sign-in.
-10. **QA process (8.2) is mandatory** for every push going forward.
-11. **Country defaults to Rwanda, Language defaults to English** across the platform.
-12. **Color code: BLACK & WHITE everywhere.** No colored icons, buttons, or accent colors unless explicitly approved.
+2. **Sprint 6 priority order:** (1) Fix React Error #310 — this blocks music playback and overall UX, (2) Fix businesses 400 + country_info 406 Supabase errors, (3) Fix admin map/gallery toggle visibility, (4) Fix map coordinates to use stored lat/lng, (5) Seed people group gallery images + admin upload, (6) Music architecture: admin vs creator songs + seed realistic dummy data, (7) Add test songs to artist profile for testing
+3. **Sprint 5 completed:** Supabase migration 20260319 ran successfully, platform B&W color code enforced, RSS HTML stripping, Angola map logic, daily login gamification confirmed working by user.
+4. **Phase 8 (testing/QA/coins) is the next priority** after all Phase 7 bugs are resolved.
+5. **Movies & Ebooks full implementation** (Phase 8.4 / 8.5) are Sprint 6-7 work.
+6. **Use `STREAMS_SPORTS_BUILD_PLAN.md`** for the detailed sprint-by-sprint breakdown with per-task checklists.
+7. **Check off items** as you complete them (☐ → ✅).
+8. **Log bugs** found during testing with priority level (P0–P3).
+9. **BARA Coins proposal (8.3) needs team review** before implementation begins.
+10. **Test accounts (8.1) need Clerk user IDs** — will be captured on first sign-in.
+11. **QA process (8.2) is mandatory** for every push going forward.
+12. **Country defaults to Rwanda, Language defaults to English** across the platform.
+13. **Color code: BLACK & WHITE everywhere.** No colored icons, buttons, or accent colors unless explicitly approved.
+14. **DPO Compliance (7.33) is tracked** and remains a P1 item — not in current sprint but will not be forgotten.
 
 ---
 
 *Master Plan created: Feb 22, 2026*
-*Updated: March 18, 2026 — Sprint 5 complete. 30 of 43 directives done, 0 critical bugs open. Fixed: all Supabase 400/401 errors (migration 20260319), platform B&W color code enforced, Angola map bug, RSS HTML stripping, React #310, music playback, gamification daily login, admin map/gallery toggle. Remaining: DPO compliance, Gaming page, Clerk prod keys, Movies/Ebooks full implementation.*
+*Updated: March 18, 2026 — Sprint 5 done, Sprint 6 planned. 28 of 48 directives done, 5 bugs open. Sprint 5 confirmed working: migration 20260319, B&W color code, RSS stripping, daily login gamification. Still broken: React #310, music playback, admin toggle visibility, businesses 400/country_info 406. New Sprint 6 items: map coordinates fix, people group gallery images, music architecture (admin vs creator), realistic dummy song seeding. DPO compliance tracked at 7.33.*
 *For Bara Afrika Platform — baraafrika.com*

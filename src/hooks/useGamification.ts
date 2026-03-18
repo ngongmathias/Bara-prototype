@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { GamificationService, GamificationProfile, calculateLevel, getXPForLevel } from '@/lib/gamificationService';
 import { useUser } from '@clerk/clerk-react';
@@ -7,6 +7,7 @@ let lastStreakCheckTime = 0;
 
 export const useGamification = () => {
     const { user } = useUser();
+    const userId = user?.id ?? null;
     const [profile, setProfile] = useState<GamificationProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [celebration, setCelebration] = useState<{
@@ -24,8 +25,8 @@ export const useGamification = () => {
     });
 
     const fetchProfile = async () => {
-        if (!user) return;
-        const data = await GamificationService.getProfile(user.id);
+        if (!userId) return;
+        const data = await GamificationService.getProfile(userId);
         setProfile(data);
         setLoading(false);
 
@@ -34,7 +35,7 @@ export const useGamification = () => {
             const now = Date.now();
             if (now - lastStreakCheckTime > 60000) { // 1 min debounce
                 lastStreakCheckTime = now;
-                await GamificationService.checkDailyStreak(user.id);
+                await GamificationService.checkDailyStreak(userId);
             }
         }
     };
@@ -43,12 +44,12 @@ export const useGamification = () => {
         fetchProfile();
 
         // Subscribe to profile changes
-        if (user) {
+        if (userId) {
             const channel = supabase
-                .channel(`gamification_profile_${user.id}`)
+                .channel(`gamification_profile_${userId}`)
                 .on(
                     'postgres_changes',
-                    { event: '*', schema: 'public', table: 'gamification_profiles', filter: `user_id=eq.${user.id}` },
+                    { event: '*', schema: 'public', table: 'gamification_profiles', filter: `user_id=eq.${userId}` },
                     (payload) => {
                         const newProfile = payload.new as GamificationProfile;
 
@@ -90,16 +91,16 @@ export const useGamification = () => {
                 window.removeEventListener('bara_achievement_earned', handleAchievement);
             };
         }
-    }, [user]);
+    }, [userId]);
 
     const addXP = async (amount: number, reason: string) => {
-        if (!user) return null;
-        return await GamificationService.addXP(user.id, amount, reason);
+        if (!userId) return null;
+        return await GamificationService.addXP(userId, amount, reason);
     };
 
     const spendCoins = async (amount: number, reason: string) => {
-        if (!user) return false;
-        return await GamificationService.spendCoins(user.id, amount, reason);
+        if (!userId) return false;
+        return await GamificationService.spendCoins(userId, amount, reason);
     };
 
     const getProgress = () => {
