@@ -361,14 +361,14 @@ Once features are live, track these to measure success:
 | 7.5 | **Streams hub page** — StreamsHub.tsx created with Music/Movies/Ebooks/Podcast/Gaming cards, `/streams` routes to hub, `/streams/music` routes to music player | P0 | 2 | ✅ Done (Mar 17) |
 | 7.6 | **Mimic Spotify** — white theme with Spotify-style sidebar, track lists, artist pages | P1 | 2 | ✅ Done (Mar 17) |
 | 7.7 | **Artist banner** + **Artist picks** — ArtistPage now has gradient banner with cover image + "Artist's Pick" featured track card | P1 | 2 | ✅ Done (Mar 17) |
-| 7.8 | **BARA News** — promote to mini-app with own tab, fix RSS HTML display | P1 | 3 | ☐ |
+| 7.8 | **BARA News** — Created dedicated `/news` page with hero section, search, source filter, featured article, article grid with images. Added to Header nav (More dropdown) and DiscoverMore component. RSS HTML already stripped (7.35). | P1 | 6 | ✅ Done (Mar 18) |
 | 7.9 | **BARA Global** — replaced UltraSimpleMap with photo gallery grid, added Read More/Show Less toggle for descriptions (300-char threshold), removed hard truncation | P0 | 3 | ✅ Done (Mar 17) |
 | 7.10 | **Listings** — removed `.slice(0,12)` cap so ALL categories display, added deduplication by slug to prevent repeats | P0 | 3 | ✅ Done (Mar 17) |
 | 7.11 | **Events** — EventCard flyer expanded from h-48 to h-64 for full visibility, venue name shown prominently below title, added Copy Link option to share menu | P1 | 3 | ✅ Done (Mar 17) |
 | 7.12 | **Blog** — BlogCard now has like (heart) button + share menu (Facebook/Twitter/WhatsApp/Copy Link), CategoryFilter converted from horizontal pills to dropdown selector | P1 | 3 | ✅ Done (Mar 17) |
 | 7.13 | **Footer cleanup** — Amazon-style 6-column layout: About, Mini-Apps, Business, Communities, BARA Global (2-col). Added Terms/Privacy/Advertising bottom bar | P1 | 1 | ✅ Done (Mar 17) |
-| 7.14 | **Home tile flip** — interactive Bara meaning reveal | P1 | 4 | ☐ |
-| 7.15 | **Admin analytics** — real-time, accurate | P0 | 4 | ☐ |
+| 7.14 | **Home tile flip** — `BaraMeaningTiles` component on landing page: 6 interactive CSS 3D flip tiles showing "Bara" meaning in Swahili (Blessing), Hausa (Gift), Yoruba (Wonder), Amharic (Gateway), Zulu (Hold), Arabic (Land). Framer-motion animated. | P1 | 6 | ✅ Done (Mar 18) |
+| 7.15 | **Admin analytics** — Added Content & Platform metrics (Songs, Artists, Playlists, Blog Posts, Marketplace, News, Country Info, Gamification Users, Coins in Circulation, Countries) as clickable cards. Replaced hardcoded System Status with real data (log entries, error count, content totals, coins). | P0 | 6 | ✅ Done (Mar 18) |
 | 7.16 | **Discover More** — added to Blog, Listings, Communities, Sports, Streams, Countries (6 pages total + Events/Marketplace already had it). Component updated with all 9 mini-apps | P1 | 1 | ✅ Done (Mar 17) |
 | 7.17 | **BARA Coins** — needs dedicated meeting (Earn/Share/Redeem/Store/Leaderboard/Purchase) | P0 | TBD | ⏳ Meeting needed |
 | 7.18 | **User Profile** — needs team decision (public? connections?) | P1 | TBD | ⏳ Meeting needed |
@@ -569,5 +569,5 @@ Once features are live, track these to measure success:
 ---
 
 *Master Plan created: Feb 22, 2026*
-*Updated: March 18, 2026 — Sprint 6 complete. 36 of 48 directives done, 0 critical bugs open. Sprint 6 fixes: React #310 (useGamification dep), music playback (autoplay policy + real URLs), admin toggle visibility, map coordinates, gallery images, country_info 406, music architecture (uploaded_by/upload_type), realistic song seeding. Remaining: 7.3 cross-device testing, 7.8 BARA News mini-app, 7.14 home tile flip, 7.15 admin analytics, 7.33 DPO compliance, 7.42 Clerk production keys. Phase 8 (testing/QA/coins) is next priority.*
+*Updated: March 18, 2026 — Sprint 6 complete. 39 of 48 directives done, 0 critical bugs open. Latest: BARA News mini-app (/news page + nav), Home tile flip animation (BaraMeaningTiles), Admin analytics (Content & Platform metrics + dynamic System Status). Remaining open: 7.3 cross-device testing, 7.17 BARA Coins (meeting needed), 7.18 User Profile (meeting needed), 7.19 email audit, 7.33 DPO compliance, 7.34 BARA Gaming, 7.42 Clerk production keys. Phase 8 (testing/QA/coins) is next priority.*
 *For Bara Afrika Platform — baraafrika.com*
