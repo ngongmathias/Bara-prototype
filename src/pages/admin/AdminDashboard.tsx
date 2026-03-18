@@ -93,6 +93,18 @@ interface UserMetrics {
   growthRate: number;
 }
 
+interface ContentMetrics {
+  totalSongs: number;
+  totalArtists: number;
+  totalPlaylists: number;
+  totalBlogPosts: number;
+  totalMarketplaceListings: number;
+  totalGamificationProfiles: number;
+  totalCoinsInCirculation: number;
+  totalRSSArticles: number;
+  totalCountryInfo: number;
+}
+
 interface ChartData {
   labels: string[];
   datasets: {
@@ -147,6 +159,17 @@ export const AdminDashboard = () => {
     newLast7Days: 0,
     newThisMonth: 0,
     growthRate: 0
+  });
+  const [contentMetrics, setContentMetrics] = useState<ContentMetrics>({
+    totalSongs: 0,
+    totalArtists: 0,
+    totalPlaylists: 0,
+    totalBlogPosts: 0,
+    totalMarketplaceListings: 0,
+    totalGamificationProfiles: 0,
+    totalCoinsInCirculation: 0,
+    totalRSSArticles: 0,
+    totalCountryInfo: 0,
   });
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -292,6 +315,40 @@ export const AdminDashboard = () => {
       });
 
       setRecentActivities(activities || []);
+
+      // Fetch content metrics (Streams, Blog, Marketplace, Gamification, News)
+      const [
+        songsResult, artistsResult, playlistsResult,
+        blogResult, marketResult, gamProfilesResult,
+        rssResult, countryInfoResult
+      ] = await Promise.all([
+        supabase.from('songs').select('id', { count: 'exact', head: true }),
+        supabase.from('artists').select('id', { count: 'exact', head: true }),
+        supabase.from('playlists').select('id', { count: 'exact', head: true }),
+        supabase.from('blog_posts').select('id', { count: 'exact', head: true }),
+        supabase.from('marketplace_listings').select('id', { count: 'exact', head: true }),
+        supabase.from('gamification_profiles').select('id', { count: 'exact', head: true }),
+        supabase.from('rss_feeds').select('id', { count: 'exact', head: true }),
+        supabase.from('country_info').select('id', { count: 'exact', head: true }),
+      ]);
+
+      // Fetch total coins in circulation
+      const { data: coinsData } = await supabase
+        .from('gamification_profiles')
+        .select('bara_coins');
+      const totalCoins = coinsData?.reduce((sum, p) => sum + (p.bara_coins || 0), 0) || 0;
+
+      setContentMetrics({
+        totalSongs: songsResult.count || 0,
+        totalArtists: artistsResult.count || 0,
+        totalPlaylists: playlistsResult.count || 0,
+        totalBlogPosts: blogResult.count || 0,
+        totalMarketplaceListings: marketResult.count || 0,
+        totalGamificationProfiles: gamProfilesResult.count || 0,
+        totalCoinsInCirculation: totalCoins,
+        totalRSSArticles: rssResult.count || 0,
+        totalCountryInfo: countryInfoResult.count || 0,
+      });
     } catch (error) {
       console.error(error);
     } finally {
@@ -647,6 +704,36 @@ export const AdminDashboard = () => {
         </Card>
       </div>
 
+      {/* Content & Platform Metrics */}
+      <div className="mb-8">
+        <h3 className="text-lg font-comfortaa font-semibold text-gray-900 mb-4">Content & Platform</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          {[
+            { label: 'Songs', value: contentMetrics.totalSongs, nav: '/admin/streams' },
+            { label: 'Artists', value: contentMetrics.totalArtists, nav: '/admin/streams' },
+            { label: 'Playlists', value: contentMetrics.totalPlaylists, nav: '/admin/streams' },
+            { label: 'Blog Posts', value: contentMetrics.totalBlogPosts, nav: '/admin/blog' },
+            { label: 'Marketplace', value: contentMetrics.totalMarketplaceListings, nav: '/admin/marketplace' },
+            { label: 'News Articles', value: contentMetrics.totalRSSArticles, nav: '/admin/rss-feeds' },
+            { label: 'Country Info', value: contentMetrics.totalCountryInfo, nav: '/admin/country-info' },
+            { label: 'Gamification Users', value: contentMetrics.totalGamificationProfiles, nav: '/admin/gamification' },
+            { label: 'Coins in Circulation', value: contentMetrics.totalCoinsInCirculation, nav: '/admin/gamification' },
+            { label: 'Countries', value: stats.totalCountries, nav: '/admin/countries' },
+          ].map((item) => (
+            <Card
+              key={item.label}
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => navigate(item.nav)}
+            >
+              <CardContent className="p-4">
+                <p className="text-xs text-gray-500 font-roboto mb-1">{item.label}</p>
+                <p className="text-xl font-bold font-comfortaa text-gray-900">{item.value.toLocaleString()}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
       {/* Recent Activity and Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
@@ -777,28 +864,28 @@ export const AdminDashboard = () => {
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <div>
                 <p className="font-roboto font-medium text-green-800">Database</p>
-                <p className="font-roboto text-sm text-green-600">All systems operational</p>
+                <p className="font-roboto text-sm text-green-600">{stats.totalLogs.toLocaleString()} log entries</p>
+              </div>
+            </div>
+            <div className={`flex items-center space-x-3 p-3 rounded-lg ${stats.errorCount > 10 ? 'bg-red-50' : 'bg-green-50'}`}>
+              <div className={`w-3 h-3 rounded-full ${stats.errorCount > 10 ? 'bg-red-500' : 'bg-green-500'}`}></div>
+              <div>
+                <p className={`font-roboto font-medium ${stats.errorCount > 10 ? 'text-red-800' : 'text-green-800'}`}>Errors</p>
+                <p className={`font-roboto text-sm ${stats.errorCount > 10 ? 'text-red-600' : 'text-green-600'}`}>{stats.errorCount} detected in logs</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
               <div>
-                <p className="font-roboto font-medium text-blue-800">API</p>
-                <p className="font-roboto text-sm text-blue-600">Response time: 120ms</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg">
-              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-              <div>
-                <p className="font-roboto font-medium text-yellow-800">Storage</p>
-                <p className="font-roboto text-sm text-yellow-600">85% capacity used</p>
+                <p className="font-roboto font-medium text-blue-800">Content</p>
+                <p className="font-roboto text-sm text-blue-600">{contentMetrics.totalSongs + contentMetrics.totalBlogPosts + contentMetrics.totalRSSArticles} total items</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
               <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
               <div>
-                <p className="font-roboto font-medium text-purple-800">Security</p>
-                <p className="font-roboto text-sm text-purple-600">All checks passed</p>
+                <p className="font-roboto font-medium text-purple-800">Gamification</p>
+                <p className="font-roboto text-sm text-purple-600">{contentMetrics.totalCoinsInCirculation.toLocaleString()} coins active</p>
               </div>
             </div>
           </div>
@@ -806,4 +893,4 @@ export const AdminDashboard = () => {
       </Card>
     </AdminLayout>
   );
-}; 
+};
