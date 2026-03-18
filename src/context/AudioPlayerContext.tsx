@@ -280,6 +280,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
         audioRef.current.src = song.file_url;
 
+        audioRef.current.play().catch(e => console.error("Playback failed:", e));
+
         setIsPlaying(true);
 
 
@@ -338,9 +340,21 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
 
 
-    const pause = () => setIsPlaying(false);
+    const pause = () => {
+        audioRef.current?.pause();
+        setIsPlaying(false);
+    };
 
-    const togglePlay = () => setIsPlaying(!isPlaying);
+    const togglePlay = () => {
+        if (!audioRef.current) return;
+        if (isPlaying) {
+            audioRef.current.pause();
+            setIsPlaying(false);
+        } else {
+            audioRef.current.play().catch(e => console.error("Resume failed:", e));
+            setIsPlaying(true);
+        }
+    };
 
 
 
