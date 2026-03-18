@@ -109,6 +109,7 @@ const Footer = () => {
               About BARA
             </h3>
             <ul className="space-y-2">
+              <li><Link to="/advertise" onClick={scrollToTop} className="text-gray-600 hover:text-gray-900 transition-colors text-sm">Advertise With Us</Link></li>
               <li><Link to="/about" onClick={scrollToTop} className="text-gray-600 hover:text-gray-900 transition-colors text-sm">{t('footer.aboutUs')}</Link></li>
               <li><Link to="/contact-us" onClick={scrollToTop} className="text-gray-600 hover:text-gray-900 transition-colors text-sm">{t('footer.contactUs')}</Link></li>
               <li><Link to="/blog" onClick={scrollToTop} className="text-gray-600 hover:text-gray-900 transition-colors text-sm">{t('footer.corporateBlog')}</Link></li>
@@ -143,7 +144,6 @@ const Footer = () => {
             </h3>
             <ul className="space-y-2">
               <li><Link to="/advertise" onClick={scrollToTop} className="text-gray-600 hover:text-gray-900 transition-colors text-sm">Advertise With Us</Link></li>
-              <li><Link to="/writeareview" onClick={scrollToTop} className="text-gray-600 hover:text-gray-900 transition-colors text-sm">Write a Review</Link></li>
               <li><Link to="/claim-listing" onClick={scrollToTop} className="text-gray-600 hover:text-gray-900 transition-colors text-sm">{t('footer.ClaimYourListing')}</Link></li>
               <li><Link to="/sponsor-country" onClick={scrollToTop} className="text-gray-600 hover:text-gray-900 transition-colors text-sm">{t('footer.sponsorCountryPage')}</Link></li>
               <li><Link to="/pricing" onClick={scrollToTop} className="text-gray-600 hover:text-gray-900 transition-colors text-sm">{t('footer.pricing')}</Link></li>

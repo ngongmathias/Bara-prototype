@@ -13,12 +13,12 @@ import {
   Calendar,
   ShoppingBag,
   Users,
-  Megaphone,
   Search,
   ChevronDown,
   FileText,
   Music,
-  Trophy
+  Trophy,
+  Wrench
 } from 'lucide-react';
 import { db } from '@/lib/supabase';
 import { TopBannerAd } from '@/components/TopBannerAd';
@@ -42,25 +42,11 @@ interface MiniApp {
 
 const miniApps: MiniApp[] = [
   {
-    id: 'advertise',
-    title: 'BARA Advertise',
-    description: 'Promote your business',
-    icon: Megaphone,
-    path: '/advertise',
-  },
-  {
     id: 'countries',
     title: 'BARA GLOBAL',
     description: 'Explore Global Africa',
     icon: Globe,
     path: '/countries',
-  },
-  {
-    id: 'listings',
-    title: 'BARA Listings',
-    description: 'Browse businesses',
-    icon: Store,
-    path: '/listings',
   },
   {
     id: 'events',
@@ -77,6 +63,20 @@ const miniApps: MiniApp[] = [
     path: '/streams',
   },
   {
+    id: 'listings',
+    title: 'BARA Listings',
+    description: 'Browse businesses',
+    icon: Store,
+    path: '/listings',
+  },
+  {
+    id: 'marketplace',
+    title: 'BARA Market',
+    description: 'Shop products',
+    icon: ShoppingBag,
+    path: '/marketplace',
+  },
+  {
     id: 'sports',
     title: 'BARA Sports',
     description: 'Scores & highlights',
@@ -91,18 +91,18 @@ const miniApps: MiniApp[] = [
     path: '/blog',
   },
   {
-    id: 'marketplace',
-    title: 'BARA Marketplace',
-    description: 'Shop products',
-    icon: ShoppingBag,
-    path: '/marketplace',
-  },
-  {
     id: 'communities',
     title: 'BARA Communities',
     description: 'Join local groups',
     icon: Users,
     path: '/communities',
+  },
+  {
+    id: 'tools',
+    title: 'BARA Tools',
+    description: 'Useful utilities',
+    icon: Wrench,
+    path: '/tools',
   },
 ];
 
