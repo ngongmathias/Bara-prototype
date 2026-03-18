@@ -71,7 +71,7 @@ const miniApps: MiniApp[] = [
   },
   {
     id: 'marketplace',
-    title: 'BARA Market',
+    title: 'BARA Marketplace',
     description: 'Shop products',
     icon: ShoppingBag,
     path: '/marketplace',
