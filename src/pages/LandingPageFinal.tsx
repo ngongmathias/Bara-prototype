@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DancingBaraLogo } from '@/components/landing/DancingBaraLogo';
-import { BaraMeaningTiles } from '@/components/landing/BaraMeaningTiles';
 import { RSSFeeds } from '@/components/landing/RSSFeeds';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -17,7 +16,9 @@ import {
   Megaphone,
   Search,
   ChevronDown,
-  FileText
+  FileText,
+  Music,
+  Trophy
 } from 'lucide-react';
 import { db } from '@/lib/supabase';
 import { TopBannerAd } from '@/components/TopBannerAd';
@@ -37,6 +38,7 @@ interface MiniApp {
   description: string;
   icon: React.ElementType;
   path: string;
+  backLabel: string;
 }
 
 const miniApps: MiniApp[] = [
@@ -46,6 +48,7 @@ const miniApps: MiniApp[] = [
     description: 'Promote your business',
     icon: Megaphone,
     path: '/advertise',
+    backLabel: 'Swahili — Blessing',
   },
   {
     id: 'countries',
@@ -53,6 +56,7 @@ const miniApps: MiniApp[] = [
     description: 'Explore Global Africa',
     icon: Globe,
     path: '/countries',
+    backLabel: 'Hausa — Gift',
   },
   {
     id: 'listings',
@@ -60,6 +64,7 @@ const miniApps: MiniApp[] = [
     description: 'Browse businesses',
     icon: Store,
     path: '/listings',
+    backLabel: 'Yoruba — Wonder',
   },
   {
     id: 'events',
@@ -67,6 +72,23 @@ const miniApps: MiniApp[] = [
     description: 'Discover happenings',
     icon: Calendar,
     path: '/events',
+    backLabel: 'Amharic — Gateway',
+  },
+  {
+    id: 'streams',
+    title: 'BARA Streams',
+    description: 'Music, movies & more',
+    icon: Music,
+    path: '/streams',
+    backLabel: 'Zulu — To Grasp',
+  },
+  {
+    id: 'sports',
+    title: 'BARA Sports',
+    description: 'Scores & highlights',
+    icon: Trophy,
+    path: '/sports',
+    backLabel: 'Arabic — Land',
   },
   {
     id: 'blog',
@@ -74,6 +96,7 @@ const miniApps: MiniApp[] = [
     description: 'Read insights & stories',
     icon: FileText,
     path: '/blog',
+    backLabel: 'Shona — To Build',
   },
   {
     id: 'marketplace',
@@ -81,6 +104,7 @@ const miniApps: MiniApp[] = [
     description: 'Shop products',
     icon: ShoppingBag,
     path: '/marketplace',
+    backLabel: 'Igbo — Together',
   },
   {
     id: 'communities',
@@ -88,6 +112,7 @@ const miniApps: MiniApp[] = [
     description: 'Join local groups',
     icon: Users,
     path: '/communities',
+    backLabel: 'Wolof — Unity',
   },
 ];
 
@@ -97,6 +122,7 @@ export const LandingPageFinal = () => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [flippedTiles, setFlippedTiles] = useState<Set<string>>(new Set());
 
 
 
@@ -164,20 +190,11 @@ export const LandingPageFinal = () => {
           <DancingBaraLogo />
         </motion.div>
 
-        {/* Bara Meaning Tiles — Interactive flip animation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-        >
-          <BaraMeaningTiles />
-        </motion.div>
-
         {/* Country Dropdown - VERY VISIBLE */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
           className="w-full max-w-2xl"
         >
           <div className="text-center mb-4">
@@ -260,41 +277,70 @@ export const LandingPageFinal = () => {
           </div>
         </motion.div>
 
-        {/* Mini Apps - Clean Grid */}
+        {/* Mini Apps - Flip Tiles Grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           className="w-full max-w-3xl"
         >
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 md:grid-cols-3 gap-4">
             {miniApps.map((app, index) => {
               const Icon = app.icon;
+              const isFlipped = flippedTiles.has(app.id);
               return (
-                <motion.button
+                <motion.div
                   key={app.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 + index * 0.05 }}
-                  whileHover={{
-                    scale: 1.05,
-                    y: -4,
-                    boxShadow: "0 10px 30px rgba(0,0,0,0.1)"
+                  className="relative h-32 cursor-pointer"
+                  style={{ perspective: 800 }}
+                  onHoverStart={() => setFlippedTiles(prev => new Set(prev).add(app.id))}
+                  onHoverEnd={() => setFlippedTiles(prev => { const next = new Set(prev); next.delete(app.id); return next; })}
+                  onTap={() => {
+                    if (isFlipped) {
+                      handleMiniAppClick(app.path);
+                    } else {
+                      setFlippedTiles(prev => {
+                        const next = new Set(prev);
+                        if (next.has(app.id)) { next.delete(app.id); } else { next.add(app.id); }
+                        return next;
+                      });
+                    }
                   }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleMiniAppClick(app.path)}
-                  className="bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-xl p-5 transition-all duration-300"
                 >
-                  <div className="flex flex-col items-center text-center gap-2.5">
-                    <div className="p-2.5 bg-black rounded-lg">
-                      <Icon className="w-6 h-6 text-white" />
+                  <motion.div
+                    className="absolute inset-0 w-full h-full"
+                    style={{ transformStyle: 'preserve-3d' }}
+                    animate={{ rotateY: isFlipped ? 180 : 0 }}
+                    transition={{ duration: 0.5, ease: 'easeInOut' }}
+                  >
+                    {/* Front — App info */}
+                    <div
+                      className="absolute inset-0 rounded-xl border border-gray-200 bg-white flex flex-col items-center justify-center gap-2.5 p-4 shadow-sm hover:shadow-md transition-shadow"
+                      style={{ backfaceVisibility: 'hidden' }}
+                    >
+                      <div className="p-2.5 bg-black rounded-lg">
+                        <Icon className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="text-center">
+                        <h3 className="text-xs font-bold text-black mb-0.5">{app.title}</h3>
+                        <p className="text-[10px] text-gray-500">{app.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-xs font-bold text-black mb-0.5">{app.title}</h3>
-                      <p className="text-[10px] text-gray-500">{app.description}</p>
+
+                    {/* Back — Bara meaning */}
+                    <div
+                      className="absolute inset-0 rounded-xl border border-gray-900 bg-gray-900 text-white flex flex-col items-center justify-center gap-1 px-3"
+                      style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+                    >
+                      <span className="text-2xl font-bold tracking-tight">BARA</span>
+                      <span className="text-xs text-gray-300 text-center leading-tight">{app.backLabel}</span>
+                      <span className="text-[10px] text-gray-500 mt-1">Tap to open</span>
                     </div>
-                  </div>
-                </motion.button>
+                  </motion.div>
+                </motion.div>
               );
             })}
           </div>
