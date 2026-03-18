@@ -64,6 +64,7 @@ const MINI_APPS = [
   { label: 'BARA Listings', short: 'Listings', to: '/listings', icon: List, color: 'text-gray-900', bg: 'bg-gray-100' },
   { label: 'BARA Marketplace', short: 'Market', to: '/marketplace', icon: ShoppingBag, color: 'text-gray-900', bg: 'bg-gray-100' },
   { label: 'BARA Sports', short: 'Sports', to: '/sports', icon: Trophy, color: 'text-gray-900', bg: 'bg-gray-100' },
+  { label: 'BARA News', short: 'News', to: '/news', icon: Newspaper, color: 'text-gray-900', bg: 'bg-gray-100' },
   { label: 'BARA Blog', short: 'Blog', to: '/blog', icon: FileText, color: 'text-gray-900', bg: 'bg-gray-100' },
   { label: 'BARA Communities', short: 'Communities', to: '/communities', icon: Users, color: 'text-gray-900', bg: 'bg-gray-100' },
   { label: 'BARA Tools', short: 'Tools', to: '/tools', icon: Wrench, color: 'text-gray-900', bg: 'bg-gray-100' },

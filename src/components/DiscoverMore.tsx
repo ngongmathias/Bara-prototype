@@ -61,6 +61,14 @@ const ALL_ITEMS: DiscoverItem[] = [
     bg: 'bg-gray-100',
   },
   {
+    title: 'News',
+    description: 'Latest headlines from Africa and the diaspora',
+    to: '/news',
+    icon: Newspaper,
+    color: 'text-gray-900',
+    bg: 'bg-gray-100',
+  },
+  {
     title: 'Blog',
     description: 'Stories, culture, and insights from the diaspora',
     to: '/blog',

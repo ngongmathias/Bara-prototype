@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DancingBaraLogo } from '@/components/landing/DancingBaraLogo';
+import { BaraMeaningTiles } from '@/components/landing/BaraMeaningTiles';
 import { RSSFeeds } from '@/components/landing/RSSFeeds';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -163,11 +164,20 @@ export const LandingPageFinal = () => {
           <DancingBaraLogo />
         </motion.div>
 
+        {/* Bara Meaning Tiles — Interactive flip animation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+        >
+          <BaraMeaningTiles />
+        </motion.div>
+
         {/* Country Dropdown - VERY VISIBLE */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
           className="w-full max-w-2xl"
         >
           <div className="text-center mb-4">

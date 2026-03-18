@@ -28,6 +28,8 @@ import "@/lib/testSupabase";
 
 import { LandingPageFinal as LandingPage } from "./pages/LandingPageFinal";
 
+import NewsPage from "./pages/NewsPage";
+
 import ListingsPage from "./pages/ListingsPage";
 
 import CategoryListingsPage from "./pages/CategoryListingsPage";
@@ -580,6 +582,12 @@ const AppRoutes = () => {
           <Route path="*" element={<MarketplacePage />} />
 
         </Route>
+
+
+
+        {/* News Route */}
+
+        <Route path="/news" element={<NewsPage />} />
 
 
 
