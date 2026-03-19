@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Music, Disc, Mic2, Plus } from "lucide-react";
+import { Users, Music, Disc, Mic2, Plus, Film, Headphones } from "lucide-react";
 import { Link } from "react-router-dom";
 import { db } from "@/lib/supabase";
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
@@ -139,6 +139,36 @@ export const AdminStreamsDashboard = () => {
                             <p className="text-gray-500 mb-4 text-sm">Create and manage albums or EP collections.</p>
                             <Link to="/admin/streams/albums">
                                 <Button className="w-full">Go to Albums</Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="hover:bg-gray-50 cursor-pointer transition-colors">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Headphones className="h-5 w-5 text-brand-blue" />
+                                Manage Podcasts
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-gray-500 mb-4 text-sm">Add and manage podcast shows and episodes.</p>
+                            <Link to="/admin/streams/podcasts">
+                                <Button className="w-full">Go to Podcasts</Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="hover:bg-gray-50 cursor-pointer transition-colors">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Film className="h-5 w-5 text-brand-blue" />
+                                Manage Movies
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-gray-500 mb-4 text-sm">Upload and manage movie content and catalog.</p>
+                            <Link to="/admin/streams/movies">
+                                <Button className="w-full">Go to Movies</Button>
                             </Link>
                         </CardContent>
                     </Card>

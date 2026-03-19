@@ -97,6 +97,8 @@ interface ContentMetrics {
   totalSongs: number;
   totalArtists: number;
   totalPlaylists: number;
+  totalPodcasts: number;
+  totalMovies: number;
   totalBlogPosts: number;
   totalMarketplaceListings: number;
   totalGamificationProfiles: number;
@@ -164,6 +166,8 @@ export const AdminDashboard = () => {
     totalSongs: 0,
     totalArtists: 0,
     totalPlaylists: 0,
+    totalPodcasts: 0,
+    totalMovies: 0,
     totalBlogPosts: 0,
     totalMarketplaceListings: 0,
     totalGamificationProfiles: 0,
@@ -332,6 +336,18 @@ export const AdminDashboard = () => {
         supabase.from('country_info').select('id', { count: 'exact', head: true }),
       ]);
 
+      // Fetch podcasts and movies counts (tables may not exist yet)
+      let podcastCount = 0;
+      let movieCount = 0;
+      try {
+        const { count: pc } = await supabase.from('podcasts').select('id', { count: 'exact', head: true });
+        podcastCount = pc || 0;
+      } catch { /* table may not exist */ }
+      try {
+        const { count: mc } = await supabase.from('movies').select('id', { count: 'exact', head: true });
+        movieCount = mc || 0;
+      } catch { /* table may not exist */ }
+
       // Fetch total coins in circulation
       const { data: coinsData } = await supabase
         .from('gamification_profiles')
@@ -342,6 +358,8 @@ export const AdminDashboard = () => {
         totalSongs: songsResult.count || 0,
         totalArtists: artistsResult.count || 0,
         totalPlaylists: playlistsResult.count || 0,
+        totalPodcasts: podcastCount,
+        totalMovies: movieCount,
         totalBlogPosts: blogResult.count || 0,
         totalMarketplaceListings: marketResult.count || 0,
         totalGamificationProfiles: gamProfilesResult.count || 0,
@@ -712,6 +730,8 @@ export const AdminDashboard = () => {
             { label: 'Songs', value: contentMetrics.totalSongs, nav: '/admin/streams' },
             { label: 'Artists', value: contentMetrics.totalArtists, nav: '/admin/streams' },
             { label: 'Playlists', value: contentMetrics.totalPlaylists, nav: '/admin/streams' },
+            { label: 'Podcasts', value: contentMetrics.totalPodcasts, nav: '/admin/streams/podcasts' },
+            { label: 'Movies', value: contentMetrics.totalMovies, nav: '/admin/streams/movies' },
             { label: 'Blog Posts', value: contentMetrics.totalBlogPosts, nav: '/admin/blog' },
             { label: 'Marketplace', value: contentMetrics.totalMarketplaceListings, nav: '/admin/marketplace' },
             { label: 'News Articles', value: contentMetrics.totalRSSArticles, nav: '/admin/rss-feeds' },

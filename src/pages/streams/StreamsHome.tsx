@@ -36,6 +36,7 @@ export default function StreamsHome() {
 
     const [recentlyPlayed, setRecentlyPlayed] = useState<Song[]>([]);
 
+    const [platformPlaylists, setPlatformPlaylists] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
 
@@ -123,6 +124,15 @@ export default function StreamsHome() {
                 setNewReleases(albumsData || []);
 
 
+
+                // Fetch Platform Playlists (Made For You)
+                const { data: playlistData } = await supabase
+                    .from('playlists')
+                    .select('*')
+                    .eq('created_by', 'platform')
+                    .eq('is_public', true)
+                    .limit(6);
+                setPlatformPlaylists(playlistData || []);
 
                 // Fetch Recently Played (from play_history)
 
@@ -276,6 +286,34 @@ export default function StreamsHome() {
 
 
 
+    const handlePlayPlaylist = async (playlistId: string) => {
+        try {
+            const { data: playlistSongsData } = await supabase
+                .from('playlist_songs')
+                .select('song_id, position, songs(*, artists(name))')
+                .eq('playlist_id', playlistId)
+                .order('position', { ascending: true });
+
+            if (playlistSongsData && playlistSongsData.length > 0) {
+                const songs: Song[] = playlistSongsData.map((ps: any) => ({
+                    id: ps.songs.id,
+                    title: ps.songs.title,
+                    artist: ps.songs.artists?.name || 'Unknown Artist',
+                    file_url: ps.songs.file_url,
+                    cover_url: ps.songs.cover_url || '/placeholder-music.png',
+                    duration: ps.songs.duration,
+                    artist_id: ps.songs.artist_id,
+                    album_id: ps.songs.album_id,
+                }));
+                playAlbum(songs, 0);
+            } else {
+                toast({ title: 'Empty playlist', description: 'This playlist has no songs yet.' });
+            }
+        } catch (error) {
+            console.error('Error playing playlist:', error);
+        }
+    };
+
     const handlePlayAlbum = async (albumId: string) => {
 
         try {
@@ -410,73 +448,61 @@ export default function StreamsHome() {
 
 
 
-                            {/* Made For You - Curated Mixes */}
+                            {/* Made For You - Curated Mixes (from real playlists) */}
 
                             <Section title="Made For You">
 
-                                {[
+                                {platformPlaylists.length > 0 ? (
+                                    platformPlaylists.map(pl => (
+                                        <div key={pl.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl">
 
-                                    { id: '1', title: 'Discover Weekly', artist: 'Personalized for you', cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop', gradient: 'from-gray-700 to-gray-900' },
+                                            <div className="relative mb-4 aspect-square shadow-2xl">
 
-                                    { id: '2', title: 'Daily Mix 1', artist: 'Afrobeats & Highlife', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop', gradient: 'from-gray-600 to-gray-800' },
+                                                <img
+                                                    src={pl.cover_url}
+                                                    alt={pl.title}
+                                                    className="w-full h-full object-cover rounded-md shadow-xl"
+                                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }}
+                                                />
 
-                                    { id: '3', title: 'Daily Mix 2', artist: 'Amapiano Beats', cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop', gradient: 'from-gray-500 to-gray-700' },
+                                                <button
+                                                    onClick={() => handlePlayPlaylist(pl.id)}
+                                                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                                >
+                                                    <Play size={24} fill="white" className="ml-1" />
+                                                </button>
 
-                                    { id: '4', title: 'Release Radar', artist: 'New from artists you follow', cover: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300&h=300&fit=crop', gradient: 'from-gray-600 to-gray-800' }
+                                            </div>
 
-                                ].map(mix => (
+                                            <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{pl.title}</h3>
 
-                                    <div key={mix.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl border border-gray-100">
-
-                                        <div className="relative mb-4 aspect-square shadow-2xl">
-
-                                            <div className={`absolute inset-0 bg-gradient-to-br ${mix.gradient} opacity-20 rounded-lg`} />
-
-                                            <img
-
-                                                src={mix.cover}
-
-                                                alt={mix.title}
-
-                                                className="w-full h-full object-cover rounded-md shadow-xl"
-
-                                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-
-                                            />
-
-                                            <button
-
-                                                onClick={() => {
-
-                                                    // Play trending songs as mix
-                                                    if (trendingSongs.length > 0) {
-                                                        playAlbum(trendingSongs, 0);
-                                                    } else {
-                                                        toast({
-                                                            title: 'No songs yet',
-                                                            description: 'Check back soon for personalized mixes.',
-                                                        });
-                                                    }
-
-                                                }}
-
-                                                className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
-
-                                            >
-
-                                                <Play size={24} fill="white" className="ml-1" />
-
-                                            </button>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest line-clamp-2">{pl.description}</p>
 
                                         </div>
-
-                                        <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{mix.title}</h3>
-
-                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{mix.artist}</p>
-
-                                    </div>
-
-                                ))}
+                                    ))
+                                ) : (
+                                    // Fallback to hardcoded mixes if no playlists found
+                                    [
+                                        { id: '1', title: 'Discover Weekly', desc: 'Personalized for you', cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop' },
+                                        { id: '2', title: 'Daily Mix 1', desc: 'Afrobeats & Highlife', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop' },
+                                        { id: '3', title: 'Daily Mix 2', desc: 'Amapiano Beats', cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop' },
+                                        { id: '4', title: 'Release Radar', desc: 'New from artists you follow', cover: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300&h=300&fit=crop' }
+                                    ].map(mix => (
+                                        <div key={mix.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl">
+                                            <div className="relative mb-4 aspect-square shadow-2xl">
+                                                <img src={mix.cover} alt={mix.title} className="w-full h-full object-cover rounded-md shadow-xl" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                                <button
+                                                    onClick={() => { if (trendingSongs.length > 0) { playAlbum(trendingSongs, 0); } else { toast({ title: 'No songs yet', description: 'Check back soon for personalized mixes.' }); } }}
+                                                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                                >
+                                                    <Play size={24} fill="white" className="ml-1" />
+                                                </button>
+                                            </div>
+                                            <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{mix.title}</h3>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{mix.desc}</p>
+                                        </div>
+                                    ))
+                                )}
 
                             </Section>
 

@@ -52,7 +52,11 @@ import {
 
   Trophy,
 
-  Video
+  Video,
+
+  Film,
+
+  Mic2
 
 } from "lucide-react";
 
@@ -301,6 +305,30 @@ const adminMenuItems = [
     path: "/admin/streams",
 
     description: "Manage music content & artists"
+
+  },
+
+  {
+
+    title: "Podcasts",
+
+    icon: Mic2,
+
+    path: "/admin/streams/podcasts",
+
+    description: "Manage podcast shows"
+
+  },
+
+  {
+
+    title: "Movies",
+
+    icon: Film,
+
+    path: "/admin/streams/movies",
+
+    description: "Manage movie catalog"
 
   },
 
