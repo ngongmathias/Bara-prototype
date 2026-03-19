@@ -372,7 +372,7 @@ Once features are live, track these to measure success:
 | 7.16 | **Discover More** — added to Blog, Listings, Communities, Sports, Streams, Countries (6 pages total + Events/Marketplace already had it). Component updated with all 9 mini-apps | P1 | 1 | ✅ Done (Mar 17) |
 | 7.17 | **BARA Coins** — needs dedicated meeting (Earn/Share/Redeem/Store/Leaderboard/Purchase) | P0 | TBD | ⏳ Meeting needed |
 | 7.18 | **User Profile** — needs team decision (public? connections?) | P1 | TBD | ⏳ Meeting needed |
-| 7.19 | **Emails** — audit which @baraafrika.com addresses exist | P1 | 4 | ☐ |
+| 7.19 | **Emails** — see expanded 7.51 below | P1 | 7 | → 7.51 |
 | 7.20 | **Country defaults to Rwanda** — CountrySelectionContext updated with DEFAULT_COUNTRY | P0 | 1 | ✅ Done (Mar 17) |
 | 7.21 | **Seed Streams data** — Migration `20260317_seed_streams_data.sql` with 8 artists, 8 albums, 22 songs. Fixed: moved ALTER TABLE before INSERTs (genre column error) | P1 | 2 | ✅ Fixed (Mar 17) — re-run `supabase db push` |
 | 7.22 | **Streams: Create Playlist UX** — Fixed column mismatch (`user_id` → `created_by`), auto-numbered playlist names, private by default, contextual sign-in/create copy, removed broken demo redirect | P0 | 3 | ✅ Done (Mar 17) |
@@ -402,6 +402,10 @@ Once features are live, track these to measure success:
 | 7.46 | **Supabase: country_info 406 fixed** — Root cause: `useCountryInfo` used `.single()` which throws 406 when 0 rows match (people groups with no entry). Changed to `.maybeSingle()` which returns `null` gracefully. businesses 400 is a separate RLS/relationship issue (deferred). | P0 | 6 | ✅ Done (Mar 18) |
 | 7.47 | **Streams: Music architecture** — Added `uploaded_by` (TEXT) and `upload_type` ('platform'/'creator') columns to songs table. Platform songs default to 'admin'/'platform'. Creator songs linked to Clerk user ID. Test artist "Mathias Ngong" created with 3 creator-type songs. Migration: `20260319_music_architecture.sql`. | P0 | 6 | ✅ Done (Mar 18) |
 | 7.48 | **Streams: Seed realistic dummy music** — All 47 songs updated: replaced `/audio/placeholder.mp3` with real SoundHelix MP3 URLs (16 unique tracks distributed evenly), generic "Track N" titles replaced with realistic African song names (e.g. Water, Fall, Kilometre, Sponono, Drive), 12 varied Unsplash cover art images rotated across songs. 3 test songs seeded under "Mathias Ngong" artist profile. | P0 | 6 | ✅ Done (Mar 18) |
+| 7.49 | **Streams: Songs STILL not playing** — 7.39 fix was partial. Need thorough re-investigation: verify audio URLs load (network tab), check `MusicPlayerContext` play/pause/next flow end-to-end, test on multiple browsers. Build an automated or semi-automated testing mechanism (e.g. Playwright script or in-app test panel) to verify playback without manual clicking. Also verify: do recommendations work? Does Daily Mix populate with real personalized data or just random songs? | P0 | 7 | ☐ |
+| 7.50 | **Streams: Movies & Podcasts — Admin pages + Revenue metrics** — Movies and Podcasts are revenue opportunities. Need: (1) Admin management pages for movies (`/admin/movies`) and podcasts (`/admin/podcasts`) — CRUD, upload, feature/unfeature, (2) Add Movies and Podcasts counts to Admin Dashboard metrics (7.15), (3) Define revenue model: ad-supported free tier, premium coins-gated content, creator revenue share. Popular movies section should highlight trending content. | P0 | 7 | ☐ |
+| 7.51 | **Emails audit & setup** — Full audit of @baraafrika.com email addresses: which exist, which are needed (support@, info@, noreply@, admin@). Set up transactional email (welcome, password reset, notifications) via a provider (Resend, SendGrid, or Supabase Edge Functions). Ensure Clerk email templates use @baraafrika.com sender. Verify SPF/DKIM/DMARC records for deliverability. | P0 | 7 | ☐ |
+| 7.52 | **Translation / i18n service** — Audit current i18n setup: which pages use `useTranslation()`, which are hardcoded English only. Ensure all user-facing strings go through `t()`. Add language selector to Header (currently placeholder). Priority languages: English (default), French, Swahili, Portuguese, Arabic. Use i18next with JSON locale files. Admin panel for managing translations if needed. | P1 | 7 | ☐ |
 
 ---
 
@@ -552,10 +556,10 @@ Once features are live, track these to measure success:
 ## HOW TO USE THIS PLAN
 
 1. **Phase 7 (team meeting directives) is the active work.** All prior phases (1-6) are complete.
-2. **Sprint 6 priority order:** (1) Fix React Error #310 — this blocks music playback and overall UX, (2) Fix businesses 400 + country_info 406 Supabase errors, (3) Fix admin map/gallery toggle visibility, (4) Fix map coordinates to use stored lat/lng, (5) Seed people group gallery images + admin upload, (6) Music architecture: admin vs creator songs + seed realistic dummy data, (7) Add test songs to artist profile for testing
-3. **Sprint 5 completed:** Supabase migration 20260319 ran successfully, platform B&W color code enforced, RSS HTML stripping, Angola map logic, daily login gamification confirmed working by user.
-4. **Phase 8 (testing/QA/coins) is the next priority** after all Phase 7 bugs are resolved.
-5. **Movies & Ebooks full implementation** (Phase 8.4 / 8.5) are Sprint 6-7 work.
+2. **Sprint 7 priority order:** (1) 7.49 Songs still not playing — fix + build testing mechanism, (2) 7.50 Movies & Podcasts admin pages + revenue metrics, (3) 7.51 Emails audit & setup, (4) 7.52 Translation/i18n service.
+3. **Sprint 6 completed:** React #310 fixed, music playback partially fixed (needs re-test), admin analytics live, BARA News mini-app, home tile flip, B&W color code, RSS HTML stripping, all Supabase errors resolved.
+4. **Phase 8 (testing/QA/coins) runs in parallel** with Sprint 7 items.
+5. **Movies & Ebooks full implementation** (Phase 8.4 / 8.5) — Movies admin is now P0 in Sprint 7 (revenue opportunity).
 6. **Use `STREAMS_SPORTS_BUILD_PLAN.md`** for the detailed sprint-by-sprint breakdown with per-task checklists.
 7. **Check off items** as you complete them (☐ → ✅).
 8. **Log bugs** found during testing with priority level (P0–P3).
@@ -569,5 +573,5 @@ Once features are live, track these to measure success:
 ---
 
 *Master Plan created: Feb 22, 2026*
-*Updated: March 18, 2026 — Sprint 6 complete. 39 of 48 directives done, 0 critical bugs open. Latest: BARA News mini-app (/news page + nav), Home tile flip animation (BaraMeaningTiles), Admin analytics (Content & Platform metrics + dynamic System Status). Remaining open: 7.3 cross-device testing, 7.17 BARA Coins (meeting needed), 7.18 User Profile (meeting needed), 7.19 email audit, 7.33 DPO compliance, 7.34 BARA Gaming, 7.42 Clerk production keys. Phase 8 (testing/QA/coins) is next priority.*
+*Updated: March 19, 2026 — Sprint 6 complete, Sprint 7 planned. 39 of 52 directives done. New Sprint 7 items: 7.49 songs still not playing + testing mechanism, 7.50 movies/podcasts admin + revenue metrics, 7.51 emails audit & setup, 7.52 translation/i18n service. Remaining open: 7.3 cross-device testing, 7.17 BARA Coins (meeting needed), 7.18 User Profile (meeting needed), 7.33 DPO compliance, 7.34 BARA Gaming, 7.42 Clerk production keys, 7.49–7.52 (Sprint 7).*
 *For Bara Afrika Platform — baraafrika.com*
