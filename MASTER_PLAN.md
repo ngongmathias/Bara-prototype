@@ -409,6 +409,344 @@ Once features are live, track these to measure success:
 
 ---
 
+## SPRINT 7: COMPREHENSIVE TESTING & TEST DATA PLAN — March 19, 2026
+
+> **Goal:** Ensure every user-facing feature works end-to-end by seeding realistic test data, setting up test accounts, and defining step-by-step manual test scripts. Every item marked ☐ must pass before shipping.
+
+---
+
+### S7.1 Test Accounts Setup
+
+> Three real Clerk accounts for testing all roles.
+
+| Account | Email | Role | What to test |
+|---------|-------|------|--------------|
+| **Test Artist** | mathiasngongngai@gmail.com | Verified Artist | Upload songs, manage artist page, view play/like counts, artist dashboard |
+| **Test User 1** | mathiasngongbi@gmail.com | Regular User | Playlists, listening, liking, sharing, missions, coins, Daily Mix |
+| **Test User 2** | mathiasjunior@gmail.com | Regular User | Follow artists, view profiles, marketplace, sports, podcasts |
+
+**Setup steps (engineering):**
+1. ☐ Each user signs up via Clerk on the dev site → capture Clerk user IDs from Supabase `clerk_users` table
+2. ☐ Run seed migration to create artist profile for Test Artist (verified, banner image, bio, genre)
+3. ☐ Assign admin role to Test Artist in `admin_users` table for admin panel access
+4. ☐ Verify all 3 accounts can sign in, see correct roles, and access their dashboards
+
+---
+
+### S7.2 Music / Streams — Test Data Seeding
+
+> **Current state:** 47 songs in DB with SoundHelix MP3 URLs, 8 artists, 8 albums. `AudioPlayerContext` handles playback via HTML5 Audio.
+
+**Seed data needed (migration `20260319_sprint7_test_data.sql`):**
+
+| Data | Count | Details |
+|------|-------|---------|
+| Artists | 12 total (4 new) | Varied genres: Afrobeats, Amapiano, Highlife, Bongo Flava. Each with bio, image, country, verified status |
+| Albums | 12 total (4 new) | 2-3 albums per top artist, with cover art (Unsplash) and release dates spanning 2024-2026 |
+| Songs | 60 total (13 new) | Every song must have a **working** `file_url` (SoundHelix or free CC0 MP3). Distribute across artists/albums. Varied durations (120-300s). Genre tags filled |
+| Playlists | 5 platform playlists | "Afrobeats Essentials", "Amapiano Heat", "Chill African Vibes", "Workout Africa", "New Releases Radar". Each with 8-12 songs. `created_by = 'platform'` |
+| Play history | 50 entries | Seed `play_history` rows for Test User 1 across 15 different songs (simulates a user who has been listening) |
+| Liked songs | 10 entries | Seed `user_song_likes` for Test User 1 on 10 songs |
+
+---
+
+### S7.3 Music / Streams — Test Script (Manual)
+
+> Step-by-step test that the user (you) will execute. Every ☐ must pass.
+
+**A. Basic Playback**
+1. ☐ Go to `/streams/music` — page loads without errors, trending songs appear
+2. ☐ Click play on any song → audio starts playing within 2 seconds
+3. ☐ GlobalPlayer bar appears at bottom with: song title, artist name, cover art, play/pause button, progress bar, volume
+4. ☐ Click pause → audio stops. Click play → audio resumes from same position
+5. ☐ Click next → next song in queue plays. Click prev → goes back (or restarts if >3s in)
+6. ☐ Drag progress bar → audio seeks to correct position
+7. ☐ Drag volume slider → volume changes audibly
+8. ☐ Open browser DevTools Network tab → verify the MP3 URL returns 200 (not 404 or CORS error)
+9. ☐ Let a song play for 30+ seconds → check Console for "Playback failed" errors (should be none)
+
+**B. Queue & Albums**
+10. ☐ Click on an album → AlbumPage loads with track list
+11. ☐ Click "Play All" on an album → all songs queued, first song plays
+12. ☐ Open queue drawer → shows correct order of songs
+13. ☐ Shuffle toggle → next song is random from queue
+14. ☐ Repeat modes: none → stops after last song; all → loops back to first; one → repeats current song
+
+**C. Playlists**
+15. ☐ Sign in as Test User 1 → go to Library → "Create Playlist" button works
+16. ☐ Add songs to playlist → songs appear in playlist
+17. ☐ Remove a song from playlist → it disappears
+18. ☐ Play playlist → all songs in playlist queue up and play in order
+19. ☐ Platform playlists (seeded) show up on StreamsHome or Library
+
+**D. Likes & History**
+20. ☐ Click heart icon on a song → it turns filled/active (liked)
+21. ☐ Go to "Liked Songs" page → the liked song appears
+22. ☐ Click heart again → unlike works, song removed from liked list
+23. ☐ "Recently Played" section on StreamsHome shows songs you've actually played
+24. ☐ Play count increments: check `songs.plays` column in Supabase before and after playing a song
+
+**E. Recommendations & Daily Mix**
+25. ☐ "Made For You" section on StreamsHome shows: Discover Weekly, Daily Mix 1, Daily Mix 2, Release Radar
+26. ☐ **KNOWN ISSUE:** These are currently **hardcoded** — not personalized. Must be wired to real data or clearly marked as editorial picks
+27. ☐ Clicking a Daily Mix card should either: (a) play a curated playlist, or (b) show "coming soon" — NOT break
+
+**F. Artist Pages**
+28. ☐ Go to `/streams/artists` → list of artists with images
+29. ☐ Click an artist → ArtistPage loads with banner, bio, top songs, albums
+30. ☐ Click play on artist's top song → plays correctly
+31. ☐ Verified badge shows for verified artists
+32. ☐ Monthly listeners count is visible
+
+**G. Gamification Integration**
+33. ☐ Play a song for 30+ seconds (signed in) → check that XP was awarded (look in Console or gamification_profiles table)
+34. ☐ Play a song for 50%+ → `daily_listen` mission progress should increment
+35. ☐ Like a song → verify no gamification errors in Console
+
+---
+
+### S7.4 Sports — Test Data & Verification
+
+> **Current state:** Full ESPN-style UI using `api-sports.io` with a real API key (`VITE_API_FOOTBALL_KEY`). Supports football, athletics, basketball, cricket, rugby, tennis, boxing, MMA, F1, swimming. Admin pages for sports news and videos exist.
+
+**Pre-requisites:**
+- ☐ Verify `VITE_API_FOOTBALL_KEY` is active (not expired/rate-limited) — check `https://v3.football.api-sports.io/status` with the key
+- ☐ If key is expired or rate-limited, get a new free key from [api-sports.io](https://www.api-sports.io/) (free tier: 100 requests/day)
+
+**Test Script (Manual):**
+
+**A. Sports Home**
+1. ☐ Go to `/sports` → SportsHome loads with ticker banner, sub-nav, hero article, news feed
+2. ☐ Live scores ticker at top shows real matches (or "No live matches" if none today) — NOT an error
+3. ☐ Click a different sport tab (Athletics, Basketball, etc.) → page updates to that sport
+4. ☐ Check Console for API errors — common issue: 429 (rate limit) or 403 (bad key)
+
+**B. Scores & Fixtures**
+5. ☐ Go to `/sports/football/scores` → today's live/recent scores load
+6. ☐ Go to `/sports/football/fixtures` → upcoming fixtures load with dates
+7. ☐ Click on a specific league from sidebar → filters fixtures to that league
+8. ☐ Standings page (`/sports/football/standings`) → table loads with team names, points, etc.
+
+**C. Sports News**
+9. ☐ News feed on SportsHome shows articles with images and dates
+10. ☐ Click an article → SportsNewsDetail page loads with full content
+11. ☐ News list (`/sports/football/news`) → paginated list of articles
+
+**D. Admin Sports**
+12. ☐ Sign in as admin → go to `/admin/sports/news` → can create/edit/delete sports news articles
+13. ☐ `/admin/sports/videos` → can manage sports video content
+14. ☐ Verify sports articles created in admin appear on the public sports pages
+
+**E. Edge Cases**
+15. ☐ Sport with no live matches → should show empty state, not crash
+16. ☐ Sport with no fixtures today → should show "No fixtures" message
+17. ☐ Switching between sports rapidly → no stale data from previous sport showing
+
+---
+
+### S7.5 Podcasts — Test Data & Build Plan
+
+> **Current state:** Placeholder "Coming Soon" page with 6 hardcoded sample podcasts. **No Supabase tables.** This needs real infrastructure.
+
+**Step 1: Database tables (migration `20260319_podcasts_schema.sql`)**
+
+```sql
+-- podcasts table
+CREATE TABLE IF NOT EXISTS public.podcasts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title TEXT NOT NULL,
+    host TEXT NOT NULL,
+    description TEXT,
+    category TEXT,
+    cover_url TEXT,
+    language TEXT DEFAULT 'en',
+    is_featured BOOLEAN DEFAULT false,
+    subscriber_count INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- podcast_episodes table
+CREATE TABLE IF NOT EXISTS public.podcast_episodes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    podcast_id UUID REFERENCES public.podcasts(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    audio_url TEXT NOT NULL,
+    duration INTEGER DEFAULT 0,
+    episode_number INTEGER,
+    season_number INTEGER DEFAULT 1,
+    published_at TIMESTAMPTZ DEFAULT now(),
+    play_count INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- podcast_subscriptions table (user follows a podcast)
+CREATE TABLE IF NOT EXISTS public.podcast_subscriptions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL,
+    podcast_id UUID REFERENCES public.podcasts(id) ON DELETE CASCADE,
+    subscribed_at TIMESTAMPTZ DEFAULT now(),
+    UNIQUE(user_id, podcast_id)
+);
+
+-- podcast_listen_history table
+CREATE TABLE IF NOT EXISTS public.podcast_listen_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL,
+    episode_id UUID REFERENCES public.podcast_episodes(id) ON DELETE CASCADE,
+    progress_seconds INTEGER DEFAULT 0,
+    completed BOOLEAN DEFAULT false,
+    listened_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+**Step 2: Seed data (6 podcasts, 5 episodes each = 30 episodes)**
+
+| Podcast | Host | Category | Episodes | Audio Source |
+|---------|------|----------|----------|-------------|
+| The African Dream | Amara Kone | Entrepreneurship | 5 | SoundHelix or free CC0 audio clips |
+| Naija Tech Talk | Tunde Obi | Technology | 5 | " |
+| Ubuntu Conversations | Thabo Mokoena | Culture | 5 | " |
+| Accra After Dark | Ama Serwaa | True Crime | 5 | " |
+| Laugh Out Loud Africa | Basket Mouth | Comedy | 5 | " |
+| The Pitch Room | Keza Ngowi | Finance | 5 | " |
+
+**Step 3: Update PodcastsPage.tsx** — Replace "Coming Soon" with real data from Supabase, add play/subscribe functionality.
+
+**Step 4: Admin page** — `/admin/podcasts` — CRUD for podcasts and episodes.
+
+**Step 5: Test Script**
+1. ☐ Go to `/streams/podcasts` → page loads with 6 podcasts from DB (not hardcoded)
+2. ☐ Click a podcast → episode list loads with play buttons
+3. ☐ Click play on an episode → audio plays in GlobalPlayer (or a dedicated podcast player)
+4. ☐ Subscribe to a podcast (signed in) → subscription persists across page reloads
+5. ☐ "Continue Listening" → resume from where you left off (progress_seconds)
+6. ☐ Admin: create a new podcast + episodes → they appear on the public page
+7. ☐ Admin Dashboard metrics show podcast count
+
+---
+
+### S7.6 Movies — Test Data & Build Plan
+
+> **Current state:** Placeholder page with 3 hardcoded `FEATURED_MOVIES`. **No Supabase tables.**
+
+**Step 1: Database tables (migration `20260319_movies_schema.sql`)**
+
+```sql
+-- movies table
+CREATE TABLE IF NOT EXISTS public.movies (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title TEXT NOT NULL,
+    description TEXT,
+    genre TEXT,
+    year INTEGER,
+    duration_minutes INTEGER,
+    rating DECIMAL(2,1) DEFAULT 0,
+    poster_url TEXT,
+    backdrop_url TEXT,
+    trailer_url TEXT,
+    video_url TEXT,
+    director TEXT,
+    cast_members TEXT[],
+    country TEXT,
+    language TEXT DEFAULT 'en',
+    is_featured BOOLEAN DEFAULT false,
+    is_free BOOLEAN DEFAULT true,
+    view_count INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- movie_categories table
+CREATE TABLE IF NOT EXISTS public.movie_categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    slug TEXT NOT NULL UNIQUE,
+    description TEXT,
+    image_url TEXT
+);
+
+-- movie_watchlist table
+CREATE TABLE IF NOT EXISTS public.movie_watchlist (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL,
+    movie_id UUID REFERENCES public.movies(id) ON DELETE CASCADE,
+    added_at TIMESTAMPTZ DEFAULT now(),
+    UNIQUE(user_id, movie_id)
+);
+```
+
+**Step 2: Seed data (10 movies, 6 categories)**
+
+| Movie | Genre | Year | Source |
+|-------|-------|------|--------|
+| The Woman King | Action/Drama | 2022 | Poster: Unsplash |
+| Lionheart | Comedy/Drama | 2018 | " |
+| Rafiki | Romance/Drama | 2018 | " |
+| The Boy Who Harnessed the Wind | Drama | 2019 | " |
+| Queen of Katwe | Biography/Drama | 2016 | " |
+| Tsotsi | Crime/Drama | 2005 | " |
+| Vaya | Drama/Thriller | 2016 | " |
+| Atlantics | Drama/Romance | 2019 | " |
+| Timbuktu | Drama | 2014 | " |
+| The Burial of Kojo | Drama/Fantasy | 2018 | " |
+
+Categories: Nollywood, Documentaries, Short Films, Drama, Comedy, Action
+
+**Step 3: Update MoviesPage.tsx** — Replace hardcoded data with Supabase queries.
+
+**Step 4: Admin page** — `/admin/movies` — CRUD for movies and categories.
+
+**Step 5: Test Script**
+1. ☐ Go to `/streams/movies` → page loads with 10 movies from DB
+2. ☐ Genre filter works → only movies of selected genre shown
+3. ☐ Click a movie → detail page with poster, description, trailer
+4. ☐ Add to watchlist (signed in) → persists across reloads
+5. ☐ "Popular Movies" section shows movies sorted by `view_count`
+6. ☐ Admin: add new movie → appears on public page
+7. ☐ Admin Dashboard metrics show movie count
+
+---
+
+### S7.7 Cross-Cutting Test Checklist
+
+> Tests that apply to all sections. Run after all individual tests pass.
+
+| # | Test | Status |
+|---|------|--------|
+| 1 | ☐ Sign out → all pages render correctly for anonymous users (no console errors) |
+| 2 | ☐ Sign in → all pages render correctly for authenticated users |
+| 3 | ☐ Mobile responsive (375px width): Header, tiles, player, sports, podcasts all usable |
+| 4 | ☐ Tablet responsive (768px width): Grid layouts adapt correctly |
+| 5 | ☐ No console errors on any page (check: Home, Streams, Sports, Podcasts, Movies, Blog, Events, Marketplace, Listings, Communities) |
+| 6 | ☐ Network tab: no persistent 400/401/404/500 errors from Supabase or APIs |
+| 7 | ☐ GlobalPlayer doesn't overlap page content on mobile |
+| 8 | ☐ Navigation between all 9 mini-apps works smoothly (no white screens or crashes) |
+| 9 | ☐ Admin Dashboard shows correct counts for: Songs, Artists, Playlists, Movies, Podcasts, Blog Posts, Events, Users |
+| 10 | ☐ Gamification: daily login XP awarded on first visit of the day |
+| 11 | ☐ Landing page flip tiles work on both mobile (tap) and desktop (hover) |
+| 12 | ☐ RSS News page (`/news`) loads articles, search and filter work |
+
+---
+
+### S7.8 Implementation Order (Engineering)
+
+> The engineer should execute these in this order:
+
+1. **Seed music test data** — migration with 4 new artists, 4 new albums, 13 new songs, 5 platform playlists, play history + likes for Test User 1
+2. **Fix song playback** (7.49) — debug `AudioPlayerContext`, verify audio URLs, test on Chrome/Firefox/Safari
+3. **Wire Daily Mix** — Replace hardcoded "Made For You" with genre-based playlists or recently-played-based recommendations
+4. **Create podcast DB tables + seed data** — migration
+5. **Update PodcastsPage.tsx** — real data from Supabase, play functionality
+6. **Create movie DB tables + seed data** — migration
+7. **Update MoviesPage.tsx** — real data from Supabase
+8. **Admin pages** — `/admin/movies`, `/admin/podcasts` with CRUD
+9. **Add Movies + Podcasts to Admin Dashboard metrics**
+10. **Verify Sports API** — confirm key works, test all sport tabs
+11. **Run full test script** (S7.3 → S7.4 → S7.5 → S7.6 → S7.7)
+12. **Fix any failures** — log bugs, fix, re-test
+
+---
+
 ## PHASE 8: TESTING, COINS DESIGN & QA PROCESS — March 17, 2026
 
 ### 8.1 Test Accounts & Real-Life Testing
@@ -573,5 +911,5 @@ Once features are live, track these to measure success:
 ---
 
 *Master Plan created: Feb 22, 2026*
-*Updated: March 19, 2026 — Sprint 6 complete, Sprint 7 planned. 39 of 52 directives done. New Sprint 7 items: 7.49 songs still not playing + testing mechanism, 7.50 movies/podcasts admin + revenue metrics, 7.51 emails audit & setup, 7.52 translation/i18n service. Remaining open: 7.3 cross-device testing, 7.17 BARA Coins (meeting needed), 7.18 User Profile (meeting needed), 7.33 DPO compliance, 7.34 BARA Gaming, 7.42 Clerk production keys, 7.49–7.52 (Sprint 7).*
+*Updated: March 19, 2026 — Sprint 6 complete, Sprint 7 planned with comprehensive testing plan. 39 of 52 directives done. Sprint 7 adds: 7.49 songs playback fix + testing, 7.50 movies/podcasts admin + revenue, 7.51 emails, 7.52 i18n. New Sprint 7 testing plan (S7.1–S7.8): 3 test accounts, music test data seeding (60 songs, 12 artists, 5 playlists), 35-step music test script, 17-step sports test script, podcasts DB schema + build plan (6 podcasts, 30 episodes), movies DB schema + build plan (10 movies), cross-cutting 12-point checklist, and 12-step implementation order.*
 *For Bara Afrika Platform — baraafrika.com*
