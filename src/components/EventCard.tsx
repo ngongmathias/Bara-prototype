@@ -110,7 +110,7 @@ export const EventCard = ({
 
   const shareToSocial = (platform: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const eventUrl = `${window.location.origin}/events?event=${id}`;
+    const eventUrl = `${window.location.origin}/events/${id}`;
     const text = `Check out this event: ${title}`;
 
     let shareUrl = '';
