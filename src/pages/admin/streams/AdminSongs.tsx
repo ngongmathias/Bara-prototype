@@ -141,13 +141,13 @@ export const AdminSongs = () => {
         const filePath = `tracks/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-            .from('music-files')
+            .from('music')
             .upload(filePath, file);
 
         if (uploadError) throw uploadError;
 
         const { data: { publicUrl } } = supabase.storage
-            .from('music-files')
+            .from('music')
             .getPublicUrl(filePath);
 
         return publicUrl;
@@ -210,10 +210,10 @@ export const AdminSongs = () => {
             if (dbError) throw dbError;
 
             // Optional: Delete from storage if it's a supabase URL
-            if (fileUrl.includes('music-files')) {
+            if (fileUrl.includes('music')) {
                 const fileName = fileUrl.split('/').pop();
                 if (fileName) {
-                    await supabase.storage.from('music-files').remove([`tracks/${fileName}`]);
+                    await supabase.storage.from('music').remove([`tracks/${fileName}`]);
                 }
             }
 
