@@ -216,6 +216,31 @@ INSERT INTO public.movies (title, description, genre, year, duration_minutes, ra
 ('Sew the Winter to My Skin', 'Based on the true story of John Kepe, a Robin Hood figure in 1950s apartheid South Africa hunted by farmers and police.', 'Action', 2018, 100, 4.0, 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=300&h=450&fit=crop', 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1200&h=600&fit=crop', 'Jahmil X.T. Qubeka', ARRAY['Ezra Mabengeza','Kandyse McClure'], 'South Africa', 'af', false, false, 19000)
 ON CONFLICT DO NOTHING;
 
+-- === STORAGE: Music Bucket Policies ===
+-- The 'music' bucket must be created via Supabase Dashboard > Storage > New Bucket
+-- Name: music, Public: true, File size limit: 50MB
+
+-- Allow anyone to read files from the music bucket
+CREATE POLICY "Music files are publicly accessible"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'music');
+
+-- Allow authenticated users to upload to the music bucket
+CREATE POLICY "Authenticated users can upload music"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id = 'music');
+
+-- Allow authenticated users to update their own files
+CREATE POLICY "Authenticated users can update music files"
+ON storage.objects FOR UPDATE
+USING (bucket_id = 'music');
+
+-- Allow authenticated users to delete their own files
+CREATE POLICY "Authenticated users can delete music files"
+ON storage.objects FOR DELETE
+USING (bucket_id = 'music');
+
 -- === DONE ===
--- All tables created and seed data inserted.
+-- All tables created, seed data inserted, and storage policies configured.
 -- The podcasts/movies pages will now show real data from Supabase.
+-- Music uploads from the Creator Portal will now work.

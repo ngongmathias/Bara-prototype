@@ -18,8 +18,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, ChevronLeft, ChevronRight, MapPin, Calendar, Clock, ArrowLeft, CalendarDays, ArrowUpDown, X, Hash, Maximize2, LayoutGrid, Share2, Copy } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useEvents, useEventCategories } from '@/hooks/useEvents';
+import { EventsService } from '@/lib/eventsService';
 import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { supabase } from '@/lib/supabase';
@@ -29,7 +30,9 @@ import { useToast } from '@/hooks/use-toast';
 
 export const EventsPage = () => {
   const navigate = useNavigate();
+  const { '*': splatParam } = useParams();
   const { toast } = useToast();
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [startDate, setStartDate] = useState('');
@@ -371,25 +374,49 @@ export const EventsPage = () => {
     }
   }, [activeEventsStartIndex]); // Track on page change
 
-  // Handle direct URL access to event details
+  // Handle direct URL access to event details (e.g. /events/<uuid>)
   useEffect(() => {
-    const eventId = window.location.pathname.split('/events/')[1];
-    if (eventId && events.length > 0) {
-      const event = events.find(e => e.id === eventId);
-      if (event) {
-        setSelectedEvent(event);
+    const urlEventId = splatParam || window.location.pathname.split('/events/')[1];
+    if (!urlEventId || urlEventId === '') {
+      setInitialLoadDone(true);
+      return;
+    }
+
+    // First check if the event is already in the loaded list
+    if (events.length > 0) {
+      const found = events.find(e => e.id === urlEventId);
+      if (found) {
+        setSelectedEvent(found);
+        setInitialLoadDone(true);
+        return;
       }
     }
-  }, [events]);
 
-  // Update URL when viewing event details
+    // Event not in filtered list — fetch directly by ID (works across all countries)
+    const fetchDirectEvent = async () => {
+      try {
+        const eventData = await EventsService.getEventById(urlEventId);
+        if (eventData) {
+          setSelectedEvent(eventData);
+        }
+      } catch (err) {
+        console.error('Failed to fetch event by ID:', err);
+      } finally {
+        setInitialLoadDone(true);
+      }
+    };
+    fetchDirectEvent();
+  }, [events, splatParam]);
+
+  // Update URL when viewing event details (only after initial load to prevent premature redirect)
   useEffect(() => {
+    if (!initialLoadDone) return;
     if (selectedEvent) {
       navigate(`/events/${selectedEvent.id}`, { replace: true });
     } else {
       navigate('/events', { replace: true });
     }
-  }, [selectedEvent, navigate]);
+  }, [selectedEvent, navigate, initialLoadDone]);
 
   const eventSchema = selectedEvent ? {
     "@context": "https://schema.org",
