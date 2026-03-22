@@ -280,7 +280,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
         audioRef.current.src = song.file_url;
 
-        audioRef.current.play().catch(e => console.error("Playback failed:", e));
+        // Don't call play() here — the useEffect [isPlaying, currentSong] will handle it
+        // Calling play() here AND in the effect causes AbortError race condition
 
         setIsPlaying(true);
 

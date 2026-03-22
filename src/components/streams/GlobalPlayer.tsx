@@ -33,17 +33,6 @@ export function GlobalPlayer() {
     const { user } = useUser();
     const [lastTrackedSongId, setLastTrackedSongId] = useState<string | null>(null);
 
-    if (!currentSong) return null;
-
-    const isLiked = likedSongs.includes(currentSong.id);
-
-    const formatTime = (time: number) => {
-        if (isNaN(time)) return '0:00';
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time % 60);
-        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    };
-
     // Phase 8: Mission Tracking for Song Listens
     useEffect(() => {
         if (user && currentSong && isPlaying) {
@@ -64,6 +53,18 @@ export function GlobalPlayer() {
             // but usually we just want one listen per song per session or reset if they start over.
         }
     }, [currentSong?.id]);
+
+    // Early return AFTER all hooks to avoid React error #310
+    if (!currentSong) return null;
+
+    const isLiked = likedSongs.includes(currentSong.id);
+
+    const formatTime = (time: number) => {
+        if (isNaN(time)) return '0:00';
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    };
 
     return (
         <div className="fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-xl border-t border-white/5 px-4 py-3 z-[100] text-white shadow-2xl">
