@@ -240,7 +240,33 @@ CREATE POLICY "Authenticated users can delete music files"
 ON storage.objects FOR DELETE
 USING (bucket_id = 'music');
 
+-- === RLS POLICIES: Streams (artists, songs, albums, play_history) ===
+-- These allow the Creator Portal to insert artist profiles, upload songs, etc.
+
+-- Artists: public read, anyone can create/update (Clerk handles auth, not Supabase auth)
+ALTER TABLE IF EXISTS public.artists ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Artists are publicly readable" ON public.artists FOR SELECT USING (true);
+CREATE POLICY "Users can create their artist profile" ON public.artists FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can update their artist profile" ON public.artists FOR UPDATE USING (true);
+
+-- Songs: public read, anyone can insert/update
+ALTER TABLE IF EXISTS public.songs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Songs are publicly readable" ON public.songs FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can insert songs" ON public.songs FOR INSERT WITH CHECK (true);
+CREATE POLICY "Authenticated users can update songs" ON public.songs FOR UPDATE USING (true);
+
+-- Albums: public read, anyone can insert/update
+ALTER TABLE IF EXISTS public.albums ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Albums are publicly readable" ON public.albums FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can insert albums" ON public.albums FOR INSERT WITH CHECK (true);
+CREATE POLICY "Authenticated users can update albums" ON public.albums FOR UPDATE USING (true);
+
+-- Play history: anyone can insert/read
+ALTER TABLE IF EXISTS public.play_history ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can insert play history" ON public.play_history FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can read play history" ON public.play_history FOR SELECT USING (true);
+
 -- === DONE ===
--- All tables created, seed data inserted, and storage policies configured.
--- The podcasts/movies pages will now show real data from Supabase.
+-- All tables created, seed data inserted, storage + RLS policies configured.
 -- Music uploads from the Creator Portal will now work.
+-- Song playback URLs have been updated (run fix-songs-and-rls.mjs if not already done).

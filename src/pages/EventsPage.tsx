@@ -375,10 +375,14 @@ export const EventsPage = () => {
   }, [activeEventsStartIndex]); // Track on page change
 
   // Handle direct URL access to event details (e.g. /events/<uuid>)
+  // Runs once on mount + when events first load
+  const directEventHandled = React.useRef(false);
   useEffect(() => {
+    if (directEventHandled.current) return;
     const urlEventId = splatParam || window.location.pathname.split('/events/')[1];
     if (!urlEventId || urlEventId === '') {
       setInitialLoadDone(true);
+      directEventHandled.current = true;
       return;
     }
 
@@ -388,35 +392,41 @@ export const EventsPage = () => {
       if (found) {
         setSelectedEvent(found);
         setInitialLoadDone(true);
+        directEventHandled.current = true;
         return;
       }
     }
 
     // Event not in filtered list — fetch directly by ID (works across all countries)
+    let cancelled = false;
     const fetchDirectEvent = async () => {
       try {
         const eventData = await EventsService.getEventById(urlEventId);
-        if (eventData) {
+        if (!cancelled && eventData) {
           setSelectedEvent(eventData);
         }
       } catch (err) {
         console.error('Failed to fetch event by ID:', err);
       } finally {
-        setInitialLoadDone(true);
+        if (!cancelled) {
+          setInitialLoadDone(true);
+          directEventHandled.current = true;
+        }
       }
     };
     fetchDirectEvent();
+    return () => { cancelled = true; };
   }, [events, splatParam]);
 
   // Update URL when viewing event details (only after initial load to prevent premature redirect)
   useEffect(() => {
     if (!initialLoadDone) return;
     if (selectedEvent) {
-      navigate(`/events/${selectedEvent.id}`, { replace: true });
+      window.history.replaceState(null, '', `/events/${selectedEvent.id}`);
     } else {
-      navigate('/events', { replace: true });
+      window.history.replaceState(null, '', '/events');
     }
-  }, [selectedEvent, navigate, initialLoadDone]);
+  }, [selectedEvent, initialLoadDone]);
 
   const eventSchema = selectedEvent ? {
     "@context": "https://schema.org",
