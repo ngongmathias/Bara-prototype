@@ -891,25 +891,301 @@ Categories: Nollywood, Documentaries, Short Films, Drama, Comedy, Action
 
 ---
 
+## PHASE 9: PLATFORM MATURITY & CREATOR ECONOMY — March 23, 2026
+
+> **Source:** Product review session — March 23, 2026. These directives address content ownership, admin UX, creator tools, sports depth, translation, and visual polish.
+
+---
+
+### 9.1 Song/Track Ownership — Link Every Track to an Account
+
+**Problem:** Artist names are floating text — songs are not tied to any user account (admin or creator). A track should always have an owner.
+
+**Current state:** `songs` table has `uploaded_by` (TEXT) and `upload_type` ('platform'/'creator') columns (added in 7.47), but the admin song form in `AdminSongs.tsx` doesn't use them. The `artists` table has no `user_id` linking to a Clerk account.
+
+**Solution:**
+| # | Task | Priority |
+|---|------|----------|
+| 9.1.1 | Add `user_id` (TEXT, nullable) to `artists` table — links artist profile to a Clerk user account | P0 |
+| 9.1.2 | Update `AdminSongs.tsx` — when admin creates a song, auto-set `uploaded_by` to admin's Clerk ID and `upload_type = 'platform'` | P0 |
+| 9.1.3 | Update `AdminArtists.tsx` — add optional "Link to User Account" field (Clerk user ID or email lookup) | P1 |
+| 9.1.4 | Creator Portal — when a creator uploads a song, auto-set `uploaded_by` to their Clerk ID, `upload_type = 'creator'`, and link to their artist profile | P0 |
+| 9.1.5 | Display ownership badge on song/artist pages — "Official Platform Content" vs "Creator Upload" | P2 |
+| 9.1.6 | Ensure no song can exist without either an admin owner or a creator owner — enforce at DB level with CHECK constraint | P1 |
+
+---
+
+### 9.2 Universal File Upload — No URL Inputs for Media
+
+**Problem:** Admin pages for Movies and Podcasts use URL text inputs for posters, backdrops, trailers, videos, and cover images. Admin should upload files directly — never paste URLs.
+
+**Rule: ALL media across ALL admin pages must use file upload to Supabase Storage. No URL text inputs for images, audio, or video.**
+
+| # | Task | Page | Fields to Convert | Storage Bucket | Priority |
+|---|------|------|-------------------|----------------|----------|
+| 9.2.1 | Movies — poster & backdrop | `AdminMovies.tsx` | `poster_url`, `backdrop_url` | `movies` | P0 |
+| 9.2.2 | Movies — trailer upload | `AdminMovies.tsx` | `trailer_url` → file upload (video) | `movies` | P0 |
+| 9.2.3 | Movies — full movie upload | `AdminMovies.tsx` | `stream_url` → file upload (video). This is the actual movie file for streaming. | `movies` | P0 |
+| 9.2.4 | Podcasts — cover image | `AdminPodcasts.tsx` | `cover_url` → file upload (image) | `podcasts` | P0 |
+| 9.2.5 | Podcasts — episode audio | `AdminPodcasts.tsx` | Episode `audio_url` → file upload (audio) | `podcasts` | P0 |
+| 9.2.6 | Ebooks — cover image & file | `AdminEbooks.tsx` (new) | `cover_url`, `file_url` → file upload | `ebooks` | P0 |
+| 9.2.7 | Blog — post images | `AdminBlogEditor.tsx` | Audit — ensure images are uploaded, not URL-pasted | `blog` | P1 |
+| 9.2.8 | Events — flyer image | `AdminEventsEnhanced.tsx` | Audit — ensure flyer upload exists (already uses upload?) | `events` | P1 |
+| 9.2.9 | Artists — profile image | `AdminArtists.tsx` | `image_url` → file upload | `music` | P1 |
+| 9.2.10 | Albums — cover art | `AdminAlbums.tsx` | `cover_url` → file upload | `music` | P1 |
+| 9.2.11 | Country Info — gallery images | `AdminCountryInfo.tsx` | Gallery image fields → file upload | `countries` | P2 |
+
+**Implementation pattern:** Reuse the file upload component from `AdminSongs.tsx` (which already uploads to Supabase Storage `music` bucket). Create Supabase Storage buckets: `movies`, `podcasts`, `ebooks` with appropriate size limits and MIME type restrictions.
+
+**Note on `stream_url`:** This was previously a URL field expecting an external streaming link. Now it should be a direct video file upload. For large video files, consider chunked upload or setting a reasonable max size (e.g., 2GB for movies, 500MB for trailers).
+
+---
+
+### 9.3 Country & Language Dropdowns
+
+**Problem:** Country and language fields on admin forms are free-text inputs. They should be dropdowns.
+
+| # | Task | Priority |
+|---|------|----------|
+| 9.3.1 | Create a shared `COUNTRIES` constant (or fetch from `countries` table) for all dropdown selectors | P1 |
+| 9.3.2 | Create a shared `LANGUAGES` constant — at minimum: English, French, Spanish, Portuguese, Swahili, Arabic, Kinyarwanda, Amharic, Hausa, Yoruba, Igbo, Zulu, Afrikaans, Somali, Tigrinya | P1 |
+| 9.3.3 | Movies admin — convert `country` and `language` to `<Select>` dropdowns | P1 |
+| 9.3.4 | Podcasts admin — convert `language` to `<Select>` dropdown | P1 |
+| 9.3.5 | Ebooks admin — use `<Select>` dropdowns for country/language from the start | P1 |
+| 9.3.6 | Artists admin — convert any free-text country field to dropdown | P1 |
+| 9.3.7 | Any other admin form with country/language — audit and convert | P2 |
+
+---
+
+### 9.4 Sports — Full Team, League & Tournament Management
+
+**Problem:** Sports admin only has news and videos management. For a proper sports section, we need team/league/tournament management and richer fan features.
+
+**Current state:** `AdminSportsDashboard.tsx`, `AdminSportsNews.tsx`, `AdminSportsVideos.tsx` exist. Data comes from `api-sports.io` for live scores. No local team/league/tournament tables.
+
+#### 9.4A — Admin Sports Management Pages
+
+| # | Page | Features | Priority |
+|---|------|----------|----------|
+| 9.4.1 | **Admin Teams** (`/admin/sports/teams`) | CRUD for teams: name, logo (upload), sport, league, country, stadium, founded year, description, social links. Import from API or create manually. | P0 |
+| 9.4.2 | **Admin Leagues** (`/admin/sports/leagues`) | CRUD for leagues/competitions: name, logo (upload), sport, country/region, season dates, tier level, description. E.g., Premier League, CAF Champions League, Rwanda Premier League | P0 |
+| 9.4.3 | **Admin Tournaments** (`/admin/sports/tournaments`) | CRUD for tournaments/cups: name, logo, sport, format (knockout/group+knockout/league), start/end dates, teams participating, prize info, status (upcoming/active/completed) | P1 |
+| 9.4.4 | **Admin Fixtures** (`/admin/sports/fixtures`) | Manually create/edit fixtures when API data is unavailable: home team, away team, date/time, venue, league, score (for results), status (scheduled/live/completed/postponed) | P1 |
+| 9.4.5 | **Admin Players** (`/admin/sports/players`) | CRUD for player profiles: name, photo (upload), team, position, nationality, jersey number, date of birth, height, weight, stats (goals/assists/appearances) | P2 |
+| 9.4.6 | **Admin Sports Settings** (`/admin/sports/settings`) | Configure which sports are active, API key management, data refresh intervals, featured leagues/teams | P2 |
+
+#### 9.4B — Database Tables for Sports
+
+```
+teams: id, name, short_name, logo_url, sport, league_id, country, stadium, founded_year, description, website, social_links (jsonb), is_featured, created_at
+leagues: id, name, logo_url, sport, country, region, season, tier, description, api_league_id (for api-sports mapping), is_active, created_at
+tournaments: id, name, logo_url, sport, format, start_date, end_date, prize_info, status, description, created_at
+tournament_teams: id, tournament_id, team_id, group_name, seed
+fixtures: id, league_id, tournament_id, home_team_id, away_team_id, date, venue, home_score, away_score, status, api_fixture_id, created_at
+players: id, name, photo_url, team_id, position, nationality, jersey_number, dob, height_cm, weight_kg, bio, stats (jsonb), created_at
+```
+
+#### 9.4C — Fan-Facing Sports Features
+
+| # | Feature | Description | Priority |
+|---|---------|-------------|----------|
+| 9.4.7 | **Team Pages** (`/sports/teams/:id`) | Full team profile: logo, name, league, roster/squad list, recent results, upcoming fixtures, stadium info, fan stats | P0 |
+| 9.4.8 | **League Tables** (enhanced) | Full standings with form guide (W/D/L last 5), goal difference, head-to-head records when clicking a team | P1 |
+| 9.4.9 | **Player Profiles** (`/sports/players/:id`) | Player bio, career stats, current team, transfer history, photo gallery | P2 |
+| 9.4.10 | **Tournament Brackets** | Visual bracket/knockout tree for cup competitions, group stage tables | P1 |
+| 9.4.11 | **Follow Teams** | Users can follow teams → personalized scores feed, notification when their team plays | P1 |
+| 9.4.12 | **Match Center** (enhanced) | Live commentary feed, lineups, substitutions, match stats (possession, shots, corners), timeline of events | P1 |
+| 9.4.13 | **Transfer News** | Transfer rumors and confirmed transfers section, filterable by league/team | P2 |
+| 9.4.14 | **Fan Polls & Ratings** | Post-match player ratings, pre-match predictions, poll of the day | P2 |
+| 9.4.15 | **Sports Calendar** | Monthly calendar view of all fixtures across followed leagues/teams | P2 |
+| 9.4.16 | **African Football Focus** | Dedicated section for AFCON, CAF Champions League, African qualifiers — priority content for the diaspora audience | P1 |
+
+---
+
+### 9.5 Admin Ebooks Page — CREATE NEW
+
+**Problem:** No admin page exists for managing ebooks. Must be created from scratch.
+
+| # | Task | Priority |
+|---|------|----------|
+| 9.5.1 | Create `AdminEbooks.tsx` at `/admin/streams/ebooks` | P0 |
+| 9.5.2 | CRUD for ebooks: title, author, description, genre/category, year, pages, language (dropdown), country (dropdown), cover image (file upload), ebook file (file upload — PDF/EPUB), preview file (optional upload), is_featured, is_free, price (coins or real money), created_at | P0 |
+| 9.5.3 | Ebook categories management — CRUD for categories (name, slug, description, icon) | P1 |
+| 9.5.4 | Feature/unfeature ebooks, free/paid toggle | P1 |
+| 9.5.5 | Add ebook count to Admin Dashboard metrics (7.15) | P1 |
+| 9.5.6 | Supabase Storage bucket `ebooks` — for cover images and ebook files (PDF/EPUB) with appropriate RLS | P0 |
+| 9.5.7 | Create `ebooks` and `ebook_categories` tables if not already created (see Phase 8.5 schema) | P0 |
+
+---
+
+### 9.6 User Dashboard — Creator Management for Music, Podcasts & Ebooks
+
+**Problem:** Users who create content (music, podcasts, ebooks) have no way to see and manage their content from their dashboard. Also missing: analytics (paid plan feature), free vs paid content model, platform commission.
+
+#### 9.6A — Dashboard Sections to Add
+
+| # | Section | Features | Priority |
+|---|---------|----------|----------|
+| 9.6.1 | **My Music** | List of songs uploaded by user, play count, like count, upload new song, edit/delete songs, link to artist profile | P0 |
+| 9.6.2 | **My Podcasts** | List of podcasts owned by user, episode list per podcast, subscriber count, upload new episode, create new podcast, edit/delete | P0 |
+| 9.6.3 | **My Ebooks** | List of ebooks published by user, download count, revenue earned, upload new ebook, edit/delete, set free/paid + price | P0 |
+| 9.6.4 | **Creator Analytics** (💎 Paid Plan) | Charts and stats: plays over time, listener demographics (country), top songs/episodes/ebooks, revenue breakdown, subscriber growth. Available only on Pro/Elite plans. Free users see a teaser with "Upgrade to unlock analytics" CTA. | P1 |
+| 9.6.5 | **Revenue Dashboard** | Earnings from paid content: total revenue, platform commission deducted, net earnings, payout history. Visible to all creators who have paid content. | P1 |
+
+#### 9.6B — Free & Paid Content Model
+
+| Content Type | Free Tier | Paid Tier | Platform Commission | User Action |
+|-------------|-----------|-----------|-------------------|-------------|
+| **Music** | Free streaming (ad-supported) | Premium downloads / exclusive tracks (coin or real money) | 15% of revenue | Listen free, pay for downloads/exclusives |
+| **Podcasts** | Free episodes (ad-supported) | Premium/bonus episodes, early access (subscription) | 15% of revenue | Subscribe for free, pay for premium episodes |
+| **Ebooks** | Free ebooks available | Paid ebooks (set price in coins or real money) | 20% of revenue | Download free, purchase paid ebooks |
+
+**Implementation:**
+- Add `is_free` (BOOLEAN) and `price` (DECIMAL) columns to songs, podcasts, ebooks tables
+- Add `podcast_subscriptions` with `tier` field ('free' / 'premium')
+- Add `ebook_purchases` table: user_id, ebook_id, price_paid, platform_commission, purchased_at
+- Add `content_revenue` table: creator_id, content_type, content_id, gross_revenue, commission, net_revenue, period
+- Extend `MonetizationService` with `recordContentPurchase()` and `getCreatorRevenue()`
+
+#### 9.6C — Dashboard Sidebar Updates
+
+Add these links to `UserDashboard.tsx` sidebar:
+- 🎵 My Music (icon: Music)
+- 🎙️ My Podcasts (icon: Mic)
+- 📚 My Ebooks (icon: BookOpen)
+- 📊 Creator Analytics (icon: TrendingUp) — badge: "PRO" for paid plan
+- 💰 Revenue (icon: DollarSign) — only visible if user has paid content
+
+---
+
+### 9.7 Search Optimization — Music, Podcasts & Ebooks
+
+**Problem:** Search on Music, Podcasts, and Ebooks pages can be more optimal.
+
+| # | Task | Priority |
+|---|------|----------|
+| 9.7.1 | **Music search** — Add debounced search (300ms) across song title, artist name, album name, genre. Show instant results as user types (autocomplete dropdown). Filter by: genre, artist, year, mood/vibe. Sort by: popularity, newest, alphabetical | P1 |
+| 9.7.2 | **Podcast search** — Search across podcast title, host name, episode title, description. Filter by: category, language. Sort by: popularity (subscribers), newest, alphabetical | P1 |
+| 9.7.3 | **Ebook search** — Search across title, author, description. Filter by: genre/category, language, free/paid. Sort by: popularity (downloads), rating, newest, alphabetical | P1 |
+| 9.7.4 | **Unified Streams search** — Global search bar on StreamsHub that searches across ALL content types (music, podcasts, ebooks, movies) and shows categorized results | P2 |
+| 9.7.5 | **Search suggestions** — "Trending searches", "Recently searched" for personalization | P2 |
+| 9.7.6 | **Empty state** — When no results found, show suggestions: "Try searching for..." with popular terms | P1 |
+
+---
+
+### 9.8 Event Flyer Image Display — A4/Portrait Optimization
+
+**Problem:** Event flyers are typically A4/portrait format (roughly 2:3 or 1:√2 ratio), but the image container is a fixed-height box (`h-72`). This leaves blank space on the sides for portrait images.
+
+**Current state:** `EventCard.tsx` uses `h-72` container with `object-contain` + blurred backdrop. The blurred backdrop helps but the container shape doesn't match typical flyer proportions.
+
+| # | Task | Priority |
+|---|------|----------|
+| 9.8.1 | Change EventCard image container from fixed `h-72` to `aspect-[3/4]` (portrait A4-like ratio) — this matches common flyer dimensions | P0 |
+| 9.8.2 | Keep `object-contain` so non-standard flyers still display correctly with blank space (blurred bg fills gaps) | P0 |
+| 9.8.3 | Event detail page — also optimize hero image for portrait flyers, allow full-size view on click/tap | P1 |
+| 9.8.4 | Mobile optimization — ensure portrait flyers look good on narrow screens without excessive whitespace | P1 |
+
+---
+
+### 9.9 User Dashboard — Missing Features Assessment
+
+**Current dashboard has:** My Events, My Tickets, My Listings, My Marketplace Ads, Post Ad, Banner Submissions, Analytics, Profile, Coin Shop, Daily Missions, Premium Upsell.
+
+**Missing features that should be added:**
+
+| # | Feature | Description | Priority |
+|---|---------|-------------|----------|
+| 9.9.1 | **My Music / Podcasts / Ebooks** | See 9.6 above — creator content management | P0 |
+| 9.9.2 | **My Playlists** | View and manage playlists created on Streams — currently only accessible from Streams pages | P1 |
+| 9.9.3 | **My Blog Posts** | View/edit/delete blog posts the user has written | P1 |
+| 9.9.4 | **My Reviews** | View reviews the user has left on businesses/listings | P2 |
+| 9.9.5 | **Notification Center** | In-app notifications: new followers, event reminders, content milestones, coin rewards | P1 |
+| 9.9.6 | **Saved / Favorites** | Centralized view of all saved items: events, marketplace ads, movies (watchlist), songs (liked), ebooks (library) | P1 |
+| 9.9.7 | **Activity Feed** | Recent activity: songs listened, events attended, purchases, coins earned — social proof for public profiles | P2 |
+| 9.9.8 | **Account Settings** (enhanced) | Notification preferences, privacy settings, connected accounts, language preference, delete account option | P1 |
+| 9.9.9 | **Support / Help** | In-dashboard help center: FAQ, contact support, report a bug | P2 |
+| 9.9.10 | **Referral Stats** | Detailed referral tracking — who signed up via your link, rewards earned, pending referrals | P2 |
+
+---
+
+### 9.10 Translation / i18n — Replace Google Translate
+
+**Problem:** Google Translate widget has intrusive popups, inconsistent behavior, and doesn't integrate seamlessly into the page. Need a better solution.
+
+**Current state:** `GoogleTranslate.tsx` injects Google Translate script, which renders a dropdown widget and shows a floating bar when translating. The popup/bar behavior is not controllable and disrupts UX.
+
+**Recommended alternatives (in order of preference):**
+
+| # | Solution | Pros | Cons | Cost |
+|---|----------|------|------|------|
+| 1 | **Weglot** (weglot.com) | Seamless in-page translation, auto-detects content, SEO-friendly, visual editor to fix translations, custom language switcher, no popups | Paid after free tier (2,000 words free, then from €15/mo) | €15-49/mo |
+| 2 | **Localize.js** (localizejs.com) | Similar to Weglot — auto-translates, in-context editor, no popup, supports 100+ languages | Paid (custom pricing, starts ~$25/mo) | ~$25/mo+ |
+| 3 | **i18next + DeepL API** (self-hosted) | Already have i18next set up. Use DeepL API for auto-translation of JSON locale files. Full control, no third-party widget. Custom language switcher in Header. | Requires manual export/import of translations, or build a pipeline. DeepL API: 500K chars/mo free | Free–$6/mo (DeepL API) |
+| 4 | **Crowdin + i18next** | Crowdin manages translation files, supports machine + human translation, syncs with GitHub. i18next renders them. | More complex setup, Crowdin free for open source only | $0-40/mo |
+
+**Recommended approach:** Option 3 (i18next + DeepL API) for cost control, or Option 1 (Weglot) for fastest seamless integration.
+
+| # | Task | Priority |
+|---|------|----------|
+| 9.10.1 | Remove Google Translate widget and `GoogleTranslate.tsx` component | P1 |
+| 9.10.2 | Build custom language switcher in Header — clean dropdown, no popup, shows flag + language name, remembers preference in localStorage | P0 |
+| 9.10.3 | If using Weglot: integrate Weglot script, configure languages, customize switcher position | P1 |
+| 9.10.4 | If using i18next approach: expand existing locale JSON files (en, fr, es, pt, sw, ar) to cover ALL user-facing strings. Add Kinyarwanda (rw) as priority language | P1 |
+| 9.10.5 | Auto-translate missing keys via DeepL API (build a script or edge function) | P2 |
+| 9.10.6 | Ensure translation covers: Header, Footer, landing page, all mini-app pages, dashboard, forms, error messages, toasts | P1 |
+
+---
+
+### 9.11 Implementation Priority Order
+
+> Execute in this order for maximum impact:
+
+```
+BATCH 1 — Core Infrastructure (do first)
+─────────────────────────────────────────
+1. 9.2  Universal file upload (movies, podcasts, ebooks admin)
+2. 9.5  Create AdminEbooks page
+3. 9.1  Song/track ownership linking
+4. 9.3  Country/language dropdowns
+
+BATCH 2 — Creator Economy
+─────────────────────────
+5. 9.6  User dashboard creator sections (My Music/Podcasts/Ebooks + revenue)
+6. 9.7  Search optimization
+
+BATCH 3 — Sports & Fan Features
+────────────────────────────────
+7. 9.4  Sports admin (teams/leagues/tournaments) + fan features
+
+BATCH 4 — Visual & UX Polish
+─────────────────────────────
+8. 9.8  Event flyer image optimization
+9. 9.9  Dashboard missing features
+10. 9.10 Translation solution (Weglot or i18next+DeepL)
+```
+
+---
+
 ## HOW TO USE THIS PLAN
 
-1. **Phase 7 (team meeting directives) is the active work.** All prior phases (1-6) are complete.
-2. **Sprint 7 priority order:** (1) 7.49 Songs still not playing — fix + build testing mechanism, (2) 7.50 Movies & Podcasts admin pages + revenue metrics, (3) 7.51 Emails audit & setup, (4) 7.52 Translation/i18n service.
-3. **Sprint 6 completed:** React #310 fixed, music playback partially fixed (needs re-test), admin analytics live, BARA News mini-app, home tile flip, B&W color code, RSS HTML stripping, all Supabase errors resolved.
-4. **Phase 8 (testing/QA/coins) runs in parallel** with Sprint 7 items.
-5. **Movies & Ebooks full implementation** (Phase 8.4 / 8.5) — Movies admin is now P0 in Sprint 7 (revenue opportunity).
-6. **Use `STREAMS_SPORTS_BUILD_PLAN.md`** for the detailed sprint-by-sprint breakdown with per-task checklists.
-7. **Check off items** as you complete them (☐ → ✅).
-8. **Log bugs** found during testing with priority level (P0–P3).
-9. **BARA Coins proposal (8.3) needs team review** before implementation begins.
-10. **Test accounts (8.1) need Clerk user IDs** — will be captured on first sign-in.
+1. **Phase 9 is the active work.** All prior phases (1-8) are complete or in progress.
+2. **Phase 9 priority order:** See 9.11 — Batch 1 (file uploads, admin ebooks, track ownership, dropdowns) → Batch 2 (creator dashboard, search) → Batch 3 (sports depth) → Batch 4 (UX polish, translation).
+3. **Sprint 7 items still open:** 7.49 (songs playback), 7.51 (emails audit), 7.52 (translation — now superseded by 9.10).
+4. **Phase 8 (testing/QA/coins) runs in parallel** with Phase 9 items.
+5. **Universal rule: NO URL inputs for media.** All images, audio, and video must be file uploads to Supabase Storage. See 9.2.
+6. **Creator economy model:** Free + paid content, platform commission (15-20%), creator analytics as paid plan feature. See 9.6B.
+7. **Use `STREAMS_SPORTS_BUILD_PLAN.md`** for the detailed sprint-by-sprint breakdown with per-task checklists.
+8. **Check off items** as you complete them (☐ → ✅).
+9. **Log bugs** found during testing with priority level (P0–P3).
+10. **BARA Coins proposal (8.3) needs team review** before implementation begins.
 11. **QA process (8.2) is mandatory** for every push going forward.
 12. **Country defaults to Rwanda, Language defaults to English** across the platform.
 13. **Color code: BLACK & WHITE everywhere.** No colored icons, buttons, or accent colors unless explicitly approved.
-14. **DPO Compliance (7.33) is tracked** and remains a P1 item — not in current sprint but will not be forgotten.
+14. **DPO Compliance (7.33) is tracked** and remains a P1 item.
 
 ---
 
 *Master Plan created: Feb 22, 2026*
-*Updated: March 19, 2026 — Sprint 6 complete, Sprint 7 planned with comprehensive testing plan. 39 of 52 directives done. Sprint 7 adds: 7.49 songs playback fix + testing, 7.50 movies/podcasts admin + revenue, 7.51 emails, 7.52 i18n. New Sprint 7 testing plan (S7.1–S7.8): 3 test accounts, music test data seeding (60 songs, 12 artists, 5 playlists), 35-step music test script, 17-step sports test script, podcasts DB schema + build plan (6 podcasts, 30 episodes), movies DB schema + build plan (10 movies), cross-cutting 12-point checklist, and 12-step implementation order.*
+*Updated: March 23, 2026 — Phase 9 added: 10 new directive groups (9.1–9.10) covering track ownership, universal file upload, country/language dropdowns, sports team/league/tournament management with 16 fan features, admin ebooks page, user dashboard creator economy (music/podcasts/ebooks + analytics + revenue), search optimization, event flyer A4 display, dashboard gaps, and translation replacement (Weglot/i18next+DeepL). 4-batch implementation order defined.*
 *For Bara Afrika Platform — baraafrika.com*
