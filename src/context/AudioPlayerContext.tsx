@@ -235,23 +235,31 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
 
     // Handle Play/Pause side effects
-
     useEffect(() => {
-
         if (!audioRef.current || !currentSong) return;
 
-
+        const audio = audioRef.current;
 
         if (isPlaying) {
-
-            audioRef.current.play().catch(e => console.error("Playback failed:", e));
-
+            // If audio is already loaded enough, play immediately
+            if (audio.readyState >= 2) {
+                audio.play().catch(e => {
+                    if (e.name !== 'AbortError') console.error("Playback failed:", e);
+                });
+            } else {
+                // Wait for enough data to start playback
+                const onCanPlay = () => {
+                    audio.play().catch(e => {
+                        if (e.name !== 'AbortError') console.error("Playback failed after canplay:", e);
+                    });
+                    audio.removeEventListener('canplay', onCanPlay);
+                };
+                audio.addEventListener('canplay', onCanPlay);
+                return () => audio.removeEventListener('canplay', onCanPlay);
+            }
         } else {
-
-            audioRef.current.pause();
-
+            audio.pause();
         }
-
     }, [isPlaying, currentSong]);
 
 
@@ -280,8 +288,10 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
         audioRef.current.src = song.file_url;
 
+        audioRef.current.load(); // Explicitly trigger browser to start fetching the audio
+
         // Don't call play() here — the useEffect [isPlaying, currentSong] will handle it
-        // Calling play() here AND in the effect causes AbortError race condition
+        // after canplay fires; calling play() here AND in the effect causes AbortError
 
         setIsPlaying(true);
 

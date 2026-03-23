@@ -487,10 +487,13 @@ const CategoryListingsPage = () => {
                       name: b.name,
                       latitude: b.latitude!,
                       longitude: b.longitude!,
-                      address: b.address || '',
-                      category: b.category?.name || '',
+                      address: b.address || null,
+                      category: b.category ? { name: b.category.name, slug: b.category.slug || '' } : undefined,
                       is_premium: b.is_premium,
-                      is_verified: b.is_verified
+                      is_verified: b.is_verified,
+                      description: b.description || null,
+                      phone: b.phone || null,
+                      website: b.website || null,
                     }))}
                     height="500px"
                   />

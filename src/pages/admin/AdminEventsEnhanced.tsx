@@ -380,9 +380,9 @@ export const AdminEventsEnhanced = () => {
       tickets: event.tickets?.map(ticket => ({
         name: ticket.name,
         description: ticket.description || '',
-        price: ticket.price || 0,
+        price: String(ticket.price || 0),
         selected: ticket.is_default || false
-      })) || [{ name: '', description: '', price: 0, selected: true }],
+      })) || [{ name: '', description: '', price: '0', selected: true }],
       is_free: event.is_free ?? false,
       entry_fee: event.entry_fee?.toString() || '',
       currency: event.currency || 'USD',
