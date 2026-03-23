@@ -58,7 +58,21 @@ import {
 
   Trophy,
 
-  Palette
+  Palette,
+
+  Music,
+
+  Mic2,
+
+  BookOpen,
+
+  TrendingUp,
+
+  FileText,
+
+  Bookmark,
+
+  Crown
 
 } from 'lucide-react';
 
@@ -339,6 +353,76 @@ export const UserDashboard = () => {
                   </Link>
 
 
+
+                  {/* Creator Content */}
+                  <div className="pt-3 pb-1 px-3">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Creator</p>
+                  </div>
+
+                  <Link to="/users/dashboard/my-music">
+                    <Button
+                      variant={isActive('/users/dashboard/my-music') ? 'default' : 'ghost'}
+                      className="w-full justify-start"
+                    >
+                      <Music className="mr-3 h-4 w-4" />
+                      My Music
+                    </Button>
+                  </Link>
+
+                  <Link to="/users/dashboard/my-podcasts">
+                    <Button
+                      variant={isActive('/users/dashboard/my-podcasts') ? 'default' : 'ghost'}
+                      className="w-full justify-start"
+                    >
+                      <Mic2 className="mr-3 h-4 w-4" />
+                      My Podcasts
+                    </Button>
+                  </Link>
+
+                  <Link to="/users/dashboard/my-ebooks">
+                    <Button
+                      variant={isActive('/users/dashboard/my-ebooks') ? 'default' : 'ghost'}
+                      className="w-full justify-start"
+                    >
+                      <BookOpen className="mr-3 h-4 w-4" />
+                      My Ebooks
+                    </Button>
+                  </Link>
+
+                  <Link to="/users/dashboard/my-blog">
+                    <Button
+                      variant={isActive('/users/dashboard/my-blog') ? 'default' : 'ghost'}
+                      className="w-full justify-start"
+                    >
+                      <FileText className="mr-3 h-4 w-4" />
+                      My Blog Posts
+                    </Button>
+                  </Link>
+
+                  <Link to="/users/dashboard/saved">
+                    <Button
+                      variant={isActive('/users/dashboard/saved') ? 'default' : 'ghost'}
+                      className="w-full justify-start"
+                    >
+                      <Bookmark className="mr-3 h-4 w-4" />
+                      Saved & Favorites
+                    </Button>
+                  </Link>
+
+                  <Link to="/users/dashboard/creator-analytics">
+                    <Button
+                      variant={isActive('/users/dashboard/creator-analytics') ? 'default' : 'ghost'}
+                      className="w-full justify-start"
+                    >
+                      <TrendingUp className="mr-3 h-4 w-4" />
+                      Creator Analytics
+                      <span className="ml-auto text-[9px] font-bold bg-gray-900 text-white px-1.5 py-0.5 rounded">PRO</span>
+                    </Button>
+                  </Link>
+
+                  <div className="pt-3 pb-1 px-3">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Account</p>
+                  </div>
 
                   <Link to="/users/dashboard/analytics">
 

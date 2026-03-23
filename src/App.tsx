@@ -288,6 +288,18 @@ import { UserTicketsPage } from "./pages/users/UserTicketsPage";
 
 import { UserAnalytics } from "./pages/users/UserAnalytics";
 
+import { UserMyMusic } from "./pages/users/UserMyMusic";
+
+import { UserMyPodcasts } from "./pages/users/UserMyPodcasts";
+
+import { UserMyEbooks } from "./pages/users/UserMyEbooks";
+
+import { UserCreatorAnalytics } from "./pages/users/UserCreatorAnalytics";
+
+import { UserMyBlogPosts } from "./pages/users/UserMyBlogPosts";
+
+import { UserSavedItems } from "./pages/users/UserSavedItems";
+
 import { OrganizerRegistrationsPage } from "./pages/users/OrganizerRegistrationsPage";
 
 import TermsOfServicePage from "./pages/TermsOfServicePage";
@@ -651,6 +663,18 @@ const AppRoutes = () => {
             <Route path="settings" element={<UserSettingsPage />} />
 
             <Route path="themes" element={<ProfileThemesPage />} />
+
+            <Route path="my-music" element={<UserMyMusic />} />
+
+            <Route path="my-podcasts" element={<UserMyPodcasts />} />
+
+            <Route path="my-ebooks" element={<UserMyEbooks />} />
+
+            <Route path="creator-analytics" element={<UserCreatorAnalytics />} />
+
+            <Route path="my-blog" element={<UserMyBlogPosts />} />
+
+            <Route path="saved" element={<UserSavedItems />} />
 
           </Route>
 
