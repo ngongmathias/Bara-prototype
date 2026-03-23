@@ -1,60 +1,25 @@
-import { Home, Search, Library, Plus, Heart, Globe, Mic2, Loader2, Film, BookOpen, Headphones, Gamepad2 } from 'lucide-react';
+import { Home, Search, Library, Plus, Heart, Globe, Mic2, Film, BookOpen, Headphones, Gamepad2 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
 import { useState } from 'react';
 import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
 import { useUser } from '@clerk/clerk-react';
 import { XPProgressBar } from '../gamification/XPProgressBar';
+import { CreatePlaylistModal } from './CreatePlaylistModal';
 
 export function StreamsSidebar({ className = "" }: { className?: string }) {
     const location = useLocation();
     const navigate = useNavigate();
-    const [creating, setCreating] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const { user: clerkUser } = useUser();
 
     const isActive = (path: string) => location.pathname === path;
 
-    const handleCreatePlaylist = async () => {
-        try {
-            setCreating(true);
-            if (!clerkUser) {
-                navigate('/sign-in');
-                return;
-            }
-
-            // Count existing playlists to auto-name
-            const { count } = await supabase
-                .from('playlists')
-                .select('*', { count: 'exact', head: true })
-                .eq('created_by', clerkUser.id);
-
-            const playlistNumber = (count || 0) + 1;
-
-            const { data: newPlaylist, error } = await supabase
-                .from('playlists')
-                .insert([
-                    {
-                        title: `My Playlist #${playlistNumber}`,
-                        description: '',
-                        created_by: clerkUser.id,
-                        is_public: false
-                    }
-                ])
-                .select()
-                .single();
-
-            if (error) throw error;
-
-            if (newPlaylist) {
-                await GamificationService.addXP(clerkUser.id, XP_REWARDS.PLAYLIST_CREATE, 'Created a new playlist');
-                await GamificationService.awardAchievement(clerkUser.id, 'playlist_creator');
-                navigate(`/streams/playlist/${newPlaylist.id}`);
-            }
-        } catch (err) {
-            console.error('Error creating playlist:', err);
-        } finally {
-            setCreating(false);
+    const handleCreatePlaylist = () => {
+        if (!clerkUser) {
+            navigate('/sign-in');
+            return;
         }
+        setIsModalOpen(true);
     };
 
     return (
@@ -86,10 +51,9 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
                     </Link>
                     <button
                         onClick={handleCreatePlaylist}
-                        disabled={creating}
-                        className="p-1 hover:bg-gray-200 rounded-full transition text-gray-500 hover:text-gray-900 disabled:opacity-50"
+                        className="p-1 hover:bg-gray-200 rounded-full transition text-gray-500 hover:text-gray-900"
                     >
-                        {creating ? <Loader2 size={20} className="animate-spin" /> : <Plus size={20} />}
+                        <Plus size={20} />
                     </button>
                 </div>
 
@@ -106,10 +70,8 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
                         </div>
                         <button
                             onClick={handleCreatePlaylist}
-                            disabled={creating}
-                            className="bg-gray-900 text-white text-xs font-bold py-2 px-4 rounded-full hover:bg-gray-800 transition active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                            className="bg-gray-900 text-white text-xs font-bold py-2 px-4 rounded-full hover:bg-gray-800 transition active:scale-95 flex items-center gap-2"
                         >
-                            {creating && <Loader2 size={12} className="animate-spin" />}
                             {clerkUser ? 'Create playlist' : 'Sign in'}
                         </button>
                     </div>
@@ -146,6 +108,16 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
                     </button>
                 </div>
             </div>
+            <CreatePlaylistModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={async () => {
+                    if (clerkUser) {
+                        await GamificationService.addXP(clerkUser.id, XP_REWARDS.PLAYLIST_CREATE, 'Created a new playlist');
+                        await GamificationService.awardAchievement(clerkUser.id, 'playlist_creator');
+                    }
+                }}
+            />
         </div>
     );
 }

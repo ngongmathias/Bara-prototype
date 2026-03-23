@@ -36,7 +36,9 @@ import {
     Upload,
     Loader2,
     Play,
-    Pause
+    Pause,
+    Star,
+    StarOff
 } from "lucide-react";
 import { db, supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -54,6 +56,7 @@ interface Song {
     plays: number;
     artists?: { name: string };
     albums?: { title: string };
+    featured_badge?: string | null;
 }
 
 interface Artist {
@@ -264,6 +267,29 @@ export const AdminSongs = () => {
         }
     };
 
+    const handleToggleBadge = async (song: Song) => {
+        const nextBadge = !song.featured_badge
+            ? 'platform_pick'
+            : song.featured_badge === 'platform_pick'
+            ? 'editors_choice'
+            : null;
+
+        try {
+            const { error } = await supabase
+                .from('songs')
+                .update({ featured_badge: nextBadge })
+                .eq('id', song.id);
+            if (error) throw error;
+            toast({
+                title: nextBadge ? 'Song promoted!' : 'Promotion removed',
+                description: nextBadge === 'platform_pick' ? '🏆 Marked as Platform Pick' : nextBadge === 'editors_choice' ? "✨ Marked as Editor's Choice" : 'Song is no longer featured'
+            });
+            fetchInitialData();
+        } catch (error) {
+            toast({ title: 'Error', description: 'Failed to update badge', variant: 'destructive' });
+        }
+    };
+
     const filteredSongs = songs.filter(s =>
         s.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.artists?.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -398,19 +424,20 @@ export const AdminSongs = () => {
                                 <TableHead>Artist</TableHead>
                                 <TableHead>Album</TableHead>
                                 <TableHead>Duration</TableHead>
+                                <TableHead>Featured</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-8">
+                                    <TableCell colSpan={7} className="text-center py-8">
                                         <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
                                     </TableCell>
                                 </TableRow>
                             ) : filteredSongs.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">No songs found.</TableCell>
+                                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">No songs found.</TableCell>
                                 </TableRow>
                             ) : (
                                 filteredSongs.map((song) => (
@@ -434,7 +461,14 @@ export const AdminSongs = () => {
                                                         <Music className="h-5 w-5 text-gray-400" />
                                                     )}
                                                 </div>
-                                                <div className="font-medium">{song.title}</div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="font-medium">{song.title}</div>
+                                                    {song.featured_badge && (
+                                                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${song.featured_badge === 'platform_pick' ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700'}`}>
+                                                            {song.featured_badge === 'platform_pick' ? '🏆' : '✨'}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>{song.artists?.name}</TableCell>
@@ -443,6 +477,20 @@ export const AdminSongs = () => {
                                             {typeof song.duration === 'number' && !isNaN(song.duration)
                                                 ? `${Math.floor(song.duration / 60)}:${Math.floor(song.duration % 60).toString().padStart(2, '0')}`
                                                 : '--:--'}
+                                        </TableCell>
+                                        <TableCell>
+                                            <button
+                                                onClick={() => handleToggleBadge(song)}
+                                                className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full transition ${
+                                                    song.featured_badge === 'platform_pick' ? 'bg-amber-100 text-amber-700' :
+                                                    song.featured_badge === 'editors_choice' ? 'bg-purple-100 text-purple-700' :
+                                                    'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                                                }`}
+                                                title="Click to toggle: None → Platform Pick → Editor's Choice"
+                                            >
+                                                <Star size={12} fill={song.featured_badge ? 'currentColor' : 'none'} />
+                                                {song.featured_badge === 'platform_pick' ? 'Pick' : song.featured_badge === 'editors_choice' ? "Editor's" : 'Promote'}
+                                            </button>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-2">

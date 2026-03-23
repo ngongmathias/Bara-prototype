@@ -67,7 +67,7 @@ export function GlobalPlayer() {
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-xl border-t border-white/5 px-4 py-3 z-[100] text-white shadow-2xl">
+        <div className="fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-xl border-t border-white/5 px-4 py-3 z-[200] text-white shadow-2xl">
             <div className="flex items-center justify-between gap-4 max-w-[1400px] mx-auto">
                 {/* Now Playing */}
                 <div className="flex items-center gap-4 flex-1 min-w-0">
