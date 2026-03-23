@@ -134,14 +134,14 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
     const songsToShow = searchQuery.trim() ? searchResults : recommendedSongs;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-h-[85vh] flex flex-col">
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 shrink-0">
-                    <h2 className="text-xl font-black text-white flex items-center gap-2">
+                <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
+                    <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
                         <Music className="text-[#1DB954]" size={24} />
                         {step === 'details' ? 'Create Playlist' : 'Add Songs'}
                     </h2>
-                    <button onClick={step === 'songs' ? handleFinish : onClose} className="text-gray-400 hover:text-white transition-colors">
+                    <button onClick={step === 'songs' ? handleFinish : onClose} className="text-gray-400 hover:text-gray-700 transition-colors">
                         <X size={24} />
                     </button>
                 </div>
@@ -149,7 +149,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                 {step === 'details' ? (
                     <form onSubmit={handleCreatePlaylist} className="p-6 space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="title" className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">
+                            <Label htmlFor="title" className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">
                                 Playlist Title *
                             </Label>
                             <Input
@@ -157,13 +157,13 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="e.g. My Summer Vibes"
-                                className="bg-gray-50 border-gray-200 text-white placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954]"
+                                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#1DB954] focus:ring-[#1DB954]"
                                 autoFocus
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="description" className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">
+                            <Label htmlFor="description" className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">
                                 Description (Optional)
                             </Label>
                             <Textarea
@@ -171,12 +171,12 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 placeholder="Tell us about this playlist..."
-                                className="bg-gray-50 border-gray-200 text-white placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] min-h-[100px] resize-none"
+                                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#1DB954] focus:ring-[#1DB954] min-h-[100px] resize-none"
                             />
                         </div>
 
                         <div className="pt-2 flex gap-3">
-                            <Button type="button" variant="ghost" onClick={onClose} className="flex-1 text-white hover:bg-gray-50 font-bold">
+                            <Button type="button" variant="ghost" onClick={onClose} className="flex-1 text-gray-700 hover:bg-gray-100 font-bold">
                                 Cancel
                             </Button>
                             <Button type="submit" disabled={loading} className="flex-1 bg-[#1DB954] text-black hover:bg-[#1ed760] font-black tracking-tight">
@@ -188,19 +188,20 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                     </form>
                 ) : (
                     <div className="flex flex-col flex-1 min-h-0">
-                        <div className="p-4 border-b border-gray-200 shrink-0">
+                        <div className="p-4 border-b border-gray-100 shrink-0">
+                            <p className="text-xs font-bold text-gray-500 mb-2">{addedSongIds.size} song{addedSongIds.size !== 1 ? 's' : ''} added to "{title}"</p>
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                 <Input
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Search for songs to add..."
-                                    className="pl-9 bg-gray-50 border-gray-200 text-white placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954]"
+                                    className="pl-9 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#1DB954] focus:ring-[#1DB954]"
                                     autoFocus
                                 />
                             </div>
                             {!searchQuery.trim() && (
-                                <p className="text-xs text-gray-500 mt-2">Recommended songs — tap + to add</p>
+                                <p className="text-xs text-gray-400 mt-2">Recommended songs — tap + to add</p>
                             )}
                         </div>
 
@@ -210,7 +211,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                                     <Loader2 className="animate-spin text-[#1DB954]" size={24} />
                                 </div>
                             ) : songsToShow.length === 0 ? (
-                                <p className="text-gray-500 text-sm text-center py-8">
+                                <p className="text-gray-400 text-sm text-center py-8">
                                     {searchQuery.trim() ? 'No songs found' : 'No songs available yet'}
                                 </p>
                             ) : (
@@ -223,12 +224,12 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                                                     <img src={song.cover_url} alt="" className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center">
-                                                        <Music size={16} className="text-gray-600" />
+                                                        <Music size={16} className="text-gray-400" />
                                                     </div>
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-white text-sm font-medium truncate">{song.title}</p>
+                                                <p className="text-gray-900 text-sm font-medium truncate">{song.title}</p>
                                                 <p className="text-gray-500 text-xs truncate">{song.artists?.name || 'Unknown Artist'}</p>
                                             </div>
                                             <button
@@ -237,7 +238,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                                                 className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition ${
                                                     isAdded
                                                         ? 'bg-[#1DB954] text-black'
-                                                        : 'bg-gray-100 text-white hover:bg-white/20'
+                                                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                                                 }`}
                                             >
                                                 {isAdded ? <Check size={14} /> : <Plus size={14} />}

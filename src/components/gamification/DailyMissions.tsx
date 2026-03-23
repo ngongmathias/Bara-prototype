@@ -19,10 +19,18 @@ export const DailyMissions = () => {
         if (user && isOpen) {
             fetchMissions();
         } else if (user && missions.length === 0) {
-            // Initial fetch to get claimable count etc even if closed
             fetchMissions();
         }
     }, [user, isOpen]);
+
+    // Refresh missions when a song is played significantly
+    useEffect(() => {
+        const handleSongPlayed = () => {
+            if (user) fetchMissions();
+        };
+        window.addEventListener('bara_song_played', handleSongPlayed);
+        return () => window.removeEventListener('bara_song_played', handleSongPlayed);
+    }, [user]);
 
     const fetchMissions = async () => {
         if (!user) return;

@@ -301,6 +301,7 @@ import { InboxPage } from "./pages/messages/InboxPage";
 import { ChatWindow } from "./pages/messages/ChatWindow";
 
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
+import { GlobalPlayer } from "@/components/streams/GlobalPlayer";
 
 
 
@@ -862,6 +863,8 @@ const App = () => (
               <AuthLogger />
 
               <AppRoutes />
+
+              <GlobalPlayer />
 
             </BrowserRouter>
 

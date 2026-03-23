@@ -2,7 +2,6 @@ import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TopBannerAd } from "@/components/TopBannerAd";
 import { BottomBannerAd } from "@/components/BottomBannerAd";
-import { GlobalPlayer } from "@/components/streams/GlobalPlayer";
 import { GlobalGamification } from "@/components/gamification/GlobalGamification";
 import { DailyMissions } from "@/components/gamification/DailyMissions";
 import { DailySpinWheel } from "@/components/gamification/DailySpinWheel";
@@ -42,7 +41,6 @@ export const MainLayout = ({ children, hideHeader = false, hideFooter = false }:
       <GlobalGamification />
       <DailyMissions />
       <DailySpinWheel />
-      <GlobalPlayer />
       <BottomBannerAd />
       <Footer />
     </div>

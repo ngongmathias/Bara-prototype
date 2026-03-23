@@ -33,26 +33,23 @@ export function GlobalPlayer() {
     const { user } = useUser();
     const [lastTrackedSongId, setLastTrackedSongId] = useState<string | null>(null);
 
-    // Phase 8: Mission Tracking for Song Listens
+    // Mission Tracking for Song Listens
     useEffect(() => {
-        if (user && currentSong && isPlaying) {
-            // If we've reached 50% of the song or 30 seconds
+        if (user && currentSong && isPlaying && duration > 0) {
             const isSignificantProgress = (progress / duration > 0.5) || (progress > 30);
-
             if (isSignificantProgress && lastTrackedSongId !== currentSong.id) {
-                GamificationService.trackMissionProgress(user.id, 'daily_listen');
                 setLastTrackedSongId(currentSong.id);
+                // Track mission progress (try multiple common key names)
+                GamificationService.trackMissionProgress(user.id, 'daily_listen');
+                GamificationService.trackMissionProgress(user.id, 'listen_songs');
+                GamificationService.trackMissionProgress(user.id, 'stream_music');
+                // Dispatch event so DailyMissions UI refreshes
+                window.dispatchEvent(new CustomEvent('bara_song_played', {
+                    detail: { songId: currentSong.id, userId: user.id }
+                }));
             }
         }
     }, [progress, duration, currentSong?.id, user?.id, isPlaying, lastTrackedSongId]);
-
-    // Reset tracked song id when song changes significantly
-    useEffect(() => {
-        if (currentSong?.id !== lastTrackedSongId && progress < 5) {
-            // If it's a new song and we're at the beginning, we might allow re-tracking later
-            // but usually we just want one listen per song per session or reset if they start over.
-        }
-    }, [currentSong?.id]);
 
     // Early return AFTER all hooks to avoid React error #310
     if (!currentSong) return null;
