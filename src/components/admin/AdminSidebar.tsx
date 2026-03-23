@@ -334,6 +334,18 @@ const adminMenuItems = [
 
   {
 
+    title: "Ebooks",
+
+    icon: BookOpen,
+
+    path: "/admin/streams/ebooks",
+
+    description: "Manage ebook library"
+
+  },
+
+  {
+
     title: "Sports",
 
     icon: Trophy,

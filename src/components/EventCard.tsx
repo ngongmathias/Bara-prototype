@@ -143,7 +143,7 @@ export const EventCard = ({
       }}
       className="bg-white rounded-lg shadow-lg overflow-hidden transition-shadow hover:shadow-2xl"
     >
-      <div className="h-72 bg-gray-900 overflow-hidden relative">
+      <div className="aspect-[3/4] bg-gray-900 overflow-hidden relative">
         {/* Blurred backdrop fill — prevents empty bars on portrait flyers */}
         <img
           src={imageUrl || '/placeholder-event.jpg'}

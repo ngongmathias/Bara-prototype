@@ -17,11 +17,15 @@ import {
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-    Plus, Search, Edit, Trash2, Film, Star, Eye, TrendingUp
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+    Plus, Search, Edit, Trash2, Film, Star, Eye, TrendingUp, Upload, Loader2, X
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { AdminPageGuide } from "@/components/admin/AdminPageGuide";
+import { COUNTRIES, LANGUAGES } from "@/lib/constants";
 
 interface Movie {
     id: string;
@@ -49,15 +53,40 @@ const GENRES = [
     "Romance", "Thriller", "Sci-Fi", "Animation", "Short Film",
 ];
 
+const BUCKET = "movies";
+
+async function uploadFile(file: File, folder: string): Promise<string> {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    const filePath = `${folder}/${fileName}`;
+
+    const { error } = await supabase.storage.from(BUCKET).upload(filePath, file);
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
+    return publicUrl;
+}
+
 export const AdminMovies = () => {
     const [movies, setMovies] = useState<Movie[]>([]);
     const [loading, setLoading] = useState(true);
+    const [uploading, setUploading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingMovie, setEditingMovie] = useState<Movie | null>(null);
     const [movieToDelete, setMovieToDelete] = useState<string | null>(null);
     const [tableExists, setTableExists] = useState(true);
     const { toast } = useToast();
+
+    // File states
+    const [posterFile, setPosterFile] = useState<File | null>(null);
+    const [backdropFile, setBackdropFile] = useState<File | null>(null);
+    const [trailerFile, setTrailerFile] = useState<File | null>(null);
+    const [movieFile, setMovieFile] = useState<File | null>(null);
+
+    // Preview states
+    const [posterPreview, setPosterPreview] = useState<string | null>(null);
+    const [backdropPreview, setBackdropPreview] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         title: "", description: "", genre: "Drama", year: new Date().getFullYear(),
@@ -90,20 +119,38 @@ export const AdminMovies = () => {
             return;
         }
         try {
+            setUploading(true);
+            const finalData = { ...formData };
+
+            // Upload files in parallel
+            const uploads = await Promise.all([
+                posterFile ? uploadFile(posterFile, "posters") : null,
+                backdropFile ? uploadFile(backdropFile, "backdrops") : null,
+                trailerFile ? uploadFile(trailerFile, "trailers") : null,
+                movieFile ? uploadFile(movieFile, "videos") : null,
+            ]);
+
+            if (uploads[0]) finalData.poster_url = uploads[0];
+            if (uploads[1]) finalData.backdrop_url = uploads[1];
+            if (uploads[2]) finalData.trailer_url = uploads[2];
+            if (uploads[3]) finalData.stream_url = uploads[3];
+
             if (editingMovie) {
-                const { error } = await supabase.from("movies").update(formData).eq("id", editingMovie.id);
+                const { error } = await supabase.from("movies").update(finalData).eq("id", editingMovie.id);
                 if (error) throw error;
-                toast({ title: "Updated", description: `"${formData.title}" updated.` });
+                toast({ title: "Updated", description: `"${finalData.title}" updated.` });
             } else {
-                const { error } = await supabase.from("movies").insert([{ ...formData, view_count: 0 }]);
+                const { error } = await supabase.from("movies").insert([{ ...finalData, view_count: 0 }]);
                 if (error) throw error;
-                toast({ title: "Created", description: `"${formData.title}" created.` });
+                toast({ title: "Created", description: `"${finalData.title}" created.` });
             }
             setIsDialogOpen(false);
             resetForm();
             fetchMovies();
         } catch (e: any) {
             toast({ title: "Error", description: e.message, variant: "destructive" });
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -130,6 +177,8 @@ export const AdminMovies = () => {
             director: m.director || "", country: m.country || "", language: m.language || "en",
             is_featured: m.is_featured || false, is_free: m.is_free ?? true,
         });
+        if (m.poster_url) setPosterPreview(m.poster_url);
+        if (m.backdrop_url) setBackdropPreview(m.backdrop_url);
         setIsDialogOpen(true);
     };
 
@@ -141,6 +190,24 @@ export const AdminMovies = () => {
             trailer_url: "", stream_url: "", director: "", country: "",
             language: "en", is_featured: false, is_free: true,
         });
+        setPosterFile(null);
+        setBackdropFile(null);
+        setTrailerFile(null);
+        setMovieFile(null);
+        setPosterPreview(null);
+        setBackdropPreview(null);
+    };
+
+    const handleImageSelect = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        setFile: (f: File | null) => void,
+        setPreview: (u: string | null) => void,
+    ) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setFile(file);
+            setPreview(URL.createObjectURL(file));
+        }
     };
 
     const filtered = movies.filter(m =>
@@ -166,14 +233,6 @@ export const AdminMovies = () => {
                             <p className="text-gray-500 text-sm mb-4">
                                 The movies table hasn't been created yet. Run the DDL SQL in your Supabase SQL Editor to create it.
                             </p>
-                            <a
-                                href="https://supabase.com/dashboard/project/sqxybqvrctegnejbkpwg/sql"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline text-sm font-medium"
-                            >
-                                Open Supabase SQL Editor →
-                            </a>
                         </CardContent>
                     </Card>
                 </div>
@@ -187,8 +246,8 @@ export const AdminMovies = () => {
                 <AdminPageGuide
                     title="Admin Movies"
                     description="Manage the BARA movie catalog."
-                    features={["Add/edit/delete movies", "Feature movies on homepage", "Track view counts", "Toggle free/premium"]}
-                    workflow={["Add a new movie with title, genre, poster", "Set featured flag for homepage visibility", "Mark movies as free or premium"]}
+                    features={["Add/edit/delete movies", "Upload posters, trailers & full movies", "Feature movies on homepage", "Toggle free/premium"]}
+                    workflow={["Add a new movie with title, genre, upload poster", "Upload trailer and movie file", "Set featured flag for homepage visibility"]}
                 />
             </div>
             <div className="p-6 space-y-6">
@@ -298,7 +357,7 @@ export const AdminMovies = () => {
 
             {/* Create/Edit Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+                <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>{editingMovie ? "Edit Movie" : "Add New Movie"}</DialogTitle>
                     </DialogHeader>
@@ -308,9 +367,12 @@ export const AdminMovies = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <Label>Genre</Label>
-                                <select className="w-full border rounded-md px-3 py-2 text-sm" value={formData.genre} onChange={e => setFormData({ ...formData, genre: e.target.value })}>
-                                    {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
-                                </select>
+                                <Select value={formData.genre} onValueChange={v => setFormData({ ...formData, genre: v })}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        {GENRES.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div><Label>Year</Label><Input type="number" value={formData.year} onChange={e => setFormData({ ...formData, year: parseInt(e.target.value) || 2024 })} /></div>
                         </div>
@@ -320,13 +382,104 @@ export const AdminMovies = () => {
                         </div>
                         <div><Label>Director</Label><Input value={formData.director} onChange={e => setFormData({ ...formData, director: e.target.value })} /></div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div><Label>Country</Label><Input value={formData.country} onChange={e => setFormData({ ...formData, country: e.target.value })} placeholder="Nigeria" /></div>
-                            <div><Label>Language</Label><Input value={formData.language} onChange={e => setFormData({ ...formData, language: e.target.value })} placeholder="en" /></div>
+                            <div>
+                                <Label>Country</Label>
+                                <Select value={formData.country} onValueChange={v => setFormData({ ...formData, country: v })}>
+                                    <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
+                                    <SelectContent>
+                                        {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label>Language</Label>
+                                <Select value={formData.language} onValueChange={v => setFormData({ ...formData, language: v })}>
+                                    <SelectTrigger><SelectValue placeholder="Select language" /></SelectTrigger>
+                                    <SelectContent>
+                                        {LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                        <div><Label>Poster URL</Label><Input value={formData.poster_url} onChange={e => setFormData({ ...formData, poster_url: e.target.value })} placeholder="https://..." /></div>
-                        <div><Label>Backdrop URL</Label><Input value={formData.backdrop_url} onChange={e => setFormData({ ...formData, backdrop_url: e.target.value })} placeholder="https://..." /></div>
-                        <div><Label>Trailer URL</Label><Input value={formData.trailer_url} onChange={e => setFormData({ ...formData, trailer_url: e.target.value })} placeholder="https://youtube.com/..." /></div>
-                        <div><Label>Stream URL</Label><Input value={formData.stream_url} onChange={e => setFormData({ ...formData, stream_url: e.target.value })} placeholder="https://..." /></div>
+
+                        {/* Poster Upload */}
+                        <div>
+                            <Label>Poster Image</Label>
+                            <div className="mt-1">
+                                {posterPreview ? (
+                                    <div className="relative inline-block">
+                                        <img src={posterPreview} alt="Poster preview" className="w-24 h-36 rounded object-cover border" />
+                                        <button onClick={() => { setPosterFile(null); setPosterPreview(null); setFormData({ ...formData, poster_url: "" }); }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X className="h-3 w-3" /></button>
+                                    </div>
+                                ) : (
+                                    <label className="flex items-center gap-2 border-2 border-dashed rounded-lg p-4 cursor-pointer hover:border-gray-400 transition">
+                                        <Upload className="h-5 w-5 text-gray-400" />
+                                        <span className="text-sm text-gray-500">Click to upload poster image</span>
+                                        <input type="file" accept="image/*" className="hidden" onChange={e => handleImageSelect(e, setPosterFile, setPosterPreview)} />
+                                    </label>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Backdrop Upload */}
+                        <div>
+                            <Label>Backdrop Image</Label>
+                            <div className="mt-1">
+                                {backdropPreview ? (
+                                    <div className="relative inline-block">
+                                        <img src={backdropPreview} alt="Backdrop preview" className="w-40 h-20 rounded object-cover border" />
+                                        <button onClick={() => { setBackdropFile(null); setBackdropPreview(null); setFormData({ ...formData, backdrop_url: "" }); }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X className="h-3 w-3" /></button>
+                                    </div>
+                                ) : (
+                                    <label className="flex items-center gap-2 border-2 border-dashed rounded-lg p-4 cursor-pointer hover:border-gray-400 transition">
+                                        <Upload className="h-5 w-5 text-gray-400" />
+                                        <span className="text-sm text-gray-500">Click to upload backdrop image</span>
+                                        <input type="file" accept="image/*" className="hidden" onChange={e => handleImageSelect(e, setBackdropFile, setBackdropPreview)} />
+                                    </label>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Trailer Upload */}
+                        <div>
+                            <Label>Trailer Video</Label>
+                            <div className="mt-1">
+                                <label className="flex items-center gap-2 border-2 border-dashed rounded-lg p-4 cursor-pointer hover:border-gray-400 transition">
+                                    <Upload className="h-5 w-5 text-gray-400" />
+                                    <span className="text-sm text-gray-500">
+                                        {trailerFile ? trailerFile.name : (editingMovie?.trailer_url ? "Upload new trailer to replace current" : "Click to upload trailer video")}
+                                    </span>
+                                    <input type="file" accept="video/*" className="hidden" onChange={e => { if (e.target.files?.[0]) setTrailerFile(e.target.files[0]); }} />
+                                </label>
+                                {trailerFile && (
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-xs text-green-600">Ready: {trailerFile.name} ({(trailerFile.size / 1024 / 1024).toFixed(1)} MB)</span>
+                                        <button onClick={() => setTrailerFile(null)} className="text-red-500 text-xs underline">Remove</button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Movie File Upload */}
+                        <div>
+                            <Label>Movie File</Label>
+                            <div className="mt-1">
+                                <label className="flex items-center gap-2 border-2 border-dashed rounded-lg p-4 cursor-pointer hover:border-gray-400 transition">
+                                    <Upload className="h-5 w-5 text-gray-400" />
+                                    <span className="text-sm text-gray-500">
+                                        {movieFile ? movieFile.name : (editingMovie?.stream_url ? "Upload new movie file to replace current" : "Click to upload movie file")}
+                                    </span>
+                                    <input type="file" accept="video/*" className="hidden" onChange={e => { if (e.target.files?.[0]) setMovieFile(e.target.files[0]); }} />
+                                </label>
+                                {movieFile && (
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-xs text-green-600">Ready: {movieFile.name} ({(movieFile.size / 1024 / 1024).toFixed(1)} MB)</span>
+                                        <button onClick={() => setMovieFile(null)} className="text-red-500 text-xs underline">Remove</button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="flex items-center gap-6">
                             <div className="flex items-center gap-2">
                                 <Checkbox checked={formData.is_featured} onCheckedChange={(v) => setFormData({ ...formData, is_featured: !!v })} id="movie-featured" />
@@ -339,8 +492,10 @@ export const AdminMovies = () => {
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleSubmit}>{editingMovie ? "Update" : "Create"}</Button>
+                        <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={uploading}>Cancel</Button>
+                        <Button onClick={handleSubmit} disabled={uploading}>
+                            {uploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Uploading...</> : (editingMovie ? "Update" : "Create")}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

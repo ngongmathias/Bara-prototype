@@ -17,11 +17,15 @@ import {
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-    Plus, Search, Edit, Trash2, Mic2, Headphones, Users, Eye
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+    Plus, Search, Edit, Trash2, Mic2, Headphones, Users, Eye, Upload, Loader2, X
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { AdminPageGuide } from "@/components/admin/AdminPageGuide";
+import { LANGUAGES } from "@/lib/constants";
 
 interface Podcast {
     id: string;
@@ -41,15 +45,34 @@ const CATEGORIES = [
     "Comedy", "Finance", "Sports", "Music", "Education", "Health",
 ];
 
+const BUCKET = "podcasts";
+
+async function uploadFile(file: File, folder: string): Promise<string> {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    const filePath = `${folder}/${fileName}`;
+
+    const { error } = await supabase.storage.from(BUCKET).upload(filePath, file);
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
+    return publicUrl;
+}
+
 export const AdminPodcasts = () => {
     const [podcasts, setPodcasts] = useState<Podcast[]>([]);
     const [loading, setLoading] = useState(true);
+    const [uploading, setUploading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingPodcast, setEditingPodcast] = useState<Podcast | null>(null);
     const [podcastToDelete, setPodcastToDelete] = useState<string | null>(null);
     const [tableExists, setTableExists] = useState(true);
     const { toast } = useToast();
+
+    // File states
+    const [coverFile, setCoverFile] = useState<File | null>(null);
+    const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         title: "", host: "", description: "", category: "Entrepreneurship",
@@ -80,20 +103,29 @@ export const AdminPodcasts = () => {
             return;
         }
         try {
+            setUploading(true);
+            const finalData = { ...formData };
+
+            if (coverFile) {
+                finalData.cover_url = await uploadFile(coverFile, "covers");
+            }
+
             if (editingPodcast) {
-                const { error } = await supabase.from("podcasts").update(formData).eq("id", editingPodcast.id);
+                const { error } = await supabase.from("podcasts").update(finalData).eq("id", editingPodcast.id);
                 if (error) throw error;
-                toast({ title: "Updated", description: `"${formData.title}" updated.` });
+                toast({ title: "Updated", description: `"${finalData.title}" updated.` });
             } else {
-                const { error } = await supabase.from("podcasts").insert([{ ...formData, subscriber_count: 0 }]);
+                const { error } = await supabase.from("podcasts").insert([{ ...finalData, subscriber_count: 0 }]);
                 if (error) throw error;
-                toast({ title: "Created", description: `"${formData.title}" created.` });
+                toast({ title: "Created", description: `"${finalData.title}" created.` });
             }
             setIsDialogOpen(false);
             resetForm();
             fetchPodcasts();
         } catch (e: any) {
             toast({ title: "Error", description: e.message, variant: "destructive" });
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -117,12 +149,15 @@ export const AdminPodcasts = () => {
             category: p.category || "Entrepreneurship", cover_url: p.cover_url || "",
             language: p.language || "en", is_featured: p.is_featured || false,
         });
+        if (p.cover_url) setCoverPreview(p.cover_url);
         setIsDialogOpen(true);
     };
 
     const resetForm = () => {
         setEditingPodcast(null);
         setFormData({ title: "", host: "", description: "", category: "Entrepreneurship", cover_url: "", language: "en", is_featured: false });
+        setCoverFile(null);
+        setCoverPreview(null);
     };
 
     const filtered = podcasts.filter(p =>
@@ -142,14 +177,6 @@ export const AdminPodcasts = () => {
                             <p className="text-gray-500 text-sm mb-4">
                                 The podcasts table hasn't been created yet. Run the DDL SQL in your Supabase SQL Editor to create it.
                             </p>
-                            <a
-                                href="https://supabase.com/dashboard/project/sqxybqvrctegnejbkpwg/sql"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline text-sm font-medium"
-                            >
-                                Open Supabase SQL Editor →
-                            </a>
                         </CardContent>
                     </Card>
                 </div>
@@ -163,8 +190,8 @@ export const AdminPodcasts = () => {
                 <AdminPageGuide
                     title="Admin Podcasts"
                     description="Manage podcast shows on the BARA platform."
-                    features={["Add/edit/delete podcasts", "Feature shows on homepage", "Track subscriber counts"]}
-                    workflow={["Add a new podcast with title, host, and category", "Toggle featured status for homepage visibility"]}
+                    features={["Add/edit/delete podcasts", "Upload cover images", "Feature shows on homepage", "Track subscriber counts"]}
+                    workflow={["Add a new podcast with title, host, and category", "Upload cover image", "Toggle featured status for homepage visibility"]}
                 />
             </div>
             <div className="p-6 space-y-6">
@@ -262,7 +289,7 @@ export const AdminPodcasts = () => {
 
             {/* Create/Edit Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="max-w-lg">
+                <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>{editingPodcast ? "Edit Podcast" : "Add New Podcast"}</DialogTitle>
                     </DialogHeader>
@@ -270,22 +297,62 @@ export const AdminPodcasts = () => {
                         <div><Label>Title *</Label><Input value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} /></div>
                         <div><Label>Host *</Label><Input value={formData.host} onChange={e => setFormData({ ...formData, host: e.target.value })} /></div>
                         <div><Label>Description</Label><Textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={3} /></div>
-                        <div>
-                            <Label>Category</Label>
-                            <select className="w-full border rounded-md px-3 py-2 text-sm" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
-                                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label>Category</Label>
+                                <Select value={formData.category} onValueChange={v => setFormData({ ...formData, category: v })}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label>Language</Label>
+                                <Select value={formData.language} onValueChange={v => setFormData({ ...formData, language: v })}>
+                                    <SelectTrigger><SelectValue placeholder="Select language" /></SelectTrigger>
+                                    <SelectContent>
+                                        {LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                        <div><Label>Cover URL</Label><Input value={formData.cover_url} onChange={e => setFormData({ ...formData, cover_url: e.target.value })} placeholder="https://..." /></div>
-                        <div><Label>Language</Label><Input value={formData.language} onChange={e => setFormData({ ...formData, language: e.target.value })} placeholder="en" /></div>
+
+                        {/* Cover Image Upload */}
+                        <div>
+                            <Label>Cover Image</Label>
+                            <div className="mt-1">
+                                {coverPreview ? (
+                                    <div className="relative inline-block">
+                                        <img src={coverPreview} alt="Cover preview" className="w-20 h-20 rounded-md object-cover border" />
+                                        <button onClick={() => { setCoverFile(null); setCoverPreview(null); setFormData({ ...formData, cover_url: "" }); }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X className="h-3 w-3" /></button>
+                                    </div>
+                                ) : (
+                                    <label className="flex items-center gap-2 border-2 border-dashed rounded-lg p-4 cursor-pointer hover:border-gray-400 transition">
+                                        <Upload className="h-5 w-5 text-gray-400" />
+                                        <span className="text-sm text-gray-500">Click to upload cover image</span>
+                                        <input type="file" accept="image/*" className="hidden" onChange={e => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                setCoverFile(file);
+                                                setCoverPreview(URL.createObjectURL(file));
+                                            }
+                                        }} />
+                                    </label>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="flex items-center gap-2">
                             <Checkbox checked={formData.is_featured} onCheckedChange={(v) => setFormData({ ...formData, is_featured: !!v })} id="featured" />
                             <Label htmlFor="featured">Featured on homepage</Label>
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleSubmit}>{editingPodcast ? "Update" : "Create"}</Button>
+                        <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={uploading}>Cancel</Button>
+                        <Button onClick={handleSubmit} disabled={uploading}>
+                            {uploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Uploading...</> : (editingPodcast ? "Update" : "Create")}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

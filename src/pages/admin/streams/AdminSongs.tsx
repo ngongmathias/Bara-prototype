@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useUser } from "@clerk/clerk-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,7 @@ interface Album {
 }
 
 export const AdminSongs = () => {
+    const { user } = useUser();
     const [songs, setSongs] = useState<Song[]>([]);
     const [artists, setArtists] = useState<Artist[]>([]);
     const [albums, setAlbums] = useState<Album[]>([]);
@@ -178,7 +180,8 @@ export const AdminSongs = () => {
             const songData = {
                 ...formData,
                 file_url: finalFileUrl,
-                album_id: formData.album_id === "none" ? null : formData.album_id
+                album_id: formData.album_id === "none" ? null : formData.album_id,
+                ...(editingSong ? {} : { uploaded_by: user?.id || 'admin', upload_type: 'platform' as const }),
             };
 
             if (editingSong) {
@@ -392,12 +395,41 @@ export const AdminSongs = () => {
                                     )}
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Cover Art URL (Optional)</Label>
-                                    <Input
-                                        value={formData.cover_url || ''}
-                                        onChange={(e) => setFormData({ ...formData, cover_url: e.target.value })}
-                                        placeholder="https://..."
-                                    />
+                                    <Label>Cover Art (Optional)</Label>
+                                    {previewUrl ? (
+                                        <div className="relative inline-block">
+                                            <img src={previewUrl} alt="Cover art" className="w-16 h-16 rounded object-cover border" />
+                                            <button onClick={() => { setPreviewUrl(null); setFormData({ ...formData, cover_url: "" }); }} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <label className="flex items-center gap-2 border-2 border-dashed rounded-lg p-3 cursor-pointer hover:border-gray-400 transition">
+                                            <Upload className="h-4 w-4 text-gray-400" />
+                                            <span className="text-sm text-gray-500">Upload cover art</span>
+                                            <input type="file" accept="image/*" className="hidden" onChange={e => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                    setPreviewUrl(URL.createObjectURL(file));
+                                                    // Upload cover art to storage
+                                                    const ext = file.name.split('.').pop();
+                                                    const name = `covers/${Math.random().toString(36).substring(2)}-${Date.now()}.${ext}`;
+                                                    supabase.storage.from('music').upload(name, file).then(({ error }) => {
+                                                        if (!error) {
+                                                            const { data: { publicUrl } } = supabase.storage.from('music').getPublicUrl(name);
+                                                            setFormData(prev => ({ ...prev, cover_url: publicUrl }));
+                                                        }
+                                                    });
+                                                }
+                                            }} />
+                                        </label>
+                                    )}
+                                    {editingSong && !previewUrl && formData.cover_url && (
+                                        <div className="mt-1">
+                                            <img src={formData.cover_url} alt="Current cover" className="w-12 h-12 rounded object-cover border" />
+                                            <p className="text-xs text-gray-500 mt-1">Current cover art</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <DialogFooter>

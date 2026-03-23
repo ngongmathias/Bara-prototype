@@ -41,11 +41,23 @@ import {
     Mic2,
     CheckCircle,
     XCircle,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Upload,
+    Loader2,
+    X
 } from "lucide-react";
-import { db } from "@/lib/supabase";
+import { db, supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+
+async function uploadArtistImage(file: File): Promise<string> {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `artists/${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    const { error } = await supabase.storage.from("music").upload(fileName, file);
+    if (error) throw error;
+    const { data: { publicUrl } } = supabase.storage.from("music").getPublicUrl(fileName);
+    return publicUrl;
+}
 
 
 interface Artist {
@@ -65,6 +77,9 @@ export const AdminArtists = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingArtist, setEditingArtist] = useState<Artist | null>(null);
     const [artistToDelete, setArtistToDelete] = useState<string | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
     const { toast } = useToast();
 
     // Form State
@@ -102,15 +117,22 @@ export const AdminArtists = () => {
                 return;
             }
 
+            setUploading(true);
+            const finalData = { ...formData };
+
+            if (imageFile) {
+                finalData.image_url = await uploadArtistImage(imageFile);
+            }
+
             if (editingArtist) {
                 const { error } = await db.artists()
-                    .update(formData)
+                    .update(finalData)
                     .eq('id', editingArtist.id);
                 if (error) throw error;
                 toast({ title: "Success", description: "Artist updated" });
             } else {
                 const { error } = await db.artists()
-                    .insert(formData);
+                    .insert(finalData);
                 if (error) throw error;
                 toast({ title: "Success", description: "Artist created" });
             }
@@ -121,6 +143,8 @@ export const AdminArtists = () => {
         } catch (error) {
             console.error(error);
             toast({ title: "Error", description: "Failed to save artist", variant: "destructive" });
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -149,11 +173,14 @@ export const AdminArtists = () => {
             instagram_handle: ""
         });
         setEditingArtist(null);
+        setImageFile(null);
+        setImagePreview(null);
     };
 
     const openEdit = (artist: Artist) => {
         setEditingArtist(artist);
         setFormData(artist);
+        if (artist.image_url) setImagePreview(artist.image_url);
         setIsDialogOpen(true);
     };
 
@@ -217,12 +244,22 @@ export const AdminArtists = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Profile Image URL</Label>
-                                    <Input
-                                        value={formData.image_url || ''}
-                                        onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                                        placeholder="https://..."
-                                    />
+                                    <Label>Profile Image</Label>
+                                    {imagePreview ? (
+                                        <div className="relative inline-block">
+                                            <img src={imagePreview} alt="Artist" className="w-20 h-20 rounded-full object-cover border" />
+                                            <button onClick={() => { setImageFile(null); setImagePreview(null); setFormData({ ...formData, image_url: "" }); }} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5"><X className="h-3 w-3" /></button>
+                                        </div>
+                                    ) : (
+                                        <label className="flex items-center gap-2 border-2 border-dashed rounded-lg p-4 cursor-pointer hover:border-gray-400 transition">
+                                            <Upload className="h-5 w-5 text-gray-400" />
+                                            <span className="text-sm text-gray-500">Click to upload profile image</span>
+                                            <input type="file" accept="image/*" className="hidden" onChange={e => {
+                                                const file = e.target.files?.[0];
+                                                if (file) { setImageFile(file); setImagePreview(URL.createObjectURL(file)); }
+                                            }} />
+                                        </label>
+                                    )}
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <Checkbox
@@ -234,8 +271,10 @@ export const AdminArtists = () => {
                                 </div>
                             </div>
                             <DialogFooter>
-                                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                                <Button onClick={handleSave} className="bg-brand-blue">Save Artist</Button>
+                                <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={uploading}>Cancel</Button>
+                                <Button onClick={handleSave} className="bg-brand-blue" disabled={uploading}>
+                                    {uploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Uploading...</> : "Save Artist"}
+                                </Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>

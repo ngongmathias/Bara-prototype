@@ -192,6 +192,8 @@ import { AdminPodcasts } from "./pages/admin/streams/AdminPodcasts";
 
 import { AdminMovies } from "./pages/admin/streams/AdminMovies";
 
+import { AdminEbooks } from "./pages/admin/streams/AdminEbooks";
+
 import { AdminSportsDashboard } from "./pages/admin/sports/AdminSportsDashboard";
 
 import AdminSportsNews from "./pages/admin/sports/AdminSportsNews";
@@ -795,6 +797,8 @@ const AppRoutes = () => {
           <Route path="streams/podcasts" element={<AdminAuthGuard><AdminPodcasts /></AdminAuthGuard>} />
 
           <Route path="streams/movies" element={<AdminAuthGuard><AdminMovies /></AdminAuthGuard>} />
+
+          <Route path="streams/ebooks" element={<AdminAuthGuard><AdminEbooks /></AdminAuthGuard>} />
 
           <Route path="sports" element={<AdminAuthGuard><AdminSportsDashboard /></AdminAuthGuard>} />
 
