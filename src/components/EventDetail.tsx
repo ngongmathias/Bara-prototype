@@ -162,9 +162,14 @@ export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => 
 
             <div className="md:flex">
                 <div className="md:flex-shrink-0 md:w-1/2">
-                    <div className="relative h-80 md:h-full">
+                    <div className="relative aspect-[3/4] md:aspect-auto md:h-full min-h-[320px]">
+                        {/* Blurred background for non-standard aspect ratios */}
+                        <div
+                            className="absolute inset-0 bg-cover bg-center blur-2xl scale-110 opacity-30"
+                            style={{ backgroundImage: `url(${images[currentImageIndex] || '/placeholder-event.jpg'})` }}
+                        />
                         <img
-                            className="h-full w-full object-cover cursor-zoom-in"
+                            className="relative h-full w-full object-contain cursor-zoom-in z-10"
                             src={images[currentImageIndex] || '/placeholder-event.jpg'}
                             alt={`${event.title} - Image ${currentImageIndex + 1}`}
                             onClick={() => openLightboxAt(0)}

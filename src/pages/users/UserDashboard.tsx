@@ -389,6 +389,16 @@ export const UserDashboard = () => {
                     </Button>
                   </Link>
 
+                  <Link to="/users/dashboard/my-playlists">
+                    <Button
+                      variant={isActive('/users/dashboard/my-playlists') ? 'default' : 'ghost'}
+                      className="w-full justify-start"
+                    >
+                      <Music className="mr-3 h-4 w-4" />
+                      My Playlists
+                    </Button>
+                  </Link>
+
                   <Link to="/users/dashboard/my-blog">
                     <Button
                       variant={isActive('/users/dashboard/my-blog') ? 'default' : 'ghost'}

@@ -9,6 +9,7 @@ import es from '../locales/es.json';
 import pt from '../locales/pt.json';
 import sw from '../locales/sw.json';
 import ar from '../locales/ar.json';
+import rw from '../locales/rw.json';
 
 const resources = {
   en: {
@@ -28,6 +29,9 @@ const resources = {
   },
   ar: {
     translation: ar
+  },
+  rw: {
+    translation: rw
   }
 };
 

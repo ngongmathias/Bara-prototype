@@ -33,7 +33,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { GoogleTranslate } from './GoogleTranslate';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { db } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
@@ -232,7 +232,7 @@ export const Header = () => {
             </DropdownMenu>
 
             {/* Language (Google Translate) */}
-            <GoogleTranslate />
+            <LanguageSwitcher />
 
             {/* Bara Coins */}
             {isSignedIn && profile && (
@@ -403,7 +403,7 @@ export const Header = () => {
                   </div>
                   <div>
                     <p className="text-[10px] font-semibold text-gray-400 uppercase mb-1">Language</p>
-                    <GoogleTranslate />
+                    <LanguageSwitcher />
                   </div>
                 </div>
 

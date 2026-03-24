@@ -304,6 +304,8 @@ import { UserCreatorAnalytics } from "./pages/users/UserCreatorAnalytics";
 
 import { UserMyBlogPosts } from "./pages/users/UserMyBlogPosts";
 
+import { UserMyPlaylists } from "./pages/users/UserMyPlaylists";
+
 import { UserSavedItems } from "./pages/users/UserSavedItems";
 
 import { OrganizerRegistrationsPage } from "./pages/users/OrganizerRegistrationsPage";
@@ -679,6 +681,7 @@ const AppRoutes = () => {
             <Route path="creator-analytics" element={<UserCreatorAnalytics />} />
 
             <Route path="my-blog" element={<UserMyBlogPosts />} />
+            <Route path="my-playlists" element={<UserMyPlaylists />} />
 
             <Route path="saved" element={<UserSavedItems />} />
 

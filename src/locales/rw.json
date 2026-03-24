@@ -1,0 +1,70 @@
+{
+  "common": {
+    "search": "Shakisha",
+    "find": "Shaka",
+    "view": "Reba",
+    "edit": "Hindura",
+    "delete": "Siba",
+    "save": "Bika",
+    "cancel": "Hagarika",
+    "submit": "Ohereza",
+    "loading": "Gutegereza...",
+    "error": "Ikosa",
+    "success": "Byagenze neza",
+    "close": "Funga",
+    "back": "Subira inyuma",
+    "next": "Komeza",
+    "previous": "Ibanjirije",
+    "yes": "Yego",
+    "no": "Oya",
+    "ok": "Sawa"
+  },
+  "navigation": {
+    "home": "Ahabanza",
+    "listings": "Urutonde rw'ubucuruzi",
+    "advertise": "Kwikorera amamenyekanisha",
+    "writeReview": "Andika igitekerezo",
+    "searchByCity": "Shakisha ku mujyi",
+    "searchByCountry": "Shakisha ku gihugu",
+    "marketplace": "Isoko",
+    "events": "Ibirori",
+    "about": "Abo turibo",
+    "contact": "Twandikire",
+    "login": "Injira",
+    "signup": "Iyandikishe",
+    "profile": "Umwirondoro",
+    "logout": "Sohoka"
+  },
+  "languages": {
+    "english": "Icyongereza",
+    "french": "Igifaransa",
+    "spanish": "Icyesipanyoli",
+    "swahili": "Igiswahili",
+    "selectLanguage": "Hitamo ururimi"
+  },
+  "homepage": {
+    "hero": {
+      "title": "Shakisha • Menye • Huza • Kura",
+      "subtitle": "Shaka ubucuruzi bwiza hafi yawe",
+      "searchPlaceholder": "Shaka ubucuruzi",
+      "locationPlaceholder": "Ahantu",
+      "searchButton": "SHAKISHA"
+    },
+    "categories": {
+      "title": "Reba ibiciro",
+      "viewMore": "Reba byinshi",
+      "viewLess": "Reba bike",
+      "viewAllCategories": "Reba ibiciro byose"
+    },
+    "businesses": {
+      "title": "Ubucuruzi buhebuje"
+    }
+  },
+  "footer": {
+    "description": "Urubuga rw'ubucuruzi n'ibikorwa bya Afurika",
+    "quickLinks": "Aho uhita",
+    "contactUs": "Twandikire",
+    "followUs": "Dukurikire",
+    "copyright": "Uburenganzira bwose burabikwa"
+  }
+}

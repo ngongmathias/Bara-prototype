@@ -1,6 +1,6 @@
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
-import { Mic2, Bell, Play, Clock, Headphones, Pause, Loader2, Users } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { Mic2, Bell, Play, Clock, Headphones, Pause, Loader2, Users, Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { SEO } from '@/components/SEO';
 import { DiscoverMore } from '@/components/DiscoverMore';
@@ -57,6 +57,11 @@ export default function PodcastsPage() {
     const [notifyEmail, setNotifyEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    // Search, filter & sort
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [sortBy, setSortBy] = useState<'popular' | 'newest' | 'az'>('popular');
 
     useEffect(() => {
         fetchPodcasts();
@@ -127,8 +132,44 @@ export default function PodcastsPage() {
         setSubmitted(true);
     };
 
-    const featuredPodcasts = podcasts.filter(p => p.is_featured);
     const categories = [...new Set(podcasts.map(p => p.category))];
+
+    const filteredPodcasts = useMemo(() => {
+        let result = [...podcasts];
+
+        // Search filter
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            result = result.filter(p =>
+                p.title.toLowerCase().includes(q) ||
+                p.host?.toLowerCase().includes(q) ||
+                p.description?.toLowerCase().includes(q) ||
+                p.category?.toLowerCase().includes(q)
+            );
+        }
+
+        // Category filter
+        if (selectedCategory) {
+            result = result.filter(p => p.category === selectedCategory);
+        }
+
+        // Sort
+        switch (sortBy) {
+            case 'popular':
+                result.sort((a, b) => (b.subscriber_count || 0) - (a.subscriber_count || 0));
+                break;
+            case 'newest':
+                result.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+                break;
+            case 'az':
+                result.sort((a, b) => a.title.localeCompare(b.title));
+                break;
+        }
+
+        return result;
+    }, [podcasts, searchQuery, selectedCategory, sortBy]);
+
+    const featuredPodcasts = podcasts.filter(p => p.is_featured);
 
     return (
         <StreamsLayout>
@@ -158,12 +199,34 @@ export default function PodcastsPage() {
                             entrepreneurs, comedians, storytellers, and thought leaders.
                         </p>
 
-                        {/* Categories */}
+                        {/* Search Bar */}
+                        <div className="relative max-w-md mx-auto mb-6">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search podcasts, hosts, topics..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 bg-white rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 border border-gray-200 shadow-sm"
+                            />
+                        </div>
+
+                        {/* Categories (clickable filters) */}
                         <div className="flex flex-wrap justify-center gap-2 mb-8">
+                            <button
+                                onClick={() => setSelectedCategory(null)}
+                                className={`text-xs font-bold px-3 py-1.5 rounded-full border transition ${!selectedCategory ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'}`}
+                            >
+                                All
+                            </button>
                             {(categories.length > 0 ? categories : ['African Stories', 'True Crime', 'Comedy', 'Tech', 'Finance', 'Sports', 'Music News', 'Self-Improvement']).map((cat) => (
-                                <span key={cat} className="bg-white text-gray-600 text-xs font-bold px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-100 cursor-pointer transition">
+                                <button
+                                    key={cat}
+                                    onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                                    className={`text-xs font-bold px-3 py-1.5 rounded-full border transition ${selectedCategory === cat ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'}`}
+                                >
                                     {cat}
-                                </span>
+                                </button>
                             ))}
                         </div>
 
@@ -237,11 +300,40 @@ export default function PodcastsPage() {
 
                         {/* All Podcasts */}
                         <div className="max-w-6xl mx-auto px-6 mt-8">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-1 tracking-tight">All Shows</h2>
-                            <p className="text-gray-500 text-sm mb-6">{usingFallback ? "Here's a taste of the podcasts we're lining up" : `${podcasts.length} shows available`}</p>
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                                        {selectedCategory ? selectedCategory : 'All Shows'}
+                                        {searchQuery && ` — "${searchQuery}"`}
+                                    </h2>
+                                    <p className="text-gray-500 text-sm">
+                                        {usingFallback ? "Here's a taste of the podcasts we're lining up" : `${filteredPodcasts.length} show${filteredPodcasts.length !== 1 ? 's' : ''} found`}
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg px-2 py-1">
+                                    <ArrowUpDown className="w-3 h-3 text-gray-400" />
+                                    <select
+                                        value={sortBy}
+                                        onChange={e => setSortBy(e.target.value as any)}
+                                        className="text-xs font-medium text-gray-700 bg-transparent border-none focus:outline-none cursor-pointer pr-1"
+                                    >
+                                        <option value="popular">Most Popular</option>
+                                        <option value="newest">Newest</option>
+                                        <option value="az">A — Z</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {filteredPodcasts.length === 0 && (
+                                <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
+                                    <Mic2 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                                    <p className="text-gray-500 font-medium">No podcasts found</p>
+                                    <p className="text-gray-400 text-sm mt-1">Try a different search or category</p>
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {podcasts.map((pod) => (
+                                {filteredPodcasts.map((pod) => (
                                     <div key={pod.id}>
                                         <div
                                             onClick={() => handleSelectPodcast(pod)}
