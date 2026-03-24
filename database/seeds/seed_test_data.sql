@@ -117,16 +117,5 @@ BEGIN
     END LOOP;
 END $$;
 
--- Seed blog_posts table if it exists (for user blog testing)
-INSERT INTO public.blog_posts (title, excerpt, content, image_url, status, author_id, author_name, views, category)
-SELECT
-    title, excerpt, content, image_url, status, author_id, author_name, views, category
-FROM (VALUES
-    ('The Rise of Amapiano: From Johannesburg to the World', 'How a South African genre conquered global dance floors', 'Amapiano started in the townships of Pretoria and Johannesburg...', 'https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=800&q=80', 'published', 'admin', 'BARA Editorial', 342, 'Music'),
-    ('5 Must-Visit Cities in East Africa', 'From Kigali to Zanzibar — your guide to East African travel', 'East Africa offers some of the most breathtaking destinations...', 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=800&q=80', 'published', 'admin', 'BARA Editorial', 518, 'Travel'),
-    ('African Tech Startups to Watch in 2026', 'The continent''s most promising tech ventures', 'Africa''s tech ecosystem continues to mature...', 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80', 'published', 'admin', 'BARA Editorial', 276, 'Technology'),
-    ('Traditional African Cuisine Going Global', 'Why the world is falling in love with African food', 'From jollof rice debates to the rise of Ethiopian restaurants...', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80', 'published', 'admin', 'BARA Editorial', 189, 'Food'),
-    ('The Future of African Cinema', 'Nollywood, South African film, and beyond', 'African cinema has never been more exciting...', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&q=80', 'published', 'admin', 'BARA Editorial', 421, 'Entertainment')
-) AS t(title, excerpt, content, image_url, status, author_id, author_name, views, category)
-WHERE EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'blog_posts')
-ON CONFLICT DO NOTHING;
+-- Blog posts seeding skipped here — blog_posts uses UUID FKs to blog_authors
+-- and blog_categories tables. Use INSERT_SAMPLE_BLOG_DATA.sql instead.
