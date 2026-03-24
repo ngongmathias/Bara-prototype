@@ -358,6 +358,42 @@ const adminMenuItems = [
 
   {
 
+    title: "Teams",
+
+    icon: Users,
+
+    path: "/admin/sports/teams",
+
+    description: "Manage sports teams"
+
+  },
+
+  {
+
+    title: "Leagues",
+
+    icon: Trophy,
+
+    path: "/admin/sports/leagues",
+
+    description: "Manage leagues & competitions"
+
+  },
+
+  {
+
+    title: "Tournaments",
+
+    icon: Calendar,
+
+    path: "/admin/sports/tournaments",
+
+    description: "Manage tournaments & cups"
+
+  },
+
+  {
+
     title: "Sports News",
 
     icon: FileText,

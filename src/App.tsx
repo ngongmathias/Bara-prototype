@@ -200,6 +200,12 @@ import AdminSportsNews from "./pages/admin/sports/AdminSportsNews";
 
 import AdminSportsVideos from "./pages/admin/sports/AdminSportsVideos";
 
+import { AdminTeams } from "./pages/admin/sports/AdminTeams";
+
+import { AdminLeagues } from "./pages/admin/sports/AdminLeagues";
+
+import { AdminTournaments } from "./pages/admin/sports/AdminTournaments";
+
 import { MainLayout } from "./components/layout/MainLayout";
 
 import BlogPage from "./pages/BlogPage";
@@ -829,6 +835,12 @@ const AppRoutes = () => {
           <Route path="sports/news" element={<AdminAuthGuard><AdminSportsNews /></AdminAuthGuard>} />
 
           <Route path="sports/videos" element={<AdminAuthGuard><AdminSportsVideos /></AdminAuthGuard>} />
+
+          <Route path="sports/teams" element={<AdminAuthGuard><AdminTeams /></AdminAuthGuard>} />
+
+          <Route path="sports/leagues" element={<AdminAuthGuard><AdminLeagues /></AdminAuthGuard>} />
+
+          <Route path="sports/tournaments" element={<AdminAuthGuard><AdminTournaments /></AdminAuthGuard>} />
 
           <Route path="*" element={<AdminAuthGuard><AdminDashboard /></AdminAuthGuard>} />
 
