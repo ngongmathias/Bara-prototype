@@ -114,6 +114,17 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     const { user: clerkUser } = useUser();
 
+    // Refs for stable access in audio event handlers (avoids stale closures)
+    const queueRef = useRef(queue);
+    const queueIndexRef = useRef(queueIndex);
+    const isShuffleRef = useRef(isShuffle);
+    const repeatModeRef = useRef(repeatMode);
+
+    useEffect(() => { queueRef.current = queue; }, [queue]);
+    useEffect(() => { queueIndexRef.current = queueIndex; }, [queueIndex]);
+    useEffect(() => { isShuffleRef.current = isShuffle; }, [isShuffle]);
+    useEffect(() => { repeatModeRef.current = repeatMode; }, [repeatMode]);
+
 
 
     // Initialize Audio Object
@@ -161,28 +172,56 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const handleDurationChange = () => setDuration(audio.duration || 0);
 
         const handleEnded = () => {
-
-            if (repeatMode === 'one') {
-
+            if (repeatModeRef.current === 'one') {
                 audio.currentTime = 0;
-
-                audio.play();
-
+                audio.play().catch(() => {});
             } else {
+                // Inline next logic using refs to avoid stale closures
+                const q = queueRef.current;
+                const idx = queueIndexRef.current;
+                if (q.length === 0) { setIsPlaying(false); return; }
 
-                next();
+                let nextIdx;
+                if (isShuffleRef.current) {
+                    nextIdx = Math.floor(Math.random() * q.length);
+                } else {
+                    nextIdx = idx + 1;
+                }
 
+                if (nextIdx < q.length) {
+                    setQueueIndex(nextIdx);
+                    play(q[nextIdx]);
+                } else if (repeatModeRef.current === 'all') {
+                    setQueueIndex(0);
+                    play(q[0]);
+                } else {
+                    setIsPlaying(false);
+                    audio.currentTime = 0;
+                }
             }
-
         };
 
 
+
+        const handleError = (e: Event) => {
+            const audio = e.target as HTMLAudioElement;
+            const error = audio.error;
+            if (error) {
+                console.warn('Audio error:', error.code, error.message);
+                // Auto-skip to next song on media error (e.g. 404, decode error)
+                if (error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || error.code === MediaError.MEDIA_ERR_NETWORK) {
+                    setIsPlaying(false);
+                }
+            }
+        };
 
         audio.addEventListener('timeupdate', handleTimeUpdate);
 
         audio.addEventListener('durationchange', handleDurationChange);
 
         audio.addEventListener('ended', handleEnded);
+
+        audio.addEventListener('error', handleError);
 
 
 
@@ -200,11 +239,13 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
             audio.removeEventListener('ended', handleEnded);
 
+            audio.removeEventListener('error', handleError);
+
             audio.pause();
 
         };
 
-    }, [repeatMode]); // Re-bind ended listener if repeatMode changes
+    }, []); // Runs once — event handlers use refs for current state
 
 
 
