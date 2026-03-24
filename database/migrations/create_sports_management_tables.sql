@@ -2,43 +2,99 @@
 -- BARA AFRIKA — Sports Management Tables
 -- Teams, Leagues, Tournaments, Players, Fixtures
 -- Run in Supabase SQL Editor
+-- Safe for re-runs: handles pre-existing tables by adding
+-- missing columns via ALTER TABLE ADD COLUMN IF NOT EXISTS
 -- ============================================================
 
 -- Leagues / Competitions
 CREATE TABLE IF NOT EXISTS public.leagues (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    short_name TEXT,
-    logo_url TEXT,
-    sport TEXT NOT NULL DEFAULT 'Football',
-    country TEXT,
-    region TEXT,
-    season TEXT,
-    tier INTEGER DEFAULT 1,
-    description TEXT,
-    api_league_id INTEGER,
-    is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Add columns that may be missing on pre-existing leagues table
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='leagues' AND column_name='short_name') THEN
+        ALTER TABLE public.leagues ADD COLUMN short_name TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='leagues' AND column_name='logo_url') THEN
+        ALTER TABLE public.leagues ADD COLUMN logo_url TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='leagues' AND column_name='sport') THEN
+        ALTER TABLE public.leagues ADD COLUMN sport TEXT NOT NULL DEFAULT 'Football';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='leagues' AND column_name='country') THEN
+        ALTER TABLE public.leagues ADD COLUMN country TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='leagues' AND column_name='region') THEN
+        ALTER TABLE public.leagues ADD COLUMN region TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='leagues' AND column_name='season') THEN
+        ALTER TABLE public.leagues ADD COLUMN season TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='leagues' AND column_name='tier') THEN
+        ALTER TABLE public.leagues ADD COLUMN tier INTEGER DEFAULT 1;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='leagues' AND column_name='description') THEN
+        ALTER TABLE public.leagues ADD COLUMN description TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='leagues' AND column_name='api_league_id') THEN
+        ALTER TABLE public.leagues ADD COLUMN api_league_id INTEGER;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='leagues' AND column_name='is_active') THEN
+        ALTER TABLE public.leagues ADD COLUMN is_active BOOLEAN DEFAULT true;
+    END IF;
+END $$;
 
 -- Teams
 CREATE TABLE IF NOT EXISTS public.teams (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    short_name TEXT,
-    logo_url TEXT,
-    sport TEXT NOT NULL DEFAULT 'Football',
-    league_id UUID REFERENCES public.leagues(id) ON DELETE SET NULL,
-    country TEXT,
-    stadium TEXT,
-    founded_year INTEGER,
-    description TEXT,
-    website TEXT,
-    social_links JSONB DEFAULT '{}',
-    is_featured BOOLEAN DEFAULT false,
-    api_team_id INTEGER,
     created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Add columns that may be missing on pre-existing teams table
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='teams' AND column_name='short_name') THEN
+        ALTER TABLE public.teams ADD COLUMN short_name TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='teams' AND column_name='logo_url') THEN
+        ALTER TABLE public.teams ADD COLUMN logo_url TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='teams' AND column_name='sport') THEN
+        ALTER TABLE public.teams ADD COLUMN sport TEXT NOT NULL DEFAULT 'Football';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='teams' AND column_name='league_id') THEN
+        ALTER TABLE public.teams ADD COLUMN league_id UUID REFERENCES public.leagues(id) ON DELETE SET NULL;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='teams' AND column_name='country') THEN
+        ALTER TABLE public.teams ADD COLUMN country TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='teams' AND column_name='stadium') THEN
+        ALTER TABLE public.teams ADD COLUMN stadium TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='teams' AND column_name='founded_year') THEN
+        ALTER TABLE public.teams ADD COLUMN founded_year INTEGER;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='teams' AND column_name='description') THEN
+        ALTER TABLE public.teams ADD COLUMN description TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='teams' AND column_name='website') THEN
+        ALTER TABLE public.teams ADD COLUMN website TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='teams' AND column_name='social_links') THEN
+        ALTER TABLE public.teams ADD COLUMN social_links JSONB DEFAULT '{}';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='teams' AND column_name='is_featured') THEN
+        ALTER TABLE public.teams ADD COLUMN is_featured BOOLEAN DEFAULT false;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='teams' AND column_name='api_team_id') THEN
+        ALTER TABLE public.teams ADD COLUMN api_team_id INTEGER;
+    END IF;
+END $$;
 
 -- Tournaments / Cups
 CREATE TABLE IF NOT EXISTS public.tournaments (
@@ -128,23 +184,57 @@ ALTER TABLE public.players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.fixtures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_team_follows ENABLE ROW LEVEL SECURITY;
 
--- Public read on all sports tables
-CREATE POLICY "leagues_public_read" ON public.leagues FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY "teams_public_read" ON public.teams FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY "tournaments_public_read" ON public.tournaments FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY "tournament_teams_public_read" ON public.tournament_teams FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY "players_public_read" ON public.players FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY "fixtures_public_read" ON public.fixtures FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY "user_team_follows_public_read" ON public.user_team_follows FOR SELECT TO anon, authenticated USING (true);
+-- Public read on all sports tables (use DO block to skip if policy already exists)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='leagues' AND policyname='leagues_public_read') THEN
+        CREATE POLICY "leagues_public_read" ON public.leagues FOR SELECT TO anon, authenticated USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='teams' AND policyname='teams_public_read') THEN
+        CREATE POLICY "teams_public_read" ON public.teams FOR SELECT TO anon, authenticated USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='tournaments' AND policyname='tournaments_public_read') THEN
+        CREATE POLICY "tournaments_public_read" ON public.tournaments FOR SELECT TO anon, authenticated USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='tournament_teams' AND policyname='tournament_teams_public_read') THEN
+        CREATE POLICY "tournament_teams_public_read" ON public.tournament_teams FOR SELECT TO anon, authenticated USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='players' AND policyname='players_public_read') THEN
+        CREATE POLICY "players_public_read" ON public.players FOR SELECT TO anon, authenticated USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='fixtures' AND policyname='fixtures_public_read') THEN
+        CREATE POLICY "fixtures_public_read" ON public.fixtures FOR SELECT TO anon, authenticated USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='user_team_follows' AND policyname='user_team_follows_public_read') THEN
+        CREATE POLICY "user_team_follows_public_read" ON public.user_team_follows FOR SELECT TO anon, authenticated USING (true);
+    END IF;
+END $$;
 
 -- Authenticated full access (admin manages these)
-CREATE POLICY "leagues_auth_all" ON public.leagues FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "teams_auth_all" ON public.teams FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "tournaments_auth_all" ON public.tournaments FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "tournament_teams_auth_all" ON public.tournament_teams FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "players_auth_all" ON public.players FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "fixtures_auth_all" ON public.fixtures FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "user_team_follows_auth_all" ON public.user_team_follows FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='leagues' AND policyname='leagues_auth_all') THEN
+        CREATE POLICY "leagues_auth_all" ON public.leagues FOR ALL TO authenticated USING (true) WITH CHECK (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='teams' AND policyname='teams_auth_all') THEN
+        CREATE POLICY "teams_auth_all" ON public.teams FOR ALL TO authenticated USING (true) WITH CHECK (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='tournaments' AND policyname='tournaments_auth_all') THEN
+        CREATE POLICY "tournaments_auth_all" ON public.tournaments FOR ALL TO authenticated USING (true) WITH CHECK (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='tournament_teams' AND policyname='tournament_teams_auth_all') THEN
+        CREATE POLICY "tournament_teams_auth_all" ON public.tournament_teams FOR ALL TO authenticated USING (true) WITH CHECK (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='players' AND policyname='players_auth_all') THEN
+        CREATE POLICY "players_auth_all" ON public.players FOR ALL TO authenticated USING (true) WITH CHECK (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='fixtures' AND policyname='fixtures_auth_all') THEN
+        CREATE POLICY "fixtures_auth_all" ON public.fixtures FOR ALL TO authenticated USING (true) WITH CHECK (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='user_team_follows' AND policyname='user_team_follows_auth_all') THEN
+        CREATE POLICY "user_team_follows_auth_all" ON public.user_team_follows FOR ALL TO authenticated USING (true) WITH CHECK (true);
+    END IF;
+END $$;
 
 -- Grants
 GRANT SELECT ON public.leagues TO anon;
