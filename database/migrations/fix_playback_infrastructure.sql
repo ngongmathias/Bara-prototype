@@ -17,8 +17,15 @@ CREATE INDEX IF NOT EXISTS idx_play_history_song ON public.play_history(song_id)
 CREATE INDEX IF NOT EXISTS idx_play_history_date ON public.play_history(played_at DESC);
 
 ALTER TABLE public.play_history ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "play_history_insert" ON public.play_history FOR INSERT WITH CHECK (true);
-CREATE POLICY "play_history_select" ON public.play_history FOR SELECT USING (true);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='play_history' AND policyname='play_history_insert') THEN
+        CREATE POLICY "play_history_insert" ON public.play_history FOR INSERT WITH CHECK (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='play_history' AND policyname='play_history_select') THEN
+        CREATE POLICY "play_history_select" ON public.play_history FOR SELECT USING (true);
+    END IF;
+END $$;
 
 GRANT SELECT, INSERT ON public.play_history TO anon;
 GRANT ALL ON public.play_history TO authenticated;
@@ -36,9 +43,18 @@ CREATE INDEX IF NOT EXISTS idx_user_song_likes_user ON public.user_song_likes(us
 CREATE INDEX IF NOT EXISTS idx_user_song_likes_song ON public.user_song_likes(song_id);
 
 ALTER TABLE public.user_song_likes ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "song_likes_insert" ON public.user_song_likes FOR INSERT WITH CHECK (true);
-CREATE POLICY "song_likes_select" ON public.user_song_likes FOR SELECT USING (true);
-CREATE POLICY "song_likes_delete" ON public.user_song_likes FOR DELETE USING (true);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='user_song_likes' AND policyname='song_likes_insert') THEN
+        CREATE POLICY "song_likes_insert" ON public.user_song_likes FOR INSERT WITH CHECK (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='user_song_likes' AND policyname='song_likes_select') THEN
+        CREATE POLICY "song_likes_select" ON public.user_song_likes FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='user_song_likes' AND policyname='song_likes_delete') THEN
+        CREATE POLICY "song_likes_delete" ON public.user_song_likes FOR DELETE USING (true);
+    END IF;
+END $$;
 
 GRANT SELECT, INSERT, DELETE ON public.user_song_likes TO anon;
 GRANT ALL ON public.user_song_likes TO authenticated;
@@ -71,33 +87,45 @@ BEGIN
     END IF;
 END $$;
 
--- Movie watchlist table (for user saved items)
-CREATE TABLE IF NOT EXISTS public.movie_watchlist (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id TEXT NOT NULL,
-    movie_id UUID REFERENCES public.movies(id) ON DELETE CASCADE,
-    added_at TIMESTAMPTZ DEFAULT now(),
-    UNIQUE(user_id, movie_id)
-);
+-- Movie watchlist table (only if movies table exists)
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='movies') THEN
+        CREATE TABLE IF NOT EXISTS public.movie_watchlist (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id TEXT NOT NULL,
+            movie_id UUID REFERENCES public.movies(id) ON DELETE CASCADE,
+            added_at TIMESTAMPTZ DEFAULT now(),
+            UNIQUE(user_id, movie_id)
+        );
+        ALTER TABLE public.movie_watchlist ENABLE ROW LEVEL SECURITY;
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='movie_watchlist' AND policyname='movie_watchlist_all') THEN
+            CREATE POLICY "movie_watchlist_all" ON public.movie_watchlist FOR ALL USING (true) WITH CHECK (true);
+        END IF;
+        GRANT ALL ON public.movie_watchlist TO anon;
+        GRANT ALL ON public.movie_watchlist TO authenticated;
+    END IF;
+END $$;
 
-ALTER TABLE public.movie_watchlist ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "movie_watchlist_all" ON public.movie_watchlist FOR ALL USING (true) WITH CHECK (true);
-GRANT ALL ON public.movie_watchlist TO anon;
-GRANT ALL ON public.movie_watchlist TO authenticated;
-
--- Ebook library table (user's saved ebooks)
-CREATE TABLE IF NOT EXISTS public.ebook_library (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id TEXT NOT NULL,
-    ebook_id UUID REFERENCES public.ebooks(id) ON DELETE CASCADE,
-    added_at TIMESTAMPTZ DEFAULT now(),
-    UNIQUE(user_id, ebook_id)
-);
-
-ALTER TABLE public.ebook_library ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "ebook_library_all" ON public.ebook_library FOR ALL USING (true) WITH CHECK (true);
-GRANT ALL ON public.ebook_library TO anon;
-GRANT ALL ON public.ebook_library TO authenticated;
+-- Ebook library table (only if ebooks table exists)
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='ebooks') THEN
+        CREATE TABLE IF NOT EXISTS public.ebook_library (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id TEXT NOT NULL,
+            ebook_id UUID REFERENCES public.ebooks(id) ON DELETE CASCADE,
+            added_at TIMESTAMPTZ DEFAULT now(),
+            UNIQUE(user_id, ebook_id)
+        );
+        ALTER TABLE public.ebook_library ENABLE ROW LEVEL SECURITY;
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='ebook_library' AND policyname='ebook_library_all') THEN
+            CREATE POLICY "ebook_library_all" ON public.ebook_library FOR ALL USING (true) WITH CHECK (true);
+        END IF;
+        GRANT ALL ON public.ebook_library TO anon;
+        GRANT ALL ON public.ebook_library TO authenticated;
+    END IF;
+END $$;
 
 -- Playlists: ensure user_id column exists
 DO $$
