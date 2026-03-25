@@ -105,6 +105,8 @@ interface ContentMetrics {
   totalCoinsInCirculation: number;
   totalRSSArticles: number;
   totalCountryInfo: number;
+  totalMovieViews: number;
+  totalPodcastPlays: number;
 }
 
 interface ChartData {
@@ -173,6 +175,8 @@ export const AdminDashboard = () => {
     totalGamificationProfiles: 0,
     totalCoinsInCirculation: 0,
     totalRSSArticles: 0,
+    totalMovieViews: 0,
+    totalPodcastPlays: 0,
     totalCountryInfo: 0,
   });
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
@@ -336,16 +340,24 @@ export const AdminDashboard = () => {
         supabase.from('country_info').select('id', { count: 'exact', head: true }),
       ]);
 
-      // Fetch podcasts and movies counts (tables may not exist yet)
+      // Fetch podcasts and movies counts + aggregate metrics (tables may not exist yet)
       let podcastCount = 0;
       let movieCount = 0;
+      let totalMovieViews = 0;
+      let totalPodcastPlays = 0;
       try {
         const { count: pc } = await supabase.from('podcasts').select('id', { count: 'exact', head: true });
         podcastCount = pc || 0;
+        // Sum play_count from all podcast episodes
+        const { data: epData } = await supabase.from('podcast_episodes').select('play_count');
+        totalPodcastPlays = epData?.reduce((sum, ep) => sum + (ep.play_count || 0), 0) || 0;
       } catch { /* table may not exist */ }
       try {
         const { count: mc } = await supabase.from('movies').select('id', { count: 'exact', head: true });
         movieCount = mc || 0;
+        // Sum view_count from all movies
+        const { data: mvData } = await supabase.from('movies').select('view_count');
+        totalMovieViews = mvData?.reduce((sum, m) => sum + (m.view_count || 0), 0) || 0;
       } catch { /* table may not exist */ }
 
       // Fetch total coins in circulation
@@ -366,6 +378,8 @@ export const AdminDashboard = () => {
         totalCoinsInCirculation: totalCoins,
         totalRSSArticles: rssResult.count || 0,
         totalCountryInfo: countryInfoResult.count || 0,
+        totalMovieViews,
+        totalPodcastPlays,
       });
     } catch (error) {
       console.error(error);
@@ -731,7 +745,9 @@ export const AdminDashboard = () => {
             { label: 'Artists', value: contentMetrics.totalArtists, nav: '/admin/streams' },
             { label: 'Playlists', value: contentMetrics.totalPlaylists, nav: '/admin/streams' },
             { label: 'Podcasts', value: contentMetrics.totalPodcasts, nav: '/admin/streams/podcasts' },
+            { label: 'Podcast Plays', value: contentMetrics.totalPodcastPlays, nav: '/admin/streams/podcasts' },
             { label: 'Movies', value: contentMetrics.totalMovies, nav: '/admin/streams/movies' },
+            { label: 'Movie Views', value: contentMetrics.totalMovieViews, nav: '/admin/streams/movies' },
             { label: 'Blog Posts', value: contentMetrics.totalBlogPosts, nav: '/admin/blog' },
             { label: 'Marketplace', value: contentMetrics.totalMarketplaceListings, nav: '/admin/marketplace' },
             { label: 'News Articles', value: contentMetrics.totalRSSArticles, nav: '/admin/rss-feeds' },

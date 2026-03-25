@@ -5,7 +5,7 @@ import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { Loader2, Play, Pause } from 'lucide-react';
 
 export default function TrendingSongsPage() {
-    const { play, currentSong, isPlaying } = useAudioPlayer();
+    const { play, playAlbum, currentSong, isPlaying } = useAudioPlayer();
     const [songs, setSongs] = useState<Song[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -44,7 +44,9 @@ export default function TrendingSongsPage() {
     }, []);
 
     const handlePlaySong = (song: Song) => {
-        play(song);
+        // Set all trending songs as queue so next/prev work
+        const idx = songs.findIndex(s => s.id === song.id);
+        playAlbum(songs, idx >= 0 ? idx : 0);
     };
 
     return (

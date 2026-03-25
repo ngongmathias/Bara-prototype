@@ -220,51 +220,89 @@ ON CONFLICT DO NOTHING;
 -- The 'music' bucket must be created via Supabase Dashboard > Storage > New Bucket
 -- Name: music, Public: true, File size limit: 50MB
 
--- Allow anyone to read files from the music bucket
-CREATE POLICY "Music files are publicly accessible"
-ON storage.objects FOR SELECT
-USING (bucket_id = 'music');
-
--- Allow authenticated users to upload to the music bucket
-CREATE POLICY "Authenticated users can upload music"
-ON storage.objects FOR INSERT
-WITH CHECK (bucket_id = 'music');
-
--- Allow authenticated users to update their own files
-CREATE POLICY "Authenticated users can update music files"
-ON storage.objects FOR UPDATE
-USING (bucket_id = 'music');
-
--- Allow authenticated users to delete their own files
-CREATE POLICY "Authenticated users can delete music files"
-ON storage.objects FOR DELETE
-USING (bucket_id = 'music');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='objects' AND policyname='Music files are publicly accessible') THEN
+        CREATE POLICY "Music files are publicly accessible" ON storage.objects FOR SELECT USING (bucket_id = 'music');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='objects' AND policyname='Authenticated users can upload music') THEN
+        CREATE POLICY "Authenticated users can upload music" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'music');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='objects' AND policyname='Authenticated users can update music files') THEN
+        CREATE POLICY "Authenticated users can update music files" ON storage.objects FOR UPDATE USING (bucket_id = 'music');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='objects' AND policyname='Authenticated users can delete music files') THEN
+        CREATE POLICY "Authenticated users can delete music files" ON storage.objects FOR DELETE USING (bucket_id = 'music');
+    END IF;
+END $$;
 
 -- === RLS POLICIES: Streams (artists, songs, albums, play_history) ===
 -- These allow the Creator Portal to insert artist profiles, upload songs, etc.
 
 -- Artists: public read, anyone can create/update (Clerk handles auth, not Supabase auth)
 ALTER TABLE IF EXISTS public.artists ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Artists are publicly readable" ON public.artists FOR SELECT USING (true);
-CREATE POLICY "Users can create their artist profile" ON public.artists FOR INSERT WITH CHECK (true);
-CREATE POLICY "Users can update their artist profile" ON public.artists FOR UPDATE USING (true);
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='artists') THEN
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='artists' AND policyname='Artists are publicly readable') THEN
+            CREATE POLICY "Artists are publicly readable" ON public.artists FOR SELECT USING (true);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='artists' AND policyname='Users can create their artist profile') THEN
+            CREATE POLICY "Users can create their artist profile" ON public.artists FOR INSERT WITH CHECK (true);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='artists' AND policyname='Users can update their artist profile') THEN
+            CREATE POLICY "Users can update their artist profile" ON public.artists FOR UPDATE USING (true);
+        END IF;
+    END IF;
+END $$;
 
 -- Songs: public read, anyone can insert/update
 ALTER TABLE IF EXISTS public.songs ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Songs are publicly readable" ON public.songs FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can insert songs" ON public.songs FOR INSERT WITH CHECK (true);
-CREATE POLICY "Authenticated users can update songs" ON public.songs FOR UPDATE USING (true);
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='songs') THEN
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='songs' AND policyname='Songs are publicly readable') THEN
+            CREATE POLICY "Songs are publicly readable" ON public.songs FOR SELECT USING (true);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='songs' AND policyname='Authenticated users can insert songs') THEN
+            CREATE POLICY "Authenticated users can insert songs" ON public.songs FOR INSERT WITH CHECK (true);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='songs' AND policyname='Authenticated users can update songs') THEN
+            CREATE POLICY "Authenticated users can update songs" ON public.songs FOR UPDATE USING (true);
+        END IF;
+    END IF;
+END $$;
 
 -- Albums: public read, anyone can insert/update
 ALTER TABLE IF EXISTS public.albums ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Albums are publicly readable" ON public.albums FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can insert albums" ON public.albums FOR INSERT WITH CHECK (true);
-CREATE POLICY "Authenticated users can update albums" ON public.albums FOR UPDATE USING (true);
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='albums') THEN
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='albums' AND policyname='Albums are publicly readable') THEN
+            CREATE POLICY "Albums are publicly readable" ON public.albums FOR SELECT USING (true);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='albums' AND policyname='Authenticated users can insert albums') THEN
+            CREATE POLICY "Authenticated users can insert albums" ON public.albums FOR INSERT WITH CHECK (true);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='albums' AND policyname='Authenticated users can update albums') THEN
+            CREATE POLICY "Authenticated users can update albums" ON public.albums FOR UPDATE USING (true);
+        END IF;
+    END IF;
+END $$;
 
 -- Play history: anyone can insert/read
 ALTER TABLE IF EXISTS public.play_history ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Anyone can insert play history" ON public.play_history FOR INSERT WITH CHECK (true);
-CREATE POLICY "Users can read play history" ON public.play_history FOR SELECT USING (true);
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='play_history') THEN
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='play_history' AND policyname='Anyone can insert play history') THEN
+            CREATE POLICY "Anyone can insert play history" ON public.play_history FOR INSERT WITH CHECK (true);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='play_history' AND policyname='Users can read play history') THEN
+            CREATE POLICY "Users can read play history" ON public.play_history FOR SELECT USING (true);
+        END IF;
+    END IF;
+END $$;
 
 -- === DONE ===
 -- All tables created, seed data inserted, storage + RLS policies configured.

@@ -16,7 +16,7 @@ interface PlaylistData {
 
 export default function PlaylistPage() {
     const { id } = useParams();
-    const { play, currentSong, isPlaying, togglePlay } = useAudioPlayer();
+    const { play, playAlbum, currentSong, isPlaying, togglePlay } = useAudioPlayer();
     const { toast } = useToast();
     const [playlist, setPlaylist] = useState<PlaylistData | null>(null);
     const [tracks, setTracks] = useState<Song[]>([]);
@@ -44,7 +44,9 @@ export default function PlaylistPage() {
                 .select(`
                     position,
                     songs (
-                        id, title, artist, album, duration, audio_url, cover_url
+                        id, title, file_url, cover_url, duration, artist_id, album_id,
+                        artists(name),
+                        albums(title)
                     )
                 `)
                 .eq('playlist_id', id)
@@ -56,11 +58,13 @@ export default function PlaylistPage() {
                     .map((ps: any) => ({
                         id: ps.songs.id,
                         title: ps.songs.title,
-                        artist: ps.songs.artist,
-                        album_title: ps.songs.album,
+                        artist: ps.songs.artists?.name || 'Unknown Artist',
+                        album_title: ps.songs.albums?.title || 'Single',
                         duration: ps.songs.duration,
-                        file_url: ps.songs.audio_url,
-                        cover_url: ps.songs.cover_url || '/placeholder.svg',
+                        file_url: ps.songs.file_url,
+                        cover_url: ps.songs.cover_url || '/placeholder-music.png',
+                        artist_id: ps.songs.artist_id,
+                        album_id: ps.songs.album_id,
                     }));
                 setTracks(mappedTracks);
             }
@@ -69,7 +73,7 @@ export default function PlaylistPage() {
             if (!playlistSongs || playlistSongs.length === 0) {
                 const { data: allSongs } = await supabase
                     .from('songs')
-                    .select('*')
+                    .select('*, artists(name), albums(title)')
                     .order('created_at', { ascending: false })
                     .limit(20);
 
@@ -77,11 +81,13 @@ export default function PlaylistPage() {
                     setTracks(allSongs.map((s: any) => ({
                         id: s.id,
                         title: s.title,
-                        artist: s.artist,
-                        album_title: s.album || 'Single',
+                        artist: s.artists?.name || 'Unknown Artist',
+                        album_title: s.albums?.title || 'Single',
                         duration: s.duration,
-                        file_url: s.file_url || s.audio_url,
-                        cover_url: s.cover_url || '/placeholder.svg',
+                        file_url: s.file_url,
+                        cover_url: s.cover_url || '/placeholder-music.png',
+                        artist_id: s.artist_id,
+                        album_id: s.album_id,
                     })));
                 }
             }
@@ -104,13 +110,15 @@ export default function PlaylistPage() {
         if (currentSong?.id === track.id) {
             togglePlay();
         } else {
-            play(track);
+            // Set entire playlist as queue so next/prev work
+            const trackIndex = tracks.findIndex(t => t.id === track.id);
+            playAlbum(tracks, trackIndex >= 0 ? trackIndex : 0);
         }
     };
 
     const handlePlayAll = () => {
         if (tracks.length > 0) {
-            play(tracks[0]);
+            playAlbum(tracks, 0);
         }
     };
 
