@@ -91,7 +91,7 @@ export const AdminSongs = () => {
     const [formData, setFormData] = useState<Partial<Song>>({
         title: "",
         artist_id: "",
-        album_id: "",
+        album_id: null,
         file_url: "",
         cover_url: "",
         duration: 0
@@ -135,7 +135,7 @@ export const AdminSongs = () => {
             audio.src = URL.createObjectURL(file);
             audio.onloadedmetadata = () => {
                 setFormData(prev => ({ ...prev, duration: Math.round(audio.duration) }));
-                toast({ title: "Metadata loaded", description: `Duration: ${Math.floor(audio.duration / 60)}:${Math.round(audio.duration % 60).toString().padStart(2, '0')}` });
+                toast({ title: "Audio file ready", description: `Duration: ${Math.floor(audio.duration / 60)}:${Math.round(audio.duration % 60).toString().padStart(2, '0')}. Full file will be uploaded on save.` });
             };
         }
     };
@@ -180,7 +180,7 @@ export const AdminSongs = () => {
             const songData = {
                 ...formData,
                 file_url: finalFileUrl,
-                album_id: formData.album_id === "none" ? null : formData.album_id,
+                album_id: (!formData.album_id || formData.album_id === "none" || formData.album_id === "") ? null : formData.album_id,
                 ...(editingSong ? {} : { uploaded_by: user?.id || 'admin', upload_type: 'platform' as const }),
             };
 
@@ -235,7 +235,7 @@ export const AdminSongs = () => {
         setFormData({
             title: "",
             artist_id: "",
-            album_id: "",
+            album_id: null,
             file_url: "",
             cover_url: "",
             duration: 0
