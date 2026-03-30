@@ -350,7 +350,7 @@ export const HeroSection = () => {
                   onFocus={() => {
                     if (searchResults.length > 0) setIsSearchOpen(true);
                   }}
-                  className="pl-8 sm:pl-10 h-11 sm:h-12 font-roboto border-[#E8EAED] focus:border-[#4285F4] focus:ring-1 focus:ring-[#4285F4] text-sm sm:text-base rounded-lg transition-all duration-200"
+                  className="pl-8 sm:pl-10 h-11 sm:h-12 font-roboto border-[#E8EAED] focus:border-gray-400 focus:ring-1 focus:ring-gray-400 text-sm sm:text-base rounded-lg transition-all duration-200"
                 />
                 
                 {/* Search Results Dropdown */}
@@ -358,7 +358,7 @@ export const HeroSection = () => {
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#E8EAED] rounded-lg shadow-xl z-50 max-h-60 sm:max-h-80 overflow-y-auto">
                     {searchLoading ? (
                       <div className="p-3 sm:p-4 text-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#4285F4] mx-auto"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500 mx-auto"></div>
                         <p className="text-xs text-yp-gray-dark mt-1">{t('common.loading')}</p>
                       </div>
                     ) : (
@@ -436,7 +436,7 @@ export const HeroSection = () => {
                         placeholder={t('homepage.hero.locationPlaceholder')}
                         value={location}
                         readOnly
-                        className="pl-8 sm:pl-10 pr-8 sm:pr-10 h-11 sm:h-12 font-roboto border-[#E8EAED] focus:border-[#4285F4] focus:ring-1 focus:ring-[#4285F4] cursor-pointer text-sm sm:text-base rounded-lg transition-all duration-200"
+                        className="pl-8 sm:pl-10 pr-8 sm:pr-10 h-11 sm:h-12 font-roboto border-[#E8EAED] focus:border-gray-400 focus:ring-1 focus:ring-gray-400 cursor-pointer text-sm sm:text-base rounded-lg transition-all duration-200"
                       />
                       <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#5F6368] w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
@@ -461,7 +461,7 @@ export const HeroSection = () => {
                       
                       {loading ? (
                         <div className="text-center py-4">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#4285F4] mx-auto"></div>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500 mx-auto"></div>
                           <p className="text-xs text-yp-gray-dark mt-1">{t('common.loading')}</p>
                         </div>
                       ) : (

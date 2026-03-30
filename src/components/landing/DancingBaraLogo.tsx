@@ -74,26 +74,27 @@ export const DancingBaraLogo = () => {
             </Link>
           </div>
 
-          {/* ─── BACK: Bara meanings ─── */}
+          {/* ─── BACK: Bara meaning ─── */}
           <div
             className="absolute inset-0"
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
           >
-            <div className="bg-gray-900 rounded-3xl px-12 py-8 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] h-full flex flex-col items-center justify-center">
-              <h2 className="text-3xl font-bold text-white tracking-tight mb-1">BARA</h2>
-              <p className="text-gray-400 text-xs tracking-[0.3em] uppercase mb-6">means</p>
-
-              <div className="grid grid-cols-2 gap-x-10 gap-y-3">
-                {BARA_MEANINGS.map((item) => (
-                  <div key={item.language} className="text-center">
-                    <p className="text-white font-bold text-sm">{item.meaning}</p>
-                    <p className="text-gray-500 text-[10px] uppercase tracking-widest">{item.language}</p>
-                  </div>
-                ))}
+            <div className="bg-gray-900 rounded-3xl px-10 py-8 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] h-full flex flex-col items-center justify-center text-center">
+              <h2 className="text-2xl font-bold text-white tracking-tight mb-4">BARA</h2>
+              <p className="text-gray-300 text-sm leading-relaxed max-w-[280px]">
+                The Swahili word for continent, mainland, our bedrock, the heart of the land.
+              </p>
+              <p className="text-gray-400 text-sm mt-4 leading-relaxed max-w-[280px]">
+                Not a collection of distant coasts, but one united body — <span className="text-white font-semibold">We Are One!</span>
+              </p>
+              <div className="flex items-center gap-3 mt-5 text-white text-xs font-bold tracking-[0.15em] uppercase">
+                <span>One land</span>
+                <span className="text-gray-600">|</span>
+                <span>One people</span>
+                <span className="text-gray-600">|</span>
+                <span>One future</span>
               </div>
-
-              <p className="text-gray-400 text-xs mt-6 tracking-[0.2em] uppercase">We Are Together</p>
-              <p className="text-gray-600 text-[10px] mt-2">Tap to flip back</p>
+              <p className="text-gray-600 text-[10px] mt-4">Tap to flip back</p>
             </div>
           </div>
         </motion.div>

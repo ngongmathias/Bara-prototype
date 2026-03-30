@@ -40,6 +40,9 @@ interface Movie {
     trailer_url: string;
     stream_url: string;
     director: string;
+    producers: string;
+    writers: string;
+    actors: string;
     country: string;
     language: string;
     is_featured: boolean;
@@ -91,8 +94,8 @@ export const AdminMovies = () => {
     const [formData, setFormData] = useState({
         title: "", description: "", genre: "Drama", year: new Date().getFullYear(),
         duration_minutes: 90, rating: 0, poster_url: "", backdrop_url: "",
-        trailer_url: "", stream_url: "", director: "", country: "",
-        language: "en", is_featured: false, is_free: true,
+        trailer_url: "", stream_url: "", director: "", producers: "", writers: "", actors: "",
+        country: "", language: "en", is_featured: false, is_free: true,
     });
 
     useEffect(() => { fetchMovies(); }, []);
@@ -174,7 +177,8 @@ export const AdminMovies = () => {
             year: m.year || new Date().getFullYear(), duration_minutes: m.duration_minutes || 90,
             rating: m.rating || 0, poster_url: m.poster_url || "", backdrop_url: m.backdrop_url || "",
             trailer_url: m.trailer_url || "", stream_url: m.stream_url || "",
-            director: m.director || "", country: m.country || "", language: m.language || "en",
+            director: m.director || "", producers: m.producers || "", writers: m.writers || "", actors: m.actors || "",
+            country: m.country || "", language: m.language || "en",
             is_featured: m.is_featured || false, is_free: m.is_free ?? true,
         });
         if (m.poster_url) setPosterPreview(m.poster_url);
@@ -187,8 +191,8 @@ export const AdminMovies = () => {
         setFormData({
             title: "", description: "", genre: "Drama", year: new Date().getFullYear(),
             duration_minutes: 90, rating: 0, poster_url: "", backdrop_url: "",
-            trailer_url: "", stream_url: "", director: "", country: "",
-            language: "en", is_featured: false, is_free: true,
+            trailer_url: "", stream_url: "", director: "", producers: "", writers: "", actors: "",
+            country: "", language: "en", is_featured: false, is_free: true,
         });
         setPosterFile(null);
         setBackdropFile(null);
@@ -380,7 +384,10 @@ export const AdminMovies = () => {
                             <div><Label>Duration (min)</Label><Input type="number" value={formData.duration_minutes} onChange={e => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) || 90 })} /></div>
                             <div><Label>Rating (0-5)</Label><Input type="number" step="0.1" min="0" max="5" value={formData.rating} onChange={e => setFormData({ ...formData, rating: parseFloat(e.target.value) || 0 })} /></div>
                         </div>
-                        <div><Label>Director</Label><Input value={formData.director} onChange={e => setFormData({ ...formData, director: e.target.value })} /></div>
+                        <div><Label>Director</Label><Input value={formData.director} onChange={e => setFormData({ ...formData, director: e.target.value })} placeholder="e.g. Kunle Afolayan" /></div>
+                        <div><Label>Producer(s)</Label><Input value={formData.producers} onChange={e => setFormData({ ...formData, producers: e.target.value })} placeholder="Comma-separated, e.g. John Doe, Jane Smith" /></div>
+                        <div><Label>Writer(s)</Label><Input value={formData.writers} onChange={e => setFormData({ ...formData, writers: e.target.value })} placeholder="Comma-separated" /></div>
+                        <div><Label>Actors / Cast</Label><Textarea value={formData.actors} onChange={e => setFormData({ ...formData, actors: e.target.value })} placeholder="Comma-separated, e.g. Omotola Jalade, John Boyega, Lupita Nyong'o" rows={2} /></div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <Label>Country</Label>

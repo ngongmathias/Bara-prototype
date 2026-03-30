@@ -119,11 +119,13 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const queueIndexRef = useRef(queueIndex);
     const isShuffleRef = useRef(isShuffle);
     const repeatModeRef = useRef(repeatMode);
+    const currentSongRef = useRef(currentSong);
 
     useEffect(() => { queueRef.current = queue; }, [queue]);
     useEffect(() => { queueIndexRef.current = queueIndex; }, [queueIndex]);
     useEffect(() => { isShuffleRef.current = isShuffle; }, [isShuffle]);
     useEffect(() => { repeatModeRef.current = repeatMode; }, [repeatMode]);
+    useEffect(() => { currentSongRef.current = currentSong; }, [currentSong]);
 
 
 
@@ -148,16 +150,16 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
 
             // Award XP after 30 seconds of playback
-
-            if (audio.currentTime >= 30 && currentSong && hasAwardedXP.current !== currentSong.id) {
+            const song = currentSongRef.current;
+            if (audio.currentTime >= 30 && song && hasAwardedXP.current !== song.id) {
 
                 const awardXP = async () => {
 
                     if (clerkUser) {
 
-                        await GamificationService.addXP(clerkUser.id, XP_REWARDS.SONG_LISTEN, `Listened to ${currentSong.title}`);
+                        await GamificationService.addXP(clerkUser.id, XP_REWARDS.SONG_LISTEN, `Listened to ${song.title}`);
 
-                        hasAwardedXP.current = currentSong.id;
+                        hasAwardedXP.current = song.id;
 
                     }
 
@@ -282,21 +284,41 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const audio = audioRef.current;
 
         if (isPlaying) {
-            // If audio is already loaded enough, play immediately
+            const tryPlay = () => {
+                const playPromise = audio.play();
+                if (playPromise) {
+                    playPromise.catch(e => {
+                        if (e.name === 'AbortError') return; // Normal when switching songs
+                        console.error("Playback failed:", e);
+                        // If NotAllowedError, user hasn't interacted yet
+                        if (e.name === 'NotAllowedError') {
+                            setIsPlaying(false);
+                        }
+                    });
+                }
+            };
+
             if (audio.readyState >= 2) {
-                audio.play().catch(e => {
-                    if (e.name !== 'AbortError') console.error("Playback failed:", e);
-                });
+                tryPlay();
             } else {
                 // Wait for enough data to start playback
                 const onCanPlay = () => {
-                    audio.play().catch(e => {
-                        if (e.name !== 'AbortError') console.error("Playback failed after canplay:", e);
-                    });
+                    tryPlay();
                     audio.removeEventListener('canplay', onCanPlay);
                 };
+                // Also handle case where canplay never fires (e.g. bad URL)
+                const onError = () => {
+                    console.error("Audio load error for:", audio.src);
+                    setIsPlaying(false);
+                    audio.removeEventListener('canplay', onCanPlay);
+                    audio.removeEventListener('error', onError);
+                };
                 audio.addEventListener('canplay', onCanPlay);
-                return () => audio.removeEventListener('canplay', onCanPlay);
+                audio.addEventListener('error', onError, { once: true });
+                return () => {
+                    audio.removeEventListener('canplay', onCanPlay);
+                    audio.removeEventListener('error', onError);
+                };
             }
         } else {
             audio.pause();

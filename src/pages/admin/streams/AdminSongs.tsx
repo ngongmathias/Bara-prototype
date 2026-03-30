@@ -88,14 +88,17 @@ export const AdminSongs = () => {
     const { toast } = useToast();
 
     // Form State
-    const [formData, setFormData] = useState<Partial<Song>>({
+    const [formData, setFormData] = useState<Partial<Song & { producer: string; songwriter: string }>>({
         title: "",
         artist_id: "",
         album_id: null,
         file_url: "",
         cover_url: "",
-        duration: 0
+        duration: 0,
+        producer: "",
+        songwriter: "",
     });
+    const [featuredArtistIds, setFeaturedArtistIds] = useState<string[]>([]);
 
     useEffect(() => {
         fetchInitialData();
@@ -177,24 +180,51 @@ export const AdminSongs = () => {
                 return;
             }
 
+            const { producer, songwriter, ...restForm } = formData;
             const songData = {
-                ...formData,
+                ...restForm,
                 file_url: finalFileUrl,
-                album_id: (!formData.album_id || formData.album_id === "none" || formData.album_id === "") ? null : formData.album_id,
+                album_id: (!restForm.album_id || restForm.album_id === "none" || restForm.album_id === "") ? null : restForm.album_id,
+                producer: producer || null,
+                songwriter: songwriter || null,
                 ...(editingSong ? {} : { uploaded_by: user?.id || 'admin', upload_type: 'platform' as const }),
             };
+
+            let songId: string;
 
             if (editingSong) {
                 const { error } = await db.songs()
                     .update(songData)
                     .eq('id', editingSong.id);
                 if (error) throw error;
+                songId = editingSong.id;
                 toast({ title: "Success", description: "Song updated" });
             } else {
-                const { error } = await db.songs()
-                    .insert(songData);
+                const { data: inserted, error } = await db.songs()
+                    .insert(songData)
+                    .select('id')
+                    .single();
                 if (error) throw error;
+                songId = inserted.id;
                 toast({ title: "Success", description: "Song created" });
+            }
+
+            // Save song_artists (primary + featured)
+            try {
+                // Remove old entries for this song
+                await supabase.from('song_artists').delete().eq('song_id', songId);
+
+                const artistEntries = [
+                    { song_id: songId, artist_id: songData.artist_id, role: 'primary', display_order: 0 },
+                    ...featuredArtistIds.map((aid, i) => ({
+                        song_id: songId, artist_id: aid, role: 'featured', display_order: i + 1
+                    })),
+                ];
+                if (artistEntries.length > 0) {
+                    await supabase.from('song_artists').insert(artistEntries);
+                }
+            } catch (e) {
+                console.warn('song_artists save failed (table may not exist yet):', e);
             }
 
             setIsDialogOpen(false);
@@ -238,13 +268,16 @@ export const AdminSongs = () => {
             album_id: null,
             file_url: "",
             cover_url: "",
-            duration: 0
+            duration: 0,
+            producer: "",
+            songwriter: "",
         });
+        setFeaturedArtistIds([]);
         setEditingSong(null);
         setSelectedFile(null);
     };
 
-    const openEdit = (song: Song) => {
+    const openEdit = async (song: Song) => {
         setEditingSong(song);
         setFormData({
             title: song.title,
@@ -252,8 +285,21 @@ export const AdminSongs = () => {
             album_id: song.album_id || "none",
             file_url: song.file_url,
             cover_url: song.cover_url || "",
-            duration: song.duration
+            duration: song.duration,
+            producer: (song as any).producer || "",
+            songwriter: (song as any).songwriter || "",
         });
+        // Load featured artists from song_artists table
+        try {
+            const { data } = await supabase
+                .from('song_artists')
+                .select('artist_id')
+                .eq('song_id', song.id)
+                .eq('role', 'featured');
+            setFeaturedArtistIds(data?.map(d => d.artist_id) || []);
+        } catch {
+            setFeaturedArtistIds([]);
+        }
         setIsDialogOpen(true);
     };
 
@@ -380,6 +426,52 @@ export const AdminSongs = () => {
                                                 ))}
                                             </SelectContent>
                                         </Select>
+                                    </div>
+                                </div>
+                                {/* Featured Artists */}
+                                <div className="space-y-2">
+                                    <Label>Featured Artists (optional)</Label>
+                                    <div className="flex flex-wrap gap-1 mb-1">
+                                        {featuredArtistIds.map(aid => {
+                                            const a = artists.find(x => x.id === aid);
+                                            return a ? (
+                                                <span key={aid} className="bg-gray-100 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                                    {a.name}
+                                                    <button onClick={() => setFeaturedArtistIds(prev => prev.filter(id => id !== aid))} className="text-red-400 hover:text-red-600">&times;</button>
+                                                </span>
+                                            ) : null;
+                                        })}
+                                    </div>
+                                    <Select onValueChange={(val) => {
+                                        if (val && !featuredArtistIds.includes(val) && val !== formData.artist_id) {
+                                            setFeaturedArtistIds(prev => [...prev, val]);
+                                        }
+                                    }}>
+                                        <SelectTrigger><SelectValue placeholder="Add featured artist..." /></SelectTrigger>
+                                        <SelectContent>
+                                            {artists.filter(a => a.id !== formData.artist_id && !featuredArtistIds.includes(a.id)).map(a => (
+                                                <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <p className="text-[10px] text-gray-400">e.g. "ft. Artist B, Artist C" — all credited artists</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label>Producer (optional)</Label>
+                                        <Input
+                                            value={(formData as any).producer || ''}
+                                            onChange={(e) => setFormData({ ...formData, producer: e.target.value })}
+                                            placeholder="e.g. Don Jazzy"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Songwriter (optional)</Label>
+                                        <Input
+                                            value={(formData as any).songwriter || ''}
+                                            onChange={(e) => setFormData({ ...formData, songwriter: e.target.value })}
+                                            placeholder="e.g. Tiwa Savage"
+                                        />
                                     </div>
                                 </div>
                                 <div className="space-y-2">

@@ -269,6 +269,7 @@ import TrendingSongsPage from "./pages/streams/TrendingSongsPage";
 import NewReleasesPage from "./pages/streams/NewReleasesPage";
 
 import LikedSongsPage from "./pages/streams/LikedSongsPage";
+import SongPage from "./pages/streams/SongPage";
 
 import LibraryPage from "./pages/streams/LibraryPage";
 
@@ -424,6 +425,8 @@ const AppRoutes = () => {
           <Route path="creator/albums" element={<UserAuthGuard><CreateAlbumPage /></UserAuthGuard>} />
 
           <Route path="verification" element={<ArtistVerificationPage />} />
+
+          <Route path="song/:id" element={<SongPage />} />
 
           <Route path="*" element={<StreamsHub />} /> {/* Fallback within streams context */}
 
