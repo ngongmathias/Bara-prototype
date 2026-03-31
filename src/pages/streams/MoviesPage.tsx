@@ -17,6 +17,9 @@ interface Movie {
   poster_url: string;
   backdrop_url: string;
   director: string;
+  producers: string;
+  writers: string;
+  actors: string;
   cast_members: string[];
   country: string;
   language: string;
@@ -137,12 +140,20 @@ export default function MoviesPage() {
                   </span>
                   <h1 className="text-3xl sm:text-5xl font-bold text-white mb-2 font-comfortaa">{featured.title}</h1>
                   <p className="text-gray-300 text-sm sm:text-base max-w-xl mb-4 leading-relaxed">{featured.description}</p>
-                  <div className="flex items-center gap-4 text-sm text-gray-300 mb-5">
+                  <div className="flex items-center gap-4 text-sm text-gray-300 mb-3">
                     <span className="flex items-center gap-1"><Star className="w-4 h-4 text-white" fill="currentColor" /> {featured.rating}</span>
                     <span>{featured.year}</span>
                     <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {formatDuration(featured.duration_minutes)}</span>
                     <span className="bg-white/20 px-2 py-0.5 rounded text-xs">{featured.genre}</span>
                     {featured.is_free && <span className="bg-green-600 px-2 py-0.5 rounded text-xs font-bold">FREE</span>}
+                  </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400 mb-5">
+                    {featured.director && <span>Dir: {featured.director}</span>}
+                    {featured.producers && <span>Prod: {featured.producers}</span>}
+                    {featured.writers && <span>Written by: {featured.writers}</span>}
+                    {(featured.actors || (featured.cast_members && featured.cast_members.length > 0)) && (
+                      <span>Cast: {featured.actors || featured.cast_members?.join(', ')}</span>
+                    )}
                   </div>
                   <div className="flex items-center gap-3">
                     <button className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold px-6 py-3 rounded-lg transition-colors">
@@ -270,7 +281,14 @@ export default function MoviesPage() {
                           <span>{formatDuration(movie.duration_minutes)}</span>
                           <span>·</span>
                           <span>{movie.genre}</span>
-                          {movie.director && <><span>·</span><span>{movie.director}</span></>}
+                        </div>
+                        <div className="mt-2 space-y-0.5 text-xs text-gray-400">
+                          {movie.director && <p><span className="text-gray-500 font-medium">Director:</span> {movie.director}</p>}
+                          {movie.producers && <p><span className="text-gray-500 font-medium">Producers:</span> {movie.producers}</p>}
+                          {movie.writers && <p><span className="text-gray-500 font-medium">Writers:</span> {movie.writers}</p>}
+                          {(movie.actors || (movie.cast_members && movie.cast_members.length > 0)) && (
+                            <p><span className="text-gray-500 font-medium">Cast:</span> {movie.actors || movie.cast_members?.join(', ')}</p>
+                          )}
                         </div>
                         <div className="flex items-center gap-1 mt-2 text-xs text-gray-400">
                           <Eye className="w-3 h-3" /> {movie.view_count?.toLocaleString()} views

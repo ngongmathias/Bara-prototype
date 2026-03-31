@@ -149,14 +149,14 @@ export default function SearchPage() {
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-8">
                             {/* Functional Genre Browsing */}
                             {[
-                                { name: 'Afrobeats', color: 'from-orange-500 to-red-600' },
-                                { name: 'Amapiano', color: 'from-yellow-500 to-orange-600' },
-                                { name: 'Hip-Hop', color: 'from-blue-600 to-indigo-700' },
-                                { name: 'R&B', color: 'from-pink-500 to-purple-600' },
-                                { name: 'Highlife', color: 'from-green-500 to-emerald-700' },
-                                { name: 'Sports News', color: 'from-blue-400 to-blue-600' },
-                                { name: 'Live Matches', color: 'from-red-500 to-purple-800' },
-                                { name: 'Podcasts', color: 'from-teal-500 to-cyan-600' }
+                                { name: 'Afrobeats', color: 'from-gray-800 to-gray-900' },
+                                { name: 'Amapiano', color: 'from-gray-700 to-gray-900' },
+                                { name: 'Hip-Hop', color: 'from-gray-800 to-gray-950' },
+                                { name: 'R&B', color: 'from-gray-700 to-gray-800' },
+                                { name: 'Highlife', color: 'from-gray-800 to-gray-900' },
+                                { name: 'Sports News', color: 'from-gray-700 to-gray-900' },
+                                { name: 'Live Matches', color: 'from-gray-800 to-gray-950' },
+                                { name: 'Podcasts', color: 'from-gray-700 to-gray-800' }
                             ].map(genre => (
                                 <div
                                     key={genre.name}

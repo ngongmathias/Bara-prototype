@@ -17,68 +17,65 @@ const BARA_MEANINGS: BaraTile[] = [
 ];
 
 export function BaraMeaningTiles() {
-  const [flippedTiles, setFlippedTiles] = useState<Set<number>>(new Set());
-
-  const toggleFlip = (index: number) => {
-    setFlippedTiles(prev => {
-      const next = new Set(prev);
-      if (next.has(index)) {
-        next.delete(index);
-      } else {
-        next.add(index);
-      }
-      return next;
-    });
-  };
+  const [isFlipped, setIsFlipped] = useState(false);
 
   return (
     <div className="w-full max-w-3xl">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-black mb-1">What does "Bara" mean?</h2>
-        <p className="text-sm text-gray-500">Tap a tile to reveal its meaning</p>
+        <p className="text-sm text-gray-500">Tap to discover</p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {BARA_MEANINGS.map((tile, index) => {
-          const isFlipped = flippedTiles.has(index);
-          return (
-            <motion.button
-              key={tile.language}
-              onClick={() => toggleFlip(index)}
-              className="relative h-28 w-full cursor-pointer"
-              style={{ perspective: 800 }}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index }}
-            >
-              <motion.div
-                className="absolute inset-0 w-full h-full"
-                style={{ transformStyle: 'preserve-3d' }}
-                animate={{ rotateY: isFlipped ? 180 : 0 }}
-                transition={{ duration: 0.5, ease: 'easeInOut' }}
-              >
-                {/* Front — Language */}
-                <div
-                  className="absolute inset-0 rounded-xl border border-gray-200 bg-white flex flex-col items-center justify-center gap-1 shadow-sm hover:shadow-md transition-shadow"
-                  style={{ backfaceVisibility: 'hidden' }}
-                >
-                  <span className="text-2xl font-bold text-gray-900 tracking-tight">BARA</span>
+      <motion.button
+        onClick={() => setIsFlipped(!isFlipped)}
+        className="relative w-full cursor-pointer"
+        style={{ perspective: 1000 }}
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <motion.div
+          className="relative w-full"
+          style={{ transformStyle: 'preserve-3d' }}
+          animate={{ rotateY: isFlipped ? 180 : 0 }}
+          transition={{ duration: 0.6, ease: 'easeInOut' }}
+        >
+          {/* Front — Language meanings grid */}
+          <div
+            className="w-full rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
+            style={{ backfaceVisibility: 'hidden' }}
+          >
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {BARA_MEANINGS.map((tile) => (
+                <div key={tile.language} className="text-center py-3">
+                  <span className="text-xl font-bold text-gray-900 tracking-tight block">BARA</span>
                   <span className="text-xs text-gray-400 font-medium uppercase tracking-widest">{tile.language}</span>
+                  <span className="text-sm text-gray-600 block mt-1">{tile.meaning}</span>
+                  <span className="text-[10px] text-gray-400">{tile.region}</span>
                 </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 mt-4 text-center">Tap to discover what Bara means</p>
+          </div>
 
-                {/* Back — Meaning */}
-                <div
-                  className="absolute inset-0 rounded-xl border border-gray-900 bg-gray-900 text-white flex flex-col items-center justify-center gap-1 px-3"
-                  style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
-                >
-                  <span className="text-lg font-bold text-center leading-tight">{tile.meaning}</span>
-                  <span className="text-[10px] text-gray-400 uppercase tracking-widest">{tile.region}</span>
-                </div>
-              </motion.div>
-            </motion.button>
-          );
-        })}
-      </div>
+          {/* Back — Unified BARA message */}
+          <div
+            className="absolute inset-0 w-full rounded-2xl border border-gray-900 bg-gray-900 text-white flex flex-col items-center justify-center px-8 py-10"
+            style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+          >
+            <h3 className="text-2xl sm:text-3xl font-black tracking-tight mb-4 text-center">BARA</h3>
+            <p className="text-sm sm:text-base text-gray-200 text-center leading-relaxed mb-4">
+              The Swahili word for continent, mainland, our bedrock, the heart of the land.
+            </p>
+            <p className="text-sm sm:text-base text-gray-300 text-center leading-relaxed mb-6">
+              Not a collection of distant coasts, but one united body — We Are One!
+            </p>
+            <p className="text-lg sm:text-xl font-bold text-white text-center tracking-wide">
+              One land &nbsp;|&nbsp; One people &nbsp;|&nbsp; One future
+            </p>
+          </div>
+        </motion.div>
+      </motion.button>
     </div>
   );
 }

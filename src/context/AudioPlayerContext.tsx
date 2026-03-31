@@ -210,9 +210,23 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
             const error = audio.error;
             if (error) {
                 console.warn('Audio error:', error.code, error.message);
-                // Auto-skip to next song on media error (e.g. 404, decode error)
-                if (error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || error.code === MediaError.MEDIA_ERR_NETWORK) {
-                    setIsPlaying(false);
+                setIsPlaying(false);
+                // Auto-skip to next song after a short delay
+                const q = queueRef.current;
+                const qi = queueIndexRef.current;
+                if (q.length > 0) {
+                    setTimeout(() => {
+                        const nextIdx = qi + 1;
+                        if (nextIdx < q.length) {
+                            setQueueIndex(nextIdx);
+                            setCurrentSong(q[nextIdx]);
+                            if (audioRef.current && q[nextIdx].file_url) {
+                                audioRef.current.src = q[nextIdx].file_url;
+                                audioRef.current.load();
+                                setIsPlaying(true);
+                            }
+                        }
+                    }, 500);
                 }
             }
         };
@@ -302,23 +316,34 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 tryPlay();
             } else {
                 // Wait for enough data to start playback
-                const onCanPlay = () => {
-                    tryPlay();
+                let settled = false;
+                const cleanup = () => {
+                    settled = true;
                     audio.removeEventListener('canplay', onCanPlay);
+                    audio.removeEventListener('error', onError);
+                    clearTimeout(timeoutId);
                 };
-                // Also handle case where canplay never fires (e.g. bad URL)
+                const onCanPlay = () => {
+                    if (settled) return;
+                    cleanup();
+                    tryPlay();
+                };
                 const onError = () => {
+                    if (settled) return;
+                    cleanup();
                     console.error("Audio load error for:", audio.src);
                     setIsPlaying(false);
-                    audio.removeEventListener('canplay', onCanPlay);
-                    audio.removeEventListener('error', onError);
                 };
+                // Timeout: if canplay doesn't fire within 15s, give up
+                const timeoutId = setTimeout(() => {
+                    if (settled) return;
+                    cleanup();
+                    console.warn("Audio load timed out for:", audio.src);
+                    setIsPlaying(false);
+                }, 15000);
                 audio.addEventListener('canplay', onCanPlay);
                 audio.addEventListener('error', onError, { once: true });
-                return () => {
-                    audio.removeEventListener('canplay', onCanPlay);
-                    audio.removeEventListener('error', onError);
-                };
+                return () => { cleanup(); };
             }
         } else {
             audio.pause();
@@ -345,16 +370,22 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
 
 
-        // New song
+        // New song — validate URL before attempting playback
+        if (!song.file_url) {
+            console.warn('Song has no file_url, skipping:', song.title);
+            // Try next song in queue
+            const index = queue.findIndex(s => s.id === song.id);
+            if (index !== -1 && index + 1 < queue.length) {
+                play(queue[index + 1]);
+            }
+            return;
+        }
 
         setCurrentSong(song);
 
         audioRef.current.src = song.file_url;
 
-        audioRef.current.load(); // Explicitly trigger browser to start fetching the audio
-
-        // Don't call play() here — the useEffect [isPlaying, currentSong] will handle it
-        // after canplay fires; calling play() here AND in the effect causes AbortError
+        audioRef.current.load();
 
         setIsPlaying(true);
 

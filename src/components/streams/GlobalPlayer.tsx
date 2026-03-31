@@ -6,6 +6,7 @@ import { GamificationService } from '@/lib/gamificationService';
 import { QueueDrawer } from './QueueDrawer';
 import { FullScreenPlayer } from './FullScreenPlayer';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 
 export function GlobalPlayer() {
     const { toast } = useToast();
@@ -32,6 +33,29 @@ export function GlobalPlayer() {
     const [isFullScreen, setIsFullScreen] = useState(false);
     const { user } = useUser();
     const [lastTrackedSongId, setLastTrackedSongId] = useState<string | null>(null);
+    const [featuredArtists, setFeaturedArtists] = useState<string[]>([]);
+
+    // Fetch featured artists for current song
+    useEffect(() => {
+        if (!currentSong) { setFeaturedArtists([]); return; }
+        let cancelled = false;
+        (async () => {
+            try {
+                const { data } = await supabase
+                    .from('song_artists')
+                    .select('role, artists(name)')
+                    .eq('song_id', currentSong.id)
+                    .eq('role', 'featured')
+                    .order('display_order');
+                if (!cancelled && data) {
+                    setFeaturedArtists(data.map((d: any) => d.artists?.name).filter(Boolean));
+                }
+            } catch {
+                if (!cancelled) setFeaturedArtists([]);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [currentSong?.id]);
 
     // Mission Tracking for Song Listens
     useEffect(() => {
@@ -96,7 +120,7 @@ export function GlobalPlayer() {
                             {currentSong.title}
                         </div>
                         <div className="text-xs text-gray-400 truncate hover:text-white transition-colors font-medium">
-                            {currentSong.artist}
+                            {currentSong.artist}{featuredArtists.length > 0 && ` ft. ${featuredArtists.join(', ')}`}
                         </div>
                     </div>
                     <button
@@ -187,7 +211,7 @@ export function GlobalPlayer() {
                                 else { await navigator.clipboard.writeText(shareUrl); toast({ title: "Copied", description: "Link copied to clipboard!" }); }
                             } catch { /* User cancelled */ }
                         }}
-                        className="text-gray-400 hover:text-white transition-colors hidden md:block"
+                        className="text-gray-400 hover:text-white transition-colors"
                         title="Share"
                     >
                         <Share2 size={18} />
