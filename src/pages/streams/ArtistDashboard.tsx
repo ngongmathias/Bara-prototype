@@ -55,14 +55,18 @@ export default function ArtistDashboard() {
     const [artistName, setArtistName] = useState('');
     const [songs, setSongs] = useState<MySong[]>([]);
     const [albums, setAlbums] = useState<MyAlbum[]>([]);
+    const [featuredOnSongs, setFeaturedOnSongs] = useState<(MySong & { primary_artist: string })[]>([]);
     const [loading, setLoading] = useState(true);
     const [isBoosting, setIsBoosting] = useState(false);
 
+    const ownPlays = songs.reduce((acc, s) => acc + (s.plays || 0), 0);
+    const featuredPlays = featuredOnSongs.reduce((acc, s) => acc + (s.plays || 0), 0);
     const stats = {
         tracks: songs.length,
         albums: albums.length,
-        totalPlays: songs.reduce((acc, s) => acc + (s.plays || 0), 0),
-        fans: Math.max(songs.length * 12, songs.reduce((acc, s) => acc + (s.plays || 0), 0) * 3)
+        totalPlays: ownPlays,
+        featuredPlays,
+        fans: Math.max(songs.length * 12, ownPlays * 3)
     };
 
     useEffect(() => {
@@ -104,6 +108,34 @@ export default function ArtistDashboard() {
 
             setSongs(songsRes.data || []);
             setAlbums(albumsRes.data || []);
+
+            // Fetch songs this artist is featured on
+            try {
+                const { data: featuredData } = await supabase
+                    .from('song_artists')
+                    .select('song_id, songs(id, title, file_url, cover_url, genre, plays, duration, created_at, album_id, artist_id, artists(name), albums(title))')
+                    .eq('artist_id', artist.id)
+                    .eq('role', 'featured');
+                if (featuredData) {
+                    setFeaturedOnSongs(
+                        featuredData
+                            .filter((f: any) => f.songs)
+                            .map((f: any) => ({
+                                id: f.songs.id,
+                                title: f.songs.title,
+                                file_url: f.songs.file_url,
+                                cover_url: f.songs.cover_url,
+                                genre: f.songs.genre,
+                                plays: f.songs.plays || 0,
+                                duration: f.songs.duration,
+                                created_at: f.songs.created_at,
+                                album_id: f.songs.album_id,
+                                albums: f.songs.albums,
+                                primary_artist: f.songs.artists?.name || 'Unknown Artist',
+                            }))
+                    );
+                }
+            } catch { /* song_artists table may not exist */ }
         } catch (error) {
             console.error(error);
         } finally {
@@ -210,8 +242,8 @@ export default function ArtistDashboard() {
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                                     {[
                                         { label: 'Total Streams', value: stats.totalPlays.toLocaleString(), icon: Play, color: 'bg-green-50 text-green-600' },
+                                        { label: 'Featured Streams', value: stats.featuredPlays.toLocaleString(), icon: Star, color: 'bg-yellow-50 text-yellow-600' },
                                         { label: 'Tracks', value: stats.tracks, icon: Music, color: 'bg-blue-50 text-blue-600' },
-                                        { label: 'Albums', value: stats.albums, icon: Disc, color: 'bg-purple-50 text-purple-600' },
                                         { label: 'Monthly Listeners', value: stats.fans.toLocaleString(), icon: Users, color: 'bg-pink-50 text-pink-600' }
                                     ].map((stat, i) => (
                                         <motion.div
@@ -250,6 +282,50 @@ export default function ArtistDashboard() {
                                         </div>
                                     </Link>
                                 </div>
+
+                                {/* Featured On */}
+                                {featuredOnSongs.length > 0 && (
+                                    <section>
+                                        <h2 className="text-xl font-bold text-gray-900 mb-4">Featured On</h2>
+                                        <div className="space-y-2">
+                                            {featuredOnSongs.slice(0, 5).map((song, i) => (
+                                                <motion.div
+                                                    key={song.id}
+                                                    initial={{ opacity: 0, x: -10 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: i * 0.05 }}
+                                                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                                                >
+                                                    <button
+                                                        onClick={() => handlePlaySong(song)}
+                                                        className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#1DB954] group-hover:text-white transition-colors"
+                                                    >
+                                                        {currentSong?.id === song.id && isPlaying ? (
+                                                            <Pause size={16} fill="currentColor" />
+                                                        ) : (
+                                                            <Play size={16} fill="currentColor" className="ml-0.5" />
+                                                        )}
+                                                    </button>
+                                                    <img
+                                                        src={song.cover_url || '/placeholder-music.png'}
+                                                        alt={song.title}
+                                                        className="w-10 h-10 rounded object-cover bg-gray-200 flex-shrink-0"
+                                                        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}
+                                                    />
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="font-semibold text-gray-900 truncate">{song.title}</div>
+                                                        <div className="text-xs text-gray-500">
+                                                            by {song.primary_artist} &middot; {(song.plays || 0).toLocaleString()} plays
+                                                        </div>
+                                                    </div>
+                                                    <div className="hidden sm:block">
+                                                        <Badge variant="secondary" className="text-xs">Featured</Badge>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
 
                                 {/* Recent Songs */}
                                 {songs.length > 0 && (

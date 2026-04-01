@@ -11,6 +11,7 @@ export default function ArtistPage() {
     const { play, currentSong, isPlaying, togglePlay } = useAudioPlayer();
     const [artist, setArtist] = useState<any>(null);
     const [topTracks, setTopTracks] = useState<Song[]>([]);
+    const [featuredOnTracks, setFeaturedOnTracks] = useState<(Song & { primary_artist: string; plays: number })[]>([]);
     const [albums, setAlbums] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [following, setFollowing] = useState(false);
@@ -39,7 +40,7 @@ export default function ArtistPage() {
                     .limit(5);
 
                 if (songsData) {
-                    const formattedSongs: Song[] = songsData.map(song => ({
+                    const formattedSongs = songsData.map(song => ({
                         id: song.id,
                         title: song.title,
                         artist: artistData?.name || 'Unknown Artist',
@@ -48,10 +49,38 @@ export default function ArtistPage() {
                         duration: song.duration,
                         artist_id: song.artist_id,
                         album_id: song.album_id,
-                        album_title: song.albums?.title
+                        album_title: song.albums?.title,
+                        plays: song.plays || 0,
                     }));
                     setTopTracks(formattedSongs);
                 }
+
+                // Fetch songs this artist is featured on
+                try {
+                    const { data: featuredData } = await supabase
+                        .from('song_artists')
+                        .select('song_id, songs(id, title, file_url, cover_url, duration, plays, artist_id, album_id, artists(name))')
+                        .eq('artist_id', id)
+                        .eq('role', 'featured')
+                        .order('display_order');
+                    if (featuredData) {
+                        const formatted = featuredData
+                            .filter((f: any) => f.songs)
+                            .map((f: any) => ({
+                                id: f.songs.id,
+                                title: f.songs.title,
+                                artist: artistData?.name || 'Unknown',
+                                file_url: f.songs.file_url,
+                                cover_url: f.songs.cover_url || '/placeholder-music.png',
+                                duration: f.songs.duration,
+                                artist_id: f.songs.artist_id,
+                                album_id: f.songs.album_id,
+                                primary_artist: f.songs.artists?.name || 'Unknown Artist',
+                                plays: f.songs.plays || 0,
+                            }));
+                        setFeaturedOnTracks(formatted);
+                    }
+                } catch { /* song_artists table may not exist yet */ }
 
                 // Fetch Albums
                 const { data: albumsData } = await supabase
@@ -142,7 +171,14 @@ export default function ArtistPage() {
                                 </div>
                                 <h1 className="text-5xl md:text-8xl font-black mb-6 leading-none tracking-tighter text-gray-900">{artist.name}</h1>
                                 <p className="text-sm font-bold text-gray-600">
-                                    {Math.floor(Math.random() * 500000) + 100000} monthly listeners
+                                    {(() => {
+                                        const ownPlays = topTracks.reduce((acc, t) => acc + ((t as any).plays || 0), 0);
+                                        const featPlays = featuredOnTracks.reduce((acc, t) => acc + (t.plays || 0), 0);
+                                        const totalPlays = ownPlays + featPlays;
+                                        // Estimate monthly listeners as ~30% of total plays (reasonable approximation)
+                                        const listeners = Math.max(totalPlays * 0.3, artist.monthly_listeners || 0);
+                                        return listeners > 0 ? `${Math.round(listeners).toLocaleString()} monthly listeners` : 'New Artist';
+                                    })()}
                                 </p>
                             </div>
                         </div>
@@ -209,7 +245,7 @@ export default function ArtistPage() {
                                                     {track.title}
                                                 </div>
                                                 <div className="text-sm text-gray-500 flex items-center gap-2">
-                                                    {/* <span>{track.plays || 0} plays</span> */}
+                                                    <span>{((track as any).plays || 0).toLocaleString()} plays</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -282,6 +318,56 @@ export default function ArtistPage() {
                                 ))}
                             </div>
                         </section>
+
+                        {/* Featured On */}
+                        {featuredOnTracks.length > 0 && (
+                            <section className="mb-12">
+                                <h2 className="text-2xl font-comfortaa font-semibold mb-6">Featured On</h2>
+                                <div className="space-y-2">
+                                    {featuredOnTracks.map((track, index) => (
+                                        <div
+                                            key={track.id}
+                                            className="grid grid-cols-[16px_4fr_2fr_minmax(80px,1fr)] gap-4 px-4 py-2 rounded group hover:bg-gray-100 cursor-pointer items-center"
+                                            onClick={() => handlePlaySong(track)}
+                                        >
+                                            <div className="text-gray-500 flex justify-center w-8">
+                                                {currentSong?.id === track.id && isPlaying ? (
+                                                    <div className="flex items-end gap-[2px] h-3">
+                                                        <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '60%' }}></div>
+                                                        <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '100%', animationDelay: '0.2s' }}></div>
+                                                        <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0.4s' }}></div>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <span className={`group-hover:hidden ${currentSong?.id === track.id ? 'text-[#1DB954]' : ''}`}>{index + 1}</span>
+                                                        <Play fill="white" className="w-4 h-4 hidden group-hover:block" />
+                                                    </>
+                                                )}
+                                            </div>
+                                            <div className="flex gap-3 items-center min-w-0">
+                                                <img src={track.cover_url} alt={track.title} className="w-10 h-10 object-cover rounded" />
+                                                <div className="min-w-0 flex-1">
+                                                    <div className={`font-bold truncate transition text-sm ${currentSong?.id === track.id ? 'text-[#1DB954]' : 'text-gray-900'}`}>
+                                                        {track.title}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 truncate">
+                                                        {track.primary_artist} ft. {artist.name}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="text-sm text-gray-500 truncate hidden md:block">
+                                                {track.plays.toLocaleString()} plays
+                                            </div>
+                                            <div className="flex items-center justify-end">
+                                                <span className="text-sm text-gray-500 min-w-[40px] text-right">
+                                                    {track.duration ? `${Math.floor(track.duration / 60)}:${(track.duration % 60).toString().padStart(2, '0')}` : '-:-'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
                     </div>
                 </div>
             </div>
