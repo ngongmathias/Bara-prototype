@@ -102,13 +102,26 @@ export const Header = () => {
           console.error('Error fetching countries:', error);
         } else if (data) {
           setCountries(data);
+          
+          // Set Rwanda as default country if no country is selected
+          if (!selectedCountry) {
+            const rwanda = data.find(c => c.code === 'RW' || c.name === 'Rwanda');
+            if (rwanda) {
+              setSelectedCountry({
+                id: rwanda.id,
+                name: rwanda.name,
+                code: rwanda.code,
+                flag_url: rwanda.flag_url || undefined
+              });
+            }
+          }
         }
       } catch (error) {
         console.error('Error fetching countries:', error);
       }
     };
     fetchCountries();
-  }, []);
+  }, [selectedCountry, setSelectedCountry]);
 
   // Close mega menu when clicking outside
   useEffect(() => {
