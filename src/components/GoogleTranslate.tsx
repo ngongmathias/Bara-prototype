@@ -59,7 +59,7 @@ export const GoogleTranslate = () => {
       new window.google.translate.TranslateElement(
         {
           pageLanguage: 'en',
-          includedLanguages: 'en,fr,es,pt,sw,ar,rw',
+          includedLanguages: 'en,fr,es,pt,sw,ar,rw,am,ha,ig,yo,zu,af,so,de,zh-CN,hi,ja,ko',
           layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
         },
         'google_translate_element'

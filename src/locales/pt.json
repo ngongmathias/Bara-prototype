@@ -99,7 +99,1098 @@
       "premium": "Premium"
     }
   },
+  "about": {
+    "hero": {
+      "title": "Sobre o Bara",
+      "subtitle": "Conectando comunidades com negócios locais de confiança",
+      "learnMore": "Saiba Mais",
+      "contactUs": "Fale Conosco"
+    },
+    "overview": {
+      "title": "Nossa História",
+      "description": "O Bara é a principal plataforma de diretório de negócios de Ruanda, dedicada a conectar comunidades locais com negócios de confiança. Acreditamos no poder do comércio local e nos esforçamos para facilitar que as pessoas descubram e se conectem com os melhores serviços em sua região.",
+      "mission": "Nossa missão é capacitar negócios locais, proporcionando-lhes uma presença digital, enquanto ajudamos os consumidores a tomar decisões informadas sobre onde comprar, comer e receber serviços.",
+      "established": "Est. 2024",
+      "location": "Ruanda"
+    },
+    "stats": {
+      "users": "Usuários Ativos",
+      "businesses": "Negócios Listados",
+      "cities": "Cidades Cobertas",
+      "satisfaction": "Satisfação do Cliente"
+    },
+    "values": {
+      "title": "Nossos Valores",
+      "subtitle": "Os princípios que guiam tudo o que fazemos",
+      "trust": {
+        "title": "Confiança e Confiabilidade",
+        "description": "Construímos relacionamentos duradouros baseados em transparência e confiabilidade."
+      },
+      "quality": {
+        "title": "Serviço de Qualidade",
+        "description": "Mantemos altos padrões em tudo o que fazemos pela nossa comunidade."
+      },
+      "innovation": {
+        "title": "Inovação",
+        "description": "Melhoramos continuamente nossa plataforma para melhor atender nossos usuários."
+      },
+      "community": {
+        "title": "Comunidade em Primeiro Lugar",
+        "description": "Priorizamos as necessidades e o crescimento de nossas comunidades locais."
+      },
+      "excellence": {
+        "title": "Excelência",
+        "description": "Buscamos a excelência em todos os aspectos do nosso negócio."
+      },
+      "growth": {
+        "title": "Crescimento Sustentável",
+        "description": "Apoiamos o desenvolvimento sustentável de negócios locais."
+      }
+    },
+    "team": {
+      "title": "Nossa Equipe",
+      "subtitle": "Conheça os profissionais dedicados por trás do Bara",
+      "leadership": {
+        "title": "Equipe de Liderança",
+        "description": "Executivos experientes guiando nossa visão estratégica e crescimento."
+      },
+      "development": {
+        "title": "Equipe de Desenvolvimento",
+        "description": "Desenvolvedores qualificados construindo soluções inovadoras para nossa plataforma."
+      },
+      "support": {
+        "title": "Suporte ao Cliente",
+        "description": "Equipe de suporte amigável garantindo uma excelente experiência ao usuário."
+      }
+    },
+    "contact": {
+      "title": "Entre em Contato",
+      "subtitle": "Adoraríamos ouvir de você. Entre em contato para saber mais sobre o Bara.",
+      "phone": {
+        "title": "Telefone",
+        "hours": "Seg - Domingo 24/7"
+      },
+      "email": {
+        "title": "E-mail",
+        "response": "Resposta em até 24 horas"
+      },
+      "location": {
+        "title": "Escritório",
+        "address": "Kigali, Ruanda",
+        "visit": "Visita com agendamento"
+      }
+    }
+  },
+  "claimListing": {
+    "page": {
+      "title": "Reivindique Sua Listagem de Negócio",
+      "subtitle": "Assuma o controle da sua listagem de negócio e conecte-se com mais clientes",
+      "hero": {
+        "callUs": "Ligue para nós:",
+        "hours": "Seg - Domingo 24/7"
+      },
+      "benefits": {
+        "title": "Por que Reivindicar Sua Listagem?",
+        "subtitle": "Ao reivindicar sua listagem de negócio, você desbloqueia ferramentas poderosas para expandir seu negócio",
+        "fullControl": {
+          "title": "Controle Total do Negócio",
+          "description": "Atualize suas informações, mídia, serviços e muito mais."
+        },
+        "enhancedVisibility": {
+          "title": "Visibilidade Aprimorada",
+          "description": "Obtenha posicionamento prioritário nos resultados de busca e listagens em destaque"
+        },
+        "customerReviews": {
+          "title": "Avaliações de Clientes",
+          "description": "Responda a avaliações e gerencie sua reputação online"
+        },
+        "verifiedBadge": {
+          "title": "Selo de Verificação",
+          "description": "Obtenha um selo de verificação para construir confiança com clientes em potencial"
+        }
+      },
+      "form": {
+        "title": "Reivindique Seu Negócio",
+        "subtitle": "Preencha o formulário abaixo para iniciar o processo de reivindicação",
+        "formTitle": "Formulário de Reivindicação de Negócio",
+        "requiredFields": "Todos os campos marcados com * são obrigatórios",
+        "businessName": "Nome do Negócio *",
+        "businessRegistrationNumber": "Número de Registro do Negócio *",
+        "businessAddress": "Endereço do Negócio *",
+        "contactName": "Seu Nome *",
+        "registrantTitle": "Adicione Seu Cargo (Função)",
+        "contactEmail": "Endereço de E-mail *",
+        "contactPhone": "Número de Telefone",
+        "website": "Website",
+        "reasonForClaim": "Motivo da Reivindicação *",
+        "additionalInfo": "Informações Adicionais",
+        "placeholders": {
+          "businessName": "Digite o nome do seu negócio",
+          "businessRegistrationNumber": "ex.: CNPJ / Nº de Registro",
+          "businessAddress": "Digite o endereço do seu negócio",
+          "contactName": "Digite seu nome completo",
+          "registrantTitle": "ex.: Proprietário, Gerente, Representante Autorizado",
+          "contactEmail": "Digite seu endereço de e-mail",
+          "contactPhone": "Digite seu número de telefone",
+          "website": "https://seu-website.com",
+          "reasonForClaim": "Por favor, explique por que está reivindicando esta listagem de negócio...",
+          "additionalInfo": "Qualquer informação adicional que possa nos ajudar a verificar sua reivindicação..."
+        },
+        "submit": "Enviar Pedido de Reivindicação",
+        "submitting": "Enviando..."
+      },
+      "contact": {
+        "title": "Precisa de Ajuda?",
+        "subtitle": "Nossa equipe está aqui para ajudá-lo a reivindicar sua listagem de negócio e responder quaisquer perguntas.",
+        "callUs": {
+          "title": "Ligue para Nós",
+          "phone": "(+250) 791 568 519",
+          "hours": "Seg - Domingo 24/7"
+        },
+        "emailUs": {
+          "title": "Envie um E-mail",
+          "email": "advertise@bara.com",
+          "response": "Responderemos em até 24 horas"
+        },
+        "processingTime": {
+          "title": "Tempo de Processamento",
+          "time": "2-3 Dias Úteis",
+          "description": "Para verificação de reivindicação"
+        }
+      },
+      "faqSection": {
+        "title": "Perguntas Frequentes",
+        "subtitle": "Encontre respostas para perguntas comuns sobre reivindicação de listagem de negócio"
+      },
+      "faq": {
+        "title": "Perguntas Frequentes",
+        "processingTime": {
+          "question": "Quanto tempo leva para processar uma reivindicação?",
+          "answer": "Normalmente processamos reivindicações em 2-3 dias úteis. Você receberá uma notificação por e-mail assim que sua reivindicação for analisada."
+        },
+        "requiredInfo": {
+          "question": "Quais informações preciso fornecer?",
+          "answer": "Você precisará fornecer o nome do seu negócio, endereço, informações de contato e explicar por que está reivindicando a listagem. Documentação adicional pode ser solicitada para verificação."
+        },
+        "cost": {
+          "question": "Existe algum custo para reivindicar minha listagem?",
+          "answer": "Reivindicar sua listagem básica é gratuito. No entanto, recursos premium e opções de visibilidade aprimorada estão disponíveis mediante pagamento."
+        },
+        "notListed": {
+          "question": "E se meu negócio ainda não estiver listado?",
+          "answer": "Se seu negócio não estiver listado atualmente, você ainda pode enviar um pedido de reivindicação e nós o ajudaremos a adicionar seu negócio ao nosso diretório."
+        }
+      },
+      "validation": {
+        "title": "Erro de Validação",
+        "requiredFields": "Por favor, preencha todos os campos obrigatórios."
+      },
+      "success": {
+        "title": "Pedido de Reivindicação Enviado",
+        "description": "Seu pedido de reivindicação foi enviado com sucesso. Entraremos em contato em 2-3 dias úteis."
+      },
+      "error": {
+        "title": "Erro",
+        "description": "Falha ao enviar pedido de reivindicação. Por favor, tente novamente."
+      }
+    }
+  },
+  "qa": {
+    "askQuestions": "Faça perguntas à comunidade Bara",
+    "shareKnowledge": "Compartilhe seu conhecimento para ajudar os outros",
+    "findAnswers": "Encontre respostas ou ofereça soluções",
+    "askQuestion": "Fazer uma Pergunta",
+    "browsePopular": "Navegar Perguntas e Respostas Populares"
+  },
+  "questions": {
+    "page": {
+      "title": "Fazer uma Pergunta",
+      "subtitle": "Obtenha Ajuda da Comunidade",
+      "description": "Faça sua pergunta e receba respostas da nossa comunidade de especialistas e outros usuários.",
+      "infoTitle": "Como funciona:",
+      "info1": "Envie sua pergunta com um título claro e uma descrição detalhada",
+      "info2": "Os membros da nossa comunidade fornecerão respostas úteis",
+      "info3": "Você receberá notificações por e-mail quando alguém responder",
+      "footer": "© 2024 Comunidade Bara. Todos os direitos reservados."
+    },
+    "form": {
+      "titleLabel": "Título da Pergunta",
+      "titlePlaceholder": "Digite um título claro e descritivo para sua pergunta",
+      "contentLabel": "Detalhes da Pergunta",
+      "contentPlaceholder": "Forneça informações detalhadas sobre sua pergunta. Seja específico para obter melhores respostas.",
+      "categoryLabel": "Categoria",
+      "selectCategory": "Selecione uma categoria",
+      "nameLabel": "Seu Nome",
+      "namePlaceholder": "Digite seu nome completo",
+      "emailLabel": "Endereço de E-mail",
+      "emailPlaceholder": "Digite seu endereço de e-mail",
+      "submit": "Enviar Pergunta",
+      "submitting": "Enviando...",
+      "submitted": "Pergunta enviada com sucesso!",
+      "titleRequired": "Por favor, digite um título para a pergunta",
+      "contentRequired": "Por favor, digite os detalhes da pergunta",
+      "nameRequired": "Por favor, digite seu nome",
+      "emailRequired": "Por favor, digite seu endereço de e-mail",
+      "categoryRequired": "Por favor, selecione uma categoria",
+      "submissionError": "Falha ao enviar pergunta. Por favor, tente novamente.",
+      "characters": "caracteres"
+    }
+  },
+  "reviews": {
+    "title": "Avaliações",
+    "writeReview": "Escrever uma Avaliação",
+    "helpFinding": "Outras pessoas precisam da sua ajuda para encontrar bons negócios.",
+    "writeShare": "Escreva uma avaliação e compartilhe sua experiência.",
+    "findBusiness": "Encontre o Negócio",
+    "feedbackImprove": "Os negócios precisam do seu feedback, tanto positivo quanto negativo, para que possam melhorar ou receber elogios por um trabalho bem feito.",
+    "postReview": "Publique",
+    "shareExperience": "Compartilhe suas experiências e sinta-se bem sabendo que está fazendo a diferença na sua comunidade!",
+    "reviewingBusiness": "Avaliando:",
+    "feedbackMessage": "Os negócios precisam do seu feedback, tanto positivo quanto negativo, para que possam melhorar ou receber elogios por um trabalho bem feito",
+    "shareMessage": "Compartilhe suas experiências e sinta-se bem sabendo que está fazendo a diferença na sua comunidade!",
+    "addPhotos": "Adicionar Fotos (Opcional)",
+    "rating": "Classificação",
+    "helpful": "Útil",
+    "notHelpful": "Não Útil",
+    "report": "Denunciar",
+    "sortBy": "Ordenar por",
+    "filterBy": "Filtrar por",
+    "allReviews": "Todas as Avaliações",
+    "positiveReviews": "Avaliações Positivas",
+    "negativeReviews": "Avaliações Negativas",
+    "searchBusiness": "Pesquisar um Negócio",
+    "selectBusiness": "Selecione um Negócio para Avaliar",
+    "businessName": "Nome do Negócio",
+    "location": "Localização",
+    "searchResults": "Resultados da Pesquisa",
+    "noResults": "Nenhum negócio encontrado",
+    "reviewTitle": "Título da Avaliação",
+    "reviewContent": "Detalhes da Avaliação",
+    "submitReview": "Enviar Avaliação",
+    "reviewSubmitted": "Avaliação Enviada!",
+    "reviewPending": "Sua avaliação será publicada após moderação",
+    "ratingRequired": "Por favor, forneça uma classificação",
+    "titleRequired": "Por favor, forneça um título para a avaliação",
+    "contentRequired": "Por favor, forneça o conteúdo da avaliação",
+    "loginRequired": "Por favor, faça login para enviar uma avaliação",
+    "searchError": "Erro na Pesquisa",
+    "searchFailed": "Falha ao pesquisar negócios",
+    "submissionError": "Erro no Envio",
+    "submissionFailed": "Falha ao enviar avaliação",
+    "backToSearch": "Voltar à Pesquisa",
+    "cancel": "Cancelar",
+    "submitting": "Enviando...",
+    "characterCount": "caracteres",
+    "outOf5": "de 5"
+  },
+  "auth": {
+    "loginRequired": "Login Necessário",
+    "login": {
+      "title": "Entrar",
+      "email": "E-mail",
+      "password": "Senha",
+      "forgotPassword": "Esqueceu a Senha?",
+      "noAccount": "Não tem uma conta?",
+      "signup": "Cadastrar"
+    },
+    "signup": {
+      "title": "Cadastrar",
+      "fullName": "Nome Completo",
+      "email": "E-mail",
+      "password": "Senha",
+      "confirmPassword": "Confirmar Senha",
+      "agreeTerms": "Eu concordo com os termos e condições",
+      "alreadyAccount": "Já tem uma conta?",
+      "login": "Entrar"
+    }
+  },
   "footer": {
-    "copyright": "© 2026 Bara, Inc. Todos os direitos reservados."
+    "localCommunities": "Comunidades Locais",
+    "cities": "Cidades",
+    "kigaliRwanda": "Kigali, Ruanda",
+    "nairobiKenya": "Nairóbi, Quênia",
+    "kampalaUganda": "Campala, Uganda",
+    "darEsSalaamTanzania": "Dar es Salaam, Tanzânia",
+    "addisAbabaEthiopia": "Adis Abeba, Etiópia",
+    "accraGhana": "Acra, Gana",
+    "lagosNigeria": "Lagos, Nigéria",
+    "capeTownSouthAfrica": "Cidade do Cabo, África do Sul",
+    "rwandafulRwanda": "Ruanda Maravilhosa",
+    "beautifulBotswana": "Botsuana Linda",
+    "kenyafulKenya": "Quênia Maravilhoso",
+    "ugandafulUganda": "Uganda Maravilhosa",
+    "tanzaniafulTanzania": "Tanzânia Maravilhosa",
+    "ethiopiafulEthiopia": "Etiópia Maravilhosa",
+    "ghanafulGhana": "Gana Maravilhosa",
+    "nigeriafulNigeria": "Nigéria Maravilhosa",
+    "about": "Sobre",
+    "aboutUs": "Sobre Nós",
+    "contactUs": "Fale Conosco",
+    "advertiseWithUs": "Anuncie Conosco",
+    "corporateBlog": "Blog Corporativo",
+    "advertisingChoices": "Anunciar",
+    "AskUsAnyQuestion": "Faça-nos Qualquer Pergunta",
+    "ClaimYourListing": "Reivindique Sua Listagem",
+    "siteDirectory": "Diretório do Site",
+    "articles": "Artigos",
+    "pricing": "Preços",
+    "coinStore": "Loja de Moedas",
+    "partners": "Parceiros",
+    "baraTools": "Ferramentas Bara",
+    "showAllLocations": "Mostrar Todas as {{count}} Localizações",
+    "showLess": "Mostrar Menos",
+    "findBusiness": "Encontrar um Negócio",
+    "ypMobileApp": "App Móvel Bara",
+    "gasGuruMobileApp": "App Móvel Gas Guru",
+    "siteMap": "Mapa do Site",
+    "categories": "Categorias",
+    "browseRestaurants": "Navegar Restaurantes",
+    "contact": "Contato",
+    "privacy": "Privacidade",
+    "terms": "Termos de Uso",
+    "legal": "Jurídico",
+    "copyright": "© 2026 BARA Afrika, Inc. Todos os direitos reservados.",
+    "trademark": "",
+    "otherMarks": "Todas as outras marcas contidas aqui são propriedade de seus respectivos proprietários.",
+    "countries": "Países",
+    "loadingCountries": "Carregando países...",
+    "noCountriesFound": "Nenhum país encontrado",
+    "globalAfrica": "África Global",
+    "africanAmericans": "Afro-Americanos",
+    "hbcusUSA": "HBCUs (EUA)",
+    "sponsorCountryPage": "Patrocinar Página do País",
+    "faq": "FAQ",
+    "askBara": "Pergunte ao BARA"
+  },
+  "sponsorCountry": {
+    "title": "Patrocine uma Página de País",
+    "subtitle": "Exiba o banner da sua empresa em qualquer página de país por apenas $25. Alcance milhares de usuários interessados naquele país específico.",
+    "benefits": {
+      "title": "O Que Você Recebe",
+      "banner": {
+        "title": "Banner na Página do País",
+        "description": "Seu banner exibido de forma destacada na página do país escolhido"
+      },
+      "visibility": {
+        "title": "Visibilidade da Empresa",
+        "description": "Aumente o reconhecimento da marca entre usuários de um país específico"
+      },
+      "audience": {
+        "title": "Público-Alvo Direcionado",
+        "description": "Alcance usuários especificamente interessados naquele país"
+      }
+    },
+    "price": {
+      "label": "Preço",
+      "amount": "$25",
+      "note": "Pagamento único"
+    },
+    "form": {
+      "title": "Formulário de Envio de Banner",
+      "companyInfo": "Informações da Empresa",
+      "companyName": "Nome da Empresa",
+      "companyNamePlaceholder": "Nome da Sua Empresa",
+      "website": "Website",
+      "websitePlaceholder": "https://suaempresa.com",
+      "bannerInfo": "Informações do Banner",
+      "selectCountry": "Selecionar País",
+      "chooseCountry": "Escolha um país",
+      "bannerImage": "Imagem do Banner",
+      "uploadHint": "Envie sua imagem de banner (Recomendado: 1200x300px)",
+      "chooseImage": "Escolher Imagem",
+      "altText": "Texto Alternativo (Opcional)",
+      "altTextPlaceholder": "Descreva seu banner para acessibilidade",
+      "terms": "Ao enviar este formulário, você concorda com nossos termos e condições. Seu banner será analisado e aprovado em 24-48 horas.",
+      "submitCta": "Pagar $25 e Enviar"
+    },
+    "payment": {
+      "detailsTitle": "Detalhes do Pagamento",
+      "amountLabel": "Valor",
+      "companyLabel": "Empresa",
+      "cardNumber": "Número do Cartão",
+      "cardNumberPlaceholder": "1234 5678 9012 3456",
+      "expiryDate": "Data de Validade",
+      "expiryPlaceholder": "MM/AA",
+      "cvv": "CVV",
+      "cvvPlaceholder": "123",
+      "cardholderName": "Nome do Titular do Cartão",
+      "cardholderPlaceholder": "João Silva",
+      "successTitle": "Pagamento Realizado com Sucesso!",
+      "successDescription": "Pagamento de ${{amount}} processado para {{companyName}}",
+      "payAmount": "Pagar ${{amount}}"
+    }
+  },
+  "faq": {
+    "title": "Perguntas Frequentes",
+    "subtitle": "Encontre respostas para perguntas comuns sobre o uso do BARA LISTINGS como cliente ou proprietário de negócio.",
+    "general": {
+      "title": "Perguntas Gerais",
+      "subtitle": "Perguntas comuns sobre o uso do BARA LISTINGS",
+      "items": {
+        "0": {
+          "q": "O que é o BARA LISTINGS?",
+          "a": "O BARA LISTINGS é um diretório de negócios abrangente que ajuda você a descobrir e se conectar com negócios em toda a África e suas comunidades da diáspora. Fornecemos informações detalhadas sobre vários negócios, incluindo detalhes de contato, serviços e avaliações de clientes."
+        },
+        "1": {
+          "q": "Como faço para pesquisar negócios?",
+          "a": "Você pode pesquisar negócios usando a barra de pesquisa no topo de qualquer página. Você pode filtrar sua pesquisa por localização, categoria ou palavras-chave específicas para encontrar exatamente o que está procurando."
+        },
+        "2": {
+          "q": "O BARA LISTINGS é gratuito?",
+          "a": "Sim, o BARA LISTINGS é completamente gratuito para usuários que pesquisam negócios. Proprietários de negócios podem reivindicar suas listagens gratuitamente, com recursos premium opcionais disponíveis."
+        },
+        "3": {
+          "q": "Como posso entrar em contato com um negócio?",
+          "a": "Cada listagem de negócio inclui informações de contato como números de telefone, endereços de e-mail e links de websites. Você pode usar esses detalhes para entrar em contato diretamente com o negócio."
+        },
+        "4": {
+          "q": "Como deixo uma avaliação?",
+          "a": "Para deixar uma avaliação, navegue até a página de perfil do negócio e clique no botão 'Escrever uma Avaliação'. Você precisará estar logado para enviar uma avaliação."
+        },
+        "5": {
+          "q": "Posso sugerir a adição de um negócio?",
+          "a": "Sim! Se você não encontrar um negócio que está procurando, pode sugeri-lo clicando no link 'Adicionar um Negócio' no menu de navegação."
+        },
+        "6": {
+          "q": "Com que frequência as informações dos negócios são atualizadas?",
+          "a": "As informações dos negócios são atualizadas em tempo real quando os proprietários atualizam suas listagens. Também verificamos periodicamente as informações para garantir a precisão."
+        },
+        "7": {
+          "q": "Como denuncio informações incorretas?",
+          "a": "Se encontrar informações incorretas, você pode denunciá-las clicando no botão 'Denunciar' na listagem do negócio. Nossa equipe analisará e atualizará as informações conforme necessário."
+        },
+        "8": {
+          "q": "Minhas informações pessoais estão seguras?",
+          "a": "Sim, levamos sua privacidade a sério. Suas informações pessoais são protegidas de acordo com nossa política de privacidade e nunca são compartilhadas sem o seu consentimento."
+        },
+        "9": {
+          "q": "Vocês têm um aplicativo móvel?",
+          "a": "Sim, o BARA LISTINGS está disponível como aplicativo móvel nas plataformas iOS e Android. Você pode baixá-lo na App Store ou na Google Play Store."
+        }
+      }
+    },
+    "business": {
+      "title": "Para Proprietários de Negócios",
+      "subtitle": "Informações para negócios listados no BARA LISTINGS",
+      "items": {
+        "0": {
+          "q": "Como reivindico minha listagem de negócio?",
+          "a": "Pesquise seu negócio em nossa plataforma e clique no botão 'Reivindicar Este Negócio'. Você precisará verificar sua identidade e completar o processo de verificação."
+        },
+        "1": {
+          "q": "Quais são os benefícios de reivindicar meu negócio?",
+          "a": "Reivindicar seu negócio permite que você atualize informações, responda a avaliações, adicione fotos, acesse análises e promova ofertas especiais para clientes em potencial."
+        },
+        "2": {
+          "q": "Quanto custa listar meu negócio?",
+          "a": "Listagens básicas são gratuitas! Também oferecemos planos premium com recursos adicionais. Visite nossa seção 'Para Negócios' para informações detalhadas sobre preços."
+        },
+        "3": {
+          "q": "Como posso melhorar a visibilidade do meu negócio?",
+          "a": "Certifique-se de que seu perfil esteja completo com informações precisas, fotos de alta qualidade e incentive clientes satisfeitos a deixar avaliações positivas. Nossos planos premium também oferecem opções de visibilidade aprimorada."
+        },
+        "4": {
+          "q": "Posso responder às avaliações dos clientes?",
+          "a": "Sim, como proprietário de negócio verificado, você pode responder a todas as avaliações. Encorajamos respostas profissionais e corteses a todo feedback."
+        },
+        "5": {
+          "q": "Como atualizo as informações do meu negócio?",
+          "a": "Faça login na sua conta empresarial, navegue até seu painel e selecione 'Editar Negócio' para atualizar suas informações. As alterações podem estar sujeitas a verificação."
+        },
+        "6": {
+          "q": "Quais métodos de pagamento vocês aceitam?",
+          "a": "Aceitamos todos os principais cartões de crédito, PayPal e transferências bancárias para serviços premium. Todas as transações são seguras e criptografadas."
+        },
+        "7": {
+          "q": "Posso anunciar ofertas especiais ou eventos?",
+          "a": "Sim, com uma conta premium, você pode criar e promover ofertas especiais, eventos e anúncios para alcançar mais clientes."
+        },
+        "8": {
+          "q": "Como cancelo minha assinatura premium?",
+          "a": "Você pode gerenciar sua assinatura na seção 'Faturamento' do painel do seu negócio. O cancelamento pode ser feito a qualquer momento."
+        },
+        "9": {
+          "q": "Com quem posso entrar em contato para suporte empresarial?",
+          "a": "Nossa equipe de suporte empresarial está disponível por e-mail em business@baralistings.com ou pelo formulário de contato no painel do seu negócio."
+        }
+      }
+    },
+    "cta": {
+      "title": "Ainda tem perguntas?",
+      "subtitle": "Nossa equipe de suporte está aqui para ajudá-lo com quaisquer outras perguntas que você possa ter.",
+      "contact": "Contatar Suporte",
+      "business": "Consultas Empresariais"
+    }
+  },
+  "categories": {
+    "title": "Todas as Categorias",
+    "searchPlaceholder": "Pesquisar categorias...",
+    "noResults": {
+      "title": "Nenhuma categoria encontrada",
+      "description": "Tente ajustar seus termos de pesquisa ou navegue por todas as categorias"
+    },
+    "airports": "Aeroportos",
+    "banks": "Bancos",
+    "bars": "Bares",
+    "barbers": "Barbearias",
+    "bookstores": "Livrarias",
+    "cafes": "Cafés",
+    "cinemas-theatres": "Cinemas e Teatros",
+    "clinics": "Clínicas",
+    "clubs-professional": "Clubes (Profissionais / Privados)",
+    "clubs-leisure": "Clubes (Lazer / Dança)",
+    "dentists": "Dentistas",
+    "doctors": "Médicos",
+    "faith": "Fé",
+    "farms": "Fazendas",
+    "galleries-art": "Galerias (Arte)",
+    "government": "Governo",
+    "hospitals": "Hospitais",
+    "hotels": "Hotéis",
+    "lawyers": "Advogados",
+    "libraries": "Bibliotecas",
+    "markets": "Mercados",
+    "museums": "Museus",
+    "parks": "Parques",
+    "pharmacies": "Farmácias",
+    "post-offices": "Correios",
+    "recreation": "Recreação",
+    "real-estate": "Imóveis",
+    "restaurants": "Restaurantes",
+    "salons": "Salões",
+    "schools": "Escolas",
+    "services": "Serviços",
+    "shopping": "Compras",
+    "tours": "Passeios",
+    "transportation": "Transporte",
+    "universities": "Universidades",
+    "utilities": "Utilidades",
+    "auto-repair": "Oficina Mecânica",
+    "coffee-shops": "Cafeterias",
+    "gyms-fitness": "Academias e Fitness",
+    "beauty-salons": "Salões de Beleza",
+    "pet-services": "Serviços para Pets"
+  },
+  "admin": {
+    "dashboard": "Painel",
+    "cities": "Cidades",
+    "countries": "Países",
+    "businesses": "Negócios",
+    "reviews": "Avaliações",
+    "users": {
+      "title": "Gerenciamento de Usuários",
+      "adminUsers": "Usuários Administradores",
+      "addUser": "Adicionar Usuário",
+      "searchPlaceholder": "Pesquisar usuários...",
+      "tabs": {
+        "users": "Usuários",
+        "logs": "Registros de Atividade"
+      },
+      "table": {
+        "name": "Nome",
+        "email": "E-mail",
+        "role": "Função",
+        "permissions": "Permissões",
+        "lastLogin": "Último Login",
+        "actions": "Ações",
+        "user": "Usuário",
+        "action": "Ação",
+        "resource": "Recurso",
+        "details": "Detalhes",
+        "timestamp": "Data/Hora"
+      },
+      "activityLogs": "Registros de Atividade"
+    },
+    "settings": "Configurações",
+    "pages": {
+      "users": "Gerenciamento de Usuários",
+      "usersSubtitle": "Gerenciar contas de usuários e permissões"
+    },
+    "advertiseSeizure": "Anunciar",
+    "statistics": "Estatísticas",
+    "recentActivity": "Atividade Recente",
+    "quickActions": "Ações Rápidas",
+    "systemStatus": "Status do Sistema",
+    "addNew": "Adicionar Novo",
+    "addBusiness": "Adicionar Negócio",
+    "addCity": "Adicionar Cidade",
+    "addCountry": "Adicionar País",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "search": "Pesquisar",
+    "filter": "Filtrar",
+    "status": "Status",
+    "actions": "Ações",
+    "name": "Nome",
+    "code": "Código",
+    "population": "População",
+    "capital": "Capital",
+    "currency": "Moeda",
+    "language": "Idioma",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "category": "Categoria",
+    "address": "Endereço",
+    "phone": "Telefone",
+    "website": "Website",
+    "rating": "Classificação",
+    "title": "Título",
+    "content": "Conteúdo",
+    "user": "Usuário",
+    "business": "Negócio",
+    "date": "Data",
+    "approved": "Aprovado",
+    "pending": "Pendente",
+    "rejected": "Rejeitado",
+    "flagged": "Sinalizado",
+    "total": "Total",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "businessesManagement": "Gerenciamento de Negócios",
+    "manageListing": "Gerenciar listagens de negócios e verificações",
+    "reviewsManagement": "Gerenciamento de Avaliações",
+    "moderateReviews": "Moderar e gerenciar avaliações de usuários",
+    "citiesManagement": "Gerenciamento de Cidades",
+    "manageCities": "Gerenciar cidades e localizações",
+    "countriesManagement": "Gerenciamento de Países",
+    "manageCountries": "Gerenciar países e regiões",
+    "overviewAnalytics": "Visão geral e análises",
+    "searchBusinesses": "Pesquisar negócios...",
+    "searchReviews": "Pesquisar avaliações...",
+    "searchCities": "Pesquisar cidades...",
+    "searchCountries": "Pesquisar países...",
+    "filterByStatus": "Filtrar por status",
+    "filterByCategory": "Filtrar por categoria",
+    "filterByRating": "Filtrar por classificação",
+    "allStatuses": "Todos os Status",
+    "allCategories": "Todas as Categorias",
+    "allRatings": "Todas as Classificações",
+    "noBusinessesFound": "Nenhum negócio encontrado",
+    "noReviewsFound": "Nenhuma avaliação encontrada",
+    "noCitiesFound": "Nenhuma cidade encontrada",
+    "noCountriesFound": "Nenhum país encontrado",
+    "tryAdjustingFilters": "Tente ajustar seus termos de pesquisa ou filtros.",
+    "businessesCount": "negócios",
+    "reviewsCount": "avaliações",
+    "citiesCount": "cidades",
+    "countriesCount": "países",
+    "totalUsers": "Total de Usuários",
+    "totalBusinesses": "Total de Negócios",
+    "totalCities": "Total de Cidades",
+    "totalCountries": "Total de Países",
+    "totalReviews": "Total de Avaliações",
+    "latestActions": "Últimas ações e atualizações",
+    "commonTasks": "Tarefas administrativas comuns",
+    "common": {
+      "refresh": "Atualizar"
+    },
+    "viewReports": "Ver Relatórios",
+    "allSystemsOperational": "Todos os sistemas operacionais",
+    "capacityUsed": "capacidade utilizada",
+    "responseTime": "Tempo de resposta",
+    "database": "Banco de Dados",
+    "storage": "Armazenamento",
+    "performance": "Desempenho",
+    "loadingBusinesses": "Carregando negócios...",
+    "businessManagement": "Gerenciamento de Negócios",
+    "manageAllBusinesses": "Gerenciar todos os negócios no sistema",
+    "editBusiness": "Editar Negócio",
+    "addNewBusiness": "Adicionar Novo Negócio",
+    "updateBusinessInfo": "Atualizar informações do negócio",
+    "createNewBusinessListing": "Criar uma nova listagem de negócio",
+    "businessName": "Nome do Negócio",
+    "description": "Descrição",
+    "selectCategory": "Selecionar categoria",
+    "selectCity": "Selecionar cidade",
+    "businessFeatures": "Recursos do Negócio",
+    "premiumBusiness": "Negócio Premium",
+    "verifiedBusiness": "Negócio Verificado",
+    "hasCoupons": "Tem Cupons",
+    "acceptsOrdersOnline": "Aceita Pedidos Online",
+    "kidFriendly": "Familiar",
+    "cancel": "Cancelar",
+    "update": "Atualizar",
+    "create": "Criar",
+    "error": "Erro",
+    "success": "Sucesso",
+    "validationError": "Erro de Validação",
+    "pleaseFillRequiredFields": "Por favor, preencha todos os campos obrigatórios",
+    "businessUpdatedSuccessfully": "Negócio atualizado com sucesso",
+    "businessCreatedSuccessfully": "Negócio criado com sucesso",
+    "failedToSaveBusiness": "Falha ao salvar negócio",
+    "confirmDeleteBusiness": "Tem certeza de que deseja excluir este negócio?",
+    "businessDeletedSuccessfully": "Negócio excluído com sucesso",
+    "failedToDeleteBusiness": "Falha ao excluir negócio",
+    "failedToFetchBusinesses": "Falha ao buscar negócios",
+    "tryAdjustingSearchTerms": "Tente ajustar seus termos de pesquisa ou filtros.",
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "flag": "Sinalizar",
+    "view": "Ver",
+    "updateSuccess": "Atualização bem-sucedida",
+    "updateError": "Falha na atualização",
+    "deleteSuccess": "Exclusão bem-sucedida",
+    "deleteError": "Falha na exclusão",
+    "statusUpdated": "Status atualizado com sucesso",
+    "reviewFlagged": "Avaliação sinalizada com sucesso",
+    "stars": "Coroas",
+    "outOf5Stars": "de 5 coroas"
+  },
+  "bannerAd": {
+    "placeholder": {
+      "badge": "ANÚNCIO",
+      "title": "Anuncie Seu Negócio Aqui",
+      "subtitle": "Alcance milhares de clientes locais • Posicionamento premium de anúncio",
+      "learnMore": "Saiba Mais"
+    },
+    "labels": {
+      "sponsored": "Patrocinado",
+      "sponsoredBy": "Patrocinado por"
+    },
+    "actions": {
+      "visitSite": "Visitar Patrocinador"
+    }
+  },
+  "lookForBusinesses": "Procure negócios por nome e localização.",
+  "findBusiness": "Encontre o Negócio",
+  "sentenceOne": "Avalie e Comente",
+  "sentenceTwo": "Publique",
+  "ReviewMessageOne": "Avalie",
+  "reviewMessage": " um Negócio e Ajude Outros!",
+  "listings": {
+    "searchResults": "Resultados da Pesquisa",
+    "mapView": "Visualização no Mapa",
+    "listView": "Visualização em Lista",
+    "all": "Todos",
+    "orderOnline": "Pedir Online",
+    "kidFriendly": "Familiar",
+    "coupons": "Cupons",
+    "premium": "Premium",
+    "verified": "Verificado",
+    "sort": "Ordenar:",
+    "default": "Padrão",
+    "distance": "Distância",
+    "rating": "Classificação",
+    "nameAZ": "Nome (A - Z)",
+    "businessesFound": "negócios encontrados",
+    "noBusinessesFound": "Nenhum negócio encontrado",
+    "noBusinessesMatching": "Nenhum negócio encontrado correspondente a",
+    "noBusinessesInCategory": "Nenhum negócio encontrado em",
+    "clearFilters": "Limpar Filtros",
+    "moreInfo": "Mais Informações",
+    "writeReview": "Escrever uma Avaliação",
+    "inCity": "em",
+    "showingBusinesses": "Mostrando",
+    "businessesInCity": "negócios em",
+    "businessesFoundCount": "Negócios encontrados",
+    "selectCity": "Selecionar uma Cidade",
+    "citiesWithBusinesses": "Cidades com",
+    "businessesInCategory": "negócios",
+    "showAllCities": "Mostrar todas as cidades",
+    "allCities": "Todas as cidades",
+    "business": "negócio",
+    "businesses": "negócios",
+    "errorLoadingBusinesses": "Erro ao Carregar Negócios",
+    "errorMessage": "Ocorreu um erro ao carregar os negócios. Por favor, tente novamente.",
+    "tryAgain": "Tentar Novamente",
+    "loadingCities": "Carregando cidades...",
+    "searchPlaceholder": "Pesquisar",
+    "findButton": "ENCONTRAR"
+  },
+  "cityDetail": {
+    "title": "Detalhes da Cidade",
+    "backToHome": "Voltar ao Início",
+    "cityNotFound": "Cidade Não Encontrada",
+    "searchBusinesses": "Pesquisar Negócios",
+    "errorLoadingBusinesses": "Erro ao Carregar Negócios",
+    "errorMessage": "Ocorreu um erro ao carregar os negócios. Por favor, tente novamente.",
+    "tryAgain": "Tentar Novamente",
+    "clearFilters": "Limpar Filtros",
+    "moreInfo": "Mais Informações",
+    "writeReview": "Escrever uma Avaliação",
+    "business": "negócio",
+    "reviews": "avaliações",
+    "cities": {
+      "kigali": "Kigali, a capital e maior cidade de Ruanda, é um exemplo brilhante de transformação urbana na África Oriental. Reconhecida por suas ruas impecavelmente limpas, Kigali conquistou a reputação de uma das capitais mais organizadas do continente. A cidade é um polo dinâmico para negócios, tecnologia e turismo, com infraestrutura moderna que inclui arranha-céus elegantes, estradas bem conservadas e um ecossistema tecnológico em crescimento, frequentemente chamado de \"Vale do Silício da África Oriental\". Sua cultura vibrante se reflete em mercados animados, dança e música tradicionais ruandesas, e festivais anuais como o KigaliUp. O rápido desenvolvimento de Kigali, aliado ao seu compromisso com a sustentabilidade e espaços verdes, como os jardins do Memorial do Genocídio de Kigali, faz dela um modelo de progresso urbano na região.",
+      "nairobi": "Nairóbi, a capital e maior cidade do Quênia, é carinhosamente conhecida como a \"Cidade Verde ao Sol\" devido à sua vegetação exuberante e clima agradável. Como uma grande potência econômica na África Oriental, Nairóbi abriga as sedes regionais de inúmeras corporações multinacionais e a Bolsa de Valores de Nairóbi. Sua população diversificada, proveniente dos muitos grupos étnicos do Quênia, contribui para uma rica tapeçaria cultural evidente em sua culinária, música e festivais como o Festival Internacional de Cinema de Nairóbi. Nairóbi serve como porta de entrada para os parques de vida selvagem mundialmente famosos do Quênia, como o Maasai Mara e o Parque Nacional de Nairóbi, onde os visitantes podem avistar leões e girafas com o horizonte da cidade ao fundo.",
+      "kampala": "Campala, a capital e maior cidade de Uganda, é famosamente construída sobre sete colinas, conferindo-lhe uma topografia e charme distintos. A cidade é um vibrante centro comercial e cultural, abrigando mercados movimentados como Owino e Nakasero, onde vendedores oferecem de tudo, desde produtos frescos até artesanato tradicional. A rica história de Campala é exibida em locais como o Museu de Uganda e os Túmulos de Kasubi, Patrimônio Mundial da UNESCO. Como polo educacional, abriga a Universidade Makerere, uma das instituições mais antigas e prestigiadas da África. Com uma economia em crescimento impulsionada pelo comércio, manufatura e serviços, a população diversificada e a animada vida noturna de Campala fazem dela um dinâmico centro urbano na África Oriental.",
+      "dar-es-salaam": "Dar es Salaam, a maior cidade e polo econômico da Tanzânia, prospera ao longo da costa do Oceano Índico, combinando beleza costeira com vitalidade urbana. Conhecida por suas praias paradisíacas como Coco Beach e seu movimentado porto, a cidade serve como o principal porto da Tanzânia, facilitando o comércio por toda a África Oriental e além. Sua cultura diversificada, influenciada por comunidades africanas, árabes e indianas, é evidente em sua culinária, música e festivais como a Swahili Fashion Week. O horizonte de Dar es Salaam, pontilhado de modernos arranha-céus, reflete seu crescente setor empresarial, particularmente em finanças e tecnologia, enquanto locais históricos como o Monumento Askari e o Museu Nacional destacam sua rica herança colonial e pré-colonial.",
+      "addis-ababa": "Adis Abeba, a capital e maior cidade da Etiópia, é o coração político da África, abrigando a sede da União Africana e inúmeras missões diplomáticas. Localizada nas terras altas, a cidade é rica em história, com marcos como a Catedral da Santíssima Trindade e o Museu Nacional, lar do famoso fóssil de Lucy. A cultura diversificada de Adis Abeba se reflete em seus vibrantes mercados, cerimônias tradicionais do café e festivais anuais como o Meskel. A economia da cidade está em expansão, com setores como manufatura, tecnologia e hospitalidade impulsionando o crescimento. Sua mistura de tradições ancestrais e desenvolvimento moderno faz de Adis Abeba um centro urbano único e influente na África Oriental.",
+      "accra": "Acra, a capital e maior cidade de Gana, é uma vibrante metrópole costeira conhecida por suas praias douradas, como a Praia de Labadi, e uma cena cultural dinâmica. Como um importante centro financeiro na África Ocidental, Acra abriga a Bolsa de Valores de Gana e inúmeras sedes corporativas. Sua rica cultura brilha através de sua música, com gêneros como highlife e hiplife, e festivais como o Chale Wote Street Art Festival. A infraestrutura moderna de Acra, incluindo shopping centers e edifícios altos, contrasta com locais históricos como o Mausoléu Kwame Nkrumah, criando uma cidade que une tradição com rápido crescimento urbano e uma próspera comunidade artística.",
+      "lagos": "Lagos, a maior cidade e potência econômica da Nigéria, é uma metrópole agitada conhecida por sua energia vibrante e diversidade cultural. Como o principal centro financeiro da África Ocidental, abriga a Bolsa de Valores da Nigéria e inúmeras corporações multinacionais. Lagos é famosa por sua cena musical dinâmica, berço de gêneros como Afrobeats, e sua próspera indústria cinematográfica de Nollywood. Os mercados da cidade, como Balogun e Computer Village, são colmeias de atividade, oferecendo de tudo, desde tecidos até eletrônicos. Apesar de sua vida urbana acelerada, Lagos possui praias deslumbrantes como Tarkwa Bay e marcos culturais como o Teatro Nacional, tornando-a um pilar do comércio e da cultura da África Ocidental.",
+      "cape-town": "Cidade do Cabo, a capital legislativa da África do Sul, é renomada por sua beleza natural deslumbrante, dominada pela icônica Montanha da Mesa e cercada pelo Oceano Atlântico. Um importante destino turístico, a cidade oferece atrações como o V&A Waterfront, a Ilha Robben e as Terras Vinícolas do Cabo. Sua cultura diversificada, moldada por influências africanas, europeias e asiáticas, é evidente em sua culinária, festivais e vibrante cena artística. A Cidade do Cabo também é um importante centro de negócios, com um setor de tecnologia em crescimento e vínculos de comércio internacional. Sua costa deslumbrante, townships vibrantes e rica história fazem dela uma das cidades mais pitorescas e culturalmente ricas da África.",
+      "johannesburg": "Joanesburgo, a maior cidade e polo econômico da África do Sul, é frequentemente chamada de \"Cidade do Ouro\" devido às suas origens como cidade de mineração de ouro no final do século XIX. Hoje, é a capital financeira da África, abrigando a Bolsa de Valores de Joanesburgo e inúmeras sedes corporativas. A rica história da cidade é explorada em locais como o Museu do Apartheid e Constitution Hill. O horizonte moderno de Joanesburgo, com arranha-céus imponentes, contrasta com suas vibrantes townships como Soweto, onde a herança cultural prospera através de música, dança e arte de rua. Sua economia dinâmica e população cosmopolita fazem dela um ator-chave nos mercados africanos e globais.",
+      "cairo": "Cairo, a capital e maior cidade do Egito, é uma metrópole histórica que combina maravilhas antigas com vibração moderna. Conhecida como a \"Cidade dos Mil Minaretes\", Cairo é lar das Pirâmides de Gizé, da Esfinge e do Museu Egípcio, que abriga tesouros da civilização egípcia antiga. Sua cultura vibrante se reflete em seus movimentados souks como Khan el-Khalili, arquitetura islâmica e locais de herança copta. Como polo econômico e cultural do Norte da África, Cairo prospera com uma mistura de cafés tradicionais, shopping centers modernos e uma cena tecnológica em crescimento, tornando-a uma cidade onde história e modernidade coexistem harmoniosamente.",
+      "alexandria": "Alexandria, a segunda maior cidade do Egito, é uma joia do Mediterrâneo conhecida por sua rica história e litoral deslumbrante. Outrora lar do antigo Farol de Alexandria e da Grande Biblioteca, a cidade mantém sua importância cultural com marcos como a Bibliotheca Alexandrina, um tributo moderno à sua predecessora antiga. A economia de Alexandria prospera em seu porto estratégico, um centro-chave para o comércio mediterrâneo, e em sua indústria turística, que atrai visitantes à sua orla marítima, fortes históricos e ruínas greco-romanas. A mistura de influências africanas, árabes e europeias da cidade cria um mosaico cultural único, evidente em sua culinária e vibrante cena artística.",
+      "casablanca": "Casablanca, a maior cidade e polo econômico do Marrocos, é uma metrópole moderna na costa atlântica, conhecida por sua arquitetura impressionante, incluindo a grandiosa Mesquita Hassan II com seu imponente minarete. Como o principal porto do país, impulsiona a economia marroquina através do comércio, finanças e indústria. A atmosfera cosmopolita da cidade se reflete em sua mistura de edifícios Art Déco, mercados agitados e vida noturna vibrante. A crescente cena de tecnologia e startups de Casablanca, junto com sua medina histórica e calçadão costeiro, fazem dela um centro dinâmico de comércio e cultura no Norte da África.",
+      "marrakech": "Marrakech, uma grande cidade do Marrocos, é um tesouro cultural conhecido por sua medina histórica, Patrimônio Mundial da UNESCO, e vibrantes souks repletos de especiarias, tecidos e artesanato intrincado. A icônica praça Jemaa el-Fnaa da cidade pulsa com contadores de histórias, músicos e barracas de comida, incorporando a rica herança marroquina. Marrakech é um dos principais destinos turísticos, com palácios deslumbrantes como o Bahia e jardins como o Jardin Majorelle. Sua mistura de influências berberes, árabes e francesas, junto com um crescente setor de hospitalidade e artes, fazem dela um cativante polo cultural e econômico no Marrocos.",
+      "butare": "Butare, agora conhecida como Huye, é uma cidade no sul de Ruanda celebrada por sua importância acadêmica e cultural. Lar do campus principal da Universidade de Ruanda, é um polo de educação e pesquisa, atraindo estudiosos de toda a região. As instituições culturais de Butare, como o Museu Etnográfico, apresentam a história e as tradições de Ruanda através de artefatos e exposições. O charme tranquilo da cidade, suas ruas arborizadas e locais históricos, incluindo edifícios da era colonial, fazem dela um centro de exploração intelectual e cultural, com foco crescente no desenvolvimento comunitário e turismo.",
+      "mombasa": "Mombaça, a joia costeira do Quênia, é uma cidade portuária histórica conhecida por suas praias paradisíacas, como Diani e Nyali, e seu porto estratégico, uma porta de entrada comercial chave para a África Oriental. A rica história da cidade, moldada por influências africanas, árabes e europeias, é evidente em marcos como o Forte Jesus, Patrimônio Mundial da UNESCO, e a arquitetura suaíli da Cidade Velha. A vibrante cultura de Mombaça brilha através de sua culinária de frutos do mar, música taarab e festivais. Como um importante centro turístico e econômico, combina relaxamento costeiro com uma próspera indústria de comércio e hospitalidade.",
+      "jinja": "Jinja, uma cidade no leste de Uganda, está famosamente localizada na nascente do Rio Nilo, tornando-a um ímã para o turismo de aventura. Conhecida pelo rafting em corredeiras, bungee jumping e caiaque, Jinja atrai aventureiros de todo o mundo. A economia da cidade está crescendo, impulsionada pelo turismo, agricultura e indústrias de pequena escala. Locais históricos como o monumento da Nascente do Nilo e edifícios da era colonial adicionam ao seu charme. A beleza cênica de Jinja, com vegetação exuberante e vistas do rio, combinada com seus vibrantes mercados, fazem dela um destino único na África Oriental.",
+      "arusha": "Arusha, uma cidade no norte da Tanzânia, é a porta de entrada para algumas das maravilhas naturais mais icônicas da África, incluindo o Monte Kilimanjaro, o Parque Nacional do Serengeti e a Cratera de Ngorongoro. Conhecida como a \"Capital do Safari\", Arusha prospera com sua indústria turística, oferecendo acesso a experiências de vida selvagem de classe mundial. Os vibrantes mercados da cidade, como o Mercado Maasai, exibem artesanato e cultura local. Arusha também serve como polo diplomático, abrigando a sede da Comunidade da África Oriental. Seu crescente setor empresarial e o cenário deslumbrante do Monte Meru fazem dela um centro econômico e cultural vital.",
+      "dire-dawa": "Dire Dawa, uma cidade no leste da Etiópia, é um importante centro de transporte e comércio, estrategicamente localizada ao longo da ferrovia Adis Abeba-Djibuti. Conhecida por sua população diversificada, incluindo comunidades etíopes, somalis e oromos, a cidade possui uma rica mistura cultural evidente em seus mercados, culinária e festivais. A economia de Dire Dawa é impulsionada pelo comércio, manufatura e agricultura, com sua estação ferroviária histórica e arquitetura colonial adicionando profundidade histórica. A vibrante vida de rua da cidade, combinada com seu papel como polo logístico, fazem dela uma parte essencial do cenário econômico da Etiópia.",
+      "kumasi": "Kumasi, a segunda maior cidade de Gana, é o coração cultural do Reino Ashanti, renomada por suas ricas tradições e história. A cidade abriga o Palácio Manhyia, sede do Asantehene, e vibrantes mercados como Kejetia, um dos maiores mercados ao ar livre da África Ocidental. A herança cultural de Kumasi é celebrada através de festivais como Akwasidae e sua intrincada tecelagem de tecido kente. Como um centro econômico em crescimento, apoia indústrias como madeira, agricultura e varejo. A mistura de herança real, comércio agitado e vibrante cena artística de Kumasi fazem dela um pilar da identidade ganense."
+    }
+  },
+  "featuredBusinesses": {
+    "featuredBusinesses": "Negócios em Destaque",
+    "featuredCategory": "{{category}} em Destaque",
+    "sponsored": "Patrocinado",
+    "ad": "Anúncio",
+    "reviews": "avaliações",
+    "website": "Website",
+    "directions": "Direções",
+    "moreInfo": "Mais Informações"
+  },
+  "businessFeatures": {
+    "hasCoupons": "Tem Cupons",
+    "acceptsOrdersOnline": "Aceita Pedidos Online",
+    "isKidFriendly": "Familiar",
+    "isPremium": "Negócio Premium",
+    "isVerified": "Negócio Verificado"
+  },
+  "advertise": {
+    "hero": {
+      "title": "Expanda Seu Negócio com o Bara",
+      "subtitle": "Alcance milhões de clientes e aumente sua visibilidade com nossas poderosas soluções de publicidade",
+      "getStarted": "Começar",
+      "learnMore": "Saiba Mais"
+    },
+    "stats": {
+      "monthlyVisitors": "Visitantes Mensais",
+      "businesses": "Negócios Listados",
+      "satisfaction": "Satisfação do Cliente"
+    },
+    "services": {
+      "title": "Nossos Serviços de Publicidade",
+      "subtitle": "Escolha a solução perfeita para expandir seu negócio e alcançar mais clientes",
+      "premium": {
+        "title": "Listagem Premium",
+        "description": "Destaque-se da concorrência com visibilidade aprimorada e posicionamento premium",
+        "feature1": "Classificação aprimorada na busca",
+        "feature2": "Posicionamento premium nos resultados",
+        "feature3": "Vitrine detalhada do negócio",
+        "cta": "Obter Listagem Premium"
+      },
+      "targeted": {
+        "title": "Publicidade Direcionada",
+        "description": "Alcance seus clientes ideais com campanhas publicitárias de precisão",
+        "feature1": "Segmentação geográfica",
+        "feature2": "Filtragem demográfica",
+        "feature3": "Insights comportamentais",
+        "cta": "Começar a Anunciar"
+      },
+      "analytics": {
+        "title": "Análises e Insights",
+        "description": "Acompanhe seu desempenho e otimize suas campanhas com análises detalhadas",
+        "feature1": "Dados de desempenho em tempo real",
+        "feature2": "Insights de comportamento do cliente",
+        "feature3": "Rastreamento e relatórios de ROI",
+        "cta": "Ver Análises"
+      }
+    },
+    "whyChoose": {
+      "title": "Por Que Escolher o Bara para Publicidade?",
+      "subtitle": "Fornecemos as ferramentas e o alcance necessários para expandir seu negócio de forma eficaz",
+      "reach": {
+        "title": "Alcance Massivo",
+        "description": "Acesso a milhões de clientes potenciais buscando ativamente negócios como o seu"
+      },
+      "growth": {
+        "title": "Crescimento Comprovado",
+        "description": "Negócios veem um aumento médio de 40% nas consultas de clientes no primeiro mês"
+      },
+      "local": {
+        "title": "Foco Local",
+        "description": "Especializados em conectar negócios locais com clientes locais na sua região"
+      },
+      "visibility": {
+        "title": "Visibilidade Aprimorada",
+        "description": "Destaque-se nos resultados de busca e seja notado por clientes que procuram seus serviços"
+      }
+    },
+    "cta": {
+      "title": "Pronto para Expandir Seu Negócio?",
+      "description": "Junte-se a milhares de negócios que confiam no Bara para ajudá-los a alcançar mais clientes e aumentar sua receita",
+      "primaryButton": "Comece a Anunciar Hoje",
+      "secondaryButton": "Agendar uma Consulta"
+    },
+    "contact": {
+      "title": "Entre em Contato",
+      "subtitle": "Nossos especialistas em publicidade estão aqui para ajudá-lo a ter sucesso",
+      "phone": {
+        "title": "Suporte Telefônico",
+        "hours": "Seg - Domingo 24/7"
+      },
+      "email": {
+        "title": "Suporte por E-mail",
+        "response": "Resposta em até 24 horas"
+      },
+      "location": {
+        "title": "Visite Nosso Escritório",
+        "address": "Kigali, Ruanda",
+        "visit": "Agende uma reunião"
+      }
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Fale Conosco",
+      "subtitle": "Estamos aqui para ajudar. Entre em contato com nossa equipe para qualquer dúvida ou suporte que você precisar."
+    },
+    "form": {
+      "title": "Envie-nos uma Mensagem",
+      "description": "Preencha o formulário abaixo e retornaremos o mais breve possível.",
+      "firstName": "Nome",
+      "firstNamePlaceholder": "Digite seu nome",
+      "lastName": "Sobrenome",
+      "lastNamePlaceholder": "Digite seu sobrenome",
+      "email": "E-mail",
+      "emailPlaceholder": "Digite seu endereço de e-mail",
+      "phone": "Telefone",
+      "phonePlaceholder": "Digite seu número de telefone",
+      "subject": "Assunto",
+      "subjectPlaceholder": "Sobre o que se trata?",
+      "message": "Mensagem",
+      "messagePlaceholder": "Diga-nos como podemos ajudá-lo...",
+      "sendMessage": "Enviar Mensagem"
+    },
+    "info": {
+      "general": {
+        "title": "Informações Gerais",
+        "phone": "Telefone",
+        "email": "E-mail",
+        "address": "Endereço",
+        "addressValue": "Kigali, Ruanda",
+        "hours": "Horário Comercial",
+        "hoursValue": "Seg - Domingo 24/7"
+      },
+      "support": {
+        "title": "Suporte ao Cliente",
+        "phone": "Telefone de Suporte",
+        "phoneHours": "Disponível 24/7",
+        "email": "E-mail de Suporte",
+        "emailResponse": "Resposta em até 2 horas"
+      },
+      "business": {
+        "title": "Consultas Empresariais",
+        "email": "E-mail Empresarial",
+        "description": "Para parcerias, publicidade e oportunidades de negócios",
+        "learnMore": "Saiba Mais Sobre Serviços Empresariais"
+      }
+    },
+    "faq": {
+      "title": "Perguntas Frequentes",
+      "subtitle": "Encontre respostas rápidas para perguntas comuns sobre nossos serviços",
+      "question1": "Como posso reivindicar minha listagem de negócio?",
+      "answer1": "Você pode reivindicar sua listagem de negócio visitando nossa página de reivindicação e seguindo o processo simples de verificação. Guiaremos você em cada etapa.",
+      "question2": "Quais opções de publicidade vocês oferecem?",
+      "answer2": "Oferecemos listagens premium, campanhas publicitárias direcionadas e ferramentas de análise para ajudá-lo a alcançar mais clientes e expandir seu negócio.",
+      "question3": "Como atualizo as informações do meu negócio?",
+      "answer3": "Depois de reivindicar sua listagem, você pode facilmente atualizar as informações do seu negócio, horários, fotos e muito mais através do seu painel de negócio.",
+      "question4": "Qual suporte vocês oferecem para negócios?",
+      "answer4": "Oferecemos suporte abrangente incluindo suporte telefônico, assistência por e-mail e gerentes de conta dedicados para clientes premium."
+    },
+    "cta": {
+      "title": "Precisa de Mais Ajuda?",
+      "description": "Nossa equipe está pronta para ajudá-lo com qualquer dúvida ou preocupação que você possa ter",
+      "primaryButton": "Contatar Suporte",
+      "secondaryButton": "Navegar Centro de Ajuda"
+    }
+  },
+  "premiumFeatures": {
+    "hero": {
+      "title": "Impulsione o engajamento do seu negócio",
+      "subtitle": "Aprimore seu perfil com ferramentas e recursos exclusivos!"
+    },
+    "billing": {
+      "monthly": "Faturamento Mensal",
+      "yearly": "Faturamento Anual",
+      "save": "Economize 20%"
+    },
+    "common": {
+      "mostPopular": "Mais Popular",
+      "perMonth": "/mês",
+      "perYear": "/ano"
+    },
+    "features": {
+      "businessProfile": "Perfil do Negócio",
+      "basicContact": "Informações Básicas de Contato",
+      "socialLinks": "Links de Redes Sociais",
+      "photoGallery": "Galeria de Fotos (até 10 imagens)",
+      "businessHours": "Horário Comercial",
+      "productServices": "Listagem de Produtos/Serviços",
+      "customerReviews": "Avaliações de Clientes",
+      "prioritySupport": "Suporte Prioritário ao Cliente",
+      "analytics": "Integração com Google Analytics",
+      "featuredListings": "Listagens em Destaque",
+      "unlimitedUploads": "Uploads de Mídia Ilimitados",
+      "customDomain": "Domínio Personalizado"
+    },
+    "plans": {
+      "normal": {
+        "name": "Normal",
+        "price": "Grátis",
+        "description": "Listagem básica com recursos essenciais",
+        "button": "Continuar Grátis"
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "$5",
+        "description": "Ideal para negócios em crescimento",
+        "button": "Assinar Pro"
+      },
+      "premium": {
+        "name": "Premium",
+        "price": "$20",
+        "description": "Para negócios que querem o melhor",
+        "button": "Obter Premium"
+      }
+    },
+    "pricing": {
+      "billedAnnually": "Cobrado anualmente"
+    },
+    "payment": {
+      "title": "Complete Sua Compra",
+      "freeDescription": "Você está se cadastrando para uma listagem gratuita.",
+      "planDescription": "Você está se cadastrando para o plano {{plan}}.",
+      "selectedPlan": "Plano {{plan}}",
+      "freeForever": "Grátis para sempre",
+      "annualBilling": "Cobrado anualmente a ${{amount}}/ano",
+      "monthlyBilling": "Cobrado mensalmente a ${{amount}}/mês",
+      "switchBilling": "Mudar para {{to}}",
+      "method": "Método de Pagamento",
+      "card": "Cartão de Crédito ou Débito",
+      "cardNumber": "Número do Cartão",
+      "cardNumberPlaceholder": "1234 5678 9012 3456",
+      "expiry": "Validade",
+      "expiryPlaceholder": "MM/AA",
+      "cvc": "CVC",
+      "cvcPlaceholder": "123",
+      "zip": "CEP/Código Postal",
+      "zipPlaceholder": "12345"
+    },
+    "form": {
+      "fullName": "Nome Completo",
+      "fullNamePlaceholder": "João Silva",
+      "email": "E-mail",
+      "emailPlaceholder": "voce@exemplo.com"
+    },
+    "notice": {
+      "label": "Nota:",
+      "text": "Esta é uma página de pagamento de teste. Nenhum pagamento real será processado. Em um ambiente de produção, isso se conectaria a um processador de pagamento seguro."
+    },
+    "actions": {
+      "completeFree": "Completar Cadastro Gratuito",
+      "confirmPayment": "Confirmar Pagamento"
+    },
+    "legal": {
+      "agree": "Ao continuar, você concorda com nossos Termos de Serviço e Política de Privacidade."
+    },
+    "planNames": {
+      "normal": "Normal",
+      "pro": "Pro",
+      "premium": "Premium"
+    }
   }
 }
