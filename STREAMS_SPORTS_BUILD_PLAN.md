@@ -1,7 +1,7 @@
 # BARA AFRIKA — FULL PLATFORM BUILD, TEST & DPO PLAN
 
 **Created:** 2026-03-17
-**Updated:** 2026-03-17 (incorporates team meeting notes from March 1, 2026)
+**Updated:** 2026-03-31 (incorporates team meeting notes from March 1, 2026 + Mar 31 sprint work)
 **Scope:** Streams, Sports, platform-wide UX changes, gamification review, cross-device testing, DPO compliance.
 
 ---
@@ -80,22 +80,15 @@ Currently exists on Events and Marketplace pages. Must be added to ALL pages.
 | Add all mini-app links to footer | P1 | ☐ |
 | Amazon-style organized footer layout | P1 | ☐ |
 
-### 0.5 Home Page — BARA Tile Flip (P1)
+### 0.5 Home Page — BARA Tile Flip (P1) ✅ DONE (Mar 31)
 > **"BARA Main Tile should be interactive — when clicked, it flips and shows the meaning of Bara"**
-
-Content for the flip:
-> *Bara is a Swahili word meaning continent, mainland, or dry land. It refers to the vast, solid ground—the interior, the heart of the land.*
-> *Bara la Afrika — The African Continent.*
-> *This is our ground. It connects us to the soil and reminds us that Africa is one united continent, not a collection of isolated coasts.*
-> *The word flows from the Arabic barr (land).*
-> *Think of Bara as your anchor. While it means other things in different languages, in our context, it is the bedrock of Pan-African identity: One land. One people. One future.*
 
 | Task | Priority | Status |
 |------|----------|--------|
-| Add CSS 3D flip animation to main BARA tile on homepage | P1 | ☐ |
-| Front: current BARA branding/logo | P1 | ☐ |
-| Back: the Bara meaning text above | P1 | ☐ |
-| Click to flip, click again to flip back | P1 | ☐ |
+| Add CSS 3D flip animation to main BARA tile on homepage | P1 | ✅ Done |
+| Front: Language meanings grid (Swahili, Hausa, Yoruba, Amharic, Zulu, Arabic) | P1 | ✅ Done |
+| Back: unified BARA message — "The Swahili word for continent, mainland..." + "One land \| One people \| One future" | P1 | ✅ Done |
+| Click to flip, click again to flip back | P1 | ✅ Done |
 
 ---
 
@@ -203,10 +196,12 @@ Without seed data, every Streams page shows empty.
 
 ## PHASE 2: BARA SPORTS — TESTING & FIXES
 
-### 2.1 Sports Infrastructure
+### 2.1 Sports Infrastructure — ⏸️ DEFERRED (Mar 31)
+> **Note:** api-sports.io requires Pro plan ($10/mo minimum) for live data. Too expensive for current stage. Sports page works with Supabase-backed content (manual news/videos). Revisit when platform has revenue.
+
 | Task | Priority | Status |
 |------|----------|--------|
-| Verify `VITE_API_FOOTBALL_KEY` is set and active | P0 | ☐ |
+| Verify `VITE_API_FOOTBALL_KEY` is set and active | P0 | ⏸️ Deferred |
 | Verify `sports_news` table exists in production | P0 | ☐ |
 | Verify `sports_videos` table exists | P1 | ☐ |
 | Verify `sports_predictions` table exists | P1 | ☐ |
@@ -476,6 +471,25 @@ PENDING — Requires Team Meetings First
 
 ---
 
+---
+
+## COMPLETED — March 31, 2026 Sprint
+
+| # | Item | Files Changed | Status |
+|---|------|---------------|--------|
+| A | **Search genre cards — remove colors** — Neutral gray monochrome cards | `SearchPage.tsx` | ✅ Done |
+| B | **Global player not playing — fixed** — URL validation, auto-skip on error, 15s canplay timeout | `AudioPlayerContext.tsx` | ✅ Done |
+| C | **Film crew credits display** — Director, Producer(s), Writer, Actors on hero + cards | `MoviesPage.tsx` | ✅ Done |
+| D | **Multi-artist credits** — GlobalPlayer shows "ft." artists, ArtistPage "Featured On" section, ArtistDashboard "Featured Streams" stat | `GlobalPlayer.tsx`, `ArtistPage.tsx`, `ArtistDashboard.tsx` | ✅ Done |
+| E | **Music share link mobile** — Removed `hidden md:block` from share button | `GlobalPlayer.tsx` | ✅ Done |
+| F | **BARA copyright fix** — "Bara" → "BARA" in locale files + HTML title | `en.json`, `pt.json`, `index.html` | ✅ Done |
+| G | **Home page flip card redesign** — Single large card with language meanings grid + unified BARA message | `BaraMeaningTiles.tsx` | ✅ Done |
+| H | **Translation — Google Translate widget** — Replaced i18next LanguageSwitcher, 18 languages, real-time full-page translation | `Header.tsx`, `GoogleTranslate.tsx`, `index.html` | ✅ Done |
+| I | **Sports API — deferred** — Pro plan $10/mo too expensive for now | — | ⏸️ Deferred |
+
+---
+
 *Plan created: March 17, 2026*
 *Updated with team meeting notes: March 17, 2026*
+*Updated: March 31, 2026 — 8 items completed, Sports API deferred*
 *For Bara Afrika Platform — baraafrika.com*

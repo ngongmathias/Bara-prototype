@@ -57,7 +57,350 @@
       "viewAllCategories": "Reba ibiciro byose"
     },
     "businesses": {
-      "title": "Ubucuruzi buhebuje"
+      "title": "Ubucuruzi buhebuje",
+      "viewAll": "Reba byose"
+    }
+  },
+  "business": {
+    "owners": "Banyubucuruzi",
+    "manageListing": {
+      "title": "Gucunga urutonde rwawe ku buntu.",
+      "step1": "Hindura amakuru y'ubucuruzi bwawe mu ntambwe nke.",
+      "step2": "Tegura neza kugira ngo abakiriya bawe bakubone kuri BARA.",
+      "new": "Gishya!",
+      "jobPosting": "Shyira umwanya w'akazi ku rutonde rwawe ku buntu."
+    },
+    "claimListing": "Saba Urutonde Rwawe",
+    "orCall": "cyangwa hamagara",
+    "toast": {
+      "title": "Hamagara kugira ngo ubone amakuru yose",
+      "description": "Nyamuneka hamagara (+250) 791 568 519 kugira ngo ubone amakuru yose yerekeye gusaba urutonde rwawe.",
+      "callNow": "Hamagara Nonaha"
+    },
+    "details": {
+      "phone": "Telefoni",
+      "email": "Imeyili",
+      "website": "Urubuga",
+      "address": "Aderesi",
+      "hours": "Amasaha",
+      "services": "Serivisi",
+      "reviews": "Ibitekerezo",
+      "rating": "Igipimo",
+      "orderOnline": "Gura kuri Interineti",
+      "visitWebsite": "Sura Urubuga",
+      "getDirections": "Bona Inzira",
+      "share": "Sangira"
+    },
+    "status": {
+      "active": "Gikoreshwa",
+      "pending": "Gutegerezwa",
+      "suspended": "Guhagarikwa",
+      "premium": "Ibyiza cyane"
+    }
+  },
+  "about": {
+    "hero": {
+      "title": "Ibyerekeye Bara",
+      "subtitle": "Guhuza amakoperative n'ubucuruzi bw'aho bwizewe",
+      "learnMore": "Menya byinshi",
+      "contactUs": "Twandikire"
+    },
+    "overview": {
+      "title": "Inkuru Yacu",
+      "description": "Bara ni urubuga rw'ubucuruzi rukomeye mu Rwanda, rwiyemeje guhuza abaturage n'ubucuruzi bwizewe. Twizera imbaraga z'ubucuruzi bw'aho kandi tugerageza gutuma abantu bashobora kubona no guhuza n'ibikorwa byiza mu karere kabo.",
+      "mission": "Intego yacu ni guteza imbere ubucuruzi bw'aho tugirango tubahemo umwanya ku mbuga nkoranyambaga mu gihe dufasha abaguzi gufata ibyemezo bifitiye akamaro ku bijyanye n'aho bagurira, barira, n'aho bahabwa serivisi.",
+      "established": "Yashinzwe 2024",
+      "location": "u Rwanda"
+    },
+    "stats": {
+      "users": "Abakoresha bakora",
+      "businesses": "Ubucuruzi bwanditse",
+      "cities": "Imijyi igerwaho",
+      "satisfaction": "Kwishimira kw'abakiriya"
+    },
+    "values": {
+      "title": "Indangagaciro Zacu",
+      "subtitle": "Amahame ayobora ibyo dukora byose",
+      "trust": {
+        "title": "Icyizere n'Ikizere",
+        "description": "Tubaka ubusabane burambye bushingiye ku mucyo no kwizerwa."
+      },
+      "quality": {
+        "title": "Serivisi Nziza",
+        "description": "Dukomeza ibyiza mu byo dukora byose ku bw'umuryango wacu."
+      },
+      "innovation": {
+        "title": "Udushya",
+        "description": "Dukomeza kunoza urubuga rwacu kugira ngo dukorere neza abakoresha bacu."
+      },
+      "community": {
+        "title": "Umuryango Mbere ya Byose",
+        "description": "Dushyira imbere ibikenewe n'iterambere ry'imiryango yacu y'aho."
+      },
+      "excellence": {
+        "title": "Ubuhanga Bwiza",
+        "description": "Duharanira ubuhanga bwiza mu buryo bwose bw'ubucuruzi bwacu."
+      },
+      "growth": {
+        "title": "Iterambere Rirambye",
+        "description": "Dushyigikira iterambere rirambye ry'ubucuruzi bw'aho."
+      }
+    },
+    "team": {
+      "title": "Itsinda Ryacu",
+      "subtitle": "Menya abakozi b'inzobere bari inyuma ya Bara",
+      "leadership": {
+        "title": "Itsinda ry'Ubuyobozi",
+        "description": "Abayobozi b'inararibonye bayobora icyerekezo n'iterambere ryacu."
+      },
+      "development": {
+        "title": "Itsinda ry'Ikoranabuhanga",
+        "description": "Abahanga mu ikoranabuhanga bubaka ibisubizo bishya ku rubuga rwacu."
+      },
+      "support": {
+        "title": "Ubufasha bw'Abakiriya",
+        "description": "Abakozi b'ubufasha batanga uburambe bwiza ku bakoresha."
+      }
+    },
+    "contact": {
+      "title": "Tuvugishe",
+      "subtitle": "Twishimira kukumva. Twandikire kugira ngo umenye byinshi kuri Bara.",
+      "phone": {
+        "title": "Telefoni",
+        "hours": "Kuwa mbere - Ku cyumweru 24/7"
+      },
+      "email": {
+        "title": "Imeyili",
+        "response": "Igisubizo mu masaha 24"
+      },
+      "location": {
+        "title": "Ibiro",
+        "address": "Kigali, u Rwanda",
+        "visit": "Sura ufite gahunda"
+      }
+    }
+  },
+  "claimListing": {
+    "page": {
+      "title": "Saba Urutonde rw'Ubucuruzi Bwawe",
+      "subtitle": "Fata ubucuruzi bwawe uhuze n'abakiriya benshi",
+      "hero": {
+        "callUs": "Tuhamagare:",
+        "hours": "Kuwa mbere - Ku cyumweru 24/7"
+      },
+      "benefits": {
+        "title": "Kuki Wasaba Urutonde Rwawe?",
+        "subtitle": "Iyo usabye urutonde rw'ubucuruzi bwawe, ufungura ibikoresho bikomeye byo guteza imbere ubucuruzi bwawe",
+        "fullControl": {
+          "title": "Kugenzura Ubucuruzi Bwuzuye",
+          "description": "Hindura amakuru yawe, amafoto, serivisi, n'ibindi."
+        },
+        "enhancedVisibility": {
+          "title": "Kumenyekana Cyane",
+          "description": "Bona umwanya w'ibanze mu bisubizo by'ubushakashatsi n'urutonde ruhebuje"
+        },
+        "customerReviews": {
+          "title": "Ibitekerezo by'Abakiriya",
+          "description": "Subiza ibitekerezo ucunge izina ryawe kuri interineti"
+        },
+        "verifiedBadge": {
+          "title": "Ikimenyetso cy'Kwemeza",
+          "description": "Bona ikimenyetso cy'kwemeza kugira ngo wubake icyizere n'abakiriya bashoboka"
+        }
+      },
+      "form": {
+        "title": "Saba Ubucuruzi Bwawe",
+        "subtitle": "Uzuza ifishi ikurikira kugira ngo utangire inzira yo gusaba",
+        "formTitle": "Ifishi yo Gusaba Ubucuruzi",
+        "requiredFields": "Imirongo yose ifite * irakenewe",
+        "businessName": "Izina ry'Ubucuruzi *",
+        "businessRegistrationNumber": "Nimero y'Iyandikisha ry'Ubucuruzi *",
+        "businessAddress": "Aderesi y'Ubucuruzi *",
+        "contactName": "Izina Ryawe *",
+        "registrantTitle": "Ongeraho Umwanya Wawe (Uruhare)",
+        "contactEmail": "Imeyili *",
+        "contactPhone": "Nimero ya Telefoni",
+        "website": "Urubuga",
+        "reasonForClaim": "Impamvu yo Gusaba *",
+        "additionalInfo": "Amakuru Yinyongera",
+        "placeholders": {
+          "businessName": "Andika izina ry'ubucuruzi bwawe",
+          "businessRegistrationNumber": "urugero, TIN / Nimero y'iyandikisha",
+          "businessAddress": "Andika aderesi y'ubucuruzi bwawe",
+          "contactName": "Andika izina ryawe ryuzuye",
+          "registrantTitle": "urugero, Nyir'ubucuruzi, Umuyobozi, Uhagarariye",
+          "contactEmail": "Andika imeyili yawe",
+          "contactPhone": "Andika nimero ya telefoni yawe",
+          "website": "https://urubuga-rwawe.com",
+          "reasonForClaim": "Nyamuneka sobanura impamvu usaba urutonde rw'ubucuruzi...",
+          "additionalInfo": "Amakuru yose yinyongera ashobora kudufasha kwemeza icyifuzo cyawe..."
+        },
+        "submit": "Ohereza Icyifuzo cyo Gusaba",
+        "submitting": "Kohereza..."
+      },
+      "contact": {
+        "title": "Ukeneye Ubufasha?",
+        "subtitle": "Itsinda ryacu rihari kugufasha gusaba urutonde rw'ubucuruzi bwawe no gusubiza ibibazo byose ufite.",
+        "callUs": {
+          "title": "Tuhamagare",
+          "phone": "(+250) 791 568 519",
+          "hours": "Kuwa mbere - Ku cyumweru 24/7"
+        },
+        "emailUs": {
+          "title": "Twandikire",
+          "email": "advertise@bara.com",
+          "response": "Tugisubiza mu masaha 24"
+        },
+        "processingTime": {
+          "title": "Igihe cyo Gusuzuma",
+          "time": "Iminsi 2-3 y'akazi",
+          "description": "Kugira ngo twemeze icyifuzo"
+        }
+      },
+      "faqSection": {
+        "title": "Ibibazo Bikunze Kubazwa",
+        "subtitle": "Shaka ibisubizo ku bibazo bikunze kubazwa ku bijyanye no gusaba urutonde rw'ubucuruzi bwawe"
+      },
+      "faq": {
+        "title": "Ibibazo Bikunze Kubazwa",
+        "processingTime": {
+          "question": "Bisaba igihe kingana iki kugira ngo icyifuzo gisuzumwe?",
+          "answer": "Dusuzuma ibisabwa mu minsi 2-3 y'akazi. Uzohabwa ubutumwa bwa imeyili icyifuzo cyawe kimaze gusuzumwa."
+        },
+        "requiredInfo": {
+          "question": "Ni ayahe makuru nkeneye gutanga?",
+          "answer": "Uzakenera gutanga izina ry'ubucuruzi bwawe, aderesi, amakuru y'itumanaho, no gusobanura impamvu usaba urutonde. Ibimenyetso byinyongera bishobora gusabwa kugira ngo twemeze."
+        },
+        "cost": {
+          "question": "Gusaba urutonde rwanjye bitwara amafaranga angana iki?",
+          "answer": "Gusaba urutonde rwawe rusanzwe ni ubuntu. Ariko, serivisi z'agaciro n'ibirenze byo kumenyekana bihari ku giciro."
+        },
+        "notListed": {
+          "question": "Bigenda bite niba ubucuruzi bwanjye butarabandikwa?",
+          "answer": "Niba ubucuruzi bwawe butarashyirwa ku rutonde, ushobora gusaba kandi tuzagufasha gushyira ubucuruzi bwawe mu rutonde rwacu."
+        }
+      },
+      "validation": {
+        "title": "Ikosa ryo Kwemeza",
+        "requiredFields": "Nyamuneka uzuza imirongo yose irakenewe."
+      },
+      "success": {
+        "title": "Icyifuzo Cyoherejwe",
+        "description": "Icyifuzo cyawe cyoherejwe neza. Tuzakuvugisha mu minsi 2-3 y'akazi."
+      },
+      "error": {
+        "title": "Ikosa",
+        "description": "Kohereza icyifuzo byanze. Nyamuneka ongera ugerageze."
+      }
+    }
+  },
+  "qa": {
+    "askQuestions": "Baza ibibazo mu muryango wa Bara",
+    "shareKnowledge": "Sangira ubumenyi bwawe kugira ngo ufashe abandi",
+    "findAnswers": "Shaka ibisubizo cyangwa utange umuti",
+    "askQuestion": "Baza Ikibazo",
+    "browsePopular": "Reba Ibibazo n'Ibisubizo Bikunze Kubazwa"
+  },
+  "questions": {
+    "page": {
+      "title": "Baza Ikibazo",
+      "subtitle": "Bona Ubufasha mu Muryango",
+      "description": "Baza ikibazo cyawe ubona ibisubizo mu muryango w'inzobere n'abakoresha bagenzi.",
+      "infoTitle": "Uko bigenda:",
+      "info1": "Ohereza ikibazo cyawe gifite umutwe usobanutse n'ibisobanuro birambuye",
+      "info2": "Abagize umuryango wacu bazaguha ibisubizo bifasha",
+      "info3": "Uzahabwa ubutumwa bwa imeyili iyo umuntu asubije",
+      "footer": "© 2024 Bara Umuryango. Uburenganzira bwose burabikwa."
+    },
+    "form": {
+      "titleLabel": "Umutwe w'Ikibazo",
+      "titlePlaceholder": "Andika umutwe usobanutse w'ikibazo cyawe",
+      "contentLabel": "Ibisobanuro by'Ikibazo",
+      "contentPlaceholder": "Tanga amakuru arambuye ku kibazo cyawe. Sobanura neza kugira ngo ubone ibisubizo byiza.",
+      "categoryLabel": "Icyiciro",
+      "selectCategory": "Hitamo icyiciro",
+      "nameLabel": "Izina Ryawe",
+      "namePlaceholder": "Andika izina ryawe ryuzuye",
+      "emailLabel": "Imeyili",
+      "emailPlaceholder": "Andika imeyili yawe",
+      "submit": "Ohereza Ikibazo",
+      "submitting": "Kohereza...",
+      "submitted": "Ikibazo cyoherejwe neza!",
+      "titleRequired": "Nyamuneka andika umutwe w'ikibazo",
+      "contentRequired": "Nyamuneka andika ibisobanuro by'ikibazo",
+      "nameRequired": "Nyamuneka andika izina ryawe",
+      "emailRequired": "Nyamuneka andika imeyili yawe",
+      "categoryRequired": "Nyamuneka hitamo icyiciro",
+      "submissionError": "Kohereza ikibazo byanze. Nyamuneka ongera ugerageze.",
+      "characters": "inyuguti"
+    }
+  },
+  "reviews": {
+    "title": "Ibitekerezo",
+    "writeReview": "Andika Igitekerezo",
+    "helpFinding": "Abandi bantu bakeneye ubufasha bwawe mu gushaka ubucuruzi bwiza.",
+    "writeShare": "Andika igitekerezo usangire uburambe bwawe.",
+    "findBusiness": "Shaka Ubucuruzi",
+    "feedbackImprove": "Ubucuruzi bukeneye igitekerezo cyawe, cyiza n'kibi, kugira ngo bunonosore cyangwa bubone ishimwe ku mirimo myiza.",
+    "postReview": "Shiraho",
+    "shareExperience": "Sangira uburambe bwawe wumve ufite umunezero ko urimo uhindura ibintu mu muryango wawe!",
+    "reviewingBusiness": "Ugutanga igitekerezo kuri:",
+    "feedbackMessage": "Ubucuruzi bukeneye igitekerezo cyawe, cyiza n'kibi, kugira ngo bunonosore cyangwa bubone ishimwe",
+    "shareMessage": "Sangira uburambe bwawe wumve ufite umunezero ko urimo uhindura ibintu mu muryango wawe!",
+    "addPhotos": "Ongeraho Amafoto (Ntibikenewe)",
+    "rating": "Igipimo",
+    "helpful": "Bifasha",
+    "notHelpful": "Ntibifasha",
+    "report": "Tanga Raporo",
+    "sortBy": "Shyira mu murongo",
+    "filterBy": "Shungura ku",
+    "allReviews": "Ibitekerezo Byose",
+    "positiveReviews": "Ibitekerezo Byiza",
+    "negativeReviews": "Ibitekerezo Bibi",
+    "searchBusiness": "Shakisha Ubucuruzi",
+    "selectBusiness": "Hitamo Ubucuruzi bwo Gutanga Igitekerezo",
+    "businessName": "Izina ry'Ubucuruzi",
+    "location": "Ahantu",
+    "searchResults": "Ibisubizo by'Ubushakashatsi",
+    "noResults": "Nta bucuruzi bubonetse",
+    "reviewTitle": "Umutwe w'Igitekerezo",
+    "reviewContent": "Ibisobanuro by'Igitekerezo",
+    "submitReview": "Ohereza Igitekerezo",
+    "reviewSubmitted": "Igitekerezo Cyoherejwe!",
+    "reviewPending": "Igitekerezo cyawe kizashyirwa ahagaragara nyuma yo gusuzumwa",
+    "ratingRequired": "Nyamuneka tanga igipimo",
+    "titleRequired": "Nyamuneka tanga umutwe w'igitekerezo",
+    "contentRequired": "Nyamuneka tanga ibisobanuro by'igitekerezo",
+    "loginRequired": "Nyamuneka injira kugira ngo wohereze igitekerezo",
+    "searchError": "Ikosa mu Bushakashatsi",
+    "searchFailed": "Gushaka ubucuruzi byanze",
+    "submissionError": "Ikosa mu Kohereza",
+    "submissionFailed": "Kohereza igitekerezo byanze",
+    "backToSearch": "Subira mu Bushakashatsi",
+    "cancel": "Hagarika",
+    "submitting": "Kohereza...",
+    "characterCount": "inyuguti",
+    "outOf5": "kuri 5"
+  },
+  "auth": {
+    "loginRequired": "Kwinjira Birakenewe",
+    "login": {
+      "title": "Injira",
+      "email": "Imeyili",
+      "password": "Ijambo ry'ibanga",
+      "forgotPassword": "Wibagiwe ijambo ry'ibanga?",
+      "noAccount": "Nta konti ufite?",
+      "signup": "Iyandikishe"
+    },
+    "signup": {
+      "title": "Iyandikishe",
+      "fullName": "Izina Ryuzuye",
+      "email": "Imeyili",
+      "password": "Ijambo ry'ibanga",
+      "confirmPassword": "Emeza Ijambo ry'ibanga",
+      "agreeTerms": "Nemeye amategeko n'amabwiriza",
+      "alreadyAccount": "Usanzwe ufite konti?",
+      "login": "Injira"
     }
   },
   "footer": {
@@ -65,6 +408,793 @@
     "quickLinks": "Aho uhita",
     "contactUs": "Twandikire",
     "followUs": "Dukurikire",
-    "copyright": "Uburenganzira bwose burabikwa"
+    "copyright": "Uburenganzira bwose burabikwa",
+    "localCommunities": "Amakoperative y'Aho",
+    "cities": "Imijyi",
+    "kigaliRwanda": "Kigali, u Rwanda",
+    "nairobiKenya": "Nairobi, Kenya",
+    "kampalaUganda": "Kampala, Uganda",
+    "darEsSalaamTanzania": "Dar es Salaam, Tanzania",
+    "addisAbabaEthiopia": "Addis Ababa, Etiyopiya",
+    "accraGhana": "Accra, Ghana",
+    "lagosNigeria": "Lagos, Nijeriya",
+    "capeTownSouthAfrica": "Cape Town, Afurika y'Epfo",
+    "rwandafulRwanda": "Rwanda Nziza",
+    "beautifulBotswana": "Botswana Nziza",
+    "kenyafulKenya": "Kenya Nziza",
+    "ugandafulUganda": "Uganda Nziza",
+    "tanzaniafulTanzania": "Tanzania Nziza",
+    "ethiopiafulEthiopia": "Etiyopiya Nziza",
+    "ghanafulGhana": "Ghana Nziza",
+    "nigeriafulNigeria": "Nijeriya Nziza",
+    "about": "Ibyerekeye",
+    "aboutUs": "Abo Turibo",
+    "advertiseWithUs": "Amamenyekanisha Natwe",
+    "corporateBlog": "Ibinyamakuru by'Ikigo",
+    "advertisingChoices": "Amamenyekanisha",
+    "AskUsAnyQuestion": "Tubaze Ikibazo Icyo Ari Cyo Cyose",
+    "ClaimYourListing": "Saba Urutonde Rwawe",
+    "siteDirectory": "Ububiko bw'Urubuga",
+    "articles": "Inyandiko",
+    "pricing": "Ibiciro",
+    "coinStore": "Iduka ry'Amafaranga",
+    "partners": "Abafatanyabikorwa",
+    "baraTools": "Ibikoresho bya Bara",
+    "showAllLocations": "Erekana Ahantu Hose {{count}}",
+    "showLess": "Erekana Bike",
+    "findBusiness": "Shaka Ubucuruzi",
+    "ypMobileApp": "Porogaramu ya Bara ku Telefoni",
+    "gasGuruMobileApp": "Porogaramu ya Gas Guru ku Telefoni",
+    "siteMap": "Ikarita y'Urubuga",
+    "categories": "Ibyiciro",
+    "browseRestaurants": "Reba Amahuriro",
+    "contact": "Itumanaho",
+    "privacy": "Ibanga",
+    "terms": "Amategeko y'Ikoresha",
+    "legal": "Amategeko",
+    "trademark": "",
+    "otherMarks": "Ibimenyetso bindi byose birimo ni iby'abanyabyo.",
+    "countries": "Ibihugu",
+    "loadingCountries": "Gushaka ibihugu...",
+    "noCountriesFound": "Nta bihugu byabonetse",
+    "globalAfrica": "Afurika Yose",
+    "africanAmericans": "Abanyamerika b'Abanyafurika",
+    "hbcusUSA": "HBCUs (Amerika)",
+    "sponsorCountryPage": "Tera Inkunga Urupapuro rw'Igihugu",
+    "faq": "Ibibazo Bikunze Kubazwa",
+    "askBara": "Baza BARA"
+  },
+  "sponsorCountry": {
+    "title": "Tera Inkunga Urupapuro rw'Igihugu",
+    "subtitle": "Bona ibimenyetso by'isosiyete yawe byerekanywa ku rupapuro rw'igihugu icyo ari cyo cyose ku $25 gusa. Gera ku bantu ibihumbi bifitanye isano n'igihugu runaka.",
+    "benefits": {
+      "title": "Ibyo Ubona",
+      "banner": {
+        "title": "Ibimenyetso ku Rupapuro rw'Igihugu",
+        "description": "Ibimenyetso byawe byerekanywa neza ku rupapuro rw'igihugu wahisemo"
+      },
+      "visibility": {
+        "title": "Kumenyekana kw'Isosiyete",
+        "description": "Ongerera kumenyeka kw'ikimenyetso cyawe mu bakoresha b'igihugu runaka"
+      },
+      "audience": {
+        "title": "Abagenerwa Bagenewe",
+        "description": "Gera ku bakoresha bafitanye isano n'igihugu runaka by'umwihariko"
+      }
+    },
+    "price": {
+      "label": "Igiciro",
+      "amount": "$25",
+      "note": "Kwishyura rimwe"
+    },
+    "form": {
+      "title": "Ifishi yo Kohereza Ikimenyetso",
+      "companyInfo": "Amakuru y'Isosiyete",
+      "companyName": "Izina ry'Isosiyete",
+      "companyNamePlaceholder": "Izina ry'Isosiyete Yawe",
+      "website": "Urubuga",
+      "websitePlaceholder": "https://isosiyete-yawe.com",
+      "bannerInfo": "Amakuru y'Ikimenyetso",
+      "selectCountry": "Hitamo Igihugu",
+      "chooseCountry": "Hitamo igihugu",
+      "bannerImage": "Ishusho y'Ikimenyetso",
+      "uploadHint": "Ohereza ishusho y'ikimenyetso cyawe (Byifuzwa: 1200x300px)",
+      "chooseImage": "Hitamo Ishusho",
+      "altText": "Ibisobanuro by'Ishusho (Ntibikenewe)",
+      "altTextPlaceholder": "Sobanura ikimenyetso cyawe ku bw'ubufasha",
+      "terms": "Mu kohereza iyi fishi, wemeye amategeko n'amabwiriza yacu. Ikimenyetso cyawe kizasuzumwa kandi cyemezwe mu masaha 24-48.",
+      "submitCta": "Ishyura $25 & Ohereza"
+    },
+    "payment": {
+      "detailsTitle": "Ibisobanuro by'Ubwishyu",
+      "amountLabel": "Ingano",
+      "companyLabel": "Isosiyete",
+      "cardNumber": "Nimero y'Ikarita",
+      "cardNumberPlaceholder": "1234 5678 9012 3456",
+      "expiryDate": "Itariki y'Irangira",
+      "expiryPlaceholder": "MM/YY",
+      "cvv": "CVV",
+      "cvvPlaceholder": "123",
+      "cardholderName": "Izina ry'Umunyakarita",
+      "cardholderPlaceholder": "Izina Ryuzuye",
+      "successTitle": "Ubwishyu Bwakunze!",
+      "successDescription": "Ubwishyu bwa ${{amount}} bwakozwe kuri {{companyName}}",
+      "payAmount": "Ishyura ${{amount}}"
+    }
+  },
+  "faq": {
+    "title": "Ibibazo Bikunze Kubazwa",
+    "subtitle": "Shaka ibisubizo ku bibazo bikunze kubazwa ku bijyanye no gukoresha BARA LISTINGS nk'umukiriya cyangwa nyir'ubucuruzi.",
+    "general": {
+      "title": "Ibibazo Rusange",
+      "subtitle": "Ibibazo bikunze kubazwa ku bijyanye no gukoresha BARA LISTINGS",
+      "items": {
+        "0": {
+          "q": "BARA LISTINGS ni iki?",
+          "a": "BARA LISTINGS ni ububiko bw'ubucuruzi bugufasha kubona no guhuza n'ubucuruzi buri muri Afurika n'abatuye mu mahanga. Dutanga amakuru arambuye ku bucuruzi butandukanye, harimo amakuru y'itumanaho, serivisi, n'ibitekerezo by'abakiriya."
+        },
+        "1": {
+          "q": "Nshaka nte ubucuruzi?",
+          "a": "Ushobora gushaka ubucuruzi ukoresheje agashakisho kari hejuru ku rupapuro urwo ari rwo rwose. Ushobora gushungura ku hantu, icyiciro, cyangwa amagambo adasanzwe kugira ngo ubone ibyo ushaka."
+        },
+        "2": {
+          "q": "BARA LISTINGS ni ubuntu?",
+          "a": "Yego, BARA LISTINGS ni ubuntu rwose ku bakoresha bashaka ubucuruzi. Banyubucuruzi bashobora gusaba urutonde rwabo ku buntu, hafite serivisi z'agaciro zishobora kuboneka."
+        },
+        "3": {
+          "q": "Nakora nte kugira ngo mvugishe ubucuruzi?",
+          "a": "Ubucuruzi bwose bwanditswe bufite amakuru y'itumanaho nka nimero za telefoni, imeyili, n'urubuga. Ushobora gukoresha ayo makuru kugira ngo uvugishe ubucuruzi ku buryo butaziguye."
+        },
+        "4": {
+          "q": "Nakora nte kugira ngo nandike igitekerezo?",
+          "a": "Kugira ngo wandike igitekerezo, genda ku rupapuro rw'ubucuruzi ukande kuri 'Andika Igitekerezo'. Ugomba kuba winjiye kugira ngo wohereze igitekerezo."
+        },
+        "5": {
+          "q": "Nshobora gusaba ko ubucuruzi bwongerwa?",
+          "a": "Yego! Niba udashobora kubona ubucuruzi ushaka, ushobora kubusaba ukanda kuri 'Ongeraho Ubucuruzi' mu mwanya wo kugana."
+        },
+        "6": {
+          "q": "Amakuru y'ubucuruzi ahindurwa kangahe?",
+          "a": "Amakuru y'ubucuruzi ahindurwa ako kanya iyo banyubucuruzi bahinduye urutonde rwabo. Nanone dusuzuma amakuru buri gihe kugira ngo twemeze ko ari ayo ukuri."
+        },
+        "7": {
+          "q": "Nakora nte kugira ngo ntange raporo y'amakuru atari yo?",
+          "a": "Niba ubonye amakuru atari yo, ushobora gutanga raporo ukanda kuri 'Tanga Raporo' ku rutonde rw'ubucuruzi. Itsinda ryacu rizasuzuma kandi rihindure amakuru nk'uko bikenewe."
+        },
+        "8": {
+          "q": "Amakuru yanjye bwite ni amahoro?",
+          "a": "Yego, dufata ibanga ryawe by'umwihariko. Amakuru yawe bwite arindwa hakurikijwe amategeko yacu y'ibanga kandi ntashobora gusangirwa utabyemeye."
+        },
+        "9": {
+          "q": "Mufite porogaramu ya telefoni igendanwa?",
+          "a": "Yego, BARA LISTINGS iboneka nka porogaramu ya telefoni igendanwa kuri iOS na Android. Ushobora kuyikura kuri App Store cyangwa Google Play Store."
+        }
+      }
+    },
+    "business": {
+      "title": "Ku Banyubucuruzi",
+      "subtitle": "Amakuru ku bucuruzi bwanditswe kuri BARA LISTINGS",
+      "items": {
+        "0": {
+          "q": "Nkora nte kugira ngo nsabe urutonde rw'ubucuruzi bwanjye?",
+          "a": "Shakisha ubucuruzi bwawe ku rubuga rwacu, hanyuma ukande kuri 'Saba Ubucuruzi Bwawe'. Uzakenera kwemeza umwirondoro wawe no gusozera inzira yo kwemeza."
+        },
+        "1": {
+          "q": "Ni izihe nyungu zo gusaba ubucuruzi bwanjye?",
+          "a": "Gusaba ubucuruzi bwawe bigufasha guhindura amakuru, gusubiza ibitekerezo, kongeraho amafoto, kubona imibare, no gutangaza ibiciro bidasanzwe ku bakiriya bashoboka."
+        },
+        "2": {
+          "q": "Bitwara amafaranga angana iki gushyira ubucuruzi bwanjye ku rutonde?",
+          "a": "Urutonde rusanzwe ni ubuntu! Nanone dutanga gahunda z'agaciro zifite serivisi zinyongera. Sura igice 'Ku Bucuruzi' kugira ngo ubone ibiciro birambuye."
+        },
+        "3": {
+          "q": "Nakora nte kugira ngo nongerere kumenyekana kw'ubucuruzi bwanjye?",
+          "a": "Menya neza ko umwirondoro wawe wuzuye ufite amakuru nyayo, amafoto y'umwimerere, kandi utere inkunga abakiriya bishimiye gutanga ibitekerezo byiza. Gahunda zacu z'agaciro nanone zitanga uburyo bwo kumenyekana cyane."
+        },
+        "4": {
+          "q": "Nshobora gusubiza ibitekerezo by'abakiriya?",
+          "a": "Yego, nk'umunyubucuruzi wemejwe, ushobora gusubiza ibitekerezo byose. Dutera inkunga ibisubizo by'umuco mwiza n'icyubahiro ku bitekerezo byose."
+        },
+        "5": {
+          "q": "Nakora nte kugira ngo nhindure amakuru y'ubucuruzi bwanjye?",
+          "a": "Injira muri konti y'ubucuruzi bwawe, genda ku mwanya w'ibikoresho, uhitemo 'Hindura Ubucuruzi' kugira ngo uhindure amakuru yawe. Impinduka zishobora gusabwa kwemezwa."
+        },
+        "6": {
+          "q": "Ni ubuhe buryo bwo kwishyura mwemera?",
+          "a": "Twemera amakarita yose akomeye, PayPal, n'uburyo bwo kohereza amafaranga mu banki ku bikorwa by'agaciro. Ibikorwa byose ni amahoro kandi bikingiwe."
+        },
+        "7": {
+          "q": "Nshobora kumenyesha ibiciro bidasanzwe cyangwa ibirori?",
+          "a": "Yego, ufite konti y'agaciro, ushobora gukora no gutangaza ibiciro bidasanzwe, ibirori, n'amatangazo kugira ngo ugere ku bakiriya benshi."
+        },
+        "8": {
+          "q": "Nakora nte kugira ngo nhagarike kwiyandikisha ku gahunda y'agaciro?",
+          "a": "Ushobora gucunga kwiyandikisha kwawe mu gice 'Kwishyura' mu mwanya w'ibikoresho by'ubucuruzi bwawe. Guhagarika bishobora gukorwa igihe icyo ari cyo cyose."
+        },
+        "9": {
+          "q": "Ni nde nahagararira ku bufasha bw'ubucuruzi?",
+          "a": "Itsinda ryacu ry'ubufasha bw'ubucuruzi riboneka ku imeyili kuri business@baralistings.com cyangwa mu ifishi y'itumanaho mu mwanya w'ibikoresho by'ubucuruzi bwawe."
+        }
+      }
+    },
+    "cta": {
+      "title": "Ukiriho ibibazo?",
+      "subtitle": "Itsinda ryacu ry'ubufasha rihari kugufasha ku bibazo bindi byose ufite.",
+      "contact": "Vugisha Ubufasha",
+      "business": "Ibibazo by'Ubucuruzi"
+    }
+  },
+  "categories": {
+    "title": "Ibyiciro Byose",
+    "searchPlaceholder": "Shakisha ibyiciro...",
+    "noResults": {
+      "title": "Nta byiciro byabonetse",
+      "description": "Gerageza guhindura amagambo y'ubushakashatsi cyangwa reba ibyiciro byose"
+    },
+    "airports": "Ikibuga cy'indege",
+    "banks": "Amabanki",
+    "bars": "Amabari",
+    "barbers": "Abakoze imisatsi",
+    "bookstores": "Amaduka y'ibitabo",
+    "cafes": "Amakafe",
+    "cinemas-theatres": "Sinema n'Ububiko bw'Imikino",
+    "clinics": "Ibigo nderabuzima",
+    "clubs-professional": "Amakipe (y'Umwuga / Bwite)",
+    "clubs-leisure": "Amakipe (y'Ubuzima / Imbyino)",
+    "dentists": "Abaganga b'amenyo",
+    "doctors": "Abaganga",
+    "faith": "Idini",
+    "farms": "Amashamba",
+    "galleries-art": "Inyubako z'Ubuhanzi",
+    "government": "Leta",
+    "hospitals": "Ibitaro",
+    "hotels": "Amahotelike",
+    "lawyers": "Abavoka",
+    "libraries": "Amazu y'ibitabo",
+    "markets": "Amasoko",
+    "museums": "Amazu ndangamurage",
+    "parks": "Amapariki",
+    "pharmacies": "Amafarumasi",
+    "post-offices": "Iposita",
+    "recreation": "Kwidagadura",
+    "real-estate": "Imitungo Itimukanwa",
+    "restaurants": "Amahuriro",
+    "salons": "Amasaloni",
+    "schools": "Amashuri",
+    "services": "Serivisi",
+    "shopping": "Amaduka",
+    "tours": "Urugendo",
+    "transportation": "Ubwikorezi",
+    "universities": "Kaminuza",
+    "utilities": "Ibikoresho by'Ibanze",
+    "auto-repair": "Gukora Imodoka",
+    "coffee-shops": "Amaduka ya Kawa",
+    "gyms-fitness": "Amazu y'Imyitozo",
+    "beauty-salons": "Amasaloni y'Ubwiza",
+    "pet-services": "Serivisi z'Inyamaswa"
+  },
+  "admin": {
+    "dashboard": "Ikibaho",
+    "cities": "Imijyi",
+    "countries": "Ibihugu",
+    "businesses": "Ubucuruzi",
+    "reviews": "Ibitekerezo",
+    "users": "Abakoresha",
+    "settings": "Igenamiterere",
+    "pages": {
+      "users": "Gucunga Abakoresha",
+      "usersSubtitle": "Gucunga konti z'abakoresha n'uburenganzira"
+    },
+    "advertiseSeizure": "Amamenyekanisha",
+    "statistics": "Imibare",
+    "recentActivity": "Ibikorwa Bishya",
+    "quickActions": "Ibikorwa Byihuse",
+    "systemStatus": "Imiterere y'Sisitemu",
+    "addNew": "Ongeraho Gishya",
+    "addBusiness": "Ongeraho Ubucuruzi",
+    "addCity": "Ongeraho Umujyi",
+    "addCountry": "Ongeraho Igihugu",
+    "edit": "Hindura",
+    "delete": "Siba",
+    "search": "Shakisha",
+    "filter": "Shungura",
+    "status": "Imiterere",
+    "actions": "Ibikorwa",
+    "name": "Izina",
+    "code": "Kode",
+    "population": "Abaturage",
+    "capital": "Umurwa mukuru",
+    "currency": "Ifaranga",
+    "language": "Ururimi",
+    "latitude": "Ubugari",
+    "longitude": "Uburebure",
+    "category": "Icyiciro",
+    "address": "Aderesi",
+    "phone": "Telefoni",
+    "website": "Urubuga",
+    "rating": "Igipimo",
+    "title": "Umutwe",
+    "content": "Ibikubiyemo",
+    "user": "Umukoresha",
+    "business": "Ubucuruzi",
+    "date": "Itariki",
+    "approved": "Byemejwe",
+    "pending": "Gutegerezwa",
+    "rejected": "Byanzwe",
+    "flagged": "Byafashwe",
+    "total": "Igiteranyo",
+    "active": "Gikoreshwa",
+    "inactive": "Ntikikoreshwa",
+    "businessesManagement": "Gucunga Ubucuruzi",
+    "manageListing": "Gucunga urutonde rw'ubucuruzi no kwemeza",
+    "reviewsManagement": "Gucunga Ibitekerezo",
+    "moderateReviews": "Gusuzuma no gucunga ibitekerezo by'abakoresha",
+    "citiesManagement": "Gucunga Imijyi",
+    "manageCities": "Gucunga imijyi n'ahantu",
+    "countriesManagement": "Gucunga Ibihugu",
+    "manageCountries": "Gucunga ibihugu n'uturere",
+    "overviewAnalytics": "Incamake n'imibare",
+    "searchBusinesses": "Shakisha ubucuruzi...",
+    "searchReviews": "Shakisha ibitekerezo...",
+    "searchCities": "Shakisha imijyi...",
+    "searchCountries": "Shakisha ibihugu...",
+    "filterByStatus": "Shungura ku miterere",
+    "filterByCategory": "Shungura ku cyiciro",
+    "filterByRating": "Shungura ku gipimo",
+    "allStatuses": "Imiterere Yose",
+    "allCategories": "Ibyiciro Byose",
+    "allRatings": "Ibipimo Byose",
+    "noBusinessesFound": "Nta bucuruzi bubonetse",
+    "noReviewsFound": "Nta bitekerezo byabonetse",
+    "noCitiesFound": "Nta mijyi yabonetse",
+    "noCountriesFound": "Nta bihugu byabonetse",
+    "tryAdjustingFilters": "Gerageza guhindura amagambo y'ubushakashatsi cyangwa shungura.",
+    "businessesCount": "ubucuruzi",
+    "reviewsCount": "ibitekerezo",
+    "citiesCount": "imijyi",
+    "countriesCount": "ibihugu",
+    "totalUsers": "Abakoresha Bose",
+    "totalBusinesses": "Ubucuruzi Bwose",
+    "totalCities": "Imijyi Yose",
+    "totalCountries": "Ibihugu Byose",
+    "totalReviews": "Ibitekerezo Byose",
+    "users": {
+      "title": "Gucunga Abakoresha",
+      "adminUsers": "Abakoresha b'Ubuyobozi",
+      "addUser": "Ongeraho Umukoresha",
+      "searchPlaceholder": "Shakisha abakoresha...",
+      "tabs": {
+        "users": "Abakoresha",
+        "logs": "Inyandiko z'Ibikorwa"
+      },
+      "table": {
+        "name": "Izina",
+        "email": "Imeyili",
+        "role": "Uruhare",
+        "permissions": "Uburenganzira",
+        "lastLogin": "Kwinjira kwa Nyuma",
+        "actions": "Ibikorwa",
+        "user": "Umukoresha",
+        "action": "Igikorwa",
+        "resource": "Ibikoresho",
+        "details": "Ibisobanuro",
+        "timestamp": "Igihe"
+      },
+      "activityLogs": "Inyandiko z'Ibikorwa"
+    },
+    "latestActions": "Ibikorwa bishya n'amahinduka",
+    "commonTasks": "Imirimo isanzwe y'ubuyobozi",
+    "common": {
+      "refresh": "Kongerera"
+    },
+    "viewReports": "Reba Raporo",
+    "allSystemsOperational": "Sisitemu zose zirakora",
+    "capacityUsed": "ubushobozi bwakoreshejwe",
+    "responseTime": "Igihe cy'igisubizo",
+    "database": "Ububiko bw'amakuru",
+    "storage": "Ububiko",
+    "performance": "Imikorere",
+    "loadingBusinesses": "Gushaka ubucuruzi...",
+    "businessManagement": "Gucunga Ubucuruzi",
+    "manageAllBusinesses": "Gucunga ubucuruzi bwose mu sisitemu",
+    "editBusiness": "Hindura Ubucuruzi",
+    "addNewBusiness": "Ongeraho Ubucuruzi Bushya",
+    "updateBusinessInfo": "Hindura amakuru y'ubucuruzi",
+    "createNewBusinessListing": "Kora urutonde rushya rw'ubucuruzi",
+    "businessName": "Izina ry'Ubucuruzi",
+    "description": "Ibisobanuro",
+    "selectCategory": "Hitamo icyiciro",
+    "selectCity": "Hitamo umujyi",
+    "businessFeatures": "Ibikoresho by'Ubucuruzi",
+    "premiumBusiness": "Ubucuruzi bw'Agaciro",
+    "verifiedBusiness": "Ubucuruzi Bwemejwe",
+    "hasCoupons": "Bufite Amabone",
+    "acceptsOrdersOnline": "Bwemera Gutumiza kuri Interineti",
+    "kidFriendly": "Bwiza ku Miryango",
+    "cancel": "Hagarika",
+    "update": "Hindura",
+    "create": "Kora",
+    "error": "Ikosa",
+    "success": "Byagenze neza",
+    "validationError": "Ikosa ryo Kwemeza",
+    "pleaseFillRequiredFields": "Nyamuneka uzuza imirongo yose irakenewe",
+    "businessUpdatedSuccessfully": "Ubucuruzi bwahinduwe neza",
+    "businessCreatedSuccessfully": "Ubucuruzi bwakozwe neza",
+    "failedToSaveBusiness": "Kubika ubucuruzi byanze",
+    "confirmDeleteBusiness": "Uremeza ko ushaka gusiba ubu bucuruzi?",
+    "businessDeletedSuccessfully": "Ubucuruzi bwasibwe neza",
+    "failedToDeleteBusiness": "Gusiba ubucuruzi byanze",
+    "failedToFetchBusinesses": "Kubona ubucuruzi byanze",
+    "tryAdjustingSearchTerms": "Gerageza guhindura amagambo y'ubushakashatsi cyangwa shungura.",
+    "reviews": "ibitekerezo",
+    "approve": "Emeza",
+    "reject": "Anga",
+    "flag": "Fata",
+    "view": "Reba",
+    "updateSuccess": "Guhindura byagenze neza",
+    "updateError": "Guhindura byanze",
+    "deleteSuccess": "Gusiba byagenze neza",
+    "deleteError": "Gusiba byanze",
+    "statusUpdated": "Imiterere yahinduwe neza",
+    "reviewFlagged": "Igitekerezo cyafashwe neza",
+    "stars": "Ikamba",
+    "outOf5Stars": "kuri 5 z'ikamba"
+  },
+  "bannerAd": {
+    "placeholder": {
+      "badge": "IGIKORWA",
+      "title": "Menyekanisha Ubucuruzi Bwawe Hano",
+      "subtitle": "Gera ku bakiriya ibihumbi bo mu karere • Umwanya w'amamenyekanisha w'agaciro",
+      "learnMore": "Menya Byinshi"
+    },
+    "labels": {
+      "sponsored": "Byatewe Inkunga",
+      "sponsoredBy": "Byatewe inkunga na"
+    },
+    "actions": {
+      "visitSite": "Sura Umutera Inkunga"
+    }
+  },
+  "lookForBusinesses": "Shakisha ubucuruzi ku izina n'ahantu.",
+  "findBusiness": "Shaka Ubucuruzi",
+  "sentenceOne": "Pima no Gutanga Igitekerezo",
+  "sentenceTwo": "Shiraho",
+  "ReviewMessageOne": "Igitekerezo",
+  "reviewMessage": " cy'Ubucuruzi kandi Ufashe Abandi!",
+  "listings": {
+    "searchResults": "Ibisubizo by'Ubushakashatsi",
+    "mapView": "Ikarita",
+    "listView": "Urutonde",
+    "all": "Byose",
+    "orderOnline": "Gura kuri Interineti",
+    "kidFriendly": "Bwiza ku Miryango",
+    "coupons": "Amabone",
+    "premium": "Ibyiza cyane",
+    "verified": "Byemejwe",
+    "sort": "Shyira mu murongo:",
+    "default": "Ibisanzwe",
+    "distance": "Intera",
+    "rating": "Igipimo",
+    "nameAZ": "Izina (A - Z)",
+    "businessesFound": "ubucuruzi bubonetse",
+    "noBusinessesFound": "Nta bucuruzi bubonetse",
+    "noBusinessesMatching": "Nta bucuruzi bubonetse buhuye na",
+    "noBusinessesInCategory": "Nta bucuruzi bubonetse muri",
+    "clearFilters": "Siba Ishungura",
+    "moreInfo": "Amakuru Yose",
+    "writeReview": "Andika Igitekerezo",
+    "inCity": "muri",
+    "showingBusinesses": "Kwerekana",
+    "businessesInCity": "ubucuruzi muri",
+    "businessesFoundCount": "Ubucuruzi bubonetse",
+    "selectCity": "Hitamo Umujyi",
+    "citiesWithBusinesses": "Imijyi ifite",
+    "businessesInCategory": "ubucuruzi",
+    "showAllCities": "Erekana imijyi yose",
+    "allCities": "Imijyi yose",
+    "business": "ubucuruzi",
+    "businesses": "ubucuruzi",
+    "errorLoadingBusinesses": "Ikosa mu Gushaka Ubucuruzi",
+    "errorMessage": "Habaye ikosa mu gihe cyo gushaka ubucuruzi. Nyamuneka ongera ugerageze.",
+    "tryAgain": "Ongera Ugerageze",
+    "loadingCities": "Gushaka imijyi...",
+    "searchPlaceholder": "Shakisha",
+    "findButton": "SHAKISHA"
+  },
+  "cityDetail": {
+    "title": "Ibisobanuro by'Umujyi",
+    "backToHome": "Subira Ahabanza",
+    "cityNotFound": "Umujyi Ntiwaboneka",
+    "searchBusinesses": "Shakisha Ubucuruzi",
+    "errorLoadingBusinesses": "Ikosa mu Gushaka Ubucuruzi",
+    "errorMessage": "Habaye ikosa mu gihe cyo gushaka ubucuruzi. Nyamuneka ongera ugerageze.",
+    "tryAgain": "Ongera Ugerageze",
+    "clearFilters": "Siba Ishungura",
+    "moreInfo": "Amakuru Yose",
+    "writeReview": "Andika Igitekerezo",
+    "business": "ubucuruzi",
+    "reviews": "ibitekerezo",
+    "cities": {
+      "kigali": "Kigali, umurwa mukuru n'umujyi munini w'u Rwanda, ni urugero rukomeye rw'ihinduka ry'imijyi muri Afurika y'Iburasirazuba. Kigali imenyerewe imihanda yayo isukuye cyane, ikaba yabonye izina nk'umwe mu mirwa mikuru isukuye cyane ku mugabane. Umujyi ni ihuriro ry'ubucuruzi, ikoranabuhanga, n'ubukerarugendo, ufite ibikorwa remezo bigezweho bifite inyubako ndende zinoze, imihanda iringaniye, n'urwego rw'ikoranabuhanga rukunze kwitwa \"Ikibaya cya Silicon cy'Afurika y'Iburasirazuba.\" Umuco wayo ugaragara mu masoko ahumuriza, imbyino n'umuziki gakondo by'u Rwanda, n'iminsi mikuru ya buri mwaka nka KigaliUp. Iterambere ryihuse rya Kigali, hamwe n'iyemezamirimo ryayo mu bijyanye n'ibidukikije n'ahantu h'icyatsi nk'ubusitani bw'Urwibutso rwa Jenoside bwa Kigali, bituma uba urugero rw'iterambere ry'imijyi mu karere.",
+      "nairobi": "Nairobi, umurwa mukuru n'umujyi munini wa Kenya, wimenyekanisha nk'\"Umujyi w'Icyatsi mu Zuba\" kubera ubwatsi buhari n'ikirere gishimishije. Nk'imbaraga z'ubukungu zikomeye muri Afurika y'Iburasirazuba, Nairobi yirirwa ibiro bikuru by'akarere by'amasosiyete menshi mpuzamahanga n'Isoko ry'Imigabane ya Nairobi. Abaturage bayo batandukanye, baturutse mu moko menshi ya Kenya, batanga umuco ukungahaye ugaragara mu biribwa, umuziki, n'iminsi mikuru nka Festival Mpuzamahanga y'Amafilime ya Nairobi. Nairobi ni inzira y'ibanze igana mu birangiro by'inyamaswa bikunzwe ku isi bya Kenya, nk'iy'i Maasai Mara n'iy'Umutarama wa Nairobi, aho abasura bashobora kureba intare n'ingeragere n'umujyi uboneka mu cyerekezo.",
+      "kampala": "Kampala, umurwa mukuru n'umujyi munini wa Uganda, wimenyekanisha ko wubatswe ku misozi irindwi, bimuha isura idasanzwe n'uburyohe. Umujyi ni ihuriro ry'ubucuruzi n'umuco rigezweho, rifite amasoko ahiye nka Owino na Nakasero, aho abacuruza bagurisha ibintu byose kuva ku bihingwa bimeze neza kugeza ku bikorwa by'amaboko gakondo. Amateka akungahaye ya Kampala agaragazwa mu bice nk'Ububiko bw'Ibintu by'u Uganda n'Imva za Kasubi, ahagize umurage w'isi wa UNESCO. Nk'ihuriro ry'uburezi, itwikiriwe na Kaminuza ya Makerere, imwe mu mashuri makuru ya kera n'ay'agaciro mu Afurika. Hamwe n'ubukungu bukura buterwa n'ubucuruzi, inganda, na serivisi, abaturage batandukanye ba Kampala n'ubuzima bw'ijoro bushimishije bituma uba ihuriro ry'imijyi rigezweho muri Afurika y'Iburasirazuba.",
+      "dar-es-salaam": "Dar es Salaam, umujyi munini wa Tanzania n'ihuriro ry'ubukungu, utera imbere ku nkombe z'Inyanja y'Ubuhinde, uhuza ubwiza bw'inyanja n'ubuzima bw'umujyi. Wimenyekanisha ku biyaga bye bisukuye nka Coco Beach n'ikibuga cyayo gihiye, umujyi ukora nk'ikibuga cy'ubucuruzi cy'ibanze cya Tanzania, gutuma ubucuruzi bwinjira muri Afurika y'Iburasirazuba no hanze yayo. Umuco wayo utandukanye, utewe n'amakoperative y'Abanyafurika, Abarabu, n'Abahinde, ugaragara mu biribwa, umuziki, n'iminsi mikuru nka Swahili Fashion Week. Umujyi wa Dar es Salaam, ufite inyubako ndende zigezweho, ugaragaza igice cy'ubucuruzi gikura, by'umwihariko mu by'imari n'ikoranabuhanga, mu gihe ahantu h'amateka nk'Urwibutso rwa Askari n'Ububiko Nsanganyamatsiko bigaragaza umurage wayo ukungahaye.",
+      "addis-ababa": "Addis Ababa, umurwa mukuru n'umujyi munini wa Etiyopiya, ni umutima w'ubutegetsi bwa Afurika, witwikiriwe n'ibiro bikuru by'Umuryango w'Afurika yunze ubumwe n'ambasade nyinshi. Uhagaze mu misozi, umujyi uzuye amateka, ufite ahantu nk'Urusengero rwa Sainte Trinité n'Ububiko Nsanganyamatsiko, bubikamo ikigezweho cya Lucy. Umuco utandukanye wa Addis Ababa ugaragara mu masoko yayo ahiye, imigenzo yo kunywa ikawa, n'iminsi mikuru ya buri mwaka nka Meskel. Ubukungu bw'umujyi burimo gukura, hamwe n'inganda nk'iz'ubucuruzi, ikoranabuhanga, n'ubwakira bitera iterambere. Ihuriro ry'imigenzo ya kera n'amajyambere y'ubu bituma Addis Ababa iba ihuriro ry'imijyi ridasanzwe kandi rifite ingufu muri Afurika y'Iburasirazuba.",
+      "accra": "Accra, umurwa mukuru n'umujyi munini wa Ghana, ni umujyi ukomeye uri ku nkombe umenyerewe amashyamba yayo abengerana nka Labadi Beach, n'umuco wayo uhindagurika. Nk'ihuriro rikuru ry'imari muri Afurika y'Iburengerazuba, Accra ni ahagaragarira Isoko ry'Imigabane ya Ghana n'ibiro bikuru by'amasosiyete menshi. Umuco wayo ukungahaye ugaragara mu muziki, ufite ubwoko nka highlife na hiplife, n'iminsi mikuru nka Chale Wote Street Art Festival. Ibikorwa remezo bigezweho bya Accra, birimo amaduka manini n'inyubako ndende, bijyana n'ahantu h'amateka nk'Urwibutso rwa Kwame Nkrumah, bituma umujyi uhuza umugenzo n'iterambere ryihuse ry'imijyi n'umuco w'ubuhanzi ukura.",
+      "lagos": "Lagos, umujyi munini wa Nijeriya n'imbaraga z'ubukungu, ni umujyi munini wimenyekanisha n'ingufu zawo n'umuco utandukanye. Nk'ihuriro rikuru ry'imari muri Afurika y'Iburengerazuba, itwikiriwe n'Isoko ry'Imigabane ya Nijeriya n'amasosiyete mpuzamahanga menshi. Lagos imenyerewe umuziki wayo uhindagurika, yavuyemo ubwoko nka Afrobeats, n'inganda z'amafilime za Nollywood zikura. Amasoko y'umujyi, nka Balogun na Computer Village, ahiye cyane, agurisha ibintu byose kuva ku myenda kugeza ku bikoresho by'ikoranabuhanga. Nubwo ubuzima bw'umujyi bugenda bwihuta, Lagos ifite amashyamba ashimishije nka Tarkwa Bay n'ahantu h'umuco nk'Inyubako y'Igihugu, bituma iba inkingi y'ubucuruzi n'umuco bya Afurika y'Iburengerazuba.",
+      "cape-town": "Cape Town, umurwa mukuru w'amategeko wa Afurika y'Epfo, wimenyekanisha n'ubwiza bw'ibidukikije bwayo buhebuje, butwikiriwe n'Umusozi wa Table ugaragara kandi ukikijwe n'Inyanja ya Atalantike. Nk'ahantu hakunzwe n'abasuye, umujyi utanga ibirango nk'igice cya V&A Waterfront, Ikirwa cya Robben, n'Uturere tw'Inzoga twa Cape. Umuco wayo utandukanye, wahimbwe n'amakoperative y'Abanyafurika, Abanyaburayi, n'Abanyaziya, ugaragara mu biribwa, iminsi mikuru, n'umuco w'ubuhanzi uhindagurika. Cape Town nanone ni ihuriro rikuru ry'ubucuruzi, rifite igice cy'ikoranabuhanga gikura n'ubucuruzi mpuzamahanga. Inkombe zayo zishimishije, imijyi yayo igezweho, n'amateka akungahaye bituma iba umwe mu mijyi y'Afurika yiza cyane kandi ikungahaye mu muco.",
+      "johannesburg": "Johannesburg, umujyi munini wa Afurika y'Epfo n'ihuriro ry'ubukungu, ukunze kwitwa \"Umujyi w'Izahabu\" kubera inkomoko yawo nk'umujyi w'amashyamba y'izahabu mu mpera z'ikinyejana cya 19. Muri iki gihe, ni umurwa mukuru w'imari w'Afurika, witwikiriwe n'Isoko ry'Imigabane ya Johannesburg n'ibiro bikuru by'amasosiyete menshi. Amateka akungahaye y'umujyi agaragazwa mu bice nk'Ububiko bw'Ivanguramoko n'Umusozi wa Constitution. Umujyi wa Johannesburg ugezweho, ufite inyubako ndende, ujyana n'imijyi yayo igezweho nka Soweto, aho umurage w'umuco ukura mu muziki, imbyino, n'ubuhanzi. Ubukungu bwayo buhindagurika n'abaturage bayo b'amahanga bituma uba umukinyi ukomeye mu masoko y'Afurika n'iy'isi.",
+      "cairo": "Cairo, umurwa mukuru n'umujyi munini wa Misiri, ni umujyi w'amateka uhuza ibitangaza bya kera n'ubuzima bugezweho. Wimenyekanisha nk'\"Umujyi w'Imizinga Igihumbi,\" Cairo ni ahagaragarira Piramide za Giza, Sphinx, n'Ububiko bwa Misiri, butwikiriwe n'ubutunzi bw'ubuvanganzo bwa kera bwa Misiri. Umuco wayo uhindagurika ugaragara mu masoko ahiye nka Khan el-Khalili, ubuubatsi bw'Abayisilamu, n'ahantu h'umurage wa Kopite. Nk'ihuriro ry'ubukungu n'umuco rya Afurika y'Amajyaruguru, Cairo ikura n'ikafeteri gakondo, amaduka agezweho, n'igice cy'ikoranabuhanga gikura, bituma uba umujyi aho amateka n'ibishya byishyurirana neza.",
+      "alexandria": "Alexandria, umujyi wa kabiri munini wa Misiri, ni igitangaza cyo ku Nyanja ya Mediterane kimenyerewe amateka akungahaye n'inkombe nziza. Yari aho habaga Itara rya kera rya Alexandria n'Isomero Rikuru, umujyi ugumana agaciro kawo k'umuco hamwe n'ahantu nka Bibliotheca Alexandrina, ubuhamya bugezweho bw'inkomoko yawo ya kera. Ubukungu bwa Alexandria bukura ku kibuga cyayo cy'ubucuruzi gihambaye, ihuriro ry'ingenzi ry'ubucuruzi bwa Mediterane, n'inganda z'ubukerarugendo bwayo, ziyobora abasura ku nkombe zayo, ibihome bya kera, n'ibisigazwa by'igihe cy'Abagereki n'Abaroma. Ihuriro ry'amakoperative y'Abanyafurika, Abarabu, n'Abanyaburayi rikora umuco udasanzwe, ugaragara mu biribwa n'umuco w'ubuhanzi uhindagurika.",
+      "casablanca": "Casablanca, umujyi munini wa Maroko n'ihuriro ry'ubukungu, ni umujyi ugezweho uri ku nkombe za Atalantike, umenyerewe ubuubatsi bwayo bushimishije, birimo Umusigiti munini wa Hassan II ufite umuzinga wawo muremure. Nk'ikibuga cy'ubucuruzi cy'ibanze cy'igihugu, uteza imbere ubukungu bwa Maroko mu bucuruzi, imari, n'inganda. Isura y'amahanga y'umujyi igaragara mu ihuriro ry'inyubako z'Art Deco, amasoko ahiye, n'ubuzima bw'ijoro bushimishije. Igice cy'ikoranabuhanga n'amasosiyete mashya ya Casablanca gikura, hamwe n'igice cyayo cya kera cya medina n'uruhande rw'inyanja, bituma uba ihuriro ry'ubucuruzi n'umuco rigezweho muri Afurika y'Amajyaruguru.",
+      "marrakech": "Marrakech, umujyi ukomeye muri Maroko, ni ubutunzi bw'umuco bumenyerewe igice cyayo cya kera cya medina, ahagize umurage w'isi wa UNESCO, n'amasoko ahiye yuzuyemo ibiyiko, imyenda, n'ibikoresho by'amaboko akozwe neza. Ikibanza kizwi cya Jemaa el-Fnaa cy'umujyi gishimishirwa n'abavuga inkuru, abaririmbi, n'amaduka y'ibiryo, bigaragaza umurage ukungahaye wa Maroko. Marrakech ni ahantu h'ibanze hakunzwe n'abasuye, hafite ingo nziza nka Bahia n'amasoko nka Jardin Majorelle. Ihuriro ry'amakoperative y'Ababerberi, Abarabu, n'Abafaransa, hamwe n'inganda z'ubwakira n'ubuhanzi zikura, bituma uba ihuriro ry'umuco n'ubukungu rishimishije muri Maroko.",
+      "butare": "Butare, ubu uzwi nka Huye, ni umujyi uri mu majyepfo y'u Rwanda wizihiwe kuba inkingi y'uburezi n'umuco. Ahagaragarira kampusi nkuru ya Kaminuza y'u Rwanda, ni ihuriro ry'uburezi n'ubushakashatsi, rikurura abahanga mu karere kose. Ibigo by'umuco bya Butare, nk'Ububiko bw'Umuco, bigaragaza amateka n'imigenzo by'u Rwanda binyuze mu bikoresho n'imyerekano. Uburyohe bw'umujyi, imihanda yayo irimo ibiti, n'ahantu h'amateka, harimo inyubako z'igihe cy'ubukoloni, bituma uba ihuriro ry'ubushakashatsi bw'ubwenge n'umuco, hamwe n'iterambere ryihariye ryerekeye iterambere ry'umuryango n'ubukerarugendo.",
+      "mombasa": "Mombasa, igitangaza cyo ku nkombe za Kenya, ni umujyi w'amateka w'ikibuga wimenyekanisha amashyamba yayo asukuye, nka Diani na Nyali, n'ikibuga cyayo cy'ubucuruzi gihambaye, inzira y'ingenzi y'ubucuruzi muri Afurika y'Iburasirazuba. Amateka akungahaye y'umujyi, yahimbwe n'amakoperative y'Abanyafurika, Abarabu, n'Abanyaburayi, agaragara mu birango nk'Igihome cya Fort Jesus, ahagize umurage w'isi wa UNESCO, n'ubuubatsi bw'Igiswahili bw'igice cya kera. Umuco uhindagurika wa Mombasa ugaragara mu biribwa by'amafi, umuziki wa taarab, n'iminsi mikuru. Nk'ihuriro rikuru ry'ubukerarugendo n'ubukungu, ihuza ubuzima bw'ku nkombe n'inganda z'ubucuruzi n'ubwakira zikura.",
+      "jinja": "Jinja, umujyi uri mu burasirazuba bwa Uganda, wimenyekanisha ko uri aho Uruzi rwa Nili ruva, bituma uba ihuriro ry'ubukerarugendo bw'inkino. Wimenyekanisha n'inkino zo mu mazi ahindagurika, gusimbuka ku mugozi, no gukata amazi, Jinja ikurura abashaka inkino z'ubwoba baturutse ku isi yose. Ubukungu bw'umujyi burimo gukura, buterwa n'ubukerarugendo, ubuhinzi, n'inganda nto. Ahantu h'amateka nk'urwibutso rw'Isoko ry'Uruzi rwa Nili n'inyubako z'igihe cy'ubukoloni yongeraho uburyohe bwawo. Ubwiza bw'ibidukikije bwa Jinja, hamwe n'ubwatsi buhari n'imiraba y'uruzi, n'amasoko yayo ahiye, bituma uba ahantu hadasanzwe muri Afurika y'Iburasirazuba.",
+      "arusha": "Arusha, umujyi uri mu majyaruguru ya Tanzania, ni inzira igana ku bitangaza by'ibidukikije bizwi cyane muri Afurika, birimo Umusozi wa Kilimanjaro, Umutarama w'Igihugu wa Serengeti, n'Ikibaya cya Ngorongoro. Wimenyekanisha nk'\"Umurwa Mukuru w'Ubukerarugendo bw'Inkino,\" Arusha ikura ku nganda z'ubukerarugendo, itanga uburyo bwo kureba inyamaswa z'umwimerere zikomeye ku isi. Amasoko ahiye y'umujyi, nk'Isoko ry'Abamaasai, agaragaza ibikoresho by'amaboko n'umuco w'aho. Arusha nanone ni ihuriro ry'amahanga, itwikiriwe n'ibiro bikuru by'Umuryango w'Afurika y'Iburasirazuba. Igice cyayo cy'ubucuruzi gikura n'isura nziza y'Umusozi wa Meru bituma uba ihuriro ry'ubukungu n'umuco rikomeye.",
+      "dire-dawa": "Dire Dawa, umujyi uri mu burasirazuba bwa Etiyopiya, ni ihuriro ry'ubwikorezi n'ubucuruzi rikuru, riri ahantu h'ingenzi ku nzira y'igare ya Addis Ababa - Djibouti. Wimenyekanisha abaturage batandukanye, harimo amakoperative y'Abanyetiyopiya, Abasomali, n'Aboromo, umujyi ufite umuco uhuriweho ugaragara mu masoko, ibiribwa, n'iminsi mikuru. Ubukungu bwa Dire Dawa buterwa n'ubucuruzi, inganda, n'ubuhinzi, hamwe n'ikibuga cyayo cy'igare cya kera n'ubuubatsi bw'igihe cy'ubukoloni byongeraho uburebure bw'amateka. Ubuzima bw'umujyi bushimishije, hamwe n'uruhare rwawo nk'ihuriro ry'ibintu bigendanwa, bituma uba igice cy'ingenzi cy'ubukungu bwa Etiyopiya.",
+      "kumasi": "Kumasi, umujyi wa kabiri munini wa Ghana, ni umutima w'umuco w'Ubwami bwa Ashanti, wimenyekanisha imigenzo ikungahaye n'amateka. Umujyi ni ahagaragarira Ingoro ya Manhyia, intebe y'Asantehene, n'amasoko ahiye nka Kejetia, rimwe mu masoko manini y'ahagaragara muri Afurika y'Iburengerazuba. Umurage w'umuco wa Kumasi wizihizwa mu minsi mikuru nka Akwasidae n'ububoshyi bw'imyenda ya kente bwakozwe neza. Nk'ihuriro ry'ubukungu rikura, rufasha inganda nk'iz'ibiti, ubuhinzi, n'ubucuruzi. Ihuriro ry'umurage w'ubwami, ubucuruzi buhiye, n'umuco w'ubuhanzi ugezweho bya Kumasi bituma uba inkingi y'umwirondoro w'i Ghana."
+    }
+  },
+  "featuredBusinesses": {
+    "featuredBusinesses": "Ubucuruzi Buhebuje",
+    "featuredCategory": "{{category}} Buhebuje",
+    "sponsored": "Byatewe Inkunga",
+    "ad": "Ik.",
+    "reviews": "ibitekerezo",
+    "website": "Urubuga",
+    "directions": "Inzira",
+    "moreInfo": "Amakuru Yose"
+  },
+  "businessFeatures": {
+    "hasCoupons": "Bufite Amabone",
+    "acceptsOrdersOnline": "Bwemera Gutumiza kuri Interineti",
+    "isKidFriendly": "Bwiza ku Miryango",
+    "isPremium": "Ubucuruzi bw'Agaciro",
+    "isVerified": "Ubucuruzi Bwemejwe"
+  },
+  "advertise": {
+    "hero": {
+      "title": "Kuzamura Ubucuruzi Bwawe na Bara",
+      "subtitle": "Gera ku bakiriya amamiliyoni ukuze kumenyekana kwawe n'ibisubizo byacu by'amamenyekanisha bikomeye",
+      "getStarted": "Tangira",
+      "learnMore": "Menya Byinshi"
+    },
+    "stats": {
+      "monthlyVisitors": "Abasura ba Buri Kwezi",
+      "businesses": "Ubucuruzi Bwanditse",
+      "satisfaction": "Kwishimira kw'Abakiriya"
+    },
+    "services": {
+      "title": "Serivisi Zacu z'Amamenyekanisha",
+      "subtitle": "Hitamo igisubizo gikwiriye cyo guteza imbere ubucuruzi bwawe no kugera ku bakiriya benshi",
+      "premium": {
+        "title": "Urutonde rw'Agaciro",
+        "description": "Imenyekane kuruta abandi ufite kumenyekana kwongeweho n'umwanya w'agaciro",
+        "feature1": "Ubushakashatsi bwongeweho",
+        "feature2": "Umwanya w'agaciro mu bisubizo",
+        "feature3": "Kwerekana ubucuruzi mu buryo burambuye",
+        "cta": "Bona Urutonde rw'Agaciro"
+      },
+      "targeted": {
+        "title": "Amamenyekanisha Agenewe",
+        "description": "Gera ku bakiriya bawe b'inzozi n'amamenyekanisha agenewe neza",
+        "feature1": "Kugena ku karere",
+        "feature2": "Gushungura ku myaka n'ubwoko",
+        "feature3": "Ubushishozi bw'imyitwarire",
+        "cta": "Tangira Amamenyekanisha"
+      },
+      "analytics": {
+        "title": "Imibare n'Ubushishozi",
+        "description": "Kurikirana imikorere yawe unonosore ibikorwa byawe n'imibare irambuye",
+        "feature1": "Amakuru y'imikorere mu gihe nyacyo",
+        "feature2": "Ubushishozi ku myitwarire y'abakiriya",
+        "feature3": "Gukurikirana inyungu n'amakuru",
+        "cta": "Reba Imibare"
+      }
+    },
+    "whyChoose": {
+      "title": "Kuki Wahitamo Bara ku Mamenyekanisha?",
+      "subtitle": "Dutanga ibikoresho n'ubushobozi ukeneye kugira ngo uteze imbere ubucuruzi bwawe neza",
+      "reach": {
+        "title": "Kugera Kwinshi",
+        "description": "Kubona abakiriya amamiliyoni bashoboka bashaka ubucuruzi nk'ubwawe"
+      },
+      "growth": {
+        "title": "Iterambere Ryemejwe",
+        "description": "Ubucuruzi bubona inyongera ya 40% mu bibazo by'abakiriya mu kwezi kwa mbere"
+      },
+      "local": {
+        "title": "Gushishikarira Aho",
+        "description": "Twihariwe mu guhuza ubucuruzi bw'aho n'abakiriya b'aho mu karere kawe"
+      },
+      "visibility": {
+        "title": "Kumenyekana Cyane",
+        "description": "Imenyekana mu bisubizo by'ubushakashatsi ubonwe n'abakiriya bashaka serivisi zawe"
+      }
+    },
+    "cta": {
+      "title": "Witeguye Guteza Imbere Ubucuruzi Bwawe?",
+      "description": "Ifatanye n'ubucuruzi ibihumbi bwizera Bara kubafasha kugera ku bakiriya benshi no kongera inyungu",
+      "primaryButton": "Tangira Amamenyekanisha Uyu Munsi",
+      "secondaryButton": "Tegura Inama"
+    },
+    "contact": {
+      "title": "Tuvugishe",
+      "subtitle": "Inzobere zacu z'amamenyekanisha zihari kugufasha gutsinda",
+      "phone": {
+        "title": "Ubufasha kuri Telefoni",
+        "hours": "Kuwa mbere - Ku cyumweru 24/7"
+      },
+      "email": {
+        "title": "Ubufasha kuri Imeyili",
+        "response": "Igisubizo mu masaha 24"
+      },
+      "location": {
+        "title": "Sura Ibiro Byacu",
+        "address": "Kigali, u Rwanda",
+        "visit": "Tegura inama"
+      }
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Twandikire",
+      "subtitle": "Turi hano kugufasha. Tuvugishe ku bibazo byose cyangwa ubufasha ukeneye."
+    },
+    "form": {
+      "title": "Twoherereze Ubutumwa",
+      "description": "Uzuza ifishi ikurikira tuzakugarura vuba bishoboka.",
+      "firstName": "Izina ry'Ibanze",
+      "firstNamePlaceholder": "Andika izina ryawe ry'ibanze",
+      "lastName": "Izina ry'Umuryango",
+      "lastNamePlaceholder": "Andika izina ryawe ry'umuryango",
+      "email": "Imeyili",
+      "emailPlaceholder": "Andika imeyili yawe",
+      "phone": "Telefoni",
+      "phonePlaceholder": "Andika nimero ya telefoni yawe",
+      "subject": "Insanganyamatsiko",
+      "subjectPlaceholder": "Ibyerekeye iki?",
+      "message": "Ubutumwa",
+      "messagePlaceholder": "Tubwire uko twakugirira akamaro...",
+      "sendMessage": "Ohereza Ubutumwa"
+    },
+    "info": {
+      "general": {
+        "title": "Amakuru Rusange",
+        "phone": "Telefoni",
+        "email": "Imeyili",
+        "address": "Aderesi",
+        "addressValue": "Kigali, u Rwanda",
+        "hours": "Amasaha y'Akazi",
+        "hoursValue": "Kuwa mbere - Ku cyumweru 24/7"
+      },
+      "support": {
+        "title": "Ubufasha bw'Abakiriya",
+        "phone": "Telefoni y'Ubufasha",
+        "phoneHours": "Ihari 24/7",
+        "email": "Imeyili y'Ubufasha",
+        "emailResponse": "Igisubizo mu masaha 2"
+      },
+      "business": {
+        "title": "Ibibazo by'Ubucuruzi",
+        "email": "Imeyili y'Ubucuruzi",
+        "description": "Ku bw'ubufatanye, amamenyekanisha, n'amahirwe y'ubucuruzi",
+        "learnMore": "Menya Byinshi ku Serivisi z'Ubucuruzi"
+      }
+    },
+    "faq": {
+      "title": "Ibibazo Bikunze Kubazwa",
+      "subtitle": "Shaka ibisubizo byihuse ku bibazo bikunze kubazwa ku serivisi zacu",
+      "question1": "Nakora nte kugira ngo nsabe urutonde rw'ubucuruzi bwanjye?",
+      "answer1": "Ushobora gusaba urutonde rw'ubucuruzi bwawe usura urupapuro rwo gusaba ukurikize inzira yoroshye yo kwemeza. Tuzakuyobora mu ntambwe zose.",
+      "question2": "Ni ayahe mahitamo y'amamenyekanisha mutanga?",
+      "answer2": "Dutanga urutonde rw'agaciro, amamenyekanisha agenewe, n'ibikoresho by'imibare kugira ngo dufashe kugera ku bakiriya benshi no guteza imbere ubucuruzi bwawe.",
+      "question3": "Nakora nte kugira ngo nhindure amakuru y'ubucuruzi bwanjye?",
+      "answer3": "Umaze gusaba urutonde rwawe, ushobora guhindura byoroshye amakuru y'ubucuruzi bwawe, amasaha, amafoto, n'ibindi binyuze mu mwanya w'ibikoresho by'ubucuruzi bwawe.",
+      "question4": "Ni ubuhe bufasha mutanga ku bucuruzi?",
+      "answer4": "Dutanga ubufasha bwuzuye harimo ubufasha kuri telefoni, ubufasha ku imeyili, n'abayobozi ba konti bihariye ku bakiriya b'agaciro."
+    },
+    "cta": {
+      "title": "Ukeneye Ubufasha Bwinshi?",
+      "description": "Itsinda ryacu riteguye kugufasha ku bibazo byose cyangwa ibikubangamiye",
+      "primaryButton": "Vugisha Ubufasha",
+      "secondaryButton": "Reba Ikigo cy'Ubufasha"
+    }
+  },
+  "premiumFeatures": {
+    "hero": {
+      "title": "Kuzamura ubufatanye bw'ubucuruzi bwawe",
+      "subtitle": "Nonosora umwirondoro wawe n'ibikoresho n'ibintu bidasanzwe!"
+    },
+    "billing": {
+      "monthly": "Kwishyura bya Buri Kwezi",
+      "yearly": "Kwishyura bya Buri Mwaka",
+      "save": "Kuzigama 20%"
+    },
+    "common": {
+      "mostPopular": "Bikunzwe Cyane",
+      "perMonth": "/ukwezi",
+      "perYear": "/umwaka"
+    },
+    "features": {
+      "businessProfile": "Umwirondoro w'Ubucuruzi",
+      "basicContact": "Amakuru y'Itumanaho y'Ibanze",
+      "socialLinks": "Aho Bahurira ku Mbuga Nkoranyambaga",
+      "photoGallery": "Ububiko bw'Amafoto (kugeza ku mashusho 10)",
+      "businessHours": "Amasaha y'Ubucuruzi",
+      "productServices": "Urutonde rw'Ibicuruzwa/Serivisi",
+      "customerReviews": "Ibitekerezo by'Abakiriya",
+      "prioritySupport": "Ubufasha bw'Abakiriya bw'Ibanze",
+      "analytics": "Guhuzwa na Google Analytics",
+      "featuredListings": "Urutonde Ruhebuje",
+      "unlimitedUploads": "Kohereza Amafoto Adafite Imipaka",
+      "customDomain": "Izina ry'Urubuga Ryihariye"
+    },
+    "plans": {
+      "normal": {
+        "name": "Isanzwe",
+        "price": "Ubuntu",
+        "description": "Urutonde rw'ibanze rufite ibintu by'ibanze",
+        "button": "Komeza Ubuntu"
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "$5",
+        "description": "Bikwiriye ubucuruzi bukura",
+        "button": "Jya kuri Pro"
+      },
+      "premium": {
+        "name": "Premium",
+        "price": "$20",
+        "description": "Ku bucuruzi bushaka ibyiza cyane",
+        "button": "Bona Premium"
+      }
+    },
+    "pricing": {
+      "billedAnnually": "Bwishyurwa buri mwaka"
+    },
+    "payment": {
+      "title": "Soza Kugura Kwawe",
+      "freeDescription": "Uriyandikisha ku rutonde rw'ubuntu.",
+      "planDescription": "Uriyandikisha ku gahunda ya {{plan}}.",
+      "selectedPlan": "Gahunda ya {{plan}}",
+      "freeForever": "Ubuntu iteka",
+      "annualBilling": "Bwishyurwa buri mwaka kuri ${{amount}}/umwaka",
+      "monthlyBilling": "Bwishyurwa buri kwezi kuri ${{amount}}/ukwezi",
+      "switchBilling": "Hindukira kuri {{to}}",
+      "method": "Uburyo bwo Kwishyura",
+      "card": "Ikarita y'Inguzanyo cyangwa Ikarita",
+      "cardNumber": "Nimero y'Ikarita",
+      "cardNumberPlaceholder": "1234 5678 9012 3456",
+      "expiry": "Irangira",
+      "expiryPlaceholder": "MM/YY",
+      "cvc": "CVC",
+      "cvcPlaceholder": "123",
+      "zip": "Kode y'Iposita",
+      "zipPlaceholder": "12345"
+    },
+    "form": {
+      "fullName": "Izina Ryuzuye",
+      "fullNamePlaceholder": "Izina Ryuzuye",
+      "email": "Imeyili",
+      "emailPlaceholder": "imeyili@urugero.com"
+    },
+    "notice": {
+      "label": "Icyitonderwa:",
+      "text": "Uru ni urupapuro rw'ubwishyu rw'ikizami. Nta bwishyu nyabwo buzakorwa. Mu bikorwa nyabyo, uru rupapuro rwahuzwa n'uburyo bwo kwishyura bukomeye."
+    },
+    "actions": {
+      "completeFree": "Soza Kwiyandikisha ku Buntu",
+      "confirmPayment": "Emeza Ubwishyu"
+    },
+    "legal": {
+      "agree": "Mu gukomeza, wemeye Amategeko y'Ikoreshwa n'Amategeko y'Ibanga."
+    },
+    "planNames": {
+      "normal": "Isanzwe",
+      "pro": "Pro",
+      "premium": "Premium"
+    }
   }
 }
