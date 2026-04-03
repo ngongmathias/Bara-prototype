@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 
 interface FullScreenPlayerProps {
     isOpen: boolean;
@@ -52,7 +53,30 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
     const [showQueue, setShowQueue] = useState(false);
     const [showLyrics, setShowLyrics] = useState(false);
     const [dominantColor, setDominantColor] = useState('#1DB954');
+    const [featuredArtists, setFeaturedArtists] = useState<string[]>([]);
     const imgRef = useRef<HTMLImageElement>(null);
+
+    // Fetch featured artists for current song
+    useEffect(() => {
+        if (!currentSong) { setFeaturedArtists([]); return; }
+        let cancelled = false;
+        (async () => {
+            try {
+                const { data } = await supabase
+                    .from('song_artists')
+                    .select('role, artists(name)')
+                    .eq('song_id', currentSong.id)
+                    .eq('role', 'featured')
+                    .order('display_order');
+                if (!cancelled && data) {
+                    setFeaturedArtists(data.map((d: any) => d.artists?.name).filter(Boolean));
+                }
+            } catch {
+                if (!cancelled) setFeaturedArtists([]);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [currentSong?.id]);
 
     // Extract a pseudo-dominant color from the cover art for the background gradient
     useEffect(() => {
@@ -95,7 +119,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                     animate={{ y: 0 }}
                     exit={{ y: '100%' }}
                     transition={{ type: 'spring', damping: 28, stiffness: 200 }}
-                    className="fixed inset-0 z-[200] flex flex-col overflow-hidden text-white"
+                    className="fixed inset-0 z-[9999] flex flex-col overflow-hidden text-white"
                     style={{
                         background: `linear-gradient(160deg, ${dominantColor}40 0%, #121212 40%, #0a0a0a 100%)`
                     }}
@@ -193,7 +217,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                         transition={{ delay: 0.3 }}
                                         className="text-lg md:text-xl text-white/60 font-medium"
                                     >
-                                        {currentSong.artist}
+                                        {currentSong.artist}{featuredArtists.length > 0 && ` ft. ${featuredArtists.join(', ')}`}
                                     </motion.p>
                                 </div>
 
