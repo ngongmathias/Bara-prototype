@@ -270,6 +270,7 @@ import NewReleasesPage from "./pages/streams/NewReleasesPage";
 
 import LikedSongsPage from "./pages/streams/LikedSongsPage";
 import SongPage from "./pages/streams/SongPage";
+import CreditPage from "./pages/streams/CreditPage";
 
 import LibraryPage from "./pages/streams/LibraryPage";
 
@@ -427,6 +428,8 @@ const AppRoutes = () => {
           <Route path="verification" element={<ArtistVerificationPage />} />
 
           <Route path="song/:id" element={<SongPage />} />
+          <Route path="producer/:id" element={<CreditPage />} />
+          <Route path="songwriter/:id" element={<CreditPage />} />
 
           <Route path="*" element={<StreamsHub />} /> {/* Fallback within streams context */}
 

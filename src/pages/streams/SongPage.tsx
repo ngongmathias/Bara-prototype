@@ -10,7 +10,7 @@ export default function SongPage() {
     const { id } = useParams<{ id: string }>();
     const { play, currentSong, isPlaying, togglePlay, toggleLike, likedSongs } = useAudioPlayer();
     const [song, setSong] = useState<Song | null>(null);
-    const [credits, setCredits] = useState<{ role: string; name: string }[]>([]);
+    const [credits, setCredits] = useState<{ role: string; name: string; artist_id: string }[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
 
@@ -45,11 +45,11 @@ export default function SongPage() {
             try {
                 const { data: sa } = await supabase
                     .from('song_artists')
-                    .select('role, artists(name)')
+                    .select('role, artist_id, artists(name)')
                     .eq('song_id', id)
                     .order('display_order');
                 if (sa) {
-                    setCredits(sa.map((s: any) => ({ role: s.role, name: s.artists?.name || '' })));
+                    setCredits(sa.map((s: any) => ({ role: s.role, name: s.artists?.name || '', artist_id: s.artist_id })));
                 }
             } catch { /* table may not exist */ }
 
@@ -181,7 +181,17 @@ export default function SongPage() {
                                 {credits.map((c, i) => (
                                     <div key={i} className="flex justify-between text-sm">
                                         <span className="text-gray-500 capitalize">{c.role === 'primary' ? 'Artist' : c.role}</span>
-                                        <span className="text-gray-300">{c.name}</span>
+                                        {c.role === 'producer' || c.role === 'songwriter' ? (
+                                            <Link to={`/streams/${c.role}/${c.artist_id}`} className="text-gray-300 hover:text-white hover:underline transition-colors">
+                                                {c.name}
+                                            </Link>
+                                        ) : c.role === 'primary' || c.role === 'featured' ? (
+                                            <Link to={`/streams/artist/${c.artist_id}`} className="text-gray-300 hover:text-white hover:underline transition-colors">
+                                                {c.name}
+                                            </Link>
+                                        ) : (
+                                            <span className="text-gray-300">{c.name}</span>
+                                        )}
                                     </div>
                                 ))}
                             </div>
