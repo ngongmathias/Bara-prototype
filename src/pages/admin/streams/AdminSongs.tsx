@@ -211,20 +211,41 @@ export const AdminSongs = () => {
 
             // Save song_artists (primary + featured)
             try {
-                // Remove old entries for this song
-                await supabase.from('song_artists').delete().eq('song_id', songId);
+                // First, fetch existing entries to find ones to remove
+                const { data: existing } = await supabase
+                    .from('song_artists')
+                    .select('id, artist_id, role')
+                    .eq('song_id', songId);
 
-                const artistEntries = [
-                    { song_id: songId, artist_id: songData.artist_id, role: 'primary', display_order: 0 },
+                const newEntries = [
+                    { song_id: songId, artist_id: songData.artist_id, role: 'primary' as const, display_order: 0 },
                     ...featuredArtistIds.map((aid, i) => ({
-                        song_id: songId, artist_id: aid, role: 'featured', display_order: i + 1
+                        song_id: songId, artist_id: aid, role: 'featured' as const, display_order: i + 1
                     })),
                 ];
-                if (artistEntries.length > 0) {
-                    await supabase.from('song_artists').insert(artistEntries);
+
+                // Delete entries that are no longer needed
+                if (existing && existing.length > 0) {
+                    const keepSet = new Set(newEntries.map(e => `${e.artist_id}:${e.role}`));
+                    const toDelete = existing.filter(e => !keepSet.has(`${e.artist_id}:${e.role}`));
+                    for (const entry of toDelete) {
+                        await supabase.from('song_artists').delete().eq('id', entry.id);
+                    }
+                }
+
+                // Upsert new/updated entries
+                if (newEntries.length > 0) {
+                    const { error: upsertErr } = await supabase
+                        .from('song_artists')
+                        .upsert(newEntries, { onConflict: 'song_id,artist_id,role' });
+                    if (upsertErr) {
+                        console.error('song_artists upsert failed:', upsertErr);
+                        toast({ title: "Warning", description: "Song saved but featured artists may not have been updated. Check RLS permissions.", variant: "destructive" });
+                    }
                 }
             } catch (e) {
-                console.warn('song_artists save failed (table may not exist yet):', e);
+                console.error('song_artists save failed:', e);
+                toast({ title: "Warning", description: "Song saved but featured artists failed to save.", variant: "destructive" });
             }
 
             setIsDialogOpen(false);
