@@ -13,7 +13,7 @@ interface CreditTrack extends Song {
 
 export default function CreditPage() {
     const { role, id } = useParams<{ role: string; id: string }>();
-    const { play, currentSong, isPlaying, togglePlay } = useAudioPlayer();
+    const { play, playAlbum, currentSong, isPlaying, togglePlay } = useAudioPlayer();
     const [creditName, setCreditName] = useState<string>('');
     const [tracks, setTracks] = useState<CreditTrack[]>([]);
     const [loading, setLoading] = useState(true);
@@ -92,7 +92,7 @@ export default function CreditPage() {
 
     const handlePlayAll = () => {
         if (tracks.length > 0) {
-            play(tracks[0], tracks);
+            playAlbum(tracks, 0);
         }
     };
 

@@ -21,6 +21,7 @@ export default function PlaylistPage() {
     const [playlist, setPlaylist] = useState<PlaylistData | null>(null);
     const [tracks, setTracks] = useState<Song[]>([]);
     const [likedTracks, setLikedTracks] = useState<string[]>([]);
+    const [ftMap, setFtMap] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -97,6 +98,29 @@ export default function PlaylistPage() {
 
         if (id) fetchPlaylist();
     }, [id]);
+
+    // Fetch featured artists for playlist tracks
+    useEffect(() => {
+        if (tracks.length === 0) return;
+        const ids = tracks.map(t => t.id);
+        supabase
+            .from('song_artists')
+            .select('song_id, artists(name)')
+            .in('song_id', ids)
+            .eq('role', 'featured')
+            .then(({ data }) => {
+                const map: Record<string, string[]> = {};
+                if (data) {
+                    for (const e of data as any[]) {
+                        const name = e.artists?.name;
+                        if (name) { if (!map[e.song_id]) map[e.song_id] = []; map[e.song_id].push(name); }
+                    }
+                }
+                const result: Record<string, string> = {};
+                for (const [sid, names] of Object.entries(map)) result[sid] = ` ft. ${names.join(', ')}`;
+                setFtMap(result);
+            });
+    }, [tracks]);
 
     const toggleLike = (trackId: string) => {
         setLikedTracks(prev =>
@@ -279,7 +303,7 @@ export default function PlaylistPage() {
                                                     <div className={`font-bold truncate transition text-sm ${isCurrentTrack ? 'text-[#1DB954]' : 'group-hover:text-gray-900'}`}>
                                                         {track.title}
                                                     </div>
-                                                    <div className="text-sm text-gray-500 truncate">{track.artist}</div>
+                                                    <div className="text-sm text-gray-500 truncate">{track.artist}{ftMap[track.id] || ''}</div>
                                                 </div>
                                             </div>
 

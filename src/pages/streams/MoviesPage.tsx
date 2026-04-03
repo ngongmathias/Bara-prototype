@@ -124,6 +124,11 @@ export default function MoviesPage() {
           </div>
         ) : (
           <>
+            {/* Page Header */}
+            <div className="px-6 sm:px-10 pt-8 pb-4">
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">BARA Streams — Movies</h1>
+            </div>
+
             {/* Hero / Featured Movie */}
             {featured && (
               <div className="relative h-[400px] sm:h-[500px] overflow-hidden">

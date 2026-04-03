@@ -9,6 +9,7 @@ import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 export default function LikedSongsPage() {
     const { likedSongs, playAlbum, currentSong, isPlaying, toggleLike, play } = useAudioPlayer();
     const [songs, setSongs] = useState<Song[]>([]);
+    const [ftMap, setFtMap] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -27,7 +28,7 @@ export default function LikedSongsPage() {
                     .in('id', likedSongs);
 
                 if (data) {
-                    setSongs(data.map(song => ({
+                    const formatted = data.map(song => ({
                         id: song.id,
                         title: song.title,
                         artist: song.artists?.name || 'Unknown Artist',
@@ -36,7 +37,26 @@ export default function LikedSongsPage() {
                         duration: song.duration,
                         artist_id: song.artist_id,
                         album_id: song.album_id
-                    })));
+                    }));
+                    setSongs(formatted);
+
+                    // Fetch featured artists
+                    const ids = formatted.map(s => s.id);
+                    const { data: ftData } = await supabase
+                        .from('song_artists')
+                        .select('song_id, artists(name)')
+                        .in('song_id', ids)
+                        .eq('role', 'featured');
+                    const map: Record<string, string[]> = {};
+                    if (ftData) {
+                        for (const e of ftData as any[]) {
+                            const name = e.artists?.name;
+                            if (name) { if (!map[e.song_id]) map[e.song_id] = []; map[e.song_id].push(name); }
+                        }
+                    }
+                    const result: Record<string, string> = {};
+                    for (const [sid, names] of Object.entries(map)) result[sid] = ` ft. ${names.join(', ')}`;
+                    setFtMap(result);
                 }
             } catch (err) {
                 console.error('Error fetching liked songs:', err);
@@ -142,12 +162,12 @@ export default function LikedSongsPage() {
                                             <img src={song.cover_url} className="w-10 h-10 rounded shadow-md object-cover" alt="" />
                                             <div className="min-w-0">
                                                 <div className={`font-bold truncate ${isCurrent ? 'text-[#1DB954]' : 'text-gray-900'}`}>{song.title}</div>
-                                                <div className="text-sm text-gray-500 truncate md:hidden">{song.artist}</div>
+                                                <div className="text-sm text-gray-500 truncate md:hidden">{song.artist}{ftMap[song.id] || ''}</div>
                                             </div>
                                         </div>
 
                                         <div className="text-sm text-gray-500 truncate hidden md:block font-medium">
-                                            {song.artist}
+                                            {song.artist}{ftMap[song.id] || ''}
                                         </div>
 
                                         <div className="flex items-center justify-end gap-6 pr-4">

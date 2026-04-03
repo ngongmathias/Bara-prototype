@@ -192,7 +192,7 @@ export default function PodcastsPage() {
                         </div>
 
                         <h1 className="text-4xl font-black text-gray-900 mb-3 tracking-tight">
-                            Bara Podcasts
+                            BARA Streams — Podcasts
                         </h1>
                         <p className="text-gray-500 mb-6 leading-relaxed max-w-lg mx-auto">
                             Africa's stories deserve to be heard. Discover podcasts from the continent's best voices —
@@ -391,7 +391,7 @@ export default function PodcastsPage() {
 
                         {/* How it will work */}
                         <div className="max-w-4xl mx-auto px-6 mt-12">
-                            <h2 className="text-xl font-bold text-gray-900 mb-6">How Bara Podcasts Works</h2>
+                            <h2 className="text-xl font-bold text-gray-900 mb-6">How BARA Podcasts Works</h2>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 {[
                                     { step: '1', title: 'Discover', desc: 'Browse podcasts by category, trending topics, or recommendations tailored to your interests.' },

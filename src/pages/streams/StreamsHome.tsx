@@ -9,12 +9,29 @@ import { SEO } from '@/components/SEO';
 import { DiscoverMore } from '@/components/DiscoverMore';
 import { useUser } from '@clerk/clerk-react';
 
-function getGreeting() {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return 'Good morning';
-    if (hour >= 12 && hour < 17) return 'Good afternoon';
-    if (hour >= 17 && hour < 21) return 'Good evening';
-    return 'Good night';
+// Batch-fetch featured artists for a list of song IDs and return a map: songId -> "ft. A, B"
+async function fetchFeaturedArtistsMap(songIds: string[]): Promise<Record<string, string>> {
+    if (songIds.length === 0) return {};
+    const { data } = await supabase
+        .from('song_artists')
+        .select('song_id, artists(name)')
+        .in('song_id', songIds)
+        .eq('role', 'featured');
+    const map: Record<string, string[]> = {};
+    if (data) {
+        for (const entry of data as any[]) {
+            const name = entry.artists?.name;
+            if (name) {
+                if (!map[entry.song_id]) map[entry.song_id] = [];
+                map[entry.song_id].push(name);
+            }
+        }
+    }
+    const result: Record<string, string> = {};
+    for (const [songId, names] of Object.entries(map)) {
+        result[songId] = ` ft. ${names.join(', ')}`;
+    }
+    return result;
 }
 
 export default function StreamsHome() {
@@ -29,6 +46,7 @@ export default function StreamsHome() {
     const [platformPlaylists, setPlatformPlaylists] = useState<any[]>([]);
     const [promotedSongs, setPromotedSongs] = useState<(Song & { featured_badge?: string })[]>([]);
     const [personalizedSongs, setPersonalizedSongs] = useState<Song[]>([]);
+    const [featuredArtistsMap, setFeaturedArtistsMap] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const searchRef = useRef<HTMLInputElement>(null);
@@ -190,6 +208,19 @@ export default function StreamsHome() {
         fetchData();
     }, [clerkUser?.id]);
 
+    // Fetch featured artists for all displayed songs
+    useEffect(() => {
+        const allIds = [
+            ...trendingSongs.map(s => s.id),
+            ...promotedSongs.map(s => s.id),
+            ...personalizedSongs.map(s => s.id),
+            ...recentlyPlayed.map(s => s.id),
+        ];
+        const unique = [...new Set(allIds)];
+        if (unique.length === 0) return;
+        fetchFeaturedArtistsMap(unique).then(setFeaturedArtistsMap).catch(() => {});
+    }, [trendingSongs, promotedSongs, personalizedSongs, recentlyPlayed]);
+
     const handlePlaySong = (song: Song) => play(song);
 
     const handlePlayArtist = async (artistId: string) => {
@@ -280,7 +311,7 @@ export default function StreamsHome() {
                     {/* Greeting + Search */}
                     <div className="mb-6 sm:mb-8">
                         <h1 className="text-3xl sm:text-4xl font-bold mb-4 tracking-tight text-gray-900">
-                            {getGreeting()}
+                            BARA Streams — Music
                         </h1>
                         <form onSubmit={handleSearch} className="relative max-w-xl">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -341,7 +372,7 @@ export default function StreamsHome() {
                                                 </button>
                                             </div>
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
-                                            <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}</p>
+                                            <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}{featuredArtistsMap[song.id] || ''}</p>
                                         </div>
                                     ))}
                                 </Section>
@@ -404,7 +435,7 @@ export default function StreamsHome() {
                                                 </button>
                                             </div>
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
-                                            <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}</p>
+                                            <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}{featuredArtistsMap[song.id] || ''}</p>
                                         </div>
                                     ))}
                                 </Section>
@@ -427,7 +458,7 @@ export default function StreamsHome() {
                                                 </button>
                                             </div>
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
-                                            <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}</p>
+                                            <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}{featuredArtistsMap[song.id] || ''}</p>
                                         </div>
                                     ))
                                 ) : (
@@ -453,7 +484,7 @@ export default function StreamsHome() {
                                                 </button>
                                             </div>
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
-                                            <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}</p>
+                                            <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}{featuredArtistsMap[song.id] || ''}</p>
                                         </div>
                                     ))
                                 ) : (

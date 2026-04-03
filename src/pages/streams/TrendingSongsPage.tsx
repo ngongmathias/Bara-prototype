@@ -7,6 +7,7 @@ import { Loader2, Play, Pause } from 'lucide-react';
 export default function TrendingSongsPage() {
     const { play, playAlbum, currentSong, isPlaying } = useAudioPlayer();
     const [songs, setSongs] = useState<Song[]>([]);
+    const [ftMap, setFtMap] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -32,6 +33,26 @@ export default function TrendingSongsPage() {
                         album_id: song.album_id
                     }));
                     setSongs(formattedSongs);
+
+                    // Fetch featured artists
+                    const ids = formattedSongs.map(s => s.id);
+                    if (ids.length > 0) {
+                        const { data: ftData } = await supabase
+                            .from('song_artists')
+                            .select('song_id, artists(name)')
+                            .in('song_id', ids)
+                            .eq('role', 'featured');
+                        const map: Record<string, string[]> = {};
+                        if (ftData) {
+                            for (const e of ftData as any[]) {
+                                const name = e.artists?.name;
+                                if (name) { if (!map[e.song_id]) map[e.song_id] = []; map[e.song_id].push(name); }
+                            }
+                        }
+                        const result: Record<string, string> = {};
+                        for (const [sid, names] of Object.entries(map)) result[sid] = ` ft. ${names.join(', ')}`;
+                        setFtMap(result);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching trending songs:', error);
@@ -81,7 +102,7 @@ export default function TrendingSongsPage() {
                                     </button>
                                 </div>
                                 <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
-                                <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}</p>
+                                <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}{ftMap[song.id] || ''}</p>
                             </div>
                         ))}
                     </div>

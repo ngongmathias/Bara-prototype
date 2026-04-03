@@ -189,7 +189,7 @@ export default function EbooksPage() {
                   <BookOpen className="w-3.5 h-3.5" /> BARA Ebooks
                 </span>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 font-comfortaa leading-tight">
-                  Your Digital<br />African Library
+                  BARA Streams — Ebooks
                 </h1>
                 <p className="text-gray-300 text-sm sm:text-base max-w-lg leading-relaxed mb-6">
                   Explore thousands of ebooks from African authors — fiction, non-fiction, academic, and more. Read anywhere, anytime.
