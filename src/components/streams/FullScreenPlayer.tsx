@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import {
     ChevronDown,
@@ -111,7 +112,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
         } catch { /* cancelled */ }
     };
 
-    return (
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <motion.div
@@ -119,7 +120,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                     animate={{ y: 0 }}
                     exit={{ y: '100%' }}
                     transition={{ type: 'spring', damping: 28, stiffness: 200 }}
-                    className="fixed inset-0 z-[9999] flex flex-col overflow-hidden text-white"
+                    className="fixed inset-0 z-[2147483647] flex flex-col overflow-hidden text-white"
                     style={{
                         background: `linear-gradient(160deg, ${dominantColor}40 0%, #121212 40%, #0a0a0a 100%)`
                     }}
@@ -428,6 +429,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                     </div>
                 </motion.div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };
