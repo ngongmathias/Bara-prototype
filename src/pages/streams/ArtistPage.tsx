@@ -69,7 +69,7 @@ export default function ArtistPage() {
                             .map((f: any) => ({
                                 id: f.songs.id,
                                 title: f.songs.title,
-                                artist: artistData?.name || 'Unknown',
+                                artist: f.songs.artists?.name || 'Unknown Artist',
                                 file_url: f.songs.file_url,
                                 cover_url: f.songs.cover_url || '/placeholder-music.png',
                                 duration: f.songs.duration,
