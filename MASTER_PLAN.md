@@ -10,11 +10,10 @@
 
 | # | Document | File | Purpose | Status |
 |---|----------|------|---------|--------|
-| 1 | **Master Plan** (this document) | `MASTER_PLAN.md` | High-level roadmap, priorities, and dependencies | Active |
-| 2 | **Full Build, Test & DPO Plan** | `STREAMS_SPORTS_BUILD_PLAN.md` | Consolidated plan incorporating March 1 meeting notes — Streams/Sports/Platform-wide changes | **Active — Current Sprint** |
-| 3 | **DPO Compliance** | `compliance/` (10 files) | Rwanda Data Protection compliance — privacy policy, breach playbook, cross-border authorization | Active |
+| 1 | **Master Plan** (this document) | `MASTER_PLAN.md` | Single source of truth — roadmap, sprint details, priorities, and dependencies | Active |
+| 2 | **DPO Compliance** | `compliance/` (10 files) | Rwanda Data Protection compliance — privacy policy, breach playbook, cross-border authorization | Active |
 
-> **Note:** 74 obsolete `.md` files were removed on 2026-03-17 (old audit plans, status reports, implementation guides). All active work is now tracked in `STREAMS_SPORTS_BUILD_PLAN.md`.
+> **Note:** 74 obsolete `.md` files were removed on 2026-03-17. `STREAMS_SPORTS_BUILD_PLAN.md` was merged into this document on 2026-04-02. All active work is tracked here.
 
 ---
 
@@ -350,7 +349,8 @@ Once features are live, track these to measure success:
 
 ## PHASE 7: TEAM MEETING DIRECTIVES — March 1, 2026
 
-> **All items below come from the March 1 team meeting. Full details in `STREAMS_SPORTS_BUILD_PLAN.md`.**
+> **All items below come from the March 1 team meeting.**
+> Developer overall feedback: "Back end is SOLID!"
 
 | # | Directive | Priority | Sprint | Status |
 |---|-----------|----------|--------|--------|
@@ -413,6 +413,266 @@ Once features are live, track these to measure success:
 | 7.57 | **BARA copyright fix** — Fixed "Bara" → "BARA" in copyright and trademark text across `en.json` and `pt.json` locale files. Updated `index.html` title to "BARA Afrika". | P1 | — | ✅ Done (Mar 31) |
 | 7.58 | **Home page BARA flip card redesign** — Redesigned `BaraMeaningTiles.tsx` from 6 individual tiles to one large flip card. Front: grid of 6 language meanings (Swahili/Blessing, Hausa/Gift, Yoruba, Amharic, Zulu, Arabic). Back: unified BARA message with "One land \| One people \| One future". Uses framer-motion 3D flip. | P1 | — | ✅ Done (Mar 31) |
 | 7.59 | **Sports API — deferred** — api-sports.io requires Pro plan ($10/mo minimum) for live data. Too expensive for current stage. Sports page continues to work with Supabase-backed content (manual news/videos). Revisit when platform has revenue. | P2 | — | ⏸️ Deferred |
+| 7.60 | **Google Translate widget UI fix** — Restyled `GoogleTranslate.tsx` to hide banner frame, "Powered by" text, and Google logo. Styled the `<select>` dropdown to match header buttons (12px font, border, rounded, 32px height). Hidden tooltip popups and text highlights. | P1 | — | ✅ Done (Apr 2) |
+
+---
+
+### Phase 7 — Detailed Sprint Checklists (from March 1 Meeting)
+
+<details>
+<summary>7A. Platform-Wide Priorities (click to expand)</summary>
+
+#### 0.1 Navigation Bar Redesign (P0)
+**Required order:** BARA Global, BARA Events, BARA Streams, BARA Listings, BARA Marketplace, BARA Sports, BARA Blog, BARA Communities, BARA Tools, Language, Profile, Coins
+- Move "Advertise" and "Write a Review" to footer
+- Only keep in nav: Mini-Apps, Language, Country, Coins, Profile
+- Country defaults to Rwanda, Language defaults to English
+- **Reference: WeChat interface** for clean, minimal nav
+
+| Task | Priority | Status |
+|------|----------|--------|
+| Redesign Header component with new nav order | P0 | ✅ Done (7.1) |
+| Implement dropdown/mega-menu for mini-apps | P0 | ✅ Done (7.24) |
+| Move "Advertise" and "Write a Review" to footer | P0 | ✅ Done (7.2) |
+| Country selector — default to Rwanda | P0 | ✅ Done (7.20) |
+| Language selector — default to English | P0 | ✅ Done (7.52) |
+| Coins balance display in nav | P1 | ✅ Done (Phase 3) |
+| Profile icon/link in nav | P1 | ✅ Done (7.1) |
+| Mobile nav — clean hamburger or bottom tabs | P0 | ✅ Done (7.1) |
+| Test on mobile, tablet, laptop, desktop | P0 | ☐ |
+
+#### 0.2 Cross-Device UI Testing (P0)
+> "Testing is a HUGE deal, let's be thorough and communicate regularly about testing"
+
+| Task | Priority | Status |
+|------|----------|--------|
+| Establish device test matrix (iPhone, Android, iPad, laptop, desktop) | P0 | ☐ |
+| Test every page on mobile viewport (375px) | P0 | ☐ |
+| Test every page on tablet viewport (768px) | P0 | ☐ |
+| Test every page on desktop viewport (1440px) | P0 | ☐ |
+| Fix: Admin side content getting cut off on smaller devices | P0 | ☐ |
+| Fix: User side content getting cut off depending on device | P0 | ☐ |
+
+#### 0.3 "Discover More on BARA" — Platform-Wide (P1)
+> "This prompted navigation should be on each page, towards the bottom"
+
+| Task | Priority | Status |
+|------|----------|--------|
+| Verify `DiscoverMore.tsx` component exists and is reusable | P0 | ✅ Done (7.16) |
+| Add to: Blog, Streams, Sports, Listings, BARA Global, User Dashboard | P1 | ✅ Done (7.16) |
+| Ensure `exclude` prop hides the current section | P1 | ✅ Done |
+
+#### 0.4 Footer Cleanup (P1)
+> "Reference Amazon page"
+
+| Task | Priority | Status |
+|------|----------|--------|
+| Restructure footer with clear sections (About, Mini-Apps, Support, Legal) | P1 | ✅ Done (7.13) |
+| Move "Advertise With Us" + "Write a Review" to footer | P0 | ✅ Done (7.2) |
+| Amazon-style organized footer layout | P1 | ✅ Done (7.13) |
+
+#### 0.5 Home Page — BARA Tile Flip (P1) ✅ DONE (Mar 31)
+
+| Task | Priority | Status |
+|------|----------|--------|
+| 3D flip animation on main BARA tile | P1 | ✅ Done (7.58) |
+| Front: Language meanings grid (Swahili, Hausa, Yoruba, Amharic, Zulu, Arabic) | P1 | ✅ Done |
+| Back: unified BARA message + "One land | One people | One future" | P1 | ✅ Done |
+
+</details>
+
+<details>
+<summary>7B. BARA Streams — Redesign (click to expand)</summary>
+
+#### 1.0 Theme Change: Dark → White (P0) ✅ DONE
+| Task | Status |
+|------|--------|
+| StreamsLayout, StreamsSidebar, StreamsHome — white theme | ✅ Done (7.4) |
+| All 12 Streams pages converted to white theme | ✅ Done (7.4) |
+| Audio Player bar — white theme with accent colors | ✅ Done (7.4) |
+
+#### 1.1 Streams Hub Homepage (P0) ✅ DONE
+| Task | Status |
+|------|--------|
+| Created `StreamsHub.tsx` with Music/Movies/Ebooks/Podcast/Gaming cards | ✅ Done (7.5) |
+| Routes: `/streams` → hub, `/streams/music` → music player | ✅ Done (7.5) |
+| Sticky pill-style content-type tabs in layout | ✅ Done (7.43) |
+
+#### 1.2 Artist Page Enhancements (P1) ✅ DONE
+| Task | Status |
+|------|--------|
+| Customizable banner image on artist page | ✅ Done (7.7) |
+| "Artist Picks" featured track section | ✅ Done (7.7) |
+| Multi-artist credits: "Featured On" section + dashboard stats | ✅ Done (7.55) |
+
+#### 1.3 Mimic Spotify Functionality (P1)
+| Task | Priority | Status |
+|------|----------|--------|
+| Smooth page transitions between Streams pages | P2 | ☐ |
+| "Now Playing" full-screen view on mobile | P1 | ☐ |
+| Queue management UI (view queue, reorder, remove) | P2 | ☐ |
+| Hover-to-play on song cards | P2 | ☐ |
+| Song progress in mini-player | P0 | ✅ Exists |
+| Volume control in player | P1 | ☐ |
+
+#### 1.4 Seed Data (P0) ✅ DONE
+| Task | Status |
+|------|--------|
+| 12 artists, 12 albums, 60 songs with working audio URLs | ✅ Done (7.21, 7.48) |
+| Platform playlists seeded | ✅ Done |
+
+#### 1.5 Storage Buckets (P0)
+| Task | Status |
+|------|--------|
+| Verify `audio-files` and `cover-art` buckets exist | ☐ |
+| Create buckets + RLS policies if missing | ☐ |
+| Test upload from UploadSongPage | ☐ |
+
+</details>
+
+<details>
+<summary>7C. BARA Sports — Testing & Fixes (click to expand)</summary>
+
+#### Sports Infrastructure — ⏸️ DEFERRED (Mar 31)
+> api-sports.io requires Pro plan ($10/mo minimum) for live data. Too expensive for current stage. Sports page works with Supabase-backed content (manual news/videos). Revisit when platform has revenue.
+
+| Task | Priority | Status |
+|------|----------|--------|
+| Verify `VITE_API_FOOTBALL_KEY` is set and active | P0 | ⏸️ Deferred |
+| Verify `sports_news` / `sports_videos` / `sports_predictions` tables | P0 | ☐ |
+| Seed 5-10 sample sports news articles | P1 | ☐ |
+| Add "API suspended" fallback UI if needed | P0 | ☐ |
+
+#### Sports Admin
+| Task | Priority | Status |
+|------|----------|--------|
+| `/admin/sports` — dashboard renders | P0 | ☐ |
+| `/admin/sports/news` — CRUD works | P0 | ☐ |
+| `/admin/sports/videos` — CRUD works | P0 | ☐ |
+
+</details>
+
+<details>
+<summary>7D. Other Platform Items (click to expand)</summary>
+
+#### BARA News — Mini-App (P1) ✅ DONE
+| Task | Status |
+|------|--------|
+| Promoted to full mini-app with `/news` route | ✅ Done (7.8) |
+| Added to navigation | ✅ Done (7.8) |
+| RSS feed HTML stripping fixed | ✅ Done (7.35) |
+
+#### BARA Global Fixes (P0) ✅ DONE
+| Task | Status |
+|------|--------|
+| Admin→user data display fixed | ✅ Done (7.9) |
+| Maps replaced with photo gallery | ✅ Done (7.9, 7.23) |
+| "Read More" expandable text | ✅ Done (7.9) |
+| Gallery images seeded for 6 entries | ✅ Done (7.45) |
+
+#### BARA Listings (P0) ✅ DONE
+| Task | Status |
+|------|--------|
+| All categories showing (removed `.slice(0,12)`) | ✅ Done (7.10) |
+| Deduplication by slug | ✅ Done (7.10) |
+
+#### BARA Events Fixes (P1) ✅ DONE
+| Task | Status |
+|------|--------|
+| Full flyer image display (h-48 → h-64) | ✅ Done (7.11) |
+| Venue shown in grid view | ✅ Done (7.11) |
+| "Copy Link" share option | ✅ Done (7.11) |
+
+#### BARA Blog (P1) ✅ DONE
+| Task | Status |
+|------|--------|
+| Share buttons (Facebook/Twitter/WhatsApp/Copy Link) | ✅ Done (7.12) |
+| Like/heart button | ✅ Done (7.12) |
+| Category selector as dropdown | ✅ Done (7.12) |
+
+#### User Profile (P1) — Needs Team Decision
+| Decision Needed | Options |
+|----------------|---------|
+| Public profile visibility | A) Fully public B) Opt-in C) Private only |
+| User-to-user connection | A) Follow system B) Friend requests C) None for now |
+| **⚠️ Requires team discussion before implementation** | |
+
+#### Admin Dashboard Analytics (P0) ✅ DONE
+| Task | Status |
+|------|--------|
+| Real-time stats with content & platform metrics | ✅ Done (7.15) |
+| Songs, Artists, Playlists, Blog, Marketplace, News, Countries, Gamification, Coins | ✅ Done (7.15) |
+
+</details>
+
+<details>
+<summary>7E. BARA Coins / Gamification — Needs Team Meeting (click to expand)</summary>
+
+> "This VERY important aspect needs review between us as a specific meeting."
+
+**What exists:** Coin balance in Header ✅, Daily missions ✅, Leaderboard ✅, Coin Store ✅, Daily spin wheel ✅, Profile themes ✅, Sports predictions ✅, Artist boost ✅, Ad-free browsing ✅
+
+| Topic | Current State | Meeting Direction |
+|-------|--------------|-------------------|
+| **Earn** | XP + Coins from daily missions, login streak, spin wheel | Review: Are earn rates balanced? |
+| **Share** | Not implemented | NEW: Can users send coins to each other? |
+| **Redeem** | Coin Store has packages, boosts, themes, ad-free | Needs tier-based rewards |
+| **Leaderboard** | XP/Coins/Streak tabs | Add time filters (week/month) |
+| **Direct Purchase** | Currently grants free coins (launch mode) | Needs Stripe/Paystack |
+
+**⚠️ ACTION: Schedule dedicated BARA Coins meeting before implementing changes.**
+
+</details>
+
+<details>
+<summary>7F. Emails & DPO Compliance (click to expand)</summary>
+
+#### Emails (7.51)
+| Task | Priority | Status |
+|------|----------|--------|
+| Audit current Resend "from" address configuration | P1 | ☐ |
+| List all email addresses BARA needs (support, hello, noreply) | P1 | ☐ |
+| Confirm domain DNS is set up for Resend (not sandbox) | P0 | ☐ |
+
+#### DPO Compliance (7.33)
+**What's covered ✅:** Data Controller registration, cross-border authorization, Privacy Policy draft, Breach Response Playbook, Cookie Notice, Terms of Service.
+
+**Gaps:**
+| # | Gap | Fix |
+|---|-----|-----|
+| D1 | Privacy Policy doesn't mention api-sports.io | Add to vendor list |
+| D2 | No mention of sports predictions / coin betting data | Add to "Content you submit" section |
+| D3 | DPO Submission Pack has placeholder fields | Manual |
+| D4 | No Data Flow Diagram (DFD) | Create DFD |
+| D5 | Retention periods not defined for play_history, sports_predictions | Add retention policy |
+
+</details>
+
+### Phase 7 — Files Reference
+
+<details>
+<summary>Key files affected by Phase 7 work (click to expand)</summary>
+
+**Streams Pages (13 files):**
+`StreamsHome.tsx`, `ArtistPage.tsx`, `ArtistsPage.tsx`, `ArtistDashboard.tsx`, `ArtistVerificationPage.tsx`, `CreateAlbumPage.tsx`, `LibraryPage.tsx`, `LikedSongsPage.tsx`, `NewReleasesPage.tsx`, `PlaylistPage.tsx`, `PodcastsPage.tsx`, `TrendingSongsPage.tsx`, `UploadSongPage.tsx`
+
+**Sports Pages (11 files):**
+`SportsHome.tsx`, `SportsScores.tsx`, `SportsSchedule.tsx`, `SportsStats.tsx`, `SportsTeams.tsx`, `SportsNewsList.tsx`, `SportsNewsDetail.tsx`, `SportsPredictions.tsx`, `MatchCenter.tsx`, `TeamPage.tsx`, `LeagueTablePage.tsx`
+
+**Key Platform Files:**
+- `src/components/Header.tsx` — nav bar
+- `src/components/Footer.tsx` — footer
+- `src/components/DiscoverMore.tsx` — cross-feature discovery
+- `src/components/streams/StreamsLayout.tsx` — streams layout
+- `src/components/streams/StreamsSidebar.tsx` — sidebar
+- `src/context/AudioPlayerContext.tsx` — global audio player
+- `src/components/GoogleTranslate.tsx` — translation widget
+- `src/services/sportsApi.ts` — Sports API wrapper
+
+**DPO Compliance (10 files in `compliance/`):**
+`DPO_SUBMISSION_PACK.md`, `RW_DPO_COMPLIANCE_SUMMARY.md`, `PRIVACY_POLICY_DRAFT.md`, + 7 more
+
+</details>
 
 ---
 
@@ -1182,7 +1442,7 @@ BATCH 4 — Visual & UX Polish
 4. **Phase 8 (testing/QA/coins) runs in parallel** with Phase 9 items.
 5. **Universal rule: NO URL inputs for media.** All images, audio, and video must be file uploads to Supabase Storage. See 9.2.
 6. **Creator economy model:** Free + paid content, platform commission (15-20%), creator analytics as paid plan feature. See 9.6B.
-7. **Use `STREAMS_SPORTS_BUILD_PLAN.md`** for the detailed sprint-by-sprint breakdown with per-task checklists.
+7. **Phase 7 detailed checklists** are in collapsible sections (7A–7F) — expand them for per-task status.
 8. **Check off items** as you complete them (☐ → ✅).
 9. **Log bugs** found during testing with priority level (P0–P3).
 10. **BARA Coins proposal (8.3) needs team review** before implementation begins.
@@ -1194,6 +1454,7 @@ BATCH 4 — Visual & UX Polish
 ---
 
 *Master Plan created: Feb 22, 2026*
-*Updated: March 23, 2026 — Phase 9 added: 10 new directive groups (9.1–9.10) covering track ownership, universal file upload, country/language dropdowns, sports team/league/tournament management with 16 fan features, admin ebooks page, user dashboard creator economy (music/podcasts/ebooks + analytics + revenue), search optimization, event flyer A4 display, dashboard gaps, and translation replacement (Weglot/i18next+DeepL). 4-batch implementation order defined.*
-*Updated: March 31, 2026 — Items 7.49 (player fix), 7.52 (translation via Google Translate), 7.53–7.58 (search colors, film credits, multi-artist credits, share link, copyright, flip card) completed. Sports API (7.59) deferred due to cost.*
+*Updated: March 23, 2026 — Phase 9 added: 10 new directive groups (9.1–9.10).*
+*Updated: March 31, 2026 — Items 7.49, 7.52–7.58 completed. Sports API (7.59) deferred.*
+*Updated: April 2, 2026 — Merged `STREAMS_SPORTS_BUILD_PLAN.md` into this document (single source of truth). Google Translate widget UI fixed (7.60).*
 *For Bara Afrika Platform — baraafrika.com*
