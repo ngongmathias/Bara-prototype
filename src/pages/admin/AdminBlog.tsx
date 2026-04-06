@@ -52,6 +52,7 @@ import {
   BlogCategory,
   formatDate,
 } from '../../lib/blogService';
+import { GamificationService } from '../../lib/gamificationService';
 import { useToast } from '../../hooks/use-toast';
 
 export const AdminBlog = () => {
@@ -88,13 +89,15 @@ export const AdminBlog = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
+      // Build filter — omit status key entirely when 'all' to avoid any undefined-handling edge cases
+      const postFilter: Record<string, any> = {};
+      if (statusFilter !== 'all') postFilter.status = statusFilter;
+      if (categoryFilter !== 'all') postFilter.category = categoryFilter;
+      if (searchQuery) postFilter.search = searchQuery;
+
       const [categoriesData, postsData, allPostsData] = await Promise.all([
         blogCategoriesService.getAll(),
-        blogPostsService.getAll({
-          status: statusFilter === 'all' ? undefined : statusFilter,
-          category: categoryFilter === 'all' ? undefined : categoryFilter,
-          search: searchQuery || undefined,
-        }),
+        blogPostsService.getAll(postFilter),
         blogPostsService.getAll({}),
       ]);
 
@@ -135,6 +138,14 @@ export const AdminBlog = () => {
         decline_reason: null,
         published_at: post?.published_at ?? new Date().toISOString(),
       } as any);
+      // Award XP + coins to the author for getting published
+      const authorUserId = post?.author?.user_id;
+      if (authorUserId) {
+        await Promise.allSettled([
+          GamificationService.addXP(authorUserId, 150, 'Blog article published'),
+          GamificationService.addCoins(authorUserId, 25, 'Blog article published'),
+        ]);
+      }
       toast({ title: 'Article published!', description: 'The author\'s submission has been approved.' });
       loadData();
     } catch {

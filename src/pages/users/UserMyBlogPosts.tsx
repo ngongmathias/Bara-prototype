@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { supabase } from "@/lib/supabase";
+import { blogPostsService } from "@/lib/blogService";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -16,6 +17,8 @@ import {
   ChevronUp,
   TrendingUp,
   Clock,
+  Trash2,
+  Archive,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -79,6 +82,37 @@ export const UserMyBlogPosts = () => {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this article permanently? This cannot be undone.')) return;
+    try {
+      await blogPostsService.delete(id);
+      toast({ title: 'Article deleted' });
+      fetchMyPosts();
+    } catch {
+      toast({ title: 'Error', description: 'Failed to delete article', variant: 'destructive' });
+    }
+  };
+
+  const handleArchive = async (id: string) => {
+    try {
+      await blogPostsService.update(id, { status: 'archived' } as any);
+      toast({ title: 'Article archived', description: 'It\'s hidden from the public blog.' });
+      fetchMyPosts();
+    } catch {
+      toast({ title: 'Error', description: 'Failed to archive article', variant: 'destructive' });
+    }
+  };
+
+  const handleUnarchive = async (id: string) => {
+    try {
+      await blogPostsService.update(id, { status: 'pending_review' } as any);
+      toast({ title: 'Submitted for review', description: 'Your article is back in the review queue.' });
+      fetchMyPosts();
+    } catch {
+      toast({ title: 'Error', description: 'Failed to resubmit article', variant: 'destructive' });
     }
   };
 
@@ -224,6 +258,7 @@ export const UserMyBlogPosts = () => {
                             <Lock className="h-4 w-4" />
                           </div>
                         )}
+
                         {isDeclined && (
                           <>
                             <Link to={`/blog/edit/${post.id}`}>
@@ -232,30 +267,46 @@ export const UserMyBlogPosts = () => {
                               </Button>
                             </Link>
                             {post.decline_reason && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setExpandedDecline(showDecline ? null : post.id)}
-                                className="text-red-600"
-                                title="View feedback"
-                              >
+                              <Button variant="ghost" size="sm" onClick={() => setExpandedDecline(showDecline ? null : post.id)} className="text-red-600" title="View feedback">
                                 {showDecline ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                               </Button>
                             )}
+                            <Button variant="ghost" size="sm" onClick={() => handleDelete(post.id)} className="text-gray-400 hover:text-red-600" title="Delete">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </>
                         )}
-                        {!isUnderReview && !isDeclined && (
+
+                        {post.status === 'published' && (
                           <>
-                            {post.status === 'published' && (
-                              <Link to={`/blog/${post.slug}`}>
-                                <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
-                              </Link>
-                            )}
-                            {post.status === 'draft' && (
-                              <Link to={`/blog/edit/${post.id}`}>
-                                <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
-                              </Link>
-                            )}
+                            <Link to={`/blog/${post.slug}`}>
+                              <Button variant="ghost" size="sm" title="View live article"><Eye className="h-4 w-4" /></Button>
+                            </Link>
+                            <Button variant="ghost" size="sm" onClick={() => handleArchive(post.id)} className="text-gray-400 hover:text-orange-600" title="Archive / hide from public">
+                              <Archive className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+
+                        {post.status === 'draft' && (
+                          <>
+                            <Link to={`/blog/edit/${post.id}`}>
+                              <Button variant="ghost" size="sm" title="Edit draft"><Edit className="h-4 w-4" /></Button>
+                            </Link>
+                            <Button variant="ghost" size="sm" onClick={() => handleDelete(post.id)} className="text-gray-400 hover:text-red-600" title="Delete draft">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+
+                        {post.status === 'archived' && (
+                          <>
+                            <Button variant="outline" size="sm" onClick={() => handleUnarchive(post.id)} className="text-xs text-gray-600" title="Resubmit for review">
+                              <Edit className="h-3 w-3 mr-1" /> Resubmit
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDelete(post.id)} className="text-gray-400 hover:text-red-600" title="Delete">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </>
                         )}
                       </div>

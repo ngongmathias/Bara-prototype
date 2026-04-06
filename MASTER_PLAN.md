@@ -1500,11 +1500,75 @@ BATCH 4 — Visual & UX Polish
 |------|--------|
 | Replace coin balance `<Link>` with `DropdownMenu` showing: balance, streak, level/XP, links to missions, leaderboard, store | ✅ Done |
 
+### 10.6 Blog Submission — DB Migration Required
+| Task | Status |
+|------|--------|
+| SQL: Drop old status CHECK (only draft/published/scheduled/archived), re-add with pending_review + declined | ✅ File: `ADD_BLOG_SUBMISSION_FIELDS.sql` |
+| SQL: Add `decline_reason TEXT` column to blog_posts | ✅ File: `ADD_BLOG_SUBMISSION_FIELDS.sql` |
+| Fix image upload bucket: UserBlogEditor was using non-existent `public` bucket → switched to `event-images` | ✅ Done |
+| Fix 400 on submit: empty strings sent for nullable UUID fields — add `cleanPost()` helper | ✅ Done |
+| Fix 406 on post open: `.single()` throws on 0 rows → switched to `.maybeSingle()` | ✅ Done |
+| Fix broken view link: UserMyBlogPosts linked `/blog/{id}` (UUID) instead of `/blog/{slug}` | ✅ Done |
+
+### 10.7 User Blog Management
+| Task | Status |
+|------|--------|
+| Add insights summary row: Total Views, Published, Under Review, Drafts | ✅ Done |
+| Add delete button for drafts and declined posts | ✅ Done |
+| Add archive/hide button for published posts | ✅ Done |
+| Add resubmit button for archived posts | ✅ Done |
+| Award 150 XP + 25 Bara Coins to author when admin approves their article | ✅ Done |
+
+### 10.8 Admin Blog — Show All Articles (default filter fix)
+| Task | Status |
+|------|--------|
+| Change default statusFilter from `pending_review` to `all` | ✅ Done |
+| Make filter object construction explicit — avoids edge case with undefined status key | ✅ Done |
+
+---
+
+## OPEN ITEMS — What's Left (as of April 6, 2026)
+
+> Summary of all unchecked ☐ items across all phases. Use this as the working backlog.
+
+### P0 — Must fix before launch
+| # | Item | Phase |
+|---|------|-------|
+| 1 | **Clerk production keys** — app runs on dev keys with strict rate limits | 7.42 |
+| 2 | **Emails: audit + setup** — @baraafrika.com transactional email (Resend), SPF/DKIM | 7.51 |
+| 3 | **Streams: verify `audio-files` + `cover-art` storage buckets exist + RLS** | 7A-1.5 |
+| 4 | **Admin: Movies + Podcasts management pages** (`/admin/movies`, `/admin/podcasts`) | 7.50 |
+| 5 | **Cross-device testing** — mobile (375px), tablet (768px), desktop (1440px) for every page | 7.3 |
+| 6 | **Blog post likes** — needs `blog_post_likes` table + RLS (currently localStorage only) | 10.4 |
+
+### P1 — Important, pre-launch
+| # | Item | Phase |
+|---|------|-------|
+| 7 | **DPO Compliance** — privacy policy gaps (api-sports, session tokens, retention periods) | 7.33 |
+| 8 | **Streams: volume control in player** | 7A-1.3 |
+| 9 | **Streams: "Now Playing" full-screen view on mobile** | 7A-1.3 |
+| 10 | **User profile visibility decision** — public/opt-in/private (needs team call) | 7D |
+| 11 | **BARA Coins: earn/spend balance review** — needs team meeting before changes | 7E |
+| 12 | **Event saves** — `event_bookmarks` table + save button on event detail | 10.4 |
+| 13 | **Business listing saves** — `listing_bookmarks` table + save button on listing detail | 10.4 |
+
+### P2 — Nice to have
+| # | Item | Phase |
+|---|------|-------|
+| 14 | **Streams: queue management UI** (view/reorder/remove songs) | 7A-1.3 |
+| 15 | **Streams: hover-to-play on song cards** | 7A-1.3 |
+| 16 | **Streams: smooth page transitions** | 7A-1.3 |
+| 17 | **BARA Gaming** — placeholder at `/streams/gaming`, full build deferred | 7.34 |
+| 18 | **Sports: API live data** — deferred (api-sports.io Pro plan cost) | 7C |
+
+### Sprint 7 Test Scripts (manual QA checklist — not yet executed)
+> These are in Section S7.2–S7.6 of the plan. All checklist items marked ☐ need a manual test run.
+
 ---
 
 *Master Plan created: Feb 22, 2026*
-*Updated: March 23, 2026 — Phase 9 added: 10 new directive groups (9.1–9.10).*
-*Updated: March 31, 2026 — Items 7.49, 7.52–7.58 completed. Sports API (7.59) deferred.*
-*Updated: April 2, 2026 — Merged `STREAMS_SPORTS_BUILD_PLAN.md` into this document (single source of truth). Google Translate widget UI fixed (7.60).*
-*Updated: April 6, 2026 — Phase 10 added: blog flow fixes, admin sidebar, likes/saves, coins UX.*
+*Updated: March 23, 2026 — Phase 9 added.*
+*Updated: March 31, 2026 — Items 7.49, 7.52–7.58 completed. Sports API deferred.*
+*Updated: April 2, 2026 — Merged STREAMS_SPORTS_BUILD_PLAN.md into this document.*
+*Updated: April 6, 2026 — Phase 10 added (10.1–10.8). Open items summary added.*
 *For Bara Afrika Platform — baraafrika.com*
