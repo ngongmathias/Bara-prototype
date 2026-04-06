@@ -14,16 +14,20 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
+  TrendingUp,
+  Clock,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface MyPost {
   id: string;
   title: string;
+  slug: string;
   excerpt: string;
   image_url: string | null;
   status: string;
   view_count: number;
+  reading_time: number | null;
   decline_reason: string | null;
   created_at: string;
 }
@@ -61,7 +65,7 @@ export const UserMyBlogPosts = () => {
 
       const { data, error } = await supabase
         .from("blog_posts")
-        .select("id, title, excerpt, featured_image, status, view_count, decline_reason, created_at")
+        .select("id, title, slug, excerpt, featured_image, status, view_count, reading_time, decline_reason, created_at")
         .eq("author_id", author.id)
         .order("created_at", { ascending: false });
 
@@ -78,8 +82,11 @@ export const UserMyBlogPosts = () => {
     }
   };
 
-  const pendingCount = posts.filter(p => p.status === 'pending_review').length;
+  const pendingCount  = posts.filter(p => p.status === 'pending_review').length;
   const declinedCount = posts.filter(p => p.status === 'declined').length;
+  const publishedCount = posts.filter(p => p.status === 'published').length;
+  const draftCount    = posts.filter(p => p.status === 'draft').length;
+  const totalViews    = posts.reduce((sum, p) => sum + (p.view_count || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -100,7 +107,29 @@ export const UserMyBlogPosts = () => {
         </div>
       </div>
 
-      {/* Summary badges */}
+      {/* Insights summary */}
+      {posts.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-white border rounded-xl p-4 text-center">
+            <div className="flex items-center justify-center gap-1 text-gray-400 text-xs mb-1"><TrendingUp className="h-3 w-3" /> Total Views</div>
+            <p className="text-2xl font-bold text-gray-900">{totalViews.toLocaleString()}</p>
+          </div>
+          <div className="bg-white border rounded-xl p-4 text-center">
+            <div className="flex items-center justify-center gap-1 text-green-600 text-xs mb-1"><Eye className="h-3 w-3" /> Published</div>
+            <p className="text-2xl font-bold text-gray-900">{publishedCount}</p>
+          </div>
+          <div className="bg-white border rounded-xl p-4 text-center">
+            <div className="flex items-center justify-center gap-1 text-amber-600 text-xs mb-1"><Clock className="h-3 w-3" /> Under Review</div>
+            <p className="text-2xl font-bold text-gray-900">{pendingCount}</p>
+          </div>
+          <div className="bg-white border rounded-xl p-4 text-center">
+            <div className="flex items-center justify-center gap-1 text-gray-400 text-xs mb-1"><FileText className="h-3 w-3" /> Drafts</div>
+            <p className="text-2xl font-bold text-gray-900">{draftCount}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Alert badges for action needed */}
       {(pendingCount > 0 || declinedCount > 0) && (
         <div className="flex gap-3 flex-wrap">
           {pendingCount > 0 && (
@@ -166,9 +195,16 @@ export const UserMyBlogPosts = () => {
                         <p className="text-xs text-gray-500 truncate">{post.excerpt}</p>
                       </div>
 
-                      {/* Views */}
-                      <div className="flex items-center gap-1 text-sm text-gray-500 hidden sm:flex">
-                        <Eye className="h-3 w-3" /> {post.view_count || 0}
+                      {/* Views + reading time */}
+                      <div className="flex flex-col items-end gap-0.5 hidden sm:flex">
+                        <div className="flex items-center gap-1 text-sm text-gray-500">
+                          <Eye className="h-3 w-3" /> {post.view_count || 0}
+                        </div>
+                        {post.reading_time && (
+                          <div className="flex items-center gap-1 text-xs text-gray-400">
+                            <Clock className="h-3 w-3" /> {post.reading_time} min
+                          </div>
+                        )}
                       </div>
 
                       {/* Status badge */}
@@ -211,7 +247,7 @@ export const UserMyBlogPosts = () => {
                         {!isUnderReview && !isDeclined && (
                           <>
                             {post.status === 'published' && (
-                              <Link to={`/blog/${post.id}`}>
+                              <Link to={`/blog/${post.slug}`}>
                                 <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
                               </Link>
                             )}

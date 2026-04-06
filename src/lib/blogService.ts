@@ -290,8 +290,8 @@ export const blogPostsService = {
         category:blog_categories(*)
       `)
       .eq('slug', slug)
-      .single();
-    
+      .maybeSingle(); // returns null instead of throwing 406 when not found
+
     if (error) throw error;
     return data;
   },
@@ -305,8 +305,8 @@ export const blogPostsService = {
         category:blog_categories(*)
       `)
       .eq('id', id)
-      .single();
-    
+      .maybeSingle();
+
     if (error) throw error;
     return data;
   },
