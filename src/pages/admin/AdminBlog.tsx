@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AdminLayout } from '../../components/admin/AdminLayout';
 import { AdminPageGuide } from '../../components/admin/AdminPageGuide';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
@@ -62,7 +63,7 @@ export const AdminBlog = () => {
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('pending_review');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [stats, setStats] = useState({
     totalPosts: 0,
@@ -199,8 +200,9 @@ export const AdminBlog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <AdminLayout title="Blog Management" subtitle="Review contributor submissions and manage published articles">
+    <>
+    <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex items-center gap-4">
           <h1 className="text-3xl font-bold text-gray-900 mb-2 font-comfortaa">
@@ -221,7 +223,7 @@ export const AdminBlog = () => {
             ]}
           />
         </div>
-        <p className="text-gray-600 font-roboto mb-8">
+        <p className="text-gray-600 font-roboto mb-8 sr-only">
           Review contributor submissions and manage published articles
         </p>
 
@@ -560,7 +562,8 @@ export const AdminBlog = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
+    </AdminLayout>
   );
 };
 

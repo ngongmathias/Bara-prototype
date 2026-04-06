@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AdminLayout } from '../../components/admin/AdminLayout';
 import { AdminPageGuide } from '../../components/admin/AdminPageGuide';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
@@ -293,15 +294,17 @@ export const AdminBlogEditor = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
-      </div>
+      <AdminLayout title={isEditMode ? 'Edit Post' : 'Create New Post'}>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <AdminLayout title={isEditMode ? 'Edit Post' : 'Create New Post'} subtitle="Write and publish blog articles">
+    <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -547,9 +550,29 @@ export const AdminBlogEditor = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="pending_review">Pending Review</SelectItem>
                       <SelectItem value="published">Published</SelectItem>
                       <SelectItem value="scheduled">Scheduled</SelectItem>
                       <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="author">Assign to Author</Label>
+                  <Select
+                    value={formData.author_id}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, author_id: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select author" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {authors.map((author) => (
+                        <SelectItem key={author.id} value={author.id}>
+                          {author.display_name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -660,7 +683,7 @@ export const AdminBlogEditor = () => {
           </div>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

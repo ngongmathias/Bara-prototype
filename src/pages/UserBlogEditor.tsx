@@ -205,7 +205,7 @@ export const UserBlogEditor = () => {
         await blogPostsService.create(postData);
       }
       toast({ title: 'Draft saved' });
-      navigate('/user/profile?tab=blog');
+      navigate('/users/dashboard/my-blog');
     } catch {
       toast({ title: 'Error', description: 'Failed to save draft', variant: 'destructive' });
     } finally {
@@ -235,7 +235,7 @@ export const UserBlogEditor = () => {
         title: isDeclined ? 'Article resubmitted!' : 'Article submitted for review!',
         description: 'Our editorial team will review it and get back to you.',
       });
-      navigate('/user/profile?tab=blog');
+      navigate('/users/dashboard/my-blog');
     } catch {
       toast({ title: 'Error', description: 'Failed to submit article', variant: 'destructive' });
     } finally {

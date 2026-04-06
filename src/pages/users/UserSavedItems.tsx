@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Music, Film, BookOpen, Calendar, ShoppingBag, Bookmark } from "lucide-react";
+import { Heart, Music, Film, BookOpen, ShoppingBag, Bookmark, FileText } from "lucide-react";
+import { blogPostsService } from "@/lib/blogService";
 
 interface SavedItem {
   id: string;
@@ -13,13 +14,18 @@ interface SavedItem {
   image?: string;
   type: string;
   saved_at: string;
+  slug?: string;
+  listing_id?: string;
 }
 
 export const UserSavedItems = () => {
   const { user } = useUser();
+  const navigate = useNavigate();
   const [likedSongs, setLikedSongs] = useState<SavedItem[]>([]);
   const [watchlist, setWatchlist] = useState<SavedItem[]>([]);
   const [ebookLibrary, setEbookLibrary] = useState<SavedItem[]>([]);
+  const [savedArticles, setSavedArticles] = useState<SavedItem[]>([]);
+  const [marketplaceFavorites, setMarketplaceFavorites] = useState<SavedItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -87,6 +93,42 @@ export const UserSavedItems = () => {
           saved_at: e.added_at,
         })));
       }
+
+      // Saved blog articles (bookmarks)
+      try {
+        const blogBookmarks = await blogPostsService.getUserBookmarks(userId);
+        setSavedArticles(blogBookmarks.map((post: any) => ({
+          id: post.id,
+          title: post.title || "Unknown",
+          subtitle: post.author?.display_name,
+          image: post.featured_image,
+          type: "article",
+          saved_at: post.created_at,
+          slug: post.slug,
+        })));
+      } catch (e) {
+        console.error("Error loading blog bookmarks:", e);
+      }
+
+      // Marketplace favorites
+      const { data: mfavs } = await supabase
+        .from("marketplace_favorites")
+        .select("id, created_at, marketplace_listings(id, title, price, images)")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (mfavs) {
+        setMarketplaceFavorites(mfavs.map((f: any) => ({
+          id: f.marketplace_listings?.id || f.id,
+          title: f.marketplace_listings?.title || "Unknown",
+          subtitle: f.marketplace_listings?.price != null ? `$${f.marketplace_listings.price}` : undefined,
+          image: Array.isArray(f.marketplace_listings?.images) ? f.marketplace_listings.images[0] : undefined,
+          type: "listing",
+          saved_at: f.created_at,
+          listing_id: f.marketplace_listings?.id,
+        })));
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -105,7 +147,14 @@ export const UserSavedItems = () => {
     return (
       <div className="divide-y">
         {items.map(item => (
-          <div key={item.id} className="flex items-center gap-3 p-3 hover:bg-gray-50">
+          <div
+            key={item.id}
+            className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer"
+            onClick={() => {
+              if (item.type === 'article' && item.slug) navigate(`/blog/${item.slug}`);
+              else if (item.type === 'listing' && item.listing_id) navigate(`/marketplace/${item.listing_id}`);
+            }}
+          >
             <div className="h-10 w-10 rounded overflow-hidden bg-gray-100 flex-shrink-0">
               {item.image ? (
                 <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
@@ -131,12 +180,26 @@ export const UserSavedItems = () => {
         <p className="text-sm text-gray-500">All your saved content in one place</p>
       </div>
 
-      <Tabs defaultValue="songs">
-        <TabsList>
+      <Tabs defaultValue="articles">
+        <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="articles" className="gap-1"><FileText className="h-3 w-3" /> Saved Articles ({savedArticles.length})</TabsTrigger>
+          <TabsTrigger value="marketplace" className="gap-1"><ShoppingBag className="h-3 w-3" /> Marketplace ({marketplaceFavorites.length})</TabsTrigger>
           <TabsTrigger value="songs" className="gap-1"><Heart className="h-3 w-3" /> Liked Songs ({likedSongs.length})</TabsTrigger>
           <TabsTrigger value="movies" className="gap-1"><Film className="h-3 w-3" /> Watchlist ({watchlist.length})</TabsTrigger>
           <TabsTrigger value="ebooks" className="gap-1"><BookOpen className="h-3 w-3" /> Library ({ebookLibrary.length})</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="articles">
+          <Card><CardContent className="p-0">
+            {renderItems(savedArticles, <FileText className="h-5 w-5" />, "No saved articles yet. Bookmark blog posts to find them here.")}
+          </CardContent></Card>
+        </TabsContent>
+
+        <TabsContent value="marketplace">
+          <Card><CardContent className="p-0">
+            {renderItems(marketplaceFavorites, <ShoppingBag className="h-5 w-5" />, "No marketplace favorites yet. Heart listings to save them here.")}
+          </CardContent></Card>
+        </TabsContent>
 
         <TabsContent value="songs">
           <Card><CardContent className="p-0">

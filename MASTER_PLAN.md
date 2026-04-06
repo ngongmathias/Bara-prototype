@@ -1460,8 +1460,51 @@ BATCH 4 — Visual & UX Polish
 
 ---
 
+---
+
+## PHASE 10 — BLOG, ADMIN UX & PLATFORM POLISH (April 6, 2026)
+
+> **Goal:** Fix discovered bugs across blog flow, admin panel, likes/saves system, and Bara Coins UX. All items below were reported via user testing on April 6, 2026.
+
+### 10.1 Blog — "Write Your Article" Button Broken
+| Task | Status |
+|------|--------|
+| Fix `/blog/write` route — was pointing to `BlogContributorGuidelines` instead of `UserBlogEditor` | ✅ Done |
+| Add `/blog/edit/:id` user route — was missing, edit links from UserMyBlogPosts went nowhere | ✅ Done |
+| Fix draft save navigation — was going to `/user/profile?tab=blog` (invalid), now goes to `/users/dashboard/my-blog` | ✅ Done |
+
+### 10.2 Admin Blog — Sidebar Disappears
+| Task | Status |
+|------|--------|
+| Wrap `AdminBlog.tsx` with `AdminLayout` — sidebar was absent on `/admin/blog` | ✅ Done |
+| Wrap `AdminBlogEditor.tsx` with `AdminLayout` — sidebar absent on `/admin/blog/new` and edit pages | ✅ Done |
+
+### 10.3 Admin Blog — UI & Status Fixes
+| Task | Status |
+|------|--------|
+| Change default filter from `pending_review` to `all` — admin can now see all articles with statuses on load | ✅ Done |
+| Add `pending_review` option to AdminBlogEditor status dropdown — admin can manually set any status | ✅ Done |
+| Add author selector to AdminBlogEditor — admin can assign post to any existing platform user | ✅ Done |
+
+### 10.4 Likes & Saves — Connect to User Dashboard
+| Task | Status |
+|------|--------|
+| Add "Saved Articles" tab to `UserSavedItems` — blog bookmarks (Supabase-backed) now visible in saved items | ✅ Done |
+| Add "Marketplace Favorites" tab to `UserSavedItems` — favorites now visible in saved items | ✅ Done |
+| Blog post likes: currently stored in localStorage (TODO: needs `blog_post_likes` DB table + RLS) | ☐ Pending DB migration |
+| Event saves: needs `event_bookmarks` table | ☐ Future |
+| Business listing saves: needs `listing_bookmarks` table | ☐ Future |
+
+### 10.5 Bara Coins — Richer Navbar Dropdown
+| Task | Status |
+|------|--------|
+| Replace coin balance `<Link>` with `DropdownMenu` showing: balance, streak, level/XP, links to missions, leaderboard, store | ✅ Done |
+
+---
+
 *Master Plan created: Feb 22, 2026*
 *Updated: March 23, 2026 — Phase 9 added: 10 new directive groups (9.1–9.10).*
 *Updated: March 31, 2026 — Items 7.49, 7.52–7.58 completed. Sports API (7.59) deferred.*
 *Updated: April 2, 2026 — Merged `STREAMS_SPORTS_BUILD_PLAN.md` into this document (single source of truth). Google Translate widget UI fixed (7.60).*
+*Updated: April 6, 2026 — Phase 10 added: blog flow fixes, admin sidebar, likes/saves, coins UX.*
 *For Bara Afrika Platform — baraafrika.com*

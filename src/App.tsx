@@ -214,6 +214,8 @@ import BlogPostDetail from "./pages/BlogPostDetail";
 
 import BlogContributorGuidelines from "./pages/BlogContributorGuidelines";
 
+import UserBlogEditor from "./pages/UserBlogEditor";
+
 import AdminBlog from "./pages/admin/AdminBlog";
 
 import PricingPage from "./pages/PricingPage";
@@ -630,7 +632,9 @@ const AppRoutes = () => {
 
           <Route index element={<BlogPage />} />
 
-          <Route path="write" element={<BlogContributorGuidelines />} />
+          <Route path="write" element={<UserBlogEditor />} />
+
+          <Route path="edit/:id" element={<UserBlogEditor />} />
 
           <Route path="guidelines" element={<BlogContributorGuidelines />} />
 

@@ -249,14 +249,57 @@ export const Header = () => {
 
             {/* Bara Coins */}
             {isSignedIn && profile && (
-              <Link
-                to="/store"
-                className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-full text-sm font-bold text-gray-900 transition-colors"
-                title="Bara Coins"
-              >
-                <Coins className="w-3.5 h-3.5 text-gray-700" />
-                {profile.bara_coins.toLocaleString()}
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-full text-sm font-bold text-gray-900 transition-colors"
+                    title="Bara Coins"
+                  >
+                    <Coins className="w-3.5 h-3.5 text-gray-700" />
+                    {profile.bara_coins.toLocaleString()}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64" align="end">
+                  {/* Balance */}
+                  <div className="px-4 py-3 border-b">
+                    <p className="text-xs text-gray-500 mb-1">Bara Coins Balance</p>
+                    <div className="flex items-center gap-2">
+                      <Coins className="w-5 h-5 text-gray-700" />
+                      <span className="text-2xl font-bold text-gray-900">{profile.bara_coins.toLocaleString()}</span>
+                    </div>
+                  </div>
+                  {/* Stats */}
+                  <div className="px-4 py-2 border-b grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <p className="text-gray-500">Level</p>
+                      <p className="font-semibold text-gray-900">{profile.current_level}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Daily Streak</p>
+                      <p className="font-semibold text-gray-900">{profile.daily_streak} days</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Total XP</p>
+                      <p className="font-semibold text-gray-900">{profile.total_xp.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Multiplier</p>
+                      <p className="font-semibold text-gray-900">×{profile.multiplier}</p>
+                    </div>
+                  </div>
+                  {/* Actions */}
+                  <DropdownMenuItem onClick={() => navigate('/gamification')}>
+                    <Trophy className="w-4 h-4 mr-2" /> Missions & Achievements
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/gamification?tab=leaderboard')}>
+                    <Users className="w-4 h-4 mr-2" /> Leaderboard
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/store')}>
+                    <Coins className="w-4 h-4 mr-2" /> Coin Store
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
 
             {/* Notifications */}
