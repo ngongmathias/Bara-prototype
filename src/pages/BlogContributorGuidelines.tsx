@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Header } from '../components/Header';
 import Footer from '../components/Footer';
-import { BookOpen, CheckCircle, AlertCircle, FileText, Globe, PenLine, Phone, Mail } from 'lucide-react';
+import { BookOpen, CheckCircle, AlertCircle, FileText, Globe, PenLine, Mail } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
 export default function BlogContributorGuidelines() {
@@ -163,22 +163,16 @@ export default function BlogContributorGuidelines() {
           </div>
           <div className="pl-11 space-y-3 text-gray-700">
             <p>
-              If you have questions about these guidelines or the status of your submission, reach out to our support team:
+              If you have questions about these guidelines or the status of your submission, email our editorial team:
             </p>
             <div className="flex items-center gap-3">
-              <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
-              <a href="tel:+250791568519" className="font-semibold text-black hover:underline">
-                (+250) 791 568 519
-              </a>
-            </div>
-            <div className="flex items-center gap-3">
               <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
-              <a href="mailto:support@baraafrika.com" className="font-semibold text-black hover:underline">
-                support@baraafrika.com
+              <a href="mailto:barablogsubmission@gmail.com" className="font-semibold text-black hover:underline">
+                barablogsubmission@gmail.com
               </a>
             </div>
             <p className="text-sm text-gray-500 mt-2">
-              Please do not use the support contact for article submissions — all submissions must go through the platform.
+              Please do not use this email to submit articles — all submissions must go through the platform.
             </p>
           </div>
         </div>
