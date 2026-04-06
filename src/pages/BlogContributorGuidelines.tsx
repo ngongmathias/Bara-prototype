@@ -1,6 +1,8 @@
+import { Link } from 'react-router-dom';
 import { Header } from '../components/Header';
 import Footer from '../components/Footer';
-import { BookOpen, Mail, CheckCircle, AlertCircle, FileText, Globe } from 'lucide-react';
+import { BookOpen, CheckCircle, AlertCircle, FileText, Globe, PenLine, Phone, Mail } from 'lucide-react';
+import { Button } from '../components/ui/button';
 
 export default function BlogContributorGuidelines() {
   return (
@@ -29,7 +31,7 @@ export default function BlogContributorGuidelines() {
               www.BARAAfrika.com
             </a>
             , a platform dedicated to pan-African narratives, ideas, and dialogue. To ensure our content
-            is cohesive and impactful, please adhere to the following criteria:
+            is cohesive and impactful, please adhere to the following criteria before submitting your article.
           </p>
         </div>
 
@@ -61,30 +63,43 @@ export default function BlogContributorGuidelines() {
           </div>
         </div>
 
-        {/* Section 2: Submission Process */}
+        {/* Section 2: How to Submit (in-app) */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 mb-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm">2</div>
             <h2 className="text-xl font-bold text-gray-900">How to Submit</h2>
           </div>
           <div className="space-y-4 text-gray-700 leading-relaxed pl-11">
-            <p>All articles must be submitted to our editorial team for review. Direct publishing by users is not available.</p>
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-              <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                <Mail className="w-4 h-4" /> Send your submission to:
-              </h3>
-              <a href="mailto:blog@baraafrika.com" className="text-lg font-bold text-black hover:underline">
-                blog@baraafrika.com
-              </a>
+            <p>
+              All submissions are done directly on the platform — no email required. Here's how it works:
+            </p>
+            <ol className="space-y-3">
+              <li className="flex items-start gap-3">
+                <span className="w-5 h-5 rounded-full bg-black text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">1</span>
+                <span>Click <strong>"Write Article"</strong> below (you must be signed in).</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="w-5 h-5 rounded-full bg-black text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">2</span>
+                <span>Write your article, add a featured image, select a category, and add tags.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="w-5 h-5 rounded-full bg-black text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">3</span>
+                <span>Click <strong>"Submit for Review"</strong> when ready. You can save a draft first if needed.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="w-5 h-5 rounded-full bg-black text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">4</span>
+                <span>Our editorial team will review your submission. You'll see the status update in <strong>"My Articles"</strong> on your profile.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="w-5 h-5 rounded-full bg-black text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">5</span>
+                <span>If approved, your article goes live. If declined, you'll receive feedback explaining why and you can revise and resubmit.</span>
+              </li>
+            </ol>
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 mt-2">
+              <p className="text-sm text-gray-600">
+                Response time: Our editorial team will review your submission within <strong>5–7 business days</strong>.
+              </p>
             </div>
-            <p>Please include:</p>
-            <ul className="list-disc list-inside space-y-1 text-gray-600">
-              <li>Your full name and a brief bio (2-3 sentences)</li>
-              <li>A headshot or profile photo</li>
-              <li>Your article in a Word document or Google Doc</li>
-              <li>Any images you'd like included (with credits/permissions)</li>
-              <li>Your preferred category from our blog categories</li>
-            </ul>
           </div>
         </div>
 
@@ -137,10 +152,34 @@ export default function BlogContributorGuidelines() {
               <CheckCircle className="w-4 h-4 mt-1 flex-shrink-0 text-green-500" />
               <p>BARA reserves the right to edit submissions for clarity, length, and style</p>
             </div>
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-4 h-4 mt-1 flex-shrink-0 text-green-500" />
-              <p>Response time: Our editorial team will respond within 5-7 business days</p>
+          </div>
+        </div>
+
+        {/* Section 5: Support / Questions */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm">5</div>
+            <h2 className="text-xl font-bold text-gray-900">Have Questions?</h2>
+          </div>
+          <div className="pl-11 space-y-3 text-gray-700">
+            <p>
+              If you have questions about these guidelines or the status of your submission, reach out to our support team:
+            </p>
+            <div className="flex items-center gap-3">
+              <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <a href="tel:+250791568519" className="font-semibold text-black hover:underline">
+                (+250) 791 568 519
+              </a>
             </div>
+            <div className="flex items-center gap-3">
+              <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <a href="mailto:support@baraafrika.com" className="font-semibold text-black hover:underline">
+                support@baraafrika.com
+              </a>
+            </div>
+            <p className="text-sm text-gray-500 mt-2">
+              Please do not use the support contact for article submissions — all submissions must go through the platform.
+            </p>
           </div>
         </div>
 
@@ -148,15 +187,14 @@ export default function BlogContributorGuidelines() {
         <div className="text-center bg-black text-white rounded-xl p-8">
           <h2 className="text-2xl font-bold mb-3">Ready to contribute?</h2>
           <p className="text-gray-300 mb-6 max-w-md mx-auto">
-            Send your article to our editorial team and become part of the BARA Blog community.
+            Write your article directly on the platform and submit it for review. No emails needed.
           </p>
-          <a
-            href="mailto:blog@baraafrika.com?subject=BARA Blog Submission"
-            className="inline-flex items-center gap-2 bg-white text-black font-bold px-8 py-3 rounded-lg hover:bg-gray-100 transition"
-          >
-            <Mail className="w-5 h-5" />
-            Submit Your Article
-          </a>
+          <Link to="/blog/write">
+            <Button className="bg-white text-black hover:bg-gray-100 font-bold px-8 py-3 h-auto text-base">
+              <PenLine className="w-5 h-5 mr-2" />
+              Write Your Article
+            </Button>
+          </Link>
         </div>
       </div>
 
