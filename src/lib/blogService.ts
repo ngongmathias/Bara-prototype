@@ -335,9 +335,11 @@ export const blogPostsService = {
   },
 
   async create(post: Partial<BlogPost>): Promise<BlogPost> {
+    // Remove nested join objects that aren't actual columns in the database
+    const { author, category, ...cleanPost } = post as any;
     const { data, error } = await supabase
       .from('blog_posts')
-      .insert(post)
+      .insert(cleanPost)
       .select(`
         *,
         author:blog_authors(*),

@@ -158,13 +158,13 @@ export const UserBlogEditor = () => {
       const filePath = `blog-images/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('public')
+        .from('event-images')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('public')
+        .from('event-images')
         .getPublicUrl(filePath);
 
       setFormData(prev => ({ ...prev, featured_image: publicUrl }));
@@ -187,6 +187,17 @@ export const UserBlogEditor = () => {
     setFormData(prev => ({ ...prev, tags: prev.tags?.filter(t => t !== tag) || [] }));
   };
 
+  /** Strip empty strings from nullable DB fields so we don't send '' instead of null */
+  const cleanPost = (data: Partial<BlogPost>) => ({
+    ...data,
+    category_id: data.category_id?.trim() || null,
+    featured_image: data.featured_image?.trim() || null,
+    excerpt: data.excerpt?.trim() || null,
+    seo_title: data.seo_title?.trim() || null,
+    seo_description: data.seo_description?.trim() || null,
+    scheduled_for: data.scheduled_for?.trim() || null,
+  });
+
   const handleSaveDraft = async () => {
     if (!formData.title || !formData.content) {
       toast({ title: 'Title and content are required', variant: 'destructive' });
@@ -194,11 +205,11 @@ export const UserBlogEditor = () => {
     }
     setSaving(true);
     try {
-      const postData = {
+      const postData = cleanPost({
         ...formData,
         status: 'draft' as const,
         reading_time: calculateReadingTime(formData.content!),
-      };
+      });
       if (isEditMode) {
         await blogPostsService.update(id!, postData);
       } else {
@@ -220,12 +231,12 @@ export const UserBlogEditor = () => {
     }
     setSaving(true);
     try {
-      const postData = {
+      const postData = cleanPost({
         ...formData,
         status: 'pending_review' as const,
         decline_reason: null,
         reading_time: calculateReadingTime(formData.content!),
-      };
+      });
       if (isEditMode) {
         await blogPostsService.update(id!, postData);
       } else {
@@ -402,7 +413,9 @@ export const UserBlogEditor = () => {
                     rows={15}
                     className="font-mono text-sm"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Supports Markdown formatting</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Write your content in <strong>HTML format</strong> — e.g. <code className="bg-gray-100 px-1 rounded">&lt;p&gt;Your paragraph&lt;/p&gt;</code>, <code className="bg-gray-100 px-1 rounded">&lt;h2&gt;Heading&lt;/h2&gt;</code>, <code className="bg-gray-100 px-1 rounded">&lt;ul&gt;&lt;li&gt;Item&lt;/li&gt;&lt;/ul&gt;</code>
+                  </p>
                 </div>
               </CardContent>
             </Card>
