@@ -20,6 +20,12 @@ import { EventRejectedEmail } from "../_shared/emails/EventRejectedEmail.tsx";
 
 import { ContactFormConfirmationEmail } from "../_shared/emails/ContactFormConfirmationEmail.tsx";
 
+import { BlogSubmittedEmail } from "../_shared/emails/BlogSubmittedEmail.tsx";
+
+import { BlogApprovedEmail } from "../_shared/emails/BlogApprovedEmail.tsx";
+
+import { BlogDeclinedEmail } from "../_shared/emails/BlogDeclinedEmail.tsx";
+
 import React from "npm:react@18.2.0";
 
 
@@ -243,6 +249,24 @@ Deno.serve(async (req) => {
                 case 'contact_form_confirmation':
 
                     html = await renderAsync(React.createElement(ContactFormConfirmationEmail, templateData));
+
+                    break;
+
+                case 'blog_submitted':
+
+                    html = await renderAsync(React.createElement(BlogSubmittedEmail, templateData));
+
+                    break;
+
+                case 'blog_approved':
+
+                    html = await renderAsync(React.createElement(BlogApprovedEmail, templateData));
+
+                    break;
+
+                case 'blog_declined':
+
+                    html = await renderAsync(React.createElement(BlogDeclinedEmail, templateData));
 
                     break;
 

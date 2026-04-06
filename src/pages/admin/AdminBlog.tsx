@@ -53,6 +53,7 @@ import {
   formatDate,
 } from '../../lib/blogService';
 import { GamificationService } from '../../lib/gamificationService';
+import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/use-toast';
 
 export const AdminBlog = () => {
@@ -119,6 +120,16 @@ export const AdminBlog = () => {
     }
   };
 
+  /** Look up the email address for a Clerk user_id via the clerk_users sync table */
+  const getAuthorEmail = async (clerkUserId: string): Promise<string | null> => {
+    const { data } = await supabase
+      .from('clerk_users')
+      .select('email')
+      .eq('clerk_user_id', clerkUserId)
+      .maybeSingle();
+    return data?.email ?? null;
+  };
+
   const handleDeletePost = async (id: string) => {
     if (!confirm('Are you sure you want to delete this post?')) return;
     try {
@@ -138,15 +149,36 @@ export const AdminBlog = () => {
         decline_reason: null,
         published_at: post?.published_at ?? new Date().toISOString(),
       } as any);
-      // Award XP + coins to the author for getting published
+
       const authorUserId = post?.author?.user_id;
       if (authorUserId) {
+        // Award XP + coins
         await Promise.allSettled([
           GamificationService.addXP(authorUserId, 150, 'Blog article published'),
           GamificationService.addCoins(authorUserId, 25, 'Blog article published'),
         ]);
+
+        // Send approval email (fire-and-forget — don't block the UI)
+        const authorEmail = await getAuthorEmail(authorUserId);
+        if (authorEmail) {
+          supabase.functions.invoke('send-email', {
+            body: {
+              to: authorEmail,
+              subject: 'Your article is live on Bara Afrika!',
+              type: 'blog_approved',
+              data: {
+                authorName: post?.author?.display_name ?? 'Contributor',
+                articleTitle: post?.title ?? 'Your Article',
+                articleSlug: post?.slug ?? '',
+                xpEarned: 150,
+                coinsEarned: 25,
+              },
+            },
+          }).catch(console.error);
+        }
       }
-      toast({ title: 'Article published!', description: 'The author\'s submission has been approved.' });
+
+      toast({ title: 'Article published!', description: 'The author has been notified by email.' });
       loadData();
     } catch {
       toast({ title: 'Error', description: 'Failed to publish post', variant: 'destructive' });
@@ -168,7 +200,30 @@ export const AdminBlog = () => {
         status: 'declined',
         decline_reason: declineModal.reason.trim(),
       } as any);
-      toast({ title: 'Article declined', description: 'Feedback has been saved for the author.' });
+
+      // Send decline email (fire-and-forget)
+      const post = posts.find(p => p.id === declineModal.postId);
+      const authorUserId = post?.author?.user_id;
+      if (authorUserId) {
+        const authorEmail = await getAuthorEmail(authorUserId);
+        if (authorEmail) {
+          supabase.functions.invoke('send-email', {
+            body: {
+              to: authorEmail,
+              subject: 'Feedback on your Bara Afrika blog submission',
+              type: 'blog_declined',
+              data: {
+                authorName: post?.author?.display_name ?? 'Contributor',
+                articleTitle: declineModal.postTitle,
+                articleId: declineModal.postId,
+                declineReason: declineModal.reason.trim(),
+              },
+            },
+          }).catch(console.error);
+        }
+      }
+
+      toast({ title: 'Article declined', description: 'Feedback has been sent to the author by email.' });
       setDeclineModal({ open: false, postId: null, postTitle: '', reason: '' });
       loadData();
     } catch {

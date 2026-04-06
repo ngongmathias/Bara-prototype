@@ -242,6 +242,23 @@ export const UserBlogEditor = () => {
       } else {
         await blogPostsService.create(postData);
       }
+
+      // Send submission confirmation email (fire-and-forget)
+      const authorEmail = user?.primaryEmailAddress?.emailAddress;
+      if (authorEmail) {
+        supabase.functions.invoke('send-email', {
+          body: {
+            to: authorEmail,
+            subject: 'Your article has been submitted — Bara Afrika Blog',
+            type: 'blog_submitted',
+            data: {
+              authorName: user?.firstName ?? user?.fullName ?? 'Contributor',
+              articleTitle: formData.title ?? 'Your Article',
+            },
+          },
+        }).catch(console.error);
+      }
+
       toast({
         title: isDeclined ? 'Article resubmitted!' : 'Article submitted for review!',
         description: 'Our editorial team will review it and get back to you.',
