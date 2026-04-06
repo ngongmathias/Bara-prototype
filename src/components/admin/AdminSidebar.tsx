@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useTranslation } from "react-i18next";
 
 import { useClerk } from "@clerk/clerk-react";
+
+import { supabase } from "@/lib/supabase";
 
 import {
 
@@ -502,6 +504,28 @@ export const AdminSidebar = ({ isOpen, onToggle }: AdminSidebarProps) => {
 
   const { signOut } = useClerk();
 
+  const [pendingBlogCount, setPendingBlogCount] = useState(0);
+
+  useEffect(() => {
+
+    const fetchPendingCount = async () => {
+
+      const { count } = await supabase
+
+        .from('blog_posts')
+
+        .select('id', { count: 'exact', head: true })
+
+        .eq('status', 'pending_review');
+
+      setPendingBlogCount(count ?? 0);
+
+    };
+
+    fetchPendingCount();
+
+  }, []);
+
 
 
   const handleLogout = async () => {
@@ -668,7 +692,17 @@ export const AdminSidebar = ({ isOpen, onToggle }: AdminSidebarProps) => {
 
                   )} />
 
-                  <span className="font-roboto">{item.title}</span>
+                  <span className="font-roboto flex-1">{item.title}</span>
+
+                  {item.path === '/admin/blog' && pendingBlogCount > 0 && (
+
+                    <span className="ml-auto bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+
+                      {pendingBlogCount}
+
+                    </span>
+
+                  )}
 
                 </button>
 

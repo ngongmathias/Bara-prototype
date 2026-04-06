@@ -40,7 +40,8 @@ export interface BlogPost {
   category_id?: string;
   category?: BlogCategory;
   tags: string[];
-  status: 'draft' | 'published' | 'scheduled' | 'archived';
+  status: 'draft' | 'published' | 'scheduled' | 'archived' | 'pending_review' | 'declined';
+  decline_reason?: string | null;
   is_featured: boolean;
   view_count: number;
   reading_time?: number;

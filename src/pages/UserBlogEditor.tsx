@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import {
   ArrowLeft,
   Save,
-  Eye,
+  Send,
   Upload,
   X,
   Plus,
-  Image as ImageIcon,
-  AlertCircle,
-  Loader2
+  Loader2,
+  Lock,
+  AlertTriangle,
+  PenLine,
 } from 'lucide-react';
 import { Header } from '../components/Header';
 import Footer from '../components/Footer';
@@ -27,16 +28,15 @@ import {
   SelectValue,
 } from '../components/ui/select';
 import { Badge } from '../components/ui/badge';
-import { Alert, AlertDescription } from '../components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import {
   blogPostsService,
   blogCategoriesService,
   blogAuthorsService,
   BlogPost,
   BlogCategory,
-  BlogAuthor,
   generateSlug,
-  calculateReadingTime
+  calculateReadingTime,
 } from '../lib/blogService';
 import { useToast } from '../hooks/use-toast';
 import { supabase } from '../lib/supabase';
@@ -52,6 +52,8 @@ export const UserBlogEditor = () => {
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [postStatus, setPostStatus] = useState<string>('draft');
+  const [declineReason, setDeclineReason] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<Partial<BlogPost>>({
     title: '',
@@ -71,11 +73,15 @@ export const UserBlogEditor = () => {
   const [tagInput, setTagInput] = useState('');
   const [autoSlug, setAutoSlug] = useState(true);
 
+  const isPendingReview = postStatus === 'pending_review';
+  const isDeclined = postStatus === 'declined';
+  const isLocked = isPendingReview;
+
   useEffect(() => {
     if (!isSignedIn) {
       toast({
         title: 'Authentication Required',
-        description: 'Please sign in to create blog posts',
+        description: 'Please sign in to submit blog posts',
         variant: 'destructive',
       });
       navigate('/user/sign-in?redirect_url=/blog/write');
@@ -93,7 +99,6 @@ export const UserBlogEditor = () => {
       if (isEditMode) {
         const post = await blogPostsService.getById(id!);
         if (post) {
-          // Check if user owns this post
           const author = await blogAuthorsService.getByUserId(user!.id);
           if (post.author_id !== author?.id) {
             toast({
@@ -105,14 +110,14 @@ export const UserBlogEditor = () => {
             return;
           }
           setFormData(post);
+          setPostStatus(post.status);
+          setDeclineReason(post.decline_reason ?? null);
           setAutoSlug(false);
         }
       } else {
-        // Get or create author for current user
         if (user?.id) {
           let author = await blogAuthorsService.getByUserId(user.id);
           if (!author) {
-            // Create author profile
             author = await blogAuthorsService.create({
               user_id: user.id,
               display_name: user.fullName || user.username || 'Anonymous',
@@ -163,17 +168,9 @@ export const UserBlogEditor = () => {
         .getPublicUrl(filePath);
 
       setFormData(prev => ({ ...prev, featured_image: publicUrl }));
-      toast({
-        title: 'Success',
-        description: 'Image uploaded successfully',
-      });
+      toast({ title: 'Image uploaded successfully' });
     } catch (error) {
-      console.error('Error uploading image:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to upload image',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to upload image', variant: 'destructive' });
     } finally {
       setUploadingImage(false);
     }
@@ -181,62 +178,66 @@ export const UserBlogEditor = () => {
 
   const handleAddTag = () => {
     if (tagInput.trim() && !formData.tags?.includes(tagInput.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...(prev.tags || []), tagInput.trim()]
-      }));
+      setFormData(prev => ({ ...prev, tags: [...(prev.tags || []), tagInput.trim()] }));
       setTagInput('');
     }
   };
 
   const handleRemoveTag = (tag: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags?.filter(t => t !== tag) || []
-    }));
+    setFormData(prev => ({ ...prev, tags: prev.tags?.filter(t => t !== tag) || [] }));
   };
 
-  const handleSave = async (status: 'draft' | 'published') => {
+  const handleSaveDraft = async () => {
     if (!formData.title || !formData.content) {
-      toast({
-        title: 'Validation Error',
-        description: 'Title and content are required',
-        variant: 'destructive',
-      });
+      toast({ title: 'Title and content are required', variant: 'destructive' });
       return;
     }
-
     setSaving(true);
     try {
       const postData = {
         ...formData,
-        status,
-        reading_time: calculateReadingTime(formData.content),
-        published_at: status === 'published' ? new Date().toISOString() : undefined,
+        status: 'draft' as const,
+        reading_time: calculateReadingTime(formData.content!),
       };
-
-      let result;
       if (isEditMode) {
-        result = await blogPostsService.update(id!, postData);
+        await blogPostsService.update(id!, postData);
       } else {
-        result = await blogPostsService.create(postData);
+        await blogPostsService.create(postData);
       }
+      toast({ title: 'Draft saved' });
+      navigate('/user/profile?tab=blog');
+    } catch {
+      toast({ title: 'Error', description: 'Failed to save draft', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
 
+  const handleSubmit = async () => {
+    if (!formData.title || !formData.content) {
+      toast({ title: 'Title and content are required', variant: 'destructive' });
+      return;
+    }
+    setSaving(true);
+    try {
+      const postData = {
+        ...formData,
+        status: 'pending_review' as const,
+        decline_reason: null,
+        reading_time: calculateReadingTime(formData.content!),
+      };
+      if (isEditMode) {
+        await blogPostsService.update(id!, postData);
+      } else {
+        await blogPostsService.create(postData);
+      }
       toast({
-        title: 'Success',
-        description: status === 'published' 
-          ? 'Post published successfully!' 
-          : 'Draft saved successfully',
+        title: isDeclined ? 'Article resubmitted!' : 'Article submitted for review!',
+        description: 'Our editorial team will review it and get back to you.',
       });
-
-      navigate('/blog');
-    } catch (error) {
-      console.error('Error saving post:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to save post. Please try again.',
-        variant: 'destructive',
-      });
+      navigate('/user/profile?tab=blog');
+    } catch {
+      toast({ title: 'Error', description: 'Failed to submit article', variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -246,9 +247,43 @@ export const UserBlogEditor = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="max-w-5xl mx-auto px-4 py-12">
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <div className="max-w-5xl mx-auto px-4 py-12 flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Locked view — post is under review
+  if (isPendingReview) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-3xl mx-auto px-4 py-12">
+          <Button variant="ghost" onClick={() => navigate('/user/profile?tab=blog')} className="mb-6 flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" /> Back to My Posts
+          </Button>
+
+          <div className="text-center py-16 px-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 mb-5">
+              <Lock className="w-8 h-8 text-amber-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Your article is under review</h2>
+            <p className="text-gray-600 max-w-md mx-auto mb-2">
+              <strong>"{formData.title}"</strong> has been submitted and is currently being reviewed by our editorial team.
+            </p>
+            <p className="text-gray-500 text-sm max-w-md mx-auto mb-8">
+              Editing is disabled while the article is under review. You'll be notified of the outcome. In the meantime, you're welcome to submit a new article.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={() => navigate('/blog/write')} className="bg-black hover:bg-gray-800">
+                <PenLine className="w-4 h-4 mr-2" /> Write New Article
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/user/profile?tab=blog')}>
+                View My Submissions
+              </Button>
+            </div>
           </div>
         </div>
         <Footer />
@@ -259,73 +294,80 @@ export const UserBlogEditor = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/blog')}
-            className="flex items-center gap-2"
-          >
+          <Button variant="ghost" onClick={() => navigate('/user/profile?tab=blog')} className="flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
-            Back to Blog
+            Back to My Posts
           </Button>
-          
+
           <div className="flex gap-2">
+            {!isDeclined && (
+              <Button variant="outline" onClick={handleSaveDraft} disabled={saving}>
+                <Save className="w-4 h-4 mr-2" />
+                Save Draft
+              </Button>
+            )}
             <Button
-              variant="outline"
-              onClick={() => handleSave('draft')}
+              onClick={handleSubmit}
               disabled={saving}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save Draft
-            </Button>
-            <Button
-              onClick={() => handleSave('published')}
-              disabled={saving}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-black hover:bg-gray-800"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                <Eye className="w-4 h-4 mr-2" />
+                <Send className="w-4 h-4 mr-2" />
               )}
-              Publish
+              {isDeclined ? 'Edit & Resubmit' : 'Submit for Review'}
             </Button>
           </div>
         </div>
 
-        {/* Info Alert */}
-        <Alert className="mb-6 border-blue-500 bg-blue-50">
-          <AlertCircle className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="text-blue-700">
-            Your post will be reviewed by our team before being published publicly. 
-            You'll be notified once it's approved.
-          </AlertDescription>
-        </Alert>
+        {/* Decline reason banner */}
+        {isDeclined && declineReason && (
+          <Alert className="mb-6 border-red-300 bg-red-50">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertTitle className="text-red-800">Your article was not approved</AlertTitle>
+            <AlertDescription className="text-red-700 mt-1">
+              <strong>Feedback from our editors:</strong> {declineReason}
+              <br />
+              <span className="text-sm mt-1 block text-red-600">
+                Please revise your article based on the feedback above and resubmit.
+              </span>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* General info banner for new/draft */}
+        {!isDeclined && (
+          <Alert className="mb-6 border-blue-200 bg-blue-50">
+            <AlertDescription className="text-blue-700">
+              Articles are reviewed by our editorial team before being published. Save a draft to continue later, or submit when ready.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Editor */}
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Write Your Post</CardTitle>
+                <CardTitle>{isDeclined ? 'Revise Your Article' : 'Write Your Article'}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Title */}
                 <div>
                   <Label htmlFor="title">Title *</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => handleTitleChange(e.target.value)}
-                    placeholder="Enter post title..."
+                    placeholder="Enter article title..."
                     className="text-lg font-semibold"
                   />
                 </div>
 
-                {/* Slug */}
                 <div>
                   <Label htmlFor="slug">URL Slug</Label>
                   <Input
@@ -335,36 +377,32 @@ export const UserBlogEditor = () => {
                       setFormData(prev => ({ ...prev, slug: e.target.value }));
                       setAutoSlug(false);
                     }}
-                    placeholder="post-url-slug"
+                    placeholder="article-url-slug"
                   />
                 </div>
 
-                {/* Excerpt */}
                 <div>
                   <Label htmlFor="excerpt">Excerpt</Label>
                   <Textarea
                     id="excerpt"
                     value={formData.excerpt}
                     onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
-                    placeholder="Brief description of your post..."
+                    placeholder="Brief description of your article..."
                     rows={3}
                   />
                 </div>
 
-                {/* Content */}
                 <div>
                   <Label htmlFor="content">Content *</Label>
                   <Textarea
                     id="content"
                     value={formData.content}
                     onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                    placeholder="Write your post content here..."
+                    placeholder="Write your article content here..."
                     rows={15}
                     className="font-mono text-sm"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Supports Markdown formatting
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Supports Markdown formatting</p>
                 </div>
               </CardContent>
             </Card>
@@ -380,11 +418,7 @@ export const UserBlogEditor = () => {
               <CardContent>
                 {formData.featured_image ? (
                   <div className="relative">
-                    <img
-                      src={formData.featured_image}
-                      alt="Featured"
-                      className="w-full h-40 object-cover rounded-lg"
-                    />
+                    <img src={formData.featured_image} alt="Featured" className="w-full h-40 object-cover rounded-lg" />
                     <Button
                       variant="destructive"
                       size="sm"
@@ -395,27 +429,19 @@ export const UserBlogEditor = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div>
-                    <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        {uploadingImage ? (
-                          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-                        ) : (
-                          <>
-                            <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                            <p className="text-sm text-gray-500">Upload Image</p>
-                          </>
-                        )}
-                      </div>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        disabled={uploadingImage}
-                      />
-                    </label>
-                  </div>
+                  <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      {uploadingImage ? (
+                        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-500">Upload Image</p>
+                        </>
+                      )}
+                    </div>
+                    <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} />
+                  </label>
                 )}
               </CardContent>
             </Card>
@@ -465,15 +491,21 @@ export const UserBlogEditor = () => {
                   {formData.tags?.map((tag) => (
                     <Badge key={tag} variant="secondary" className="flex items-center gap-1">
                       {tag}
-                      <X
-                        className="w-3 h-3 cursor-pointer"
-                        onClick={() => handleRemoveTag(tag)}
-                      />
+                      <X className="w-3 h-3 cursor-pointer" onClick={() => handleRemoveTag(tag)} />
                     </Badge>
                   ))}
                 </div>
               </CardContent>
             </Card>
+
+            {/* Contributor guidelines link */}
+            <p className="text-xs text-gray-500 text-center">
+              Read our{' '}
+              <Link to="/blog/guidelines" className="underline hover:text-gray-700">
+                Contributor Guidelines
+              </Link>{' '}
+              before submitting.
+            </p>
           </div>
         </div>
       </div>
