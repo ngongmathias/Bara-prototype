@@ -212,7 +212,7 @@ import BlogPage from "./pages/BlogPage";
 
 import BlogPostDetail from "./pages/BlogPostDetail";
 
-import UserBlogEditor from "./pages/UserBlogEditor";
+import BlogContributorGuidelines from "./pages/BlogContributorGuidelines";
 
 import AdminBlog from "./pages/admin/AdminBlog";
 
@@ -630,9 +630,9 @@ const AppRoutes = () => {
 
           <Route index element={<BlogPage />} />
 
-          <Route path="write" element={<UserBlogEditor />} />
+          <Route path="write" element={<BlogContributorGuidelines />} />
 
-          <Route path="edit/:id" element={<UserBlogEditor />} />
+          <Route path="guidelines" element={<BlogContributorGuidelines />} />
 
           <Route path=":slug" element={<BlogPostDetail />} />
 

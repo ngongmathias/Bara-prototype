@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { FileText, Plus, Edit, Trash2, Eye, MessageSquare } from "lucide-react";
+import { FileText, Plus, Edit, Trash2, Eye, MessageSquare, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface MyPost {
@@ -65,10 +65,10 @@ export const UserMyBlogPosts = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">My Blog Posts</h2>
-          <p className="text-sm text-gray-500">Manage your published articles</p>
+          <p className="text-sm text-gray-500">Articles published under your name</p>
         </div>
-        <Link to="/blog/new">
-          <Button><Plus className="h-4 w-4 mr-2" /> Write New Post</Button>
+        <Link to="/blog/guidelines">
+          <Button variant="outline"><BookOpen className="h-4 w-4 mr-2" /> Contributor Guidelines</Button>
         </Link>
       </div>
 
@@ -80,9 +80,11 @@ export const UserMyBlogPosts = () => {
             <div className="p-8 text-center">
               <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
               <h3 className="font-semibold text-gray-700 mb-1">No blog posts yet</h3>
-              <p className="text-sm text-gray-500 mb-4">Share your thoughts with the BARA community</p>
-              <Link to="/blog/new">
-                <Button variant="outline"><Plus className="h-4 w-4 mr-2" /> Write Your First Post</Button>
+              <p className="text-sm text-gray-500 mb-4">
+                Want to contribute? Submit your article to our editorial team for review.
+              </p>
+              <Link to="/blog/guidelines">
+                <Button variant="outline"><BookOpen className="h-4 w-4 mr-2" /> View Contributor Guidelines</Button>
               </Link>
             </div>
           ) : (
@@ -107,14 +109,9 @@ export const UserMyBlogPosts = () => {
                     {post.status?.toUpperCase() || "DRAFT"}
                   </span>
                   <span className="text-xs text-gray-400">{new Date(post.created_at).toLocaleDateString()}</span>
-                  <div className="flex gap-1">
-                    <Link to={`/blog/edit/${post.id}`}>
-                      <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
-                    </Link>
-                    <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(post.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Link to={`/blog/${post.id}`}>
+                    <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
+                  </Link>
                 </div>
               ))}
             </div>

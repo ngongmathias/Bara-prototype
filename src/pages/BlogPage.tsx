@@ -113,15 +113,14 @@ export const BlogPage = () => {
             <h1 className="text-4xl md:text-5xl font-bold text-black font-comfortaa">
               BARA Blog
             </h1>
-            {isSignedIn && (
-              <Button
-                onClick={() => navigate('/blog/write')}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <PenSquare className="w-4 h-4 mr-2" />
-                Write Post
-              </Button>
-            )}
+            <Button
+              onClick={() => navigate('/blog/guidelines')}
+              variant="outline"
+              className="border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white"
+            >
+              <PenSquare className="w-4 h-4 mr-2" />
+              Contribute
+            </Button>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto font-roboto">
             Insights, stories, and expert advice to help you grow your business and connect with opportunities worldwide.

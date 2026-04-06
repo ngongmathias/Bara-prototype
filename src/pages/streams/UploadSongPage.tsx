@@ -38,6 +38,7 @@ export default function UploadSongPage() {
     const [albumId, setAlbumId] = useState<string>('');
     const [albums, setAlbums] = useState<any[]>([]);
 
+    const [price, setPrice] = useState<string>('');
     const [audioFile, setAudioFile] = useState<File | null>(null);
     const [coverFile, setCoverFile] = useState<File | null>(null);
     const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -189,6 +190,7 @@ export default function UploadSongPage() {
                     genre: genre || null,
                     duration: duration || null,
                     plays: 0,
+                    price: price ? parseFloat(price) : null,
                 });
 
             if (insertError) throw insertError;
@@ -321,6 +323,26 @@ export default function UploadSongPage() {
                             placeholder="Tell listeners about this track..."
                             className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] min-h-[100px] resize-none"
                         />
+                    </div>
+
+                    {/* Price */}
+                    <div className="space-y-2">
+                        <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Price (Optional)</Label>
+                        <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                            <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={price}
+                                onChange={(e) => setPrice(e.target.value)}
+                                placeholder="0.00 (free)"
+                                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] h-12 pl-8"
+                            />
+                        </div>
+                        <p className="text-xs text-gray-500">
+                            Leave empty or set to 0 for free streaming. Set a price and listeners will hear a 25-second preview before purchasing.
+                        </p>
                     </div>
 
                     {/* Upload Progress */}

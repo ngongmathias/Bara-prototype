@@ -88,7 +88,7 @@ export const AdminSongs = () => {
     const { toast } = useToast();
 
     // Form State
-    const [formData, setFormData] = useState<Partial<Song & { producer: string; songwriter: string }>>({
+    const [formData, setFormData] = useState<Partial<Song & { producer: string; songwriter: string; price: number | null }>>({
         title: "",
         artist_id: "",
         album_id: null,
@@ -97,6 +97,7 @@ export const AdminSongs = () => {
         duration: 0,
         producer: "",
         songwriter: "",
+        price: null,
     });
     const [featuredArtistIds, setFeaturedArtistIds] = useState<string[]>([]);
 
@@ -180,13 +181,14 @@ export const AdminSongs = () => {
                 return;
             }
 
-            const { producer, songwriter, ...restForm } = formData;
+            const { producer, songwriter, price, ...restForm } = formData;
             const songData = {
                 ...restForm,
                 file_url: finalFileUrl,
                 album_id: (!restForm.album_id || restForm.album_id === "none" || restForm.album_id === "") ? null : restForm.album_id,
                 producer: producer || null,
                 songwriter: songwriter || null,
+                price: price && price > 0 ? price : null,
                 ...(editingSong ? {} : { uploaded_by: user?.id || 'admin', upload_type: 'platform' as const }),
             };
 
@@ -292,6 +294,7 @@ export const AdminSongs = () => {
             duration: 0,
             producer: "",
             songwriter: "",
+            price: null,
         });
         setFeaturedArtistIds([]);
         setEditingSong(null);
@@ -309,6 +312,7 @@ export const AdminSongs = () => {
             duration: song.duration,
             producer: (song as any).producer || "",
             songwriter: (song as any).songwriter || "",
+            price: (song as any).price ?? null,
         });
         // Load featured artists from song_artists table
         try {
@@ -494,6 +498,18 @@ export const AdminSongs = () => {
                                             placeholder="e.g. Tiwa Savage"
                                         />
                                     </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Price (USD) — leave empty for free</Label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={formData.price ?? ''}
+                                        onChange={(e) => setFormData({ ...formData, price: e.target.value ? parseFloat(e.target.value) : null })}
+                                        placeholder="0.00 (free)"
+                                    />
+                                    <p className="text-xs text-gray-500">Paid songs play a 25-second preview. Users must purchase to hear the full track.</p>
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Audio File (.mp3)</Label>

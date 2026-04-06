@@ -30,7 +30,8 @@ export default function TrendingSongsPage() {
                         cover_url: song.cover_url || '/placeholder-music.png',
                         duration: song.duration,
                         artist_id: song.artist_id,
-                        album_id: song.album_id
+                        album_id: song.album_id,
+                        price: song.price ?? null,
                     }));
                     setSongs(formattedSongs);
 
@@ -102,7 +103,10 @@ export default function TrendingSongsPage() {
                                     </button>
                                 </div>
                                 <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
-                                <p className="text-xs text-gray-500 truncate mt-auto">{song.artist}{ftMap[song.id] || ''}</p>
+                                <p className="text-xs text-gray-500 truncate mt-auto">
+                                    {song.artist}{ftMap[song.id] || ''}
+                                    {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-amber-600">${song.price.toFixed(2)}</span>}
+                                </p>
                             </div>
                         ))}
                     </div>

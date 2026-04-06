@@ -30,6 +30,8 @@ export interface Song {
 
     album_title?: string; // Optional album name for lists
 
+    price?: number | null; // null or 0 = free, >0 = paid (requires purchase)
+
 }
 
 
@@ -51,6 +53,14 @@ interface AudioPlayerContextType {
     isShuffle: boolean;
 
     repeatMode: 'none' | 'one' | 'all';
+
+    isPreviewing: boolean; // true when playing a preview of a paid song
+
+    purchasedSongs: string[]; // IDs of songs the user has purchased
+
+    purchaseSong: (songId: string) => Promise<void>; // Record a song purchase
+
+    isSongPurchased: (songId: string) => boolean; // Check if user owns a song
 
     likedSongs: string[];
 
@@ -110,6 +120,10 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     const [likedSongs, setLikedSongs] = useState<string[]>([]);
 
+    const [purchasedSongs, setPurchasedSongs] = useState<string[]>([]);
+
+    const [isPreviewing, setIsPreviewing] = useState(false);
+
     const hasAwardedXP = useRef<string | null>(null);
 
     const { user: clerkUser } = useUser();
@@ -126,6 +140,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     useEffect(() => { isShuffleRef.current = isShuffle; }, [isShuffle]);
     useEffect(() => { repeatModeRef.current = repeatMode; }, [repeatMode]);
     useEffect(() => { currentSongRef.current = currentSong; }, [currentSong]);
+    const purchasedSongsRef = useRef(purchasedSongs);
+    useEffect(() => { purchasedSongsRef.current = purchasedSongs; }, [purchasedSongs]);
 
 
 
@@ -147,10 +163,20 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
             setProgress(audio.currentTime);
 
-
+            // Preview cutoff: paid songs stop at 25 seconds if not purchased
+            const song = currentSongRef.current;
+            if (song && song.price && song.price > 0 && !purchasedSongsRef.current.includes(song.id)) {
+                if (audio.currentTime >= 25) {
+                    audio.pause();
+                    setIsPlaying(false);
+                    setIsPreviewing(true);
+                    return;
+                }
+            } else {
+                if (isPreviewing) setIsPreviewing(false);
+            }
 
             // Award XP after 30 seconds of playback
-            const song = currentSongRef.current;
             if (audio.currentTime >= 30 && song && hasAwardedXP.current !== song.id) {
 
                 const awardXP = async () => {
@@ -287,6 +313,16 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
         }
 
+        // Load purchased songs
+        const { data: purchasedData } = await supabase
+            .from('purchased_songs')
+            .select('song_id')
+            .eq('user_id', clerkUser.id);
+
+        if (purchasedData) {
+            setPurchasedSongs(purchasedData.map(p => p.song_id));
+        }
+
     };
 
 
@@ -382,6 +418,10 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
 
         setCurrentSong(song);
+
+        // Check if this is a paid preview
+        const isPaid = song.price && song.price > 0 && !purchasedSongsRef.current.includes(song.id);
+        setIsPreviewing(!!isPaid);
 
         audioRef.current.src = song.file_url;
 
@@ -643,6 +683,27 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
 
 
+    const purchaseSong = async (songId: string) => {
+        if (!clerkUser) return;
+        const song = queue.find(s => s.id === songId) || currentSong;
+        const pricePaid = song?.price || 0;
+        const { error } = await supabase
+            .from('purchased_songs')
+            .insert({ user_id: clerkUser.id, song_id: songId, price_paid: pricePaid });
+        if (!error) {
+            setPurchasedSongs(prev => [...prev, songId]);
+            setIsPreviewing(false);
+            // Resume playback from beginning
+            if (audioRef.current && currentSong?.id === songId) {
+                audioRef.current.currentTime = 0;
+                audioRef.current.play().catch(() => {});
+                setIsPlaying(true);
+            }
+        }
+    };
+
+    const isSongPurchased = (songId: string) => purchasedSongs.includes(songId);
+
     return (
 
         <AudioPlayerContext.Provider
@@ -666,6 +727,14 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 repeatMode,
 
                 likedSongs,
+
+                isPreviewing,
+
+                purchasedSongs,
+
+                purchaseSong,
+
+                isSongPurchased,
 
                 play,
 

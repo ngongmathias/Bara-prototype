@@ -1,5 +1,5 @@
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
-import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List, Share2, Maximize2 } from 'lucide-react';
+import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List, Share2, Maximize2, Lock, ShoppingCart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { GamificationService } from '@/lib/gamificationService';
@@ -26,12 +26,15 @@ export function GlobalPlayer() {
         repeatMode,
         setRepeatMode,
         likedSongs,
-        toggleLike
+        toggleLike,
+        isPreviewing,
+        purchaseSong,
+        isSongPurchased
     } = useAudioPlayer();
 
     const [isQueueOpen, setIsQueueOpen] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
-    const { user } = useUser();
+    const { user, isSignedIn } = useUser();
     const [lastTrackedSongId, setLastTrackedSongId] = useState<string | null>(null);
     const [featuredArtists, setFeaturedArtists] = useState<string[]>([]);
 
@@ -236,6 +239,39 @@ export function GlobalPlayer() {
                     </div>
                 </div>
             </div>
+
+            {/* Purchase Prompt — shown when preview ends */}
+            {isPreviewing && currentSong.price && currentSong.price > 0 && (
+                <div className="absolute inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center z-30 rounded-t-lg">
+                    <div className="flex items-center gap-6 px-6">
+                        <Lock className="w-6 h-6 text-amber-400 flex-shrink-0" />
+                        <div className="min-w-0">
+                            <p className="text-white font-bold text-sm truncate">Preview ended</p>
+                            <p className="text-gray-400 text-xs truncate">
+                                {isSignedIn
+                                    ? `Purchase "${currentSong.title}" to listen to the full song`
+                                    : 'Sign in to purchase this song'}
+                            </p>
+                        </div>
+                        {isSignedIn ? (
+                            <button
+                                onClick={() => purchaseSong(currentSong.id)}
+                                className="flex items-center gap-2 bg-[#1DB954] text-black font-bold px-5 py-2.5 rounded-full hover:bg-[#1ed760] transition text-sm whitespace-nowrap flex-shrink-0"
+                            >
+                                <ShoppingCart size={16} />
+                                Buy ${currentSong.price.toFixed(2)}
+                            </button>
+                        ) : (
+                            <a
+                                href="/user/sign-in"
+                                className="flex items-center gap-2 bg-white text-black font-bold px-5 py-2.5 rounded-full hover:bg-gray-200 transition text-sm whitespace-nowrap flex-shrink-0"
+                            >
+                                Sign In
+                            </a>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Logic for QueueDrawer would be triggered by isQueueOpen */}
             <QueueDrawer isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} />
