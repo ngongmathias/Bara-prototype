@@ -58,7 +58,7 @@ interface AudioPlayerContextType {
 
     purchasedSongs: string[]; // IDs of songs the user has purchased
 
-    purchaseSong: (songId: string) => Promise<void>; // Record a song purchase
+    purchaseSong: (songId: string) => Promise<{ success: boolean; message?: string }>; // Record a song purchase
 
     isSongPurchased: (songId: string) => boolean; // Check if user owns a song
 
@@ -142,6 +142,9 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     useEffect(() => { currentSongRef.current = currentSong; }, [currentSong]);
     const purchasedSongsRef = useRef(purchasedSongs);
     useEffect(() => { purchasedSongsRef.current = purchasedSongs; }, [purchasedSongs]);
+
+    // Reload likes + purchases whenever the signed-in user changes
+    useEffect(() => { if (clerkUser) fetchLikes(); }, [clerkUser?.id]);
 
 
 
@@ -683,23 +686,44 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
 
 
-    const purchaseSong = async (songId: string) => {
-        if (!clerkUser) return;
+    const purchaseSong = async (songId: string): Promise<{ success: boolean; message?: string }> => {
+        if (!clerkUser) return { success: false, message: 'You must be signed in to purchase.' };
+
         const song = queue.find(s => s.id === songId) || currentSong;
-        const pricePaid = song?.price || 0;
-        const { error } = await supabase
-            .from('purchased_songs')
-            .insert({ user_id: clerkUser.id, song_id: songId, price_paid: pricePaid });
-        if (!error) {
-            setPurchasedSongs(prev => [...prev, songId]);
-            setIsPreviewing(false);
-            // Resume playback from beginning
-            if (audioRef.current && currentSong?.id === songId) {
-                audioRef.current.currentTime = 0;
-                audioRef.current.play().catch(() => {});
-                setIsPlaying(true);
+        const priceCoins = Math.round(song?.price || 0);
+
+        // Deduct coins first — if insufficient, abort
+        if (priceCoins > 0) {
+            const spent = await GamificationService.spendCoins(
+                clerkUser.id,
+                priceCoins,
+                `Song purchase: ${song?.title || songId}`
+            );
+            if (!spent) {
+                return { success: false, message: "You don't have enough Bara Coins for this song." };
             }
         }
+
+        const { error } = await supabase
+            .from('purchased_songs')
+            .insert({ user_id: clerkUser.id, song_id: songId, price_paid: priceCoins });
+
+        if (error) {
+            // Refund coins if the DB insert failed
+            if (priceCoins > 0) {
+                await GamificationService.addCoins(clerkUser.id, priceCoins, 'Refund: purchase failed');
+            }
+            return { success: false, message: 'Purchase failed. Please try again.' };
+        }
+
+        setPurchasedSongs(prev => [...prev, songId]);
+        setIsPreviewing(false);
+        if (audioRef.current && currentSong?.id === songId) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(() => {});
+            setIsPlaying(true);
+        }
+        return { success: true };
     };
 
     const isSongPurchased = (songId: string) => purchasedSongs.includes(songId);

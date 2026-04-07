@@ -255,11 +255,18 @@ export function GlobalPlayer() {
                         </div>
                         {isSignedIn ? (
                             <button
-                                onClick={() => purchaseSong(currentSong.id)}
+                                onClick={async () => {
+                                    const result = await purchaseSong(currentSong.id);
+                                    if (result.success) {
+                                        toast({ title: 'Purchased!', description: `You can now listen to "${currentSong.title}" in full.` });
+                                    } else {
+                                        toast({ title: 'Purchase failed', description: result.message, variant: 'destructive' });
+                                    }
+                                }}
                                 className="flex items-center gap-2 bg-[#1DB954] text-black font-bold px-5 py-2.5 rounded-full hover:bg-[#1ed760] transition text-sm whitespace-nowrap flex-shrink-0"
                             >
                                 <ShoppingCart size={16} />
-                                Buy ${currentSong.price.toFixed(2)}
+                                Buy {currentSong.price} coins
                             </button>
                         ) : (
                             <a
