@@ -421,6 +421,7 @@ Once features are live, track these to measure success:
 | 7.65 | **Blog: Add 22 new categories** — 22 new categories added via migration (`add_new_blog_categories.sql`) after deduplication against existing 31: Lifestyle, Personal Development, Health & Fitness, Parenting, DIY & Crafts, Development, Professional, Digital Marketing, Art & Design, Home & Interior Design, Sustainability/Eco-Living, Education & Coaching, Opinion, News, Reviews & Comparisons, Interviews & Profiles, Case Studies, Behind the Scenes, Spirituality, Love, Other, Creativity. Run migration in Supabase SQL Editor. | P0 | — | ✅ Done (Apr 5) |
 | 7.66 | **Blog: Submission-only model (no self-publishing)** — Replaced `UserBlogEditor.tsx` with `BlogContributorGuidelines.tsx`. `/blog/write` and `/blog/guidelines` now show contributor guidelines page with submission process, formatting requirements, content policies. "Write Post" button replaced with "Contribute" button. UserMyBlogPosts shows read-only view of published posts. Admin still publishes via AdminBlogEditor. | P0 | — | ✅ Done (Apr 5) |
 | 7.67 | **Streams Music: Freemium model (preview + purchase)** — Added `price` column to songs table + `purchased_songs` table (migration: `add_music_freemium.sql`). Song interface extended with `price`. AudioPlayerContext: paid songs cut off at 25s, purchase prompt overlay in GlobalPlayer with Buy button (or Sign In for anonymous). Price field added to UploadSongPage (artist sets price) and AdminSongs (admin sets price). Song cards show price badge. Run migration in Supabase SQL Editor. | P0 | — | ✅ Done (Apr 5) |
+| 7.68 | **Streams Music: Freemium — coin deduction + full purchase flow** — `purchaseSong()` now calls `GamificationService.spendCoins()` before inserting into `purchased_songs`; refunds coins if DB insert fails; returns `{success, message}`. GlobalPlayer shows success/failure toast after purchase attempt. Price label corrected from "$X.XX" to "X coins". Added `useEffect` on `clerkUser?.id` to reload purchased songs on sign-in (was only loaded on mount). | P0 | — | ✅ Done (Apr 8) |
 
 ---
 
@@ -1571,4 +1572,5 @@ BATCH 4 — Visual & UX Polish
 *Updated: March 31, 2026 — Items 7.49, 7.52–7.58 completed. Sports API deferred.*
 *Updated: April 2, 2026 — Merged STREAMS_SPORTS_BUILD_PLAN.md into this document.*
 *Updated: April 6, 2026 — Phase 10 added (10.1–10.8). Open items summary added.*
+*Updated: April 8, 2026 — Item 7.68 added (music freemium coin deduction + full purchase flow).*
 *For Bara Afrika Platform — baraafrika.com*
