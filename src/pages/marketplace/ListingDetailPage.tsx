@@ -59,7 +59,7 @@ export const ListingDetailPage = () => {
 
   // Fire-and-forget lead capture
   const recordLead = (contactType: string) => {
-    if (!listing) return;
+    if (!listing || !listing.created_by) return; // seller_user_id is NOT NULL
     try {
       supabase.from('marketplace_leads').insert({
         ad_id: listing.id,
@@ -238,6 +238,10 @@ export const ListingDetailPage = () => {
   const submitOffer = async () => {
     if (!user) {
       toast({ title: 'Sign in required', description: 'Please sign in to make an offer', variant: 'destructive' });
+      return;
+    }
+    if (!listing?.created_by) {
+      toast({ title: 'Cannot submit offer', description: 'Seller information is unavailable', variant: 'destructive' });
       return;
     }
     const amount = parseFloat(offerAmount);
