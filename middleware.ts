@@ -17,8 +17,11 @@
  *
  * Required env vars on Vercel:
  *   - SUPABASE_URL (or VITE_SUPABASE_URL)
- *   - SUPABASE_ANON_KEY (or VITE_SUPABASE_ANON_KEY)
+ *   - SUPABASE_SERVICE_ROLE_KEY  ← preferred (bypasses RLS)
+ *   - SUPABASE_ANON_KEY (or VITE_SUPABASE_ANON_KEY) ← fallback
  */
+
+import { next } from '@vercel/edge';
 
 export const config = {
   matcher: [
@@ -35,13 +38,13 @@ export const config = {
 
 const BOT_REGEX = /WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|LinkedInBot|Slackbot|Discordbot|SkypeUriPreview|Pinterest|Googlebot|bingbot|YandexBot|Applebot|vkShare|redditbot|Embedly/i;
 
-const SUPABASE_URL = (globalThis as any).process?.env?.SUPABASE_URL || (globalThis as any).process?.env?.VITE_SUPABASE_URL;
-// Prefer service role key (bypasses RLS) — safe here because this runs server-side on Vercel Edge.
-// Falls back to anon key if service role isn't configured.
+// Use process.env directly — the correct way to read env vars in Vercel Edge Runtime.
+// Prefer service role key (bypasses RLS); safe here because this code never reaches the browser.
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY =
-  (globalThis as any).process?.env?.SUPABASE_SERVICE_ROLE_KEY ||
-  (globalThis as any).process?.env?.SUPABASE_ANON_KEY ||
-  (globalThis as any).process?.env?.VITE_SUPABASE_ANON_KEY;
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY;
 
 interface PreviewData {
   title: string;
@@ -253,15 +256,15 @@ function buildOgTags(url: string, data: PreviewData): string {
   `;
 }
 
-export default async function middleware(request: Request): Promise<Response | undefined> {
+export default async function middleware(request: Request): Promise<Response> {
   const userAgent = request.headers.get('user-agent') || '';
 
   // Only run for known crawlers; humans get the normal SPA
-  if (!BOT_REGEX.test(userAgent)) return;
+  if (!BOT_REGEX.test(userAgent)) return next();
 
   const url = new URL(request.url);
   const data = await buildPreview(url.pathname);
-  if (!data) return; // pass-through
+  if (!data) return next(); // pass-through
 
   // Fetch base index.html from the same origin
   let html: string;
@@ -269,10 +272,10 @@ export default async function middleware(request: Request): Promise<Response | u
     const indexRes = await fetch(new URL('/', url), {
       headers: { 'x-og-middleware-bypass': '1' },
     });
-    if (!indexRes.ok) return;
+    if (!indexRes.ok) return next();
     html = await indexRes.text();
   } catch {
-    return;
+    return next();
   }
 
   const ogTags = buildOgTags(url.toString(), data);
