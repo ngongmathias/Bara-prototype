@@ -1638,4 +1638,5 @@ BATCH 4 — Visual & UX Polish
 *Updated: April 6, 2026 — Phase 10 added (10.1–10.8). Open items summary added.*
 *Updated: April 8, 2026 — Item 7.68 added (music freemium coin deduction + full purchase flow).*
 *Updated: April 6, 2026 — Phase 11 added (marketplace partner & trust overhaul: partners, verification, ratings, leads, offers, saved searches, storefronts; terminology "listing" → "ad").*
+*Updated: April 9, 2026 — Universal ShareDialog + Vercel Edge middleware for dynamic OG link previews across ads, songs, events, blog posts. Requires env vars SUPABASE_URL and SUPABASE_ANON_KEY on Vercel.*
 *For Bara Afrika Platform — baraafrika.com*

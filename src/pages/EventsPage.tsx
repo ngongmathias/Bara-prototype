@@ -27,11 +27,13 @@ import { supabase } from '@/lib/supabase';
 import { SEO } from '@/components/SEO';
 import { MonetizationService } from '@/lib/monetizationService';
 import { useToast } from '@/hooks/use-toast';
+import { useShare } from '@/context/ShareContext';
 
 export const EventsPage = () => {
   const navigate = useNavigate();
   const { '*': splatParam } = useParams();
   const { toast } = useToast();
+  const { openShare } = useShare();
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -289,16 +291,13 @@ export const EventsPage = () => {
     return `${baseUrl}/events?country=${encodeURIComponent(countryName.toLowerCase())}`;
   };
 
-  // Copy country-specific link to clipboard
-  const handleCopyCountryLink = async (countryName?: string) => {
-    const link = getCountrySpecificLink(countryName);
-    try {
-      await navigator.clipboard.writeText(link);
-      toast({ title: "Copied", description: `Link copied! Share this to show events in ${countryName || 'all countries'}` });
-    } catch (err) {
-      console.error('Failed to copy link:', err);
-      toast({ title: "Error", description: "Failed to copy link. Please try again.", variant: "destructive" });
-    }
+  // Open share dialog for country-specific events page
+  const handleCopyCountryLink = (countryName?: string) => {
+    openShare({
+      url: getCountrySpecificLink(countryName),
+      title: `Events in ${countryName || 'Africa'} — Bara Afrika`,
+      description: `Discover upcoming events and experiences${countryName ? ` in ${countryName}` : ' across Africa'}.`,
+    });
   };
 
   const handleLocationClick = async (eventId: string, city?: string) => {

@@ -5,6 +5,7 @@ import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { Play, Pause, Heart, Share2, ArrowLeft, Music, Clock, Disc } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { ShareDialog } from '@/components/ShareDialog';
 
 export default function SongPage() {
     const { id } = useParams<{ id: string }>();
@@ -12,6 +13,7 @@ export default function SongPage() {
     const [song, setSong] = useState<Song | null>(null);
     const [credits, setCredits] = useState<{ role: string; name: string; artist_id: string }[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showShare, setShowShare] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -74,22 +76,7 @@ export default function SongPage() {
         }
     };
 
-    const handleShare = async () => {
-        const url = window.location.href;
-        const shareData = {
-            title: song?.title || 'Song',
-            text: `Listen to ${song?.title} by ${song?.artist} on Bara Streams`,
-            url,
-        };
-        try {
-            if (navigator.share) {
-                await navigator.share(shareData);
-            } else {
-                await navigator.clipboard.writeText(url);
-                toast({ title: "Copied", description: "Link copied to clipboard!" });
-            }
-        } catch { /* cancelled */ }
-    };
+    const handleShare = () => setShowShare(true);
 
     const isCurrentSong = currentSong?.id === id;
     const isLiked = song ? likedSongs.includes(song.id) : false;
@@ -199,6 +186,17 @@ export default function SongPage() {
                     )}
                 </div>
             </div>
+
+            {song && (
+                <ShareDialog
+                    open={showShare}
+                    onClose={() => setShowShare(false)}
+                    url={`${window.location.origin}/streams/song/${song.id}`}
+                    title={song.title}
+                    description={`By ${song.artist} — listen on Bara Streams`}
+                    imageUrl={song.cover_url}
+                />
+            )}
         </div>
     );
 }

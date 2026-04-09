@@ -34,6 +34,7 @@ import { MessagingService } from '@/lib/MessagingService';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaWhatsapp } from 'react-icons/fa';
+import { ShareDialog } from '@/components/ShareDialog';
 
 export const ListingDetailPage = () => {
   const { listingId } = useParams();
@@ -50,6 +51,7 @@ export const ListingDetailPage = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [partner, setPartner] = useState<any>(null);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [offerAmount, setOfferAmount] = useState('');
   const [offerMessage, setOfferMessage] = useState('');
@@ -268,26 +270,7 @@ export const ListingDetailPage = () => {
     }
   };
 
-  const handleShare = async () => {
-    const url = window.location.href;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: listing?.title,
-          text: listing?.description,
-          url: url,
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      navigator.clipboard.writeText(url);
-      toast({
-        title: 'Link Copied',
-        description: 'Listing link copied to clipboard',
-      });
-    }
-  };
+  const handleShare = () => setShowShareDialog(true);
 
   const handleReport = async () => {
     if (!reportReason.trim()) {
@@ -746,6 +729,18 @@ export const ListingDetailPage = () => {
           </div>
         )}
       </main>
+
+      {/* Share Dialog */}
+      {listing && (
+        <ShareDialog
+          open={showShareDialog}
+          onClose={() => setShowShareDialog(false)}
+          url={`${window.location.origin}/marketplace/ad/${listing.id}`}
+          title={listing.title}
+          description={`${listing.currency} ${parseFloat(listing.price || 0).toLocaleString()} — ${listing.country?.name || ''}`}
+          imageUrl={listing.images?.[0]?.image_url}
+        />
+      )}
 
       {/* Make Offer Modal */}
       <AnimatePresence>

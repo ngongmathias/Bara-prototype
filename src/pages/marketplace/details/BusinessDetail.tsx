@@ -33,11 +33,13 @@ import { FaWhatsapp } from 'react-icons/fa';
 import { MonetizationService } from '@/lib/monetizationService';
 import { GamificationService } from '@/lib/gamificationService';
 import { useUser } from '@clerk/clerk-react';
+import { useShare } from "@/context/ShareContext";
 
 export const BusinessDetail = () => {
   const { listingId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { openShare } = useShare();
 
   const [listing, setListing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -159,24 +161,16 @@ export const BusinessDetail = () => {
     }
   };
 
-  const handleShare = async () => {
-    const url = window.location.href;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: listing?.title,
-          text: listing?.description,
-          url: url,
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      navigator.clipboard.writeText(url);
-      toast({
-        title: 'Link Copied',
-        description: 'Business link copied to clipboard',
-      });
+  const handleShare = () => {
+    if (!listing) return;
+    openShare({
+      url: `${window.location.origin}/marketplace/ad/${listing.id}`,
+      title: listing.title,
+      description: listing.description?.slice(0, 160) || listing.price ? `${listing.currency} ${listing.price}` : undefined,
+      imageUrl: listing.images?.[0]?.image_url || listing.marketplace_listing_images?.[0]?.image_url,
+    });
+    if (user) {
+      try { GamificationService.trackMissionProgress(user.id, "daily_social_share"); } catch {}
     }
   };
 

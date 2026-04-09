@@ -5,6 +5,7 @@ import { useUser } from '@clerk/clerk-react';
 import { GamificationService } from '@/lib/gamificationService';
 import { QueueDrawer } from './QueueDrawer';
 import { FullScreenPlayer } from './FullScreenPlayer';
+import { ShareDialog } from '@/components/ShareDialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 
@@ -34,6 +35,7 @@ export function GlobalPlayer() {
 
     const [isQueueOpen, setIsQueueOpen] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
+    const [isShareOpen, setIsShareOpen] = useState(false);
     const { user, isSignedIn } = useUser();
     const [lastTrackedSongId, setLastTrackedSongId] = useState<string | null>(null);
     const [featuredArtists, setFeaturedArtists] = useState<string[]>([]);
@@ -206,14 +208,7 @@ export function GlobalPlayer() {
                         <Maximize2 size={18} />
                     </button>
                     <button
-                        onClick={async () => {
-                            const shareUrl = `${window.location.origin}/streams/song/${currentSong.id}`;
-                            const shareData = { title: currentSong.title, text: `Listen to ${currentSong.title} by ${currentSong.artist} on Bara Streams`, url: shareUrl };
-                            try {
-                                if (navigator.share) { await navigator.share(shareData); }
-                                else { await navigator.clipboard.writeText(shareUrl); toast({ title: "Copied", description: "Link copied to clipboard!" }); }
-                            } catch { /* User cancelled */ }
-                        }}
+                        onClick={() => setIsShareOpen(true)}
                         className="text-gray-400 hover:text-white transition-colors"
                         title="Share"
                     >
@@ -284,6 +279,15 @@ export function GlobalPlayer() {
             <QueueDrawer isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} />
 
             <FullScreenPlayer isOpen={isFullScreen} onClose={() => setIsFullScreen(false)} />
+
+            <ShareDialog
+                open={isShareOpen}
+                onClose={() => setIsShareOpen(false)}
+                url={`${window.location.origin}/streams/song/${currentSong.id}`}
+                title={currentSong.title}
+                description={`By ${currentSong.artist} — listen on Bara Streams`}
+                imageUrl={currentSong.cover_url}
+            />
         </div>
     );
 }

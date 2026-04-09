@@ -329,6 +329,8 @@ import { InboxPage } from "./pages/messages/InboxPage";
 import { ChatWindow } from "./pages/messages/ChatWindow";
 
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
+
+import { ShareProvider } from "@/context/ShareContext";
 import { GlobalPlayer } from "@/components/streams/GlobalPlayer";
 
 
@@ -920,6 +922,7 @@ const App = () => (
         <CountrySelectionProvider>
 
           <AudioPlayerProvider>
+          <ShareProvider>
 
             <BrowserRouter>
 
@@ -931,6 +934,7 @@ const App = () => (
 
             </BrowserRouter>
 
+          </ShareProvider>
           </AudioPlayerProvider>
 
         </CountrySelectionProvider>
