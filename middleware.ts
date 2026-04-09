@@ -30,6 +30,7 @@ export const config = {
     '/streams/song/:id*',
     '/streams/playlist/:id*',
     '/streams/artist/:id*',
+    '/streams/movie/:id*',
     '/events/:id*',
     '/blog/:slug*',
     '/listings/:slug*',
@@ -99,6 +100,23 @@ async function buildPreview(pathname: string): Promise<PreviewData | null> {
       description: `${row.currency} ${row.price?.toLocaleString?.() || row.price} — ${(row.description || '').slice(0, 160)}`,
       image: primary?.image_url || DEFAULT_IMAGE,
       type: 'article',
+    };
+  }
+
+  // /streams/movie/:id
+  const movieMatch = pathname.match(/^\/streams\/movie\/([^/?#]+)/);
+  if (movieMatch) {
+    const id = movieMatch[1];
+    const row = await fetchFromSupabase(
+      'movies',
+      `id=eq.${id}&select=title,description,poster_url,backdrop_url,genre,year,director`
+    );
+    if (!row) return null;
+    return {
+      title: row.title,
+      description: `${row.year ? `${row.year} · ` : ''}${row.genre ? `${row.genre} · ` : ''}${row.director ? `Dir. ${row.director} — ` : ''}${(row.description || '').slice(0, 120)}`.trim().replace(/\s*·\s*$/, ''),
+      image: row.poster_url || row.backdrop_url || DEFAULT_IMAGE,
+      type: 'video.movie',
     };
   }
 

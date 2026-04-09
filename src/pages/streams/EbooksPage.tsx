@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { SEO } from '@/components/SEO';
-import { BookOpen, Star, Search, ChevronRight, TrendingUp, Heart, ArrowUpDown, Loader2 } from 'lucide-react';
+import { BookOpen, Star, Search, ChevronRight, TrendingUp, Heart, ArrowUpDown, Loader2, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DiscoverMore } from '@/components/DiscoverMore';
 import { supabase } from '@/lib/supabase';
+import { useShare } from '@/context/ShareContext';
 
 // Sample ebook data — will be replaced with Supabase data when content is uploaded
 const FEATURED_BOOKS = [
@@ -95,6 +96,7 @@ interface Ebook {
 }
 
 export default function EbooksPage() {
+  const { openShare } = useShare();
   const [searchQuery, setSearchQuery] = useState('');
   const [ebooks, setEbooks] = useState<Ebook[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,6 +104,15 @@ export default function EbooksPage() {
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'popular' | 'newest' | 'az'>('popular');
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
+
+  const handleShareEbook = (book: { id?: string; title: string; author?: string; description?: string; cover?: string; cover_url?: string }) => {
+    openShare({
+      url: `${window.location.origin}/streams/ebooks`,
+      title: `${book.title}${book.author ? ` by ${book.author}` : ''} — BARA Ebooks`,
+      description: book.description?.slice(0, 160) || 'Read on BARA Ebooks',
+      imageUrl: book.cover_url || book.cover,
+    });
+  };
 
   useEffect(() => {
     fetchEbooks();
@@ -259,8 +270,14 @@ export default function EbooksPage() {
                         <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
                           <span>{book.pages} pages</span><span>·</span><span>{book.genre}</span>
                         </div>
-                        <div className="mt-auto">
+                        <div className="mt-auto flex items-center justify-between">
                           <span className="text-sm font-bold text-gray-900">{book.price}</span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleShareEbook(book as any); }}
+                            className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 transition-colors"
+                          >
+                            <Share2 className="w-3.5 h-3.5" /> Share
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -353,8 +370,14 @@ export default function EbooksPage() {
                           </div>
                           <div className="mt-auto flex items-center gap-2">
                             <span className="text-sm font-bold text-gray-900">{book.is_free ? 'Free' : `${book.price} coins`}</span>
-                            <button className="ml-auto flex items-center gap-1.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
+                            <button className="flex items-center gap-1.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
                               <BookOpen className="w-3.5 h-3.5" /> Read Now
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleShareEbook(book); }}
+                              className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-700 transition-colors ml-auto"
+                            >
+                              <Share2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </div>

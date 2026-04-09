@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, MapPin, Maximize2, Share2, Link2 } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Maximize2, Share2 } from 'lucide-react';
 import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { InteractiveEventsMap } from "@/components/InteractiveEventsMap";
+import { useShare } from '@/context/ShareContext';
 
 interface EventDetailProps {
     event: DatabaseEvent;
@@ -13,40 +14,15 @@ interface EventDetailProps {
 }
 
 export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => {
-    const [showShareMenu, setShowShareMenu] = useState(false);
-    const [copySuccess, setCopySuccess] = useState(false);
+    const { openShare } = useShare();
 
-    const eventUrl = `${window.location.origin}/events/${event.id}`;
-    const shareText = `Check out this event: ${event.title}`;
-
-    const shareToSocial = (platform: string) => {
-        let shareUrl = '';
-        switch (platform) {
-            case 'facebook':
-                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(eventUrl)}`;
-                break;
-            case 'twitter':
-                shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(eventUrl)}`;
-                break;
-            case 'whatsapp':
-                shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + eventUrl)}`;
-                break;
-            case 'linkedin':
-                shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(eventUrl)}`;
-                break;
-        }
-        if (shareUrl) {
-            window.open(shareUrl, '_blank', 'width=600,height=400');
-        }
-        setShowShareMenu(false);
-    };
-
-    const handleCopyLink = () => {
-        navigator.clipboard.writeText(eventUrl).then(() => {
-            setCopySuccess(true);
-            setTimeout(() => setCopySuccess(false), 2000);
-            setShowShareMenu(false);
-        }).catch(() => {});
+    const handleShare = () => {
+        openShare({
+            url: `${window.location.origin}/events/${event.id}`,
+            title: event.title,
+            description: event.description?.slice(0, 160),
+            imageUrl: event.event_image_url || (event.event_images && event.event_images[0]),
+        });
     };
     const images = [
         ...(event.event_image_url ? [event.event_image_url] : []),
@@ -134,30 +110,13 @@ export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => 
                     <ArrowLeft className="w-5 h-5 mr-2" />
                     Back to Events
                 </button>
-                <div className="relative">
-                    <button
-                        onClick={() => setShowShareMenu(!showShareMenu)}
-                        className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-colors text-sm font-medium"
-                    >
-                        <Share2 className="w-4 h-4" />
-                        Share
-                    </button>
-                    {showShareMenu && (
-                        <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-xl border p-2 z-10 min-w-[160px]">
-                            <button onClick={() => shareToSocial('facebook')} className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm">Facebook</button>
-                            <button onClick={() => shareToSocial('twitter')} className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm">Twitter</button>
-                            <button onClick={() => shareToSocial('whatsapp')} className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm">WhatsApp</button>
-                            <button onClick={() => shareToSocial('linkedin')} className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm">LinkedIn</button>
-                            <hr className="my-1" />
-                            <button
-                                onClick={handleCopyLink}
-                                className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded text-sm flex items-center gap-2"
-                            >
-                                <Link2 className="w-3 h-3" /> {copySuccess ? 'Copied!' : 'Copy Link'}
-                            </button>
-                        </div>
-                    )}
-                </div>
+                <button
+                    onClick={handleShare}
+                    className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                >
+                    <Share2 className="w-4 h-4" />
+                    Share
+                </button>
             </div>
 
             <div className="md:flex">

@@ -291,6 +291,7 @@ import SportsNewsList from "./pages/sports/SportsNewsList";
 import PodcastsPage from "./pages/streams/PodcastsPage";
 
 import MoviesPage from "./pages/streams/MoviesPage";
+import MovieDetailPage from "./pages/streams/MovieDetailPage";
 
 import EbooksPage from "./pages/streams/EbooksPage";
 
@@ -422,6 +423,7 @@ const AppRoutes = () => {
           <Route path="podcasts" element={<PodcastsPage />} />
 
           <Route path="movies" element={<MoviesPage />} />
+          <Route path="movie/:id" element={<MovieDetailPage />} />
 
           <Route path="ebooks" element={<EbooksPage />} />
 

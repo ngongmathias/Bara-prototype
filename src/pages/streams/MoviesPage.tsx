@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { SEO } from '@/components/SEO';
-import { Play, Star, Clock, Filter, Search, ChevronRight, TrendingUp, Loader2, Eye } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Play, Star, Clock, Filter, Search, ChevronRight, TrendingUp, Loader2, Eye, Share2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { DiscoverMore } from '@/components/DiscoverMore';
 import { supabase } from '@/lib/supabase';
+import { useShare } from '@/context/ShareContext';
 
 interface Movie {
   id: string;
@@ -58,6 +59,8 @@ const formatDuration = (minutes: number) => {
 };
 
 export default function MoviesPage() {
+  const navigate = useNavigate();
+  const { openShare } = useShare();
   const [searchQuery, setSearchQuery] = useState('');
   const [movies, setMovies] = useState<Movie[]>([]);
   const [categories, setCategories] = useState<MovieCategory[]>([]);
@@ -220,7 +223,7 @@ export default function MoviesPage() {
                 </div>
                 <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 snap-x -mx-2 px-2">
                   {trendingMovies.map((movie) => (
-                    <div key={movie.id} className="group flex-shrink-0 w-[160px] sm:w-[180px] snap-start cursor-pointer">
+                    <div key={movie.id} onClick={() => navigate(`/streams/movie/${movie.id}`)} className="group flex-shrink-0 w-[160px] sm:w-[180px] snap-start cursor-pointer">
                       <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 shadow-lg">
                         <img
                           src={movie.poster_url}
@@ -255,7 +258,7 @@ export default function MoviesPage() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {(searchQuery ? filteredMovies : featuredMovies.length > 0 ? featuredMovies : movies.slice(0, 6)).map((movie) => (
-                    <div key={movie.id} className="group bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+                    <div key={movie.id} onClick={() => navigate(`/streams/movie/${movie.id}`)} className="group bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
                       <div className="relative aspect-video overflow-hidden">
                         <img
                           src={movie.backdrop_url || movie.poster_url}
@@ -295,8 +298,14 @@ export default function MoviesPage() {
                             <p><span className="text-gray-500 font-medium">Cast:</span> {movie.actors || movie.cast_members?.join(', ')}</p>
                           )}
                         </div>
-                        <div className="flex items-center gap-1 mt-2 text-xs text-gray-400">
-                          <Eye className="w-3 h-3" /> {movie.view_count?.toLocaleString()} views
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs text-gray-400 flex items-center gap-1"><Eye className="w-3 h-3" /> {movie.view_count?.toLocaleString()} views</span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); openShare({ url: `${window.location.origin}/streams/movie/${movie.id}`, title: movie.title, description: movie.description?.slice(0, 160), imageUrl: movie.poster_url || movie.backdrop_url }); }}
+                            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-700 transition-colors"
+                          >
+                            <Share2 className="w-3.5 h-3.5" /> Share
+                          </button>
                         </div>
                       </div>
                     </div>
