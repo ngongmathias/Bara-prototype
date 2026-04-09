@@ -107,7 +107,7 @@ export default function EbooksPage() {
 
   const handleShareEbook = (book: { id?: string; title: string; author?: string; description?: string; cover?: string; cover_url?: string }) => {
     openShare({
-      url: `${window.location.origin}/streams/ebooks`,
+      url: `${window.location.origin}/streams/ebook/${book.id}`,
       title: `${book.title}${book.author ? ` by ${book.author}` : ''} — BARA Ebooks`,
       description: book.description?.slice(0, 160) || 'Read on BARA Ebooks',
       imageUrl: book.cover_url || book.cover,

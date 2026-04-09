@@ -294,6 +294,7 @@ import MoviesPage from "./pages/streams/MoviesPage";
 import MovieDetailPage from "./pages/streams/MovieDetailPage";
 
 import EbooksPage from "./pages/streams/EbooksPage";
+import EbookDetailPage from "./pages/streams/EbookDetailPage";
 
 import SearchPage from "./pages/SearchPage";
 
@@ -426,6 +427,7 @@ const AppRoutes = () => {
           <Route path="movie/:id" element={<MovieDetailPage />} />
 
           <Route path="ebooks" element={<EbooksPage />} />
+          <Route path="ebook/:id" element={<EbookDetailPage />} />
 
           <Route path="creator" element={<UserAuthGuard><ArtistDashboard /></UserAuthGuard>} />
 
