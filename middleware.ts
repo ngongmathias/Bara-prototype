@@ -39,10 +39,10 @@ export const config = {
 const BOT_REGEX = /WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|LinkedInBot|Slackbot|Discordbot|SkypeUriPreview|Pinterest|Googlebot|bingbot|YandexBot|Applebot|vkShare|redditbot|Embedly/i;
 
 // Use process.env directly — the correct way to read env vars in Vercel Edge Runtime.
-// Prefer service role key (bypasses RLS); safe here because this code never reaches the browser.
+// Use the anon key: all preview content (events, songs, listings) is publicly readable,
+// and in this project the service_role key lacks PostgreSQL GRANTs on several tables.
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
   process.env.SUPABASE_ANON_KEY ||
   process.env.VITE_SUPABASE_ANON_KEY;
 
