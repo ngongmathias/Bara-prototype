@@ -36,7 +36,12 @@ export const config = {
 const BOT_REGEX = /WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|LinkedInBot|Slackbot|Discordbot|SkypeUriPreview|Pinterest|Googlebot|bingbot|YandexBot|Applebot|vkShare|redditbot|Embedly/i;
 
 const SUPABASE_URL = (globalThis as any).process?.env?.SUPABASE_URL || (globalThis as any).process?.env?.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = (globalThis as any).process?.env?.SUPABASE_ANON_KEY || (globalThis as any).process?.env?.VITE_SUPABASE_ANON_KEY;
+// Prefer service role key (bypasses RLS) — safe here because this runs server-side on Vercel Edge.
+// Falls back to anon key if service role isn't configured.
+const SUPABASE_KEY =
+  (globalThis as any).process?.env?.SUPABASE_SERVICE_ROLE_KEY ||
+  (globalThis as any).process?.env?.SUPABASE_ANON_KEY ||
+  (globalThis as any).process?.env?.VITE_SUPABASE_ANON_KEY;
 
 interface PreviewData {
   title: string;
@@ -49,19 +54,27 @@ const DEFAULT_IMAGE = '/og-image.jpg';
 const SITE_NAME = 'Bara Afrika';
 
 async function fetchFromSupabase(table: string, query: string): Promise<any | null> {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    console.error('[OG middleware] Missing SUPABASE_URL or key env vars');
+    return null;
+  }
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
       headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
         Accept: 'application/json',
       },
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      console.error(`[OG middleware] Supabase ${table} query failed: ${res.status} ${body}`);
+      return null;
+    }
     const rows = await res.json();
     return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
-  } catch {
+  } catch (err) {
+    console.error(`[OG middleware] fetch error for ${table}:`, err);
     return null;
   }
 }
