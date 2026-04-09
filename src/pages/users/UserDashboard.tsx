@@ -294,11 +294,11 @@ export const UserDashboard = () => {
 
 
 
-                  <Link to="/marketplace/my-listings">
+                  <Link to="/marketplace/my-ads">
 
                     <Button
 
-                      variant={isActive('/marketplace/my-listings') ? 'default' : 'ghost'}
+                      variant={isActive('/marketplace/my-ads') ? 'default' : 'ghost'}
 
                       className="w-full justify-start"
 
@@ -693,9 +693,9 @@ export const UserDashboardHome = () => {
 
       try {
 
-        // Trigger daily streak check + daily_login mission on dashboard visit
-        await GamificationService.checkDailyStreak(user.id);
-
+        // Trigger daily streak check + daily_login mission on dashboard visit
+        await GamificationService.checkDailyStreak(user.id);
+
         const data = await GamificationService.getMissions(user.id);
 
         setMissions(data);

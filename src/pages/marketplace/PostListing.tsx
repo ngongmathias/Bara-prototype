@@ -214,7 +214,7 @@ export const PostListing = () => {
 
           title: 'Authentication Required',
 
-          description: 'Please sign in to post a listing',
+          description: 'Please sign in to post an ad',
 
           variant: 'destructive',
 
@@ -708,6 +708,52 @@ export const PostListing = () => {
 
 
 
+      // Upsert partner profile on first post (fire-and-forget; non-blocking)
+
+      try {
+
+        const slugBase = (formData.seller_name || clerkUser?.fullName || 'seller')
+
+          .toLowerCase()
+
+          .replace(/[^a-z0-9]+/g, '-')
+
+          .replace(/^-|-$/g, '')
+
+          .slice(0, 40);
+
+        const partnerSlug = `${slugBase}-${userId.slice(-6)}`;
+
+        await supabase.from('marketplace_partners').upsert({
+
+          owner_user_id: userId,
+
+          display_name: formData.seller_name || clerkUser?.fullName || 'Seller',
+
+          slug: partnerSlug,
+
+          contact_email: formData.seller_email,
+
+          contact_phone: formData.seller_phone,
+
+          contact_whatsapp: formData.seller_whatsapp,
+
+          business_type: formData.seller_type,
+
+          country_id: selectedCountries[0],
+
+          verification_level: 'unverified',
+
+        }, { onConflict: 'owner_user_id', ignoreDuplicates: false });
+
+      } catch (partnerErr) {
+
+        console.warn('Partner upsert failed (non-critical):', partnerErr);
+
+      }
+
+
+
       // Frontend email fallback in case DB trigger is not applied yet
 
       try {
@@ -716,9 +762,9 @@ export const PostListing = () => {
 
           to_email: formData.seller_email,
 
-          subject: '🛒 Listing Received: ' + formData.title,
+          subject: '🛒 Ad Received: ' + formData.title,
 
-          html_content: `<p>Hi ${formData.seller_name || 'Seller'},</p><p>Your marketplace listing <strong>${formData.title}</strong> has been received and is currently under review. We will notify you once it is published.</p><p>Listing ID: ${listingData.id}</p><p>— The Bara Afrika Team</p>`,
+          html_content: `<p>Hi ${formData.seller_name || 'Seller'},</p><p>Your marketplace ad <strong>${formData.title}</strong> has been received and is currently under review. We will notify you once it is published.</p><p>Ad ID: ${listingData.id}</p><p>— The Bara Afrika Team</p>`,
 
           metadata: { listing_id: listingData.id, type: 'marketplace_submission' }
 
@@ -764,23 +810,23 @@ export const PostListing = () => {
 
         title: 'Success!',
 
-        description: 'Your listing has been submitted for review',
+        description: 'Your ad has been submitted for review',
 
       });
 
 
 
-      navigate(`/marketplace/listing/${listingData.id}`);
+      navigate(`/marketplace/ad/${listingData.id}`);
 
     } catch (error) {
 
-      console.error('Error creating listing:', error);
+      console.error('Error creating ad:', error);
 
       toast({
 
         title: 'Error',
 
-        description: 'Failed to create listing. Please try again.',
+        description: 'Failed to create ad. Please try again.',
 
         variant: 'destructive',
 
@@ -846,7 +892,7 @@ export const PostListing = () => {
 
           <p className="text-gray-600">
 
-            Fill in the details below to list your item on the marketplace
+            Fill in the details below to post your ad on the marketplace
 
           </p>
 
@@ -908,7 +954,7 @@ export const PostListing = () => {
 
                         <h4 className="font-bold text-gray-900 font-comfortaa">Elite Boost</h4>
 
-                        <p className="text-xs text-gray-600 max-w-sm">Bring your listing to the very top of all search results for 7 days.</p>
+                        <p className="text-xs text-gray-600 max-w-sm">Bring your ad to the very top of all search results for 7 days.</p>
 
                       </div>
 
@@ -2302,7 +2348,7 @@ export const PostListing = () => {
 
                 <ul className="space-y-1">
 
-                  <li>• Your listing will be reviewed before going live</li>
+                  <li>• Your ad will be reviewed before going live</li>
 
                   <li>• Make sure all information is accurate</li>
 
@@ -2368,7 +2414,7 @@ export const PostListing = () => {
 
                   <CheckCircle className="w-4 h-4 mr-2" />
 
-                  Submit Listing
+                  Submit Ad
 
                 </>
 

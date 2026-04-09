@@ -62,7 +62,7 @@ export const MyListings = () => {
   };
 
   const deleteListing = async (listingId: string) => {
-    if (!confirm('Are you sure you want to delete this listing?')) return;
+    if (!confirm('Are you sure you want to delete this ad?')) return;
 
     try {
       const { error } = await supabase
@@ -72,11 +72,11 @@ export const MyListings = () => {
 
       if (error) throw error;
 
-      toast({ title: "Success", description: "Listing deleted successfully" });
+      toast({ title: "Success", description: "Ad deleted successfully" });
       fetchMyListings();
     } catch (error) {
       console.error('Error deleting listing:', error);
-      toast({ title: "Error", description: "Error deleting listing", variant: "destructive" });
+      toast({ title: "Error", description: "Error deleting ad", variant: "destructive" });
     }
   };
 
@@ -89,11 +89,11 @@ export const MyListings = () => {
 
       if (error) throw error;
 
-      toast({ title: "Success", description: "Listing marked as sold" });
+      toast({ title: "Success", description: "Ad marked as sold" });
       fetchMyListings();
     } catch (error) {
       console.error('Error updating listing:', error);
-      toast({ title: "Error", description: "Error updating listing", variant: "destructive" });
+      toast({ title: "Error", description: "Error updating ad", variant: "destructive" });
     }
   };
 
@@ -104,7 +104,7 @@ export const MyListings = () => {
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-black mb-4 font-comfortaa">Sign In Required</h2>
-            <p className="text-gray-600 mb-6 font-roboto">Please sign in to view your listings</p>
+            <p className="text-gray-600 mb-6 font-roboto">Please sign in to view your ads</p>
             <Button onClick={() => navigate('/user/sign-in')} className="bg-black hover:bg-gray-800">
               Sign In
             </Button>
@@ -124,15 +124,15 @@ export const MyListings = () => {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-black font-comfortaa">My Listings</h1>
-              <p className="text-gray-600 font-roboto mt-2">Manage your marketplace listings</p>
+              <h1 className="text-3xl font-bold text-black font-comfortaa">My Ads</h1>
+              <p className="text-gray-600 font-roboto mt-2">Manage your marketplace ads</p>
             </div>
             <Button
               onClick={() => navigate('/marketplace/post')}
               className="bg-black hover:bg-gray-800 font-roboto"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Post New Listing
+              Post New Ad
             </Button>
           </div>
 
@@ -162,17 +162,17 @@ export const MyListings = () => {
           {loading ? (
             <div className="text-center py-16">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
-              <p className="mt-4 text-gray-600 font-roboto">Loading your listings...</p>
+              <p className="mt-4 text-gray-600 font-roboto">Loading your ads...</p>
             </div>
           ) : listings.length === 0 ? (
             <div className="text-center py-16 border border-gray-200 rounded-lg">
-              <p className="text-gray-500 text-lg font-roboto mb-4">No listings found</p>
+              <p className="text-gray-500 text-lg font-roboto mb-4">No ads found</p>
               <Button
                 onClick={() => navigate('/marketplace/post')}
                 className="bg-black hover:bg-gray-800 font-roboto"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Post Your First Listing
+                Post Your First Ad
               </Button>
             </div>
           ) : (
@@ -239,7 +239,7 @@ export const MyListings = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
+                            onClick={() => navigate(`/marketplace/ad/${listing.id}`)}
                             className="font-roboto"
                           >
                             <Eye className="w-4 h-4 mr-2" />

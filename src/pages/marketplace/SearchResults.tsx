@@ -7,14 +7,17 @@ import { BottomBannerAd } from '@/components/BottomBannerAd';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/lib/supabase';
-import { 
-  Search, 
-  SlidersHorizontal, 
+import {
+  Search,
+  SlidersHorizontal,
   X,
   Package,
   MapPin,
-  Calendar
+  Calendar,
+  BookmarkPlus
 } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
+import { useToast } from '@/components/ui/use-toast';
 import {
   Select,
   SelectContent,
@@ -28,6 +31,31 @@ export const SearchResults = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { selectedCountry } = useCountrySelection();
+  const { user } = useUser();
+  const { toast } = useToast();
+
+  const saveCurrentSearch = async () => {
+    if (!user) {
+      toast({ title: 'Sign in required', description: 'Please sign in to save searches', variant: 'destructive' });
+      return;
+    }
+    const queryString = searchParams.toString();
+    const name = searchParams.get('q') || searchParams.get('category') || 'My saved search';
+    try {
+      const { error } = await supabase.from('marketplace_saved_searches').insert({
+        user_id: user.id,
+        name,
+        query_string: queryString,
+        filters: Object.fromEntries(searchParams.entries()),
+        email_alerts: false,
+      });
+      if (error) throw error;
+      toast({ title: 'Search saved!', description: 'You can find it in your dashboard.' });
+    } catch (err) {
+      console.error('Save search failed', err);
+      toast({ title: 'Error', description: 'Could not save search', variant: 'destructive' });
+    }
+  };
   
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -577,6 +605,16 @@ export const SearchResults = () => {
                     {activeFiltersCount}
                   </span>
                 )}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={saveCurrentSearch}
+                className="h-12 px-6"
+                title="Save this search"
+              >
+                <BookmarkPlus className="w-4 h-4 mr-2" />
+                Save Search
               </Button>
             </form>
 

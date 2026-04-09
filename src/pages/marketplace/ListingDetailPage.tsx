@@ -24,7 +24,10 @@ import {
   Clock,
   CheckCircle,
   X,
-  MessageCircle
+  MessageCircle,
+  Star,
+  ShieldCheck,
+  DollarSign
 } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { MessagingService } from '@/lib/MessagingService';
@@ -46,6 +49,29 @@ export const ListingDetailPage = () => {
   const [relatedListings, setRelatedListings] = useState<any[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
+  const [partner, setPartner] = useState<any>(null);
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [offerAmount, setOfferAmount] = useState('');
+  const [offerMessage, setOfferMessage] = useState('');
+  const [submittingOffer, setSubmittingOffer] = useState(false);
+
+  // Fire-and-forget lead capture
+  const recordLead = (contactType: string) => {
+    if (!listing) return;
+    try {
+      supabase.from('marketplace_leads').insert({
+        ad_id: listing.id,
+        seller_user_id: listing.created_by,
+        buyer_user_id: user?.id || null,
+        contact_type: contactType,
+        buyer_name: user?.fullName || null,
+        buyer_email: user?.primaryEmailAddress?.emailAddress || null,
+        metadata: { source: 'ad_detail_page' },
+      }).then(() => {}, () => {});
+      // Increment contact_clicks counter
+      supabase.rpc('increment_listing_views', { listing_id: listing.id }).then(() => {}, () => {});
+    } catch { /* non-critical */ }
+  };
 
   useEffect(() => {
     if (listingId) {
@@ -78,6 +104,18 @@ export const ListingDetailPage = () => {
       };
 
       setListing(transformedListing);
+
+      // Fetch partner/seller profile for trust signals (non-blocking)
+      if (data.created_by) {
+        supabase
+          .from('marketplace_partners')
+          .select('*')
+          .eq('owner_user_id', data.created_by)
+          .maybeSingle()
+          .then(({ data: partnerData }) => {
+            if (partnerData) setPartner(partnerData);
+          }, () => {});
+      }
 
       // Fetch related listings
       if (data.category_id) {
@@ -161,6 +199,7 @@ export const ListingDetailPage = () => {
     }
 
     try {
+      recordLead('chat');
       const conversationId = await MessagingService.startConversation(user.id, listing.user_id);
       navigate(`/messages/${conversationId}`);
     } catch (error) {
@@ -171,7 +210,8 @@ export const ListingDetailPage = () => {
 
   const handleWhatsAppContact = () => {
     if (listing?.seller_whatsapp) {
-      const message = encodeURIComponent(`Hi, I'm interested in your listing: ${listing.title}`);
+      recordLead('whatsapp');
+      const message = encodeURIComponent(`Hi, I'm interested in your ad: ${listing.title}`);
       const whatsappUrl = `https://wa.me/${listing.seller_whatsapp.replace(/[^0-9]/g, '')}?text=${message}`;
       window.open(whatsappUrl, '_blank');
     }
@@ -179,15 +219,52 @@ export const ListingDetailPage = () => {
 
   const handlePhoneContact = () => {
     if (listing?.seller_phone) {
+      recordLead('phone');
       window.location.href = `tel:${listing.seller_phone}`;
     }
   };
 
   const handleEmailContact = () => {
     if (listing?.seller_email) {
+      recordLead('email');
       const subject = encodeURIComponent(`Inquiry about: ${listing.title}`);
-      const body = encodeURIComponent(`Hi,\n\nI'm interested in your listing "${listing.title}".\n\nPlease provide more details.\n\nThank you!`);
+      const body = encodeURIComponent(`Hi,\n\nI'm interested in your ad "${listing.title}".\n\nPlease provide more details.\n\nThank you!`);
       window.location.href = `mailto:${listing.seller_email}?subject=${subject}&body=${body}`;
+    }
+  };
+
+  const submitOffer = async () => {
+    if (!user) {
+      toast({ title: 'Sign in required', description: 'Please sign in to make an offer', variant: 'destructive' });
+      return;
+    }
+    const amount = parseFloat(offerAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({ title: 'Invalid amount', description: 'Please enter a valid offer amount', variant: 'destructive' });
+      return;
+    }
+    setSubmittingOffer(true);
+    try {
+      const { error } = await supabase.from('marketplace_offers').insert({
+        ad_id: listing.id,
+        buyer_user_id: user.id,
+        seller_user_id: listing.created_by,
+        amount,
+        currency: listing.currency || 'USD',
+        message: offerMessage || null,
+        status: 'pending',
+      });
+      if (error) throw error;
+      recordLead('offer');
+      toast({ title: 'Offer sent!', description: 'The seller has been notified.' });
+      setShowOfferModal(false);
+      setOfferAmount('');
+      setOfferMessage('');
+    } catch (err) {
+      console.error('Error submitting offer:', err);
+      toast({ title: 'Error', description: 'Failed to submit offer', variant: 'destructive' });
+    } finally {
+      setSubmittingOffer(false);
     }
   };
 
@@ -480,6 +557,15 @@ export const ListingDetailPage = () => {
                   Chat on Bara
                 </Button>
 
+                <Button
+                  onClick={() => setShowOfferModal(true)}
+                  variant="outline"
+                  className="w-full h-12 border-amber-500 text-amber-700 hover:bg-amber-50"
+                >
+                  <DollarSign className="w-5 h-5 mr-2" />
+                  Make an Offer
+                </Button>
+
                 {listing.seller_whatsapp && (
                   <Button
                     onClick={handleWhatsAppContact}
@@ -527,18 +613,56 @@ export const ListingDetailPage = () => {
               {/* Seller Info */}
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-gray-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-900">{listing.seller_name}</div>
-                    <div className="text-sm text-gray-600 capitalize">{listing.seller_type}</div>
+                  {partner?.logo_url ? (
+                    <img src={partner.logo_url} alt={partner.display_name} className="w-12 h-12 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                      <User className="w-6 h-6 text-gray-600" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    {partner?.slug ? (
+                      <button
+                        onClick={() => navigate(`/marketplace/store/${partner.slug}`)}
+                        className="font-medium text-gray-900 hover:underline truncate block text-left"
+                      >
+                        {partner.display_name || listing.seller_name}
+                      </button>
+                    ) : (
+                      <div className="font-medium text-gray-900 truncate">{listing.seller_name}</div>
+                    )}
+                    <div className="text-xs text-gray-600 capitalize">{partner?.business_type || listing.seller_type}</div>
                   </div>
                 </div>
-                {listing.is_verified && (
-                  <div className="flex items-center gap-2 text-sm text-green-600">
-                    <CheckCircle className="w-4 h-4" />
-                    Verified Seller
+
+                {/* Trust badges */}
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {partner?.verification_level && partner.verification_level !== 'unverified' && (
+                    <span className="inline-flex items-center gap-1 text-xs font-medium bg-green-50 text-green-700 border border-green-200 px-2 py-1 rounded-full">
+                      <ShieldCheck className="w-3 h-3" />
+                      {partner.verification_level === 'id_verified' && 'ID Verified'}
+                      {partner.verification_level === 'business_verified' && 'Business Verified'}
+                      {partner.verification_level === 'phone_verified' && 'Phone Verified'}
+                      {partner.verification_level === 'email_verified' && 'Email Verified'}
+                    </span>
+                  )}
+                  {partner?.rating_count > 0 && (
+                    <span className="inline-flex items-center gap-1 text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 px-2 py-1 rounded-full">
+                      <Star className="w-3 h-3 fill-current" />
+                      {Number(partner.avg_rating).toFixed(1)} ({partner.rating_count})
+                    </span>
+                  )}
+                  {partner?.response_time_hours != null && (
+                    <span className="inline-flex items-center gap-1 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 rounded-full">
+                      <Clock className="w-3 h-3" />
+                      Replies in ~{partner.response_time_hours}h
+                    </span>
+                  )}
+                </div>
+
+                {partner?.member_since && (
+                  <div className="text-xs text-gray-500">
+                    Member since {new Date(partner.member_since).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}
                   </div>
                 )}
               </div>
@@ -622,6 +746,67 @@ export const ListingDetailPage = () => {
           </div>
         )}
       </main>
+
+      {/* Make Offer Modal */}
+      <AnimatePresence>
+        {showOfferModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowOfferModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-lg p-6 max-w-md w-full"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold">Make an Offer</h3>
+                <button
+                  onClick={() => setShowOfferModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <p className="text-gray-600 mb-4 text-sm">
+                Asking price: <span className="font-semibold">{listing?.currency} {parseFloat(listing?.price || 0).toLocaleString()}</span>
+              </p>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Your offer ({listing?.currency})</label>
+              <input
+                type="number"
+                value={offerAmount}
+                onChange={(e) => setOfferAmount(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-3 mb-4"
+                placeholder="Enter amount"
+              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Message (optional)</label>
+              <textarea
+                value={offerMessage}
+                onChange={(e) => setOfferMessage(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-3 mb-4 min-h-[80px]"
+                placeholder="Add a note for the seller..."
+              />
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setShowOfferModal(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={submitOffer}
+                  disabled={submittingOffer || !offerAmount}
+                  className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+                >
+                  {submittingOffer ? 'Sending...' : 'Send Offer'}
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Report Modal */}
       <AnimatePresence>

@@ -1528,6 +1528,70 @@ BATCH 4 — Visual & UX Polish
 
 ---
 
+## PHASE 11 — MARKETPLACE PARTNER & TRUST OVERHAUL (April 6, 2026)
+
+> **Context:** Onboarding of first marketplace partners exposed gaps vs. industry leaders (OLX, Dubizzle, Gumtree). We also hit a schema/RLS bug (`is_premium` missing + access denied for partners). This phase rebuilds the marketplace around a **partner-centric, trust-first** model.
+>
+> **Terminology:** On Bara, *"listings"* refers to Business Directory listings. Marketplace items are now called **"ads"** throughout the UI to avoid confusion. DB tables stay as `marketplace_listings` internally.
+
+### 11.1 — Data layer (done)
+- [x] Migration `marketplace_phase11_partner_and_trust.sql`
+- [x] Adds missing columns on `marketplace_listings`: `is_premium`, `slug`, `video_url`, `partner_id`, `contact_clicks`
+- [x] New table `marketplace_partners` (storefront/profile + verification tier + rating aggregates)
+- [x] New table `marketplace_partner_members` (multi-user partner access)
+- [x] New table `marketplace_seller_ratings` (1–5 star reviews + trigger to recalc partner aggregates)
+- [x] New table `marketplace_leads` (unified contact inbox: chat/whatsapp/phone/email/offer)
+- [x] New table `marketplace_offers` (Make an Offer flow)
+- [x] New table `marketplace_saved_searches` (saved searches + email alerts flag)
+- [x] RLS policies + GRANTs for all new tables (permissive — Clerk handles authz)
+- [x] Trigger `trg_sync_partner_ad_count` keeps partner ad counts in sync
+- [ ] **User must run the migration in Supabase SQL Editor** ← BLOCKING
+
+### 11.2 — Terminology rename (done)
+- [x] PostListing.tsx — user-facing text, submit button, navigate path → `/marketplace/ad/:id`
+- [x] MyListings.tsx — "My Ads", "Post New Ad", toasts
+- [x] UserDashboard links → `/marketplace/my-ads`
+- [x] App.tsx route aliases: `/marketplace/ad/:id`, `/marketplace/my-ads`, `/marketplace/edit-ad/:id` (legacy `/listing/` still works)
+
+### 11.3 — Trust infrastructure (done)
+- [x] Partner profile auto-created on first PostListing submit (upsert by `owner_user_id`, auto-slug)
+- [x] ListingDetailPage fetches `marketplace_partners` and shows:
+  - Verification badge (unverified / email / phone / id / business)
+  - Star rating + rating count
+  - Response time ("Replies in ~Nh")
+  - Member-since date
+  - Clickable storefront link
+- [x] Contact buttons (chat/whatsapp/phone/email) now record into `marketplace_leads`
+- [x] Make-an-Offer button + modal inserts into `marketplace_offers`
+
+### 11.4 — Partner storefront page (done)
+- [x] `/marketplace/store/:slug` — `MarketplaceStorefront.tsx`
+- [x] Cover photo + logo + display name + business type
+- [x] Trust badges row (verification, rating, response time, location)
+- [x] Contact buttons (WhatsApp/call/email/website)
+- [x] Grid of all active ads from that partner
+
+### 11.5 — Saved searches (done)
+- [x] "Save Search" button on SearchResults.tsx
+- [x] Persists query_string + filters to `marketplace_saved_searches`
+
+### 11.6 — Remaining work (backlog)
+- [ ] Marketplace card grid trust badges (MarketplacePage + SearchResults cards) — show verified icon + rating inline on each card
+- [ ] Partner dashboard — `/marketplace/partner/dashboard` — edit storefront, upload logo/cover, see leads inbox, see offers, invite team members
+- [ ] Admin verification console — approve/reject verification upgrades (id_verified, business_verified)
+- [ ] Bulk CSV upload for partners — `/marketplace/bulk-upload` — multi-ad import for dealers
+- [ ] Lead inbox UI — `/marketplace/leads` — seller sees buyer contacts in one place, mark as seen/responded
+- [ ] Seller ratings UI — post-transaction rating form + rating display on storefront
+- [ ] Saved searches management page — view/run/delete from user dashboard
+- [ ] Email alerts cron for saved searches (weekly digest of new matching ads)
+- [ ] Response-time computation job — populate `response_time_hours` from lead→first-response delta
+- [ ] Video ad support (field exists; no upload UI yet)
+- [ ] Slug-based ad URLs (`/marketplace/ad/iphone-15-pro-lagos` instead of UUID)
+- [ ] Category-specific ad templates (field requirements per category)
+- [ ] Fraud detection rules (duplicate image hash, banned words, price outliers)
+
+---
+
 ## OPEN ITEMS — What's Left (as of April 6, 2026)
 
 > Summary of all unchecked ☐ items across all phases. Use this as the working backlog.
@@ -1573,4 +1637,5 @@ BATCH 4 — Visual & UX Polish
 *Updated: April 2, 2026 — Merged STREAMS_SPORTS_BUILD_PLAN.md into this document.*
 *Updated: April 6, 2026 — Phase 10 added (10.1–10.8). Open items summary added.*
 *Updated: April 8, 2026 — Item 7.68 added (music freemium coin deduction + full purchase flow).*
+*Updated: April 6, 2026 — Phase 11 added (marketplace partner & trust overhaul: partners, verification, ratings, leads, offers, saved searches, storefronts; terminology "listing" → "ad").*
 *For Bara Afrika Platform — baraafrika.com*

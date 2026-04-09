@@ -146,6 +146,8 @@ import MyFavorites from "./pages/marketplace/MyFavorites";
 
 import EditListing from "./pages/marketplace/EditListing";
 
+import MarketplaceStorefront from "./pages/marketplace/MarketplaceStorefront";
+
 import { CommunityPage } from "./pages/communities/CommunityPage";
 
 import UserSignInPage from "./pages/user/UserSignInPage";
@@ -596,9 +598,17 @@ const AppRoutes = () => {
 
           <Route path="my-listings" element={<MyListings />} />
 
+          <Route path="my-ads" element={<MyListings />} />
+
           <Route path="listing/:listingId" element={<CategoryDetailRouter />} />
 
+          <Route path="ad/:listingId" element={<CategoryDetailRouter />} />
+
           <Route path="edit/:listingId" element={<EditListing />} />
+
+          <Route path="edit-ad/:listingId" element={<EditListing />} />
+
+          <Route path="store/:slug" element={<MarketplaceStorefront />} />
 
           <Route path="favorites" element={<MyFavorites />} />
 
