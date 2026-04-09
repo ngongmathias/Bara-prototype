@@ -167,14 +167,15 @@ async function buildPreview(pathname: string): Promise<PreviewData | null> {
     if (['create', 'new', 'edit', 'categories'].includes(id)) return null;
     const row = await fetchFromSupabase(
       'events',
-      `id=eq.${id}&select=title,description,event_image_url,event_images,start_date,location`
+      `id=eq.${id}&select=title,description,event_image_url,event_images,start_date,venue_name,venue_address`
     );
     if (!row) return null;
     const when = row.start_date ? new Date(row.start_date).toLocaleDateString(undefined, { dateStyle: 'medium' }) : '';
+    const venue = row.venue_name || row.venue_address || '';
     const firstGallery = Array.isArray(row.event_images) && row.event_images.length > 0 ? row.event_images[0] : null;
     return {
       title: row.title,
-      description: `${when}${row.location ? ` · ${row.location}` : ''}${row.description ? ` — ${row.description.slice(0, 120)}` : ''}`.trim(),
+      description: `${when}${venue ? ` · ${venue}` : ''}${row.description ? ` — ${row.description.slice(0, 120)}` : ''}`.trim(),
       image: row.event_image_url || firstGallery || DEFAULT_IMAGE,
       type: 'event',
     };
