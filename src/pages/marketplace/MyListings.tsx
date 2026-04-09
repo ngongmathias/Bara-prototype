@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { useUser } from '@clerk/clerk-react';
-import { Plus, Edit, Trash2, Eye, CheckCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, CheckCircle, Store } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const MyListings = () => {
@@ -15,6 +15,18 @@ export const MyListings = () => {
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
+  const [storeSlug, setStoreSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('marketplace_partners')
+        .select('slug')
+        .eq('owner_user_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => { if (data?.slug) setStoreSlug(data.slug); });
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     if (user) {
@@ -127,13 +139,25 @@ export const MyListings = () => {
               <h1 className="text-3xl font-bold text-black font-comfortaa">My Ads</h1>
               <p className="text-gray-600 font-roboto mt-2">Manage your marketplace ads</p>
             </div>
-            <Button
-              onClick={() => navigate('/marketplace/post')}
-              className="bg-black hover:bg-gray-800 font-roboto"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Post New Ad
-            </Button>
+            <div className="flex items-center gap-2">
+              {storeSlug && (
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(`/marketplace/store/${storeSlug}`)}
+                  className="font-roboto"
+                >
+                  <Store className="w-4 h-4 mr-2" />
+                  My Store
+                </Button>
+              )}
+              <Button
+                onClick={() => navigate('/marketplace/post')}
+                className="bg-black hover:bg-gray-800 font-roboto"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Post New Ad
+              </Button>
+            </div>
           </div>
 
           {/* Filter Tabs */}

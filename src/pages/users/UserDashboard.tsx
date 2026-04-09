@@ -72,7 +72,9 @@ import {
 
   Bookmark,
 
-  Crown
+  Crown,
+
+  Store
 
 } from 'lucide-react';
 
@@ -89,6 +91,15 @@ export const UserDashboard = () => {
   const { isSignedIn, user, isLoaded } = useUser();
 
   const location = useLocation();
+
+  const [storeSlug, setStoreSlug] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (user?.id) {
+      supabase.from('marketplace_partners').select('slug').eq('owner_user_id', user.id).maybeSingle()
+        .then(({ data }) => { if (data?.slug) setStoreSlug(data.slug); });
+    }
+  }, [user?.id]);
 
 
 
@@ -311,6 +322,15 @@ export const UserDashboard = () => {
                     </Button>
 
                   </Link>
+
+                  {storeSlug && (
+                    <Link to={`/marketplace/store/${storeSlug}`}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <Store className="mr-3 h-4 w-4" />
+                        My Storefront
+                      </Button>
+                    </Link>
+                  )}
 
 
 

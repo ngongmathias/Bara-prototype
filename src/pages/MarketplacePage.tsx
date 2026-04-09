@@ -266,13 +266,22 @@ const MarketplacePage = () => {
               </Button>
             </form>
 
-            {/* Sell Something Button */}
-            <Button
-              onClick={() => navigate('/marketplace/post')}
-              className="bg-black hover:bg-gray-800 text-white font-semibold px-6 h-12 whitespace-nowrap"
-            >
-              Sell Something
-            </Button>
+            {/* Sell Something + My Ads */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => navigate('/marketplace/my-ads')}
+                className="h-12 whitespace-nowrap hidden sm:flex"
+              >
+                My Ads
+              </Button>
+              <Button
+                onClick={() => navigate('/marketplace/post')}
+                className="bg-black hover:bg-gray-800 text-white font-semibold px-6 h-12 whitespace-nowrap"
+              >
+                Sell Something
+              </Button>
+            </div>
           </div>
         </div>
       </div>
