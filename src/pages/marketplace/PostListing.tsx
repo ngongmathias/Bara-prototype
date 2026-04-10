@@ -67,6 +67,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import { uploadImage } from '@/lib/storage';
 
 import { useCountrySelection } from '@/context/CountrySelectionContext';
+import { getCategoryConfig } from '@/config/categoryFieldConfigs';
 
 
 
@@ -484,13 +485,16 @@ export const PostListing = () => {
 
 
 
-    if (!formData.price || parseFloat(formData.price) <= 0) {
+    // Price validation — category-aware
+    const catConfig = getCategoryConfig(selectedCategorySlug);
+    const priceRequired = catConfig?.priceField ? catConfig.priceField.required : true;
+    if (priceRequired && (!formData.price || parseFloat(formData.price) <= 0)) {
 
       toast({
 
         title: 'Validation Error',
 
-        description: 'Please enter a valid price',
+        description: `Please enter a valid ${catConfig?.priceField?.label?.toLowerCase() || 'price'}`,
 
         variant: 'destructive',
 
@@ -538,7 +542,9 @@ export const PostListing = () => {
 
 
 
-    if (selectedImages.length === 0) {
+    // Image validation — category-aware (optional for jobs, services, businesses)
+    const imageRequired = catConfig?.imageRequired !== false;
+    if (imageRequired && selectedImages.length === 0) {
 
       toast({
 
@@ -1810,7 +1816,7 @@ export const PostListing = () => {
 
             <h2 className="text-xl font-bold text-gray-900 mb-4 font-comfortaa">
 
-              Pricing
+              {getCategoryConfig(selectedCategorySlug)?.priceField?.label === 'Salary Range' ? 'Salary' : getCategoryConfig(selectedCategorySlug)?.priceField?.label === 'Rate' ? 'Rate' : 'Pricing'}
 
             </h2>
 
@@ -1820,7 +1826,10 @@ export const PostListing = () => {
 
               <div>
 
-                <Label htmlFor="price">Price *</Label>
+                <Label htmlFor="price">
+                  {getCategoryConfig(selectedCategorySlug)?.priceField?.label || 'Price'}
+                  {getCategoryConfig(selectedCategorySlug)?.priceField?.required !== false && ' *'}
+                </Label>
 
                 <Input
 
@@ -1832,7 +1841,7 @@ export const PostListing = () => {
 
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
 
-                  placeholder="0.00"
+                  placeholder={getCategoryConfig(selectedCategorySlug)?.priceField?.placeholder || '0.00'}
 
                   min="0"
 

@@ -31,8 +31,10 @@ export const CategoryPostForm = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [priceMax, setPriceMax] = useState('');
   const [currency, setCurrency] = useState('USD');
   const [priceType, setPriceType] = useState('fixed');
+  const [pricePeriod, setPricePeriod] = useState('');
   const [condition, setCondition] = useState('new');
   const [locationDetails, setLocationDetails] = useState('');
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
@@ -165,6 +167,11 @@ export const CategoryPostForm = () => {
     });
   };
 
+  // Get the active category config
+  const activeCategoryConfig = getCategoryConfig(selectedCategory);
+  const priceFieldConfig = activeCategoryConfig?.priceField;
+  const isImageRequired = activeCategoryConfig?.imageRequired !== false; // default true
+
   const validateForm = (): boolean => {
     if (!selectedCategory) {
       toast({ title: 'Error', description: 'Please select a category', variant: 'destructive' });
@@ -178,10 +185,15 @@ export const CategoryPostForm = () => {
       toast({ title: 'Error', description: 'Please enter a description', variant: 'destructive' });
       return false;
     }
-    if (!price || parseFloat(price) <= 0) {
-      toast({ title: 'Error', description: 'Please enter a valid price', variant: 'destructive' });
+
+    // Price validation — category-aware
+    const priceRequired = priceFieldConfig ? priceFieldConfig.required : true;
+    if (priceRequired && (!price || parseFloat(price) <= 0)) {
+      const label = priceFieldConfig?.label || 'Price';
+      toast({ title: 'Error', description: `Please enter a valid ${label.toLowerCase()}`, variant: 'destructive' });
       return false;
     }
+
     if (selectedCountries.length === 0) {
       toast({ title: 'Error', description: 'Please select at least one country', variant: 'destructive' });
       return false;
@@ -195,10 +207,15 @@ export const CategoryPostForm = () => {
       return false;
     }
 
+    // Image validation — category-aware
+    if (isImageRequired && images.length === 0) {
+      toast({ title: 'Error', description: 'Please upload at least one image', variant: 'destructive' });
+      return false;
+    }
+
     // Validate category-specific required fields
-    const categoryConfig = getCategoryConfig(selectedCategory);
-    if (categoryConfig) {
-      for (const field of categoryConfig.fields) {
+    if (activeCategoryConfig) {
+      for (const field of activeCategoryConfig.fields) {
         if (field.required && !attributes[field.name]) {
           toast({
             title: 'Error',
@@ -228,6 +245,13 @@ export const CategoryPostForm = () => {
         if (url) imageUrls.push(url);
       }
 
+      // Merge price-related fields into attributes for categories with special pricing
+      const mergedAttributes = {
+        ...attributes,
+        ...(priceMax ? { salary_max: parseFloat(priceMax) } : {}),
+        ...(pricePeriod ? { price_period: pricePeriod } : {}),
+      };
+
       // Create listing
       const { data: listing, error: listingError } = await supabase
         .from('marketplace_listings')
@@ -236,7 +260,7 @@ export const CategoryPostForm = () => {
           category_id: selectedCategory,
           title: title.trim(),
           description: description.trim(),
-          price: parseFloat(price),
+          price: price ? parseFloat(price) : 0,
           currency,
           price_type: priceType,
           condition,
@@ -247,7 +271,7 @@ export const CategoryPostForm = () => {
           seller_whatsapp: sellerWhatsapp.trim() || null,
           seller_email: sellerEmail.trim() || null,
           seller_website: sellerWebsite.trim() || null,
-          attributes,
+          attributes: mergedAttributes,
           status: 'active'
         })
         .select()
@@ -524,58 +548,93 @@ export const CategoryPostForm = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="price">
-                    Price <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    required
-                  />
-                </div>
+              {/* Price / Salary / Rate — category-aware */}
+              {(!priceFieldConfig?.hidden) && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="price">
+                      {priceFieldConfig?.label || 'Price'}
+                      {(priceFieldConfig?.required !== false) && <span className="text-red-500"> *</span>}
+                    </Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      placeholder={priceFieldConfig?.placeholder || '0.00'}
+                      min="0"
+                      step="0.01"
+                      required={priceFieldConfig?.required !== false}
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="currency">Currency</Label>
-                  <Select value={currency} onValueChange={setCurrency}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
-                      <SelectItem value="XAF">XAF</SelectItem>
-                      <SelectItem value="NGN">NGN</SelectItem>
-                      <SelectItem value="KES">KES</SelectItem>
-                      <SelectItem value="ZAR">ZAR</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  {/* Max field for range mode (e.g. salary range) */}
+                  {priceFieldConfig?.isRange && (
+                    <div className="space-y-2">
+                      <Label htmlFor="priceMax">
+                        {priceFieldConfig.label} (Max)
+                      </Label>
+                      <Input
+                        id="priceMax"
+                        type="number"
+                        value={priceMax}
+                        onChange={(e) => setPriceMax(e.target.value)}
+                        placeholder={priceFieldConfig.placeholderMax || '0.00'}
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                  )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="priceType">Price Type</Label>
-                  <Select value={priceType} onValueChange={setPriceType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="fixed">Fixed</SelectItem>
-                      <SelectItem value="negotiable">Negotiable</SelectItem>
-                      <SelectItem value="hourly">Hourly</SelectItem>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="yearly">Yearly</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-2">
+                    <Label htmlFor="currency">Currency</Label>
+                    <Select value={currency} onValueChange={setCurrency}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="GBP">GBP</SelectItem>
+                        <SelectItem value="XAF">XAF</SelectItem>
+                        <SelectItem value="NGN">NGN</SelectItem>
+                        <SelectItem value="KES">KES</SelectItem>
+                        <SelectItem value="ZAR">ZAR</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Period selector OR price type — depends on category */}
+                  {priceFieldConfig?.periodOptions ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="pricePeriod">Period</Label>
+                      <Select value={pricePeriod} onValueChange={setPricePeriod}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select period" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {priceFieldConfig.periodOptions.map(opt => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="priceType">Price Type</Label>
+                      <Select value={priceType} onValueChange={setPriceType}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="fixed">Fixed</SelectItem>
+                          <SelectItem value="negotiable">Negotiable</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="condition">Condition</Label>
@@ -609,8 +668,12 @@ export const CategoryPostForm = () => {
             {/* Images */}
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-gray-900 font-comfortaa">
-                Images
+                Images {isImageRequired && <span className="text-red-500 text-sm">*</span>}
+                {!isImageRequired && <span className="text-gray-400 text-sm font-normal ml-2">(optional)</span>}
               </h2>
+              {activeCategoryConfig?.imageGuidance && (
+                <p className="text-sm text-gray-500">{activeCategoryConfig.imageGuidance}</p>
+              )}
 
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                 <input

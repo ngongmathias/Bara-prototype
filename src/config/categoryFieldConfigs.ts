@@ -11,11 +11,32 @@ export interface FieldConfig {
   helperText?: string;
 }
 
+export interface PriceFieldConfig {
+  /** Label shown on the form, e.g. "Price", "Salary Range", "Rate" */
+  label: string;
+  /** Whether this field is required */
+  required: boolean;
+  /** Show a range (min/max) instead of a single value */
+  isRange?: boolean;
+  /** Period options to show, e.g. monthly/yearly for salary */
+  periodOptions?: { value: string; label: string }[];
+  /** Placeholder for the single/min field */
+  placeholder?: string;
+  /** Placeholder for the max field (range mode) */
+  placeholderMax?: string;
+  /** Whether to hide the price field entirely (rare — for categories where pricing doesn't apply) */
+  hidden?: boolean;
+}
+
 export interface CategoryConfig {
   categorySlug: string;
   categoryName: string;
   fields: FieldConfig[];
   imageGuidance?: string;
+  /** Whether at least one image is required. Defaults to true if not specified. */
+  imageRequired?: boolean;
+  /** How the "price/value" field behaves for this category */
+  priceField?: PriceFieldConfig;
 }
 
 export const categoryFieldConfigs: CategoryConfig[] = [
@@ -24,6 +45,17 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'property',
     categoryName: 'Properties',
     imageGuidance: 'Upload clear photos of exterior, interior, kitchen, bathrooms, and any special features',
+    imageRequired: true,
+    priceField: {
+      label: 'Price',
+      required: true,
+      placeholder: 'e.g., 250000',
+      periodOptions: [
+        { value: 'total', label: 'Total Price' },
+        { value: 'monthly', label: 'Per Month (Rent)' },
+        { value: 'yearly', label: 'Per Year' }
+      ]
+    },
     fields: [
       {
         name: 'bedrooms',
@@ -143,6 +175,12 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'motors',
     categoryName: 'Motors',
     imageGuidance: 'Upload photos from all angles: front, back, sides, interior, engine, and any damage',
+    imageRequired: true,
+    priceField: {
+      label: 'Price',
+      required: true,
+      placeholder: 'e.g., 15000'
+    },
     fields: [
       {
         name: 'make',
@@ -267,6 +305,19 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'jobs',
     categoryName: 'Jobs',
     imageGuidance: 'Upload company logo or workplace photos (optional)',
+    imageRequired: false,
+    priceField: {
+      label: 'Salary Range',
+      required: false,
+      isRange: true,
+      placeholder: 'Min salary, e.g., 50000',
+      placeholderMax: 'Max salary, e.g., 80000',
+      periodOptions: [
+        { value: 'monthly', label: 'Per Month' },
+        { value: 'yearly', label: 'Per Year' },
+        { value: 'hourly', label: 'Per Hour' }
+      ]
+    },
     fields: [
       {
         name: 'company_name',
@@ -377,6 +428,8 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'electronics',
     categoryName: 'Electronics',
     imageGuidance: 'Upload clear photos showing the device from multiple angles, screen, and any accessories',
+    imageRequired: true,
+    priceField: { label: 'Price', required: true, placeholder: 'e.g., 500' },
     fields: [
       {
         name: 'brand',
@@ -489,6 +542,8 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'fashion',
     categoryName: 'Fashion & Beauty',
     imageGuidance: 'Upload clear photos showing the item from different angles, tags, and any defects',
+    imageRequired: true,
+    priceField: { label: 'Price', required: true, placeholder: 'e.g., 50' },
     fields: [
       {
         name: 'brand',
@@ -587,6 +642,18 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'services',
     categoryName: 'Services',
     imageGuidance: 'Upload photos of your work, certifications, or team (optional)',
+    imageRequired: false,
+    priceField: {
+      label: 'Rate',
+      required: false,
+      placeholder: 'e.g., 50',
+      periodOptions: [
+        { value: 'hourly', label: 'Per Hour' },
+        { value: 'daily', label: 'Per Day' },
+        { value: 'per-project', label: 'Per Project' },
+        { value: 'monthly', label: 'Per Month' }
+      ]
+    },
     fields: [
       {
         name: 'service_type',
@@ -671,6 +738,8 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'home-furniture',
     categoryName: 'Home & Furniture',
     imageGuidance: 'Upload photos from multiple angles showing condition and dimensions',
+    imageRequired: true,
+    priceField: { label: 'Price', required: true, placeholder: 'e.g., 200' },
     fields: [
       {
         name: 'furniture_type',
@@ -763,6 +832,8 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'pets',
     categoryName: 'Pets & Birds',
     imageGuidance: 'Upload clear photos of the pet, vaccination records if available',
+    imageRequired: true,
+    priceField: { label: 'Price', required: true, placeholder: 'e.g., 300' },
     fields: [
       {
         name: 'pet_type',
@@ -871,6 +942,8 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'kids-babies',
     categoryName: 'Kids & Babies',
     imageGuidance: 'Upload clear photos showing condition, tags, and any safety certifications',
+    imageRequired: true,
+    priceField: { label: 'Price', required: true, placeholder: 'e.g., 25' },
     fields: [
       {
         name: 'item_type',
@@ -970,6 +1043,8 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'hobbies',
     categoryName: 'Hobbies',
     imageGuidance: 'Upload clear photos showing condition, any signatures, certificates, or special features',
+    imageRequired: true,
+    priceField: { label: 'Price', required: true, placeholder: 'e.g., 100' },
     fields: [
       {
         name: 'hobby_type',
@@ -1049,6 +1124,12 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'businesses',
     categoryName: 'Businesses & Industrial',
     imageGuidance: 'Upload photos of the business premises, equipment, or relevant documents',
+    imageRequired: false,
+    priceField: {
+      label: 'Price / Valuation',
+      required: false,
+      placeholder: 'e.g., 100000'
+    },
     fields: [
       {
         name: 'business_type',
