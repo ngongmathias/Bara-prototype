@@ -29,7 +29,8 @@ import {
   Calendar as CalendarIcon,
   Palette,
   Cog,
-  Zap
+  Zap,
+  DollarSign,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,6 +44,7 @@ import {
   useListingPartner,
   SellerTrustCard,
   ReportListingModal,
+  OfferModal,
   buildListingShare,
 } from '@/components/marketplace/listing-parts';
 
@@ -58,6 +60,7 @@ export const MotorsDetail = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [relatedListings, setRelatedListings] = useState<any[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showOfferModal, setShowOfferModal] = useState(false);
 
   const { user } = useUser();
   const partner = useListingPartner(listing?.created_by);
@@ -501,6 +504,14 @@ export const MotorsDetail = () => {
 
               {/* Seller Info */}
               <div className="pt-6 border-t border-gray-200">
+                <Button
+                  onClick={() => setShowOfferModal(true)}
+                  variant="outline"
+                  className="w-full h-12 border-amber-500 text-amber-700 hover:bg-amber-50 mb-4"
+                >
+                  <DollarSign className="w-5 h-5 mr-2" />
+                  Make an Offer
+                </Button>
                 <SellerTrustCard partner={partner} listing={listing} />
               </div>
 
