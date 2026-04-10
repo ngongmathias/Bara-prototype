@@ -281,7 +281,7 @@ export const CategoryPage = () => {
                   const props = {
                     key: listing.id,
                     listing,
-                    onClick: () => navigate(`/marketplace/listing/${listing.id}`)
+                    onClick: () => navigate(`/marketplace/ad/${listing.id}`)
                   };
 
                   if (categorySlug?.includes('property')) {

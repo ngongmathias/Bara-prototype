@@ -1195,7 +1195,7 @@ export const SearchResults = () => {
                 return (
                   <div
                     key={listing.id}
-                    onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
+                    onClick={() => navigate(`/marketplace/ad/${listing.id}`)}
                     className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                   >
                     <div className="relative w-full h-48 bg-gray-100">

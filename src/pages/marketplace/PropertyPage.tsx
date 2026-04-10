@@ -370,7 +370,7 @@ export const PropertyPage = () => {
                   <PropertyCard
                     key={listing.id}
                     listing={listing}
-                    onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
+                    onClick={() => navigate(`/marketplace/ad/${listing.id}`)}
                   />
                 ))}
               </div>

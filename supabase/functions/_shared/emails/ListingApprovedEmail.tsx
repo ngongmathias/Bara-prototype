@@ -43,7 +43,7 @@ export const ListingApprovedEmail = ({
                     Great news! Your ad for <strong>{listingTitle}</strong> has been approved and is now live on the marketplace.
                 </Text>
                 <Section style={btnContainer}>
-                    <Link style={button} href={`${baseUrl}/marketplace/listing/${listingId}`}>
+                    <Link style={button} href={`${baseUrl}/marketplace/ad/${listingId}`}>
                         View Ad
                     </Link>
                 </Section>

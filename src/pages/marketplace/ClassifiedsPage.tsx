@@ -181,7 +181,7 @@ export const ClassifiedsPage = () => {
                   return (
                     <div
                       key={listing.id}
-                      onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
+                      onClick={() => navigate(`/marketplace/ad/${listing.id}`)}
                       className="cursor-pointer group"
                     >
                       <div className="relative h-40 bg-gray-100 rounded-lg overflow-hidden mb-2">

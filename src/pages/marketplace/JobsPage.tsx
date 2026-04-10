@@ -133,7 +133,7 @@ export const JobsPage = () => {
                   <JobCard
                     key={job.id}
                     listing={job}
-                    onClick={() => navigate(`/marketplace/listing/${job.id}`)}
+                    onClick={() => navigate(`/marketplace/ad/${job.id}`)}
                   />
                 ))}
               </div>

@@ -1552,6 +1552,7 @@ BATCH 4 — Visual & UX Polish
 - [x] MyListings.tsx — "My Ads", "Post New Ad", toasts
 - [x] UserDashboard links → `/marketplace/my-ads`
 - [x] App.tsx route aliases: `/marketplace/ad/:id`, `/marketplace/my-ads`, `/marketplace/edit-ad/:id` (legacy `/listing/` still works)
+- [x] **All remaining `/marketplace/listing/` navigation links renamed to `/marketplace/ad/`** (April 10, 2026) — 26 files updated: MarketplacePage, CategoryPage, ClassifiedsPage, CategoryPostForm, JobsPage, PropertyPage, MotorsPage, SearchResults, MyFavorites, ListingDetailPage, ShareModal, AdminMarketplace, all 11 detail pages, both ListingApprovedEmail copies. Middleware keeps legacy `/listing/` matcher for old shared URLs.
 
 ### 11.3 — Trust infrastructure (done)
 - [x] Partner profile auto-created on first PostListing submit (upsert by `owner_user_id`, auto-slug)
@@ -1587,8 +1588,101 @@ BATCH 4 — Visual & UX Polish
 - [ ] Response-time computation job — populate `response_time_hours` from lead→first-response delta
 - [ ] Video ad support (field exists; no upload UI yet)
 - [ ] Slug-based ad URLs (`/marketplace/ad/iphone-15-pro-lagos` instead of UUID)
-- [ ] Category-specific ad templates (field requirements per category)
+- [x] Category-specific ad templates (field requirements per category) — `src/config/categoryFieldConfigs.ts` exists for all 11 categories; not yet wired to live posting form (see 11.8 Call A)
 - [ ] Fraud detection rules (duplicate image hash, banned words, price outliers)
+
+---
+
+## Phase 12 — Universal Share & Dynamic OG Previews (done, April 9, 2026)
+
+### 12.1 — ShareContext + ShareDialog
+- [x] `src/context/ShareContext.tsx` — global `useShare()` hook + `ShareProvider`
+- [x] `src/components/ShareDialog.tsx` — unified bottom-sheet with native `navigator.share`, copy link, WhatsApp/FB/Twitter/Email quick buttons, preview thumbnail
+- [x] Wired into: marketplace ad detail, event detail (`EventDetail.tsx`), streams song/playlist/artist, movies grid + detail, ebooks grid + detail, blog post detail
+- [x] Replaced per-component custom share dropdowns (EventDetail, etc.)
+
+### 12.2 — Vercel Edge Middleware for crawler-served OG tags
+- [x] `middleware.ts` using `@vercel/edge` with `next()` pass-through for real users
+- [x] Detects WhatsApp/Telegram/Facebook/Twitter/Slack/LinkedIn crawlers by user-agent regex
+- [x] Per-route handlers fetch from Supabase REST + inject dynamic `<meta og:*>` tags
+- [x] Matcher routes: `/marketplace/ad/:id`, `/events/:id`, `/streams/song/:id`, `/streams/playlist/:id`, `/streams/artist/:id`, `/streams/movie/:id`, `/blog/:slug`, `/listings/:slug`
+- [x] Env vars required on Vercel: `SUPABASE_URL`, `SUPABASE_ANON_KEY` (NOT service_role — this project's `service_role` lacks table GRANTs on `events`, returns 42501)
+- [x] Events query uses `venue_name,venue_address` (not non-existent `location` column)
+- [x] Homepage OG description updated: "Africa's marketplace, events, music, and community platform" (was "African Business Directory")
+
+### 12.3 — Movies & Ebooks detail pages (required for shareable URLs)
+- [x] `src/pages/streams/MovieDetailPage.tsx` — backdrop hero, poster, cast, director, related movies, Watch Now + Share; fetches `movies` table
+- [x] `src/pages/streams/EbookDetailPage.tsx` — fallback to STATIC_BOOKS dict for seed IDs 1–8, tries `ebooks` table first
+- [x] Routes added: `/streams/movie/:id`, `/streams/ebook/:id`
+- [x] Movies/Ebooks grid cards are now clickable and each have individual share URLs (previously all ebooks shared `/streams/ebooks`)
+
+### 12.3.1 — Events 1000-row limit fix (done, April 10, 2026)
+- [x] Root cause: Supabase PostgREST caps `.range()` at 1000 rows per request. `EventsPage.tsx` set `eventsLimit = 10000` but only ever received 1000.
+- [x] Fix: `eventsService.ts` `searchEvents()` now paginates in batches of 1000 when `limit > 1000`, concatenating results until all rows are fetched or the requested limit is reached.
+- [x] Deduplicated filter logic — shared `applyFilters()` helper used for both data query and count query (was duplicated before).
+- [x] `EventsPage.tsx` limit raised to 100000 (effectively unlimited). Display message updated.
+
+### 12.4 — Marketplace lead/offer NOT NULL constraint fixes
+- [x] `ListingDetailPage.tsx` `recordLead()` — early-return if `listing.created_by` is null (seller_user_id is NOT NULL on `marketplace_leads`; seeded ads can have null created_by)
+- [x] `submitOffer()` — explicit guard on `listing.created_by` before insert
+
+### 12.5 — Navigation link additions
+- [x] `UserDashboard.tsx` — "My Storefront" sidebar link (conditional on having a `marketplace_partners` row)
+- [x] `MyListings.tsx` — "My Store" button next to "Post New Ad"
+- [x] `MarketplacePage.tsx` — "My Ads" button in header next to "Sell Something"
+
+---
+
+## Phase 11.7 — Marketplace structural refactor & category UX (PLANNED, awaiting sign-off)
+
+> Strategic analysis completed April 9, 2026. Root finding: 11 detail pages (~8,000 LOC) duplicate the same chrome; only ~60 lines each are category-specific. `PostListing.tsx` (2,446 LOC hardcoded) and `CategoryPostForm.tsx` (828 LOC dynamic, reads `categoryFieldConfigs.ts` — all 11 categories defined) are parallel posting systems; only the monolith is routed. Admin has no Partners/Leads/Offers tabs despite Phase 11 data layer being deployed.
+
+### 11.7.1 — SQL migrations (blocking, small)
+- [ ] **Migration: `marketplace_phase11_7_lead_types.sql`** — `marketplace_leads`: add `lead_type` enum, `meta` jsonb, `seen_at`, `responded_at`
+- [ ] **Migration: `marketplace_phase11_7_partner_verification.sql`** — `marketplace_partners`: add `verification_doc_url`, `verification_requested_tier`, `verification_reviewed_by`, `verification_reviewed_at`, `verification_notes`
+
+### 11.7.2 — Extract shared listing primitives (Call B, revised)
+> **Keep 11 distinct detail pages** — each category should feel like its own app (property = Zillow-ish, motors = AutoTrader-ish, jobs = LinkedIn-ish, etc.). Do NOT collapse into one generic page. Instead extract the duplicated chrome into shared components each detail page composes. Fixes the silent-rot problem (e.g. Phase 12.4 NOT NULL fix + universal share dialog that currently only landed in `ListingDetailPage.tsx`) without flattening UX.
+- [ ] `src/components/marketplace/listing-parts/LeadRecorder.ts` — the `recordLead()` function with the NOT NULL guard on `listing.created_by`; called by every page's contact buttons
+- [ ] `src/components/marketplace/listing-parts/ContactActionButtons.tsx` — WhatsApp/call/email/mailto buttons with integrated lead recording; accepts `variant` prop (`primary` | `secondary`) so specialized CTAs can push it to secondary
+- [ ] `src/components/marketplace/listing-parts/SellerTrustCard.tsx` — partner badge + verification tier + rating + response time + storefront link
+- [ ] `src/components/marketplace/listing-parts/ListingGallery.tsx` — image carousel with keyboard nav, thumbnails, fullscreen
+- [ ] `src/components/marketplace/listing-parts/OfferModal.tsx` — make-an-offer form with `marketplace_offers` insert and `created_by` guard
+- [ ] `src/components/marketplace/listing-parts/ShareButton.tsx` — thin wrapper around `useShare()` with the listing URL pattern pre-filled
+- [ ] `src/components/marketplace/listing-parts/RelatedListings.tsx` — "more from this seller" or "similar ads" grid
+- [ ] `src/components/marketplace/listing-parts/ListingBreadcrumbs.tsx` — home > category > title
+- [ ] `src/components/marketplace/listing-parts/ViewCounter.tsx` — increments `views_count` on mount (one place, one effect)
+- [ ] Each of the 11 detail pages keeps its own layout, hero, specs, and category-specific CTA/sidebar components — but composes the above primitives instead of duplicating their logic
+- [ ] Target: drop from ~8,000 LOC across 11 files to ~4,000 LOC (each page becomes ~300 lines of layout + composition instead of ~700 lines of layout + chrome + duplication)
+
+### 11.7.3 — Category-specific primary CTAs (Call C)
+- [ ] `property` → **Request Viewing** modal (date + time + message) → lead with `lead_type='viewing'`
+- [ ] `motors` → **Book Test Drive** modal (date + location + message) → lead with `lead_type='test_drive'`
+- [ ] `jobs` → **Apply Now** modal (message + optional CV URL) → lead with `lead_type='application'`, status `applied`
+- [ ] `services` → **Book Appointment** modal (date + time + service notes) → lead with `lead_type='booking'`
+- [ ] `electronics`, `fashion`, `home-furniture`, `hobbies`, `kids-babies`, `pets` → keep Buy / Make Offer (`lead_type='offer'` or `'contact'`)
+- [ ] `businesses` → Contact Owner (`lead_type='contact'`)
+
+### 11.7.4 — Seller partner dashboard (Call E)
+- [ ] New page `/marketplace/partner/dashboard` — `src/pages/marketplace/PartnerDashboard.tsx`
+- [ ] Tab: Storefront editor — edit `marketplace_partners` row (cover/logo upload, bio, contact, business type)
+- [ ] Tab: Leads inbox — rows from `marketplace_leads` filtered by `seller_user_id = current user`, mark seen/responded, filter by `lead_type`
+- [ ] Tab: Offers inbox — rows from `marketplace_offers`, Accept/Decline buttons → update `status`
+- [ ] Tab: Team — view/invite `marketplace_partner_members`
+- [ ] Link entry points: `UserDashboard`, `MarketplacePage`, `MyListings` "My Store" button
+
+### 11.7.5 — Admin marketplace tabs (Call D)
+- [ ] Extend `src/pages/admin/AdminMarketplace.tsx` — add 4 tabs to existing `activeTab` state machine
+- [ ] Tab: **Partners** — list, verification tier upgrade review (approve/reject `verification_requested_tier` → sets `verification_tier`, stamps reviewed_at/by)
+- [ ] Tab: **Leads** — global read view of `marketplace_leads` (audit / dispute handling)
+- [ ] Tab: **Offers** — global read view of `marketplace_offers`
+- [ ] Tab: **Bulk Upload** — CSV → `marketplace_listings` rows linked to selected `partner_id`
+
+### 11.7.6 — Posting form unification (Call A — LAST, highest risk)
+- [ ] Port Clerk auth + image upload + partner auto-upsert logic from `PostListing.tsx` into `CategoryPostForm.tsx`
+- [ ] Swap route: `/marketplace/post` → `CategoryPostForm`
+- [ ] Delete `PostListing.tsx` (2,446 LOC removed)
+- [ ] Single source of truth for category fields = `src/config/categoryFieldConfigs.ts`
 
 ---
 
@@ -1639,4 +1733,6 @@ BATCH 4 — Visual & UX Polish
 *Updated: April 8, 2026 — Item 7.68 added (music freemium coin deduction + full purchase flow).*
 *Updated: April 6, 2026 — Phase 11 added (marketplace partner & trust overhaul: partners, verification, ratings, leads, offers, saved searches, storefronts; terminology "listing" → "ad").*
 *Updated: April 9, 2026 — Universal ShareDialog + Vercel Edge middleware for dynamic OG link previews across ads, songs, events, blog posts. Requires env vars SUPABASE_URL and SUPABASE_ANON_KEY on Vercel.*
+*Updated: April 9, 2026 — Phase 12 documented (universal share, OG middleware, movie/ebook detail pages, NOT NULL constraint fixes, nav link additions). Phase 11.7 added (planned structural refactor: detail page unification, category-specific CTAs, partner dashboard, admin tabs, posting form unification). Awaiting sign-off on Calls A–E before implementation.*
+*Updated: April 10, 2026 — All `/marketplace/listing/` navigation links renamed to `/marketplace/ad/` (26 files). Events 1000-row limit fixed via batch pagination in eventsService. Master plan status updated.*
 *For Bara Afrika Platform — baraafrika.com*

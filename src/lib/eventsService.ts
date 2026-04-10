@@ -300,109 +300,82 @@ export class EventsService {
         has_filters: !!(search_query || country_id || city_id || category)
       });
 
-      // Build the query without foreign key relationships
-      let query = supabase
-        .from('events')
-        .select('*');
-
-      // Only filter by is_public if not including private events (for admin)
-      if (!include_private) {
-        query = query.eq('is_public', true);
-      } else {
-      }
-
-      // Only filter by status if not including all statuses (for public-facing pages)
-      if (!include_all_statuses) {
-        query = query.in('event_status', ['upcoming', 'ongoing']);
-      } else {
-      }
-
-      query = query
-        .order('start_date', { ascending: true })
-        .range(offset, offset + limit - 1);
-
-      // Apply filters
-      if (search_query) {
-        query = query.or(`title.ilike.%${search_query}%,description.ilike.%${search_query}%,venue_name.ilike.%${search_query}%,organizer_name.ilike.%${search_query}%`);
-      }
-
-      if (created_by_user_id && created_by_email) {
-        query = query.or(`created_by_user_id.eq.${created_by_user_id},created_by_email.eq.${created_by_email},organizer_email.eq.${created_by_email}`);
-      } else if (created_by_user_id) {
-        query = query.eq('created_by_user_id', created_by_user_id);
-      } else if (created_by_email) {
-        query = query.or(`created_by_email.eq.${created_by_email},organizer_email.eq.${created_by_email}`);
-      }
-
-      if (country_id) {
-        query = query.eq('country_id', country_id);
-      }
-
-      if (city_id) {
-        query = query.eq('city_id', city_id);
-      }
-
-      if (category) {
-        query = query.eq('category', category);
-      }
-
-      // Add hashtag filtering
-      if (hashtags && hashtags.length > 0) {
-        query = query.overlaps('tags', hashtags);
-      }
-
-      if (start_date) {
-        query = query.gte('start_date', start_date);
-      }
-
-      if (end_date) {
-        query = query.lte('end_date', end_date);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      // Get total count separately to avoid any potential issues
-      let totalCount = 0;
-      try {
-        let countQuery = supabase
-          .from('events')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_public', true);
-
-        // Only filter by status if not including all statuses
-        if (!include_all_statuses) {
-          countQuery = countQuery.in('event_status', ['upcoming', 'ongoing']);
+      // Helper to apply all filters to a query
+      const applyFilters = (q: any) => {
+        if (!include_private) {
+          q = q.eq('is_public', true);
         }
-
-        // Apply the same filters for count
+        if (!include_all_statuses) {
+          q = q.in('event_status', ['upcoming', 'ongoing']);
+        }
         if (search_query) {
-          countQuery.or(`title.ilike.%${search_query}%,description.ilike.%${search_query}%,venue_name.ilike.%${search_query}%,organizer_name.ilike.%${search_query}%`);
+          q = q.or(`title.ilike.%${search_query}%,description.ilike.%${search_query}%,venue_name.ilike.%${search_query}%,organizer_name.ilike.%${search_query}%`);
         }
         if (created_by_user_id && created_by_email) {
-          countQuery.or(`created_by_user_id.eq.${created_by_user_id},created_by_email.eq.${created_by_email},organizer_email.eq.${created_by_email}`);
+          q = q.or(`created_by_user_id.eq.${created_by_user_id},created_by_email.eq.${created_by_email},organizer_email.eq.${created_by_email}`);
         } else if (created_by_user_id) {
-          countQuery.eq('created_by_user_id', created_by_user_id);
+          q = q.eq('created_by_user_id', created_by_user_id);
         } else if (created_by_email) {
-          countQuery.or(`created_by_email.eq.${created_by_email},organizer_email.eq.${created_by_email}`);
+          q = q.or(`created_by_email.eq.${created_by_email},organizer_email.eq.${created_by_email}`);
         }
         if (country_id) {
-          countQuery.eq('country_id', country_id);
+          q = q.eq('country_id', country_id);
         }
         if (city_id) {
-          countQuery.eq('city_id', city_id);
+          q = q.eq('city_id', city_id);
         }
         if (category) {
-          countQuery.eq('category', category);
+          q = q.eq('category', category);
+        }
+        if (hashtags && hashtags.length > 0) {
+          q = q.overlaps('tags', hashtags);
         }
         if (start_date) {
-          countQuery.gte('start_date', start_date);
+          q = q.gte('start_date', start_date);
         }
         if (end_date) {
-          countQuery.lte('end_date', end_date);
+          q = q.lte('end_date', end_date);
         }
+        return q;
+      };
 
+      // Supabase PostgREST caps at 1000 rows per request.
+      // When limit > 1000, fetch in batches and combine results.
+      const BATCH_SIZE = 1000;
+      let data: any[] = [];
+
+      if (limit <= BATCH_SIZE) {
+        // Single fetch
+        let query = applyFilters(supabase.from('events').select('*'));
+        query = query.order('start_date', { ascending: true }).range(offset, offset + limit - 1);
+        const result = await query;
+        if (result.error) throw result.error;
+        data = result.data || [];
+      } else {
+        // Paginate in batches of 1000 to bypass PostgREST row limit
+        let currentOffset = offset;
+        let remaining = limit;
+        while (remaining > 0) {
+          const batchSize = Math.min(remaining, BATCH_SIZE);
+          let query = applyFilters(supabase.from('events').select('*'));
+          query = query.order('start_date', { ascending: true }).range(currentOffset, currentOffset + batchSize - 1);
+          const result = await query;
+          if (result.error) throw result.error;
+          const batch = result.data || [];
+          data = data.concat(batch);
+          // If we got fewer rows than requested, there are no more rows
+          if (batch.length < batchSize) break;
+          currentOffset += batchSize;
+          remaining -= batchSize;
+        }
+      }
+
+      // Get total count using the same filters
+      let totalCount = 0;
+      try {
+        const countQuery = applyFilters(
+          supabase.from('events').select('*', { count: 'exact', head: true })
+        );
         const { count } = await countQuery;
         totalCount = count || 0;
       } catch (countError) {

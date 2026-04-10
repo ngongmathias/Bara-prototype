@@ -34,6 +34,13 @@ import { MonetizationService } from '@/lib/monetizationService';
 import { GamificationService } from '@/lib/gamificationService';
 import { useUser } from '@clerk/clerk-react';
 import { useShare } from "@/context/ShareContext";
+import {
+  useListingContact,
+  useListingPartner,
+  SellerTrustCard,
+  ReportListingModal,
+  buildListingShare,
+} from '@/components/marketplace/listing-parts';
 
 export const BusinessDetail = () => {
   const { listingId } = useParams();
@@ -45,9 +52,20 @@ export const BusinessDetail = () => {
   const [loading, setLoading] = useState(true);
   const [relatedListings, setRelatedListings] = useState<any[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [reportReason, setReportReason] = useState('');
 
   const { user } = useUser();
+  const partner = useListingPartner(listing?.created_by);
+  const {
+    handleWhatsApp: handleWhatsAppContact,
+    handlePhone: handlePhoneContact,
+    handleEmail: handleEmailContact,
+  } = useListingContact(listing, {
+    itemNoun: 'business',
+    source: 'business_detail_page',
+    whatsappMessage: (l) => `Hi, I'm interested in your business: ${l.title}`,
+    emailSubject: (l) => `Business Inquiry: ${l.title}`,
+    emailBody: (l) => `Hi,\n\nI'm interested in your business "${l.title}".\n\nPlease provide more details.\n\nThank you!`,
+  });
 
   useEffect(() => {
     if (listingId) {
@@ -139,71 +157,11 @@ export const BusinessDetail = () => {
     }
   };
 
-  const handleWhatsAppContact = () => {
-    if (listing?.seller_whatsapp) {
-      const message = encodeURIComponent(`Hi, I'm interested in your business: ${listing.title}`);
-      const whatsappUrl = `https://wa.me/${listing.seller_whatsapp.replace(/[^0-9]/g, '')}?text=${message}`;
-      window.open(whatsappUrl, '_blank');
-    }
-  };
-
-  const handlePhoneContact = () => {
-    if (listing?.seller_phone) {
-      window.location.href = `tel:${listing.seller_phone}`;
-    }
-  };
-
-  const handleEmailContact = () => {
-    if (listing?.seller_email) {
-      const subject = encodeURIComponent(`Business Inquiry: ${listing.title}`);
-      const body = encodeURIComponent(`Hi,\n\nI'm interested in your business "${listing.title}".\n\nPlease provide more details.\n\nThank you!`);
-      window.location.href = `mailto:${listing.seller_email}?subject=${subject}&body=${body}`;
-    }
-  };
-
   const handleShare = () => {
     if (!listing) return;
-    openShare({
-      url: `${window.location.origin}/marketplace/ad/${listing.id}`,
-      title: listing.title,
-      description: listing.description?.slice(0, 160) || listing.price ? `${listing.currency} ${listing.price}` : undefined,
-      imageUrl: listing.images?.[0]?.image_url || listing.marketplace_listing_images?.[0]?.image_url,
-    });
+    openShare(buildListingShare(listing));
     if (user) {
       try { GamificationService.trackMissionProgress(user.id, "daily_social_share"); } catch {}
-    }
-  };
-
-  const handleReport = async () => {
-    if (!reportReason.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Please provide a reason for reporting',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    try {
-      await supabase.from('marketplace_reports').insert({
-        listing_id: listingId,
-        reason: reportReason,
-        status: 'pending',
-      });
-
-      toast({
-        title: 'Report Submitted',
-        description: 'Thank you for reporting. We will review this listing.',
-      });
-      setShowReportModal(false);
-      setReportReason('');
-    } catch (error) {
-      console.error('Error reporting listing:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to submit report',
-        variant: 'destructive',
-      });
     }
   };
 
@@ -434,21 +392,7 @@ export const BusinessDetail = () => {
 
               <div className="pt-6 border-t border-gray-200">
                 <h3 className="font-semibold text-gray-900 mb-3">Business Owner</h3>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-gray-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-900">{listing.seller_name}</div>
-                    <div className="text-sm text-gray-600 capitalize">{listing.seller_type}</div>
-                  </div>
-                </div>
-                {listing.is_verified && (
-                  <div className="flex items-center gap-2 text-sm text-green-600">
-                    <CheckCircle className="w-4 h-4" />
-                    Verified Seller
-                  </div>
-                )}
+                <SellerTrustCard partner={partner} listing={listing} />
               </div>
 
               <div className="mt-6 pt-6 border-t border-gray-200 space-y-2 text-sm text-gray-600">
@@ -520,7 +464,7 @@ export const BusinessDetail = () => {
                     key={item.id}
                     onClick={() => {
                       window.scrollTo(0, 0);
-                      navigate(`/marketplace/listing/${item.id}`);
+                      navigate(`/marketplace/ad/${item.id}`);
                     }}
                     className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                   >
@@ -556,59 +500,11 @@ export const BusinessDetail = () => {
         )}
       </main>
 
-      <AnimatePresence>
-        {showReportModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={() => setShowReportModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-lg p-6 max-w-md w-full"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold">Report Business</h3>
-                <button
-                  onClick={() => setShowReportModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              <p className="text-gray-600 mb-4">
-                Please tell us why you're reporting this business listing
-              </p>
-              <textarea
-                value={reportReason}
-                onChange={(e) => setReportReason(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-3 mb-4 min-h-[100px]"
-                placeholder="Describe the issue..."
-              />
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowReportModal(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleReport}
-                  className="flex-1 bg-red-600 hover:bg-red-700"
-                >
-                  Submit Report
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ReportListingModal
+        open={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        listingId={listingId!}
+      />
 
       <BottomBannerAd />
       <Footer />

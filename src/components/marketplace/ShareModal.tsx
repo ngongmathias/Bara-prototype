@@ -19,7 +19,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ listingId, title }) => {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const url = `${window.location.origin}/marketplace/listing/${listingId}`;
+  const url = `${window.location.origin}/marketplace/ad/${listingId}`;
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
 

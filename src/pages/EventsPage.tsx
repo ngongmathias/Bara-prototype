@@ -100,7 +100,7 @@ export const EventsPage = () => {
   const { events, loading, searchEvents } = useEvents();
   const [totalEventsCount, setTotalEventsCount] = useState(0);
   const [currentOffset, setCurrentOffset] = useState(0);
-  const eventsLimit = 10000;
+  const eventsLimit = 100000; // No practical limit — service paginates through Supabase's 1000-row cap automatically
   const { categories } = useEventCategories();
   const { selectedCountry } = useCountrySelection();
 
@@ -696,9 +696,9 @@ export const EventsPage = () => {
                 <p className="text-base text-gray-600">
                   Showing <span className="font-bold text-gray-900 text-lg">{sortedEvents.length}</span> of <span className="font-bold text-gray-900 text-lg">{totalEventsCount}</span> total events
                 </p>
-                {totalEventsCount > eventsLimit && (
+                {totalEventsCount > sortedEvents.length && (
                   <p className="text-sm text-gray-500 mt-1">
-                    Displaying {eventsLimit} events per page
+                    Some events may be filtered out by your current filters
                   </p>
                 )}
               </div>

@@ -310,7 +310,7 @@ export const MotorsPage = () => {
                   <VehicleCard
                     key={listing.id}
                     listing={listing}
-                    onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
+                    onClick={() => navigate(`/marketplace/ad/${listing.id}`)}
                   />
                 ))}
               </div>

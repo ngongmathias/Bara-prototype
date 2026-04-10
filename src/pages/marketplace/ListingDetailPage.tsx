@@ -703,7 +703,7 @@ export const ListingDetailPage = () => {
                 return (
                   <div
                     key={item.id}
-                    onClick={() => navigate(`/marketplace/listing/${item.id}`)}
+                    onClick={() => navigate(`/marketplace/ad/${item.id}`)}
                     className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                   >
                     <div className="relative w-full h-48 bg-gray-100">

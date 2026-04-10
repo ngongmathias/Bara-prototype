@@ -123,7 +123,7 @@ export const MyFavorites = () => {
                   >
                     <div className="flex flex-col sm:flex-row gap-4">
                       <div
-                        onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
+                        onClick={() => navigate(`/marketplace/ad/${listing.id}`)}
                         className="relative w-full sm:w-48 h-48 bg-gray-100 flex-shrink-0 cursor-pointer"
                       >
                         <img
@@ -135,7 +135,7 @@ export const MyFavorites = () => {
 
                       <div className="flex-1 p-4">
                         <div
-                          onClick={() => navigate(`/marketplace/listing/${listing.id}`)}
+                          onClick={() => navigate(`/marketplace/ad/${listing.id}`)}
                           className="cursor-pointer"
                         >
                           <div className="text-2xl font-bold text-black mb-2 font-comfortaa">

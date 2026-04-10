@@ -288,7 +288,7 @@ export const CategoryPostForm = () => {
         description: 'Your listing has been posted successfully',
       });
 
-      navigate(`/marketplace/listing/${listing.id}`);
+      navigate(`/marketplace/ad/${listing.id}`);
     } catch (error: any) {
       console.error('Error creating listing:', error);
       toast({

@@ -524,7 +524,7 @@ export const AdminMarketplace = () => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => window.open(`/marketplace/listing/${listing.id}`, '_blank')}
+                                  onClick={() => window.open(`/marketplace/ad/${listing.id}`, '_blank')}
                                   title="View"
                                 >
                                   <Eye className="w-4 h-4" />
@@ -631,7 +631,7 @@ export const AdminMarketplace = () => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => window.open(`/marketplace/listing/${report.marketplace_listings.id}`, '_blank')}
+                                  onClick={() => window.open(`/marketplace/ad/${report.marketplace_listings.id}`, '_blank')}
                                   title="View Listing"
                                 >
                                   <Eye className="w-4 h-4" />
