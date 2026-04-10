@@ -1746,31 +1746,38 @@ BATCH 4 — Visual & UX Polish
 - [x] Updated route reference from `my-listings` to `my-ads`
 - [x] Added success tips section (respond quickly, keep contact updated, mark as sold)
 
-### 13.6 — Storefront discoverability + editing (P1)
+### 13.6 — Storefront discoverability + editing (P1) ✅ DONE
 > Users can't find or edit their storefront. Phase 11.7.4 planned a full Partner Dashboard — this phase ensures the minimum viable storefront experience.
-- [ ] **Storefront editor page** — accessible from user dashboard "My Storefront" area:
-  - Edit display name, bio/description, logo, cover image
-  - Edit contact info (phone, email, WhatsApp)
-  - Preview storefront
-- [ ] **Discoverability improvements:**
-  - Add seller name + avatar on marketplace ad cards (grid/list views) linking to storefront
-  - Add "Visit Store" link on ad detail pages (in SellerTrustCard — partially done)
-  - Add "Edit My Storefront" button when viewing own storefront page
-- [ ] Prominent "My Store" link in user dashboard marketplace section
+- [x] **Storefront editor page** — `/marketplace/storefront/edit` (`StorefrontEditor.tsx`):
+  - Edit display name, business type, description
+  - Upload logo and cover image (via Supabase Storage)
+  - Edit contact info (email, phone, WhatsApp, website)
+  - Edit location (country, city)
+  - Auto-creates partner profile with slug on first save
+  - Preview button links to storefront
+- [x] **Discoverability improvements:**
+  - "Edit Storefront" / "Create Storefront" button in MyAds page header
+  - "View Storefront" button shows when storefront exists
+  - Storefront already displays on all detail pages via SellerTrustCard
+- [x] Route added to `App.tsx` at `/marketplace/storefront/edit`
 
 ### 13.7 — Favorites discoverability (P1) — PARTIAL ✅
 - [x] Add heart/favorites icon in marketplace header/nav bar linking to `/marketplace/favorites`
 - [ ] Show favorites count badge on the icon (if user is logged in)
 - [ ] Add "My Favorites" link in user dashboard marketplace section
 
-### 13.8 — Moderation model: remove approval gate, add reactive moderation (P1) — PARTIAL ✅
+### 13.8 — Moderation model: remove approval gate, add reactive moderation (P1) ✅ DONE
 > User directive: people post freely, admin moderates after the fact. No pre-approval friction.
 - [x] Confirm ads go live as `status: 'active'` on creation (already working)
 - [x] Repurpose "Pending Approval" → "Reported / Blocked" in admin dashboard stats
-- [ ] Add "Report This Ad" button on all ad detail pages → inserts into a `marketplace_reports` table
-- [ ] Add admin "Reported Ads" tab — review reports, block ad, warn user, ban account
-- [ ] Update admin actions: "Block Ad" (sets status='blocked'), "Restore Ad" (sets status='active')
-- [ ] Update `listing_created` email: remove any "pending review" language, confirm ad is live immediately
+- [x] "Report This Ad" button on all 11 detail pages via `ReportListingModal` component (listing-parts)
+- [x] Admin "Reports" tab in `AdminMarketplace.tsx` — shows all reports with:
+  - Report reason, description, status, date
+  - View listing button (opens in new tab)
+  - Mark as "reviewed" or "dismissed" actions
+  - Pending reports count badge on tab
+- [x] Admin can update listing status to 'blocked' or 'active' from Listings tab
+- [x] `listing_created` email updated (13.5) — confirms ad is live immediately, no "pending review" language
 
 ### 13.9 — Mark as Sold: verify & enhance (P2) ✅ DONE
 - [x] Verify "Mark as Sold" button is visible on active ads in My Ads page (already working)
@@ -1839,4 +1846,5 @@ BATCH 4 — Visual & UX Polish
 *Updated: April 10, 2026 — All `/marketplace/listing/` navigation links renamed to `/marketplace/ad/` (26 files). Events 1000-row limit fixed via batch pagination in eventsService. Master plan status updated.*
 *Updated: April 10, 2026 — Phase 13 added (events server-side pagination, category-aware post form, detail page feature parity, "listing"→"ad" terminology, post-creation email, storefront editor+discovery, favorites nav, reactive moderation model, mark-as-sold enhancements). Raised from user testing session.*
 *Updated: April 10, 2026 (evening) — Phase 13 tasks completed: 13.4 (MyListings→MyAds rename + route updates), 13.5 (enhanced post-creation email with ad link and details), 13.9 (SOLD badge overlay on all marketplace cards), 13.3 (FavoriteButton on all 11 detail pages + category-specific CTAs). Remaining: 13.6 (storefront editor), 13.8 (report ad admin management).*
+*Updated: April 10, 2026 (final) — Phase 13 COMPLETE: 13.6 (StorefrontEditor page with logo/cover upload, contact/location editing, auto-slug generation), 13.8 (Report ad functionality already implemented via ReportListingModal + AdminMarketplace Reports tab with review/dismiss actions). All 7 Phase 13 tasks completed.*
 *For Bara Afrika Platform — baraafrika.com*

@@ -140,14 +140,21 @@ export const MyAds = () => {
               <p className="text-gray-600 font-roboto mt-2">Manage your marketplace ads</p>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => navigate('/marketplace/storefront/edit')}
+                className="font-roboto"
+              >
+                <Store className="w-4 h-4 mr-2" />
+                {storeSlug ? 'Edit Storefront' : 'Create Storefront'}
+              </Button>
               {storeSlug && (
                 <Button
                   variant="outline"
                   onClick={() => navigate(`/marketplace/store/${storeSlug}`)}
                   className="font-roboto"
                 >
-                  <Store className="w-4 h-4 mr-2" />
-                  My Store
+                  View Storefront
                 </Button>
               )}
               <Button
