@@ -390,8 +390,8 @@ export class EventsService {
 
       // Determine sort column and direction
       const applySorting = (q: any) => {
-        // Premium events always first
-        q = q.order('is_premium', { ascending: false, nullsFirst: false });
+        // Sort by is_featured first (events table has is_featured, not is_premium)
+        q = q.order('is_featured', { ascending: false, nullsFirst: false });
         switch (sort_by) {
           case 'title':
             q = q.order('title', { ascending: true });

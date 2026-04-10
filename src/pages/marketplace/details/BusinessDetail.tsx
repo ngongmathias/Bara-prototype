@@ -518,6 +518,13 @@ export const BusinessDetail = () => {
         listingId={listingId!}
       />
 
+      {/* Offer Modal */}
+      <OfferModal
+        open={showOfferModal}
+        onClose={() => setShowOfferModal(false)}
+        listing={listing}
+      />
+
       <BottomBannerAd />
       <Footer />
     </div>

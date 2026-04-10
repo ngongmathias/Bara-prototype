@@ -639,6 +639,13 @@ export const MotorsDetail = () => {
         listingId={listingId!}
       />
 
+      {/* Offer Modal */}
+      <OfferModal
+        open={showOfferModal}
+        onClose={() => setShowOfferModal(false)}
+        listing={listing}
+      />
+
 
       {/* Image Modal */}
       <AnimatePresence>

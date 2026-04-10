@@ -150,7 +150,7 @@ export const Header = () => {
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <header className="sticky top-0 z-[9997] backdrop-blur-md bg-white/90 border-b border-gray-200/50 shadow-sm">
+    <header className="sticky top-0 z-[9999] backdrop-blur-md bg-white/90 border-b border-gray-200/50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
 

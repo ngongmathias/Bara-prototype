@@ -665,6 +665,13 @@ export const ElectronicsDetail = () => {
         listingId={listingId!}
       />
 
+      {/* Offer Modal */}
+      <OfferModal
+        open={showOfferModal}
+        onClose={() => setShowOfferModal(false)}
+        listing={listing}
+      />
+
       {/* Image Modal */}
       <AnimatePresence>
         {showImageModal && primaryImage && (

@@ -578,6 +578,13 @@ export const FurnitureDetail = () => {
         listingId={listingId!}
       />
 
+      {/* Offer Modal */}
+      <OfferModal
+        open={showOfferModal}
+        onClose={() => setShowOfferModal(false)}
+        listing={listing}
+      />
+
       <AnimatePresence>
         {showImageModal && primaryImage && (
           <motion.div
