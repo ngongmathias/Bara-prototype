@@ -27,7 +27,8 @@ import {
   Shirt,
   PawPrint,
   Music,
-  Building2
+  Building2,
+  Heart
 } from "lucide-react";
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { supabase } from '@/lib/supabase';
@@ -266,8 +267,16 @@ const MarketplacePage = () => {
               </Button>
             </form>
 
-            {/* Sell Something + My Ads */}
+            {/* Favorites + My Ads + Sell */}
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/marketplace/favorites')}
+                className="h-12 whitespace-nowrap hidden sm:flex text-gray-600 hover:text-red-500"
+                title="My Favorites"
+              >
+                <Heart className="w-5 h-5" />
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => navigate('/marketplace/my-ads')}

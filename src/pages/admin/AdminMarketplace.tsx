@@ -372,9 +372,9 @@ export const AdminMarketplace = () => {
               </div>
             </div>
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="text-sm text-gray-600 font-roboto mb-1">Pending Approval</div>
+              <div className="text-sm text-gray-600 font-roboto mb-1">Reported / Blocked</div>
               <div className="text-3xl font-bold text-yellow-600 font-comfortaa">
-                {listings.filter(l => l.status === 'pending').length}
+                {listings.filter(l => l.status === 'blocked' || l.status === 'rejected').length}
               </div>
             </div>
             <div className="bg-white border border-gray-200 rounded-lg p-6">
