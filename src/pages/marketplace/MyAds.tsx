@@ -8,11 +8,11 @@ import { useUser } from '@clerk/clerk-react';
 import { Plus, Edit, Trash2, Eye, CheckCircle, Store } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-export const MyListings = () => {
+export const MyAds = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { toast } = useToast();
-  const [listings, setListings] = useState<any[]>([]);
+  const [ads, setAds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
@@ -30,11 +30,11 @@ export const MyListings = () => {
 
   useEffect(() => {
     if (user) {
-      fetchMyListings();
+      fetchMyAds();
     }
   }, [user, filter]);
 
-  const fetchMyListings = async () => {
+  const fetchMyAds = async () => {
     if (!user) return;
 
     setLoading(true);
@@ -58,53 +58,53 @@ export const MyListings = () => {
 
       if (error) throw error;
 
-      const transformedListings = (data || []).map((listing: any) => ({
-        ...listing,
-        category: listing.marketplace_categories,
-        country: listing.countries,
-        images: listing.marketplace_listing_images || [],
+      const transformedAds = (data || []).map((ad: any) => ({
+        ...ad,
+        category: ad.marketplace_categories,
+        country: ad.countries,
+        images: ad.marketplace_listing_images || [],
       }));
 
-      setListings(transformedListings);
+      setAds(transformedAds);
     } catch (error) {
-      console.error('Error fetching listings:', error);
+      console.error('Error fetching ads:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const deleteListing = async (listingId: string) => {
+  const deleteAd = async (adId: string) => {
     if (!confirm('Are you sure you want to delete this ad?')) return;
 
     try {
       const { error } = await supabase
         .from('marketplace_listings')
         .delete()
-        .eq('id', listingId);
+        .eq('id', adId);
 
       if (error) throw error;
 
       toast({ title: "Success", description: "Ad deleted successfully" });
-      fetchMyListings();
+      fetchMyAds();
     } catch (error) {
-      console.error('Error deleting listing:', error);
+      console.error('Error deleting ad:', error);
       toast({ title: "Error", description: "Error deleting ad", variant: "destructive" });
     }
   };
 
-  const markAsSold = async (listingId: string) => {
+  const markAsSold = async (adId: string) => {
     try {
       const { error } = await supabase
         .from('marketplace_listings')
         .update({ status: 'sold' })
-        .eq('id', listingId);
+        .eq('id', adId);
 
       if (error) throw error;
 
       toast({ title: "Success", description: "Ad marked as sold" });
-      fetchMyListings();
+      fetchMyAds();
     } catch (error) {
-      console.error('Error updating listing:', error);
+      console.error('Error updating ad:', error);
       toast({ title: "Error", description: "Error updating ad", variant: "destructive" });
     }
   };
@@ -182,13 +182,13 @@ export const MyListings = () => {
             ))}
           </div>
 
-          {/* Listings */}
+          {/* Ads */}
           {loading ? (
             <div className="text-center py-16">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
               <p className="mt-4 text-gray-600 font-roboto">Loading your ads...</p>
             </div>
-          ) : listings.length === 0 ? (
+          ) : ads.length === 0 ? (
             <div className="text-center py-16 border border-gray-200 rounded-lg">
               <p className="text-gray-500 text-lg font-roboto mb-4">No ads found</p>
               <Button
@@ -201,14 +201,14 @@ export const MyListings = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {listings.map((listing) => {
-                const primaryImage = listing.images?.find((img: any) => img.is_primary)?.image_url ||
-                  listing.images?.[0]?.image_url ||
+              {ads.map((ad) => {
+                const primaryImage = ad.images?.find((img: any) => img.is_primary)?.image_url ||
+                  ad.images?.[0]?.image_url ||
                   '/placeholder.jpg';
 
                 return (
                   <div
-                    key={listing.id}
+                    key={ad.id}
                     className="border border-gray-200 rounded-lg overflow-hidden hover:border-black transition-colors"
                   >
                     <div className="flex flex-col sm:flex-row gap-4">
@@ -216,15 +216,15 @@ export const MyListings = () => {
                       <div className="relative w-full sm:w-48 h-48 bg-gray-100 flex-shrink-0">
                         <img
                           src={primaryImage}
-                          alt={listing.title}
+                          alt={ad.title}
                           className="w-full h-full object-cover"
                         />
-                        <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${listing.status === 'active' ? 'bg-green-500 text-white' :
-                          listing.status === 'pending' ? 'bg-yellow-500 text-black' :
-                            listing.status === 'sold' ? 'bg-gray-500 text-white' :
+                        <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${ad.status === 'active' ? 'bg-green-500 text-white' :
+                          ad.status === 'pending' ? 'bg-yellow-500 text-black' :
+                            ad.status === 'sold' ? 'bg-gray-500 text-white' :
                               'bg-red-500 text-white'
                           }`}>
-                          {listing.status.toUpperCase()}
+                          {ad.status.toUpperCase()}
                         </div>
                       </div>
 
@@ -233,28 +233,28 @@ export const MyListings = () => {
                         <div className="flex items-start justify-between mb-2">
                           <div>
                             <h3 className="text-xl font-bold text-black font-comfortaa">
-                              {listing.title}
+                              {ad.title}
                             </h3>
                             <p className="text-sm text-gray-600 font-roboto">
-                              {listing.category?.name} • {listing.country?.name}
+                              {ad.category?.name} • {ad.country?.name}
                             </p>
                           </div>
                           <div className="text-xl font-bold text-black font-comfortaa">
-                            {listing.currency} {listing.price?.toLocaleString()}
+                            {ad.currency} {ad.price?.toLocaleString()}
                           </div>
                         </div>
 
                         <p className="text-gray-700 text-sm mb-4 line-clamp-2 font-roboto">
-                          {listing.description}
+                          {ad.description}
                         </p>
 
                         <div className="flex items-center gap-4 text-sm text-gray-600 font-roboto mb-4">
                           <span className="flex items-center gap-1">
                             <Eye className="w-4 h-4" />
-                            {listing.views_count || 0} views
+                            {ad.views_count || 0} views
                           </span>
                           <span>
-                            Posted: {new Date(listing.created_at).toLocaleDateString()}
+                            Posted: {new Date(ad.created_at).toLocaleDateString()}
                           </span>
                         </div>
 
@@ -263,7 +263,7 @@ export const MyListings = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate(`/marketplace/ad/${listing.id}`)}
+                            onClick={() => navigate(`/marketplace/ad/${ad.id}`)}
                             className="font-roboto"
                           >
                             <Eye className="w-4 h-4 mr-2" />
@@ -273,18 +273,18 @@ export const MyListings = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate(`/marketplace/edit/${listing.id}`)}
+                            onClick={() => navigate(`/marketplace/edit/${ad.id}`)}
                             className="font-roboto"
                           >
                             <Edit className="w-4 h-4 mr-2" />
                             Edit
                           </Button>
 
-                          {listing.status === 'active' && (
+                          {ad.status === 'active' && (
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => markAsSold(listing.id)}
+                              onClick={() => markAsSold(ad.id)}
                               className="font-roboto"
                             >
                               <CheckCircle className="w-4 h-4 mr-2" />
@@ -295,7 +295,7 @@ export const MyListings = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => deleteListing(listing.id)}
+                            onClick={() => deleteAd(ad.id)}
                             className="text-red-600 hover:text-red-700 hover:border-red-600 font-roboto"
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
@@ -317,4 +317,4 @@ export const MyListings = () => {
   );
 };
 
-export default MyListings;
+export default MyAds;

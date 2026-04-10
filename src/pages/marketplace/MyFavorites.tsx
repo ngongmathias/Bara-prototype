@@ -131,6 +131,13 @@ export const MyFavorites = () => {
                           alt={listing.title}
                           className="w-full h-full object-cover"
                         />
+                        {listing.status === 'sold' && (
+                          <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                            <div className="bg-red-600 text-white text-xl font-bold px-5 py-2 rounded-lg transform -rotate-12">
+                              SOLD
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex-1 p-4">

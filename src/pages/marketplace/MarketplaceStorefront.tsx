@@ -179,8 +179,15 @@ export const MarketplaceStorefront = () => {
                   onClick={() => navigate(`/marketplace/ad/${ad.id}`)}
                   className="text-left bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
                 >
-                  <div className="aspect-square bg-gray-100">
+                  <div className="aspect-square bg-gray-100 relative">
                     <img src={img} alt={ad.title} className="w-full h-full object-cover" />
+                    {ad.status === 'sold' && (
+                      <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                        <div className="bg-red-600 text-white text-xl font-bold px-5 py-2 rounded-lg transform -rotate-12">
+                          SOLD
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="p-3">
                     <div className="text-blue-600 font-bold">{ad.currency} {parseFloat(ad.price).toLocaleString()}</div>

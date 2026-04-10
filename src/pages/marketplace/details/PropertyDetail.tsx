@@ -50,6 +50,7 @@ import {
   OfferModal,
   buildListingShare,
 } from '@/components/marketplace/listing-parts';
+import { FavoriteButton } from '@/components/marketplace/FavoriteButton';
 
 export const PropertyDetail = () => {
   const { listingId } = useParams();
@@ -468,6 +469,14 @@ export const PropertyDetail = () => {
 
               {/* Contact Buttons */}
               <div className="space-y-3 mb-6">
+                <Button
+                  onClick={handleWhatsAppContact}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold h-12"
+                >
+                  <Calendar className="w-5 h-5 mr-2" />
+                  Request Viewing
+                </Button>
+                
                 {listing.seller_whatsapp && (
                   <Button
                     onClick={handleWhatsAppContact}
@@ -543,6 +552,7 @@ export const PropertyDetail = () => {
 
               {/* Action Buttons */}
               <div className="mt-6 pt-6 border-t border-gray-200 flex gap-2">
+                <FavoriteButton listingId={listing.id} className="border border-gray-300 rounded-md" />
                 <Button
                   variant="outline"
                   size="sm"

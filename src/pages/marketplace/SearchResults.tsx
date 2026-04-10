@@ -1210,12 +1210,19 @@ export const SearchResults = () => {
                           <Package className="w-12 h-12 text-gray-400" />
                         </div>
                       )}
-                      {listing.is_featured && (
+                      {listing.status === 'sold' && (
+                        <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                          <div className="bg-red-600 text-white text-2xl font-bold px-6 py-3 rounded-lg transform -rotate-12">
+                            SOLD
+                          </div>
+                        </div>
+                      )}
+                      {listing.is_featured && listing.status !== 'sold' && (
                         <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-xs font-semibold px-2 py-1 rounded">
                           FEATURED
                         </div>
                       )}
-                      {listing.condition && (
+                      {listing.condition && listing.status !== 'sold' && (
                         <div className="absolute top-2 left-2 bg-white text-gray-700 text-xs font-medium px-2 py-1 rounded shadow">
                           {listing.condition.toUpperCase()}
                         </div>

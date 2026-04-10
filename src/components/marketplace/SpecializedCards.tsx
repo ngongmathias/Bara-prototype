@@ -21,7 +21,14 @@ export const PropertyCard: React.FC<CardProps> = ({ listing, onClick }) => {
         >
             <div className="relative h-48 bg-gray-100">
                 <img src={primaryImage} alt={listing.title} className="w-full h-full object-cover" />
-                {listing.is_featured && (
+                {listing.status === 'sold' && (
+                    <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                        <div className="bg-red-600 text-white text-2xl font-bold px-6 py-3 rounded-lg transform -rotate-12">
+                            SOLD
+                        </div>
+                    </div>
+                )}
+                {listing.is_featured && listing.status !== 'sold' && (
                     <div className="absolute top-2 right-2 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded">
                         FEATURED
                     </div>
@@ -79,6 +86,13 @@ export const VehicleCard: React.FC<CardProps> = ({ listing, onClick }) => {
         >
             <div className="relative h-48 bg-gray-100">
                 <img src={primaryImage} alt={listing.title} className="w-full h-full object-cover" />
+                {listing.status === 'sold' && (
+                    <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                        <div className="bg-red-600 text-white text-2xl font-bold px-6 py-3 rounded-lg transform -rotate-12">
+                            SOLD
+                        </div>
+                    </div>
+                )}
             </div>
             <div className="p-4">
                 <div className="text-2xl font-bold text-black mb-1 font-comfortaa">
@@ -123,8 +137,15 @@ export const JobCard: React.FC<CardProps> = ({ listing, onClick }) => {
     return (
         <div
             onClick={onClick}
-            className="border border-gray-200 rounded-lg p-6 hover:border-black transition-colors cursor-pointer bg-white group shadow-sm"
+            className="border border-gray-200 rounded-lg p-6 hover:border-black transition-colors cursor-pointer bg-white group shadow-sm relative"
         >
+            {listing.status === 'sold' && (
+                <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-lg z-10">
+                    <div className="bg-red-600 text-white text-2xl font-bold px-6 py-3 rounded-lg transform -rotate-12">
+                        FILLED
+                    </div>
+                </div>
+            )}
             <div className="flex justify-between items-start mb-4">
                 <div>
                     <h3 className="text-xl font-bold text-black mb-1 font-comfortaa group-hover:underline">

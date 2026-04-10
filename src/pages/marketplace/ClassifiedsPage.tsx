@@ -190,6 +190,13 @@ export const ClassifiedsPage = () => {
                           alt={listing.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         />
+                        {listing.status === 'sold' && (
+                          <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                            <div className="bg-red-600 text-white text-lg font-bold px-4 py-2 rounded-lg transform -rotate-12">
+                              SOLD
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div className="text-lg font-bold text-black font-comfortaa">
                         {listing.currency} {listing.price?.toLocaleString()}

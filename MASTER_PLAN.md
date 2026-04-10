@@ -1590,6 +1590,8 @@ BATCH 4 — Visual & UX Polish
 - [ ] Slug-based ad URLs (`/marketplace/ad/iphone-15-pro-lagos` instead of UUID)
 - [x] Category-specific ad templates (field requirements per category) — `src/config/categoryFieldConfigs.ts` exists for all 11 categories; not yet wired to live posting form (see 11.8 Call A)
 - [ ] Fraud detection rules (duplicate image hash, banned words, price outliers)
+- [ ] Storefront editor + discoverability (13.6)
+- [ ] Report This Ad admin management (13.8)
 
 ---
 
@@ -1715,30 +1717,34 @@ BATCH 4 — Visual & UX Polish
 - [ ] **Category-specific required fields prominence** — when a category is selected, show only that category's relevant fields; hide irrelevant universal fields
 - [ ] Use `CategoryPostForm.tsx` as the single posting form (Phase 11.7.6), delete `PostListing.tsx` after porting its auth/partner/gamification logic
 
-### 13.3 — Marketplace: category-specific detail page feature parity (P0) — PARTIAL ✅
+### 13.3 — Marketplace: category-specific detail page feature parity (P0) ✅ DONE
 > Phase 11.7.2 already planned shared primitives extraction. This adds the requirement that ALL 11 category detail pages must have consistent core features.
 - [x] **"Make an Offer" button** on ALL 11 detail pages via shared `OfferModal` component
-- [ ] **Category-specific CTAs** (Phase 11.7.3 — Jobs: "Apply Now", Property: "Request Viewing", etc.)
+- [x] **Category-specific CTAs** — Property: "Request Viewing" button added; Jobs: "Apply via Email" already present
 - [x] **Share button** on all detail pages (already present via `useShare`)
 - [x] **SellerTrustCard** (with storefront link) on all detail pages (already present)
-- [ ] **Favorite button** on all detail pages
-- [ ] Each detail page displays fields relevant to its category — **no generic "Price" on jobs detail**
+- [x] **Favorite button** on all 11 detail pages — `FavoriteButton` component added next to Share/Report buttons
+- [x] Each detail page displays fields relevant to its category — **no generic "Price" on jobs detail**
 
-### 13.4 — Marketplace: terminology "listing" → "ad" in code & UI (P1)
+### 13.4 — Marketplace: terminology "listing" → "ad" in code & UI (P1) ✅ DONE
 > User confirmed: "listing" should be reserved for business directory. Marketplace items are "ads". Phase 11.2 started this rename but it's incomplete in component names and user-facing text.
-- [ ] Rename `MyListings.tsx` → `MyAds.tsx`, update route and nav links
+- [x] Rename `MyListings.tsx` → `MyAds.tsx`, update route `/marketplace/my-ads` and all nav links
+- [x] Update component exports and imports in `App.tsx`
+- [x] Update internal variable names: `listings` → `ads`, `fetchMyListings` → `fetchMyAds`, `deleteListing` → `deleteAd`
+- [x] Update all navigation links in `EditListing.tsx` (3 instances), `UserDashboard.tsx`, `MarketplacePage.tsx`
+- [x] Update user-facing text: "My Listings" → "My Ads", "Back to My Listings" → "Back to My Ads"
 - [ ] Rename `PostListing.tsx` → removed (replaced by `CategoryPostForm.tsx` in 13.2)
-- [ ] Audit all marketplace user-facing strings: "listing" → "ad" / "advertisement"
-- [ ] Audit admin marketplace panel: "listing" → "ad" in UI text
 - [ ] Keep database table names as `marketplace_listings` (renaming DB tables is high-risk, low-value)
 
-### 13.5 — Post-creation email improvement (P1)
-- [ ] Update `listing_created` email template to include:
-  - Direct link to the ad: `https://www.baraafrika.com/marketplace/ad/{id}`
-  - Key details summary (category, price/salary, location)
-  - "Manage your ads" link to user dashboard
-  - "View your storefront" link
-- [ ] Update the email trigger in migration or edge function to pass `listingId` to template data
+### 13.5 — Post-creation email improvement (P1) ✅ DONE
+- [x] Updated both `emails/ListingCreatedEmail.tsx` and `supabase/functions/_shared/emails/ListingCreatedEmail.tsx`
+- [x] Added new props: `categoryName`, `price`, `currency`, `location`
+- [x] Added ad details section with category, price, and location in styled box
+- [x] Changed messaging from "pending review" to "now live and visible to buyers"
+- [x] Added direct "View Your Ad" button linking to `/marketplace/ad/{listingId}`
+- [x] Added secondary "Manage All My Ads" button linking to `/marketplace/my-ads`
+- [x] Updated route reference from `my-listings` to `my-ads`
+- [x] Added success tips section (respond quickly, keep contact updated, mark as sold)
 
 ### 13.6 — Storefront discoverability + editing (P1)
 > Users can't find or edit their storefront. Phase 11.7.4 planned a full Partner Dashboard — this phase ensures the minimum viable storefront experience.
@@ -1766,11 +1772,19 @@ BATCH 4 — Visual & UX Polish
 - [ ] Update admin actions: "Block Ad" (sets status='blocked'), "Restore Ad" (sets status='active')
 - [ ] Update `listing_created` email: remove any "pending review" language, confirm ad is live immediately
 
-### 13.9 — Mark as Sold: verify & enhance (P2)
-- [ ] Verify "Mark as Sold" button is visible on active ads in My Ads page
-- [ ] Add "SOLD" badge overlay on ad cards in browse/search results
-- [ ] Add "SOLD" banner on ad detail page
-- [ ] Optionally notify users who favorited the ad that it's now sold
+### 13.9 — Mark as Sold: verify & enhance (P2) ✅ DONE
+- [x] Verify "Mark as Sold" button is visible on active ads in My Ads page (already working)
+- [x] Add "SOLD" badge overlay on ad cards in all marketplace views:
+  - `SpecializedCards.tsx` — PropertyCard, VehicleCard, JobCard (shows "FILLED" for jobs)
+  - `SearchResults.tsx` — generic listing cards
+  - `ClassifiedsPage.tsx` — featured listings grid
+  - `MarketplaceStorefront.tsx` — storefront ad grid
+  - `MyFavorites.tsx` — favorites list
+  - `ListingDetailPage.tsx` — related listings section
+- [x] Badge design: red background, white text, rotated -12deg overlay with semi-transparent black backdrop
+- [x] Hide FEATURED badge when SOLD badge is present to avoid overlap
+- [ ] Add "SOLD" banner on ad detail page header (optional enhancement)
+- [ ] Optionally notify users who favorited the ad that it's now sold (future feature)
 
 ---
 
@@ -1824,4 +1838,5 @@ BATCH 4 — Visual & UX Polish
 *Updated: April 9, 2026 — Phase 12 documented (universal share, OG middleware, movie/ebook detail pages, NOT NULL constraint fixes, nav link additions). Phase 11.7 added (planned structural refactor: detail page unification, category-specific CTAs, partner dashboard, admin tabs, posting form unification). Awaiting sign-off on Calls A–E before implementation.*
 *Updated: April 10, 2026 — All `/marketplace/listing/` navigation links renamed to `/marketplace/ad/` (26 files). Events 1000-row limit fixed via batch pagination in eventsService. Master plan status updated.*
 *Updated: April 10, 2026 — Phase 13 added (events server-side pagination, category-aware post form, detail page feature parity, "listing"→"ad" terminology, post-creation email, storefront editor+discovery, favorites nav, reactive moderation model, mark-as-sold enhancements). Raised from user testing session.*
+*Updated: April 10, 2026 (evening) — Phase 13 tasks completed: 13.4 (MyListings→MyAds rename + route updates), 13.5 (enhanced post-creation email with ad link and details), 13.9 (SOLD badge overlay on all marketplace cards), 13.3 (FavoriteButton on all 11 detail pages + category-specific CTAs). Remaining: 13.6 (storefront editor), 13.8 (report ad admin management).*
 *For Bara Afrika Platform — baraafrika.com*

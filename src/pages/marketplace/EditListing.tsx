@@ -153,11 +153,11 @@ export const EditListing = () => {
 
       if (error) throw error;
 
-      toast({ title: "Success", description: "Listing updated successfully!" });
-      navigate('/marketplace/my-listings');
+      toast({ title: "Success", description: "Ad updated successfully!" });
+      navigate('/marketplace/my-ads');
     } catch (error) {
-      console.error('Error updating listing:', error);
-      toast({ title: "Error", description: "Error updating listing. Please try again.", variant: "destructive" });
+      console.error('Error updating ad:', error);
+      toast({ title: "Error", description: "Error updating ad. Please try again.", variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -184,13 +184,13 @@ export const EditListing = () => {
           <div className="mb-6">
             <Button
               variant="ghost"
-              onClick={() => navigate('/marketplace/my-listings')}
+              onClick={() => navigate('/marketplace/my-ads')}
               className="mb-4"
             >
               <ChevronLeft className="w-4 h-4 mr-2" />
-              Back to My Listings
+              Back to My Ads
             </Button>
-            <h1 className="text-3xl font-bold text-black font-comfortaa">Edit Listing</h1>
+            <h1 className="text-3xl font-bold text-black font-comfortaa">Edit Ad</h1>
           </div>
 
           <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-8 space-y-6">
@@ -379,7 +379,7 @@ export const EditListing = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate('/marketplace/my-listings')}
+                onClick={() => navigate('/marketplace/my-ads')}
                 className="flex-1"
               >
                 Cancel

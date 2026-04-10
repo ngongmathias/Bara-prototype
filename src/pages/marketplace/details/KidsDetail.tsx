@@ -42,6 +42,7 @@ import {
   OfferModal,
   buildListingShare,
 } from '@/components/marketplace/listing-parts';
+import { FavoriteButton } from '@/components/marketplace/FavoriteButton';
 
 export const KidsDetail = () => {
   const { listingId } = useParams();
@@ -480,6 +481,7 @@ export const KidsDetail = () => {
               </div>
 
               <div className="mt-6 pt-6 border-t border-gray-200 flex gap-2">
+                <FavoriteButton listingId={listing.id} className="border border-gray-300 rounded-md" />
                 <Button
                   variant="outline"
                   size="sm"

@@ -136,7 +136,7 @@ import PostListing from "./pages/marketplace/PostListing";
 
 import CategoryPostForm from "./pages/marketplace/CategoryPostForm";
 
-import MyListings from "./pages/marketplace/MyListings";
+import MyAds from "./pages/marketplace/MyAds";
 
 import SearchResults from "./pages/marketplace/SearchResults";
 
@@ -602,9 +602,7 @@ const AppRoutes = () => {
 
           <Route path="post" element={<PostListing />} />
 
-          <Route path="my-listings" element={<MyListings />} />
-
-          <Route path="my-ads" element={<MyListings />} />
+          <Route path="my-ads" element={<MyAds />} />
 
           <Route path="listing/:listingId" element={<CategoryDetailRouter />} />
 
