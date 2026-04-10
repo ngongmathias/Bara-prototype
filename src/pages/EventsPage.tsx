@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -43,7 +43,6 @@ export const EventsPage = () => {
   const [selectedEvent, setSelectedEvent] = useState<DatabaseEvent | null>(null);
   const [activeEventsPage, setActiveEventsPage] = useState(1);
   const [pastEventsPage, setPastEventsPage] = useState(1);
-  const eventsPerSection = 12;
   const [mapModalOpen, setMapModalOpen] = useState(false);
   const [mapEvents, setMapEvents] = useState<any[]>([]);
   const [selectedEventForMap, setSelectedEventForMap] = useState<string | undefined>();
@@ -96,13 +95,25 @@ export const EventsPage = () => {
     }
   };
 
-  // Use real data from database
-  const { events, loading, searchEvents } = useEvents();
-  const [totalEventsCount, setTotalEventsCount] = useState(0);
-  const [currentOffset, setCurrentOffset] = useState(0);
-  const eventsLimit = 100000; // No practical limit — service paginates through Supabase's 1000-row cap automatically
+  // Use real data from database — server-side pagination
+  const { searchEvents } = useEvents();
+  const [activeEvents, setActiveEvents] = useState<DatabaseEvent[]>([]);
+  const [pastEvents, setPastEvents] = useState<DatabaseEvent[]>([]);
+  const [activeEventsTotal, setActiveEventsTotal] = useState(0);
+  const [pastEventsTotal, setPastEventsTotal] = useState(0);
+  const [loadingActive, setLoadingActive] = useState(false);
+  const [loadingPast, setLoadingPast] = useState(false);
+  const eventsPerSection = 12;
   const { categories } = useEventCategories();
   const { selectedCountry } = useCountrySelection();
+
+  // Debounced search query — avoids firing a query on every keystroke
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    searchTimerRef.current = setTimeout(() => setDebouncedSearch(searchQuery), 400);
+    return () => clearTimeout(searchTimerRef.current);
+  }, [searchQuery]);
 
   // Check URL for country parameter on mount
   useEffect(() => {
@@ -113,157 +124,94 @@ export const EventsPage = () => {
     }
   }, []);
 
-  // Load events on component mount and when selected country changes
-  useEffect(() => {
-    const loadEvents = async () => {
-      const result = await searchEvents({
-        country_id: selectedCountry?.id,
-        limit: eventsLimit,
-        offset: 0, // Always load from beginning
-        include_all_statuses: true // Include past events for the Past Events section
-      });
-      if (result) {
-        setTotalEventsCount(result.total_count);
-      }
+  // Build shared query params from current filter state
+  const buildQueryParams = useCallback(() => {
+    const params: any = {
+      country_id: selectedCountry?.id,
+      include_all_statuses: true,
     };
-    loadEvents();
-  }, [searchEvents, selectedCountry]);
-
-  // Filter events based on search and filters
-  const filteredEvents = events.filter(event => {
-
-    const matchesSearch = !searchQuery ||
-      event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (event.venue_name && event.venue_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (event.organizer_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      // Include hashtag search in main search
-      (event.tags && event.tags.some(tag =>
-        tag.toLowerCase().includes(searchQuery.toLowerCase().replace('#', ''))
-      ));
-
-    // Check both category slug and category field (which contains display name)
-    // Convert event.category (display name) to slug format
-    const eventCategorySlug = event.category
-      ? event.category.toLowerCase()
-        .replace(/\s*&\s*/g, '-and-') // Replace " & " with "-and-"
-        .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
-        .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
-      : '';
-
-    // Also check category_name if it exists
-    const categoryNameSlug = event.category_name
-      ? event.category_name.toLowerCase()
-        .replace(/\s*&\s*/g, '-and-') // Replace " & " with "-and-"
-        .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
-        .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
-      : '';
-
-    const matchesCategory = selectedCategory === 'all' ||
-      event.category === selectedCategory ||
-      event.category_name === selectedCategory ||
-      eventCategorySlug === selectedCategory ||
-      categoryNameSlug === selectedCategory;
-
-    const eventStart = parseDate(event.start_date);
-    const eventEnd = parseDate(event.end_date);
-    const filterStart = parseDate(startDate);
-    const filterEnd = parseDate(endDate);
-    const matchesStartDate = !filterStart || !eventStart || eventStart >= filterStart;
-    const matchesEndDate = !filterEnd || !eventEnd || eventEnd <= filterEnd;
-
-    // Filter by URL country parameter if present
-    const matchesCountry = !urlCountryFilter ||
-      (event.country_name && event.country_name.toLowerCase() === urlCountryFilter.toLowerCase());
-
-    return matchesSearch && matchesCategory && matchesStartDate && matchesEndDate && matchesCountry;
-  });
-
-  // Sort events
-  const sortedEvents = [...filteredEvents].sort((a, b) => {
-    // Phase 7: Priority sorting for Premium/Paid events
-    if (a.is_premium && !b.is_premium) return -1;
-    if (!a.is_premium && b.is_premium) return 1;
-
-    switch (sortBy) {
-      case 'date':
-        return (parseDate(a.start_date)?.getTime() ?? Number.POSITIVE_INFINITY) - (parseDate(b.start_date)?.getTime() ?? Number.POSITIVE_INFINITY);
-      case 'title':
-        return a.title.localeCompare(b.title);
-      case 'location':
-        return (a.city_name || '').localeCompare(b.city_name || '');
-      default:
-        return 0;
+    if (debouncedSearch.trim()) {
+      params.search_query = debouncedSearch.trim();
     }
-  });
-
-  // Apply time-based filter
-  const timeFilteredEvents = sortedEvents.filter(event => {
-    if (timeFilter === 'all') return true;
-
-    const now = new Date();
-    const eventStart = parseDate(event.start_date);
-    const eventEnd = parseDate(event.end_date);
-    if (!eventStart || !eventEnd) return true;
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const dayAfterTomorrow = new Date(tomorrow);
-    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
-
-    switch (timeFilter) {
-      case 'active':
-        // Events that haven't ended yet (upcoming or ongoing)
-        return eventEnd >= now;
-      case 'happening':
-        // Events happening right now
-        return eventStart <= now && eventEnd >= now;
-      case 'today':
-        // Events starting today
-        return eventStart >= today && eventStart < tomorrow;
-      case 'tomorrow':
-        // Events starting tomorrow
-        return eventStart >= tomorrow && eventStart < dayAfterTomorrow;
-      case 'weekend':
-        // Events happening on the upcoming weekend (Saturday or Sunday)
-        const dayOfWeek = eventStart.getDay();
-        const daysUntilSaturday = (6 - now.getDay() + 7) % 7;
-        const nextSaturday = new Date(today);
-        nextSaturday.setDate(nextSaturday.getDate() + daysUntilSaturday);
-        const nextMonday = new Date(nextSaturday);
-        nextMonday.setDate(nextMonday.getDate() + 2);
-        return eventStart >= nextSaturday && eventStart < nextMonday;
-      default:
-        return true;
+    if (selectedCategory !== 'all') {
+      params.category = selectedCategory;
     }
-  });
+    if (startDate) {
+      params.start_date = startDate;
+    }
+    if (endDate) {
+      params.end_date = endDate;
+    }
+    if (sortBy) {
+      params.sort_by = sortBy;
+    }
+    // Map the time filter for specific sub-filters (today, tomorrow, weekend, happening)
+    if (timeFilter && timeFilter !== 'all' && timeFilter !== 'active') {
+      params.time_filter = timeFilter;
+    }
+    return params;
+  }, [selectedCountry, debouncedSearch, selectedCategory, startDate, endDate, sortBy, timeFilter]);
 
-  // Split into Active and Past events BEFORE pagination
-  const now = new Date();
-  const allActiveEvents = timeFilteredEvents.filter(e => {
-    const end = parseDate(e.end_date);
-    const start = parseDate(e.start_date);
-    const compareDate = end ?? start;
-    if (!compareDate) return false;
-    return compareDate >= now;
-  });
-  const allPastEvents = timeFilteredEvents.filter(e => {
-    const end = parseDate(e.end_date);
-    const start = parseDate(e.start_date);
-    const compareDate = end ?? start;
-    if (!compareDate) return true;
-    return compareDate < now;
-  });
+  // Load active (upcoming/ongoing) events
+  const loadActiveEvents = useCallback(async (page: number) => {
+    setLoadingActive(true);
+    try {
+      const params = buildQueryParams();
+      params.time_filter = (timeFilter === 'all' || timeFilter === 'active') ? 'active' : timeFilter;
+      params.limit = eventsPerSection;
+      params.offset = (page - 1) * eventsPerSection;
+      const result = await EventsService.searchEvents(params);
+      setActiveEvents(result.events);
+      setActiveEventsTotal(result.total_count);
+    } catch (err) {
+      console.error('Error loading active events:', err);
+    } finally {
+      setLoadingActive(false);
+    }
+  }, [buildQueryParams, timeFilter, eventsPerSection]);
 
-  // Paginate active events
-  const activeEventsTotalPages = Math.ceil(allActiveEvents.length / eventsPerSection);
-  const activeEventsStartIndex = (activeEventsPage - 1) * eventsPerSection;
-  const activeEvents = allActiveEvents.slice(activeEventsStartIndex, activeEventsStartIndex + eventsPerSection);
+  // Load past events
+  const loadPastEvents = useCallback(async (page: number) => {
+    setLoadingPast(true);
+    try {
+      const params = buildQueryParams();
+      params.time_filter = 'past';
+      params.limit = eventsPerSection;
+      params.offset = (page - 1) * eventsPerSection;
+      const result = await EventsService.searchEvents(params);
+      setPastEvents(result.events);
+      setPastEventsTotal(result.total_count);
+    } catch (err) {
+      console.error('Error loading past events:', err);
+    } finally {
+      setLoadingPast(false);
+    }
+  }, [buildQueryParams, eventsPerSection]);
 
-  // Paginate past events
-  const pastEventsTotalPages = Math.ceil(allPastEvents.length / eventsPerSection);
-  const pastEventsStartIndex = (pastEventsPage - 1) * eventsPerSection;
-  const pastEvents = allPastEvents.slice(pastEventsStartIndex, pastEventsStartIndex + eventsPerSection);
+  // Reload both sections when filters change
+  useEffect(() => {
+    setActiveEventsPage(1);
+    setPastEventsPage(1);
+    loadActiveEvents(1);
+    loadPastEvents(1);
+  }, [selectedCountry, debouncedSearch, selectedCategory, startDate, endDate, sortBy, timeFilter]);
+
+  // Reload active events when its page changes
+  useEffect(() => {
+    loadActiveEvents(activeEventsPage);
+  }, [activeEventsPage]);
+
+  // Reload past events when its page changes
+  useEffect(() => {
+    loadPastEvents(pastEventsPage);
+  }, [pastEventsPage]);
+
+  // Server-side pagination totals
+  const activeEventsTotalPages = Math.ceil(activeEventsTotal / eventsPerSection);
+  const pastEventsTotalPages = Math.ceil(pastEventsTotal / eventsPerSection);
+
+  // Combined list of currently loaded events (for map, gallery, event lookup)
+  const allLoadedEvents = [...activeEvents, ...pastEvents];
 
 
   const handleViewEvent = (event: DatabaseEvent) => {
@@ -275,7 +223,7 @@ export const EventsPage = () => {
   };
 
   const handleViewGallery = (eventId: string) => {
-    const event = events.find(e => e.id === eventId);
+    const event = allLoadedEvents.find(e => e.id === eventId);
     if (event && event.event_images && event.event_images.length > 0) {
       setSelectedGalleryEvent(event);
       setGalleryModalOpen(true);
@@ -301,11 +249,11 @@ export const EventsPage = () => {
   };
 
   const handleLocationClick = async (eventId: string, city?: string) => {
-    const clickedEvent = events.find(e => e.id === eventId);
+    const clickedEvent = allLoadedEvents.find(e => e.id === eventId);
     if (!clickedEvent) return;
 
     // Get ALL events with valid coordinates from the database
-    const eventsWithCoords = events.filter(e =>
+    const eventsWithCoords = allLoadedEvents.filter(e =>
       ((e.latitude && e.longitude) || (e.venue_latitude && e.venue_longitude))
     );
 
@@ -330,7 +278,7 @@ export const EventsPage = () => {
   // Get ALL events with coordinates for event detail map
   const getAllEventsForMap = (currentEvent: DatabaseEvent) => {
     // Get ALL events with valid coordinates from the database
-    const eventsWithCoords = events.filter(e =>
+    const eventsWithCoords = allLoadedEvents.filter(e =>
       e.id !== currentEvent.id && // Exclude current event to add it first
       ((e.latitude && e.longitude) || (e.venue_latitude && e.venue_longitude))
     );
@@ -371,7 +319,7 @@ export const EventsPage = () => {
         MonetizationService.trackInteraction(event.id, 'event', 'impression');
       });
     }
-  }, [activeEventsStartIndex]); // Track on page change
+  }, [activeEventsPage]); // Track on page change
 
   // Handle direct URL access to event details (e.g. /events/<uuid>)
   // Runs once on mount + when events first load
@@ -386,8 +334,8 @@ export const EventsPage = () => {
     }
 
     // First check if the event is already in the loaded list
-    if (events.length > 0) {
-      const found = events.find(e => e.id === urlEventId);
+    if (allLoadedEvents.length > 0) {
+      const found = allLoadedEvents.find(e => e.id === urlEventId);
       if (found) {
         setSelectedEvent(found);
         setInitialLoadDone(true);
@@ -415,7 +363,7 @@ export const EventsPage = () => {
     };
     fetchDirectEvent();
     return () => { cancelled = true; };
-  }, [events, splatParam]);
+  }, [allLoadedEvents, splatParam]);
 
   // Update URL when viewing event details (only after initial load to prevent premature redirect)
   useEffect(() => {
@@ -500,7 +448,7 @@ export const EventsPage = () => {
             }}
           />
           <SimilarEvents
-            events={events}
+            events={allLoadedEvents}
             currentEvent={selectedEvent}
             onEventClick={(event) => {
               setSelectedEvent(event);
@@ -641,7 +589,7 @@ export const EventsPage = () => {
               <div className="space-y-4">
                 <label className="text-base font-bold text-gray-900 uppercase tracking-wide">Organizers</label>
                 <div className="grid grid-cols-2 gap-3">
-                  {[...new Set(events.map(e => e.organizer_name).filter(Boolean))].slice(0, 20).map((organizer, idx) => (
+                  {[...new Set(allLoadedEvents.map(e => e.organizer_name).filter(Boolean))].slice(0, 20).map((organizer, idx) => (
                     <label key={idx} className="flex items-start space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
                       <input
                         type="checkbox"
@@ -694,11 +642,11 @@ export const EventsPage = () => {
               {/* Results Count */}
               <div className="pt-6 border-t border-gray-200">
                 <p className="text-base text-gray-600">
-                  Showing <span className="font-bold text-gray-900 text-lg">{sortedEvents.length}</span> of <span className="font-bold text-gray-900 text-lg">{totalEventsCount}</span> total events
+                  Showing <span className="font-bold text-gray-900 text-lg">{activeEventsTotal + pastEventsTotal}</span> events
                 </p>
-                {totalEventsCount > sortedEvents.length && (
+                {(activeEventsTotal + pastEventsTotal) > allLoadedEvents.length && (
                   <p className="text-sm text-gray-500 mt-1">
-                    Some events may be filtered out by your current filters
+                    Browse pages to see more events
                   </p>
                 )}
               </div>
@@ -801,7 +749,7 @@ export const EventsPage = () => {
                 </Button>
               </div>
             </div>
-            {loading ? (
+            {(loadingActive && loadingPast) ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
                 <p className="text-gray-600">Loading events...</p>
@@ -836,17 +784,17 @@ export const EventsPage = () => {
 
                 {viewMode === 'grid' ? (
                   <>
-                    {sortedEvents.length > 0 ? (
+                    {(activeEventsTotal + pastEventsTotal) > 0 ? (
                       <>
                         {/* Active Events Section */}
-                        {allActiveEvents.length > 0 && (
+                        {activeEvents.length > 0 && (
                           <div className="mb-12">
                             <div className="mb-6">
                               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                                 Active Events
                               </h2>
                               <p className="text-gray-600">
-                                Showing {activeEventsStartIndex + 1}-{Math.min(activeEventsStartIndex + eventsPerSection, allActiveEvents.length)} of {allActiveEvents.length} upcoming and ongoing events
+                                Showing {((activeEventsPage - 1) * eventsPerSection) + 1}-{Math.min(activeEventsPage * eventsPerSection, activeEventsTotal)} of {activeEventsTotal} upcoming and ongoing events
                               </p>
                             </div>
 
@@ -876,7 +824,7 @@ export const EventsPage = () => {
                                     priceDisplay={getEventPriceDisplay(event)}
                                     currency={event.currency}
                                     onViewEvent={(id) => {
-                                      const eventToView = events.find(e => e.id === id);
+                                      const eventToView = allLoadedEvents.find(e => e.id === id);
                                       if (eventToView) {
                                         handleViewEvent(eventToView);
                                       }
@@ -940,14 +888,14 @@ export const EventsPage = () => {
                         )}
 
                         {/* Past Events Section */}
-                        {allPastEvents.length > 0 && (
+                        {pastEvents.length > 0 && (
                           <div className="mb-12">
                             <div className="mb-6">
                               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                                 Past Events
                               </h2>
                               <p className="text-gray-600">
-                                Showing {pastEventsStartIndex + 1}-{Math.min(pastEventsStartIndex + eventsPerSection, allPastEvents.length)} of {allPastEvents.length} past events
+                                Showing {((pastEventsPage - 1) * eventsPerSection) + 1}-{Math.min(pastEventsPage * eventsPerSection, pastEventsTotal)} of {pastEventsTotal} past events
                               </p>
                             </div>
 
@@ -979,7 +927,7 @@ export const EventsPage = () => {
                                     galleryImages={event.event_images}
                                     isPastEvent={true}
                                     onViewEvent={(id) => {
-                                      const eventToView = events.find(e => e.id === id);
+                                      const eventToView = allLoadedEvents.find(e => e.id === id);
                                       if (eventToView) {
                                         handleViewEvent(eventToView);
                                       }
@@ -1106,7 +1054,7 @@ export const EventsPage = () => {
                         for (let day = 1; day <= daysInMonth; day++) {
                           const date = new Date(currentYear, currentMonth, day);
                           const dateStr = date.toLocaleDateString('en-CA');
-                          const dayEvents = sortedEvents.filter(e => {
+                          const dayEvents = allLoadedEvents.filter(e => {
                             const eventDateStr = typeof e.start_date === 'string'
                               ? new Date(e.start_date).toLocaleDateString('en-CA')
                               : (parseDate(String(e.start_date))?.toLocaleDateString('en-CA') ?? '');
@@ -1213,12 +1161,18 @@ const HeroSlideshow = () => {
 
   useEffect(() => {
     const fetchSlides = async () => {
-      const { data } = await supabase
-        .from('event_slideshow_images')
-        .select('image_url, video_url, video_thumbnail, media_type, title, description, is_active, sort_order')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
-      setSlides((data || []) as any);
+      try {
+        const { data, error } = await supabase
+          .from('event_slideshow_images')
+          .select('image_url, video_url, video_thumbnail, media_type, title, description, is_active, sort_order')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
+        if (!error) {
+          setSlides((data || []) as any);
+        }
+      } catch {
+        // Table may not exist yet — silently fall back to static hero
+      }
     };
     fetchSlides();
   }, []);

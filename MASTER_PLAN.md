@@ -1686,6 +1686,99 @@ BATCH 4 — Visual & UX Polish
 
 ---
 
+## Phase 13 — Events Performance, Marketplace UX & Terminology Cleanup (April 10, 2026)
+
+> User-raised concerns: events page loads all rows (100K limit) causing slow page loads; marketplace post form uses generic "Price" and requires images for ALL categories including jobs; each category should feel like its own mini-app with relevant fields only; storefront is hard to find and can't be edited; "Make an Offer" only exists on the generic detail page, not on category-specific detail pages; favorites page has no navigation path; admin approval gate is unwanted friction; "listing" terminology in marketplace should become "ad" to avoid confusion with business listings; events page throws 400 error on `event_slideshow_images` table query.
+
+### 13.1 — Events: server-side pagination & performance (P0)
+- [ ] Replace `eventsLimit = 100000` with `24` (12 active + 12 past per page)
+- [ ] Move search, category, date, and time filters into `eventsService.searchEvents()` Supabase query (currently client-side)
+- [ ] Add "Load More" button or page-number pagination for both Active and Past sections
+- [ ] Keep country filter as-is (already server-side)
+- [ ] Fix 400 error: `event_slideshow_images` table query — either create the table or guard the query
+- [ ] Test with large dataset to confirm loading is fast
+
+### 13.2 — Marketplace: category-aware post form overhaul (P0)
+> Each category should feel like its own posting experience. The universal "Price" + "Image required" pattern doesn't fit all categories. This extends Phase 11.7.6 (posting form unification).
+- [ ] **Category-specific "value" field** — replace the universal required Price field:
+  - `jobs` → "Salary Range" (min/max, currency, period: monthly/yearly/hourly) — **not** "Price"
+  - `property` → "Price" (keep as-is, add rent/buy toggle with period)
+  - `motors` → "Price" (keep as-is)
+  - `services` → "Rate" (amount + period: hourly/daily/per-project)
+  - `electronics`, `fashion`, `home-furniture`, `kids-babies`, `hobbies`, `pets` → "Price" (keep)
+  - `businesses` → "Price / Valuation" (optional for some sub-types)
+- [ ] **Category-specific image requirements:**
+  - `jobs` → image **optional** (guidance: "Upload company logo or workplace photo")
+  - `services` → image **optional** (guidance: "Upload portfolio or sample work")
+  - `property`, `motors`, `electronics`, `fashion` → image **required** (at least 1)
+  - All others → image recommended but not blocking
+- [ ] **Category-specific required fields prominence** — when a category is selected, show only that category's relevant fields; hide irrelevant universal fields
+- [ ] Ensure the create form labels match what the detail page displays (e.g., if detail page says "Salary" then form must say "Salary", not "Price")
+- [ ] Use `CategoryPostForm.tsx` as the single posting form (Phase 11.7.6), delete `PostListing.tsx` after porting its auth/partner/gamification logic
+
+### 13.3 — Marketplace: category-specific detail page feature parity (P0)
+> Phase 11.7.2 already planned shared primitives extraction. This adds the requirement that ALL 11 category detail pages must have consistent core features.
+- [ ] **"Make an Offer" / category CTA** on ALL detail pages (currently only on generic `ListingDetailPage.tsx`):
+  - Jobs → "Apply Now" (Phase 11.7.3)
+  - Property → "Request Viewing" (Phase 11.7.3)
+  - Motors → "Book Test Drive" (Phase 11.7.3)
+  - Services → "Book Appointment" (Phase 11.7.3)
+  - All others → "Make an Offer" + "Contact Seller"
+- [ ] **Favorite button** on all detail pages
+- [ ] **Share button** on all detail pages
+- [ ] **SellerTrustCard** (with storefront link) on all detail pages
+- [ ] Each detail page displays fields relevant to its category (salary for jobs, bedrooms for property, mileage for motors, etc.) — **no generic "Price" on jobs detail**
+
+### 13.4 — Marketplace: terminology "listing" → "ad" in code & UI (P1)
+> User confirmed: "listing" should be reserved for business directory. Marketplace items are "ads". Phase 11.2 started this rename but it's incomplete in component names and user-facing text.
+- [ ] Rename `MyListings.tsx` → `MyAds.tsx`, update route and nav links
+- [ ] Rename `PostListing.tsx` → removed (replaced by `CategoryPostForm.tsx` in 13.2)
+- [ ] Audit all marketplace user-facing strings: "listing" → "ad" / "advertisement"
+- [ ] Audit admin marketplace panel: "listing" → "ad" in UI text
+- [ ] Keep database table names as `marketplace_listings` (renaming DB tables is high-risk, low-value)
+
+### 13.5 — Post-creation email improvement (P1)
+- [ ] Update `listing_created` email template to include:
+  - Direct link to the ad: `https://www.baraafrika.com/marketplace/ad/{id}`
+  - Key details summary (category, price/salary, location)
+  - "Manage your ads" link to user dashboard
+  - "View your storefront" link
+- [ ] Update the email trigger in migration or edge function to pass `listingId` to template data
+
+### 13.6 — Storefront discoverability + editing (P1)
+> Users can't find or edit their storefront. Phase 11.7.4 planned a full Partner Dashboard — this phase ensures the minimum viable storefront experience.
+- [ ] **Storefront editor page** — accessible from user dashboard "My Storefront" area:
+  - Edit display name, bio/description, logo, cover image
+  - Edit contact info (phone, email, WhatsApp)
+  - Preview storefront
+- [ ] **Discoverability improvements:**
+  - Add seller name + avatar on marketplace ad cards (grid/list views) linking to storefront
+  - Add "Visit Store" link on ad detail pages (in SellerTrustCard — partially done)
+  - Add "Edit My Storefront" button when viewing own storefront page
+- [ ] Prominent "My Store" link in user dashboard marketplace section
+
+### 13.7 — Favorites discoverability (P1)
+- [ ] Add heart/favorites icon in marketplace header/nav bar linking to `/marketplace/favorites`
+- [ ] Show favorites count badge on the icon (if user is logged in)
+- [ ] Add "My Favorites" link in user dashboard marketplace section
+
+### 13.8 — Moderation model: remove approval gate, add reactive moderation (P1)
+> User directive: people post freely, admin moderates after the fact. No pre-approval friction.
+- [ ] Confirm ads go live as `status: 'active'` on creation (already working — keep this)
+- [ ] Remove "Pending Approval" count/filter from admin marketplace dashboard (or repurpose for reported/flagged ads)
+- [ ] Add "Report This Ad" button on all ad detail pages → inserts into a `marketplace_reports` table
+- [ ] Add admin "Reported Ads" tab — review reports, block ad, warn user, ban account
+- [ ] Update admin actions: "Block Ad" (sets status='blocked'), "Restore Ad" (sets status='active')
+- [ ] Update `listing_created` email: remove any "pending review" language, confirm ad is live immediately
+
+### 13.9 — Mark as Sold: verify & enhance (P2)
+- [ ] Verify "Mark as Sold" button is visible on active ads in My Ads page
+- [ ] Add "SOLD" badge overlay on ad cards in browse/search results
+- [ ] Add "SOLD" banner on ad detail page
+- [ ] Optionally notify users who favorited the ad that it's now sold
+
+---
+
 ## OPEN ITEMS — What's Left (as of April 6, 2026)
 
 > Summary of all unchecked ☐ items across all phases. Use this as the working backlog.
@@ -1735,4 +1828,5 @@ BATCH 4 — Visual & UX Polish
 *Updated: April 9, 2026 — Universal ShareDialog + Vercel Edge middleware for dynamic OG link previews across ads, songs, events, blog posts. Requires env vars SUPABASE_URL and SUPABASE_ANON_KEY on Vercel.*
 *Updated: April 9, 2026 — Phase 12 documented (universal share, OG middleware, movie/ebook detail pages, NOT NULL constraint fixes, nav link additions). Phase 11.7 added (planned structural refactor: detail page unification, category-specific CTAs, partner dashboard, admin tabs, posting form unification). Awaiting sign-off on Calls A–E before implementation.*
 *Updated: April 10, 2026 — All `/marketplace/listing/` navigation links renamed to `/marketplace/ad/` (26 files). Events 1000-row limit fixed via batch pagination in eventsService. Master plan status updated.*
+*Updated: April 10, 2026 — Phase 13 added (events server-side pagination, category-aware post form, detail page feature parity, "listing"→"ad" terminology, post-creation email, storefront editor+discovery, favorites nav, reactive moderation model, mark-as-sold enhancements). Raised from user testing session.*
 *For Bara Afrika Platform — baraafrika.com*

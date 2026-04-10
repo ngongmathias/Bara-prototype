@@ -172,6 +172,8 @@ export interface EventSearchParams {
   offset?: number;
   include_all_statuses?: boolean; // For admin: include completed/cancelled events
   include_private?: boolean; // For admin: include non-public events
+  time_filter?: 'all' | 'active' | 'past' | 'happening' | 'today' | 'tomorrow' | 'weekend';
+  sort_by?: 'date' | 'title' | 'location';
   created_by_user_id?: string;
   created_by_email?: string;
 }
@@ -289,7 +291,9 @@ export class EventsService {
         include_all_statuses = false,
         include_private = false,
         created_by_user_id,
-        created_by_email
+        created_by_email,
+        time_filter,
+        sort_by = 'date'
       } = params;
 
       console.log('🔧 [EventsService.searchEvents] Parameters:', {
@@ -297,6 +301,8 @@ export class EventsService {
         include_private,
         limit,
         offset,
+        time_filter,
+        sort_by,
         has_filters: !!(search_query || country_id || city_id || category)
       });
 
@@ -336,6 +342,44 @@ export class EventsService {
         if (end_date) {
           q = q.lte('end_date', end_date);
         }
+
+        // Server-side time filter
+        if (time_filter && time_filter !== 'all') {
+          const now = new Date();
+          const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+          const tomorrowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
+          const dayAfterTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2).toISOString();
+
+          switch (time_filter) {
+            case 'active':
+              // Events that haven't ended yet
+              q = q.gte('end_date', now.toISOString());
+              break;
+            case 'past':
+              // Events that have ended
+              q = q.lt('end_date', now.toISOString());
+              break;
+            case 'happening':
+              // Events happening right now
+              q = q.lte('start_date', now.toISOString()).gte('end_date', now.toISOString());
+              break;
+            case 'today':
+              q = q.gte('start_date', todayStart).lt('start_date', tomorrowStart);
+              break;
+            case 'tomorrow':
+              q = q.gte('start_date', tomorrowStart).lt('start_date', dayAfterTomorrow);
+              break;
+            case 'weekend': {
+              const dayOfWeek = now.getDay();
+              const daysUntilSaturday = (6 - dayOfWeek + 7) % 7;
+              const saturday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilSaturday);
+              const monday = new Date(saturday.getFullYear(), saturday.getMonth(), saturday.getDate() + 2);
+              q = q.gte('start_date', saturday.toISOString()).lt('start_date', monday.toISOString());
+              break;
+            }
+          }
+        }
+
         return q;
       };
 
@@ -344,10 +388,29 @@ export class EventsService {
       const BATCH_SIZE = 1000;
       let data: any[] = [];
 
+      // Determine sort column and direction
+      const applySorting = (q: any) => {
+        // Premium events always first
+        q = q.order('is_premium', { ascending: false, nullsFirst: false });
+        switch (sort_by) {
+          case 'title':
+            q = q.order('title', { ascending: true });
+            break;
+          case 'location':
+            q = q.order('city_id', { ascending: true });
+            break;
+          case 'date':
+          default:
+            q = q.order('start_date', { ascending: time_filter === 'past' ? false : true });
+            break;
+        }
+        return q;
+      };
+
       if (limit <= BATCH_SIZE) {
         // Single fetch
-        let query = applyFilters(supabase.from('events').select('*'));
-        query = query.order('start_date', { ascending: true }).range(offset, offset + limit - 1);
+        let query = applySorting(applyFilters(supabase.from('events').select('*')));
+        query = query.range(offset, offset + limit - 1);
         const result = await query;
         if (result.error) throw result.error;
         data = result.data || [];
@@ -357,8 +420,8 @@ export class EventsService {
         let remaining = limit;
         while (remaining > 0) {
           const batchSize = Math.min(remaining, BATCH_SIZE);
-          let query = applyFilters(supabase.from('events').select('*'));
-          query = query.order('start_date', { ascending: true }).range(currentOffset, currentOffset + batchSize - 1);
+          let query = applySorting(applyFilters(supabase.from('events').select('*')));
+          query = query.range(currentOffset, currentOffset + batchSize - 1);
           const result = await query;
           if (result.error) throw result.error;
           const batch = result.data || [];
