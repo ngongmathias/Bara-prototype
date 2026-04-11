@@ -1795,7 +1795,66 @@ BATCH 4 — Visual & UX Polish
 
 ---
 
-## OPEN ITEMS — What's Left (as of April 6, 2026)
+## Phase 14 — Marketplace Deep Features: Variants, Cart, Transactions, Reviews (PLANNED, April 10, 2026)
+
+> User testing revealed 8 areas needing work — from UX polish to major new systems. Items 14.1–14.4 are quick wins; 14.5–14.8 are major features that build on each other.
+
+### 14.1 — Category pricing thoroughness (P0)
+- [ ] Add `priceTypeOptions` to `PriceFieldConfig` interface in `categoryFieldConfigs.ts`
+- [ ] Each category defines its own price type dropdown: Fashion/Electronics/Motors/Furniture/Hobbies = Fixed|Negotiable; Pets/Kids = Fixed|Negotiable|Free; Businesses = Fixed|Negotiable|Contact for Price; Property/Services/Jobs already use period/range mode
+- [ ] `PostListing.tsx` standard branch reads options from config instead of hardcoding Fixed/Negotiable
+- [ ] Verify every category shows correct pricing UI
+
+### 14.2 — Sign-in vs sign-up UX (P0)
+- [ ] Add "Sign Up" button to mobile menu in `Header.tsx` (currently only shows Sign In)
+- [ ] Swap visual weight: "Sign Up" = primary button, "Sign In" = secondary on both mobile and desktop
+- [ ] Make "New here? Create an account" more prominent on `UserSignInPage.tsx`
+- [ ] Auth-required pages redirect to `/user/sign-up` (not sign-in) with `?redirect_url=`
+
+### 14.3 — Storefront brand naming clarity (P1)
+- [ ] Rename "Display Name" to "Store / Brand Name" in `StorefrontEditor.tsx`
+- [ ] Add helper text and live URL preview
+
+### 14.4 — Country selection simplification (P1)
+- [ ] Replace multi-checkbox country selector with single `<Select>` dropdown in `PostListing.tsx`
+- [ ] Auto-select user's country if known
+- [ ] Add city/area text input below country
+
+### 14.5 — Multi-variant listings (P1)
+- [ ] **Migration:** `marketplace_listing_variants` table (listing_id, label, attributes JSONB, price_override, quantity, quantity_sold, image_url, is_available, sort_order)
+- [ ] Add `variantDimensions` config per category in `categoryFieldConfigs.ts` — Fashion: Size/Color; Electronics: Storage/Color; Services: Package tiers; Property/Motors/Jobs/Pets/Businesses: none
+- [ ] Variant builder UI in `PostListing.tsx` — toggle ON → pick dimensions → enter values → auto-generate grid → set quantity/price per variant
+- [ ] `VariantSelector.tsx` component for detail pages — size buttons, color swatches, stock count
+- [ ] Auto-mark listing sold when all variants sold out
+
+### 14.6 — Real-time purchase confirmation (P1)
+- [ ] **Migration:** `marketplace_transactions` table (listing_id, variant_id, buyer/seller_user_id, status enum, quantity, amount, currency, messages, timestamps)
+- [ ] Workflow: buyer "Buy Now" → pending_seller → seller confirms/declines → completed/cancelled
+- [ ] Real-time notifications via Supabase Realtime subscription
+- [ ] "Transactions" tab in MyAds for sellers
+- [ ] New `MyPurchases.tsx` page for buyers
+- [ ] Seller can still manually "Mark as Sold" from MyAds (existing flow preserved)
+
+### 14.7 — Shopping cart (P2)
+- [ ] **Migration:** `marketplace_cart_items` table (user_id, listing_id, variant_id, quantity)
+- [ ] `CartContext.tsx` — localStorage for guests, Supabase sync for logged-in users
+- [ ] Cart page at `/marketplace/cart` — items grouped by seller, quantity controls, subtotals
+- [ ] Cart icon with count badge in Header (marketplace pages)
+- [ ] "Add to Cart" button on detail pages for cartable categories (Fashion, Electronics, Furniture, Kids, Hobbies)
+- [ ] Non-cartable categories (Property, Motors, Jobs, Services, Businesses, Pets) show "Buy Now" / "Contact Seller" only
+- [ ] Checkout creates one transaction per seller
+
+### 14.8 — Comments & ratings on marketplace items (P2)
+- [ ] **Migration:** `marketplace_reviews` table (listing_id, reviewer_user_id, rating 1-5, title, body, is_verified_purchase, helpful_count)
+- [ ] **Migration:** `marketplace_listing_comments` table (listing_id, user_id, parent_id, body, is_seller_response) — threaded Q&A
+- [ ] `ReviewsSection.tsx` — star rating form, review list with verified purchase badge, average rating bar chart
+- [ ] `QASection.tsx` — question form, seller response with "Seller" badge, threaded replies
+- [ ] Aggregate avg_rating + review_count on listing cards
+- [ ] Admin moderation tab for reviews
+
+---
+
+## OPEN ITEMS — What's Left (as of April 10, 2026)
 
 > Summary of all unchecked ☐ items across all phases. Use this as the working backlog.
 
@@ -1847,4 +1906,5 @@ BATCH 4 — Visual & UX Polish
 *Updated: April 10, 2026 — Phase 13 added (events server-side pagination, category-aware post form, detail page feature parity, "listing"→"ad" terminology, post-creation email, storefront editor+discovery, favorites nav, reactive moderation model, mark-as-sold enhancements). Raised from user testing session.*
 *Updated: April 10, 2026 (evening) — Phase 13 tasks completed: 13.4 (MyListings→MyAds rename + route updates), 13.5 (enhanced post-creation email with ad link and details), 13.9 (SOLD badge overlay on all marketplace cards), 13.3 (FavoriteButton on all 11 detail pages + category-specific CTAs). Remaining: 13.6 (storefront editor), 13.8 (report ad admin management).*
 *Updated: April 10, 2026 (final) — Phase 13 COMPLETE: 13.6 (StorefrontEditor page with logo/cover upload, contact/location editing, auto-slug generation), 13.8 (Report ad functionality already implemented via ReportListingModal + AdminMarketplace Reports tab with review/dismiss actions). All 7 Phase 13 tasks completed.*
+*Updated: April 10, 2026 (late) — Phase 14 PLANNED: 8 marketplace deep features from user testing — category pricing audit, sign-in/sign-up UX, storefront branding, country simplification, multi-variant listings, purchase confirmation, shopping cart, comments & ratings. Awaiting user approval before implementation.*
 *For Bara Afrika Platform — baraafrika.com*

@@ -25,6 +25,7 @@ import {
   Users,
   Newspaper,
   LayoutGrid,
+  ShoppingCart,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -42,6 +43,7 @@ import { useGamification } from '@/hooks/useGamification';
 import { getPrestigeTier } from '@/lib/gamificationService';
 import { scrollToTop } from '@/lib/scrollToTop';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
+import { useCart } from '@/context/CartContext';
 
 interface Country {
   id: string;
@@ -84,6 +86,7 @@ export const Header = () => {
   const { signOut } = useClerk();
   const { selectedCountry, setSelectedCountry } = useCountrySelection();
   const { profile } = useGamification();
+  const { count: cartCount } = useCart();
 
   const [countries, setCountries] = useState<Country[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -305,6 +308,20 @@ export const Header = () => {
             {/* Notifications */}
             {isSignedIn && <NotificationBell />}
 
+            {/* Cart */}
+            <button
+              onClick={() => navigate('/marketplace/cart')}
+              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Shopping Cart"
+            >
+              <ShoppingCart className="w-5 h-5 text-gray-700" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </button>
+
             {/* Profile / Auth */}
             {isSignedIn ? (
               <DropdownMenu>
@@ -361,11 +378,11 @@ export const Header = () => {
               </DropdownMenu>
             ) : (
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={() => navigate('/user/sign-up')} className="hidden xl:inline-flex text-sm">
-                  Sign Up
-                </Button>
-                <Button variant="default" size="sm" onClick={() => navigate('/user/sign-in')} className="text-sm">
+                <Button variant="ghost" size="sm" onClick={() => navigate('/user/sign-in')} className="hidden xl:inline-flex text-sm">
                   Sign In
+                </Button>
+                <Button variant="default" size="sm" onClick={() => navigate('/user/sign-up')} className="text-sm">
+                  Sign Up
                 </Button>
               </div>
             )}
@@ -382,6 +399,18 @@ export const Header = () => {
                 {profile.bara_coins.toLocaleString()}
               </Link>
             )}
+            <button
+              onClick={() => navigate('/marketplace/cart')}
+              className="relative p-1.5"
+              aria-label="Shopping Cart"
+            >
+              <ShoppingCart className="w-5 h-5 text-gray-700" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-0.5">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </button>
             <Button
               variant="ghost"
               size="sm"
@@ -434,6 +463,14 @@ export const Header = () => {
                       <p className="text-sm font-medium text-gray-700">Welcome to BARA!</p>
                       <Button
                         variant="default"
+                        className="w-full"
+                        size="sm"
+                        onClick={() => { navigate('/user/sign-up'); closeMobileMenu(); }}
+                      >
+                        Create Account
+                      </Button>
+                      <Button
+                        variant="outline"
                         className="w-full"
                         size="sm"
                         onClick={() => { navigate('/user/sign-in'); closeMobileMenu(); }}

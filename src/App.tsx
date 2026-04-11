@@ -137,6 +137,8 @@ import PostListing from "./pages/marketplace/PostListing";
 import CategoryPostForm from "./pages/marketplace/CategoryPostForm";
 
 import MyAds from "./pages/marketplace/MyAds";
+import MyPurchases from "./pages/marketplace/MyPurchases";
+import CartPage from "./pages/marketplace/CartPage";
 
 import SearchResults from "./pages/marketplace/SearchResults";
 
@@ -335,6 +337,7 @@ import { ChatWindow } from "./pages/messages/ChatWindow";
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
 
 import { ShareProvider } from "@/context/ShareContext";
+import { CartProvider } from "@/context/CartContext";
 import { GlobalPlayer } from "@/components/streams/GlobalPlayer";
 
 
@@ -605,6 +608,10 @@ const AppRoutes = () => {
           <Route path="post" element={<PostListing />} />
 
           <Route path="my-ads" element={<MyAds />} />
+
+          <Route path="my-purchases" element={<MyPurchases />} />
+
+          <Route path="cart" element={<CartPage />} />
 
           <Route path="listing/:listingId" element={<CategoryDetailRouter />} />
 
@@ -929,6 +936,7 @@ const App = () => (
 
           <AudioPlayerProvider>
           <ShareProvider>
+          <CartProvider>
 
             <BrowserRouter>
 
@@ -940,6 +948,7 @@ const App = () => (
 
             </BrowserRouter>
 
+          </CartProvider>
           </ShareProvider>
           </AudioPlayerProvider>
 

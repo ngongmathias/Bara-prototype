@@ -68,6 +68,7 @@ import { uploadImage } from '@/lib/storage';
 
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { getCategoryConfig } from '@/config/categoryFieldConfigs';
+import { VariantBuilder, type VariantRow } from '@/components/marketplace/listing-parts/VariantBuilder';
 
 
 
@@ -97,7 +98,8 @@ export const PostListing = () => {
 
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
 
-
+  const [variantsEnabled, setVariantsEnabled] = useState(false);
+  const [variantRows, setVariantRows] = useState<VariantRow[]>([]);
 
   const [formData, setFormData] = useState({
 
@@ -512,7 +514,7 @@ export const PostListing = () => {
 
         title: 'Validation Error',
 
-        description: 'Please select at least one country',
+        description: 'Please select a country',
 
         variant: 'destructive',
 
@@ -712,7 +714,24 @@ export const PostListing = () => {
 
       if (countriesError) throw countriesError;
 
-
+      // Insert variants if enabled
+      if (variantsEnabled && variantRows.length > 0) {
+        const variantInserts = variantRows.map((v, idx) => ({
+          listing_id: listingData.id,
+          label: v.label,
+          attributes: v.attributes,
+          price_override: v.price_override ? parseFloat(v.price_override) : null,
+          quantity: parseInt(v.quantity) || 1,
+          quantity_sold: 0,
+          image_url: v.image_url || null,
+          is_available: true,
+          sort_order: idx,
+        }));
+        const { error: variantError } = await supabase
+          .from('marketplace_listing_variants')
+          .insert(variantInserts);
+        if (variantError) console.error('Variant insert error:', variantError);
+      }
 
       // Upsert partner profile on first post (fire-and-forget; non-blocking)
 
@@ -2440,7 +2459,14 @@ export const PostListing = () => {
                         placeholder={pf?.placeholder || '0.00'}
                         min="0"
                         step="0.01"
+                        disabled={formData.price_type === 'free' || formData.price_type === 'contact'}
                       />
+                      {formData.price_type === 'free' && (
+                        <p className="text-sm text-green-600 mt-1">This item is listed for free.</p>
+                      )}
+                      {formData.price_type === 'contact' && (
+                        <p className="text-sm text-gray-500 mt-1">Buyers will contact you for pricing.</p>
+                      )}
                     </div>
                     <div>
                       <Label>Currency</Label>
@@ -2459,11 +2485,20 @@ export const PostListing = () => {
                     </div>
                     <div>
                       <Label>Price Type</Label>
-                      <Select value={formData.price_type} onValueChange={(value) => setFormData({ ...formData, price_type: value })}>
+                      <Select value={formData.price_type} onValueChange={(value) => {
+                        const updates: any = { ...formData, price_type: value };
+                        if (value === 'free') updates.price = '0';
+                        if (value === 'contact') updates.price = '0';
+                        setFormData(updates);
+                      }}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="fixed">Fixed</SelectItem>
-                          <SelectItem value="negotiable">Negotiable</SelectItem>
+                          {(pf?.priceTypeOptions || [
+                            { value: 'fixed', label: 'Fixed' },
+                            { value: 'negotiable', label: 'Negotiable' },
+                          ]).map(opt => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -2473,7 +2508,24 @@ export const PostListing = () => {
             );
           })()}
 
-
+          {/* Variants — only show for categories that support them */}
+          {(() => {
+            const catConfig = getCategoryConfig(selectedCategorySlug);
+            const dims = catConfig?.variantDimensions;
+            if (!dims || dims.length === 0) return null;
+            return (
+              <VariantBuilder
+                dimensions={dims}
+                variants={variantRows}
+                onVariantsChange={setVariantRows}
+                enabled={variantsEnabled}
+                onEnabledChange={(on) => {
+                  setVariantsEnabled(on);
+                  if (!on) setVariantRows([]);
+                }}
+              />
+            );
+          })()}
 
           {/* Images */}
 
@@ -2602,7 +2654,7 @@ export const PostListing = () => {
 
             <h2 className="text-xl font-bold text-gray-900 mb-4 font-comfortaa">
 
-              Location & Visibility
+              Location
 
             </h2>
 
@@ -2632,75 +2684,26 @@ export const PostListing = () => {
 
               <div>
 
-                <Label>Target Countries * (Select where your ad will appear)</Label>
+                <Label>Country *</Label>
 
-                <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 mt-2">
-
-                  {countries.map((country) => (
-
-                    <label
-
-                      key={country.id}
-
-                      className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer"
-
-                    >
-
-                      <input
-
-                        type="checkbox"
-
-                        checked={selectedCountries.includes(country.id)}
-
-                        onChange={() => toggleCountrySelection(country.id)}
-
-                        className="rounded border-gray-300"
-
-                      />
-
-                      <div className="flex items-center space-x-2">
-
-                        {country.flag_url && (
-
-                          <img src={country.flag_url} alt={country.name} className="w-5 h-4" />
-
-                        )}
-
-                        <span className="text-sm">{country.name}</span>
-
-                      </div>
-
-                    </label>
-
-                  ))}
-
-                </div>
-
-                {selectedCountries.length > 0 && (
-
-                  <div className="mt-2 flex flex-wrap gap-2">
-
-                    {selectedCountries.map(countryId => {
-
-                      const country = countries.find(c => c.id === countryId);
-
-                      return country ? (
-
-                        <div key={countryId} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-
-                          {country.flag_url && <img src={country.flag_url} alt={country.name} className="w-4 h-3" />}
-
-                          <span>{country.name}</span>
-
-                        </div>
-
-                      ) : null;
-
-                    })}
-
-                  </div>
-
-                )}
+                <Select
+                  value={selectedCountries[0] || ''}
+                  onValueChange={(value) => setSelectedCountries([value])}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Select your country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((country) => (
+                      <SelectItem key={country.id} value={country.id}>
+                        <span className="flex items-center gap-2">
+                          {country.flag_url && <img src={country.flag_url} alt={country.name} className="w-5 h-4 inline-block" />}
+                          {country.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
               </div>
 

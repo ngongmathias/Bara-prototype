@@ -5,6 +5,8 @@ import Footer from '@/components/Footer';
 import { TopBannerAd } from '@/components/TopBannerAd';
 import { getSoldLabel } from '@/config/categoryFieldConfigs';
 import { BottomBannerAd } from '@/components/BottomBannerAd';
+import { ReviewsSection } from '@/components/marketplace/listing-parts/ReviewsSection';
+import { QASection } from '@/components/marketplace/listing-parts/QASection';
 import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +38,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaWhatsapp } from 'react-icons/fa';
 import { ShareDialog } from '@/components/ShareDialog';
+import { VariantSelector, type Variant } from '@/components/marketplace/listing-parts/VariantSelector';
+import { BuyNowModal } from '@/components/marketplace/listing-parts/BuyNowModal';
 
 export const ListingDetailPage = () => {
   const { listingId } = useParams();
@@ -54,6 +58,8 @@ export const ListingDetailPage = () => {
   const [partner, setPartner] = useState<any>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showOfferModal, setShowOfferModal] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+  const [showBuyNow, setShowBuyNow] = useState(false);
   const [offerAmount, setOfferAmount] = useState('');
   const [offerMessage, setOfferMessage] = useState('');
   const [submittingOffer, setSubmittingOffer] = useState(false);
@@ -519,6 +525,18 @@ export const ListingDetailPage = () => {
                 {listing.title}
               </div>
 
+              {/* Variant Selector */}
+              {listingId && (
+                <div className="mb-4">
+                  <VariantSelector
+                    listingId={listingId}
+                    basePrice={parseFloat(listing.price) || 0}
+                    currency={listing.currency}
+                    onVariantSelect={setSelectedVariant}
+                  />
+                </div>
+              )}
+
               {/* Meta Info */}
               <div className="space-y-2 mb-6 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
@@ -544,6 +562,16 @@ export const ListingDetailPage = () => {
                   <MessageCircle className="w-5 h-5 mr-2" />
                   Chat on Bara
                 </Button>
+
+                {listing.status === 'active' && listing.created_by !== user?.id && (
+                  <Button
+                    onClick={() => setShowBuyNow(true)}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold h-12"
+                  >
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Buy Now
+                  </Button>
+                )}
 
                 <Button
                   onClick={() => setShowOfferModal(true)}
@@ -754,6 +782,15 @@ export const ListingDetailPage = () => {
         />
       )}
 
+      {/* Buy Now Modal */}
+      {showBuyNow && listing && (
+        <BuyNowModal
+          listing={listing}
+          selectedVariant={selectedVariant}
+          onClose={() => setShowBuyNow(false)}
+        />
+      )}
+
       {/* Make Offer Modal */}
       <AnimatePresence>
         {showOfferModal && (
@@ -917,6 +954,13 @@ export const ListingDetailPage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {listing && (
+        <div className="max-w-7xl mx-auto px-4">
+          <ReviewsSection listingId={listing.id} sellerId={listing.created_by} />
+          <QASection listingId={listing.id} sellerId={listing.created_by} />
+        </div>
+      )}
 
       <BottomBannerAd />
       <Footer />

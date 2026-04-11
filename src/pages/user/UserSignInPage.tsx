@@ -110,17 +110,24 @@ export const UserSignInPage = () => {
 
           </p>
 
-          <p className="mt-2 text-sm text-gray-600">
+          <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
 
-            New here?{' '}
+            <p className="text-sm font-medium text-blue-900">
 
-            <Link className="text-blue-600 hover:text-blue-800 font-medium" to={signUpUrl}>
+              Don't have an account yet?
 
-              Create an account
+            </p>
+
+            <Link
+              className="mt-2 inline-block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm"
+              to={signUpUrl}
+            >
+
+              Create Your Account
 
             </Link>
 
-          </p>
+          </div>
 
         </div>
 

@@ -26,6 +26,19 @@ export interface PriceFieldConfig {
   placeholderMax?: string;
   /** Whether to hide the price field entirely (rare — for categories where pricing doesn't apply) */
   hidden?: boolean;
+  /** Price type options for the standard (non-range, non-period) mode.
+   *  If omitted, defaults to Fixed / Negotiable. */
+  priceTypeOptions?: { value: string; label: string }[];
+}
+
+/** Defines a variant dimension (e.g. Size, Color) that sellers can use to create variants. */
+export interface VariantDimension {
+  /** Internal key stored in variant attributes JSON, e.g. "size", "color" */
+  key: string;
+  /** User-facing label, e.g. "Size", "Color" */
+  label: string;
+  /** Pre-defined options the seller can pick from. If empty, freeform text input. */
+  presets?: string[];
 }
 
 export interface CategoryConfig {
@@ -37,6 +50,11 @@ export interface CategoryConfig {
   imageRequired?: boolean;
   /** How the "price/value" field behaves for this category */
   priceField?: PriceFieldConfig;
+  /** Whether this category supports multi-variant listings (sizes, colors, etc.).
+   *  If undefined or empty, variants are not available for this category. */
+  variantDimensions?: VariantDimension[];
+  /** Whether items in this category can be added to a shopping cart. Defaults to true if not specified. */
+  cartable?: boolean;
 }
 
 export const categoryFieldConfigs: CategoryConfig[] = [
@@ -46,6 +64,7 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categoryName: 'Properties',
     imageGuidance: 'Upload clear photos of exterior, interior, kitchen, bathrooms, and any special features',
     imageRequired: true,
+    cartable: false,
     priceField: {
       label: 'Price',
       required: true,
@@ -176,6 +195,7 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categoryName: 'Motors',
     imageGuidance: 'Upload photos from all angles: front, back, sides, interior, engine, and any damage',
     imageRequired: true,
+    cartable: false,
     priceField: {
       label: 'Price',
       required: true,
@@ -305,6 +325,7 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'jobs',
     categoryName: 'Jobs',
     imageGuidance: 'Upload company logo or workplace photos (optional)',
+    cartable: false,
     imageRequired: false,
     priceField: {
       label: 'Salary Range',
@@ -428,6 +449,10 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categorySlug: 'electronics',
     categoryName: 'Electronics',
     imageGuidance: 'Upload clear photos showing the device from multiple angles, screen, and any accessories',
+    variantDimensions: [
+      { key: 'storage', label: 'Storage', presets: ['32GB', '64GB', '128GB', '256GB', '512GB', '1TB'] },
+      { key: 'color', label: 'Color', presets: ['Black', 'White', 'Silver', 'Gold', 'Blue', 'Red'] },
+    ],
     imageRequired: true,
     priceField: { label: 'Price', required: true, placeholder: 'e.g., 500' },
     fields: [
@@ -543,6 +568,10 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categoryName: 'Fashion & Beauty',
     imageGuidance: 'Upload clear photos showing the item from different angles, tags, and any defects',
     imageRequired: true,
+    variantDimensions: [
+      { key: 'size', label: 'Size', presets: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '38', '40', '42', '44'] },
+      { key: 'color', label: 'Color', presets: ['Black', 'White', 'Red', 'Blue', 'Green', 'Pink', 'Brown', 'Grey', 'Beige'] },
+    ],
     priceField: { label: 'Price', required: true, placeholder: 'e.g., 50' },
     fields: [
       {
@@ -643,6 +672,10 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categoryName: 'Services',
     imageGuidance: 'Upload photos of your work, certifications, or team (optional)',
     imageRequired: false,
+    cartable: false,
+    variantDimensions: [
+      { key: 'package', label: 'Service Package', presets: ['Basic', 'Standard', 'Premium'] },
+    ],
     priceField: {
       label: 'Rate',
       required: false,
@@ -739,6 +772,10 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categoryName: 'Home & Furniture',
     imageGuidance: 'Upload photos from multiple angles showing condition and dimensions',
     imageRequired: true,
+    variantDimensions: [
+      { key: 'color', label: 'Color', presets: ['Black', 'White', 'Brown', 'Grey', 'Beige', 'Natural Wood'] },
+      { key: 'size', label: 'Size', presets: ['Small', 'Medium', 'Large'] },
+    ],
     priceField: { label: 'Price', required: true, placeholder: 'e.g., 200' },
     fields: [
       {
@@ -833,7 +870,17 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categoryName: 'Pets & Birds',
     imageGuidance: 'Upload clear photos of the pet, vaccination records if available',
     imageRequired: true,
-    priceField: { label: 'Adoption Fee / Price', required: false, placeholder: 'e.g., 300' },
+    cartable: false,
+    priceField: {
+      label: 'Adoption Fee / Price',
+      required: false,
+      placeholder: 'e.g., 300',
+      priceTypeOptions: [
+        { value: 'fixed', label: 'Fixed' },
+        { value: 'negotiable', label: 'Negotiable' },
+        { value: 'free', label: 'Free (Adoption)' },
+      ],
+    },
     fields: [
       {
         name: 'pet_type',
@@ -943,7 +990,20 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categoryName: 'Kids & Babies',
     imageGuidance: 'Upload clear photos showing condition, tags, and any safety certifications',
     imageRequired: true,
-    priceField: { label: 'Price', required: true, placeholder: 'e.g., 25' },
+    variantDimensions: [
+      { key: 'size', label: 'Size / Age', presets: ['Newborn', '0-3 months', '3-6 months', '6-12 months', '1-2 years', '2-3 years', '3-5 years'] },
+      { key: 'color', label: 'Color' },
+    ],
+    priceField: {
+      label: 'Price',
+      required: true,
+      placeholder: 'e.g., 25',
+      priceTypeOptions: [
+        { value: 'fixed', label: 'Fixed' },
+        { value: 'negotiable', label: 'Negotiable' },
+        { value: 'free', label: 'Free' },
+      ],
+    },
     fields: [
       {
         name: 'item_type',
@@ -1044,6 +1104,10 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categoryName: 'Hobbies',
     imageGuidance: 'Upload clear photos showing condition, any signatures, certificates, or special features',
     imageRequired: true,
+    variantDimensions: [
+      { key: 'size', label: 'Size', presets: ['S', 'M', 'L', 'XL', 'XXL'] },
+      { key: 'color', label: 'Color' },
+    ],
     priceField: { label: 'Price', required: true, placeholder: 'e.g., 100' },
     fields: [
       {
@@ -1125,10 +1189,16 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categoryName: 'Businesses & Industrial',
     imageGuidance: 'Upload photos of the business premises, equipment, or relevant documents',
     imageRequired: false,
+    cartable: false,
     priceField: {
       label: 'Price / Valuation',
       required: false,
-      placeholder: 'e.g., 100000'
+      placeholder: 'e.g., 100000',
+      priceTypeOptions: [
+        { value: 'fixed', label: 'Fixed' },
+        { value: 'negotiable', label: 'Negotiable' },
+        { value: 'contact', label: 'Contact for Price' },
+      ],
     },
     fields: [
       {

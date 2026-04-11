@@ -4,6 +4,8 @@ import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { TopBannerAd } from '@/components/TopBannerAd';
 import { BottomBannerAd } from '@/components/BottomBannerAd';
+import { ReviewsSection } from '@/components/marketplace/listing-parts/ReviewsSection';
+import { QASection } from '@/components/marketplace/listing-parts/QASection';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
@@ -587,6 +589,13 @@ export const JobsDetail = () => {
         onClose={() => setShowReportModal(false)}
         listingId={listingId!}
       />
+
+      {listing && (
+        <div className="max-w-7xl mx-auto px-4">
+          <ReviewsSection listingId={listing.id} sellerId={listing.created_by} />
+          <QASection listingId={listing.id} sellerId={listing.created_by} />
+        </div>
+      )}
 
       <BottomBannerAd />
       <Footer />

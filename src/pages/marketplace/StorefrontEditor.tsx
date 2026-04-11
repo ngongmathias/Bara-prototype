@@ -276,14 +276,27 @@ export const StorefrontEditor = () => {
             
             <div className="space-y-4">
               <div>
-                <Label htmlFor="display_name">Display Name *</Label>
+                <Label htmlFor="display_name">Store / Brand Name *</Label>
                 <Input
                   id="display_name"
                   value={formData.display_name}
                   onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
-                  placeholder="Your business or personal name"
+                  placeholder="e.g., Amara Fashion House"
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  This is the name customers will see on your storefront.
+                  {formData.display_name && !partner && (
+                    <span className="block mt-0.5 text-blue-600">
+                      Your store URL will be: baraafrika.com/marketplace/store/{formData.display_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}
+                    </span>
+                  )}
+                  {partner?.slug && (
+                    <span className="block mt-0.5 text-blue-600">
+                      Your store URL: baraafrika.com/marketplace/store/{partner.slug}
+                    </span>
+                  )}
+                </p>
               </div>
 
               <div>
