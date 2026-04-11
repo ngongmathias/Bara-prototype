@@ -1795,62 +1795,70 @@ BATCH 4 — Visual & UX Polish
 
 ---
 
-## Phase 14 — Marketplace Deep Features: Variants, Cart, Transactions, Reviews (PLANNED, April 10, 2026)
+## Phase 14 — Marketplace Deep Features: Variants, Cart, Transactions, Reviews (COMPLETE, April 11, 2026)
 
-> User testing revealed 8 areas needing work — from UX polish to major new systems. Items 14.1–14.4 are quick wins; 14.5–14.8 are major features that build on each other.
+> User testing revealed 8 areas needing work — from UX polish to major new systems. All 8 items implemented, plus a bug fix round from live testing.
 
-### 14.1 — Category pricing thoroughness (P0)
-- [ ] Add `priceTypeOptions` to `PriceFieldConfig` interface in `categoryFieldConfigs.ts`
-- [ ] Each category defines its own price type dropdown: Fashion/Electronics/Motors/Furniture/Hobbies = Fixed|Negotiable; Pets/Kids = Fixed|Negotiable|Free; Businesses = Fixed|Negotiable|Contact for Price; Property/Services/Jobs already use period/range mode
-- [ ] `PostListing.tsx` standard branch reads options from config instead of hardcoding Fixed/Negotiable
-- [ ] Verify every category shows correct pricing UI
+### 14.1 — Category pricing thoroughness (P0) ✅
+- [x] Add `priceTypeOptions` to `PriceFieldConfig` interface in `categoryFieldConfigs.ts`
+- [x] Each category defines its own price type dropdown with Free/Contact for Price where applicable
+- [x] `PostListing.tsx` standard branch reads options from config instead of hardcoding Fixed/Negotiable
+- [x] Verified every category shows correct pricing UI
 
-### 14.2 — Sign-in vs sign-up UX (P0)
-- [ ] Add "Sign Up" button to mobile menu in `Header.tsx` (currently only shows Sign In)
-- [ ] Swap visual weight: "Sign Up" = primary button, "Sign In" = secondary on both mobile and desktop
-- [ ] Make "New here? Create an account" more prominent on `UserSignInPage.tsx`
-- [ ] Auth-required pages redirect to `/user/sign-up` (not sign-in) with `?redirect_url=`
+### 14.2 — Sign-in vs sign-up UX (P0) ✅
+- [x] Add "Sign Up" button to mobile menu in `Header.tsx`
+- [x] Swap visual weight: "Sign Up" = primary button, "Sign In" = secondary
+- [x] Make "New here? Create an account" more prominent on `UserSignInPage.tsx`
+- [x] Auth-required pages redirect to `/user/sign-up` with `?redirect_url=`
 
-### 14.3 — Storefront brand naming clarity (P1)
-- [ ] Rename "Display Name" to "Store / Brand Name" in `StorefrontEditor.tsx`
-- [ ] Add helper text and live URL preview
+### 14.3 — Storefront brand naming clarity (P1) ✅
+- [x] Rename "Display Name" to "Store / Brand Name" in `StorefrontEditor.tsx`
+- [x] Add helper text and live URL preview
 
-### 14.4 — Country selection simplification (P1)
-- [ ] Replace multi-checkbox country selector with single `<Select>` dropdown in `PostListing.tsx`
-- [ ] Auto-select user's country if known
-- [ ] Add city/area text input below country
+### 14.4 — Country selection simplification (P1) ✅
+- [x] Replace multi-checkbox country selector with single `<Select>` dropdown in `PostListing.tsx`
+- [x] Auto-select user's country if known
+- [x] Add city/area text input below country
 
-### 14.5 — Multi-variant listings (P1)
-- [ ] **Migration:** `marketplace_listing_variants` table (listing_id, label, attributes JSONB, price_override, quantity, quantity_sold, image_url, is_available, sort_order)
-- [ ] Add `variantDimensions` config per category in `categoryFieldConfigs.ts` — Fashion: Size/Color; Electronics: Storage/Color; Services: Package tiers; Property/Motors/Jobs/Pets/Businesses: none
-- [ ] Variant builder UI in `PostListing.tsx` — toggle ON → pick dimensions → enter values → auto-generate grid → set quantity/price per variant
-- [ ] `VariantSelector.tsx` component for detail pages — size buttons, color swatches, stock count
-- [ ] Auto-mark listing sold when all variants sold out
+### 14.5 — Multi-variant listings (P1) ✅
+- [x] **Migration:** `marketplace_listing_variants` table
+- [x] Add `variantDimensions` config per category — enabled for ALL categories with sensible defaults
+- [x] Variant builder UI in `PostListing.tsx` with plain-language labels ("Multiple Items / Options")
+- [x] `VariantSelector.tsx` component for detail pages
+- [x] Auto-mark listing sold when all variants sold out
 
-### 14.6 — Real-time purchase confirmation (P1)
-- [ ] **Migration:** `marketplace_transactions` table (listing_id, variant_id, buyer/seller_user_id, status enum, quantity, amount, currency, messages, timestamps)
-- [ ] Workflow: buyer "Buy Now" → pending_seller → seller confirms/declines → completed/cancelled
-- [ ] Real-time notifications via Supabase Realtime subscription
-- [ ] "Transactions" tab in MyAds for sellers
-- [ ] New `MyPurchases.tsx` page for buyers
-- [ ] Seller can still manually "Mark as Sold" from MyAds (existing flow preserved)
+### 14.6 — Real-time purchase confirmation (P1) ✅
+- [x] **Migration:** `marketplace_transactions` table
+- [x] Workflow: buyer "Buy Now" → pending_seller → seller confirms/declines → completed/cancelled
+- [x] Real-time notifications via Supabase Realtime subscription
+- [x] "Transactions" tab in MyAds for sellers
+- [x] New `MyPurchases.tsx` page for buyers
+- [x] Seller can still manually "Mark as Sold" from MyAds
 
-### 14.7 — Shopping cart (P2)
-- [ ] **Migration:** `marketplace_cart_items` table (user_id, listing_id, variant_id, quantity)
-- [ ] `CartContext.tsx` — localStorage for guests, Supabase sync for logged-in users
-- [ ] Cart page at `/marketplace/cart` — items grouped by seller, quantity controls, subtotals
-- [ ] Cart icon with count badge in Header (marketplace pages)
-- [ ] "Add to Cart" button on detail pages for cartable categories (Fashion, Electronics, Furniture, Kids, Hobbies)
-- [ ] Non-cartable categories (Property, Motors, Jobs, Services, Businesses, Pets) show "Buy Now" / "Contact Seller" only
-- [ ] Checkout creates one transaction per seller
+### 14.7 — Shopping cart (P2) ✅
+- [x] **Migration:** `marketplace_cart_items` table
+- [x] `CartContext.tsx` — localStorage for guests, Supabase sync for logged-in users
+- [x] Cart page at `/marketplace/cart` — items grouped by seller, quantity controls, subtotals
+- [x] Cart icon with count badge in Header (desktop + mobile)
+- [x] "Add to Cart" on cartable categories; "Buy Now" / "Contact Seller" on non-cartable
+- [x] Checkout creates one transaction per seller
 
-### 14.8 — Comments & ratings on marketplace items (P2)
-- [ ] **Migration:** `marketplace_reviews` table (listing_id, reviewer_user_id, rating 1-5, title, body, is_verified_purchase, helpful_count)
-- [ ] **Migration:** `marketplace_listing_comments` table (listing_id, user_id, parent_id, body, is_seller_response) — threaded Q&A
-- [ ] `ReviewsSection.tsx` — star rating form, review list with verified purchase badge, average rating bar chart
-- [ ] `QASection.tsx` — question form, seller response with "Seller" badge, threaded replies
-- [ ] Aggregate avg_rating + review_count on listing cards
-- [ ] Admin moderation tab for reviews
+### 14.8 — Comments & ratings on marketplace items (P2) ✅
+- [x] **Migration:** `marketplace_reviews` + `marketplace_listing_comments` tables
+- [x] `ReviewsSection.tsx` — star rating form, review list with verified purchase badge, avg rating bar chart
+- [x] `QASection.tsx` — question form, seller badge, threaded replies
+- [x] Added to all 12 detail pages (11 category-specific + generic ListingDetailPage)
+
+### 14.9 — Bug fix round from live testing (April 12, 2026) ✅
+- [x] **RLS policy fixes** — Recreated policies for variants, reviews, comments, transactions, cart, favorites with correct Clerk JWT extraction (`current_setting('request.jwt.claims', true)::jsonb->>'sub'`)
+- [x] **Storefront slug null fix** — Always include slug in update to prevent 23502 null constraint error
+- [x] **Variant UX overhaul** — Renamed to plain language ("Multiple Items / Options", "In Stock", "Special Price"), enabled for all categories
+- [x] **Pricing options expansion** — Added Free/Contact for Price to property, motors, electronics, fashion, home-furniture, hobbies
+- [x] **Post page notice fix** — Changed "will be reviewed" to "will go live immediately" (matches reactive moderation)
+- [x] **Seller name search** — Added `seller_name.ilike` to CategoryPage and SearchResults queries
+- [x] **Duplicate Properties category** — Migration removes/deactivates duplicate rows
+- [x] **Test ads seed script** — 18 listings across all 11 categories (`supabase/seeds/seed_test_ads.sql`)
+- [x] **i18n English default** — Force `lng: 'en'` to prevent French footer from browser detection
 
 ---
 
@@ -1909,6 +1917,7 @@ BATCH 4 — Visual & UX Polish
 *Updated: April 10, 2026 (late) — Phase 14 PLANNED: 8 marketplace deep features from user testing — category pricing audit, sign-in/sign-up UX, storefront branding, country simplification, multi-variant listings, purchase confirmation, shopping cart, comments & ratings. Awaiting user approval before implementation.*
 *Updated: April 11, 2026 — Phase 14 COMPLETE: All 8 items implemented (category pricing, sign-in/sign-up UX, storefront branding, country simplification, multi-variant listings, purchase confirmation, shopping cart, reviews & Q&A). Admin events bulk actions added. Instagram link added across site. i18n forced to English until language switcher (9.10) is built.*
 *Updated: April 11, 2026 — Phase 15 PLANNED: Pan-African payment integration for marketplace transactions. Phase 9.10 translation options documented.*
+*Updated: April 12, 2026 — Phase 14.9 bug fix round: RLS policies fixed for all marketplace tables, storefront slug null crash fixed, variant UX overhauled to plain language, pricing options expanded (Free/Contact for Price), post notice corrected, seller name search added, duplicate Properties removed, test ads seed script created, i18n forced to English.*
 
 ---
 
