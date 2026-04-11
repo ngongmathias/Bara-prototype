@@ -125,14 +125,14 @@ BEGIN
   -- 5. SERVICES — Professional Photography
   -- ============================================================
   IF v_services_cat IS NOT NULL THEN
-    INSERT INTO marketplace_listings (id, title, description, price, currency, price_type, price_period, category_id, country_id, created_by, seller_name, seller_phone, seller_email, seller_type, status, location_details)
-    VALUES (gen_random_uuid(), 'Professional Event Photography & Videography', 'Experienced photographer offering event coverage in Kigali. Weddings, corporate events, birthdays, graduations. High-resolution photos delivered within 48 hours. Drone footage available. Portfolio available on request. Over 200 events covered.', 150, 'USD', 'fixed', 'per_project', v_services_cat, v_country_id, v_seller_id, 'Mathias Ngong', '+250791568519', 'mathiasngongngai@gmail.com', 'individual', 'active', 'Kigali')
+    INSERT INTO marketplace_listings (id, title, description, price, currency, price_type, category_id, country_id, created_by, seller_name, seller_phone, seller_email, seller_type, status, location_details)
+    VALUES (gen_random_uuid(), 'Professional Event Photography & Videography', 'Experienced photographer offering event coverage in Kigali. Weddings, corporate events, birthdays, graduations. High-resolution photos delivered within 48 hours. Drone footage available. Portfolio available on request. Over 200 events covered.', 150, 'USD', 'per_project', v_services_cat, v_country_id, v_seller_id, 'Mathias Ngong', '+250791568519', 'mathiasngongngai@gmail.com', 'individual', 'active', 'Kigali')
     RETURNING id INTO v_listing_id;
     INSERT INTO marketplace_listing_images (listing_id, image_url, is_primary) VALUES (v_listing_id, 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=800', true);
     INSERT INTO marketplace_listing_countries (listing_id, country_id) VALUES (v_listing_id, v_country_id);
 
-    INSERT INTO marketplace_listings (id, title, description, price, currency, price_type, price_period, category_id, country_id, created_by, seller_name, seller_phone, seller_email, seller_type, status, location_details)
-    VALUES (gen_random_uuid(), 'Home & Office Cleaning Service', 'Reliable and thorough cleaning service for homes and offices. Weekly, bi-weekly, or one-time deep cleaning. We bring our own supplies and equipment. Trained and vetted staff. Serving all areas of Kigali. Free quote and consultation.', 20000, 'RWF', 'fixed', 'per_hour', v_services_cat, v_country_id, v_seller_id, 'Mathias Ngong', '+250791568519', 'mathiasngongngai@gmail.com', 'individual', 'active', 'Kigali')
+    INSERT INTO marketplace_listings (id, title, description, price, currency, price_type, category_id, country_id, created_by, seller_name, seller_phone, seller_email, seller_type, status, location_details)
+    VALUES (gen_random_uuid(), 'Home & Office Cleaning Service', 'Reliable and thorough cleaning service for homes and offices. Weekly, bi-weekly, or one-time deep cleaning. We bring our own supplies and equipment. Trained and vetted staff. Serving all areas of Kigali. Free quote and consultation.', 20000, 'RWF', 'per_hour', v_services_cat, v_country_id, v_seller_id, 'Mathias Ngong', '+250791568519', 'mathiasngongngai@gmail.com', 'individual', 'active', 'Kigali')
     RETURNING id INTO v_listing_id;
     INSERT INTO marketplace_listing_images (listing_id, image_url, is_primary) VALUES (v_listing_id, 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800', true);
     INSERT INTO marketplace_listing_countries (listing_id, country_id) VALUES (v_listing_id, v_country_id);
