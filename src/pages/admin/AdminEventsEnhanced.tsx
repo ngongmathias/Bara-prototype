@@ -97,6 +97,10 @@ export const AdminEventsEnhanced = () => {
   const [regsLoading, setRegsLoading] = useState(false);
   const [updatingRegId, setUpdatingRegId] = useState<string | null>(null);
 
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
+
   const { toast } = useToast();
   const { events, loading, searchEvents } = useEvents();
   const { categories } = useEventCategories();
@@ -408,6 +412,45 @@ export const AdminEventsEnhanced = () => {
         variant: "destructive",
       });
     }
+  };
+
+  // Bulk selection helpers
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === paginatedEvents.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(paginatedEvents.map((e) => e.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedIds.size} event(s)? This cannot be undone.`)) return;
+    setBulkLoading(true);
+    let deleted = 0;
+    for (const id of selectedIds) {
+      try {
+        await deleteEvent(id);
+        deleted++;
+      } catch {
+        // continue with remaining
+      }
+    }
+    toast({
+      title: `${deleted} event(s) deleted`,
+      description: deleted < selectedIds.size ? `${selectedIds.size - deleted} failed.` : 'All selected events removed.',
+    });
+    setSelectedIds(new Set());
+    setBulkLoading(false);
+    searchEvents({ limit: 10000, include_all_statuses: true, include_private: true });
   };
 
   const resetForm = () => {
@@ -1118,12 +1161,45 @@ export const AdminEventsEnhanced = () => {
               </div>
             ) : filteredEvents.length > 0 ? (
               <>
-                <div className="mb-4 text-sm text-gray-600">
-                  Showing {startIndex + 1}-{Math.min(endIndex, filteredEvents.length)} of {filteredEvents.length} events
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-sm text-gray-600">
+                    Showing {startIndex + 1}-{Math.min(endIndex, filteredEvents.length)} of {filteredEvents.length} events
+                  </div>
+                  {selectedIds.size > 0 && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded">
+                        {selectedIds.size} selected
+                      </span>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleBulkDelete}
+                        disabled={bulkLoading}
+                      >
+                        {bulkLoading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Trash2 className="w-4 h-4 mr-1" />}
+                        Delete Selected
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedIds(new Set())}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-10">
+                        <input
+                          type="checkbox"
+                          checked={paginatedEvents.length > 0 && selectedIds.size === paginatedEvents.length}
+                          onChange={toggleSelectAll}
+                          className="rounded border-gray-300"
+                        />
+                      </TableHead>
                       <TableHead>Event</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Date & Time</TableHead>
@@ -1138,7 +1214,15 @@ export const AdminEventsEnhanced = () => {
                   </TableHeader>
                   <TableBody>
                     {paginatedEvents.map((event) => (
-                      <TableRow key={event.id}>
+                      <TableRow key={event.id} className={selectedIds.has(event.id) ? 'bg-blue-50' : ''}>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(event.id)}
+                            onChange={() => toggleSelect(event.id)}
+                            className="rounded border-gray-300"
+                          />
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-3">
                             <img

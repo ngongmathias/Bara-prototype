@@ -6,6 +6,7 @@ import { db } from '@/lib/supabase';
 import { slugFromName } from '@/lib/locationSlug';
 import { useToast } from "@/components/ui/use-toast";
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { FaInstagram } from 'react-icons/fa6';
 
 interface Country {
   id: string;
@@ -215,7 +216,7 @@ const Footer = () => {
 
         </div>
 
-        {/* Bottom Bar — Legal Links & Copyright */}
+        {/* Bottom Bar — Social, Legal Links & Copyright */}
         <div className="border-t border-gray-200 pt-4 md:pt-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-4 text-xs text-gray-500">
@@ -225,10 +226,22 @@ const Footer = () => {
               <span className="text-gray-300">|</span>
               <Link to="/advertise" onClick={scrollToTop} className="hover:text-gray-900 transition-colors">{t('footer.advertisingChoices')}</Link>
             </div>
-            <div className="text-center sm:text-right text-xs text-gray-400 space-y-0.5">
-              <p className="font-roboto">{t('footer.copyright')}</p>
-              <p className="font-roboto">{t('footer.trademark')}</p>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-gray-400">Follow us:</span>
+              <a
+                href="https://www.instagram.com/baraafrikadotcom/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-pink-600 transition-colors"
+                aria-label="BARA Afrika on Instagram"
+              >
+                <FaInstagram className="w-5 h-5" />
+              </a>
             </div>
+          </div>
+          <div className="mt-3 text-center sm:text-right text-xs text-gray-400 space-y-0.5">
+            <p className="font-roboto">{t('footer.copyright')}</p>
+            <p className="font-roboto">{t('footer.trademark')}</p>
           </div>
         </div>
       </div>

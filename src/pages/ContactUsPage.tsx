@@ -19,8 +19,10 @@ import {
   Send,
   Building,
   User,
-  Mail as MailIcon
+  Mail as MailIcon,
+  ExternalLink
 } from "lucide-react";
+import { FaInstagram } from 'react-icons/fa6';
 
 const ContactUsPage = () => {
   const { t } = useTranslation();
@@ -242,6 +244,20 @@ const ContactUsPage = () => {
                     <div>
                       <p className="font-semibold font-roboto">{t('contact.info.general.hours')}</p>
                       <p className="text-gray-600 font-roboto">{t('contact.info.general.hoursValue')}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <FaInstagram className="w-6 h-6 text-pink-600" />
+                    <div>
+                      <p className="font-semibold font-roboto">Instagram</p>
+                      <a
+                        href="https://www.instagram.com/baraafrikadotcom/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-pink-600 hover:text-pink-700 font-roboto flex items-center gap-1"
+                      >
+                        @baraafrikadotcom <ExternalLink className="w-3 h-3" />
+                      </a>
                     </div>
                   </div>
                 </CardContent>

@@ -26,6 +26,7 @@ import {
   Eye,
   TrendingUp
 } from "lucide-react";
+import { FaInstagram } from 'react-icons/fa6';
 
 const aboutSlides: string[] = [
   "/About Us page/pexels-luis-gomes-166706-546819.jpg",
@@ -283,7 +284,7 @@ const AboutUsPage = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
               <div className="text-center space-y-4">
                 <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto transition-transform hover:scale-110">
                   <Phone className="w-8 h-8 text-white" />
@@ -309,6 +310,22 @@ const AboutUsPage = () => {
                 <h3 className="text-lg font-semibold font-comfortaa">{t('about.contact.location.title')}</h3>
                 <p className="text-gray-600 font-roboto">{t('about.contact.location.address')}</p>
                 <p className="text-sm text-gray-500 font-roboto">{t('about.contact.location.visit')}</p>
+              </div>
+
+              <div className="text-center space-y-4">
+                <a
+                  href="https://www.instagram.com/baraafrikadotcom/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <div className="w-16 h-16 bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto transition-transform hover:scale-110">
+                    <FaInstagram className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold font-comfortaa mt-4">Instagram</h3>
+                  <p className="text-pink-600 font-roboto">@baraafrikadotcom</p>
+                  <p className="text-sm text-gray-500 font-roboto">Follow us for updates</p>
+                </a>
               </div>
             </div>
           </div>
