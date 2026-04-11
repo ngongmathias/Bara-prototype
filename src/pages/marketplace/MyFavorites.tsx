@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
+import { getSoldLabel } from '@/config/categoryFieldConfigs';
 import { supabase } from '@/lib/supabase';
 import { useUser } from '@clerk/clerk-react';
 import { Heart } from 'lucide-react';
@@ -134,7 +135,7 @@ export const MyFavorites = () => {
                         {listing.status === 'sold' && (
                           <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
                             <div className="bg-red-600 text-white text-xl font-bold px-5 py-2 rounded-lg transform -rotate-12">
-                              SOLD
+                              {getSoldLabel(listing.category?.slug || '')}
                             </div>
                           </div>
                         )}

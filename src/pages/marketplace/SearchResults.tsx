@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { TopBannerAd } from '@/components/TopBannerAd';
+import { getSoldLabel } from '@/config/categoryFieldConfigs';
 import { BottomBannerAd } from '@/components/BottomBannerAd';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1213,7 +1214,7 @@ export const SearchResults = () => {
                       {listing.status === 'sold' && (
                         <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
                           <div className="bg-red-600 text-white text-2xl font-bold px-6 py-3 rounded-lg transform -rotate-12">
-                            SOLD
+                            {getSoldLabel(listing.category?.slug || '')}
                           </div>
                         </div>
                       )}

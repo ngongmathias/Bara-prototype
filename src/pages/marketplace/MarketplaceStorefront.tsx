@@ -3,15 +3,22 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
-import { ShieldCheck, Star, Clock, MapPin, Mail, Phone, Globe } from 'lucide-react';
+import { getSoldLabel } from '@/config/categoryFieldConfigs';
+import { ShieldCheck, Star, Clock, MapPin, Mail, Phone, Globe, Edit, Share2 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
+import { useUser } from '@clerk/clerk-react';
+import { useShare } from '@/context/ShareContext';
 
 export const MarketplaceStorefront = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { user } = useUser();
+  const { openShare } = useShare();
   const [partner, setPartner] = useState<any>(null);
   const [ads, setAds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const isOwner = !!user && !!partner && user.id === partner.owner_user_id;
 
   useEffect(() => {
     if (!slug) return;
@@ -31,10 +38,11 @@ export const MarketplaceStorefront = () => {
           .from('marketplace_listings')
           .select(`
             id, title, price, currency, status, created_at,
+            category:marketplace_categories(id, name, slug),
             marketplace_listing_images(image_url, is_primary)
           `)
           .eq('created_by', partnerData.owner_user_id)
-          .eq('status', 'active')
+          .in('status', ['active', 'sold'])
           .order('created_at', { ascending: false })
           .limit(60);
         setAds(adData || []);
@@ -103,6 +111,27 @@ export const MarketplaceStorefront = () => {
             <div className="flex-1 pb-2">
               <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow">{partner.display_name}</h1>
               <div className="text-sm text-white/90 capitalize">{partner.business_type}</div>
+            </div>
+            <div className="flex gap-2 pb-2">
+              <button
+                onClick={() => openShare({
+                  title: `${partner.display_name} — Bara Marketplace Store`,
+                  description: partner.description || `Check out ${partner.display_name}'s store on Bara Marketplace`,
+                  url: window.location.href,
+                  imageUrl: partner.logo_url || undefined,
+                })}
+                className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 backdrop-blur text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                <Share2 className="w-4 h-4" /> Share
+              </button>
+              {isOwner && (
+                <button
+                  onClick={() => navigate(`/marketplace/storefront/edit`)}
+                  className="inline-flex items-center gap-1.5 bg-white hover:bg-gray-100 text-gray-900 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <Edit className="w-4 h-4" /> Edit Store
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -184,7 +213,7 @@ export const MarketplaceStorefront = () => {
                     {ad.status === 'sold' && (
                       <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
                         <div className="bg-red-600 text-white text-xl font-bold px-5 py-2 rounded-lg transform -rotate-12">
-                          SOLD
+                          {getSoldLabel(ad.category?.slug || '')}
                         </div>
                       </div>
                     )}

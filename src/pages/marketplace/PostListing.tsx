@@ -626,7 +626,7 @@ export const PostListing = () => {
 
           country_id: selectedCountries[0],
 
-          price: parseFloat(formData.price),
+          price: parseFloat(formData.price) || 0,
 
           currency: formData.currency,
 
@@ -1140,7 +1140,7 @@ export const PostListing = () => {
 
                 {/* Only show condition for physical products, not services/jobs/pets */}
 
-                {!['jobs', 'services', 'pets', 'businesses-industrial'].includes(selectedCategorySlug) && (
+                {!['jobs', 'services', 'pets', 'businesses'].includes(selectedCategorySlug) && !selectedCategorySlug.includes('property') && (
 
                   <div>
 
@@ -1390,7 +1390,7 @@ export const PostListing = () => {
 
 
 
-              {(selectedCategorySlug === 'property-sale' || selectedCategorySlug === 'property-rent') && (
+              {selectedCategorySlug.includes('property') && (
 
                 <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
 
@@ -1642,9 +1642,21 @@ export const PostListing = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
+                    <div className="md:col-span-2">
+
+                      <Label>Company Name *</Label>
+
+                      <Input
+                        value={attributes.company_name || ''}
+                        onChange={(e) => setAttributes({ ...attributes, company_name: e.target.value })}
+                        placeholder="e.g., ABC Corporation"
+                      />
+
+                    </div>
+
                     <div>
 
-                      <Label>Job Type</Label>
+                      <Label>Job Type *</Label>
 
                       <Select value={attributes.job_type || ''} onValueChange={(value) => setAttributes({ ...attributes, job_type: value })}>
 
@@ -1657,6 +1669,8 @@ export const PostListing = () => {
                           <SelectItem value="Part-time">Part-time</SelectItem>
 
                           <SelectItem value="Contract">Contract</SelectItem>
+
+                          <SelectItem value="Freelance">Freelance</SelectItem>
 
                           <SelectItem value="Internship">Internship</SelectItem>
 
@@ -1712,6 +1726,18 @@ export const PostListing = () => {
 
                     </div>
 
+                    <div>
+
+                      <Label>Application Deadline</Label>
+
+                      <Input
+                        type="date"
+                        value={attributes.deadline || ''}
+                        onChange={(e) => setAttributes({ ...attributes, deadline: e.target.value })}
+                      />
+
+                    </div>
+
                   </div>
 
                 </div>
@@ -1730,7 +1756,7 @@ export const PostListing = () => {
 
                     <div>
 
-                      <Label>Pet Type</Label>
+                      <Label>Pet Type *</Label>
 
                       <Select value={attributes.pet_type || ''} onValueChange={(value) => setAttributes({ ...attributes, pet_type: value })}>
 
@@ -1746,11 +1772,25 @@ export const PostListing = () => {
 
                           <SelectItem value="Fish">Fish</SelectItem>
 
+                          <SelectItem value="Rabbit">Rabbit</SelectItem>
+
                           <SelectItem value="Other">Other</SelectItem>
 
                         </SelectContent>
 
                       </Select>
+
+                    </div>
+
+                    <div>
+
+                      <Label>Breed</Label>
+
+                      <Input
+                        value={attributes.breed || ''}
+                        onChange={(e) => setAttributes({ ...attributes, breed: e.target.value })}
+                        placeholder="e.g., Labrador Retriever"
+                      />
 
                     </div>
 
@@ -1798,6 +1838,460 @@ export const PostListing = () => {
 
                     </div>
 
+                    <div>
+
+                      <Label>Vaccinated</Label>
+
+                      <Select value={attributes.vaccinated || ''} onValueChange={(value) => setAttributes({ ...attributes, vaccinated: value })}>
+
+                        <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+
+                        <SelectContent>
+
+                          <SelectItem value="Yes">Yes</SelectItem>
+
+                          <SelectItem value="No">No</SelectItem>
+
+                          <SelectItem value="Partial">Partially</SelectItem>
+
+                        </SelectContent>
+
+                      </Select>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              )}
+
+              {selectedCategorySlug === 'services' && (
+
+                <div className="mt-6 p-4 bg-teal-50 rounded-lg border border-teal-200">
+
+                  <h3 className="font-semibold text-gray-900 mb-4">Service Details</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div>
+
+                      <Label>Service Type *</Label>
+
+                      <Select value={attributes.service_type || ''} onValueChange={(value) => setAttributes({ ...attributes, service_type: value })}>
+
+                        <SelectTrigger><SelectValue placeholder="Select service type" /></SelectTrigger>
+
+                        <SelectContent>
+
+                          <SelectItem value="Cleaning">Cleaning</SelectItem>
+
+                          <SelectItem value="Repair">Repair & Maintenance</SelectItem>
+
+                          <SelectItem value="Tutoring">Tutoring & Education</SelectItem>
+
+                          <SelectItem value="Photography">Photography</SelectItem>
+
+                          <SelectItem value="Catering">Catering</SelectItem>
+
+                          <SelectItem value="Consulting">Consulting</SelectItem>
+
+                          <SelectItem value="IT">IT & Technology</SelectItem>
+
+                          <SelectItem value="Legal">Legal</SelectItem>
+
+                          <SelectItem value="Health">Health & Wellness</SelectItem>
+
+                          <SelectItem value="Other">Other</SelectItem>
+
+                        </SelectContent>
+
+                      </Select>
+
+                    </div>
+
+                    <div>
+
+                      <Label>Availability *</Label>
+
+                      <Select value={attributes.availability || ''} onValueChange={(value) => setAttributes({ ...attributes, availability: value })}>
+
+                        <SelectTrigger><SelectValue placeholder="Select availability" /></SelectTrigger>
+
+                        <SelectContent>
+
+                          <SelectItem value="Weekdays">Weekdays</SelectItem>
+
+                          <SelectItem value="Weekends">Weekends</SelectItem>
+
+                          <SelectItem value="24/7">24/7</SelectItem>
+
+                          <SelectItem value="By Appointment">By Appointment</SelectItem>
+
+                        </SelectContent>
+
+                      </Select>
+
+                    </div>
+
+                    <div>
+
+                      <Label>Years of Experience</Label>
+
+                      <Input
+                        type="number"
+                        value={attributes.experience_years || ''}
+                        onChange={(e) => setAttributes({ ...attributes, experience_years: e.target.value })}
+                        placeholder="e.g., 5"
+                        min="0"
+                      />
+
+                    </div>
+
+                    <div>
+
+                      <Label>Service Area</Label>
+
+                      <Input
+                        value={attributes.service_area || ''}
+                        onChange={(e) => setAttributes({ ...attributes, service_area: e.target.value })}
+                        placeholder="e.g., City-wide, Specific neighborhoods"
+                      />
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              )}
+
+              {selectedCategorySlug === 'home-furniture' && (
+
+                <div className="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
+
+                  <h3 className="font-semibold text-gray-900 mb-4">Furniture Details</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div>
+
+                      <Label>Furniture Type</Label>
+
+                      <Select value={attributes.furniture_type || ''} onValueChange={(value) => setAttributes({ ...attributes, furniture_type: value })}>
+
+                        <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+
+                        <SelectContent>
+
+                          <SelectItem value="Sofa">Sofa</SelectItem>
+
+                          <SelectItem value="Bed">Bed</SelectItem>
+
+                          <SelectItem value="Table">Table</SelectItem>
+
+                          <SelectItem value="Chair">Chair</SelectItem>
+
+                          <SelectItem value="Cabinet">Cabinet</SelectItem>
+
+                          <SelectItem value="Desk">Desk</SelectItem>
+
+                          <SelectItem value="Appliance">Home Appliance</SelectItem>
+
+                          <SelectItem value="Other">Other</SelectItem>
+
+                        </SelectContent>
+
+                      </Select>
+
+                    </div>
+
+                    <div>
+
+                      <Label>Material</Label>
+
+                      <Input
+                        value={attributes.material || ''}
+                        onChange={(e) => setAttributes({ ...attributes, material: e.target.value })}
+                        placeholder="e.g., Wood, Metal, Fabric"
+                      />
+
+                    </div>
+
+                    <div>
+
+                      <Label>Dimensions</Label>
+
+                      <Input
+                        value={attributes.dimensions || ''}
+                        onChange={(e) => setAttributes({ ...attributes, dimensions: e.target.value })}
+                        placeholder="e.g., 200x100x80 cm"
+                      />
+
+                    </div>
+
+                    <div>
+
+                      <Label>Color</Label>
+
+                      <Input
+                        value={attributes.color || ''}
+                        onChange={(e) => setAttributes({ ...attributes, color: e.target.value })}
+                        placeholder="e.g., Brown"
+                      />
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              )}
+
+              {selectedCategorySlug === 'kids-babies' && (
+
+                <div className="mt-6 p-4 bg-rose-50 rounded-lg border border-rose-200">
+
+                  <h3 className="font-semibold text-gray-900 mb-4">Kids & Babies Details</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div>
+
+                      <Label>Item Type</Label>
+
+                      <Select value={attributes.item_type || ''} onValueChange={(value) => setAttributes({ ...attributes, item_type: value })}>
+
+                        <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+
+                        <SelectContent>
+
+                          <SelectItem value="Clothing">Clothing</SelectItem>
+
+                          <SelectItem value="Toys">Toys & Games</SelectItem>
+
+                          <SelectItem value="Stroller">Stroller / Pram</SelectItem>
+
+                          <SelectItem value="Car Seat">Car Seat</SelectItem>
+
+                          <SelectItem value="Feeding">Feeding Supplies</SelectItem>
+
+                          <SelectItem value="Furniture">Nursery Furniture</SelectItem>
+
+                          <SelectItem value="Other">Other</SelectItem>
+
+                        </SelectContent>
+
+                      </Select>
+
+                    </div>
+
+                    <div>
+
+                      <Label>Age Group</Label>
+
+                      <Select value={attributes.age_group || ''} onValueChange={(value) => setAttributes({ ...attributes, age_group: value })}>
+
+                        <SelectTrigger><SelectValue placeholder="Select age group" /></SelectTrigger>
+
+                        <SelectContent>
+
+                          <SelectItem value="Newborn">Newborn (0-3 months)</SelectItem>
+
+                          <SelectItem value="Baby">Baby (3-12 months)</SelectItem>
+
+                          <SelectItem value="Toddler">Toddler (1-3 years)</SelectItem>
+
+                          <SelectItem value="Preschool">Preschool (3-5 years)</SelectItem>
+
+                          <SelectItem value="Kids">Kids (5-12 years)</SelectItem>
+
+                          <SelectItem value="Teens">Teens (12+)</SelectItem>
+
+                        </SelectContent>
+
+                      </Select>
+
+                    </div>
+
+                    <div>
+
+                      <Label>Gender</Label>
+
+                      <Select value={attributes.gender || ''} onValueChange={(value) => setAttributes({ ...attributes, gender: value })}>
+
+                        <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+
+                        <SelectContent>
+
+                          <SelectItem value="Boy">Boy</SelectItem>
+
+                          <SelectItem value="Girl">Girl</SelectItem>
+
+                          <SelectItem value="Unisex">Unisex</SelectItem>
+
+                        </SelectContent>
+
+                      </Select>
+
+                    </div>
+
+                    <div>
+
+                      <Label>Brand</Label>
+
+                      <Input
+                        value={attributes.brand || ''}
+                        onChange={(e) => setAttributes({ ...attributes, brand: e.target.value })}
+                        placeholder="e.g., Graco, Fisher-Price"
+                      />
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              )}
+
+              {selectedCategorySlug === 'hobbies' && (
+
+                <div className="mt-6 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+
+                  <h3 className="font-semibold text-gray-900 mb-4">Hobby Item Details</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div>
+
+                      <Label>Category</Label>
+
+                      <Select value={attributes.hobby_type || ''} onValueChange={(value) => setAttributes({ ...attributes, hobby_type: value })}>
+
+                        <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+
+                        <SelectContent>
+
+                          <SelectItem value="Sports">Sports Equipment</SelectItem>
+
+                          <SelectItem value="Musical">Musical Instruments</SelectItem>
+
+                          <SelectItem value="Books">Books & Media</SelectItem>
+
+                          <SelectItem value="Games">Games & Puzzles</SelectItem>
+
+                          <SelectItem value="Art">Art & Crafts</SelectItem>
+
+                          <SelectItem value="Outdoor">Outdoor & Camping</SelectItem>
+
+                          <SelectItem value="Collectibles">Collectibles</SelectItem>
+
+                          <SelectItem value="Other">Other</SelectItem>
+
+                        </SelectContent>
+
+                      </Select>
+
+                    </div>
+
+                    <div>
+
+                      <Label>Brand</Label>
+
+                      <Input
+                        value={attributes.brand || ''}
+                        onChange={(e) => setAttributes({ ...attributes, brand: e.target.value })}
+                        placeholder="e.g., Wilson, Yamaha"
+                      />
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              )}
+
+              {selectedCategorySlug === 'businesses' && (
+
+                <div className="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+
+                  <h3 className="font-semibold text-gray-900 mb-4">Business Details</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div>
+
+                      <Label>Business Type *</Label>
+
+                      <Select value={attributes.business_type || ''} onValueChange={(value) => setAttributes({ ...attributes, business_type: value })}>
+
+                        <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+
+                        <SelectContent>
+
+                          <SelectItem value="Restaurant">Restaurant / Food</SelectItem>
+
+                          <SelectItem value="Retail">Retail Shop</SelectItem>
+
+                          <SelectItem value="Manufacturing">Manufacturing</SelectItem>
+
+                          <SelectItem value="Service">Service Business</SelectItem>
+
+                          <SelectItem value="Franchise">Franchise</SelectItem>
+
+                          <SelectItem value="Online">Online Business</SelectItem>
+
+                          <SelectItem value="Industrial">Industrial Equipment</SelectItem>
+
+                          <SelectItem value="Other">Other</SelectItem>
+
+                        </SelectContent>
+
+                      </Select>
+
+                    </div>
+
+                    <div>
+
+                      <Label>Years in Operation</Label>
+
+                      <Input
+                        type="number"
+                        value={attributes.years_operating || ''}
+                        onChange={(e) => setAttributes({ ...attributes, years_operating: e.target.value })}
+                        placeholder="e.g., 5"
+                        min="0"
+                      />
+
+                    </div>
+
+                    <div>
+
+                      <Label>Number of Employees</Label>
+
+                      <Input
+                        type="number"
+                        value={attributes.employees || ''}
+                        onChange={(e) => setAttributes({ ...attributes, employees: e.target.value })}
+                        placeholder="e.g., 10"
+                        min="0"
+                      />
+
+                    </div>
+
+                    <div>
+
+                      <Label>Revenue (Annual)</Label>
+
+                      <Input
+                        value={attributes.annual_revenue || ''}
+                        onChange={(e) => setAttributes({ ...attributes, annual_revenue: e.target.value })}
+                        placeholder="e.g., $50,000"
+                      />
+
+                    </div>
+
                   </div>
 
                 </div>
@@ -1810,128 +2304,174 @@ export const PostListing = () => {
 
 
 
-          {/* Pricing */}
+          {/* Pricing — category-aware */}
 
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          {(() => {
+            const catConfig = getCategoryConfig(selectedCategorySlug);
+            const pf = catConfig?.priceField;
+            const isRange = pf?.isRange;
+            const hasPeriod = pf?.periodOptions && pf.periodOptions.length > 0;
+            const sectionTitle = pf?.label === 'Salary Range' ? 'Compensation' : pf?.label === 'Rate' ? 'Pricing / Rate' : 'Pricing';
 
-            <h2 className="text-xl font-bold text-gray-900 mb-4 font-comfortaa">
+            return (
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <h2 className="text-xl font-bold text-gray-900 mb-4 font-comfortaa">
+                  {sectionTitle}
+                </h2>
 
-              {getCategoryConfig(selectedCategorySlug)?.priceField?.label === 'Salary Range' ? 'Salary' : getCategoryConfig(selectedCategorySlug)?.priceField?.label === 'Rate' ? 'Rate' : 'Pricing'}
-
-            </h2>
-
-
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-              <div>
-
-                <Label htmlFor="price">
-                  {getCategoryConfig(selectedCategorySlug)?.priceField?.label || 'Price'}
-                  {getCategoryConfig(selectedCategorySlug)?.priceField?.required !== false && ' *'}
-                </Label>
-
-                <Input
-
-                  id="price"
-
-                  type="number"
-
-                  value={formData.price}
-
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-
-                  placeholder={getCategoryConfig(selectedCategorySlug)?.priceField?.placeholder || '0.00'}
-
-                  min="0"
-
-                  step="0.01"
-
-                />
-
+                {isRange ? (
+                  /* --- Range mode (Jobs: salary min / max) --- */
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>{pf?.label ? `${pf.label} (Min)` : 'Min'}</Label>
+                        <Input
+                          type="number"
+                          value={attributes.salary_min || ''}
+                          onChange={(e) => setAttributes({ ...attributes, salary_min: e.target.value })}
+                          placeholder={pf?.placeholder || 'e.g., 50000'}
+                          min="0"
+                        />
+                      </div>
+                      <div>
+                        <Label>{pf?.label ? `${pf.label} (Max)` : 'Max'}</Label>
+                        <Input
+                          type="number"
+                          value={attributes.salary_max || ''}
+                          onChange={(e) => setAttributes({ ...attributes, salary_max: e.target.value })}
+                          placeholder={pf?.placeholderMax || 'e.g., 80000'}
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Currency</Label>
+                        <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="USD">USD ($)</SelectItem>
+                            <SelectItem value="EUR">EUR (€)</SelectItem>
+                            <SelectItem value="GBP">GBP (£)</SelectItem>
+                            <SelectItem value="RWF">RWF (FRw)</SelectItem>
+                            <SelectItem value="NGN">NGN (₦)</SelectItem>
+                            <SelectItem value="KES">KES (KSh)</SelectItem>
+                            <SelectItem value="ZAR">ZAR (R)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {hasPeriod && (
+                        <div>
+                          <Label>Period</Label>
+                          <Select value={attributes.salary_period || ''} onValueChange={(value) => setAttributes({ ...attributes, salary_period: value })}>
+                            <SelectTrigger><SelectValue placeholder="Select period" /></SelectTrigger>
+                            <SelectContent>
+                              {pf!.periodOptions!.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500">Leave blank if you prefer not to disclose salary.</p>
+                  </div>
+                ) : hasPeriod ? (
+                  /* --- Period mode (Services: rate, Property: price with period) --- */
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="price">
+                        {pf?.label || 'Price'}
+                        {pf?.required !== false && ' *'}
+                      </Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        placeholder={pf?.placeholder || '0.00'}
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                    <div>
+                      <Label>Currency</Label>
+                      <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="USD">USD ($)</SelectItem>
+                          <SelectItem value="EUR">EUR (€)</SelectItem>
+                          <SelectItem value="GBP">GBP (£)</SelectItem>
+                          <SelectItem value="RWF">RWF (FRw)</SelectItem>
+                          <SelectItem value="NGN">NGN (₦)</SelectItem>
+                          <SelectItem value="KES">KES (KSh)</SelectItem>
+                          <SelectItem value="ZAR">ZAR (R)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Period</Label>
+                      <Select value={formData.price_type} onValueChange={(value) => setFormData({ ...formData, price_type: value })}>
+                        <SelectTrigger><SelectValue placeholder="Select period" /></SelectTrigger>
+                        <SelectContent>
+                          {pf!.periodOptions!.map(opt => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {pf?.required === false && (
+                      <p className="text-sm text-gray-500 col-span-full">Leave blank if pricing varies or is negotiable.</p>
+                    )}
+                  </div>
+                ) : (
+                  /* --- Standard mode (Motors, Electronics, Fashion, etc.) --- */
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="price">
+                        {pf?.label || 'Price'}
+                        {pf?.required !== false && ' *'}
+                      </Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        placeholder={pf?.placeholder || '0.00'}
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                    <div>
+                      <Label>Currency</Label>
+                      <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="USD">USD ($)</SelectItem>
+                          <SelectItem value="EUR">EUR (€)</SelectItem>
+                          <SelectItem value="GBP">GBP (£)</SelectItem>
+                          <SelectItem value="RWF">RWF (FRw)</SelectItem>
+                          <SelectItem value="NGN">NGN (₦)</SelectItem>
+                          <SelectItem value="KES">KES (KSh)</SelectItem>
+                          <SelectItem value="ZAR">ZAR (R)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Price Type</Label>
+                      <Select value={formData.price_type} onValueChange={(value) => setFormData({ ...formData, price_type: value })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="fixed">Fixed</SelectItem>
+                          <SelectItem value="negotiable">Negotiable</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
               </div>
-
-
-
-              <div>
-
-                <Label htmlFor="currency">Currency</Label>
-
-                <Select
-
-                  value={formData.currency}
-
-                  onValueChange={(value) => setFormData({ ...formData, currency: value })}
-
-                >
-
-                  <SelectTrigger>
-
-                    <SelectValue />
-
-                  </SelectTrigger>
-
-                  <SelectContent>
-
-                    <SelectItem value="USD">USD ($)</SelectItem>
-
-                    <SelectItem value="EUR">EUR (€)</SelectItem>
-
-                    <SelectItem value="GBP">GBP (£)</SelectItem>
-
-                    <SelectItem value="RWF">RWF (FRw)</SelectItem>
-
-                    <SelectItem value="NGN">NGN (₦)</SelectItem>
-
-                    <SelectItem value="KES">KES (KSh)</SelectItem>
-
-                    <SelectItem value="ZAR">ZAR (R)</SelectItem>
-
-                  </SelectContent>
-
-                </Select>
-
-              </div>
-
-
-
-              <div>
-
-                <Label htmlFor="price_type">Price Type</Label>
-
-                <Select
-
-                  value={formData.price_type}
-
-                  onValueChange={(value) => setFormData({ ...formData, price_type: value })}
-
-                >
-
-                  <SelectTrigger>
-
-                    <SelectValue />
-
-                  </SelectTrigger>
-
-                  <SelectContent>
-
-                    <SelectItem value="fixed">Fixed</SelectItem>
-
-                    <SelectItem value="negotiable">Negotiable</SelectItem>
-
-                    <SelectItem value="monthly">Per Month</SelectItem>
-
-                    <SelectItem value="yearly">Per Year</SelectItem>
-
-                  </SelectContent>
-
-                </Select>
-
-              </div>
-
-            </div>
-
-          </div>
+            );
+          })()}
 
 
 
@@ -1941,9 +2481,12 @@ export const PostListing = () => {
 
             <h2 className="text-xl font-bold text-gray-900 mb-4 font-comfortaa">
 
-              Images * (Max 10)
+              Images {getCategoryConfig(selectedCategorySlug)?.imageRequired === false ? '(Optional — Max 10)' : '* (Max 10)'}
 
             </h2>
+            {getCategoryConfig(selectedCategorySlug)?.imageGuidance && (
+              <p className="text-sm text-gray-500 mb-3">{getCategoryConfig(selectedCategorySlug)?.imageGuidance}</p>
+            )}
 
 
 

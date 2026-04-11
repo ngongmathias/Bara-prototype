@@ -833,7 +833,7 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     categoryName: 'Pets & Birds',
     imageGuidance: 'Upload clear photos of the pet, vaccination records if available',
     imageRequired: true,
-    priceField: { label: 'Price', required: true, placeholder: 'e.g., 300' },
+    priceField: { label: 'Adoption Fee / Price', required: false, placeholder: 'e.g., 300' },
     fields: [
       {
         name: 'pet_type',
@@ -1232,4 +1232,31 @@ export const getCategoryConfig = (categorySlug: string): CategoryConfig | undefi
 // Helper function to get all category slugs
 export const getAllCategorySlugs = (): string[] => {
   return categoryFieldConfigs.map(config => config.categorySlug);
+};
+
+/**
+ * Returns the category-appropriate label for the "sold" status.
+ * e.g. Jobs → "Position Filled", Pets → "Adopted", etc.
+ */
+export const getSoldLabel = (categorySlug: string): string => {
+  if (!categorySlug) return 'SOLD';
+  const slug = categorySlug.toLowerCase();
+  if (slug.includes('job')) return 'POSITION FILLED';
+  if (slug.includes('pet')) return 'ADOPTED';
+  if (slug.includes('service')) return 'UNAVAILABLE';
+  if (slug.includes('business')) return 'ACQUIRED';
+  return 'SOLD';
+};
+
+/**
+ * Returns the category-appropriate button label for "Mark as Sold" action.
+ */
+export const getMarkAsSoldLabel = (categorySlug: string): string => {
+  if (!categorySlug) return 'Mark as Sold';
+  const slug = categorySlug.toLowerCase();
+  if (slug.includes('job')) return 'Mark Position as Filled';
+  if (slug.includes('pet')) return 'Mark as Adopted';
+  if (slug.includes('service')) return 'Mark as Unavailable';
+  if (slug.includes('business')) return 'Mark as Acquired';
+  return 'Mark as Sold';
 };

@@ -2,6 +2,7 @@ import React from 'react';
 import { MapPin, Bed, Bath, Move, Calendar, Gauge, Fuel, Zap, Briefcase, DollarSign, Clock } from 'lucide-react';
 import { MarketplaceListing } from '@/types/marketplace';
 import { Button } from '@/components/ui/button';
+import { getSoldLabel } from '@/config/categoryFieldConfigs';
 
 interface CardProps {
     listing: MarketplaceListing;
@@ -24,7 +25,7 @@ export const PropertyCard: React.FC<CardProps> = ({ listing, onClick }) => {
                 {listing.status === 'sold' && (
                     <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
                         <div className="bg-red-600 text-white text-2xl font-bold px-6 py-3 rounded-lg transform -rotate-12">
-                            SOLD
+                            {getSoldLabel(listing.category?.slug || '')}
                         </div>
                     </div>
                 )}
@@ -89,7 +90,7 @@ export const VehicleCard: React.FC<CardProps> = ({ listing, onClick }) => {
                 {listing.status === 'sold' && (
                     <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
                         <div className="bg-red-600 text-white text-2xl font-bold px-6 py-3 rounded-lg transform -rotate-12">
-                            SOLD
+                            {getSoldLabel(listing.category?.slug || '')}
                         </div>
                     </div>
                 )}
@@ -142,7 +143,7 @@ export const JobCard: React.FC<CardProps> = ({ listing, onClick }) => {
             {listing.status === 'sold' && (
                 <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-lg z-10">
                     <div className="bg-red-600 text-white text-2xl font-bold px-6 py-3 rounded-lg transform -rotate-12">
-                        FILLED
+                        {getSoldLabel(listing.category?.slug || '')}
                     </div>
                 </div>
             )}

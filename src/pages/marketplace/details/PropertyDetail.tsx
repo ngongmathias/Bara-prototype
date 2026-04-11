@@ -523,14 +523,31 @@ export const PropertyDetail = () => {
 
               {/* Seller Info */}
               <div className="pt-6 border-t border-gray-200">
-                <Button
-                  onClick={() => setShowOfferModal(true)}
-                  variant="outline"
-                  className="w-full h-12 border-amber-500 text-amber-700 hover:bg-amber-50 mb-4"
-                >
-                  <DollarSign className="w-5 h-5 mr-2" />
-                  Make an Offer
-                </Button>
+                <div className="flex gap-2 mb-4">
+                  <Button
+                    onClick={() => setShowOfferModal(true)}
+                    variant="outline"
+                    className="flex-1 h-12 border-amber-500 text-amber-700 hover:bg-amber-50"
+                  >
+                    <DollarSign className="w-5 h-5 mr-2" />
+                    Make an Offer
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (listing.seller_whatsapp) {
+                        handleWhatsAppContact();
+                      } else if (listing.seller_phone) {
+                        handlePhoneContact();
+                      } else if (listing.seller_email) {
+                        window.location.href = `mailto:${listing.seller_email}?subject=Viewing Request: ${listing.title}`;
+                      }
+                    }}
+                    className="flex-1 h-12 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <Eye className="w-5 h-5 mr-2" />
+                    Request Viewing
+                  </Button>
+                </div>
                 <SellerTrustCard partner={partner} listing={listing} />
               </div>
 

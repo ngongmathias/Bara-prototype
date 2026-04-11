@@ -34,6 +34,7 @@ export const config = {
     '/events/:id*',
     '/blog/:slug*',
     '/listings/:slug*',
+    '/marketplace/store/:slug*',
   ],
 };
 
@@ -234,6 +235,25 @@ async function buildPreview(pathname: string): Promise<PreviewData | null> {
       description: row.description?.slice(0, 160) || `${row.name} on Bara Afrika`,
       image: row.cover_image_url || row.logo_url || DEFAULT_IMAGE,
       type: 'business.business',
+    };
+  }
+
+  // /marketplace/store/:slug (marketplace storefront)
+  const storeMatch = pathname.match(/^\/marketplace\/store\/([^/?#]+)/);
+  if (storeMatch) {
+    const slug = storeMatch[1];
+    if (['edit', 'new'].includes(slug)) return null;
+    const row = await fetchFromSupabase(
+      'marketplace_partners',
+      `slug=eq.${slug}&select=display_name,description,logo_url,cover_url,business_type`
+    );
+    if (!row) return null;
+    const typeLabel = row.business_type ? ` · ${row.business_type}` : '';
+    return {
+      title: `${row.display_name} — Bara Marketplace`,
+      description: row.description?.slice(0, 160) || `${row.display_name}${typeLabel} on Bara Marketplace`,
+      image: row.logo_url || row.cover_url || DEFAULT_IMAGE,
+      type: 'profile',
     };
   }
 

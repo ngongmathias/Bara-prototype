@@ -26,6 +26,7 @@ import {
   TrendingUp,
   Briefcase,
   DollarSign,
+  MessageCircle,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -39,7 +40,6 @@ import {
   useListingPartner,
   SellerTrustCard,
   ReportListingModal,
-  OfferModal,
   buildListingShare,
 } from '@/components/marketplace/listing-parts';
 import { FavoriteButton } from '@/components/marketplace/FavoriteButton';
@@ -54,7 +54,6 @@ export const BusinessDetail = () => {
   const [loading, setLoading] = useState(true);
   const [relatedListings, setRelatedListings] = useState<any[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [showOfferModal, setShowOfferModal] = useState(false);
 
   const { user } = useUser();
   const partner = useListingPartner(listing?.created_by);
@@ -396,12 +395,19 @@ export const BusinessDetail = () => {
               <div className="pt-6 border-t border-gray-200">
                 <h3 className="font-semibold text-gray-900 mb-3">Business Owner</h3>
                 <Button
-                  onClick={() => setShowOfferModal(true)}
-                  variant="outline"
-                  className="w-full h-12 border-amber-500 text-amber-700 hover:bg-amber-50 mb-4"
+                  onClick={() => {
+                    if (listing.seller_whatsapp) {
+                      handleWhatsAppContact();
+                    } else if (listing.seller_email) {
+                      window.location.href = `mailto:${listing.seller_email}?subject=Inquiry: ${listing.title}`;
+                    } else {
+                      handlePhoneContact();
+                    }
+                  }}
+                  className="w-full h-12 bg-slate-700 hover:bg-slate-800 text-white mb-4"
                 >
-                  <DollarSign className="w-5 h-5 mr-2" />
-                  Make an Offer
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Contact Owner
                 </Button>
                 <SellerTrustCard partner={partner} listing={listing} />
               </div>
@@ -518,12 +524,6 @@ export const BusinessDetail = () => {
         listingId={listingId!}
       />
 
-      {/* Offer Modal */}
-      <OfferModal
-        open={showOfferModal}
-        onClose={() => setShowOfferModal(false)}
-        listing={listing}
-      />
 
       <BottomBannerAd />
       <Footer />

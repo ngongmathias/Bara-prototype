@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { useUser } from '@clerk/clerk-react';
 import { Plus, Edit, Trash2, Eye, CheckCircle, Store } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getSoldLabel, getMarkAsSoldLabel } from '@/config/categoryFieldConfigs';
 
 export const MyAds = () => {
   const navigate = useNavigate();
@@ -231,7 +232,7 @@ export const MyAds = () => {
                             ad.status === 'sold' ? 'bg-gray-500 text-white' :
                               'bg-red-500 text-white'
                           }`}>
-                          {ad.status.toUpperCase()}
+                          {ad.status === 'sold' ? getSoldLabel(ad.category?.slug || '') : ad.status.toUpperCase()}
                         </div>
                       </div>
 
@@ -295,7 +296,7 @@ export const MyAds = () => {
                               className="font-roboto"
                             >
                               <CheckCircle className="w-4 h-4 mr-2" />
-                              Mark as Sold
+                              {getMarkAsSoldLabel(ad.category?.slug || '')}
                             </Button>
                           )}
 
