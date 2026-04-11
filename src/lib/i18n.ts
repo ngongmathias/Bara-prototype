@@ -40,6 +40,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
+    lng: 'en', // Force English until custom language switcher (9.10) is built
     fallbackLng: 'en',
     debug: false,
 
