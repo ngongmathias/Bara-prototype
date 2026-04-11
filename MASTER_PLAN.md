@@ -1907,4 +1907,109 @@ BATCH 4 — Visual & UX Polish
 *Updated: April 10, 2026 (evening) — Phase 13 tasks completed: 13.4 (MyListings→MyAds rename + route updates), 13.5 (enhanced post-creation email with ad link and details), 13.9 (SOLD badge overlay on all marketplace cards), 13.3 (FavoriteButton on all 11 detail pages + category-specific CTAs). Remaining: 13.6 (storefront editor), 13.8 (report ad admin management).*
 *Updated: April 10, 2026 (final) — Phase 13 COMPLETE: 13.6 (StorefrontEditor page with logo/cover upload, contact/location editing, auto-slug generation), 13.8 (Report ad functionality already implemented via ReportListingModal + AdminMarketplace Reports tab with review/dismiss actions). All 7 Phase 13 tasks completed.*
 *Updated: April 10, 2026 (late) — Phase 14 PLANNED: 8 marketplace deep features from user testing — category pricing audit, sign-in/sign-up UX, storefront branding, country simplification, multi-variant listings, purchase confirmation, shopping cart, comments & ratings. Awaiting user approval before implementation.*
+*Updated: April 11, 2026 — Phase 14 COMPLETE: All 8 items implemented (category pricing, sign-in/sign-up UX, storefront branding, country simplification, multi-variant listings, purchase confirmation, shopping cart, reviews & Q&A). Admin events bulk actions added. Instagram link added across site. i18n forced to English until language switcher (9.10) is built.*
+*Updated: April 11, 2026 — Phase 15 PLANNED: Pan-African payment integration for marketplace transactions. Phase 9.10 translation options documented.*
+
+---
+
+## Phase 15 — Marketplace Payment Integration
+
+**Goal:** Enable real payments on the marketplace so buyers can pay sellers through the platform, starting with pan-African payment methods.
+
+### Current State
+- Marketplace transactions exist as a **request system** (buyer requests → seller confirms → arrange payment offline)
+- No payment processing — the "Buy Now" flow creates a `marketplace_transactions` record but money moves outside the platform
+- BARA Coins exist for gamification but not yet usable for marketplace purchases
+- Event ticket purchases also have no live payment (placeholder from Phase 5)
+
+### Payment Provider Options for Africa
+
+| Provider | Coverage | Methods Supported | Fees | Integration Complexity | Notes |
+|----------|----------|-------------------|------|----------------------|-------|
+| **Flutterwave** | 34 African countries + global | Mobile Money (M-Pesa, MTN MoMo, Airtel Money, Orange Money), Cards (Visa/MC), Bank Transfer, USSD, Mpesa, Apple Pay, Google Pay | 1.4% local, 3.8% international | Medium (REST API + hosted checkout) | Most popular pan-African gateway. HQ: Nigeria. Supports payouts to sellers. |
+| **Paystack** | Nigeria, Ghana, South Africa, Kenya | Cards, Bank Transfer, USSD, Mobile Money, QR | 1.5% + NGN 100 (local), 3.9% + NGN 100 (intl) | Easy (clean API, React SDK) | Stripe-acquired. Excellent docs. More limited country coverage. |
+| **DPO (formerly 3G Direct Pay)** | 40+ African countries | Mobile Money, Cards, Bank Transfer, Crypto | Varies by country (1.5-3.5%) | Medium | Oldest pan-African gateway. Wide coverage including East Africa. |
+| **Chipper Cash API** | 9 African countries | Mobile Money, Chipper wallet | ~1% | Medium | Popular P2P app, business API available. Good for East/West Africa. |
+| **MTN MoMo API** | MTN markets (16 countries) | MTN Mobile Money only | 1-2% | Medium | Direct integration, MTN users only. Good for Uganda, Rwanda, Ghana, Cameroon. |
+| **Stripe** | South Africa, Nigeria, Ghana, Kenya (expanding) | Cards, bank debits | 2.9% + $0.30 | Easy (best docs) | Limited African coverage but excellent developer experience. |
+
+### Recommended Approach: Flutterwave as Primary
+
+**Why Flutterwave:**
+- Covers 34 African countries (matches BARA's pan-African mission)
+- Supports ALL major payment methods: MoMo, M-Pesa, cards, bank transfer, USSD
+- **Split payments** — can automatically split buyer payment between seller + BARA commission
+- **Subaccounts** — each seller gets a Flutterwave subaccount for direct payouts
+- React SDK available (`flutterwave-react-v3`)
+- Supports multiple currencies (USD, NGN, KES, GHS, RWF, UGX, ZAR, XAF, XOF, etc.)
+
+### Implementation Plan
+
+| # | Task | Priority | Complexity |
+|---|------|----------|------------|
+| 15.1 | **Flutterwave account setup** — Create business account, get API keys, configure webhook URL | P0 | Config |
+| 15.2 | **Payment service module** — `src/lib/PaymentService.ts` with Flutterwave REST API integration (initialize payment, verify payment, handle webhooks) | P0 | Medium |
+| 15.3 | **Checkout flow** — After buyer confirms purchase in BuyNowModal, redirect to Flutterwave hosted checkout (or inline popup). On success, update `marketplace_transactions.status` to `payment_received` | P0 | Medium |
+| 15.4 | **Webhook handler** — Supabase Edge Function to receive Flutterwave webhook, verify signature, update transaction status, decrement variant stock | P0 | Medium |
+| 15.5 | **Seller payouts** — Flutterwave subaccounts or manual payout triggers. BARA takes X% commission, rest goes to seller | P1 | Large |
+| 15.6 | **Transaction status expansion** — Add new statuses: `payment_pending`, `payment_received`, `payment_failed`, `refund_requested`, `refunded` | P0 | Small |
+| 15.7 | **Cart checkout** — Cart page groups items by seller, creates one Flutterwave payment per seller (or one payment with split) | P1 | Medium |
+| 15.8 | **Payment method selector** — UI for buyer to choose: Mobile Money, Card, Bank Transfer, USSD. Flutterwave handles the rest. | P1 | Small |
+| 15.9 | **Paystack as secondary** — Add Paystack for Nigeria/Ghana/SA/Kenya as fallback where Flutterwave has issues | P2 | Medium |
+| 15.10 | **BARA Coins as payment** — Allow partial/full payment with BARA Coins alongside real money | P2 | Medium |
+| 15.11 | **Event ticket payments** — Reuse same Flutterwave integration for paid event tickets | P2 | Medium |
+| 15.12 | **Coin Store payments** — Enable buying BARA Coins with real money via Flutterwave | P2 | Small |
+
+### Transaction Flow (with payments)
+
+```
+Buyer clicks "Buy Now"
+  → Creates transaction (status: pending_seller)
+  → Seller notified
+
+Seller clicks "Confirm"
+  → Status: confirmed
+  → Buyer notified: "Pay now" button appears
+
+Buyer clicks "Pay Now"
+  → Flutterwave checkout opens (MoMo / Card / Bank / USSD)
+  → On success: webhook fires → status: payment_received
+  → Seller notified: "Payment received, ship/deliver the item"
+
+Seller delivers + clicks "Mark Complete"
+  → Status: completed
+  → Variant stock decremented, listing marked sold if last unit
+  → BARA commission deducted, seller payout initiated
+```
+
+### Database Changes Needed
+- Add `payment_reference TEXT` to `marketplace_transactions`
+- Add `payment_method TEXT` to `marketplace_transactions`
+- Add `payment_status TEXT` to `marketplace_transactions`
+- Add `commission_amount NUMERIC(12,2)` to `marketplace_transactions`
+- New table: `marketplace_seller_payouts` (id, seller_user_id, transaction_id, amount, currency, flutterwave_ref, status, created_at)
+
+---
+
+## Phase 9.10 — Translation / i18n (Options Analysis)
+
+**Current state:** i18n forced to English. Google Translate widget (7.52) exists as temporary solution. Proper language switcher needed.
+
+### Option Comparison
+
+| # | Approach | Pros | Cons | Cost | Effort |
+|---|----------|------|------|------|--------|
+| **A** | **Weglot** | Zero-code integration, auto-translates everything, SEO-friendly, visual editor to fix translations, custom switcher | Paid after 2K words free, monthly cost scales with content | ~15-49/mo | 1-2 hours |
+| **B** | **i18next + DeepL API** (already have i18next) | Full control, no third-party widget, already have locale files for 7 languages, DeepL quality is excellent | Need to translate ALL strings (hundreds), need pipeline to keep translations in sync as content changes | Free-6/mo (DeepL API) | 2-3 days |
+| **C** | **i18next + AI batch translate** | Same as B but use Claude/GPT to bulk-translate all JSON locale files at once, then human-review | One-time effort, but still need sync pipeline for new strings | Free (one-time) | 1-2 days |
+| **D** | **Crowdin + i18next** | Professional translation management, machine + human translation, GitHub sync, community translators | Complex setup, overkill for current stage | Free (open source) or $0-40/mo | 1 day setup |
+| **E** | **Keep Google Translate + fix i18n default** | Already working, zero cost, zero maintenance | Ugly widget, inconsistent translations, no SEO benefit, can't customize translations | Free | Done (already forced English) |
+
+### Recommendation
+- **For now (launch phase):** Option E is fine — English default + Google Translate widget for users who need other languages
+- **Next step (when you have time):** Option C — use AI to bulk-translate all locale files, build a clean language dropdown in the Header, remove Google Translate widget
+- **Long term (when revenue justifies):** Option A (Weglot) for professional auto-translation with zero maintenance
+
+The language switcher UI itself (9.10.2) is straightforward — a dropdown in the Header that calls `i18n.changeLanguage('fr')` etc. The hard part is making sure ALL user-facing strings are in the locale files, which is why Options A/C are best.
+
 *For Bara Afrika Platform — baraafrika.com*
