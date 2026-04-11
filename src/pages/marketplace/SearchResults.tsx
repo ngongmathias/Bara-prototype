@@ -224,7 +224,7 @@ export const SearchResults = () => {
       // Search query
       const searchQuery = searchParams.get('q');
       if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location_details.ilike.%${searchQuery}%`);
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location_details.ilike.%${searchQuery}%,seller_name.ilike.%${searchQuery}%`);
       }
 
       // Category filter

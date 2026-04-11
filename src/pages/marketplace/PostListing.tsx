@@ -2508,11 +2508,12 @@ export const PostListing = () => {
             );
           })()}
 
-          {/* Variants — only show for categories that support them */}
+          {/* Variants — available for all categories */}
           {(() => {
             const catConfig = getCategoryConfig(selectedCategorySlug);
-            const dims = catConfig?.variantDimensions;
-            if (!dims || dims.length === 0) return null;
+            const dims = catConfig?.variantDimensions || [
+              { key: 'option', label: 'Option', presets: [] },
+            ];
             return (
               <VariantBuilder
                 dimensions={dims}
@@ -2903,13 +2904,15 @@ export const PostListing = () => {
 
                 <ul className="space-y-1">
 
-                  <li>• Your ad will be reviewed before going live</li>
+                  <li>• Your ad will go live immediately after posting</li>
 
-                  <li>• Make sure all information is accurate</li>
+                  <li>• Make sure all information is accurate and truthful</li>
 
-                  <li>• Upload clear, high-quality images</li>
+                  <li>• Upload clear, high-quality images for better engagement</li>
 
-                  <li>• Provide at least one contact method</li>
+                  <li>• Provide at least one contact method so buyers can reach you</li>
+
+                  <li>• Ads that violate our guidelines may be removed</li>
 
                 </ul>
 

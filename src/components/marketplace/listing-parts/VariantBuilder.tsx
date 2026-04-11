@@ -22,6 +22,16 @@ interface VariantBuilderProps {
   onEnabledChange: (enabled: boolean) => void;
 }
 
+const friendlyDimLabel = (key: string, label: string): string => {
+  const map: Record<string, string> = {
+    size: 'Available Sizes',
+    color: 'Available Colors',
+    storage: 'Storage Options',
+    material: 'Material Options',
+  };
+  return map[key] || label;
+};
+
 export const VariantBuilder: React.FC<VariantBuilderProps> = ({
   dimensions,
   variants,
@@ -29,11 +39,9 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
   enabled,
   onEnabledChange,
 }) => {
-  // Track selected values per dimension for auto-generation
   const [dimValues, setDimValues] = useState<Record<string, string[]>>({});
   const [customInput, setCustomInput] = useState<Record<string, string>>({});
 
-  // Initialize dimValues from dimensions presets
   useEffect(() => {
     const init: Record<string, string[]> = {};
     dimensions.forEach((d) => {
@@ -111,11 +119,13 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <Package className="w-5 h-5 text-gray-600" />
-          <h2 className="text-xl font-bold text-gray-900 font-comfortaa">Variants</h2>
+          <h2 className="text-xl font-bold text-gray-900 font-comfortaa">
+            Multiple Items / Options
+          </h2>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">
-            {enabled ? 'Multiple variants' : 'Single item'}
+            {enabled ? 'Yes, I have options' : 'Single item'}
           </span>
           <Switch checked={enabled} onCheckedChange={onEnabledChange} />
         </div>
@@ -123,7 +133,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
 
       {!enabled && (
         <p className="text-sm text-gray-500">
-          Toggle on if this item comes in different sizes, colors, or packages.
+          Turn this on if you have multiple of the same item (e.g. different sizes, colors, or quantities).
         </p>
       )}
 
@@ -132,9 +142,9 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
           {/* Dimension value pickers */}
           {dimensions.map((dim) => (
             <div key={dim.key}>
-              <Label className="text-sm font-medium">{dim.label}</Label>
+              <Label className="text-sm font-medium">{friendlyDimLabel(dim.key, dim.label)}</Label>
               <p className="text-xs text-gray-500 mb-2">
-                Select or type the {dim.label.toLowerCase()} options you offer
+                Pick which {dim.label.toLowerCase()} options you have, or type your own
               </p>
 
               {dim.presets && dim.presets.length > 0 && (
@@ -165,7 +175,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                   onChange={(e) =>
                     setCustomInput((prev) => ({ ...prev, [dim.key]: e.target.value }))
                   }
-                  placeholder={`Add custom ${dim.label.toLowerCase()}...`}
+                  placeholder={`Type a custom ${dim.label.toLowerCase()} and press Enter...`}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -184,7 +194,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                 </Button>
               </div>
 
-              {/* Show selected custom values that aren't presets */}
+              {/* Show selected custom values */}
               {(dimValues[dim.key] || []).filter(
                 (v) => !dim.presets?.includes(v)
               ).length > 0 && (
@@ -213,7 +223,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
 
           {/* Generate button */}
           <Button type="button" variant="default" onClick={generateVariants} className="w-full">
-            Generate Variants
+            Create Options
             {Object.values(dimValues).some((v) => v.length > 0) && (
               <span className="ml-2 text-xs opacity-75">
                 ({Object.values(dimValues).reduce((acc, v) => acc * Math.max(v.length, 1), 1)}{' '}
@@ -227,7 +237,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-gray-700">
-                  {variants.length} Variant{variants.length > 1 ? 's' : ''}
+                  {variants.length} Option{variants.length > 1 ? 's' : ''}
                 </h3>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">Set all quantities:</span>
@@ -243,9 +253,9 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
 
               <div className="border rounded-lg overflow-hidden">
                 <div className="grid grid-cols-[1fr_100px_80px_40px] gap-2 px-3 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
-                  <span>Variant</span>
-                  <span>Price Override</span>
-                  <span>Quantity</span>
+                  <span>Option</span>
+                  <span>Special Price</span>
+                  <span>In Stock</span>
                   <span></span>
                 </div>
                 {variants.map((variant, idx) => (
@@ -262,7 +272,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                       step="0.01"
                       value={variant.price_override}
                       onChange={(e) => updateVariant(idx, 'price_override', e.target.value)}
-                      placeholder="Base"
+                      placeholder="Same"
                       className="h-8 text-sm"
                     />
                     <Input
@@ -283,7 +293,7 @@ export const VariantBuilder: React.FC<VariantBuilderProps> = ({
                 ))}
               </div>
               <p className="text-xs text-gray-500">
-                Leave "Price Override" blank to use the base price above.
+                "Special Price" — leave blank to use the same price as above. Only fill in if a specific option costs more or less.
               </p>
             </div>
           )}

@@ -117,6 +117,10 @@ export const CategoryPage = () => {
         query = query.eq('subcategory_id', selectedSubcategory);
       }
 
+      if (searchQuery.trim()) {
+        query = query.or(`title.ilike.%${searchQuery.trim()}%,description.ilike.%${searchQuery.trim()}%,seller_name.ilike.%${searchQuery.trim()}%`);
+      }
+
       const { data, error } = await query;
 
       if (error) throw error;

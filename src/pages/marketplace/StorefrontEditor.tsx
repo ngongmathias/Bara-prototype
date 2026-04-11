@@ -89,21 +89,18 @@ export const StorefrontEditor = () => {
 
     setSaving(true);
     try {
+      const slugBase = formData.display_name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 40);
+
       const updateData: any = {
         owner_user_id: user.id,
         ...formData,
+        slug: partner?.slug || `${slugBase}-${user.id.slice(-6)}`,
         updated_at: new Date().toISOString(),
       };
-
-      // If no partner exists, create slug
-      if (!partner) {
-        const slugBase = formData.display_name
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-|-$/g, '')
-          .slice(0, 40);
-        updateData.slug = `${slugBase}-${user.id.slice(-6)}`;
-      }
 
       const { data, error } = await supabase
         .from('marketplace_partners')

@@ -67,8 +67,13 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     cartable: false,
     priceField: {
       label: 'Price',
-      required: true,
+      required: false,
       placeholder: 'e.g., 250000',
+      priceTypeOptions: [
+        { value: 'fixed', label: 'Fixed' },
+        { value: 'negotiable', label: 'Negotiable' },
+        { value: 'contact', label: 'Contact for Price' },
+      ],
       periodOptions: [
         { value: 'total', label: 'Total Price' },
         { value: 'monthly', label: 'Per Month (Rent)' },
@@ -198,8 +203,13 @@ export const categoryFieldConfigs: CategoryConfig[] = [
     cartable: false,
     priceField: {
       label: 'Price',
-      required: true,
-      placeholder: 'e.g., 15000'
+      required: false,
+      placeholder: 'e.g., 15000',
+      priceTypeOptions: [
+        { value: 'fixed', label: 'Fixed' },
+        { value: 'negotiable', label: 'Negotiable' },
+        { value: 'contact', label: 'Contact for Price' },
+      ],
     },
     fields: [
       {
@@ -454,7 +464,17 @@ export const categoryFieldConfigs: CategoryConfig[] = [
       { key: 'color', label: 'Color', presets: ['Black', 'White', 'Silver', 'Gold', 'Blue', 'Red'] },
     ],
     imageRequired: true,
-    priceField: { label: 'Price', required: true, placeholder: 'e.g., 500' },
+    priceField: {
+      label: 'Price',
+      required: false,
+      placeholder: 'e.g., 500',
+      priceTypeOptions: [
+        { value: 'fixed', label: 'Fixed' },
+        { value: 'negotiable', label: 'Negotiable' },
+        { value: 'free', label: 'Free' },
+        { value: 'contact', label: 'Contact for Price' },
+      ],
+    },
     fields: [
       {
         name: 'brand',
@@ -572,7 +592,16 @@ export const categoryFieldConfigs: CategoryConfig[] = [
       { key: 'size', label: 'Size', presets: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '38', '40', '42', '44'] },
       { key: 'color', label: 'Color', presets: ['Black', 'White', 'Red', 'Blue', 'Green', 'Pink', 'Brown', 'Grey', 'Beige'] },
     ],
-    priceField: { label: 'Price', required: true, placeholder: 'e.g., 50' },
+    priceField: {
+      label: 'Price',
+      required: false,
+      placeholder: 'e.g., 50',
+      priceTypeOptions: [
+        { value: 'fixed', label: 'Fixed' },
+        { value: 'negotiable', label: 'Negotiable' },
+        { value: 'free', label: 'Free' },
+      ],
+    },
     fields: [
       {
         name: 'brand',
@@ -776,7 +805,16 @@ export const categoryFieldConfigs: CategoryConfig[] = [
       { key: 'color', label: 'Color', presets: ['Black', 'White', 'Brown', 'Grey', 'Beige', 'Natural Wood'] },
       { key: 'size', label: 'Size', presets: ['Small', 'Medium', 'Large'] },
     ],
-    priceField: { label: 'Price', required: true, placeholder: 'e.g., 200' },
+    priceField: {
+      label: 'Price',
+      required: false,
+      placeholder: 'e.g., 200',
+      priceTypeOptions: [
+        { value: 'fixed', label: 'Fixed' },
+        { value: 'negotiable', label: 'Negotiable' },
+        { value: 'free', label: 'Free' },
+      ],
+    },
     fields: [
       {
         name: 'furniture_type',
@@ -1108,7 +1146,16 @@ export const categoryFieldConfigs: CategoryConfig[] = [
       { key: 'size', label: 'Size', presets: ['S', 'M', 'L', 'XL', 'XXL'] },
       { key: 'color', label: 'Color' },
     ],
-    priceField: { label: 'Price', required: true, placeholder: 'e.g., 100' },
+    priceField: {
+      label: 'Price',
+      required: false,
+      placeholder: 'e.g., 100',
+      priceTypeOptions: [
+        { value: 'fixed', label: 'Fixed' },
+        { value: 'negotiable', label: 'Negotiable' },
+        { value: 'free', label: 'Free' },
+      ],
+    },
     fields: [
       {
         name: 'hobby_type',
