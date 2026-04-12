@@ -218,13 +218,11 @@ export const SearchResults = () => {
           marketplace_categories(name, slug),
           marketplace_subcategories(name, slug),
           countries(name, code, flag_url),
-          marketplace_listing_images(image_url, is_primary),
-          marketplace_partners!marketplace_listings_created_by_fkey(display_name, slug)
+          marketplace_listing_images(image_url, is_primary)
         `)
         .eq('status', 'active');
 
       // Search query - search in title, description, location, and seller_name
-      // Note: Cannot use OR with nested table (marketplace_partners), so we filter that separately
       const searchQuery = searchParams.get('q');
       if (searchQuery) {
         query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location_details.ilike.%${searchQuery}%,seller_name.ilike.%${searchQuery}%`);
@@ -366,12 +364,41 @@ export const SearchResults = () => {
 
       if (error) throw error;
 
-      const transformed = (data || []).map((listing: any) => ({
+      let transformed = (data || []).map((listing: any) => ({
         ...listing,
         category: listing.marketplace_categories,
         country: listing.countries,
         images: listing.marketplace_listing_images || [],
       }));
+
+      // Client-side filter by store name if search query exists
+      if (searchQuery) {
+        // Fetch store names for all unique created_by IDs
+        const createdByIds = [...new Set(transformed.map((l: any) => l.created_by).filter(Boolean))];
+        if (createdByIds.length > 0) {
+          const { data: stores } = await supabase
+            .from('marketplace_partners')
+            .select('user_id, display_name')
+            .in('user_id', createdByIds);
+          
+          if (stores) {
+            // Create a map of user_id to store name
+            const storeMap = new Map(stores.map((s: any) => [s.user_id, s.display_name]));
+            
+            // Filter results to include those matching store name
+            const searchLower = searchQuery.toLowerCase();
+            transformed = transformed.filter((listing: any) => {
+              const storeName = storeMap.get(listing.created_by);
+              // Keep if already matched by title/description/location/seller_name OR matches store name
+              return !storeName || storeName.toLowerCase().includes(searchLower) ||
+                     listing.title?.toLowerCase().includes(searchLower) ||
+                     listing.description?.toLowerCase().includes(searchLower) ||
+                     listing.location_details?.toLowerCase().includes(searchLower) ||
+                     listing.seller_name?.toLowerCase().includes(searchLower);
+            });
+          }
+        }
+      }
 
       setResults(transformed);
     } catch (error) {
