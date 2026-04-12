@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
+import { MarketplaceNav } from '@/components/marketplace/MarketplaceNav';
 
 export const SearchResults = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -222,10 +223,11 @@ export const SearchResults = () => {
         `)
         .eq('status', 'active');
 
-      // Search query - now includes store name from marketplace_partners
+      // Search query - search in title, description, location, and seller_name
+      // Note: Cannot use OR with nested table (marketplace_partners), so we filter that separately
       const searchQuery = searchParams.get('q');
       if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location_details.ilike.%${searchQuery}%,seller_name.ilike.%${searchQuery}%,marketplace_partners.display_name.ilike.%${searchQuery}%`);
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location_details.ilike.%${searchQuery}%,seller_name.ilike.%${searchQuery}%`);
       }
 
       // Category filter
@@ -573,8 +575,9 @@ export const SearchResults = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <TopBannerAd />
       <Header />
+      <TopBannerAd />
+      <MarketplaceNav />
 
       <main className="flex-1 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

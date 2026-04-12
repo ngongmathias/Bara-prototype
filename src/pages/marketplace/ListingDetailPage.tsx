@@ -319,8 +319,8 @@ export const ListingDetailPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <TopBannerAd />
         <Header />
+      <TopBannerAd />
         <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="animate-pulse space-y-6">
             <div className="h-96 bg-gray-200 rounded-lg" />
@@ -336,8 +336,8 @@ export const ListingDetailPage = () => {
   if (!listing) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <TopBannerAd />
         <Header />
+      <TopBannerAd />
         <div className="max-w-7xl mx-auto px-4 py-12 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Listing Not Found</h1>
           <Button onClick={() => navigate('/marketplace')}>
@@ -376,8 +376,8 @@ export const ListingDetailPage = () => {
         type="website"
         schemaData={productSchema}
       />
-      <TopBannerAd />
       <Header />
+      <TopBannerAd />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}

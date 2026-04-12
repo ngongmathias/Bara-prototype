@@ -873,9 +873,8 @@ export const PostListing = () => {
 
       <div className="min-h-screen bg-gray-50">
 
-        <TopBannerAd />
-
         <Header />
+      <TopBannerAd />
 
         <div className="max-w-4xl mx-auto px-4 py-12 text-center">
 
@@ -899,9 +898,8 @@ export const PostListing = () => {
 
     <div className="min-h-screen bg-gray-50 font-roboto">
 
-      <TopBannerAd />
-
       <Header />
+      <TopBannerAd />
 
 
 
