@@ -28,6 +28,7 @@ import { SEO } from '@/components/SEO';
 import { MonetizationService } from '@/lib/monetizationService';
 import { useToast } from '@/hooks/use-toast';
 import { useShare } from '@/context/ShareContext';
+import { SectionNavButton } from '@/components/SectionNavButton';
 
 export const EventsPage = () => {
   const navigate = useNavigate();

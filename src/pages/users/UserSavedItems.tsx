@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase, createAuthenticatedSupabaseClient } from "@/lib/supabase";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,12 +22,16 @@ export const UserSavedItems = () => {
   const { user } = useUser();
   const { getToken } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [likedSongs, setLikedSongs] = useState<SavedItem[]>([]);
   const [watchlist, setWatchlist] = useState<SavedItem[]>([]);
   const [ebookLibrary, setEbookLibrary] = useState<SavedItem[]>([]);
   const [savedArticles, setSavedArticles] = useState<SavedItem[]>([]);
   const [marketplaceFavorites, setMarketplaceFavorites] = useState<SavedItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Get default tab from URL parameter
+  const defaultTab = searchParams.get('tab') || 'articles';
 
   useEffect(() => {
     if (user?.id) fetchAll();
@@ -190,10 +194,11 @@ export const UserSavedItems = () => {
         <p className="text-sm text-gray-500">All your saved content in one place</p>
       </div>
 
-      <Tabs defaultValue="articles">
+      <Tabs defaultValue={defaultTab}>
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="articles" className="gap-1"><FileText className="h-3 w-3" /> Saved Articles ({savedArticles.length})</TabsTrigger>
           <TabsTrigger value="marketplace" className="gap-1"><ShoppingBag className="h-3 w-3" /> Marketplace ({marketplaceFavorites.length})</TabsTrigger>
+          <TabsTrigger value="events" className="gap-1"><Heart className="h-3 w-3" /> Liked Events (0)</TabsTrigger>
           <TabsTrigger value="songs" className="gap-1"><Heart className="h-3 w-3" /> Liked Songs ({likedSongs.length})</TabsTrigger>
           <TabsTrigger value="movies" className="gap-1"><Film className="h-3 w-3" /> Watchlist ({watchlist.length})</TabsTrigger>
           <TabsTrigger value="ebooks" className="gap-1"><BookOpen className="h-3 w-3" /> Library ({ebookLibrary.length})</TabsTrigger>
@@ -208,6 +213,15 @@ export const UserSavedItems = () => {
         <TabsContent value="marketplace">
           <Card><CardContent className="p-0">
             {renderItems(marketplaceFavorites, <ShoppingBag className="h-5 w-5" />, "No marketplace favorites yet. Heart listings to save them here.")}
+          </CardContent></Card>
+        </TabsContent>
+
+        <TabsContent value="events">
+          <Card><CardContent className="p-0">
+            <div className="p-8 text-center">
+              <Heart className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">Event likes coming soon! Like events to save them here.</p>
+            </div>
           </CardContent></Card>
         </TabsContent>
 

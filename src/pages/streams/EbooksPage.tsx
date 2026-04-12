@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { DiscoverMore } from '@/components/DiscoverMore';
 import { supabase } from '@/lib/supabase';
 import { useShare } from '@/context/ShareContext';
+import { SectionNavButton } from '@/components/SectionNavButton';
 
 // Sample ebook data — will be replaced with Supabase data when content is uploaded
 const FEATURED_BOOKS = [

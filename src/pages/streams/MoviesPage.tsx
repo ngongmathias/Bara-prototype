@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { DiscoverMore } from '@/components/DiscoverMore';
 import { supabase } from '@/lib/supabase';
 import { useShare } from '@/context/ShareContext';
+import { SectionNavButton } from '@/components/SectionNavButton';
 
 interface Movie {
   id: string;
