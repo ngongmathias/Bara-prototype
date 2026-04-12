@@ -57,8 +57,20 @@ function writeLocalCart(items: CartItem[]) {
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const getAuthenticatedClient = useCallback(async () => {
+    const token = await getToken({ template: 'supabase' });
+    return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : '',
+        },
+      },
+    });
+  }, [getToken]);
 
   // Load cart on mount
   useEffect(() => {
@@ -72,6 +84,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const syncFromDb = async () => {
     if (!user) return;
     setLoading(true);
+    const supabase = await getAuthenticatedClient();
     const { data } = await supabase
       .from('marketplace_cart_items')
       .select(`
@@ -131,7 +144,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         { onConflict: 'user_id,listing_id,variant_id' }
       );
     }
-  }, [items, user]);
+  }, [items, user, getAuthenticatedClient]);
 
   const removeFromCart = useCallback(async (listingId: string, variantId: string | null) => {
     const updated = items.filter(
@@ -141,6 +154,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     writeLocalCart(updated);
 
     if (user) {
+      const supabase = await getAuthenticatedClient();
       let query = supabase
         .from('marketplace_cart_items')
         .delete()
@@ -153,7 +167,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       await query;
     }
-  }, [items, user]);
+  }, [items, user, getAuthenticatedClient]);
 
   const updateQuantity = useCallback(async (listingId: string, variantId: string | null, qty: number) => {
     if (qty <= 0) return removeFromCart(listingId, variantId);
@@ -166,6 +180,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     writeLocalCart(updated);
 
     if (user) {
+      const supabase = await getAuthenticatedClient();
       let query = supabase
         .from('marketplace_cart_items')
         .update({ quantity: qty })
@@ -178,15 +193,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       await query;
     }
-  }, [items, user, removeFromCart]);
+  }, [items, user, removeFromCart, getAuthenticatedClient]);
 
   const clearCart = useCallback(async () => {
     setItems([]);
     writeLocalCart([]);
     if (user) {
+      const supabase = await getAuthenticatedClient();
       await supabase.from('marketplace_cart_items').delete().eq('user_id', user.id);
     }
-  }, [user]);
+  }, [user, getAuthenticatedClient]);
 
   const count = items.reduce((sum, i) => sum + i.quantity, 0);
 
