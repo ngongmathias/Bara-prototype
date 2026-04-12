@@ -26,7 +26,8 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
   }, [user, listingId]);
 
   const getAuthenticatedClient = async () => {
-    const token = await getToken();
+    // Requires 'supabase' JWT template in Clerk Dashboard
+    const token = await getToken({ template: 'supabase' });
     return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: {
         headers: {
