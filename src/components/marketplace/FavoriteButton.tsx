@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { useUser } from '@clerk/clerk-react';
+import { createClient } from '@supabase/supabase-js';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 interface FavoriteButtonProps {
   listingId: string;
@@ -11,6 +14,7 @@ interface FavoriteButtonProps {
 
 export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, className = '' }) => {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,10 +25,22 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
     }
   }, [user, listingId]);
 
+  const getAuthenticatedClient = async () => {
+    const token = await getToken({ template: 'supabase' });
+    return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : '',
+        },
+      },
+    });
+  };
+
   const checkFavorite = async () => {
     if (!user) return;
 
     try {
+      const supabase = await getAuthenticatedClient();
       const { data } = await supabase
         .from('marketplace_favorites')
         .select('id')
@@ -48,6 +64,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
 
     setLoading(true);
     try {
+      const supabase = await getAuthenticatedClient();
       if (isFavorite) {
         await supabase
           .from('marketplace_favorites')

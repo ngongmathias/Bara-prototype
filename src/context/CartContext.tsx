@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useUser } from '@clerk/clerk-react';
-import { supabase } from '@/lib/supabase';
+import { useAuth, useUser } from '@clerk/clerk-react';
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export interface CartItem {
   id?: string; // DB id (only for synced items)
@@ -117,6 +120,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     writeLocalCart(updated);
 
     if (user) {
+      const supabase = await getAuthenticatedClient();
       await supabase.from('marketplace_cart_items').upsert(
         {
           user_id: user.id,
