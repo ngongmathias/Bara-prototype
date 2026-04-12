@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
+import { MarketplaceNav } from '@/components/marketplace/MarketplaceNav';
 import { TopBannerAd } from '@/components/TopBannerAd';
 import { BottomBannerAd } from '@/components/BottomBannerAd';
 import { ReviewsSection } from '@/components/marketplace/listing-parts/ReviewsSection';
@@ -176,8 +177,9 @@ export const JobsDetail = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <TopBannerAd />
         <Header />
+        <TopBannerAd />
+        <MarketplaceNav />
         <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="animate-pulse space-y-6">
             <div className="h-64 bg-gray-200 rounded-lg" />
@@ -192,8 +194,9 @@ export const JobsDetail = () => {
   if (!listing) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <TopBannerAd />
         <Header />
+        <TopBannerAd />
+        <MarketplaceNav />
         <div className="max-w-7xl mx-auto px-4 py-12 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Job Not Found</h1>
           <Button onClick={() => navigate('/marketplace')}>
@@ -221,8 +224,9 @@ export const JobsDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-roboto">
-      <TopBannerAd />
       <Header />
+      <TopBannerAd />
+        <MarketplaceNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
