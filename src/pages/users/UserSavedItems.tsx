@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
+import { supabase, createAuthenticatedSupabaseClient } from "@/lib/supabase";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, Music, Film, BookOpen, ShoppingBag, Bookmark, FileText } from "lucide-react";
@@ -20,6 +20,7 @@ interface SavedItem {
 
 export const UserSavedItems = () => {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const navigate = useNavigate();
   const [likedSongs, setLikedSongs] = useState<SavedItem[]>([]);
   const [watchlist, setWatchlist] = useState<SavedItem[]>([]);
@@ -110,24 +111,33 @@ export const UserSavedItems = () => {
         console.error("Error loading blog bookmarks:", e);
       }
 
-      // Marketplace favorites
-      const { data: mfavs } = await supabase
-        .from("marketplace_favorites")
-        .select("id, created_at, marketplace_listings(id, title, price, images)")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(20);
+      // Marketplace favorites - use authenticated client
+      try {
+        const token = await getToken({ template: 'supabase' });
+        if (token) {
+          const authSupabase = await createAuthenticatedSupabaseClient(token);
+          const { data: mfavs } = await authSupabase
+            .from("marketplace_favorites")
+            .select("listing_id, created_at, marketplace_listings(id, title, price, marketplace_listing_images(image_url, is_primary))")
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false })
+            .limit(20);
 
-      if (mfavs) {
-        setMarketplaceFavorites(mfavs.map((f: any) => ({
-          id: f.marketplace_listings?.id || f.id,
-          title: f.marketplace_listings?.title || "Unknown",
-          subtitle: f.marketplace_listings?.price != null ? `$${f.marketplace_listings.price}` : undefined,
-          image: Array.isArray(f.marketplace_listings?.images) ? f.marketplace_listings.images[0] : undefined,
-          type: "listing",
-          saved_at: f.created_at,
-          listing_id: f.marketplace_listings?.id,
-        })));
+          if (mfavs) {
+            setMarketplaceFavorites(mfavs.map((f: any) => ({
+              id: f.marketplace_listings?.id || f.listing_id,
+              title: f.marketplace_listings?.title || "Unknown",
+              subtitle: f.marketplace_listings?.price != null ? `$${f.marketplace_listings.price}` : undefined,
+              image: f.marketplace_listings?.marketplace_listing_images?.find((img: any) => img.is_primary)?.image_url || 
+                     f.marketplace_listings?.marketplace_listing_images?.[0]?.image_url,
+              type: "listing",
+              saved_at: f.created_at,
+              listing_id: f.marketplace_listings?.id,
+            })));
+          }
+        }
+      } catch (err) {
+        console.error("Error loading marketplace favorites:", err);
       }
     } catch (e) {
       console.error(e);
