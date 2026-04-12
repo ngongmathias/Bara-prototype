@@ -371,31 +371,47 @@ export const SearchResults = () => {
         images: listing.marketplace_listing_images || [],
       }));
 
-      // Client-side filter by store name if search query exists
+      // Also search by store name: find stores matching the query,
+      // then fetch their listings and merge (deduplicated).
       if (searchQuery) {
-        // Fetch store names for all unique created_by IDs
-        const createdByIds = [...new Set(transformed.map((l: any) => l.created_by).filter(Boolean))];
-        if (createdByIds.length > 0) {
-          const { data: stores } = await supabase
-            .from('marketplace_partners')
-            .select('user_id, display_name')
-            .in('user_id', createdByIds);
-          
-          if (stores) {
-            // Create a map of user_id to store name
-            const storeMap = new Map(stores.map((s: any) => [s.user_id, s.display_name]));
-            
-            // Filter results to include those matching store name
-            const searchLower = searchQuery.toLowerCase();
-            transformed = transformed.filter((listing: any) => {
-              const storeName = storeMap.get(listing.created_by);
-              // Keep if already matched by title/description/location/seller_name OR matches store name
-              return !storeName || storeName.toLowerCase().includes(searchLower) ||
-                     listing.title?.toLowerCase().includes(searchLower) ||
-                     listing.description?.toLowerCase().includes(searchLower) ||
-                     listing.location_details?.toLowerCase().includes(searchLower) ||
-                     listing.seller_name?.toLowerCase().includes(searchLower);
-            });
+        const { data: matchingStores } = await supabase
+          .from('marketplace_partners')
+          .select('user_id')
+          .ilike('display_name', `%${searchQuery}%`);
+
+        if (matchingStores && matchingStores.length > 0) {
+          const storeUserIds = matchingStores.map((s: any) => s.user_id);
+          let storeQuery = supabase
+            .from('marketplace_listings')
+            .select(`
+              *,
+              marketplace_categories(name, slug),
+              marketplace_subcategories(name, slug),
+              countries(name, code, flag_url),
+              marketplace_listing_images(image_url, is_primary)
+            `)
+            .eq('status', 'active')
+            .in('created_by', storeUserIds);
+
+          // Respect the same country filter
+          const countryParam = searchParams.get('country') || selectedCountryFilter;
+          if (countryParam) {
+            storeQuery = storeQuery.eq('country_id', countryParam);
+          }
+
+          const { data: storeListings } = await storeQuery;
+
+          if (storeListings) {
+            const existingIds = new Set(transformed.map((l: any) => l.id));
+            const extraListings = storeListings
+              .filter((l: any) => !existingIds.has(l.id))
+              .map((listing: any) => ({
+                ...listing,
+                category: listing.marketplace_categories,
+                country: listing.countries,
+                images: listing.marketplace_listing_images || [],
+              }));
+            transformed = [...transformed, ...extraListings];
           }
         }
       }

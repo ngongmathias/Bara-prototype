@@ -30,8 +30,14 @@ export const UserSavedItems = () => {
   const [marketplaceFavorites, setMarketplaceFavorites] = useState<SavedItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Get default tab from URL parameter
-  const defaultTab = searchParams.get('tab') || 'articles';
+  // Controlled tab from URL parameter
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'articles');
+
+  // Sync tab when URL changes
+  useEffect(() => {
+    const urlTab = searchParams.get('tab');
+    if (urlTab && urlTab !== activeTab) setActiveTab(urlTab);
+  }, [searchParams]);
 
   useEffect(() => {
     if (user?.id) fetchAll();
@@ -194,7 +200,7 @@ export const UserSavedItems = () => {
         <p className="text-sm text-gray-500">All your saved content in one place</p>
       </div>
 
-      <Tabs defaultValue={defaultTab}>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="articles" className="gap-1"><FileText className="h-3 w-3" /> Saved Articles ({savedArticles.length})</TabsTrigger>
           <TabsTrigger value="marketplace" className="gap-1"><ShoppingBag className="h-3 w-3" /> Marketplace ({marketplaceFavorites.length})</TabsTrigger>

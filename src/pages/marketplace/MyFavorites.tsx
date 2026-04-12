@@ -79,7 +79,7 @@ export const MyFavorites = () => {
 
       if (error) throw error;
 
-      setFavorites(favorites.filter(f => f.id !== listingId));
+      setFavorites(prev => prev.filter(f => f.id !== listingId));
     } catch (error) {
       console.error('Error removing favorite:', error);
     }
