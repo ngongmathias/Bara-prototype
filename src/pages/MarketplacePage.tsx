@@ -28,11 +28,13 @@ import {
   PawPrint,
   Music,
   Building2,
-  Heart
+  Heart,
+  ShoppingCart
 } from "lucide-react";
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { supabase } from '@/lib/supabase';
 import { MonetizationService } from '@/lib/monetizationService';
+import { useCart } from '@/context/CartContext';
 
 interface Category {
   id: string;
@@ -132,6 +134,7 @@ const categories: Category[] = [
 const MarketplacePage = () => {
   const navigate = useNavigate();
   const { selectedCountry } = useCountrySelection();
+  const { count: cartCount } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const [featuredListings, setFeaturedListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -267,7 +270,7 @@ const MarketplacePage = () => {
               </Button>
             </form>
 
-            {/* Favorites + My Ads + Sell */}
+            {/* Favorites + Cart + My Ads + Sell */}
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
@@ -276,6 +279,19 @@ const MarketplacePage = () => {
                 title="My Favorites"
               >
                 <Heart className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/marketplace/cart')}
+                className="h-12 whitespace-nowrap hidden sm:flex text-gray-600 hover:text-blue-600 relative"
+                title="Shopping Cart"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
               </Button>
               <Button
                 variant="outline"

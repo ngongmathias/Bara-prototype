@@ -25,8 +25,6 @@ import {
   Users,
   Newspaper,
   LayoutGrid,
-  ShoppingCart,
-  Heart,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -44,7 +42,6 @@ import { useGamification } from '@/hooks/useGamification';
 import { getPrestigeTier } from '@/lib/gamificationService';
 import { scrollToTop } from '@/lib/scrollToTop';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
-import { useCart } from '@/context/CartContext';
 
 interface Country {
   id: string;
@@ -87,7 +84,6 @@ export const Header = () => {
   const { signOut } = useClerk();
   const { selectedCountry, setSelectedCountry } = useCountrySelection();
   const { profile } = useGamification();
-  const { count: cartCount } = useCart();
 
   const [countries, setCountries] = useState<Country[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -309,31 +305,6 @@ export const Header = () => {
             {/* Notifications */}
             {isSignedIn && <NotificationBell />}
 
-            {/* Favorites */}
-            {isSignedIn && (
-              <button
-                onClick={() => navigate('/marketplace/favorites')}
-                className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Favorites"
-              >
-                <Heart className="w-5 h-5 text-gray-700" />
-              </button>
-            )}
-
-            {/* Cart */}
-            <button
-              onClick={() => navigate('/marketplace/cart')}
-              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="Shopping Cart"
-            >
-              <ShoppingCart className="w-5 h-5 text-gray-700" />
-              {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-                  {cartCount > 99 ? '99+' : cartCount}
-                </span>
-              )}
-            </button>
-
             {/* Profile / Auth */}
             {isSignedIn ? (
               <DropdownMenu>
@@ -404,34 +375,15 @@ export const Header = () => {
           <div className="flex lg:hidden items-center gap-2">
             {isSignedIn && profile && (
               <Link
-                to="/store"
-                className="flex items-center gap-1 px-2 py-1 bg-gray-100 border border-gray-300 rounded-full text-xs font-bold text-gray-900"
+                to="/coins"
+                className="flex items-center gap-1.5 bg-yellow-50 hover:bg-yellow-100 px-2 py-1 rounded-lg transition-colors"
               >
-                <Coins className="w-3 h-3 text-gray-700" />
-                {profile.bara_coins.toLocaleString()}
+                <Coins className="w-4 h-4 text-yellow-600" />
+                <span className="text-xs font-bold text-yellow-700">
+                  {profile.bara_coins.toLocaleString()}
+                </span>
               </Link>
             )}
-            {isSignedIn && (
-              <button
-                onClick={() => navigate('/marketplace/favorites')}
-                className="relative p-1.5"
-                aria-label="Favorites"
-              >
-                <Heart className="w-5 h-5 text-gray-700" />
-              </button>
-            )}
-            <button
-              onClick={() => navigate('/marketplace/cart')}
-              className="relative p-1.5"
-              aria-label="Shopping Cart"
-            >
-              <ShoppingCart className="w-5 h-5 text-gray-700" />
-              {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-0.5">
-                  {cartCount > 99 ? '99+' : cartCount}
-                </span>
-              )}
-            </button>
             <Button
               variant="ghost"
               size="sm"
