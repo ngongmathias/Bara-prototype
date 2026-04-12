@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
+import { createAuthenticatedSupabaseClient } from '@/lib/supabase';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 interface FavoriteButtonProps {
   listingId: string;
@@ -26,15 +23,9 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
   }, [user, listingId]);
 
   const getAuthenticatedClient = async () => {
-    // Requires 'supabase' JWT template in Clerk Dashboard
     const token = await getToken({ template: 'supabase' });
-    return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-      },
-    });
+    if (!token) throw new Error('No auth token available');
+    return createAuthenticatedSupabaseClient(token);
   };
 
   const checkFavorite = async () => {
@@ -42,16 +33,20 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
 
     try {
       const supabase = await getAuthenticatedClient();
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('marketplace_favorites')
         .select('id')
         .eq('user_id', user.id)
         .eq('listing_id', listingId)
-        .single();
+        .maybeSingle();
 
+      if (error) {
+        console.error('Error checking favorite:', error);
+        return;
+      }
       setIsFavorite(!!data);
     } catch (error) {
-      // Not a favorite
+      console.error('Error in checkFavorite:', error);
     }
   };
 
@@ -74,13 +69,17 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
           .eq('listing_id', listingId);
         setIsFavorite(false);
       } else {
-        await supabase
+        const { error: insertError } = await supabase
           .from('marketplace_favorites')
-          .insert({
+          .upsert({
             user_id: user.id,
             listing_id: listingId,
-          });
-        setIsFavorite(true);
+          }, { onConflict: 'user_id,listing_id' });
+        if (insertError) {
+          console.error('Error adding favorite:', insertError);
+        } else {
+          setIsFavorite(true);
+        }
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);

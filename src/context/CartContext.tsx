@@ -1,9 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { createClient } from '@supabase/supabase-js';
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+import { createAuthenticatedSupabaseClient } from '@/lib/supabase';
 
 export interface CartItem {
   id?: string; // DB id (only for synced items)
@@ -62,15 +59,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(false);
 
   const getAuthenticatedClient = useCallback(async () => {
-    // Requires 'supabase' JWT template in Clerk Dashboard
     const token = await getToken({ template: 'supabase' });
-    return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-      },
-    });
+    if (!token) throw new Error('No auth token available');
+    return createAuthenticatedSupabaseClient(token);
   }, [getToken]);
 
   // Load cart on mount
