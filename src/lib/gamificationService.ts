@@ -166,27 +166,89 @@ export class GamificationService {
 
     static async getProfile(userId: string): Promise<GamificationProfile | null> {
 
-        const { data, error } = await supabase
+        try {
 
-            .from('gamification_profiles')
+            const { data, error } = await supabase
 
-            .select('*')
+                .from('gamification_profiles')
 
-            .eq('user_id', userId)
+                .select('*')
 
-            .single();
+                .eq('user_id', userId)
+
+                .single();
 
 
 
-        if (error) {
+            if (error) {
 
-            console.error('Error fetching gamification profile:', error);
+                // If profile doesn't exist (PGRST116), create it
+
+                if (error.code === 'PGRST116') {
+
+                    console.log('Creating new gamification profile for user:', userId);
+
+                    const { data: newProfile, error: insertError } = await supabase
+
+                        .from('gamification_profiles')
+
+                        .insert({
+
+                            user_id: userId,
+
+                            total_xp: 0,
+
+                            current_level: 1,
+
+                            bara_coins: 100, // Starting coins
+
+                            daily_streak: 0,
+
+                            consecutive_days: 0,
+
+                            multiplier: 1.0,
+
+                            trust_rank: 0,
+
+                            last_activity_at: new Date().toISOString(),
+
+                        })
+
+                        .select()
+
+                        .single();
+
+
+
+                    if (insertError) {
+
+                        console.error('Error creating gamification profile:', insertError);
+
+                        return null;
+
+                    }
+
+                    return newProfile;
+
+                }
+
+                console.error('Error fetching gamification profile:', error);
+
+                return null;
+
+            }
+
+
+
+            return data;
+
+        } catch (err) {
+
+            console.error('Error in getProfile:', err);
 
             return null;
 
         }
-
-        return data;
 
     }
 
