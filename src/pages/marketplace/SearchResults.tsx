@@ -217,14 +217,15 @@ export const SearchResults = () => {
           marketplace_categories(name, slug),
           marketplace_subcategories(name, slug),
           countries(name, code, flag_url),
-          marketplace_listing_images(image_url, is_primary)
+          marketplace_listing_images(image_url, is_primary),
+          marketplace_partners!marketplace_listings_created_by_fkey(display_name, slug)
         `)
         .eq('status', 'active');
 
-      // Search query
+      // Search query - now includes store name from marketplace_partners
       const searchQuery = searchParams.get('q');
       if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location_details.ilike.%${searchQuery}%,seller_name.ilike.%${searchQuery}%`);
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location_details.ilike.%${searchQuery}%,seller_name.ilike.%${searchQuery}%,marketplace_partners.display_name.ilike.%${searchQuery}%`);
       }
 
       // Category filter

@@ -122,14 +122,14 @@ export const MarketplaceStorefront = () => {
                   url: window.location.href,
                   imageUrl: partner.logo_url || undefined,
                 })}
-                className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 backdrop-blur text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-lg"
               >
-                <Share2 className="w-4 h-4" /> Share
+                <Share2 className="w-4 h-4" /> Share Store
               </button>
               {isOwner && (
                 <button
                   onClick={() => navigate(`/marketplace/storefront/edit`)}
-                  className="inline-flex items-center gap-1.5 bg-white hover:bg-gray-100 text-gray-900 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                  className="inline-flex items-center gap-1.5 bg-white hover:bg-gray-100 text-gray-900 px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-lg"
                 >
                   <Edit className="w-4 h-4" /> Edit Store
                 </button>
