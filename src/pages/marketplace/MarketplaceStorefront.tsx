@@ -109,8 +109,10 @@ export const MarketplaceStorefront = () => {
               </div>
             )}
             <div className="flex-1 pb-2">
-              <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow">{partner.display_name}</h1>
-              <div className="text-sm text-white/90 capitalize">{partner.business_type}</div>
+              <div className="bg-black/50 backdrop-blur-sm px-4 py-2 rounded-lg inline-block">
+                <h1 className="text-2xl md:text-3xl font-bold text-white font-comfortaa">{partner.display_name}</h1>
+                <div className="text-sm text-white/90 capitalize font-roboto">{partner.business_type}</div>
+              </div>
             </div>
             <div className="flex gap-2 pb-2">
               <button
