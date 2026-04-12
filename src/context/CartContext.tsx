@@ -62,7 +62,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(false);
 
   const getAuthenticatedClient = useCallback(async () => {
-    const token = await getToken({ template: 'supabase' });
+    const token = await getToken();
     return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: {
         headers: {

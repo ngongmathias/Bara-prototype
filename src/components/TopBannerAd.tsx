@@ -293,7 +293,7 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
   if (!bannerToShow) {
     // Render placeholder if no banner found
     return (
-      <div className={`w-full py-4 flex justify-center ${className}`}>
+      <div className={`w-full py-4 flex justify-center relative z-[1] ${className}`}>
         <div className="w-full max-w-[728px] px-4">
           <div className="w-full h-[90px] bg-gray-100 border border-gray-200 rounded flex items-center justify-center">
             <span className="text-gray-400 text-sm font-roboto uppercase tracking-widest">Advertisement</span>
@@ -305,7 +305,7 @@ export const TopBannerAd: React.FC<TopBannerAdProps> = ({ className = "" }) => {
 
   return (
     <div
-      className={`w-full py-4 flex justify-center ${className}`}
+      className={`w-full py-4 flex justify-center relative z-[1] ${className}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >

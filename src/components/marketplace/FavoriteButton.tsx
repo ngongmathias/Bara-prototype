@@ -26,7 +26,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
   }, [user, listingId]);
 
   const getAuthenticatedClient = async () => {
-    const token = await getToken({ template: 'supabase' });
+    const token = await getToken();
     return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: {
         headers: {
