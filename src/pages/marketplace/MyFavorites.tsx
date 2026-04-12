@@ -4,13 +4,14 @@ import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { getSoldLabel } from '@/config/categoryFieldConfigs';
-import { supabase } from '@/lib/supabase';
-import { useUser } from '@clerk/clerk-react';
+import { createAuthenticatedSupabaseClient } from '@/lib/supabase';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { Heart } from 'lucide-react';
 
 export const MyFavorites = () => {
   const navigate = useNavigate();
   const { user } = useUser();
+  const { getToken } = useAuth();
   const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,10 +26,18 @@ export const MyFavorites = () => {
 
     setLoading(true);
     try {
+      const token = await getToken({ template: 'supabase' });
+      if (!token) {
+        console.error('No auth token available');
+        setLoading(false);
+        return;
+      }
+      const supabase = await createAuthenticatedSupabaseClient(token);
       const { data, error } = await supabase
         .from('marketplace_favorites')
         .select(`
-          *,
+          listing_id,
+          created_at,
           marketplace_listings(
             *,
             marketplace_categories(name, slug),
@@ -43,7 +52,7 @@ export const MyFavorites = () => {
 
       const transformed = (data || []).map((fav: any) => ({
         ...fav.marketplace_listings,
-        favorite_id: fav.id,
+        favorite_listing_id: fav.listing_id,
         category: fav.marketplace_listings.marketplace_categories,
         country: fav.marketplace_listings.countries,
         images: fav.marketplace_listings.marketplace_listing_images || [],
@@ -57,16 +66,20 @@ export const MyFavorites = () => {
     }
   };
 
-  const removeFavorite = async (favoriteId: string) => {
+  const removeFavorite = async (listingId: string) => {
     try {
+      const token = await getToken({ template: 'supabase' });
+      if (!token) return;
+      const supabase = await createAuthenticatedSupabaseClient(token);
       const { error } = await supabase
         .from('marketplace_favorites')
         .delete()
-        .eq('id', favoriteId);
+        .eq('user_id', user!.id)
+        .eq('listing_id', listingId);
 
       if (error) throw error;
 
-      setFavorites(favorites.filter(f => f.favorite_id !== favoriteId));
+      setFavorites(favorites.filter(f => f.id !== listingId));
     } catch (error) {
       console.error('Error removing favorite:', error);
     }
@@ -164,7 +177,7 @@ export const MyFavorites = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => removeFavorite(listing.favorite_id)}
+                          onClick={() => removeFavorite(listing.id)}
                           className="text-red-600 hover:text-red-700 hover:border-red-600"
                         >
                           <Heart className="w-4 h-4 mr-2 fill-current" />
