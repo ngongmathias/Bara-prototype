@@ -3,6 +3,7 @@ import { MapPin, Bed, Bath, Move, Calendar, Gauge, Fuel, Zap, Briefcase, DollarS
 import { MarketplaceListing } from '@/types/marketplace';
 import { Button } from '@/components/ui/button';
 import { getSoldLabel } from '@/config/categoryFieldConfigs';
+import { FavoriteButton } from '@/components/marketplace/FavoriteButton';
 
 interface CardProps {
     listing: MarketplaceListing;
@@ -22,6 +23,9 @@ export const PropertyCard: React.FC<CardProps> = ({ listing, onClick }) => {
         >
             <div className="relative h-48 bg-gray-100">
                 <img src={primaryImage} alt={listing.title} className="w-full h-full object-cover" />
+                <div className="absolute top-2 left-2 z-10">
+                    <FavoriteButton listingId={listing.id} className="bg-white/90 hover:bg-white shadow-md" />
+                </div>
                 {listing.status === 'sold' && (
                     <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
                         <div className="bg-red-600 text-white text-2xl font-bold px-6 py-3 rounded-lg transform -rotate-12">
@@ -137,9 +141,12 @@ export const JobCard: React.FC<CardProps> = ({ listing, onClick }) => {
 
     return (
         <div
-            onClick={onClick}
             className="border border-gray-200 rounded-lg p-6 hover:border-black transition-colors cursor-pointer bg-white group shadow-sm relative"
         >
+            <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
+                <FavoriteButton listingId={listing.id} className="bg-gray-100 hover:bg-gray-200" />
+            </div>
+            <div onClick={onClick}>
             {listing.status === 'sold' && (
                 <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-lg z-10">
                     <div className="bg-red-600 text-white text-2xl font-bold px-6 py-3 rounded-lg transform -rotate-12">
@@ -187,6 +194,7 @@ export const JobCard: React.FC<CardProps> = ({ listing, onClick }) => {
             <Button className="w-full bg-black text-white hover:bg-gray-800">
                 View Details & Apply
             </Button>
+            </div>
         </div>
     );
 };
