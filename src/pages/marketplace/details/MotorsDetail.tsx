@@ -47,6 +47,7 @@ import {
   SellerTrustCard,
   ReportListingModal,
   OfferModal,
+  BuyActions,
   buildListingShare,
 } from '@/components/marketplace/listing-parts';
 import { FavoriteButton } from '@/components/marketplace/FavoriteButton';
@@ -460,8 +461,12 @@ export const MotorsDetail = () => {
               </div>
 
               {/* Contact Buttons */}
+              <div className="mb-6">
+                <BuyActions listing={listing} cartable={false} buyable={true} />
+              </div>
+
               <div className="space-y-3 mb-6">
-                {listing.seller_whatsapp && (
+                {(listing.seller_whatsapp || listing.seller_phone) && (
                   <Button
                     onClick={handleWhatsAppContact}
                     className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold h-12"

@@ -50,6 +50,7 @@ import {
   SellerTrustCard,
   ReportListingModal,
   OfferModal,
+  BuyActions,
   buildListingShare,
 } from '@/components/marketplace/listing-parts';
 import { FavoriteButton } from '@/components/marketplace/FavoriteButton';
@@ -478,8 +479,12 @@ export const PropertyDetail = () => {
                   <Calendar className="w-5 h-5 mr-2" />
                   Request Viewing
                 </Button>
-                
-                {listing.seller_whatsapp && (
+
+                <div className="mb-4">
+                  <BuyActions listing={listing} cartable={false} buyable={false} />
+                </div>
+
+                {(listing.seller_whatsapp || listing.seller_phone) && (
                   <Button
                     onClick={handleWhatsAppContact}
                     className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold h-12"

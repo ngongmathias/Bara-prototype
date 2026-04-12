@@ -26,6 +26,7 @@ import {
   Newspaper,
   LayoutGrid,
   ShoppingCart,
+  Heart,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -308,6 +309,17 @@ export const Header = () => {
             {/* Notifications */}
             {isSignedIn && <NotificationBell />}
 
+            {/* Favorites */}
+            {isSignedIn && (
+              <button
+                onClick={() => navigate('/marketplace/favorites')}
+                className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Favorites"
+              >
+                <Heart className="w-5 h-5 text-gray-700" />
+              </button>
+            )}
+
             {/* Cart */}
             <button
               onClick={() => navigate('/marketplace/cart')}
@@ -398,6 +410,15 @@ export const Header = () => {
                 <Coins className="w-3 h-3 text-gray-700" />
                 {profile.bara_coins.toLocaleString()}
               </Link>
+            )}
+            {isSignedIn && (
+              <button
+                onClick={() => navigate('/marketplace/favorites')}
+                className="relative p-1.5"
+                aria-label="Favorites"
+              >
+                <Heart className="w-5 h-5 text-gray-700" />
+              </button>
             )}
             <button
               onClick={() => navigate('/marketplace/cart')}

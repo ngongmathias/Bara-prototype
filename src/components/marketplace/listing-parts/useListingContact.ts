@@ -78,12 +78,16 @@ export function useListingContact(listing: any, options: ListingContactOptions =
   );
 
   const handleWhatsApp = useCallback(() => {
-    if (!listing?.seller_whatsapp) return;
+    // Fall back to seller_phone when seller_whatsapp isn't set (most seeded ads).
+    const raw = listing?.seller_whatsapp || listing?.seller_phone;
+    if (!raw) return;
     recordLead('whatsapp');
     const msg = options.whatsappMessage
       ? options.whatsappMessage(listing)
       : `Hi, I'm interested in your ${itemNoun}: ${listing.title}`;
-    const whatsappUrl = `https://wa.me/${listing.seller_whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`;
+    // Strip everything except digits. wa.me requires international format without +.
+    const digits = String(raw).replace(/[^0-9]/g, '');
+    const whatsappUrl = `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`;
     window.open(whatsappUrl, '_blank');
   }, [listing, recordLead, options, itemNoun]);
 
