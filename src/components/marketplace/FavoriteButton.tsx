@@ -35,7 +35,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
       const supabase = await getAuthenticatedClient();
       const { data, error } = await supabase
         .from('marketplace_favorites')
-        .select('id')
+        .select('listing_id')
         .eq('user_id', user.id)
         .eq('listing_id', listingId)
         .maybeSingle();
@@ -71,12 +71,17 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
       } else {
         const { error: insertError } = await supabase
           .from('marketplace_favorites')
-          .upsert({
+          .insert({
             user_id: user.id,
             listing_id: listingId,
-          }, { onConflict: 'user_id,listing_id' });
+          });
         if (insertError) {
-          console.error('Error adding favorite:', insertError);
+          // If duplicate, it's already a favorite
+          if (insertError.code === '23505') {
+            setIsFavorite(true);
+          } else {
+            console.error('Error adding favorite:', insertError);
+          }
         } else {
           setIsFavorite(true);
         }
