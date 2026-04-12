@@ -376,11 +376,11 @@ export const SearchResults = () => {
       if (searchQuery) {
         const { data: matchingStores } = await supabase
           .from('marketplace_partners')
-          .select('user_id')
+          .select('owner_user_id')
           .ilike('display_name', `%${searchQuery}%`);
 
         if (matchingStores && matchingStores.length > 0) {
-          const storeUserIds = matchingStores.map((s: any) => s.user_id);
+          const storeUserIds = matchingStores.map((s: any) => s.owner_user_id);
           let storeQuery = supabase
             .from('marketplace_listings')
             .select(`
