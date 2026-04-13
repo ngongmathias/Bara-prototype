@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Calendar, Clock, User, ArrowRight, Heart, Share2, Link2 } from 'lucide-react';
-import { BlogPost, formatDate } from '../lib/blogService';
+import { BlogPost, formatDate, calculateReadingTime } from '../lib/blogService';
 
 interface BlogCardProps {
   post: BlogPost;
@@ -10,6 +10,8 @@ interface BlogCardProps {
 export const BlogCard = ({ post, onReadMore }: BlogCardProps) => {
   const [liked, setLiked] = useState(false);
   const [showShare, setShowShare] = useState(false);
+
+  const readingTime = post.reading_time || (post.content ? calculateReadingTime(post.content) : null);
 
   const shareUrl = `${window.location.origin}/blog/${post.slug}`;
   const shareText = `Check out: ${post.title}`;
@@ -63,10 +65,10 @@ export const BlogCard = ({ post, onReadMore }: BlogCardProps) => {
               <span>{formatDate(post.published_at)}</span>
             </div>
           )}
-          {post.reading_time && (
+          {readingTime && (
             <div className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
-              <span>{post.reading_time} min read</span>
+              <span>{readingTime} min read</span>
             </div>
           )}
         </div>

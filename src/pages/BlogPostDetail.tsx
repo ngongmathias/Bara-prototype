@@ -28,9 +28,12 @@ import {
   BlogPost,
   BlogComment,
   formatDate,
-  formatRelativeTime
+  formatRelativeTime,
+  calculateReadingTime
 } from '../lib/blogService';
 import { useToast } from '../hooks/use-toast';
+import { supabase } from '@/lib/supabase';
+import { useShare } from '@/context/ShareContext';
 
 export const BlogPostDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -46,9 +49,23 @@ export const BlogPostDetail = () => {
   const [likesCount, setLikesCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const { openShare } = useShare();
   const [commentText, setCommentText] = useState('');
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [readingProgress, setReadingProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
+      setReadingProgress(progress);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (slug) {
@@ -63,12 +80,8 @@ export const BlogPostDetail = () => {
       checkBookmarkStatus();
       incrementViewCount();
 
-      // Load saved like status from local storage for prototype persistence
-      const savedLike = localStorage.getItem(`blog_post_liked_${post.id}`);
-      if (savedLike === 'true') {
-        setIsLiked(true);
-        setLikesCount(1);
-      }
+      // Load like status from Supabase
+      loadLikeStatus();
     }
   }, [post?.id]);
 
@@ -165,6 +178,31 @@ export const BlogPostDetail = () => {
     }
   };
 
+  const loadLikeStatus = async () => {
+    if (!post) return;
+    try {
+      // Get total likes count
+      const { count } = await supabase
+        .from('blog_post_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('post_id', post.id);
+      setLikesCount(count || 0);
+
+      // Check if current user has liked
+      if (user) {
+        const { data } = await supabase
+          .from('blog_post_likes')
+          .select('id')
+          .eq('post_id', post.id)
+          .eq('user_id', user.id)
+          .maybeSingle();
+        setIsLiked(!!data);
+      }
+    } catch (error) {
+      console.error('Error loading like status:', error);
+    }
+  };
+
   const handleLike = async () => {
     if (!user) {
       toast({
@@ -175,23 +213,35 @@ export const BlogPostDetail = () => {
       return;
     }
 
+    const newLikeStatus = !isLiked;
+    // Optimistic update
+    setIsLiked(newLikeStatus);
+    setLikesCount(prev => newLikeStatus ? prev + 1 : Math.max(prev - 1, 0));
+
     try {
-      const newLikeStatus = !isLiked;
-      setIsLiked(newLikeStatus);
-      setLikesCount(prev => newLikeStatus ? prev + 1 : prev - 1);
+      if (newLikeStatus) {
+        const { error } = await supabase
+          .from('blog_post_likes')
+          .insert({ post_id: post!.id, user_id: user.id });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('blog_post_likes')
+          .delete()
+          .eq('post_id', post!.id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+      }
 
-      // Persist to local storage for prototype
-      localStorage.setItem(`blog_post_liked_${post!.id}`, String(newLikeStatus));
-
-      // TODO: Implement actual like/unlike API call when backend is ready
       toast({
         title: newLikeStatus ? 'Post Liked' : 'Post Unliked',
         description: newLikeStatus ? 'Added to your liked posts' : 'Removed from your liked posts',
       });
     } catch (error) {
       console.error('Error toggling like:', error);
-      setIsLiked(!isLiked);
-      setLikesCount(prev => isLiked ? prev + 1 : prev - 1);
+      // Revert optimistic update
+      setIsLiked(!newLikeStatus);
+      setLikesCount(prev => newLikeStatus ? Math.max(prev - 1, 0) : prev + 1);
       toast({
         title: 'Error',
         description: 'Failed to update like status',
@@ -351,6 +401,15 @@ export const BlogPostDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <div
+        className="fixed top-0 left-0 right-0 h-1 bg-transparent z-50 pointer-events-none"
+        aria-hidden="true"
+      >
+        <div
+          className="h-full bg-red-600 transition-[width] duration-75 ease-linear"
+          style={{ width: `${readingProgress}%` }}
+        />
+      </div>
       <Header />
       <TopBannerAd />
 
@@ -408,12 +467,15 @@ export const BlogPostDetail = () => {
               <span>{formatDate(post.published_at!)}</span>
             </div>
 
-            {post.reading_time && (
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <span>{post.reading_time} min read</span>
-              </div>
-            )}
+            {(() => {
+              const minutes = post.reading_time || (post.content ? calculateReadingTime(post.content) : 0);
+              return minutes > 0 ? (
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  <span>{minutes} min read</span>
+                </div>
+              ) : null;
+            })()}
 
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
@@ -442,54 +504,18 @@ export const BlogPostDetail = () => {
                 <Bookmark className="w-5 h-5" fill={isBookmarked ? 'currentColor' : 'none'} />
               </button>
 
-              <div className="relative">
-                <button
-                  onClick={() => setShowShareMenu(!showShareMenu)}
-                  className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                >
-                  <Share2 className="w-5 h-5" />
-                </button>
-
-                {showShareMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
-                    <button
-                      onClick={() => handleShare('facebook')}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                    >
-                      <Facebook className="w-4 h-4" />
-                      Share on Facebook
-                    </button>
-                    <button
-                      onClick={() => handleShare('twitter')}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                    >
-                      <Twitter className="w-4 h-4" />
-                      Share on Twitter
-                    </button>
-                    <button
-                      onClick={() => handleShare('linkedin')}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                    >
-                      <Linkedin className="w-4 h-4" />
-                      Share on LinkedIn
-                    </button>
-                    <button
-                      onClick={() => handleShare('whatsapp')}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      Share on WhatsApp
-                    </button>
-                    <button
-                      onClick={() => handleShare('copy')}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                    >
-                      <LinkIcon className="w-4 h-4" />
-                      Copy Link
-                    </button>
-                  </div>
-                )}
-              </div>
+              <button
+                onClick={() => openShare({
+                  url: window.location.href,
+                  title: post?.title || 'Blog Post',
+                  description: post?.excerpt || post?.seo_description || '',
+                  imageUrl: post?.featured_image || undefined,
+                })}
+                className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                title="Share article"
+              >
+                <Share2 className="w-5 h-5" />
+              </button>
             </div>
           </div>
 
