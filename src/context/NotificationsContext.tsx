@@ -3,12 +3,19 @@ import { supabase } from '@/lib/supabase';
 import { useUser } from '@clerk/clerk-react';
 import { useToast } from '@/hooks/use-toast';
 
+export type NotificationType = 
+    | 'info' | 'success' | 'warning' | 'error'
+    | 'new_message' | 'event_reminder' | 'new_song_from_artist'
+    | 'blog_comment_reply' | 'coins_earned' | 'new_ad_from_store'
+    | 'offer_received' | 'offer_accepted' | 'event_rsvp'
+    | 'blog_approved' | 'blog_declined' | 'listing_approved' | 'listing_rejected';
+
 export interface Notification {
     id: string;
     user_id: string;
     title: string;
     message: string;
-    type: 'info' | 'success' | 'warning' | 'error';
+    type: NotificationType;
     link?: string;
     is_read: boolean;
     created_at: string;

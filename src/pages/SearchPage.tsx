@@ -293,8 +293,23 @@ export default function SearchPage() {
 
                             {isSearching && !loading && results.songs.length === 0 && results.artists.length === 0 && results.albums.length === 0 && results.teams.length === 0 && (
                                 <div className="text-center py-20">
+                                    <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-5">
+                                        <SearchIcon className="w-8 h-8 text-gray-500" />
+                                    </div>
                                     <h2 className="text-2xl font-bold mb-2">No results found for "{searchQuery}"</h2>
-                                    <p className="text-gray-400">Please check your spelling or try searching for something else.</p>
+                                    <p className="text-gray-400 mb-8">Check your spelling or try different keywords.</p>
+                                    <div className="flex flex-wrap justify-center gap-2">
+                                        <p className="w-full text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Try searching for</p>
+                                        {['Afrobeats', 'Amapiano', 'Gospel', 'Hip-Hop', 'R&B'].map(genre => (
+                                            <button
+                                                key={genre}
+                                                onClick={() => setSearchQuery(genre)}
+                                                className="px-4 py-1.5 text-sm bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors font-medium"
+                                            >
+                                                {genre}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>

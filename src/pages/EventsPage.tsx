@@ -29,6 +29,7 @@ import { MonetizationService } from '@/lib/monetizationService';
 import { useToast } from '@/hooks/use-toast';
 import { useShare } from '@/context/ShareContext';
 import { SectionNavButton } from '@/components/SectionNavButton';
+import { EmptyState } from '@/components/EmptyState';
 
 export const EventsPage = () => {
   const navigate = useNavigate();
@@ -995,28 +996,31 @@ export const EventsPage = () => {
 
                       </>
                     ) : (
-                      <div className="text-center py-12">
-                        <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No events found</h3>
-                        <p className="text-gray-600 mb-6">
-                          {searchQuery || selectedCategory !== 'all' || startDate || endDate
-                            ? 'Try adjusting your search criteria or filters.'
-                            : 'Check back later for upcoming events.'}
-                        </p>
-                        {(searchQuery || selectedCategory !== 'all' || startDate || endDate) && (
-                          <Button
-                            onClick={() => {
-                              setSearchQuery('');
-                              setSelectedCategory('all');
-                              setStartDate('');
-                              setEndDate('');
-                            }}
-                            variant="outline"
-                          >
-                            Clear Filters
-                          </Button>
-                        )}
-                      </div>
+                      <EmptyState
+                        icon={Calendar}
+                        title="No events found"
+                        searchQuery={searchQuery || undefined}
+                        description={
+                          searchQuery || selectedCategory !== 'all' || startDate || endDate
+                            ? 'Try different keywords, adjust your dates, or remove some filters.'
+                            : 'Check back soon — new events are added regularly!'
+                        }
+                        onClearFilters={
+                          (searchQuery || selectedCategory !== 'all' || startDate || endDate)
+                            ? () => {
+                                setSearchQuery('');
+                                setSelectedCategory('all');
+                                setStartDate('');
+                                setEndDate('');
+                              }
+                            : undefined
+                        }
+                        suggestions={[
+                          { label: 'Music Events', onClick: () => setSelectedCategory('Music') },
+                          { label: 'Sports', onClick: () => setSelectedCategory('Sports') },
+                          { label: 'Networking', onClick: () => setSelectedCategory('Networking') },
+                        ]}
+                      />
                     )}
                   </>
                 ) : (

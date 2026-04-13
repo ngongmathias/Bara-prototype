@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { useUser, useAuth } from '@clerk/clerk-react';
@@ -22,6 +22,7 @@ import Footer from '../components/Footer';
 import { TopBannerAd } from '../components/TopBannerAd';
 import { BottomBannerAd } from '../components/BottomBannerAd';
 import { BlogCard } from '../components/BlogCard';
+import { BlogTableOfContents, TocHeading } from '../components/BlogTableOfContents';
 import {
   blogPostsService,
   blogCommentsService,
@@ -73,6 +74,33 @@ export const BlogPostDetail = () => {
       loadPost();
     }
   }, [slug]);
+
+  const { contentHtml, tocHeadings } = useMemo(() => {
+    if (!post?.content) return { contentHtml: '', tocHeadings: [] as TocHeading[] };
+    const sanitized = DOMPurify.sanitize(post.content);
+    if (typeof window === 'undefined') return { contentHtml: sanitized, tocHeadings: [] };
+    const doc = new DOMParser().parseFromString(sanitized, 'text/html');
+    const headings: TocHeading[] = [];
+    const used = new Set<string>();
+    doc.querySelectorAll('h2, h3').forEach((el) => {
+      const text = el.textContent?.trim() || '';
+      if (!text) return;
+      let base = text
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .slice(0, 60) || 'section';
+      let id = base;
+      let i = 2;
+      while (used.has(id)) {
+        id = `${base}-${i++}`;
+      }
+      used.add(id);
+      el.setAttribute('id', id);
+      headings.push({ id, text, level: el.tagName === 'H2' ? 2 : 3 });
+    });
+    return { contentHtml: doc.body.innerHTML, tocHeadings: headings };
+  }, [post?.content]);
 
   useEffect(() => {
     if (post) {
@@ -429,6 +457,7 @@ export const BlogPostDetail = () => {
       </div>
       <Header />
       <TopBannerAd />
+      <BlogTableOfContents headings={tocHeadings} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Back Button */}
@@ -546,8 +575,8 @@ export const BlogPostDetail = () => {
           )}
 
           {/* Article Content */}
-          <div className="prose prose-lg max-w-none mb-12 font-roboto">
-            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
+          <div className="prose prose-lg max-w-none mb-12 font-roboto scroll-smooth">
+            <div dangerouslySetInnerHTML={{ __html: contentHtml }} />
           </div>
 
           {/* Tags */}

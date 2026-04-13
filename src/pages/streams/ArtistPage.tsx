@@ -4,11 +4,13 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { SEO } from '@/components/SEO';
-import { Loader2, Play, Pause, BadgeCheck } from 'lucide-react';
+import { Loader2, Play, Pause, BadgeCheck, Share2 } from 'lucide-react';
+import { useShare } from '@/context/ShareContext';
 
 export default function ArtistPage() {
     const { id } = useParams();
     const { play, currentSong, isPlaying, togglePlay } = useAudioPlayer();
+    const { openShare } = useShare();
     const [artist, setArtist] = useState<any>(null);
     const [topTracks, setTopTracks] = useState<Song[]>([]);
     const [featuredOnTracks, setFeaturedOnTracks] = useState<(Song & { primary_artist: string; plays: number })[]>([]);
@@ -204,6 +206,20 @@ export default function ArtistPage() {
                             className={`px-8 py-1.5 rounded-full font-bold transition bg-transparent border border-gray-500 text-gray-900 hover:border-white hover:scale-105 active:scale-95 text-sm uppercase tracking-widest`}
                         >
                             {following ? 'Following' : 'Follow'}
+                        </button>
+
+                        {/* Share Button */}
+                        <button
+                            onClick={() => openShare({
+                                url: `${window.location.origin}/streams/artist/${id}`,
+                                title: `${artist.name} — Bara Afrika Streams`,
+                                description: artist.bio || `Listen to ${artist.name} on Bara Afrika Streams.`,
+                                imageUrl: artist.banner_url || artist.image_url,
+                            })}
+                            className="p-2 rounded-full hover:bg-gray-200 transition text-gray-600 hover:text-gray-900"
+                            title="Share artist"
+                        >
+                            <Share2 className="w-5 h-5" />
                         </button>
                     </div>
                 </div>

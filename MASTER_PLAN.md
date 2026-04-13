@@ -428,7 +428,7 @@
 | # | Task | Priority | Status |
 |---|------|----------|--------|
 | 20.1.1 | **Estimated reading time** on every blog card and detail page (word count / 200 wpm) | P0 | ✅ Done |
-| 20.1.2 | **Table of contents** — auto-generated from headings, sticky sidebar on desktop, collapsible on mobile | P1 | ☐ |
+| 20.1.2 | **Table of contents** — auto-generated from headings, sticky sidebar on desktop, collapsible on mobile | P1 | ✅ Done (BlogTableOfContents: DOMParser-extracted h2/h3, fixed sidebar on xl+, mobile drawer) |
 | 20.1.3 | **Reading progress bar** at top of page filling as user scrolls | P1 | ✅ Done |
 | 20.1.4 | **Text-to-speech** — "Listen to this article" via Web Speech API | P2 | ☐ |
 | 20.1.5 | **Dark/light reading mode toggle** on blog detail pages | P2 | ☐ |
@@ -439,7 +439,7 @@
 |---|------|----------|--------|
 | 20.2.1 | **Likes** — simple heart icon on blog posts (needs `blog_post_likes` DB table — see Active Work #6) | P0 | ✅ Done (table + RLS, BlogCard + BlogPostDetail persist via Clerk-authed client) |
 | 20.2.2 | **Comments system** — threaded with reply, like, report. `blog_comments` table (exists from 7.32) | P0 | ✅ Exists |
-| 20.2.3 | **"Related articles"** at bottom of every post — same category + tags | P1 | ☐ |
+| 20.2.3 | **"Related articles"** at bottom of every post — same category + tags | P1 | ✅ Done (BlogPostDetail.loadRelatedPosts via blogPostsService.getRelated) |
 | 20.2.4 | **Bookmarks** — save articles for later. Make more visible with bookmark icon on every card + article header | P1 | ✅ Done (blog_bookmarks table + bookmark button on BlogCard & BlogPostDetail, Liked Articles tab in dashboard) |
 
 ### 20.3 Writer Experience

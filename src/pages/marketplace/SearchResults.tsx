@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/select';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { MarketplaceNav } from '@/components/marketplace/MarketplaceNav';
+import { EmptyState } from '@/components/EmptyState';
 
 export const SearchResults = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -1222,17 +1223,22 @@ export const SearchResults = () => {
               ))}
             </div>
           ) : results.length === 0 ? (
-            <div className="text-center py-16 bg-white border border-gray-200 rounded-lg">
-              <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg font-roboto mb-2">No results found</p>
-              <p className="text-gray-400 text-sm font-roboto">Try adjusting your search or filters</p>
-              <Button
-                variant="outline"
-                onClick={clearFilters}
-                className="mt-4"
-              >
-                Clear Filters
-              </Button>
+            <div className="bg-white border border-gray-200 rounded-lg">
+              <EmptyState
+                icon={Package}
+                title="No ads found"
+                searchQuery={searchInput || undefined}
+                description="Try different keywords, check your spelling, or remove some filters."
+                onClearFilters={clearFilters}
+                showBrowseCategories
+                browseCategoriesHref="/marketplace"
+                suggestions={[
+                  { label: 'Electronics', onClick: () => { setSearchParams({ q: 'electronics' }); } },
+                  { label: 'Vehicles', onClick: () => { setSearchParams({ q: 'vehicles' }); } },
+                  { label: 'Fashion', onClick: () => { setSearchParams({ q: 'fashion' }); } },
+                  { label: 'Property', onClick: () => { setSearchParams({ q: 'property' }); } },
+                ]}
+              />
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
