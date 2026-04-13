@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { SEO } from '@/components/SEO';
-import { Play, Star, Clock, Filter, Search, ChevronRight, TrendingUp, Loader2, Eye, Share2 } from 'lucide-react';
+import { Play, Star, Clock, Filter, Search, ChevronRight, TrendingUp, Eye, Share2 } from 'lucide-react';
+import { SkeletonCard } from '@/components/animations/SkeletonCard';
 import { Link, useNavigate } from 'react-router-dom';
 import { DiscoverMore } from '@/components/DiscoverMore';
 import { supabase } from '@/lib/supabase';
@@ -123,8 +124,10 @@ export default function MoviesPage() {
 
       <div className="min-h-screen pb-24">
         {loading ? (
-          <div className="flex justify-center py-32">
-            <Loader2 className="w-10 h-10 animate-spin text-gray-400" />
+          <div className="px-6 sm:px-10 pt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <SkeletonCard key={i} type="product" />
+            ))}
           </div>
         ) : (
           <>

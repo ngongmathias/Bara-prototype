@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
-import { Heart, Play, User, Music, Loader2, Plus } from 'lucide-react';
+import { Heart, Play, User, Music, Plus } from 'lucide-react';
+import { SkeletonCard } from '@/components/animations/SkeletonCard';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
@@ -112,8 +113,10 @@ export default function LibraryPage() {
                     <h1 className="text-3xl font-black text-gray-900 mb-8 tracking-tighter">Your Library</h1>
 
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center py-20">
-                            <Loader2 className="w-10 h-10 animate-spin text-[#1DB954]" />
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                            {Array.from({ length: 10 }).map((_, i) => (
+                                <SkeletonCard key={i} type="product" />
+                            ))}
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
-import { Loader2, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
+import { SkeletonCard } from '@/components/animations/SkeletonCard';
 import { Link } from 'react-router-dom';
 
 export default function ArtistsPage() {
@@ -35,8 +36,10 @@ export default function ArtistsPage() {
                 <h1 className="text-4xl font-bold mb-8 tracking-tight text-gray-900">Artists</h1>
 
                 {loading ? (
-                    <div className="flex justify-center py-20">
-                        <Loader2 className="w-10 h-10 animate-spin text-[#1DB954]" />
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                        {Array.from({ length: 12 }).map((_, i) => (
+                            <SkeletonCard key={i} type="product" />
+                        ))}
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">

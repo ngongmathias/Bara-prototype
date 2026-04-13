@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { SEO } from '@/components/SEO';
-import { BookOpen, Star, Search, ChevronRight, TrendingUp, Heart, ArrowUpDown, Loader2, Share2 } from 'lucide-react';
+import { BookOpen, Star, Search, ChevronRight, TrendingUp, Heart, ArrowUpDown, Share2 } from 'lucide-react';
+import { SkeletonCard } from '@/components/animations/SkeletonCard';
 import { Link } from 'react-router-dom';
 import { DiscoverMore } from '@/components/DiscoverMore';
 import { supabase } from '@/lib/supabase';
@@ -235,8 +236,10 @@ export default function EbooksPage() {
 
         <main className="p-4 sm:p-8 max-w-[1400px] mx-auto space-y-12">
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-gray-400" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <SkeletonCard key={i} type="product" />
+              ))}
             </div>
           ) : usingFallback ? (
             <>

@@ -2,7 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
-import { Loader2, Play, Pause, Clock, Search, Star, Sparkles } from 'lucide-react';
+import { Play, Pause, Clock, Search, Star, Sparkles } from 'lucide-react';
+import { SkeletonCard } from '@/components/animations/SkeletonCard';
 import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { SEO } from '@/components/SEO';
@@ -337,8 +338,12 @@ export default function StreamsHome() {
                     </div>
 
                     {loading ? (
-                        <div className="flex justify-center py-20">
-                            <Loader2 className="w-10 h-10 animate-spin text-gray-400" />
+                        <div className="space-y-8 sm:space-y-12">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                                {Array.from({ length: 12 }).map((_, i) => (
+                                    <SkeletonCard key={i} type="product" />
+                                ))}
+                            </div>
                         </div>
                     ) : (
                         <div className="space-y-8 sm:space-y-12">
