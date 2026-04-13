@@ -397,36 +397,38 @@ export const blogPostsService = {
     }
   },
 
-  async toggleBookmark(postId: string, userId: string): Promise<boolean> {
-    const { data: existing } = await supabase
+  async toggleBookmark(postId: string, userId: string, client: any = supabase): Promise<boolean> {
+    const { data: existing } = await client
       .from('blog_bookmarks')
       .select('id')
       .eq('post_id', postId)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (existing) {
-      await supabase
+      await client
         .from('blog_bookmarks')
         .delete()
         .eq('post_id', postId)
         .eq('user_id', userId);
       return false;
     } else {
-      await supabase
+      const { error } = await client
         .from('blog_bookmarks')
         .insert({ post_id: postId, user_id: userId });
+      // 23505 = already bookmarked (stale client state); treat as success
+      if (error && error.code !== '23505') throw error;
       return true;
     }
   },
 
-  async isBookmarked(postId: string, userId: string): Promise<boolean> {
-    const { data } = await supabase
+  async isBookmarked(postId: string, userId: string, client: any = supabase): Promise<boolean> {
+    const { data } = await client
       .from('blog_bookmarks')
       .select('id')
       .eq('post_id', postId)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     return !!data;
   },

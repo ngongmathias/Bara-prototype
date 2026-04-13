@@ -78,13 +78,20 @@ export const BlogPostDetail = () => {
     if (post) {
       loadComments();
       loadRelatedPosts();
-      checkBookmarkStatus();
       incrementViewCount();
-
-      // Load like status from Supabase
-      loadLikeStatus();
     }
   }, [post?.id]);
+
+  // Re-run user-scoped checks once both post and user are available
+  useEffect(() => {
+    if (post && user) {
+      checkBookmarkStatus();
+      loadLikeStatus();
+    } else if (post && !user) {
+      // Signed-out: still fetch public like count
+      loadLikeStatus();
+    }
+  }, [post?.id, user?.id]);
 
   const loadPost = async () => {
     setIsLoading(true);
@@ -162,7 +169,10 @@ export const BlogPostDetail = () => {
     }
 
     try {
-      const bookmarked = await blogPostsService.toggleBookmark(post!.id, user.id);
+      const token = await getToken({ template: 'supabase' });
+      if (!token) throw new Error('No auth token available');
+      const authedClient = await createAuthenticatedSupabaseClient(token);
+      const bookmarked = await blogPostsService.toggleBookmark(post!.id, user.id, authedClient);
       setIsBookmarked(bookmarked);
       toast({
         title: bookmarked ? 'Bookmarked' : 'Removed from Bookmarks',
@@ -228,7 +238,9 @@ export const BlogPostDetail = () => {
         const { error } = await authedClient
           .from('blog_post_likes')
           .insert({ post_id: post!.id, user_id: user.id });
-        if (error) throw error;
+        // 23505 = unique violation: row already exists (stale client state),
+        // treat as success and keep isLiked=true.
+        if (error && error.code !== '23505') throw error;
       } else {
         const { error } = await authedClient
           .from('blog_post_likes')
