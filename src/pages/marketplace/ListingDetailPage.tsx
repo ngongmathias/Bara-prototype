@@ -55,6 +55,9 @@ export const ListingDetailPage = () => {
   const [relatedListings, setRelatedListings] = useState<any[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
+  const [showSafetyTips, setShowSafetyTips] = useState(() => {
+    try { return localStorage.getItem('bara.marketplace.safetyTipsDismissed') !== '1'; } catch { return true; }
+  });
   const [partner, setPartner] = useState<any>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showOfferModal, setShowOfferModal] = useState(false);
@@ -126,9 +129,9 @@ export const ListingDetailPage = () => {
           }, () => {});
       }
 
-      // Fetch related listings
+      // Fetch related listings (same category, similar price ±30%, same country if available)
       if (data.category_id) {
-        fetchRelatedListings(data.category_id, data.id);
+        fetchRelatedListings(data.category_id, data.id, parseFloat(data.price) || 0, data.country_id);
       }
     } catch (error) {
       console.error('Error fetching listing:', error);
@@ -142,29 +145,73 @@ export const ListingDetailPage = () => {
     }
   };
 
-  const fetchRelatedListings = async (categoryId: string, currentListingId: string) => {
+  const fetchRelatedListings = async (
+    categoryId: string,
+    currentListingId: string,
+    basePrice: number,
+    countryId?: string | null,
+  ) => {
     try {
-      const { data } = await supabase
-        .from('marketplace_listings')
-        .select(`
-          *,
-          marketplace_categories(name),
-          countries(name),
-          marketplace_listing_images(image_url, is_primary)
-        `)
-        .eq('category_id', categoryId)
-        .eq('status', 'active')
-        .neq('id', currentListingId)
-        .limit(4);
-
-      if (data) {
-        setRelatedListings(data.map(item => ({
+      const map = (rows: any[]) =>
+        rows.map((item) => ({
           ...item,
           category: item.marketplace_categories,
           country: item.countries,
           images: item.marketplace_listing_images || [],
-        })));
+        }));
+      const select = `
+        *,
+        marketplace_categories(name),
+        countries(name),
+        marketplace_listing_images(image_url, is_primary)
+      `;
+
+      // Tier 1: same category + same country + similar price (±30%)
+      let rows: any[] = [];
+      if (basePrice > 0 && countryId) {
+        const minP = basePrice * 0.7;
+        const maxP = basePrice * 1.3;
+        const { data } = await supabase
+          .from('marketplace_listings')
+          .select(select)
+          .eq('category_id', categoryId)
+          .eq('status', 'active')
+          .eq('country_id', countryId)
+          .neq('id', currentListingId)
+          .gte('price', minP)
+          .lte('price', maxP)
+          .limit(4);
+        if (data) rows = data;
       }
+
+      // Tier 2: backfill with same category + same country
+      if (rows.length < 4 && countryId) {
+        const excludeIds = [currentListingId, ...rows.map((r) => r.id)];
+        const { data } = await supabase
+          .from('marketplace_listings')
+          .select(select)
+          .eq('category_id', categoryId)
+          .eq('status', 'active')
+          .eq('country_id', countryId)
+          .not('id', 'in', `(${excludeIds.join(',')})`)
+          .limit(4 - rows.length);
+        if (data) rows = [...rows, ...data];
+      }
+
+      // Tier 3: backfill with same category only
+      if (rows.length < 4) {
+        const excludeIds = [currentListingId, ...rows.map((r) => r.id)];
+        const { data } = await supabase
+          .from('marketplace_listings')
+          .select(select)
+          .eq('category_id', categoryId)
+          .eq('status', 'active')
+          .not('id', 'in', `(${excludeIds.join(',')})`)
+          .limit(4 - rows.length);
+        if (data) rows = [...rows, ...data];
+      }
+
+      setRelatedListings(map(rows));
     } catch (error) {
       console.error('Error fetching related listings:', error);
     }
@@ -706,16 +753,29 @@ export const ListingDetailPage = () => {
               </div>
             </div>
 
-            {/* Safety Tips */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-2">Safety Tips</h3>
-              <ul className="text-sm text-gray-700 space-y-1">
-                <li>• Meet in a safe public place</li>
-                <li>• Check the item before you buy</li>
-                <li>• Pay only after collecting item</li>
-                <li>• Don't share personal information</li>
-              </ul>
-            </div>
+            {/* Safety Tips (dismissible) */}
+            {showSafetyTips && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSafetyTips(false);
+                    try { localStorage.setItem('bara.marketplace.safetyTipsDismissed', '1'); } catch {}
+                  }}
+                  className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
+                  aria-label="Dismiss safety tips"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <h3 className="font-semibold text-gray-900 mb-2 pr-6">Safety Tips</h3>
+                <ul className="text-sm text-gray-700 space-y-1">
+                  <li>• Meet in a safe public place</li>
+                  <li>• Inspect the item carefully before paying</li>
+                  <li>• Don't share banking info or passwords</li>
+                  <li>• Pay only after collecting the item</li>
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 

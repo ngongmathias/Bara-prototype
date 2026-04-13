@@ -385,7 +385,7 @@
 | 19.1.1 | **Category-aware autocomplete** — typing "iPhone" suggests "iPhone 15 Pro > Mobiles & Tablets" | P0 | ☐ |
 | 19.1.2 | **Recent searches** dropdown when focusing search bar | P1 | ✅ |
 | 19.1.3 | **Voice search** — Web Speech API, especially useful for mobile | P2 | ☐ |
-| 19.1.4 | **"Similar ads"** section on every ad detail page (same category, similar price, same location) | P1 | ☐ |
+| 19.1.4 | **"Similar ads"** section on every ad detail page (same category, similar price, same location) | P1 | ✅ |
 
 ### 19.2 Ad Quality
 
@@ -404,7 +404,7 @@
 | 19.3.1 | **Private in-app chat** — "Message Seller" on every ad opens private 1-on-1 conversation | P0 | ☐ |
 | 19.3.2 | **Public Q&A section** — separate from private chat. Buyer asks, seller answers publicly. Reduces repetitive questions. `marketplace_ad_questions` table | P0 | ☐ |
 | 19.3.3 | **"Make an Offer"** — buyer proposes price, seller accepts/counters/declines. `marketplace_offers` table (exists from Phase 11) | P0 | ✅ Exists |
-| 19.3.4 | **Safety tips** — dismissible banner on ad detail: "Meet in public places", "Don't share banking info", "Inspect before paying" | P1 | ☐ |
+| 19.3.4 | **Safety tips** — dismissible banner on ad detail: "Meet in public places", "Don't share banking info", "Inspect before paying" | P1 | ✅ |
 | 19.3.5 | **Seller response time** — "Usually responds within X hours" from historical chat data | P1 | ☐ |
 
 ### 19.4 Storefront Enhancements
