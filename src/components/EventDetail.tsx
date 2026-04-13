@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, MapPin, Maximize2, Share2 } from 'lucide-react';
 import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { InteractiveEventsMap } from "@/components/InteractiveEventsMap";
+import { EventCountdown } from "@/components/EventCountdown";
 import { useShare } from '@/context/ShareContext';
 
 interface EventDetailProps {
@@ -172,6 +173,13 @@ export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => 
                     )}
 
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">{event.title}</h1>
+
+                    <div className="mb-6">
+                        <EventCountdown
+                            startDate={parseDate(event.start_date)}
+                            endDate={parseDate(event.end_date)}
+                        />
+                    </div>
 
                     <div className="space-y-6">
                         <div className="flex items-start">
