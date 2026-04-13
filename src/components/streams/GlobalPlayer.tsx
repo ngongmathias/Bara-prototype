@@ -161,8 +161,32 @@ export function GlobalPlayer() {
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
+    const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
+    const handleTouchStart = (e: React.TouchEvent) => {
+        const t = e.touches[0];
+        touchStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+    };
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        const start = touchStartRef.current;
+        if (!start) return;
+        const end = e.changedTouches[0];
+        const dx = end.clientX - start.x;
+        const dy = end.clientY - start.y;
+        const dt = Date.now() - start.t;
+        touchStartRef.current = null;
+        if (dt > 600) return;
+        if (Math.abs(dx) < 60) return;
+        if (Math.abs(dy) > Math.abs(dx)) return;
+        if (dx > 0) next();
+        else prev();
+    };
+
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-xl border-t border-white/5 px-4 py-3 z-[200] text-white shadow-2xl">
+        <div
+            className="fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-xl border-t border-white/5 px-4 py-3 z-[200] text-white shadow-2xl"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+        >
             <div className="flex items-center justify-between gap-4 max-w-[1400px] mx-auto">
                 {/* Now Playing */}
                 <div className="flex items-center gap-4 flex-1 min-w-0">
