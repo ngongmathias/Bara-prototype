@@ -402,11 +402,11 @@ export const BlogPostDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div
-        className="fixed top-0 left-0 right-0 h-1 bg-transparent z-50 pointer-events-none"
+        className="fixed top-0 left-0 right-0 h-1 bg-transparent z-[10000] pointer-events-none"
         aria-hidden="true"
       >
         <div
-          className="h-full bg-red-600 transition-[width] duration-75 ease-linear"
+          className="h-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.5)] transition-[width] duration-75 ease-linear"
           style={{ width: `${readingProgress}%` }}
         />
       </div>
