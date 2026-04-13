@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SEO } from '@/components/SEO';
 import { DiscoverMore } from '@/components/DiscoverMore';
+import { ScrollReveal } from '@/components/animations/ScrollReveal';
 import {
   Search,
   Car,
@@ -347,7 +348,7 @@ const MarketplacePage = () => {
             Popular Categories
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <ScrollReveal className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
@@ -392,7 +393,7 @@ const MarketplacePage = () => {
                 </div>
               );
             })}
-          </div>
+          </ScrollReveal>
 
           {/* View All Categories Button */}
           <div className="flex justify-center mt-8">
@@ -437,7 +438,7 @@ const MarketplacePage = () => {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <ScrollReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {featuredListings.map((listing) => {
                   const primaryImage = listing.marketplace_listing_images?.find((img: any) => img.is_primary)?.image_url ||
                     listing.marketplace_listing_images?.[0]?.image_url;
@@ -480,7 +481,7 @@ const MarketplacePage = () => {
                     </div>
                   );
                 })}
-              </div>
+              </ScrollReveal>
             )}
           </section>
         )}

@@ -3,6 +3,7 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { Play, Pause } from 'lucide-react';
 import { SkeletonCard } from '@/components/animations/SkeletonCard';
+import { ScrollReveal } from '@/components/animations/ScrollReveal';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 
 export default function NewReleasesPage() {
@@ -67,7 +68,7 @@ export default function NewReleasesPage() {
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                    <ScrollReveal className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                         {albums.map(album => (
                             <div key={album.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col h-full shadow-lg">
                                 <div className="relative mb-4 aspect-square shadow-2xl">
@@ -92,7 +93,7 @@ export default function NewReleasesPage() {
                                 <p className="text-xs text-gray-500 truncate mt-auto">{album.artists?.name}</p>
                             </div>
                         ))}
-                    </div>
+                    </ScrollReveal>
                 )}
             </div>
         </StreamsLayout>

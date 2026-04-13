@@ -3,6 +3,7 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { Play } from 'lucide-react';
 import { SkeletonCard } from '@/components/animations/SkeletonCard';
+import { ScrollReveal } from '@/components/animations/ScrollReveal';
 import { Link } from 'react-router-dom';
 
 export default function ArtistsPage() {
@@ -42,7 +43,7 @@ export default function ArtistsPage() {
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                    <ScrollReveal className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                         {artists.map(artist => (
                             <Link key={artist.id} to={`/streams/artist/${artist.id}`} className="group flex flex-col items-center">
                                 <div className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 w-full text-center group">
@@ -66,7 +67,7 @@ export default function ArtistsPage() {
                                 </div>
                             </Link>
                         ))}
-                    </div>
+                    </ScrollReveal>
                 )}
             </div>
         </StreamsLayout>

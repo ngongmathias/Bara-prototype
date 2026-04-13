@@ -21,6 +21,7 @@ import {
 import { useToast } from '../hooks/use-toast';
 import { EmptyState } from '@/components/EmptyState';
 import { SectionNavButton } from '@/components/SectionNavButton';
+import { ScrollReveal } from '@/components/animations/ScrollReveal';
 
 export const BlogPage = () => {
   const navigate = useNavigate();
@@ -184,11 +185,11 @@ export const BlogPage = () => {
           </div>
         ) : posts.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <ScrollReveal className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {posts.map((post) => (
                 <BlogCard key={post.id} post={post} onReadMore={handleReadMore} />
               ))}
-            </div>
+            </ScrollReveal>
 
             {/* Pagination */}
             {totalPages > 1 && (
