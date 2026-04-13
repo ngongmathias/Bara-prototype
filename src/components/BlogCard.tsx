@@ -1,6 +1,9 @@
-import { useState } from 'react';
-import { Calendar, Clock, User, ArrowRight, Heart, Share2, Link2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calendar, Clock, User, ArrowRight, Heart, Bookmark, Share2, Link2 } from 'lucide-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { BlogPost, formatDate, calculateReadingTime } from '../lib/blogService';
+import { supabase, createAuthenticatedSupabaseClient } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 interface BlogCardProps {
   post: BlogPost;
@@ -8,10 +11,97 @@ interface BlogCardProps {
 }
 
 export const BlogCard = ({ post, onReadMore }: BlogCardProps) => {
+  const { user } = useUser();
+  const { getToken } = useAuth();
+  const { toast } = useToast();
   const [liked, setLiked] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [showShare, setShowShare] = useState(false);
 
   const readingTime = post.reading_time || (post.content ? calculateReadingTime(post.content) : null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadStatus = async () => {
+      if (!user || !post?.id) return;
+      try {
+        const [likeRes, bookmarkRes] = await Promise.all([
+          supabase.from('blog_post_likes').select('id').eq('post_id', post.id).eq('user_id', user.id).maybeSingle(),
+          supabase.from('blog_bookmarks').select('id').eq('post_id', post.id).eq('user_id', user.id).maybeSingle(),
+        ]);
+        if (cancelled) return;
+        setLiked(!!likeRes.data);
+        setBookmarked(!!bookmarkRes.data);
+      } catch {
+        /* ignore */
+      }
+    };
+    loadStatus();
+    return () => { cancelled = true; };
+  }, [user?.id, post?.id]);
+
+  const requireAuthedClient = async () => {
+    const token = await getToken({ template: 'supabase' });
+    if (!token) throw new Error('No auth token available');
+    return createAuthenticatedSupabaseClient(token);
+  };
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      toast({ title: 'Sign In Required', description: 'Please sign in to like posts', variant: 'destructive' });
+      return;
+    }
+    if (busy) return;
+    setBusy(true);
+    const next = !liked;
+    setLiked(next);
+    try {
+      const client = await requireAuthedClient();
+      if (next) {
+        const { error } = await client.from('blog_post_likes').insert({ post_id: post.id, user_id: user.id });
+        if (error && error.code !== '23505') throw error;
+      } else {
+        const { error } = await client.from('blog_post_likes').delete().eq('post_id', post.id).eq('user_id', user.id);
+        if (error) throw error;
+      }
+    } catch (err) {
+      console.error('BlogCard like error:', err);
+      setLiked(!next);
+      toast({ title: 'Error', description: 'Failed to update like', variant: 'destructive' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleBookmark = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      toast({ title: 'Sign In Required', description: 'Please sign in to bookmark posts', variant: 'destructive' });
+      return;
+    }
+    if (busy) return;
+    setBusy(true);
+    const next = !bookmarked;
+    setBookmarked(next);
+    try {
+      const client = await requireAuthedClient();
+      if (next) {
+        const { error } = await client.from('blog_bookmarks').insert({ post_id: post.id, user_id: user.id });
+        if (error && error.code !== '23505') throw error;
+      } else {
+        const { error } = await client.from('blog_bookmarks').delete().eq('post_id', post.id).eq('user_id', user.id);
+        if (error) throw error;
+      }
+    } catch (err) {
+      console.error('BlogCard bookmark error:', err);
+      setBookmarked(!next);
+      toast({ title: 'Error', description: 'Failed to update bookmark', variant: 'destructive' });
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const shareUrl = `${window.location.origin}/blog/${post.slug}`;
   const shareText = `Check out: ${post.title}`;
@@ -96,11 +186,22 @@ export const BlogCard = ({ post, onReadMore }: BlogCardProps) => {
           <div className="flex items-center gap-2">
             {/* Like Button */}
             <button
-              onClick={() => setLiked(!liked)}
-              className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+              onClick={handleLike}
+              disabled={busy}
+              className="p-1.5 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
               title={liked ? 'Unlike' : 'Like'}
             >
               <Heart className={`w-4 h-4 ${liked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+            </button>
+
+            {/* Bookmark Button */}
+            <button
+              onClick={handleBookmark}
+              disabled={busy}
+              className="p-1.5 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
+              title={bookmarked ? 'Remove bookmark' : 'Bookmark'}
+            >
+              <Bookmark className={`w-4 h-4 ${bookmarked ? 'fill-blue-500 text-blue-500' : 'text-gray-400'}`} />
             </button>
 
             {/* Share Button */}
