@@ -1,6 +1,6 @@
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List, Share2, Maximize2, Lock, ShoppingCart, MoreHorizontal, Timer, Gauge } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { GamificationService } from '@/lib/gamificationService';
 import { QueueDrawer } from './QueueDrawer';
@@ -59,9 +59,55 @@ export function GlobalPlayer() {
     const [isQueueOpen, setIsQueueOpen] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
+    const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
+    const previousVolumeRef = useRef(1);
     const { user, isSignedIn } = useUser();
     const [lastTrackedSongId, setLastTrackedSongId] = useState<string | null>(null);
     const [featuredArtists, setFeaturedArtists] = useState<string[]>([]);
+
+    // Global keyboard shortcuts (17.1.14)
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement | null;
+            if (!target) return;
+            const tag = target.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target.isContentEditable) return;
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+            if (e.key === ' ' || e.code === 'Space') {
+                if (!currentSong) return;
+                e.preventDefault();
+                togglePlay();
+            } else if (e.key === 'ArrowRight') {
+                if (!currentSong) return;
+                e.preventDefault();
+                seek(Math.min((progress || 0) + 10, duration || 0));
+            } else if (e.key === 'ArrowLeft') {
+                if (!currentSong) return;
+                e.preventDefault();
+                seek(Math.max((progress || 0) - 10, 0));
+            } else if (e.key === 'n' || e.key === 'N') {
+                next();
+            } else if (e.key === 'p' || e.key === 'P') {
+                prev();
+            } else if (e.key === 'l' || e.key === 'L') {
+                if (currentSong) toggleLike(currentSong.id);
+            } else if (e.key === 'm' || e.key === 'M') {
+                if (volume > 0) {
+                    previousVolumeRef.current = volume;
+                    setVolume(0);
+                } else {
+                    setVolume(previousVolumeRef.current || 1);
+                }
+            } else if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+                setIsShortcutsHelpOpen((v) => !v);
+            } else if (e.key === 'Escape') {
+                if (isShortcutsHelpOpen) setIsShortcutsHelpOpen(false);
+            }
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [currentSong, togglePlay, seek, next, prev, toggleLike, volume, setVolume, progress, duration, isShortcutsHelpOpen]);
 
     // Fetch featured artists for current song
     useEffect(() => {
@@ -381,6 +427,51 @@ export function GlobalPlayer() {
                 description={`By ${currentSong.artist} — listen on Bara Streams`}
                 imageUrl={currentSong.cover_url}
             />
+
+            {isShortcutsHelpOpen && (
+                <div
+                    className="fixed inset-0 z-[100] bg-black/70 flex items-center justify-center p-4"
+                    onClick={() => setIsShortcutsHelpOpen(false)}
+                >
+                    <div
+                        className="bg-gray-900 border border-gray-700 rounded-xl max-w-md w-full p-6 shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-bold text-white font-comfortaa">Keyboard Shortcuts</h2>
+                            <button
+                                onClick={() => setIsShortcutsHelpOpen(false)}
+                                className="text-gray-400 hover:text-white text-xl leading-none"
+                                aria-label="Close"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className="space-y-2 text-sm font-roboto">
+                            {[
+                                ['Space', 'Play / Pause'],
+                                ['→', 'Seek +10s'],
+                                ['←', 'Seek −10s'],
+                                ['N', 'Next track'],
+                                ['P', 'Previous track'],
+                                ['L', 'Like / unlike'],
+                                ['M', 'Mute / unmute'],
+                                ['?', 'Toggle this help'],
+                            ].map(([key, label]) => (
+                                <div key={key} className="flex items-center justify-between">
+                                    <span className="text-gray-300">{label}</span>
+                                    <kbd className="px-2 py-0.5 bg-white/10 border border-white/20 rounded text-xs text-white font-mono">
+                                        {key}
+                                    </kbd>
+                                </div>
+                            ))}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-4">
+                            Shortcuts are disabled while typing in inputs.
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

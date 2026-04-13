@@ -294,7 +294,7 @@
 | 17.1.11 | **Sleep timer** — "Stop after 15/30/60 min or end of track" from menu icon | P1 | ✅ Done (AudioPlayerContext.setSleepTimer + GlobalPlayer extras popover with live remaining) |
 | 17.1.12 | **Playback speed** — 0.5x, 1x, 1.25x, 1.5x, 2x for podcasts/audiobooks | P1 | ✅ Done (AudioPlayerContext.setPlaybackRate + 0.5–2x grid in GlobalPlayer extras popover) |
 | 17.1.13 | **"Go to artist" / "Go to album"** links always visible near song title | P0 | ☐ |
-| 17.1.14 | **Keyboard shortcuts** — Space=play/pause, arrows=seek ±10s, N=next, P=prev, L=like, M=mute. "?" help modal | P1 | ☐ |
+| 17.1.14 | **Keyboard shortcuts** — Space=play/pause, arrows=seek ±10s, N=next, P=prev, L=like, M=mute. "?" help modal | P1 | ✅ Done (GlobalPlayer global keydown listener with help modal, skips when typing) |
 
 ### 17.2 Discovery & Personalization
 
