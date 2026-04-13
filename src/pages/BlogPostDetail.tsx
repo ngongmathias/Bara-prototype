@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import {
   Calendar,
   Clock,
@@ -32,13 +32,14 @@ import {
   calculateReadingTime
 } from '../lib/blogService';
 import { useToast } from '../hooks/use-toast';
-import { supabase } from '@/lib/supabase';
+import { supabase, createAuthenticatedSupabaseClient } from '@/lib/supabase';
 import { useShare } from '@/context/ShareContext';
 
 export const BlogPostDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user } = useUser();
+  const { getToken } = useAuth();
   const { toast } = useToast();
 
   const [post, setPost] = useState<BlogPost | null>(null);
@@ -219,13 +220,17 @@ export const BlogPostDetail = () => {
     setLikesCount(prev => newLikeStatus ? prev + 1 : Math.max(prev - 1, 0));
 
     try {
+      const token = await getToken({ template: 'supabase' });
+      if (!token) throw new Error('No auth token available');
+      const authedClient = await createAuthenticatedSupabaseClient(token);
+
       if (newLikeStatus) {
-        const { error } = await supabase
+        const { error } = await authedClient
           .from('blog_post_likes')
           .insert({ post_id: post!.id, user_id: user.id });
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { error } = await authedClient
           .from('blog_post_likes')
           .delete()
           .eq('post_id', post!.id)
