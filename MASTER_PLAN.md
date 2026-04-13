@@ -391,8 +391,8 @@
 
 | # | Task | Priority | Status |
 |---|------|----------|--------|
-| 19.2.1 | **Image guidelines** — minimum 1 photo, suggest 3+. Quality score: "Your ad is 70% complete — add price, location, 2 more photos" | P1 | ☐ |
-| 19.2.2 | **Ad completeness bar** — visual progress during ad creation | P1 | ☐ |
+| 19.2.1 | **Image guidelines** — minimum 1 photo, suggest 3+. Quality score: "Your ad is 70% complete — add price, location, 2 more photos" | P1 | ✅ Done (completeness bar lists missing items; no-photo tip about 3+ photos → 5× more views) |
+| 19.2.2 | **Ad completeness bar** — visual progress during ad creation | P1 | ✅ Done (sticky bar on PostListing with 9 checks, color-coded red/amber/green) |
 | 19.2.3 | **Auto-categorization suggestion** — based on title keywords, suggest category/subcategory | P2 | ☐ |
 | 19.2.4 | **Ad boost/promote** — paid feature to pin to top of search. UI flow: "Contact us to boost your ad" (manual for now) | P2 | ☐ |
 | 19.2.5 | **Payment Instructions field** — dedicated field in ad creation + prominent display on detail page as "How to Pay" | P0 | ☐ |

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -894,6 +894,24 @@ export const PostListing = () => {
 
 
 
+  const completeness = useMemo(() => {
+    const checks: Array<{ key: string; label: string; done: boolean }> = [
+      { key: 'title', label: 'Title', done: !!formData.title.trim() },
+      { key: 'desc', label: 'Description (30+ chars)', done: formData.description.trim().length >= 30 },
+      { key: 'category', label: 'Category', done: !!formData.category_id },
+      { key: 'price', label: 'Price', done: !!formData.price && parseFloat(formData.price) > 0 },
+      { key: 'condition', label: 'Condition', done: !!formData.condition },
+      { key: 'location', label: 'Location', done: !!(formData.location_details?.trim() || selectedCountries.length > 0) },
+      { key: 'image1', label: 'At least 1 photo', done: imagePreviews.length >= 1 },
+      { key: 'image3', label: '3+ photos (recommended)', done: imagePreviews.length >= 3 },
+      { key: 'contact', label: 'Phone or WhatsApp', done: !!(formData.seller_phone?.trim() || formData.seller_whatsapp?.trim()) },
+    ];
+    const doneCount = checks.filter((c) => c.done).length;
+    const percent = Math.round((doneCount / checks.length) * 100);
+    const missing = checks.filter((c) => !c.done).map((c) => c.label);
+    return { checks, percent, missing };
+  }, [formData, imagePreviews.length, selectedCountries.length]);
+
   return (
 
     <div className="min-h-screen bg-gray-50 font-roboto">
@@ -919,6 +937,40 @@ export const PostListing = () => {
 
           </p>
 
+        </div>
+
+        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200 mb-6 sticky top-16 z-20">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-bold text-gray-900 font-comfortaa">
+              Ad Completeness
+            </span>
+            <span className={`text-lg font-bold tabular-nums ${
+              completeness.percent >= 80 ? 'text-green-600' : completeness.percent >= 50 ? 'text-amber-600' : 'text-red-600'
+            }`}>
+              {completeness.percent}%
+            </span>
+          </div>
+          <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden mb-3">
+            <div
+              className={`h-full transition-all duration-500 ${
+                completeness.percent >= 80 ? 'bg-green-500' : completeness.percent >= 50 ? 'bg-amber-500' : 'bg-red-500'
+              }`}
+              style={{ width: `${completeness.percent}%` }}
+            />
+          </div>
+          {completeness.missing.length > 0 ? (
+            <p className="text-xs text-gray-600">
+              <span className="font-semibold">Still needed:</span> {completeness.missing.slice(0, 3).join(', ')}
+              {completeness.missing.length > 3 && ` +${completeness.missing.length - 3} more`}
+            </p>
+          ) : (
+            <p className="text-xs text-green-600 font-semibold">Your ad looks great — ready to publish!</p>
+          )}
+          {imagePreviews.length === 0 && (
+            <div className="mt-3 p-2.5 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
+              <span className="font-semibold">Tip:</span> Ads with 3+ clear photos get up to 5× more views. Use natural light and show all angles.
+            </div>
+          )}
         </div>
 
 
