@@ -232,7 +232,7 @@
 | 16.1.1 | **Autocomplete/typeahead** on every search bar — suggestions dropdown (recent, popular, matching) | P0 | ☐ |
 | 16.1.2 | **Typo tolerance** — fuzzy matching ("Matystores" → "MatyStores"). Client-side Levenshtein or Supabase `similarity()`/trigram | P0 | ☐ |
 | 16.1.3 | **Federated search** — main navbar search shows categorized results: Events, Ads, Blog, Artists in grouped sections | P1 | ☐ |
-| 16.1.4 | **Search history** — persist last 10 searches per user (Supabase table or localStorage), show when search bar focused | P1 | ☐ |
+| 16.1.4 | **Search history** — persist last 10 searches per user (Supabase table or localStorage), show when search bar focused | P1 | ✅ |
 | 16.1.5 | **"No results" state** — never blank. Suggest: related items, popular items, spelling corrections, browse categories CTA | P0 | ✅ Done |
 
 ### 16.2 Micro-Interactions & Motion
@@ -383,7 +383,7 @@
 | # | Task | Priority | Status |
 |---|------|----------|--------|
 | 19.1.1 | **Category-aware autocomplete** — typing "iPhone" suggests "iPhone 15 Pro > Mobiles & Tablets" | P0 | ☐ |
-| 19.1.2 | **Recent searches** dropdown when focusing search bar | P1 | ☐ |
+| 19.1.2 | **Recent searches** dropdown when focusing search bar | P1 | ✅ |
 | 19.1.3 | **Voice search** — Web Speech API, especially useful for mobile | P2 | ☐ |
 | 19.1.4 | **"Similar ads"** section on every ad detail page (same category, similar price, same location) | P1 | ☐ |
 

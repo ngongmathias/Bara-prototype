@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -15,8 +15,31 @@ import {
   Package,
   MapPin,
   Calendar,
-  BookmarkPlus
+  BookmarkPlus,
+  Clock
 } from 'lucide-react';
+
+const SEARCH_HISTORY_KEY = 'bara.marketplace.searchHistory';
+const MAX_HISTORY = 10;
+
+const readSearchHistory = (): string[] => {
+  try {
+    const raw = localStorage.getItem(SEARCH_HISTORY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((s) => typeof s === 'string') : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeSearchHistory = (history: string[]) => {
+  try {
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+  } catch {
+    // ignore
+  }
+};
 import { useUser } from '@clerk/clerk-react';
 import { useToast } from '@/components/ui/use-toast';
 import {
@@ -64,6 +87,9 @@ export const SearchResults = () => {
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState(searchParams.get('q') || '');
   const [showFilters, setShowFilters] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<string[]>(() => readSearchHistory());
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchWrapperRef = useRef<HTMLDivElement>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [countries, setCountries] = useState<any[]>([]);
   
@@ -425,18 +451,63 @@ export const SearchResults = () => {
     }
   };
 
+  const pushSearchHistory = (query: string) => {
+    const q = query.trim();
+    if (!q) return;
+    setSearchHistory((prev) => {
+      const deduped = [q, ...prev.filter((item) => item.toLowerCase() !== q.toLowerCase())].slice(0, MAX_HISTORY);
+      writeSearchHistory(deduped);
+      return deduped;
+    });
+  };
+
+  const removeFromHistory = (query: string) => {
+    setSearchHistory((prev) => {
+      const next = prev.filter((item) => item !== query);
+      writeSearchHistory(next);
+      return next;
+    });
+  };
+
+  const clearHistory = () => {
+    setSearchHistory([]);
+    writeSearchHistory([]);
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams(searchParams);
-    
-    if (searchInput.trim()) {
-      params.set('q', searchInput.trim());
+    const trimmed = searchInput.trim();
+
+    if (trimmed) {
+      params.set('q', trimmed);
+      pushSearchHistory(trimmed);
     } else {
       params.delete('q');
     }
-    
+
+    setIsSearchFocused(false);
     setSearchParams(params);
   };
+
+  const applyHistoryItem = (query: string) => {
+    setSearchInput(query);
+    const params = new URLSearchParams(searchParams);
+    params.set('q', query);
+    pushSearchHistory(query);
+    setIsSearchFocused(false);
+    setSearchParams(params);
+  };
+
+  useEffect(() => {
+    const onClickOutside = (e: MouseEvent) => {
+      if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
 
   const applyFilters = () => {
     const params = new URLSearchParams(searchParams);
@@ -628,14 +699,52 @@ export const SearchResults = () => {
           {/* Search Bar */}
           <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
             <form onSubmit={handleSearch} className="flex gap-2">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="flex-1 relative" ref={searchWrapperRef}>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
                 <Input
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
                   placeholder="Search marketplace..."
                   className="pl-10 h-12 font-roboto"
                 />
+                {isSearchFocused && searchHistory.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-30 overflow-hidden">
+                    <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100 bg-gray-50">
+                      <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Recent Searches</span>
+                      <button
+                        type="button"
+                        onClick={clearHistory}
+                        className="text-xs text-gray-500 hover:text-red-600"
+                      >
+                        Clear all
+                      </button>
+                    </div>
+                    <ul className="max-h-72 overflow-y-auto">
+                      {searchHistory.map((item) => (
+                        <li
+                          key={item}
+                          className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 cursor-pointer group"
+                          onMouseDown={(e) => { e.preventDefault(); applyHistoryItem(item); }}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            <span className="text-sm text-gray-700 truncate">{item}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); e.preventDefault(); removeFromHistory(item); }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 p-1"
+                            title="Remove"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
               <Button type="submit" className="bg-blue-600 hover:bg-blue-700 h-12 px-6">
                 <Search className="w-4 h-4 mr-2" />
