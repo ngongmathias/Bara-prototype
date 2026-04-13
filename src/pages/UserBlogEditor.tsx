@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import {
@@ -72,6 +72,12 @@ export const UserBlogEditor = () => {
 
   const [tagInput, setTagInput] = useState('');
   const [autoSlug, setAutoSlug] = useState(true);
+
+  const [currentPostId, setCurrentPostId] = useState<string | null>(isEditMode ? (id ?? null) : null);
+  const [autosaveStatus, setAutosaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const dirtyRef = useRef(false);
+  const isAutosavingRef = useRef(false);
 
   const isPendingReview = postStatus === 'pending_review';
   const isDeclined = postStatus === 'declined';
@@ -271,6 +277,55 @@ export const UserBlogEditor = () => {
     }
   };
 
+  const runAutosave = async () => {
+    if (isAutosavingRef.current) return;
+    if (isLocked) return;
+    if (postStatus === 'published') return;
+    if (!formData.title?.trim() || !formData.content?.trim()) return;
+    if (!formData.author_id) return;
+
+    isAutosavingRef.current = true;
+    setAutosaveStatus('saving');
+    try {
+      const postData = cleanPost({
+        ...formData,
+        status: (postStatus === 'declined' ? 'declined' : 'draft') as any,
+        reading_time: calculateReadingTime(formData.content!),
+      });
+      if (currentPostId) {
+        await blogPostsService.update(currentPostId, postData);
+      } else {
+        const created = await blogPostsService.create(postData);
+        if (created?.id) {
+          setCurrentPostId(created.id);
+        }
+      }
+      dirtyRef.current = false;
+      setLastSavedAt(new Date());
+      setAutosaveStatus('saved');
+    } catch (err) {
+      console.error('Autosave error:', err);
+      setAutosaveStatus('error');
+    } finally {
+      isAutosavingRef.current = false;
+    }
+  };
+
+  useEffect(() => {
+    dirtyRef.current = true;
+    if (autosaveStatus === 'saved') setAutosaveStatus('idle');
+  }, [formData.title, formData.content, formData.excerpt, formData.featured_image, formData.category_id, formData.tags, formData.seo_title, formData.seo_description]);
+
+  useEffect(() => {
+    if (loading || isLocked || postStatus === 'published') return;
+    const interval = setInterval(() => {
+      if (dirtyRef.current) {
+        runAutosave();
+      }
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [loading, isLocked, postStatus, currentPostId, formData]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -331,7 +386,15 @@ export const UserBlogEditor = () => {
             Back to My Posts
           </Button>
 
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            {!isLocked && postStatus !== 'published' && (
+              <span className="text-xs text-gray-500 font-roboto mr-2" aria-live="polite">
+                {autosaveStatus === 'saving' && 'Saving…'}
+                {autosaveStatus === 'saved' && lastSavedAt && `Saved ${lastSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                {autosaveStatus === 'error' && <span className="text-red-600">Autosave failed</span>}
+                {autosaveStatus === 'idle' && dirtyRef.current && 'Unsaved changes'}
+              </span>
+            )}
             {!isDeclined && (
               <Button variant="outline" onClick={handleSaveDraft} disabled={saving}>
                 <Save className="w-4 h-4 mr-2" />

@@ -447,7 +447,7 @@
 | # | Task | Priority | Status |
 |---|------|----------|--------|
 | 20.3.1 | **Writer profiles** — dedicated author pages at `/blog/author/:slug` with bio, social links, all posts, follower count. Auto-created on first publish | P0 | ☐ |
-| 20.3.2 | **Draft autosave** — save every 30 seconds to prevent content loss | P1 | ☐ |
+| 20.3.2 | **Draft autosave** — save every 30 seconds to prevent content loss | P1 | ✅ Done (UserBlogEditor: 30s interval, creates-or-updates, header status indicator) |
 | 20.3.3 | **Post analytics** — views, read completion rate, shares, comments in writer dashboard | P1 | ☐ |
 | 20.3.4 | **SEO suggestions** — pre-publish checklist: title length, meta description, featured image, tags | P2 | ☐ |
 | 20.3.5 | **Content scheduling** — "Publish at" date/time picker for future publishing | P2 | ☐ |
