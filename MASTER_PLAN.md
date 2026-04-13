@@ -411,7 +411,7 @@
 
 | # | Task | Priority | Status |
 |---|------|----------|--------|
-| 19.4.1 | **Store categories/filters** — within storefront, filter store's ads by category | P1 | ☐ |
+| 19.4.1 | **Store categories/filters** — within storefront, filter store's ads by category | P1 | ✅ |
 | 19.4.2 | **Store reviews/ratings** — buyers rate experience (1-5 stars + text). `store_reviews` table | P1 | ☐ |
 | 19.4.3 | **Store analytics for sellers** — views, clicks, favorites, messages chart over time | P1 | ☐ |
 | 19.4.4 | **"Follow Store"** — notifications when store adds new ads | P1 | ☐ |

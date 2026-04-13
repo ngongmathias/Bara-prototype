@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -17,8 +17,40 @@ export const MarketplaceStorefront = () => {
   const [partner, setPartner] = useState<any>(null);
   const [ads, setAds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategorySlug, setSelectedCategorySlug] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'recent' | 'price_asc' | 'price_desc'>('recent');
 
   const isOwner = !!user && !!partner && user.id === partner.owner_user_id;
+
+  const categoryOptions = useMemo(() => {
+    const map = new Map<string, { slug: string; name: string; count: number }>();
+    ads.forEach((ad) => {
+      const slug = ad.category?.slug;
+      const name = ad.category?.name;
+      if (!slug || !name) return;
+      const existing = map.get(slug);
+      if (existing) existing.count += 1;
+      else map.set(slug, { slug, name, count: 1 });
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [ads]);
+
+  const filteredAds = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    const filtered = ads.filter((ad) => {
+      if (selectedCategorySlug !== 'all' && ad.category?.slug !== selectedCategorySlug) return false;
+      if (term && !ad.title?.toLowerCase().includes(term)) return false;
+      return true;
+    });
+    if (sortBy === 'price_asc') {
+      return [...filtered].sort((a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0));
+    }
+    if (sortBy === 'price_desc') {
+      return [...filtered].sort((a, b) => (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0));
+    }
+    return filtered;
+  }, [ads, searchTerm, selectedCategorySlug, sortBy]);
 
   useEffect(() => {
     if (!slug) return;
@@ -193,14 +225,52 @@ export const MarketplaceStorefront = () => {
         </div>
 
         {/* Ads grid */}
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Ads ({ads.length})</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Ads ({filteredAds.length})</h2>
+
+        {ads.length > 0 && (
+          <div className="flex flex-wrap gap-3 mb-4 items-center">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search this store..."
+              className="flex-1 min-w-[200px] h-10 px-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              value={selectedCategorySlug}
+              onChange={(e) => setSelectedCategorySlug(e.target.value)}
+              className="h-10 px-3 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All categories ({ads.length})</option>
+              {categoryOptions.map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {c.name} ({c.count})
+                </option>
+              ))}
+            </select>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className="h-10 px-3 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="recent">Most recent</option>
+              <option value="price_asc">Price: low to high</option>
+              <option value="price_desc">Price: high to low</option>
+            </select>
+          </div>
+        )}
+
         {ads.length === 0 ? (
           <div className="text-center py-16 border border-dashed border-gray-200 rounded-lg text-gray-500">
             This seller has no active ads yet.
           </div>
+        ) : filteredAds.length === 0 ? (
+          <div className="text-center py-16 border border-dashed border-gray-200 rounded-lg text-gray-500">
+            No ads match your filters.
+          </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {ads.map((ad) => {
+            {filteredAds.map((ad) => {
               const img = ad.marketplace_listing_images?.find((i: any) => i.is_primary)?.image_url
                 || ad.marketplace_listing_images?.[0]?.image_url
                 || '/placeholder.jpg';
