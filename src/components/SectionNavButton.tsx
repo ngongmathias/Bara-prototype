@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Heart, Bookmark, ShoppingBag } from 'lucide-react';
 
 interface SectionNavButtonProps {
-  section: 'events' | 'streams-music' | 'streams-movies' | 'streams-ebooks' | 'blog' | 'marketplace';
+  section: 'events' | 'streams-music' | 'streams-movies' | 'streams-ebooks' | 'blog' | 'blog-liked' | 'marketplace';
   variant?: 'default' | 'outline' | 'ghost';
   className?: string;
 }
@@ -41,6 +41,11 @@ export const SectionNavButton: React.FC<SectionNavButtonProps> = ({
       label: 'My Saved Articles',
       icon: Bookmark,
       path: '/users/dashboard/saved?tab=articles',
+    },
+    'blog-liked': {
+      label: 'My Liked Articles',
+      icon: Heart,
+      path: '/users/dashboard/saved?tab=likedArticles',
     },
     'marketplace': {
       label: 'My Favorites',

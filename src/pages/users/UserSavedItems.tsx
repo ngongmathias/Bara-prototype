@@ -27,6 +27,7 @@ export const UserSavedItems = () => {
   const [watchlist, setWatchlist] = useState<SavedItem[]>([]);
   const [ebookLibrary, setEbookLibrary] = useState<SavedItem[]>([]);
   const [savedArticles, setSavedArticles] = useState<SavedItem[]>([]);
+  const [likedArticles, setLikedArticles] = useState<SavedItem[]>([]);
   const [marketplaceFavorites, setMarketplaceFavorites] = useState<SavedItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -121,6 +122,34 @@ export const UserSavedItems = () => {
         console.error("Error loading blog bookmarks:", e);
       }
 
+      // Liked blog articles
+      try {
+        const { data: likes } = await supabase
+          .from("blog_post_likes")
+          .select("created_at, blog_posts(id, title, slug, featured_image, author:blog_authors(display_name))")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(50);
+
+        if (likes) {
+          setLikedArticles(
+            likes
+              .filter((l: any) => l.blog_posts)
+              .map((l: any) => ({
+                id: l.blog_posts.id,
+                title: l.blog_posts.title || "Unknown",
+                subtitle: l.blog_posts.author?.display_name,
+                image: l.blog_posts.featured_image,
+                type: "article",
+                saved_at: l.created_at,
+                slug: l.blog_posts.slug,
+              }))
+          );
+        }
+      } catch (e) {
+        console.error("Error loading liked articles:", e);
+      }
+
       // Marketplace favorites - use authenticated client
       try {
         const token = await getToken({ template: 'supabase' });
@@ -203,6 +232,7 @@ export const UserSavedItems = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="articles" className="gap-1"><FileText className="h-3 w-3" /> Saved Articles ({savedArticles.length})</TabsTrigger>
+          <TabsTrigger value="likedArticles" className="gap-1"><Heart className="h-3 w-3" /> Liked Articles ({likedArticles.length})</TabsTrigger>
           <TabsTrigger value="marketplace" className="gap-1"><ShoppingBag className="h-3 w-3" /> Marketplace ({marketplaceFavorites.length})</TabsTrigger>
           <TabsTrigger value="events" className="gap-1"><Heart className="h-3 w-3" /> Liked Events (0)</TabsTrigger>
           <TabsTrigger value="songs" className="gap-1"><Heart className="h-3 w-3" /> Liked Songs ({likedSongs.length})</TabsTrigger>
@@ -213,6 +243,12 @@ export const UserSavedItems = () => {
         <TabsContent value="articles">
           <Card><CardContent className="p-0">
             {renderItems(savedArticles, <FileText className="h-5 w-5" />, "No saved articles yet. Bookmark blog posts to find them here.")}
+          </CardContent></Card>
+        </TabsContent>
+
+        <TabsContent value="likedArticles">
+          <Card><CardContent className="p-0">
+            {renderItems(likedArticles, <Heart className="h-5 w-5" />, "No liked articles yet. Tap the heart on a blog post to save it here.")}
           </CardContent></Card>
         </TabsContent>
 

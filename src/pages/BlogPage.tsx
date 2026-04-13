@@ -19,6 +19,8 @@ import {
   BlogCategory 
 } from '../lib/blogService';
 import { useToast } from '../hooks/use-toast';
+import { EmptyState } from '@/components/EmptyState';
+import { SectionNavButton } from '@/components/SectionNavButton';
 
 export const BlogPage = () => {
   const navigate = useNavigate();
@@ -127,6 +129,14 @@ export const BlogPage = () => {
           </p>
         </div>
 
+        {/* Section Nav — liked + saved articles */}
+        {isSignedIn && (
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            <SectionNavButton section="blog-liked" />
+            <SectionNavButton section="blog" />
+          </div>
+        )}
+
         {/* Search Bar */}
         <div className="max-w-2xl mx-auto mb-12">
           <form onSubmit={handleSearch} className="relative">
@@ -218,17 +228,29 @@ export const BlogPage = () => {
             )}
           </>
         ) : (
-          <div className="text-center py-16">
-            <TrendingUp className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2 font-comfortaa">
-              No Posts Found
-            </h3>
-            <p className="text-gray-600 font-roboto">
-              {searchQuery
-                ? 'Try adjusting your search terms'
-                : 'Check back soon for new content!'}
-            </p>
-          </div>
+          <EmptyState
+            icon={TrendingUp}
+            title="No articles found"
+            searchQuery={searchQuery || undefined}
+            description={
+              searchQuery || selectedCategory
+                ? 'Try different keywords or browse all categories.'
+                : 'Check back soon — new articles are published regularly!'
+            }
+            onClearFilters={
+              (searchQuery || selectedCategory)
+                ? () => {
+                    setSearchQuery('');
+                    setSelectedCategory(null);
+                    setCurrentPage(1);
+                  }
+                : undefined
+            }
+            suggestions={[
+              { label: 'Browse All', onClick: () => { setSelectedCategory(null); setSearchQuery(''); } },
+              { label: 'Write an Article', href: '/blog/guidelines' },
+            ]}
+          />
         )}
 
         {/* Newsletter Subscribe Section */}
