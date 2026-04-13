@@ -291,8 +291,8 @@
 | 17.1.8 | **Controls row** — centered: shuffle, prev, play/pause (large), next, repeat. Below: volume (desktop), heart/like, add-to-playlist, share | P0 | ☐ |
 | 17.1.9 | **Swipe gestures** — swipe right = next, swipe left = previous (mobile) | P1 | ☐ |
 | 17.1.10 | **Crossfade control** — 0-12s crossfade between tracks, stored in localStorage | P2 | ☐ |
-| 17.1.11 | **Sleep timer** — "Stop after 15/30/60 min or end of track" from menu icon | P1 | ☐ |
-| 17.1.12 | **Playback speed** — 0.5x, 1x, 1.25x, 1.5x, 2x for podcasts/audiobooks | P1 | ☐ |
+| 17.1.11 | **Sleep timer** — "Stop after 15/30/60 min or end of track" from menu icon | P1 | ✅ Done (AudioPlayerContext.setSleepTimer + GlobalPlayer extras popover with live remaining) |
+| 17.1.12 | **Playback speed** — 0.5x, 1x, 1.25x, 1.5x, 2x for podcasts/audiobooks | P1 | ✅ Done (AudioPlayerContext.setPlaybackRate + 0.5–2x grid in GlobalPlayer extras popover) |
 | 17.1.13 | **"Go to artist" / "Go to album"** links always visible near song title | P0 | ☐ |
 | 17.1.14 | **Keyboard shortcuts** — Space=play/pause, arrows=seek ±10s, N=next, P=prev, L=like, M=mute. "?" help modal | P1 | ☐ |
 

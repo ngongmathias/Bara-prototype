@@ -1,5 +1,5 @@
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
-import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List, Share2, Maximize2, Lock, ShoppingCart } from 'lucide-react';
+import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List, Share2, Maximize2, Lock, ShoppingCart, MoreHorizontal, Timer, Gauge } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { GamificationService } from '@/lib/gamificationService';
@@ -30,8 +30,31 @@ export function GlobalPlayer() {
         toggleLike,
         isPreviewing,
         purchaseSong,
-        isSongPurchased
+        isSongPurchased,
+        playbackRate,
+        setPlaybackRate,
+        sleepTimerMinutes,
+        sleepTimerEndOfTrack,
+        sleepTimerRemainingMs,
+        setSleepTimer
     } = useAudioPlayer();
+
+    const [isExtrasOpen, setIsExtrasOpen] = useState(false);
+    const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+    const SLEEP_OPTIONS: Array<{ label: string; value: number | 'end-of-track' | null }> = [
+        { label: 'Off', value: null },
+        { label: '15 min', value: 15 },
+        { label: '30 min', value: 30 },
+        { label: '60 min', value: 60 },
+        { label: 'End of track', value: 'end-of-track' },
+    ];
+    const formatRemaining = (ms: number | null) => {
+        if (ms === null) return '';
+        const total = Math.max(0, Math.floor(ms / 1000));
+        const m = Math.floor(total / 60);
+        const s = total % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    };
 
     const [isQueueOpen, setIsQueueOpen] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
@@ -214,6 +237,76 @@ export function GlobalPlayer() {
                     >
                         <Share2 size={18} />
                     </button>
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsExtrasOpen(!isExtrasOpen)}
+                            className="text-gray-400 hover:text-white transition-colors relative"
+                            title="Playback speed & sleep timer"
+                            aria-label="Playback speed and sleep timer"
+                        >
+                            <MoreHorizontal size={18} />
+                            {(playbackRate !== 1 || sleepTimerMinutes !== null || sleepTimerEndOfTrack) && (
+                                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#1DB954]" />
+                            )}
+                        </button>
+                        {isExtrasOpen && (
+                            <>
+                                <div className="fixed inset-0 z-40" onClick={() => setIsExtrasOpen(false)} />
+                                <div className="absolute bottom-full right-0 mb-2 w-60 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl p-3 z-50">
+                                    <div className="mb-3">
+                                        <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                            <Gauge size={12} /> Playback Speed
+                                        </div>
+                                        <div className="grid grid-cols-4 gap-1">
+                                            {SPEED_OPTIONS.map((rate) => (
+                                                <button
+                                                    key={rate}
+                                                    onClick={() => setPlaybackRate(rate)}
+                                                    className={`text-xs py-1 rounded ${
+                                                        playbackRate === rate
+                                                            ? 'bg-white text-black font-bold'
+                                                            : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                                                    }`}
+                                                >
+                                                    {rate}x
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center justify-between text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                            <span className="flex items-center gap-1.5"><Timer size={12} /> Sleep Timer</span>
+                                            {sleepTimerRemainingMs !== null && (
+                                                <span className="text-[#1DB954] tabular-nums">{formatRemaining(sleepTimerRemainingMs)}</span>
+                                            )}
+                                            {sleepTimerEndOfTrack && <span className="text-[#1DB954]">end of track</span>}
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            {SLEEP_OPTIONS.map((opt) => {
+                                                const active =
+                                                    (opt.value === null && sleepTimerMinutes === null && !sleepTimerEndOfTrack) ||
+                                                    (typeof opt.value === 'number' && sleepTimerMinutes === opt.value) ||
+                                                    (opt.value === 'end-of-track' && sleepTimerEndOfTrack);
+                                                return (
+                                                    <button
+                                                        key={opt.label}
+                                                        onClick={() => setSleepTimer(opt.value)}
+                                                        className={`text-xs py-1.5 px-2 rounded text-left ${
+                                                            active
+                                                                ? 'bg-white text-black font-bold'
+                                                                : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                                                        }`}
+                                                    >
+                                                        {opt.label}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
                     <div className="hidden md:flex items-center gap-2 group/volume w-32">
                         <Volume2 size={18} className="text-gray-400 group-hover/volume:text-white transition-colors" />
                         <div className="relative flex-1 h-1 bg-white/10 rounded-full overflow-hidden cursor-pointer group-hover/volume:h-1.5 transition-all">

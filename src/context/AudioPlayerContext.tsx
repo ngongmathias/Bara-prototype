@@ -88,6 +88,18 @@ interface AudioPlayerContextType {
 
     toggleLike: (songId: string) => Promise<void>;
 
+    playbackRate: number;
+
+    setPlaybackRate: (rate: number) => void;
+
+    sleepTimerMinutes: number | null; // null when disabled; 'end-of-track' represented separately
+
+    sleepTimerEndOfTrack: boolean;
+
+    sleepTimerRemainingMs: number | null;
+
+    setSleepTimer: (option: number | 'end-of-track' | null) => void;
+
 }
 
 
@@ -123,6 +135,15 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const [purchasedSongs, setPurchasedSongs] = useState<string[]>([]);
 
     const [isPreviewing, setIsPreviewing] = useState(false);
+
+    const [playbackRate, setPlaybackRateState] = useState(1);
+
+    const [sleepTimerMinutes, setSleepTimerMinutes] = useState<number | null>(null);
+    const [sleepTimerEndOfTrack, setSleepTimerEndOfTrack] = useState(false);
+    const [sleepTimerRemainingMs, setSleepTimerRemainingMs] = useState<number | null>(null);
+    const sleepTimerDeadlineRef = useRef<number | null>(null);
+    const sleepTimerEndOfTrackRef = useRef(false);
+    useEffect(() => { sleepTimerEndOfTrackRef.current = sleepTimerEndOfTrack; }, [sleepTimerEndOfTrack]);
 
     const hasAwardedXP = useRef<string | null>(null);
 
@@ -203,6 +224,12 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const handleDurationChange = () => setDuration(audio.duration || 0);
 
         const handleEnded = () => {
+            if (sleepTimerEndOfTrackRef.current) {
+                sleepTimerEndOfTrackRef.current = false;
+                setSleepTimerEndOfTrack(false);
+                setIsPlaying(false);
+                return;
+            }
             if (repeatModeRef.current === 'one') {
                 audio.currentTime = 0;
                 audio.play().catch(() => {});
@@ -608,6 +635,61 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     };
 
+    const setPlaybackRate = (rate: number) => {
+        const clamped = Math.max(0.25, Math.min(4, rate));
+        setPlaybackRateState(clamped);
+        if (audioRef.current) audioRef.current.playbackRate = clamped;
+    };
+
+    useEffect(() => {
+        if (audioRef.current) audioRef.current.playbackRate = playbackRate;
+    }, [currentSong?.id]);
+
+    const setSleepTimer = (option: number | 'end-of-track' | null) => {
+        if (option === null) {
+            setSleepTimerMinutes(null);
+            setSleepTimerEndOfTrack(false);
+            setSleepTimerRemainingMs(null);
+            sleepTimerDeadlineRef.current = null;
+            return;
+        }
+        if (option === 'end-of-track') {
+            setSleepTimerMinutes(null);
+            setSleepTimerEndOfTrack(true);
+            setSleepTimerRemainingMs(null);
+            sleepTimerDeadlineRef.current = null;
+            return;
+        }
+        const minutes = option;
+        setSleepTimerEndOfTrack(false);
+        setSleepTimerMinutes(minutes);
+        const deadline = Date.now() + minutes * 60 * 1000;
+        sleepTimerDeadlineRef.current = deadline;
+        setSleepTimerRemainingMs(deadline - Date.now());
+    };
+
+    useEffect(() => {
+        if (sleepTimerMinutes === null) return;
+        const tick = () => {
+            const deadline = sleepTimerDeadlineRef.current;
+            if (deadline === null) return;
+            const remaining = deadline - Date.now();
+            if (remaining <= 0) {
+                if (audioRef.current) {
+                    audioRef.current.pause();
+                }
+                setIsPlaying(false);
+                setSleepTimerMinutes(null);
+                setSleepTimerRemainingMs(null);
+                sleepTimerDeadlineRef.current = null;
+            } else {
+                setSleepTimerRemainingMs(remaining);
+            }
+        };
+        const interval = window.setInterval(tick, 1000);
+        return () => window.clearInterval(interval);
+    }, [sleepTimerMinutes]);
+
 
 
     const addToQueue = (song: Song) => {
@@ -782,7 +864,19 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
                 setRepeatMode,
 
-                toggleLike
+                toggleLike,
+
+                playbackRate,
+
+                setPlaybackRate,
+
+                sleepTimerMinutes,
+
+                sleepTimerEndOfTrack,
+
+                sleepTimerRemainingMs,
+
+                setSleepTimer
 
             }}
 
