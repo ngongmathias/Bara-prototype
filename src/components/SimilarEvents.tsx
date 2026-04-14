@@ -38,7 +38,7 @@ export const SimilarEvents = ({ events, currentEvent, onEventClick }: SimilarEve
                         <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                             <div className="aspect-video relative overflow-hidden">
                                 <img
-                                    src={similarEvent.event_image_url || '/placeholder-event.jpg'}
+                                    loading="lazy" src={similarEvent.event_image_url || '/placeholder-event.jpg'}
                                     alt={similarEvent.title}
                                     className="w-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 />

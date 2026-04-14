@@ -108,7 +108,7 @@ export const ReviewList = ({ businessId }: { businessId: string }) => {
                         <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
                             {review.images.map((img, idx) => (
                                 <img
-                                    key={idx}
+                                    loading="lazy" key={idx}
                                     src={img}
                                     alt="Review"
                                     className="h-20 w-20 object-cover rounded border"

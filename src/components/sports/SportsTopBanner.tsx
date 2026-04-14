@@ -384,7 +384,7 @@ const MatchTile = ({ match, sport }: { match: any, sport: string }) => {
 
                     <div className="flex items-center gap-1.5 min-w-0">
 
-                        {homeTeam.logo && <img src={homeTeam.logo} alt="" className="w-3.5 h-3.5 object-contain" />}
+                        {homeTeam.logo && <img loading="lazy" src={homeTeam.logo} alt="" className="w-3.5 h-3.5 object-contain" />}
 
                         <span className={`text-[11px] font-bold tracking-tight uppercase truncate ${isFinished && (homeScore < awayScore) ? 'text-gray-500' : 'text-white'}`}>
 
@@ -408,7 +408,7 @@ const MatchTile = ({ match, sport }: { match: any, sport: string }) => {
 
                     <div className="flex items-center gap-1.5 min-w-0">
 
-                        {awayTeam.logo && <img src={awayTeam.logo} alt="" className="w-3.5 h-3.5 object-contain" />}
+                        {awayTeam.logo && <img loading="lazy" src={awayTeam.logo} alt="" className="w-3.5 h-3.5 object-contain" />}
 
                         <span className={`text-[11px] font-bold tracking-tight uppercase truncate ${isFinished && (awayScore < homeScore) ? 'text-gray-500' : 'text-white'}`}>
 

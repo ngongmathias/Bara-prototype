@@ -139,7 +139,7 @@ export default function FrontendPopup({
             onClick={handlePopupClick}
           >
             <img 
-              src={currentPopup?.image_url} 
+              loading="lazy" src={currentPopup?.image_url} 
               alt={currentPopup?.name || "Advertisement"} 
               className="max-w-full max-h-[70vh] sm:max-h-[600px] w-auto h-auto object-contain rounded-lg"
               onError={(e) => {

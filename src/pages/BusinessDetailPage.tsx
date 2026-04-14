@@ -225,7 +225,7 @@ export const BusinessDetailPage = () => {
                   {business.images.slice(0, 4).map((image, index) => (
                     <div key={index} className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
                       <img
-                        src={image}
+                        loading="lazy" src={image}
                         alt={`${business.name} - Image ${index + 1} `}
                         className="w-full h-full object-contain bg-gray-100"
                       />
@@ -321,7 +321,7 @@ export const BusinessDetailPage = () => {
                         <div className="mt-3 flex space-x-2">
                           {(review as any).images.slice(0, 3).map((image: string, index: number) => (
                             <img
-                              key={index}
+                              loading="lazy" key={index}
                               src={image}
                               alt={`Review image ${index + 1} `}
                               className="w-16 h-16 object-cover rounded border"

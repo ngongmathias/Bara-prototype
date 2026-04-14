@@ -98,12 +98,12 @@ export default function SportsStats() {
                                                             <div className="flex items-center gap-3 md:gap-4">
                                                                 <div className="relative shrink-0">
                                                                     <img
-                                                                        src={item.player.photo}
+                                                                        loading="lazy" src={item.player.photo}
                                                                         alt=""
                                                                         className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-white shadow-sm"
                                                                     />
                                                                     <img
-                                                                        src={item.statistics[0].team.logo}
+                                                                        loading="lazy" src={item.statistics[0].team.logo}
                                                                         alt=""
                                                                         className="w-3 h-3 md:w-4 md:h-4 absolute -bottom-1 -right-1 bg-white rounded-full shadow-sm"
                                                                     />

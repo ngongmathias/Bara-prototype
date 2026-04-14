@@ -49,7 +49,7 @@ export const ContinueWhereYouLeftOff = () => {
             <div className="aspect-square bg-gray-100 relative">
               {item.imageUrl ? (
                 <img
-                  src={item.imageUrl}
+                  loading="lazy" src={item.imageUrl}
                   alt={item.title}
                   className="w-full h-full object-cover"
                   onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.jpg'; }}

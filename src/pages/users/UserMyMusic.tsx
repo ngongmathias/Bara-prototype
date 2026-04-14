@@ -133,7 +133,7 @@ export const UserMyMusic = () => {
                   <span className="text-sm text-gray-400 w-6 text-right">{i + 1}</span>
                   <div className="h-10 w-10 rounded overflow-hidden bg-gray-100 flex-shrink-0">
                     {song.cover_url ? (
-                      <img src={song.cover_url} alt={song.title} className="h-full w-full object-cover" />
+                      <img loading="lazy" src={song.cover_url} alt={song.title} className="h-full w-full object-cover" />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center"><Disc className="h-5 w-5 text-gray-300" /></div>
                     )}

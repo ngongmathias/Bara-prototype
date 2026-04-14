@@ -490,7 +490,7 @@ export const AdminMarketplace = () => {
                             <TableCell>
                               <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden">
                                 {primaryImage ? (
-                                  <img src={primaryImage} alt={listing.title} className="w-full h-full object-cover" />
+                                  <img loading="lazy" src={primaryImage} alt={listing.title} className="w-full h-full object-cover" />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <ImageIcon className="w-6 h-6 text-gray-400" />
@@ -507,7 +507,7 @@ export const AdminMarketplace = () => {
                             <TableCell className="font-roboto">
                               <div className="flex items-center gap-2">
                                 {listing.countries?.flag_url && (
-                                  <img src={listing.countries.flag_url} alt="" className="w-5 h-4" />
+                                  <img loading="lazy" src={listing.countries.flag_url} alt="" className="w-5 h-4" />
                                 )}
                                 {listing.countries?.name}
                               </div>
@@ -780,7 +780,7 @@ export const AdminMarketplace = () => {
                       />
                       <div className="flex items-center space-x-2">
                         {country.flag_url && (
-                          <img src={country.flag_url} alt={country.name} className="w-5 h-4" />
+                          <img loading="lazy" src={country.flag_url} alt={country.name} className="w-5 h-4" />
                         )}
                         <span className="text-sm">{country.name}</span>
                       </div>
@@ -793,7 +793,7 @@ export const AdminMarketplace = () => {
                       const country = countries.find(c => c.id === countryId);
                       return country ? (
                         <div key={countryId} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-                          {country.flag_url && <img src={country.flag_url} alt={country.name} className="w-4 h-3" />}
+                          {country.flag_url && <img loading="lazy" src={country.flag_url} alt={country.name} className="w-4 h-3" />}
                           <span>{country.name}</span>
                           <button
                             type="button"

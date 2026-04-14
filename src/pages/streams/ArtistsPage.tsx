@@ -49,7 +49,7 @@ export default function ArtistsPage() {
                                 <div className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 w-full text-center group">
                                     <div className="relative mb-4 aspect-square shadow-2xl">
                                         <img
-                                            src={artist.image_url}
+                                            loading="lazy" src={artist.image_url}
                                             alt={artist.name}
                                             className="w-full h-full object-cover rounded-full shadow-lg"
                                             onError={(e) => {

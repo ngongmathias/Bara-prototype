@@ -98,7 +98,7 @@ export default function SportsSchedule() {
                                     <div key={group.league.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                                         <div className="bg-gray-50 px-4 py-3 border-b flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <img src={group.league.logo} alt="" className="w-5 h-5 object-contain" />
+                                                <img loading="lazy" src={group.league.logo} alt="" className="w-5 h-5 object-contain" />
                                                 <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-800">{group.league.name}</h2>
                                             </div>
                                             <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -159,13 +159,13 @@ function ScheduleRow({ match }: { match: Match }) {
                 <div className="flex-grow space-y-3">
                     {/* Home Team */}
                     <div className="flex items-center gap-3">
-                        <img src={match.teams.home.logo} alt="" className="w-6 h-6 object-contain" />
+                        <img loading="lazy" src={match.teams.home.logo} alt="" className="w-6 h-6 object-contain" />
                         <span className="text-sm font-bold text-gray-900">{match.teams.home.name}</span>
                     </div>
 
                     {/* Away Team */}
                     <div className="flex items-center gap-3">
-                        <img src={match.teams.away.logo} alt="" className="w-6 h-6 object-contain" />
+                        <img loading="lazy" src={match.teams.away.logo} alt="" className="w-6 h-6 object-contain" />
                         <span className="text-sm font-bold text-gray-900">{match.teams.away.name}</span>
                     </div>
                 </div>

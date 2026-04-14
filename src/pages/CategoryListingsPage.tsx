@@ -517,7 +517,7 @@ const CategoryListingsPage = () => {
                   >
                     <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                       {business.logo_url ? (
-                        <img src={business.logo_url} alt={business.name} className="w-full h-full object-cover rounded-lg" />
+                        <img loading="lazy" src={business.logo_url} alt={business.name} className="w-full h-full object-cover rounded-lg" />
                       ) : (
                         <Building2 className="w-6 h-6 text-gray-300" />
                       )}
@@ -565,7 +565,7 @@ const CategoryListingsPage = () => {
                               onClick={() => handleBusinessClick(business)}
                             >
                               {businessImage ? (
-                                <img src={businessImage} alt={business.name} className="w-full h-full object-cover" />
+                                <img loading="lazy" src={businessImage} alt={business.name} className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                   <Building2 className="w-12 h-12 text-gray-300" />
@@ -727,7 +727,7 @@ const CategoryListingsPage = () => {
 
                           <div className="bg-gray-100 h-48 flex items-center justify-center relative">
                             {businessImage ? (
-                              <img src={businessImage} alt={business.name} className="w-full h-full object-cover" />
+                              <img loading="lazy" src={businessImage} alt={business.name} className="w-full h-full object-cover" />
                             ) : (
                               <Building2 className="w-16 h-16 text-gray-300" />
                             )}

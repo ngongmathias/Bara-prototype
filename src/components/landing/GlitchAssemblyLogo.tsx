@@ -143,7 +143,7 @@ export const GlitchAssemblyLogo = () => {
             transition={{ duration: 0.3, repeat: isGlitching ? 3 : 0 }}
           >
             <img 
-              src="/images/africa-map.png" 
+              loading="lazy" src="/images/africa-map.png" 
               alt="Africa Map Logo"
               className="w-28 h-auto drop-shadow-xl"
             />
@@ -227,7 +227,7 @@ export const GlitchAssemblyLogo = () => {
             transition={{ duration: 0.3, repeat: isGlitching ? 3 : 0 }}
           >
             <img 
-              src="/images/b-lettermark.png" 
+              loading="lazy" src="/images/b-lettermark.png" 
               alt="B Lettermark Logo"
               className="w-28 h-auto drop-shadow-xl"
             />
@@ -263,7 +263,7 @@ export const GlitchAssemblyLogo = () => {
       >
         <div className="relative">
           <img 
-            src="/images/bara-text.png" 
+            loading="lazy" src="/images/bara-text.png" 
             alt="BARA Logo"
             className="w-80 h-auto drop-shadow-lg relative z-10"
           />

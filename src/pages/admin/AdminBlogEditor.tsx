@@ -499,7 +499,7 @@ export const AdminBlogEditor = () => {
                 {formData.featured_image ? (
                   <div className="relative">
                     <img
-                      src={formData.featured_image}
+                      loading="lazy" src={formData.featured_image}
                       alt="Featured"
                       className="w-full h-48 object-cover rounded-lg"
                     />

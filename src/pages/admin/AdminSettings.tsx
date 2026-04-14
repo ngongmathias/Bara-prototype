@@ -112,7 +112,7 @@ export const AdminSettings = () => {
               <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
                 {user?.imageUrl ? (
                   <img
-                    src={user.imageUrl}
+                    loading="lazy" src={user.imageUrl}
                     alt="Profile"
                     className="w-20 h-20 rounded-full object-cover"
                   />

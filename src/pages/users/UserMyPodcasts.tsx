@@ -121,7 +121,7 @@ export const UserMyPodcasts = () => {
                 <div key={podcast.id} className="flex items-center gap-4 p-4 hover:bg-gray-50">
                   <div className="h-14 w-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                     {podcast.cover_url ? (
-                      <img src={podcast.cover_url} alt={podcast.title} className="h-full w-full object-cover" />
+                      <img loading="lazy" src={podcast.cover_url} alt={podcast.title} className="h-full w-full object-cover" />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center"><Mic2 className="h-6 w-6 text-gray-300" /></div>
                     )}

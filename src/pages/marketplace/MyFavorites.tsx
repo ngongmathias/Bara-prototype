@@ -141,7 +141,7 @@ export const MyFavorites = () => {
                         className="relative w-full sm:w-48 h-48 bg-gray-100 flex-shrink-0 cursor-pointer"
                       >
                         <img
-                          src={primaryImage}
+                          loading="lazy" src={primaryImage}
                           alt={listing.title}
                           className="w-full h-full object-cover"
                         />

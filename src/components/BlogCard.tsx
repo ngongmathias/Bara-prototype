@@ -126,7 +126,7 @@ export const BlogCard = ({ post, onReadMore }: BlogCardProps) => {
       {post.featured_image && (
         <div className="relative h-48 overflow-hidden">
           <img
-            src={post.featured_image}
+            loading="lazy" src={post.featured_image}
             alt={post.title}
             className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
           />

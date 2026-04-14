@@ -705,7 +705,7 @@ export const UserEventsPage = () => {
                 <div className="mt-2 flex items-center space-x-4">
                   {imagePreview && (
                     <img
-                      src={imagePreview}
+                      loading="lazy" src={imagePreview}
                       alt="Event preview"
                       className="w-20 h-20 object-cover rounded-lg border"
                     />
@@ -742,7 +742,7 @@ export const UserEventsPage = () => {
                   <div className="flex flex-wrap gap-2 mb-3">
                     {formData.event_images.map((img, idx) => (
                       <div key={idx} className="relative w-16 h-16">
-                        <img src={img} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover rounded-md border" />
+                        <img loading="lazy" src={img} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover rounded-md border" />
                         <button
                           type="button"
                           className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
@@ -1078,7 +1078,7 @@ Orange Money: *144*1*XXXX#"
                       <div className="flex items-center space-x-3">
                         {event.event_image_url && (
                           <img
-                            src={event.event_image_url}
+                            loading="lazy" src={event.event_image_url}
                             alt={event.title}
                             className="w-10 h-10 object-cover rounded"
                           />

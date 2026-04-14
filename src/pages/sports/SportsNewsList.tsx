@@ -87,7 +87,7 @@ export default function SportsNewsList() {
                                     {article.image_url && (
                                         <div className="w-48 h-32 flex-shrink-0">
                                             <img
-                                                src={article.image_url}
+                                                loading="lazy" src={article.image_url}
                                                 alt={article.title}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                             />

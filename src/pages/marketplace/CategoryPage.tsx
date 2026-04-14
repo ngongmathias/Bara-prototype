@@ -310,7 +310,7 @@ export const CategoryPage = () => {
                     >
                       <div className="relative h-48 bg-gray-100">
                         <img
-                          src={primaryImage}
+                          loading="lazy" src={primaryImage}
                           alt={listing.title}
                           className="w-full h-full object-cover"
                         />

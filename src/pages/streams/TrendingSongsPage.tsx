@@ -92,7 +92,7 @@ export default function TrendingSongsPage() {
                             <div key={song.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col h-full shadow-lg" {...contextMenuHandlers(song)}>
                                 <div className="relative mb-4 aspect-square shadow-2xl">
                                     <img
-                                        src={song.cover_url}
+                                        loading="lazy" src={song.cover_url}
                                         alt={song.title}
                                         className="w-full h-full object-cover rounded-md shadow-lg"
                                         onError={(e) => {

@@ -22,7 +22,7 @@ export const PropertyCard: React.FC<CardProps> = ({ listing, onClick }) => {
             className="border border-gray-200 rounded-lg overflow-hidden hover:border-black transition-colors cursor-pointer bg-white group"
         >
             <div className="relative h-48 bg-gray-100">
-                <img src={primaryImage} alt={listing.title} className="w-full h-full object-cover" />
+                <img loading="lazy" src={primaryImage} alt={listing.title} className="w-full h-full object-cover" />
                 <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
                     <FavoriteButton listingId={listing.id} className="bg-white/90 hover:bg-white shadow-md" />
                 </div>
@@ -90,7 +90,7 @@ export const VehicleCard: React.FC<CardProps> = ({ listing, onClick }) => {
             className="border border-gray-200 rounded-lg overflow-hidden hover:border-black transition-colors cursor-pointer bg-white group"
         >
             <div className="relative h-48 bg-gray-100">
-                <img src={primaryImage} alt={listing.title} className="w-full h-full object-cover" />
+                <img loading="lazy" src={primaryImage} alt={listing.title} className="w-full h-full object-cover" />
                 <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
                     <FavoriteButton listingId={listing.id} className="bg-white/90 hover:bg-white shadow-md" />
                 </div>

@@ -286,7 +286,7 @@ export const MyAds = () => {
                       {/* Image */}
                       <div className="relative w-full sm:w-48 h-48 bg-gray-100 flex-shrink-0">
                         <img
-                          src={primaryImage}
+                          loading="lazy" src={primaryImage}
                           alt={ad.title}
                           className="w-full h-full object-cover"
                         />
@@ -421,7 +421,7 @@ export const MyAds = () => {
 
                     return (
                       <div key={tx.id} className="border border-gray-200 rounded-lg p-4 flex gap-4">
-                        <img src={img} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                        <img loading="lazy" src={img} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <h3 className="font-semibold text-gray-900 truncate text-sm">{tx.listing?.title}</h3>

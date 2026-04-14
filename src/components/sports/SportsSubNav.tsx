@@ -45,7 +45,7 @@ export const SportsSubNav = () => {
                                                 <div className="space-y-2">
                                                     {sport.featuredLeagues.map(league => (
                                                         <Link key={league.id} to={`/sports/${sport.slug}/table/${league.id}`} className="flex items-center gap-2 group">
-                                                            {league.logo && <img src={league.logo} alt="" className="w-4 h-4 object-contain grayscale group-hover:grayscale-0 transition-all text-[8px]" />}
+                                                            {league.logo && <img loading="lazy" src={league.logo} alt="" className="w-4 h-4 object-contain grayscale group-hover:grayscale-0 transition-all text-[8px]" />}
                                                             <span className="text-xs font-bold text-gray-700 group-hover:text-red-600 truncate">{league.name}</span>
                                                         </Link>
                                                     ))}

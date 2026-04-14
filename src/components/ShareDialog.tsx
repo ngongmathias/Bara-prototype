@@ -130,7 +130,7 @@ export const ShareDialog = ({ open, onClose, url, title, description, imageUrl }
               <div className="flex gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                 {imageUrl && (
                   <img
-                    src={imageUrl}
+                    loading="lazy" src={imageUrl}
                     alt=""
                     className="w-16 h-16 rounded object-cover flex-shrink-0 bg-gray-200"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

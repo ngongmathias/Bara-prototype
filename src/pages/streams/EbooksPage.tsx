@@ -226,7 +226,7 @@ export default function EbooksPage() {
                     className="rounded-lg overflow-hidden shadow-2xl border-2 border-white/20"
                     style={{ transform: `rotate(${(i - 1) * 5}deg) translateY(${i === 1 ? -10 : 0}px)`, width: 100, height: 150 }}
                   >
-                    <img src={book.cover} alt={book.title} className="w-full h-full object-cover" />
+                    <img loading="lazy" src={book.cover} alt={book.title} className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -265,7 +265,7 @@ export default function EbooksPage() {
                   {FEATURED_BOOKS.map((book) => (
                     <div key={book.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group flex">
                       <div className="w-32 sm:w-36 flex-shrink-0">
-                        <img src={book.cover} alt={book.title} className="w-full h-full object-cover" />
+                        <img loading="lazy" src={book.cover} alt={book.title} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 p-4 flex flex-col">
                         <h3 className="font-bold text-gray-900 text-sm">{book.title}</h3>
@@ -299,7 +299,7 @@ export default function EbooksPage() {
                   {NEW_RELEASES.map((book) => (
                     <div key={book.id} className="group flex-shrink-0 w-[140px] sm:w-[160px] snap-start cursor-pointer">
                       <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 shadow-lg">
-                        <img src={book.cover} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img loading="lazy" src={book.cover} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       </div>
                       <h3 className="font-bold text-gray-900 text-xs truncate">{book.title}</h3>
                       <p className="text-[11px] text-gray-500 truncate">{book.author}</p>
@@ -359,7 +359,7 @@ export default function EbooksPage() {
                       <div key={book.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group flex">
                         <div className="w-32 sm:w-36 flex-shrink-0 bg-gray-100">
                           {book.cover_url ? (
-                            <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
+                            <img loading="lazy" src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center"><BookOpen className="w-8 h-8 text-gray-300" /></div>
                           )}
@@ -408,7 +408,7 @@ export default function EbooksPage() {
                       <div key={book.id} className="group cursor-pointer">
                         <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 shadow-lg bg-gray-100">
                           {book.cover_url ? (
-                            <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            <img loading="lazy" src={book.cover_url} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center"><BookOpen className="w-10 h-10 text-gray-300" /></div>
                           )}

@@ -377,7 +377,7 @@ export const BlogPostDetail = () => {
       <div className="flex gap-3">
         {comment.user_avatar ? (
           <img
-            src={comment.user_avatar}
+            loading="lazy" src={comment.user_avatar}
             alt={comment.user_name}
             className="w-10 h-10 rounded-full"
           />
@@ -490,7 +490,7 @@ export const BlogPostDetail = () => {
               <div className="flex items-center gap-2">
                 {post.author.avatar_url ? (
                   <img
-                    src={post.author.avatar_url}
+                    loading="lazy" src={post.author.avatar_url}
                     alt={post.author.display_name}
                     className="w-10 h-10 rounded-full"
                   />
@@ -568,7 +568,7 @@ export const BlogPostDetail = () => {
           {/* Featured Image */}
           {post.featured_image && (
             <img
-              src={post.featured_image}
+              loading="lazy" src={post.featured_image}
               alt={post.title}
               className="w-full h-96 object-cover rounded-lg mb-8"
             />
@@ -599,7 +599,7 @@ export const BlogPostDetail = () => {
               <div className="flex gap-4">
                 {post.author.avatar_url ? (
                   <img
-                    src={post.author.avatar_url}
+                    loading="lazy" src={post.author.avatar_url}
                     alt={post.author.display_name}
                     className="w-16 h-16 rounded-full"
                   />

@@ -113,7 +113,7 @@ export default function LeagueTablePage() {
                                                 {/* Team Name */}
                                                 <div className="flex items-center gap-3 min-w-0">
                                                     <img
-                                                        src={team.team.logo}
+                                                        loading="lazy" src={team.team.logo}
                                                         alt={team.team.name}
                                                         className="w-8 h-8 object-contain flex-shrink-0"
                                                     />

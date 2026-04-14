@@ -44,7 +44,7 @@ export const DancingBaraLogo = () => {
                     animate={{ y: [0, -8, 0] }}
                     transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <img src="/images/africa-map.png" alt="Africa Map Logo" className="w-28 h-auto drop-shadow-xl" />
+                    <img loading="lazy" src="/images/africa-map.png" alt="Africa Map Logo" className="w-28 h-auto drop-shadow-xl" />
                   </motion.div>
 
                   <div className="text-black text-5xl font-light">×</div>
@@ -53,7 +53,7 @@ export const DancingBaraLogo = () => {
                     animate={{ y: [0, -8, 0] }}
                     transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 3 }}
                   >
-                    <img src="/images/b-lettermark.png" alt="B Lettermark Logo" className="w-28 h-auto drop-shadow-xl" />
+                    <img loading="lazy" src="/images/b-lettermark.png" alt="B Lettermark Logo" className="w-28 h-auto drop-shadow-xl" />
                   </motion.div>
                 </div>
 
@@ -63,7 +63,7 @@ export const DancingBaraLogo = () => {
                   transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                   className="mt-4"
                 >
-                  <img src="/images/bara-text.png" alt="BARA Logo" className="w-80 h-auto drop-shadow-lg mx-auto" />
+                  <img loading="lazy" src="/images/bara-text.png" alt="BARA Logo" className="w-80 h-auto drop-shadow-lg mx-auto" />
                   <p className="text-center text-xs text-gray-500 tracking-[0.3em] uppercase mt-2">
                     We Are Together
                   </p>

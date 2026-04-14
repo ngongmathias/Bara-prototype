@@ -1515,7 +1515,7 @@ export const AdminBusinesses = () => {
                 {logoFile && (
                   <div className="mt-2 flex items-center space-x-2">
                     <img
-                      src={URL.createObjectURL(logoFile)}
+                      loading="lazy" src={URL.createObjectURL(logoFile)}
                       alt="Logo preview"
                       className="w-16 h-16 object-cover rounded border"
                     />
@@ -1547,7 +1547,7 @@ export const AdminBusinesses = () => {
                     {uploadedImages.map((image, index) => (
                       <div key={index} className="relative">
                         <img
-                          src={image}
+                          loading="lazy" src={image}
                           alt={`Business image ${index + 1}`}
                           className="w-20 h-20 object-cover rounded border"
                         />
@@ -1884,7 +1884,7 @@ export const AdminBusinesses = () => {
                 {(logoFile || selectedBusiness?.logo_url) && (
                   <div className="mt-2 flex items-center space-x-2">
                     <img
-                      src={logoFile ? URL.createObjectURL(logoFile) : selectedBusiness?.logo_url}
+                      loading="lazy" src={logoFile ? URL.createObjectURL(logoFile) : selectedBusiness?.logo_url}
                       alt="Logo preview"
                       className="w-16 h-16 object-cover rounded border"
                     />
@@ -1916,7 +1916,7 @@ export const AdminBusinesses = () => {
                     {uploadedImages.map((image, index) => (
                       <div key={index} className="relative">
                         <img
-                          src={image}
+                          loading="lazy" src={image}
                           alt={`Business image ${index + 1}`}
                           className="w-20 h-20 object-cover rounded border"
                         />
@@ -1963,7 +1963,7 @@ export const AdminBusinesses = () => {
               <div className="flex items-start space-x-4">
                 {selectedBusiness.logo_url && (
                   <img
-                    src={selectedBusiness.logo_url}
+                    loading="lazy" src={selectedBusiness.logo_url}
                     alt="Business logo"
                     className="w-20 h-20 object-cover rounded-lg border"
                   />
@@ -2002,7 +2002,7 @@ export const AdminBusinesses = () => {
                   <div className="grid grid-cols-4 gap-4">
                     {selectedBusiness.images.map((image, index) => (
                       <img
-                        key={index}
+                        loading="lazy" key={index}
                         src={image}
                         alt={`Business image ${index + 1}`}
                         className="w-full h-32 object-cover rounded-lg border"

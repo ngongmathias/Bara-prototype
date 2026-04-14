@@ -427,7 +427,7 @@ export const CountriesPage = () => {
 
                 <img
 
-                  src="/bara-3.png"
+                  loading="lazy" src="/bara-3.png"
 
                   alt="Africa Map"
 

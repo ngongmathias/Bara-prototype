@@ -318,7 +318,7 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
                     }`}
                 >
                   <img
-                    src={bannerToShow.banner_image_url}
+                    loading="lazy" src={bannerToShow.banner_image_url}
                     alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
                     className="w-full h-[90px] object-cover bg-white"
                   />
@@ -331,7 +331,7 @@ export const BottomBannerAd: React.FC<BottomBannerAdProps> = ({ className = "" }
                     }`}
                 >
                   <img
-                    src={bannerToShow.banner_image_url}
+                    loading="lazy" src={bannerToShow.banner_image_url}
                     alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
                     className="w-full h-[90px] object-cover bg-white"
                   />

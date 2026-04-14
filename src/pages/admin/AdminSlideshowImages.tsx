@@ -426,7 +426,7 @@ export const AdminSlideshowImages: React.FC = () => {
                         <TableCell>
                           <div className="w-16 h-12 rounded-lg overflow-hidden">
                             <img
-                              src={image.image_url}
+                              loading="lazy" src={image.image_url}
                               alt={image.image_alt_text || image.title || 'Slideshow image'}
                               className="w-full h-full object-cover"
                             />
@@ -540,7 +540,7 @@ export const AdminSlideshowImages: React.FC = () => {
                   {previewUrl ? (
                     <div className="space-y-3">
                       <img
-                        src={previewUrl}
+                        loading="lazy" src={previewUrl}
                         alt="Preview"
                         className="max-h-48 mx-auto rounded-lg"
                       />

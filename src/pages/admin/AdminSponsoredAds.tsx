@@ -623,7 +623,7 @@ export const AdminSponsoredAds = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             {banner.banner_image_url ? (
                               <img
-                                src={banner.banner_image_url}
+                                loading="lazy" src={banner.banner_image_url}
                                 alt={banner.banner_alt_text || 'Banner preview'}
                                 className="w-16 h-10 object-cover rounded border border-gray-200"
                               />

@@ -225,7 +225,7 @@ export const StorefrontEditor = () => {
                 <div className="mt-2">
                   {partner?.logo_url ? (
                     <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-200">
-                      <img src={partner.logo_url} alt="Logo" className="w-full h-full object-cover" />
+                      <img loading="lazy" src={partner.logo_url} alt="Logo" className="w-full h-full object-cover" />
                     </div>
                   ) : (
                     <div className="w-32 h-32 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
@@ -248,7 +248,7 @@ export const StorefrontEditor = () => {
                 <div className="mt-2">
                   {partner?.cover_url ? (
                     <div className="relative w-full h-32 rounded-lg overflow-hidden border border-gray-200">
-                      <img src={partner.cover_url} alt="Cover" className="w-full h-full object-cover" />
+                      <img loading="lazy" src={partner.cover_url} alt="Cover" className="w-full h-full object-cover" />
                     </div>
                   ) : (
                     <div className="w-full h-32 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">

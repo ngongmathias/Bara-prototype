@@ -249,7 +249,7 @@ export const BannerAd: React.FC<BannerAdProps> = ({ className = "" }) => {
                     }`}
                   >
                     <img
-                      src={bannerToShow.banner_image_url}
+                      loading="lazy" src={bannerToShow.banner_image_url}
                       alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
                       className="w-full h-[250px] object-cover bg-gradient-to-r from-blue-50 to-indigo-50"
                     />
@@ -263,7 +263,7 @@ export const BannerAd: React.FC<BannerAdProps> = ({ className = "" }) => {
                     }`}
                   >
                     <img
-                      src={bannerToShow.banner_image_url}
+                      loading="lazy" src={bannerToShow.banner_image_url}
                       alt={bannerToShow.banner_alt_text || t('bannerAd.placeholder.title')}
                       className="w-full h-[250px] object-cover bg-gradient-to-r from-blue-50 to-indigo-50"
                     />

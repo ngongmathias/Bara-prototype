@@ -704,7 +704,7 @@ export const CategoryPostForm = () => {
                   {imagePreviews.map((preview, index) => (
                     <div key={index} className="relative group">
                       <img
-                        src={preview}
+                        loading="lazy" src={preview}
                         alt={`Preview ${index + 1}`}
                         className={`w-full h-32 object-cover rounded-lg ${primaryImageIndex === index ? 'ring-4 ring-blue-500' : ''
                           }`}

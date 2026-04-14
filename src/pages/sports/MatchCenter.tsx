@@ -114,7 +114,7 @@ export default function MatchCenter() {
                             {/* Home Team */}
                             <div className="flex-1 flex flex-col items-center">
                                 <img
-                                    src={match.teams.home.logo}
+                                    loading="lazy" src={match.teams.home.logo}
                                     alt={match.teams.home.name}
                                     className="w-24 h-24 object-contain mb-3"
                                 />
@@ -143,7 +143,7 @@ export default function MatchCenter() {
                             {/* Away Team */}
                             <div className="flex-1 flex flex-col items-center">
                                 <img
-                                    src={match.teams.away.logo}
+                                    loading="lazy" src={match.teams.away.logo}
                                     alt={match.teams.away.name}
                                     className="w-24 h-24 object-contain mb-3"
                                 />
@@ -372,7 +372,7 @@ function LineupsTab({ lineups }: { lineups: Lineup[] | undefined }) {
             {lineups.map((lineup, idx) => (
                 <div key={idx} className="bg-white rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-6">
-                        <img src={lineup.team.logo} alt={lineup.team.name} className="w-12 h-12 object-contain" />
+                        <img loading="lazy" src={lineup.team.logo} alt={lineup.team.name} className="w-12 h-12 object-contain" />
                         <div>
                             <h3 className="font-comfortaa font-semibold text-lg">{lineup.team.name}</h3>
                             <p className="text-sm text-gray-600">Formation: {lineup.formation}</p>

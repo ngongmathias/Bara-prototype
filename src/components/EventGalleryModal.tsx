@@ -138,7 +138,7 @@ export const EventGalleryModal: React.FC<EventGalleryModalProps> = ({
                 </div>
               )}
               <img
-                src={images[currentImageIndex]}
+                loading="lazy" src={images[currentImageIndex]}
                 alt={`${eventTitle} - Photo ${currentImageIndex + 1}`}
                 className="max-w-full max-h-full object-contain"
                 onLoad={() => setIsImageLoading(false)}
@@ -189,7 +189,7 @@ export const EventGalleryModal: React.FC<EventGalleryModalProps> = ({
                 }`}
               >
                 <img
-                  src={image}
+                  loading="lazy" src={image}
                   alt={`Thumbnail ${index + 1}`}
                   className="w-full h-full object-cover"
                 />

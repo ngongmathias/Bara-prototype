@@ -176,7 +176,7 @@ export const InteractiveEventsMap: React.FC<InteractiveEventsMapProps> = ({
               <Card className="border-0 shadow-none p-2">
                 {event.image_url && (
                   <img
-                    src={event.image_url}
+                    loading="lazy" src={event.image_url}
                     alt={event.title}
                     className="w-full h-32 object-cover rounded-lg mb-3"
                   />

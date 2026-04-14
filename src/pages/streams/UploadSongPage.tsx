@@ -257,7 +257,7 @@ export default function UploadSongPage() {
                                 className="w-32 h-32 rounded-lg border-2 border-dashed border-gray-700 hover:border-gray-500 bg-gray-50 flex items-center justify-center cursor-pointer transition-all overflow-hidden flex-shrink-0"
                             >
                                 {coverPreview ? (
-                                    <img src={coverPreview} alt="Cover" className="w-full h-full object-cover" />
+                                    <img loading="lazy" src={coverPreview} alt="Cover" className="w-full h-full object-cover" />
                                 ) : (
                                     <Image className="text-gray-500" size={32} />
                                 )}

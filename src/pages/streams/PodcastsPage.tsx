@@ -275,7 +275,7 @@ export default function PodcastsPage() {
                                             <div className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow">
                                                 <div className={`h-36 bg-gradient-to-br ${CATEGORY_COLORS[pod.category] || 'from-gray-600 to-gray-800'} relative flex items-end p-4`}>
                                                     {pod.cover_url ? (
-                                                        <img src={pod.cover_url} alt={pod.title} className="absolute inset-0 w-full h-full object-cover opacity-80" />
+                                                        <img loading="lazy" src={pod.cover_url} alt={pod.title} className="absolute inset-0 w-full h-full object-cover opacity-80" />
                                                     ) : (
                                                         <Mic2 size={48} className="absolute top-4 right-4 text-white/20" />
                                                     )}
@@ -341,7 +341,7 @@ export default function PodcastsPage() {
                                         >
                                             <div className={`h-28 bg-gradient-to-br ${CATEGORY_COLORS[pod.category] || 'from-gray-600 to-gray-800'} flex items-center justify-center relative`}>
                                                 {pod.cover_url ? (
-                                                    <img src={pod.cover_url} alt={pod.title} className="w-full h-full object-cover" />
+                                                    <img loading="lazy" src={pod.cover_url} alt={pod.title} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <Mic2 size={40} className="text-white/30" />
                                                 )}

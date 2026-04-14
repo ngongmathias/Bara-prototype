@@ -196,7 +196,7 @@ export default function SportsNewsDetail() {
                                 {article.image_url && (
                                     <div className="px-6">
                                         <img
-                                            src={article.image_url}
+                                            loading="lazy" src={article.image_url}
                                             alt={article.title}
                                             className="w-full h-auto max-h-[500px] object-cover rounded-lg"
                                         />
@@ -276,7 +276,7 @@ export default function SportsNewsDetail() {
                                             >
                                                 {item.image_url && (
                                                     <img
-                                                        src={item.image_url}
+                                                        loading="lazy" src={item.image_url}
                                                         alt={item.title}
                                                         className="w-20 h-14 object-cover rounded flex-shrink-0"
                                                     />

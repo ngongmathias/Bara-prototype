@@ -443,7 +443,7 @@ export default function AdminPopups() {
                     <TableRow key={popup.id}>
                       <TableCell>
                         <img 
-                          src={popup.image_url} 
+                          loading="lazy" src={popup.image_url} 
                           className="h-12 w-16 object-cover rounded border" 
                           alt={popup.name}
                           onError={(e) => {
@@ -592,7 +592,7 @@ export default function AdminPopups() {
                   </label>
                   {form.image_url && !file && (
                     <div className="flex items-center gap-2">
-                      <img src={form.image_url} className="h-10 w-16 object-cover rounded border" alt="Current" />
+                      <img loading="lazy" src={form.image_url} className="h-10 w-16 object-cover rounded border" alt="Current" />
                       <span className="text-sm text-gray-600">Current image</span>
                     </div>
                   )}

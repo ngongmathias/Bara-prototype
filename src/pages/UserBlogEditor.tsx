@@ -511,7 +511,7 @@ export const UserBlogEditor = () => {
               <CardContent>
                 {formData.featured_image ? (
                   <div className="relative">
-                    <img src={formData.featured_image} alt="Featured" className="w-full h-40 object-cover rounded-lg" />
+                    <img loading="lazy" src={formData.featured_image} alt="Featured" className="w-full h-40 object-cover rounded-lg" />
                     <Button
                       variant="destructive"
                       size="sm"

@@ -249,7 +249,7 @@ export const AdminLeagues = () => {
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 {l.logo_url ? (
-                                                    <img src={l.logo_url} alt={l.name} className="w-8 h-8 rounded object-cover" />
+                                                    <img loading="lazy" src={l.logo_url} alt={l.name} className="w-8 h-8 rounded object-cover" />
                                                 ) : (
                                                     <div className="w-8 h-8 rounded bg-gray-200 flex items-center justify-center"><Trophy className="h-4 w-4 text-gray-400" /></div>
                                                 )}
@@ -342,7 +342,7 @@ export const AdminLeagues = () => {
                             <div className="mt-1">
                                 {logoPreview ? (
                                     <div className="relative inline-block">
-                                        <img src={logoPreview} alt="Logo preview" className="w-16 h-16 rounded object-cover border" />
+                                        <img loading="lazy" src={logoPreview} alt="Logo preview" className="w-16 h-16 rounded object-cover border" />
                                         <button onClick={() => { setLogoFile(null); setLogoPreview(null); }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X className="h-3 w-3" /></button>
                                     </div>
                                 ) : (

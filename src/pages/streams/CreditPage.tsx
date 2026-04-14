@@ -189,7 +189,7 @@ export default function CreditPage() {
                                             {/* Song info */}
                                             <div className="flex gap-3 items-center min-w-0">
                                                 <img
-                                                    src={track.cover_url}
+                                                    loading="lazy" src={track.cover_url}
                                                     alt={track.title}
                                                     className="w-10 h-10 rounded object-cover flex-shrink-0 bg-gray-100"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}

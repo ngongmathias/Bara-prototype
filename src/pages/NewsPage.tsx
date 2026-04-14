@@ -272,7 +272,7 @@ export default function NewsPage() {
                     {feed.imageUrl && (
                       <div className="mb-4 -mx-5 -mt-5 overflow-hidden rounded-t-xl">
                         <img
-                          src={feed.imageUrl}
+                          loading="lazy" src={feed.imageUrl}
                           alt={feed.title}
                           className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-500"
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

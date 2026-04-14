@@ -66,7 +66,7 @@ export const CityInfo: React.FC<CityInfoProps> = ({
             <span className="text-4xl">{flag}</span>
             {coatOfArmsUrl && (
               <img 
-                src={coatOfArmsUrl} 
+                loading="lazy" src={coatOfArmsUrl} 
                 alt={`Coat of arms of ${countryCode}`}
                 className="w-12 h-12 object-contain"
                 onError={(e) => {

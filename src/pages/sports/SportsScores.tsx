@@ -250,7 +250,7 @@ export default function SportsScores() {
 
                                                 <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center p-1.5">
 
-                                                    <img src={group.league.logo} alt="" className="w-full h-full object-contain" />
+                                                    <img loading="lazy" src={group.league.logo} alt="" className="w-full h-full object-contain" />
 
                                                 </div>
 
@@ -474,7 +474,7 @@ function MatchRow({ match, sport }: { match: Match, sport: string }) {
 
                             </span>
 
-                            <img src={match.teams.home.logo} alt="" className="w-8 h-8 object-contain" />
+                            <img loading="lazy" src={match.teams.home.logo} alt="" className="w-8 h-8 object-contain" />
 
                             <span className={`text-2xl font-black w-10 text-right ${isFinished && homeScore < awayScore ? 'text-gray-400' : 'text-gray-900'}`}>
 
@@ -498,7 +498,7 @@ function MatchRow({ match, sport }: { match: Match, sport: string }) {
 
                             </span>
 
-                            <img src={match.teams.away.logo} alt="" className="w-8 h-8 object-contain" />
+                            <img loading="lazy" src={match.teams.away.logo} alt="" className="w-8 h-8 object-contain" />
 
                             <span className={`text-[15px] font-black uppercase tracking-tighter ${isFinished && awayScore < homeScore ? 'text-gray-400' : 'text-gray-900'}`}>
 

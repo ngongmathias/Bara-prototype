@@ -382,7 +382,7 @@ export const HeroSection = () => {
                                 <div className="flex-shrink-0">
                                   {business.logo_url ? (
                                     <img 
-                                      src={business.logo_url} 
+                                      loading="lazy" src={business.logo_url} 
                                       alt={business.name}
                                       className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
                                     />

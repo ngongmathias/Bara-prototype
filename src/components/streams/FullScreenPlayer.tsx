@@ -188,7 +188,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                     {/* Ambient background glow from cover art */}
                     <div className="absolute inset-0 overflow-hidden pointer-events-none">
                         <img
-                            src={currentSong.cover_url}
+                            loading="lazy" src={currentSong.cover_url}
                             alt=""
                             className="absolute top-0 left-0 w-full h-[70%] object-cover blur-[120px] opacity-25 scale-[1.5]"
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -233,7 +233,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                 />
                                 <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
                                     <img
-                                        src={currentSong.cover_url}
+                                        loading="lazy" src={currentSong.cover_url}
                                         alt={currentSong.title}
                                         className="w-full h-full object-cover"
                                         onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}
@@ -423,7 +423,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                         <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">Now Playing</p>
                                         <div className="flex items-center gap-3 p-2.5 rounded-lg bg-white/5">
                                             <img
-                                                src={currentSong.cover_url || '/placeholder-music.png'}
+                                                loading="lazy" src={currentSong.cover_url || '/placeholder-music.png'}
                                                 alt={currentSong.title}
                                                 className="w-11 h-11 rounded-md object-cover flex-shrink-0"
                                                 onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}
@@ -464,7 +464,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                                     >
                                                         <span className="text-xs text-white/20 w-5 text-right font-medium flex-shrink-0">{i + 1}</span>
                                                         <img
-                                                            src={song.cover_url || '/placeholder-music.png'}
+                                                            loading="lazy" src={song.cover_url || '/placeholder-music.png'}
                                                             alt={song.title}
                                                             className="w-9 h-9 rounded object-cover bg-white/10 flex-shrink-0"
                                                             onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}

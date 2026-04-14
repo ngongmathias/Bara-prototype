@@ -117,7 +117,7 @@ export default function EbookDetailPage() {
               <div className="sm:w-56 flex-shrink-0 bg-gray-100">
                 {ebook.cover_url ? (
                   <img
-                    src={ebook.cover_url}
+                    loading="lazy" src={ebook.cover_url}
                     alt={ebook.title}
                     className="w-full h-64 sm:h-full object-cover"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

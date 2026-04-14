@@ -523,7 +523,7 @@ export const AdminBannerAds = () => {
                       {formData.image_url && (
                         <div className="border rounded p-2">
                           <img
-                            src={formData.image_url}
+                            loading="lazy" src={formData.image_url}
                             alt="Preview"
                             className="max-h-20 object-contain"
                           />
@@ -697,7 +697,7 @@ export const AdminBannerAds = () => {
                       <TableRow key={ad.id}>
                         <TableCell>
                           <img
-                            src={ad.image_url}
+                            loading="lazy" src={ad.image_url}
                             alt={ad.alt_text || ad.title}
                             className="w-16 h-10 object-cover rounded"
                           />
@@ -787,7 +787,7 @@ export const AdminBannerAds = () => {
                             <td className="px-6 py-4 whitespace-nowrap">
                               {banner.banner_image_url ? (
                                 <img
-                                  src={banner.banner_image_url}
+                                  loading="lazy" src={banner.banner_image_url}
                                   alt={banner.banner_alt_text || 'Banner preview'}
                                   className="w-16 h-10 object-cover rounded border border-gray-200"
                                 />

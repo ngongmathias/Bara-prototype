@@ -2653,7 +2653,7 @@ export const PostListing = () => {
 
                       <img
 
-                        src={preview}
+                        loading="lazy" src={preview}
 
                         alt={`Preview ${index + 1}`}
 
@@ -2748,7 +2748,7 @@ export const PostListing = () => {
                     {countries.map((country) => (
                       <SelectItem key={country.id} value={country.id}>
                         <span className="flex items-center gap-2">
-                          {country.flag_url && <img src={country.flag_url} alt={country.name} className="w-5 h-4 inline-block" />}
+                          {country.flag_url && <img loading="lazy" src={country.flag_url} alt={country.name} className="w-5 h-4 inline-block" />}
                           {country.name}
                         </span>
                       </SelectItem>

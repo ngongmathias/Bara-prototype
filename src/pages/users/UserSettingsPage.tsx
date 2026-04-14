@@ -186,7 +186,7 @@ const UserSettingsPage = () => {
 
                 {user?.imageUrl ? (
 
-                  <img src={user.imageUrl} alt="Avatar" className="w-20 h-20 object-cover rounded-full" />
+                  <img loading="lazy" src={user.imageUrl} alt="Avatar" className="w-20 h-20 object-cover rounded-full" />
 
                 ) : (
 

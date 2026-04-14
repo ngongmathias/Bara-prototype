@@ -349,7 +349,7 @@ export default function ArtistDashboard() {
                                                         )}
                                                     </button>
                                                     <img
-                                                        src={song.cover_url || '/placeholder-music.png'}
+                                                        loading="lazy" src={song.cover_url || '/placeholder-music.png'}
                                                         alt={song.title}
                                                         className="w-10 h-10 rounded object-cover bg-gray-200 flex-shrink-0"
                                                         onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}
@@ -398,7 +398,7 @@ export default function ArtistDashboard() {
                                                         )}
                                                     </button>
                                                     <img
-                                                        src={song.cover_url || '/placeholder-music.png'}
+                                                        loading="lazy" src={song.cover_url || '/placeholder-music.png'}
                                                         alt={song.title}
                                                         className="w-10 h-10 rounded object-cover bg-gray-200 flex-shrink-0"
                                                         onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}
@@ -474,7 +474,7 @@ export default function ArtistDashboard() {
                                                         <TableCell>
                                                             <div className="flex items-center gap-3">
                                                                 <img
-                                                                    src={song.cover_url || '/placeholder-music.png'}
+                                                                    loading="lazy" src={song.cover_url || '/placeholder-music.png'}
                                                                     alt={song.title}
                                                                     className="w-10 h-10 rounded object-cover bg-gray-200"
                                                                     onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}
@@ -559,7 +559,7 @@ export default function ArtistDashboard() {
                                                 <Card className="border-none shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
                                                     <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
                                                         {album.cover_url ? (
-                                                            <img src={album.cover_url} alt={album.title} className="w-full h-full object-cover" />
+                                                            <img loading="lazy" src={album.cover_url} alt={album.title} className="w-full h-full object-cover" />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center">
                                                                 <Disc size={64} className="text-gray-300" />
@@ -667,7 +667,7 @@ export default function ArtistDashboard() {
                                                             <div key={song.id} className="flex items-center gap-4">
                                                                 <span className="text-sm font-bold text-gray-400 w-6 text-right">{i + 1}</span>
                                                                 <img
-                                                                    src={song.cover_url || '/placeholder-music.png'}
+                                                                    loading="lazy" src={song.cover_url || '/placeholder-music.png'}
                                                                     alt={song.title}
                                                                     className="w-10 h-10 rounded object-cover bg-gray-200 flex-shrink-0"
                                                                     onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}

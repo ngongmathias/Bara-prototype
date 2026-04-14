@@ -300,7 +300,7 @@ export const UserBannerSubmission = () => {
                   {form.media_type === 'video' ? (
                     <video src={preview} className="w-full h-48 object-cover rounded" controls />
                   ) : (
-                    <img src={preview} className="w-full h-48 object-cover rounded" />
+                    <img loading="lazy" src={preview} className="w-full h-48 object-cover rounded" />
                   )}
                 </div>
               )}
@@ -318,7 +318,7 @@ export const UserBannerSubmission = () => {
                   Upload a custom thumbnail image for your video. If not provided, a frame from the video will be used.
                 </p>
                 {thumbnailPreview && (
-                  <img src={thumbnailPreview} className="mt-2 w-32 h-20 object-cover rounded" />
+                  <img loading="lazy" src={thumbnailPreview} className="mt-2 w-32 h-20 object-cover rounded" />
                 )}
               </div>
             )}
@@ -380,7 +380,7 @@ export const UserBannerSubmission = () => {
                   <div className="flex items-start gap-4">
                     <div className="w-24 h-16 overflow-hidden rounded relative flex-shrink-0">
                       <img
-                        src={submission.thumbnail_url || submission.media_url}
+                        loading="lazy" src={submission.thumbnail_url || submission.media_url}
                         alt={submission.alt_text || 'submission'}
                         className="w-full h-full object-cover"
                       />

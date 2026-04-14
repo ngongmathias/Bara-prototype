@@ -126,7 +126,7 @@ export default function TeamPage() {
                     <div className="max-w-7xl mx-auto px-4 py-12 relative z-10">
                         <div className="flex flex-col md:flex-row items-center gap-8">
                             <div className="w-32 h-32 md:w-40 md:h-40 bg-white/10 rounded-full flex items-center justify-center p-6 backdrop-blur-sm border border-white/10">
-                                <img src={team.logo} alt={team.name} className="w-full h-full object-contain" />
+                                <img loading="lazy" src={team.logo} alt={team.name} className="w-full h-full object-contain" />
                             </div>
                             <div className="text-center md:text-left flex-1">
                                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
@@ -199,14 +199,14 @@ export default function TeamPage() {
                                                     <div className="text-xl font-black uppercase tracking-tighter">{nextMatch.teams.home.name}</div>
                                                     <div className="text-xs text-gray-500 font-bold uppercase tracking-widest">Home</div>
                                                 </div>
-                                                <img src={nextMatch.teams.home.logo} alt="" className="w-16 h-16 object-contain" />
+                                                <img loading="lazy" src={nextMatch.teams.home.logo} alt="" className="w-16 h-16 object-contain" />
                                             </div>
                                             <div className="text-center">
                                                 <div className="text-3xl font-black italic text-red-600 mb-1 uppercase tracking-tighter">VS</div>
                                                 <div className="text-xs font-black bg-gray-100 px-3 py-1 rounded-full">{new Date(nextMatch.fixture.date).toLocaleDateString()}</div>
                                             </div>
                                             <div className="flex items-center gap-6">
-                                                <img src={nextMatch.teams.away.logo} alt="" className="w-16 h-16 object-contain" />
+                                                <img loading="lazy" src={nextMatch.teams.away.logo} alt="" className="w-16 h-16 object-contain" />
                                                 <div className="text-center md:text-left">
                                                     <div className="text-xl font-black uppercase tracking-tighter">{nextMatch.teams.away.name}</div>
                                                     <div className="text-xs text-gray-500 font-bold uppercase tracking-widest">Away</div>
@@ -230,7 +230,7 @@ export default function TeamPage() {
                                                 <div className="flex items-center gap-4 flex-1">
                                                     <span className="text-[10px] font-black text-gray-400 w-12">{new Date(m.fixture.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
                                                     <div className="flex items-center gap-2">
-                                                        <img src={m.teams.home.id === team.id ? m.teams.away.logo : m.teams.home.logo} alt="" className="w-5 h-5 object-contain" />
+                                                        <img loading="lazy" src={m.teams.home.id === team.id ? m.teams.away.logo : m.teams.home.logo} alt="" className="w-5 h-5 object-contain" />
                                                         <span className="text-sm font-bold tracking-tight">{m.teams.home.id === team.id ? m.teams.away.name : m.teams.home.name}</span>
                                                     </div>
                                                 </div>
@@ -287,10 +287,10 @@ export default function TeamPage() {
                                                 <div className="text-xs text-gray-400 font-bold">{new Date(f.fixture.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</div>
                                             </div>
                                             <div className="flex items-center gap-4">
-                                                <img src={f.teams.home.logo} alt="" className="w-8 h-8 object-contain" />
+                                                <img loading="lazy" src={f.teams.home.logo} alt="" className="w-8 h-8 object-contain" />
                                                 <span className="text-base font-bold tracking-tight">{f.teams.home.name}</span>
                                                 <span className="text-xs font-black text-gray-400 mx-2">VS</span>
-                                                <img src={f.teams.away.logo} alt="" className="w-8 h-8 object-contain" />
+                                                <img loading="lazy" src={f.teams.away.logo} alt="" className="w-8 h-8 object-contain" />
                                                 <span className="text-base font-bold tracking-tight">{f.teams.away.name}</span>
                                             </div>
                                         </div>

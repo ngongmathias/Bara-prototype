@@ -11,7 +11,7 @@ export const RealBaraLogo = () => {
           transition={{ type: "spring", stiffness: 400, damping: 10 }}
         >
           <img 
-            src="/images/africa-map.png" 
+            loading="lazy" src="/images/africa-map.png" 
             alt="Africa Map Logo"
             className="w-32 h-auto drop-shadow-2xl"
           />
@@ -32,7 +32,7 @@ export const RealBaraLogo = () => {
           transition={{ type: "spring", stiffness: 400, damping: 10 }}
         >
           <img 
-            src="/images/b-lettermark.png" 
+            loading="lazy" src="/images/b-lettermark.png" 
             alt="B Lettermark Logo"
             className="w-32 h-auto drop-shadow-2xl"
           />
@@ -47,7 +47,7 @@ export const RealBaraLogo = () => {
         className="text-center"
       >
         <img 
-          src="/images/bara-text.png" 
+          loading="lazy" src="/images/bara-text.png" 
           alt="BARA Logo"
           className="w-96 h-auto drop-shadow-2xl mx-auto mb-4"
         />

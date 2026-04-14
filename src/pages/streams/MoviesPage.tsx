@@ -140,7 +140,7 @@ export default function MoviesPage() {
             {featured && (
               <div className="relative h-[400px] sm:h-[500px] overflow-hidden">
                 <img
-                  src={featured.backdrop_url}
+                  loading="lazy" src={featured.backdrop_url}
                   alt={featured.title}
                   className="w-full h-full object-cover"
                   onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&h=600&fit=crop'; }}
@@ -203,7 +203,7 @@ export default function MoviesPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                   {categories.map((cat) => (
                     <div key={cat.id} className="group relative rounded-xl overflow-hidden cursor-pointer aspect-[16/10]">
-                      <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=250&fit=crop'; }} />
+                      <img loading="lazy" src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=250&fit=crop'; }} />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-3">
                         <h3 className="text-white font-bold text-sm">{cat.name}</h3>
@@ -230,7 +230,7 @@ export default function MoviesPage() {
                     <div key={movie.id} onClick={() => navigate(`/streams/movie/${movie.id}`)} className="group flex-shrink-0 w-[160px] sm:w-[180px] snap-start cursor-pointer">
                       <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 shadow-lg">
                         <img
-                          src={movie.poster_url}
+                          loading="lazy" src={movie.poster_url}
                           alt={movie.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop'; }}
@@ -265,7 +265,7 @@ export default function MoviesPage() {
                     <div key={movie.id} onClick={() => navigate(`/streams/movie/${movie.id}`)} className="group bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
                       <div className="relative aspect-video overflow-hidden">
                         <img
-                          src={movie.backdrop_url || movie.poster_url}
+                          loading="lazy" src={movie.backdrop_url || movie.poster_url}
                           alt={movie.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&h=600&fit=crop'; }}

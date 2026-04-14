@@ -398,7 +398,7 @@ export const SponsorCountryPage: React.FC = () => {
                               <div className="flex items-center space-x-2">
                                 {country.flag_url && (
                                   <img
-                                    src={country.flag_url}
+                                    loading="lazy" src={country.flag_url}
                                     alt={country.name}
                                     className="w-4 h-3"
                                   />
@@ -419,7 +419,7 @@ export const SponsorCountryPage: React.FC = () => {
                         {bannerImageUrl ? (
                           <div className="space-y-4">
                             <img
-                              src={bannerImageUrl}
+                              loading="lazy" src={bannerImageUrl}
                               alt="Banner preview"
                               className="max-h-32 mx-auto rounded"
                             />

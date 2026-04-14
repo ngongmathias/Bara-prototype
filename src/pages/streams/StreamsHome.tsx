@@ -369,7 +369,7 @@ export default function StreamsHome() {
                                         <div key={song.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-sm">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
                                                 <img
-                                                    src={song.cover_url}
+                                                    loading="lazy" src={song.cover_url}
                                                     alt={song.title}
                                                     className="w-full h-full object-cover rounded-md shadow-lg"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }}
@@ -402,7 +402,7 @@ export default function StreamsHome() {
                                     platformPlaylists.map(pl => (
                                         <div key={pl.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
-                                                <img src={pl.cover_url} alt={pl.title} className="w-full h-full object-cover rounded-md shadow-xl"
+                                                <img loading="lazy" src={pl.cover_url} alt={pl.title} className="w-full h-full object-cover rounded-md shadow-xl"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
                                                 <button onClick={() => handlePlayPlaylist(pl.id)}
                                                     className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
@@ -422,7 +422,7 @@ export default function StreamsHome() {
                                     ].map(mix => (
                                         <div key={mix.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
-                                                <img src={mix.cover} alt={mix.title} className="w-full h-full object-cover rounded-md shadow-xl" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                                <img loading="lazy" src={mix.cover} alt={mix.title} className="w-full h-full object-cover rounded-md shadow-xl" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                                                 <button
                                                     onClick={() => { if (trendingSongs.length > 0) { playAlbum(trendingSongs, 0); } else { toast({ title: 'No songs yet', description: 'Check back soon for personalized mixes.' }); } }}
                                                     className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
@@ -442,7 +442,7 @@ export default function StreamsHome() {
                                     {personalizedSongs.map(song => (
                                         <div key={song.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
-                                                <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover rounded-md shadow-lg"
+                                                <img loading="lazy" src={song.cover_url} alt={song.title} className="w-full h-full object-cover rounded-md shadow-lg"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
                                                 <div className="absolute top-2 left-2 bg-purple-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
                                                     <Sparkles size={8} /> For You
@@ -468,7 +468,7 @@ export default function StreamsHome() {
                                     recentlyPlayed.map(song => (
                                         <div key={song.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
-                                                <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover rounded-md shadow-lg"
+                                                <img loading="lazy" src={song.cover_url} alt={song.title} className="w-full h-full object-cover rounded-md shadow-lg"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
                                                 <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                                                     <Clock size={10} /> Played
@@ -500,7 +500,7 @@ export default function StreamsHome() {
                                     trendingSongs.map(song => (
                                         <div key={song.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
-                                                <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover rounded-md shadow-lg"
+                                                <img loading="lazy" src={song.cover_url} alt={song.title} className="w-full h-full object-cover rounded-md shadow-lg"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
                                                 <button onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
                                                     className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
@@ -528,7 +528,7 @@ export default function StreamsHome() {
                                         <Link key={artist.id} to={`/streams/artist/${artist.id}`} className="group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
                                             <div className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 w-full text-center">
                                                 <div className="relative mb-4 aspect-square shadow-2xl">
-                                                    <img src={artist.image_url} alt={artist.name} className="w-full h-full object-cover rounded-full shadow-lg"
+                                                    <img loading="lazy" src={artist.image_url} alt={artist.name} className="w-full h-full object-cover rounded-full shadow-lg"
                                                         onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop'; }} />
                                                     <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePlayArtist(artist.id); }}
                                                         className="absolute bottom-6 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
@@ -551,7 +551,7 @@ export default function StreamsHome() {
                                     newReleases.map(album => (
                                         <div key={album.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
-                                                <img src={album.cover_url} alt={album.title} className="w-full h-full object-cover rounded-md shadow-lg"
+                                                <img loading="lazy" src={album.cover_url} alt={album.title} className="w-full h-full object-cover rounded-md shadow-lg"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&h=300&fit=crop'; }} />
                                                 <button onClick={(e) => { e.stopPropagation(); handlePlayAlbum(album.id); }}
                                                     className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
@@ -622,9 +622,9 @@ function RadioCard({ title, images, color, footer }: { title: string; images: st
             <div className={`relative mb-4 aspect-square shadow-2xl rounded-md overflow-hidden ${color}`}>
                 <div className="absolute top-2 right-2 text-[10px] font-black tracking-tighter text-white opacity-80 uppercase">Radio</div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <img src={images[1]} className="absolute w-[40%] aspect-square rounded-full border-2 border-black/20 left-[10%] z-0 scale-90 translate-y-2 opacity-80" alt="" />
-                    <img src={images[2]} className="absolute w-[40%] aspect-square rounded-full border-2 border-black/20 right-[10%] z-0 scale-90 translate-y-2 opacity-80" alt="" />
-                    <img src={images[0]} className="w-[60%] aspect-square rounded-full border-4 border-black/20 z-10 shadow-2xl" alt="" />
+                    <img loading="lazy" src={images[1]} className="absolute w-[40%] aspect-square rounded-full border-2 border-black/20 left-[10%] z-0 scale-90 translate-y-2 opacity-80" alt="" />
+                    <img loading="lazy" src={images[2]} className="absolute w-[40%] aspect-square rounded-full border-2 border-black/20 right-[10%] z-0 scale-90 translate-y-2 opacity-80" alt="" />
+                    <img loading="lazy" src={images[0]} className="w-[60%] aspect-square rounded-full border-4 border-black/20 z-10 shadow-2xl" alt="" />
                 </div>
                 <div className="absolute bottom-4 left-4 right-4">
                     <h3 className="text-xl font-black text-white leading-tight tracking-tighter truncate">{title}</h3>

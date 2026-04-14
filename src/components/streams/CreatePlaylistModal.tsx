@@ -221,7 +221,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                                         <div key={song.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition">
                                             <div className="w-10 h-10 rounded bg-gray-100 overflow-hidden shrink-0">
                                                 {song.cover_url ? (
-                                                    <img src={song.cover_url} alt="" className="w-full h-full object-cover" />
+                                                    <img loading="lazy" src={song.cover_url} alt="" className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center">
                                                         <Music size={16} className="text-gray-400" />

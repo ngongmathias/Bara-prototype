@@ -202,7 +202,7 @@ export default function ArtistPage() {
                 <div className="bg-gradient-to-b from-gray-600 to-gray-100 pt-20 pb-6 px-8 relative">
                     {artist.banner_url && (
                         <div className="absolute inset-0 z-0">
-                            <img src={artist.banner_url} alt="Banner" className="w-full h-full object-cover opacity-60" />
+                            <img loading="lazy" src={artist.banner_url} alt="Banner" className="w-full h-full object-cover opacity-60" />
                             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-gray-100"></div>
                         </div>
                     )}
@@ -298,7 +298,7 @@ export default function ArtistPage() {
 
                                         {/* Track Info */}
                                         <div className="flex gap-3 items-center min-w-0">
-                                            <img src={track.cover_url} alt={track.title} className="w-10 h-10 object-cover rounded" />
+                                            <img loading="lazy" src={track.cover_url} alt={track.title} className="w-10 h-10 object-cover rounded" />
                                             <div className="min-w-0 flex-1">
                                                 <div className={`font-bold truncate transition text-sm ${currentSong?.id === track.id ? 'text-[#1DB954]' : 'text-gray-900'}`}>
                                                     {track.title}
@@ -332,7 +332,7 @@ export default function ArtistPage() {
                                 <div className="flex gap-6">
                                     <div className="flex items-start gap-4 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl p-5 max-w-md">
                                         <img
-                                            src={topTracks[0].cover_url}
+                                            loading="lazy" src={topTracks[0].cover_url}
                                             alt={topTracks[0].title}
                                             className="w-20 h-20 rounded-lg object-cover shadow-md flex-shrink-0"
                                         />
@@ -363,7 +363,7 @@ export default function ArtistPage() {
                                     <div key={album.id} className="bg-white border border-gray-100 p-4 rounded-lg hover:bg-gray-50 transition cursor-pointer group min-w-[180px] flex flex-col">
                                         <div className="relative mb-4 aspect-square">
                                             <img
-                                                src={album.cover_url || '/placeholder-music.png'}
+                                                loading="lazy" src={album.cover_url || '/placeholder-music.png'}
                                                 alt={album.title}
                                                 className="w-full h-full object-cover rounded shadow-lg"
                                             />
@@ -404,7 +404,7 @@ export default function ArtistPage() {
                                                 )}
                                             </div>
                                             <div className="flex gap-3 items-center min-w-0">
-                                                <img src={track.cover_url} alt={track.title} className="w-10 h-10 object-cover rounded" />
+                                                <img loading="lazy" src={track.cover_url} alt={track.title} className="w-10 h-10 object-cover rounded" />
                                                 <div className="min-w-0 flex-1">
                                                     <div className={`font-bold truncate transition text-sm ${currentSong?.id === track.id ? 'text-[#1DB954]' : 'text-gray-900'}`}>
                                                         {track.title}
@@ -440,7 +440,7 @@ export default function ArtistPage() {
                                             className="bg-white border border-gray-100 p-4 rounded-lg hover:bg-gray-50 transition cursor-pointer min-w-[160px] flex flex-col items-center text-center"
                                         >
                                             <img
-                                                src={a.image_url || '/placeholder-music.png'}
+                                                loading="lazy" src={a.image_url || '/placeholder-music.png'}
                                                 alt={a.name}
                                                 className="w-28 h-28 rounded-full object-cover shadow-md mb-3"
                                             />

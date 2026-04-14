@@ -262,7 +262,7 @@ export const AdminPodcasts = () => {
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 {p.cover_url ? (
-                                                    <img src={p.cover_url} alt={p.title} className="w-10 h-10 rounded-md object-cover" />
+                                                    <img loading="lazy" src={p.cover_url} alt={p.title} className="w-10 h-10 rounded-md object-cover" />
                                                 ) : (
                                                     <div className="w-10 h-10 rounded-md bg-gray-200 flex items-center justify-center"><Mic2 className="h-4 w-4 text-gray-400" /></div>
                                                 )}
@@ -324,7 +324,7 @@ export const AdminPodcasts = () => {
                             <div className="mt-1">
                                 {coverPreview ? (
                                     <div className="relative inline-block">
-                                        <img src={coverPreview} alt="Cover preview" className="w-20 h-20 rounded-md object-cover border" />
+                                        <img loading="lazy" src={coverPreview} alt="Cover preview" className="w-20 h-20 rounded-md object-cover border" />
                                         <button onClick={() => { setCoverFile(null); setCoverPreview(null); setFormData({ ...formData, cover_url: "" }); }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X className="h-3 w-3" /></button>
                                     </div>
                                 ) : (

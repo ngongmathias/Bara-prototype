@@ -193,7 +193,7 @@ export const ClassifiedsPage = () => {
                     >
                       <div className="relative h-40 bg-gray-100 rounded-lg overflow-hidden mb-2">
                         <img
-                          src={primaryImage}
+                          loading="lazy" src={primaryImage}
                           alt={listing.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         />

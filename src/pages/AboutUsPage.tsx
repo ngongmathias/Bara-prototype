@@ -98,7 +98,7 @@ const AboutUsPage = () => {
               <div className="relative">
                 <div className="w-full h-80 rounded-2xl overflow-hidden">
                   <img
-                    src="/aboutBara.jpg"
+                    loading="lazy" src="/aboutBara.jpg"
                     alt="About BARA"
                     className="w-full h-full object-cover"
                   />

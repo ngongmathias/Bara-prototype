@@ -482,7 +482,7 @@ export const CountryDetailPage: React.FC = () => {
 
                     <img
 
-                      src={countryInfo?.flag_url || country.flag_url || `https://flagcdn.com/w160/${country.code.toLowerCase()}.png`}
+                      loading="lazy" src={countryInfo?.flag_url || country.flag_url || `https://flagcdn.com/w160/${country.code.toLowerCase()}.png`}
 
                       alt={`${country.name} flag`}
 
@@ -520,7 +520,7 @@ export const CountryDetailPage: React.FC = () => {
 
                       <img
 
-                        src={countryInfo?.coat_of_arms_url || country.coat_of_arms_url}
+                        loading="lazy" src={countryInfo?.coat_of_arms_url || country.coat_of_arms_url}
 
                         alt={`${country.name} Coat of Arms`}
 
@@ -759,7 +759,7 @@ export const CountryDetailPage: React.FC = () => {
 
                     <img
 
-                      src={banner.banner_image_url}
+                      loading="lazy" src={banner.banner_image_url}
 
                       alt={banner.banner_alt_text || banner.company_name}
 
@@ -1075,7 +1075,7 @@ export const CountryDetailPage: React.FC = () => {
 
                       <img
 
-                        src={countryInfo.ad_image_url}
+                        loading="lazy" src={countryInfo.ad_image_url}
 
                         alt={countryInfo.ad_company_name || `${country.name} Landmark`}
 
@@ -1293,7 +1293,7 @@ export const CountryDetailPage: React.FC = () => {
 
                             {biz.logo_url ? (
 
-                              <img src={biz.logo_url} alt="" className="w-8 h-8 object-cover rounded" />
+                              <img loading="lazy" src={biz.logo_url} alt="" className="w-8 h-8 object-cover rounded" />
 
                             ) : (
 
@@ -1371,7 +1371,7 @@ export const CountryDetailPage: React.FC = () => {
 
                       <img
 
-                        src={countryInfo.leader_image_url}
+                        loading="lazy" src={countryInfo.leader_image_url}
 
                         alt={countryInfo.president_name}
 

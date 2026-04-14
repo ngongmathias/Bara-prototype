@@ -250,7 +250,7 @@ export const JobsDetail = () => {
               <div className="flex items-start gap-4 mb-6">
                 {companyLogo && (
                   <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                    <img src={companyLogo} alt={companyName} className="w-full h-full object-contain p-2" />
+                    <img loading="lazy" src={companyLogo} alt={companyName} className="w-full h-full object-contain p-2" />
                   </div>
                 )}
                 <div className="flex-1">

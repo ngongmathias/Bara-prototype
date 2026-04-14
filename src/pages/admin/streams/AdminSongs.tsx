@@ -527,7 +527,7 @@ export const AdminSongs = () => {
                                     <Label>Cover Art (Optional)</Label>
                                     {previewUrl ? (
                                         <div className="relative inline-block">
-                                            <img src={previewUrl} alt="Cover art" className="w-16 h-16 rounded object-cover border" />
+                                            <img loading="lazy" src={previewUrl} alt="Cover art" className="w-16 h-16 rounded object-cover border" />
                                             <button onClick={() => { setPreviewUrl(null); setFormData({ ...formData, cover_url: "" }); }} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
                                             </button>
@@ -555,7 +555,7 @@ export const AdminSongs = () => {
                                     )}
                                     {editingSong && !previewUrl && formData.cover_url && (
                                         <div className="mt-1">
-                                            <img src={formData.cover_url} alt="Current cover" className="w-12 h-12 rounded object-cover border" />
+                                            <img loading="lazy" src={formData.cover_url} alt="Current cover" className="w-12 h-12 rounded object-cover border" />
                                             <p className="text-xs text-gray-500 mt-1">Current cover art</p>
                                         </div>
                                     )}
@@ -617,7 +617,7 @@ export const AdminSongs = () => {
                                             <div className="flex items-center gap-3">
                                                 <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
                                                     {song.cover_url ? (
-                                                        <img src={song.cover_url} alt={song.title} className="h-full w-full object-cover" />
+                                                        <img loading="lazy" src={song.cover_url} alt={song.title} className="h-full w-full object-cover" />
                                                     ) : (
                                                         <Music className="h-5 w-5 text-gray-400" />
                                                     )}

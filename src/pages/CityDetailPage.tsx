@@ -398,7 +398,7 @@ export const CityDetailPage: React.FC = () => {
                       <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         {business.logo_url ? (
                           <img 
-                            src={business.logo_url} 
+                            loading="lazy" src={business.logo_url} 
                             alt={`${business.name} logo`}
                             className="w-8 h-8 rounded object-cover"
                           />

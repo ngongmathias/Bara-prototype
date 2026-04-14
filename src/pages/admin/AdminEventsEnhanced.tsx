@@ -611,7 +611,7 @@ export const AdminEventsEnhanced = () => {
                           </div>
                         ) : imagePreview ? (
                           <img
-                            src={imagePreview}
+                            loading="lazy" src={imagePreview}
                             alt="Preview"
                             className="w-full h-full object-cover rounded-lg"
                           />
@@ -640,7 +640,7 @@ export const AdminEventsEnhanced = () => {
                       <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                         {formData.event_images.map((url) => (
                           <div key={url} className="relative group">
-                            <img src={url} alt="event" className="w-full h-28 object-cover rounded" />
+                            <img loading="lazy" src={url} alt="event" className="w-full h-28 object-cover rounded" />
                             {formData.event_image_url === url && (
                               <span className="absolute top-1 left-1 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded">Cover</span>
                             )}
@@ -1226,7 +1226,7 @@ export const AdminEventsEnhanced = () => {
                         <TableCell>
                           <div className="flex items-center space-x-3">
                             <img
-                              src={event.event_image_url || '/placeholder-event.jpg'}
+                              loading="lazy" src={event.event_image_url || '/placeholder-event.jpg'}
                               alt={event.title}
                               className="w-12 h-12 rounded-lg object-cover"
                             />

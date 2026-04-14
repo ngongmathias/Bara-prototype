@@ -189,7 +189,7 @@ export const UserTicketsPage = () => {
                                 <div className="sm:w-48 h-32 sm:h-auto flex-shrink-0">
                                     {reg.event?.event_image_url ? (
                                         <img
-                                            src={reg.event.event_image_url}
+                                            loading="lazy" src={reg.event.event_image_url}
                                             alt={reg.event.title}
                                             className="w-full h-full object-cover"
                                         />

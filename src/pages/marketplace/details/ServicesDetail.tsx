@@ -240,7 +240,7 @@ export const ServicesDetail = () => {
               <div className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
                 <div className="relative aspect-video bg-gray-100">
                   <img
-                    src={primaryImage}
+                    loading="lazy" src={primaryImage}
                     alt={listing.title}
                     className="w-full h-full object-cover"
                   />
@@ -509,7 +509,7 @@ export const ServicesDetail = () => {
                     {itemImage && (
                       <div className="relative w-full h-48 bg-gray-100">
                         <img
-                          src={itemImage}
+                          loading="lazy" src={itemImage}
                           alt={item.title}
                           className="w-full h-full object-cover"
                         />

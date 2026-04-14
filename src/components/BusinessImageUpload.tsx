@@ -221,7 +221,7 @@ export const BusinessImageUpload = ({
               {images.map((imageUrl, index) => (
                 <div key={index} className="relative group">
                   <img
-                    src={imageUrl}
+                    loading="lazy" src={imageUrl}
                     alt={`Business image ${index + 1}`}
                     className="w-full h-32 object-cover rounded-lg border border-gray-200"
                   />

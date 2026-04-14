@@ -192,7 +192,7 @@ export function GlobalPlayer() {
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="relative group">
                         <img
-                            src={currentSong.cover_url}
+                            loading="lazy" src={currentSong.cover_url}
                             alt={currentSong.title}
                             className="w-14 h-14 rounded shadow-lg object-cover bg-gray-800 transition-transform group-hover:scale-105 cursor-pointer"
                             onError={(e) => {

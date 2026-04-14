@@ -156,8 +156,8 @@ export const Header = () => {
 
           {/* Logo */}
           <Link to="/" onClick={scrollToTop} className="flex items-center flex-shrink-0">
-            <img src="/bara-3.png" className="h-8 w-auto" alt="BARA" />
-            <img src="/bara-1-removebg-preview.png" className="h-8 w-auto ml-1" alt="BARA Afrika" />
+            <img loading="lazy" src="/bara-3.png" className="h-8 w-auto" alt="BARA" />
+            <img loading="lazy" src="/bara-1-removebg-preview.png" className="h-8 w-auto ml-1" alt="BARA Afrika" />
           </Link>
 
           {/* ─── Desktop: Center — Primary nav links + More dropdown ─── */}
@@ -318,7 +318,7 @@ export const Header = () => {
                       'bg-gray-200 opacity-50'
                     ) : 'bg-transparent'}`} />
                     {user?.imageUrl ? (
-                      <img src={user.imageUrl} alt={user.fullName || 'User'} className="h-full w-full rounded-full object-cover" />
+                      <img loading="lazy" src={user.imageUrl} alt={user.fullName || 'User'} className="h-full w-full rounded-full object-cover" />
                     ) : (
                       <div className="h-full w-full rounded-full bg-gray-100 flex items-center justify-center">
                         <User className="h-4 w-4 text-gray-700" />
@@ -329,7 +329,7 @@ export const Header = () => {
                 <DropdownMenuContent className="w-56" align="end">
                   <div className="flex items-center gap-3 p-3 border-b">
                     {user?.imageUrl ? (
-                      <img src={user.imageUrl} alt={user.fullName || 'User'} className="h-10 w-10 rounded-full border-2 border-white ring-1 ring-black/5" />
+                      <img loading="lazy" src={user.imageUrl} alt={user.fullName || 'User'} className="h-10 w-10 rounded-full border-2 border-white ring-1 ring-black/5" />
                     ) : (
                       <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
                         <User className="h-5 w-5 text-gray-700" />
@@ -422,7 +422,7 @@ export const Header = () => {
                   {isSignedIn ? (
                     <div className="flex items-center gap-3">
                       <img
-                        className="h-11 w-11 rounded-full object-cover border-2 border-blue-200"
+                        loading="lazy" className="h-11 w-11 rounded-full object-cover border-2 border-blue-200"
                         src={user?.imageUrl || '/default-avatar.png'}
                         alt={user?.fullName || 'User'}
                       />

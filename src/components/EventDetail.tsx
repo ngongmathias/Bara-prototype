@@ -195,7 +195,7 @@ export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => 
                             style={{ backgroundImage: `url(${images[currentImageIndex] || '/placeholder-event.jpg'})` }}
                         />
                         <img
-                            className="relative h-full w-full object-contain cursor-zoom-in z-10"
+                            loading="lazy" className="relative h-full w-full object-contain cursor-zoom-in z-10"
                             src={images[currentImageIndex] || '/placeholder-event.jpg'}
                             alt={`${event.title} - Image ${currentImageIndex + 1}`}
                             onClick={() => openLightboxAt(0)}
@@ -204,7 +204,7 @@ export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => 
                             <div className="absolute bottom-3 left-3 right-3 flex gap-2 overflow-x-auto">
                                 {images.slice(0, 6).map((img, idx) => (
                                     <img
-                                        key={`${img}-${idx}`}
+                                        loading="lazy" key={`${img}-${idx}`}
                                         src={img}
                                         alt="thumbnail"
                                         className={`h-12 w-16 object-cover rounded-md border cursor-pointer ${idx === currentImageIndex ? 'ring-2 ring-black' : 'border-white/70'}`}
@@ -402,7 +402,7 @@ export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => 
                 >
                     {/* Lightbox content */}
                     <img
-                        src={images[currentImageIndex]}
+                        loading="lazy" src={images[currentImageIndex]}
                         className="max-h-[90vh] max-w-[90vw] object-contain"
                         alt="fullscreen"
                     />

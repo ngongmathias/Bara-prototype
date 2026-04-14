@@ -98,7 +98,7 @@ export default function SportsTeams() {
                                     <div className="flex flex-col items-center text-center">
                                         <div className="w-20 h-20 mb-4 bg-gray-50 rounded-full flex items-center justify-center p-3 group-hover:scale-110 transition-transform">
                                             <img
-                                                src={standing.team.logo}
+                                                loading="lazy" src={standing.team.logo}
                                                 alt={standing.team.name}
                                                 className="w-full h-full object-contain"
                                             />

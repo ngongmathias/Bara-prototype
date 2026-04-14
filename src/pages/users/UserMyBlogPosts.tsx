@@ -215,7 +215,7 @@ export const UserMyBlogPosts = () => {
                       {/* Thumbnail */}
                       <div className="h-12 w-16 rounded overflow-hidden bg-gray-100 flex-shrink-0">
                         {post.image_url ? (
-                          <img src={post.image_url} alt={post.title} className="h-full w-full object-cover" />
+                          <img loading="lazy" src={post.image_url} alt={post.title} className="h-full w-full object-cover" />
                         ) : (
                           <div className="h-full w-full flex items-center justify-center">
                             <FileText className="h-5 w-5 text-gray-300" />

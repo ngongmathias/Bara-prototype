@@ -267,7 +267,7 @@ export const MotorsDetail = () => {
               <div className="relative aspect-[16/9] bg-gray-100">
                 {primaryImage ? (
                   <img
-                    src={primaryImage}
+                    loading="lazy" src={primaryImage}
                     alt={listing.title}
                     className="w-full h-full object-cover cursor-pointer"
                     onClick={() => setShowImageModal(true)}
@@ -323,7 +323,7 @@ export const MotorsDetail = () => {
                         }`}
                     >
                       <img
-                        src={image.image_url}
+                        loading="lazy" src={image.image_url}
                         alt={`View ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
@@ -610,7 +610,7 @@ export const MotorsDetail = () => {
                     <div className="relative w-full h-48 bg-gray-100">
                       {itemImage ? (
                         <img
-                          src={itemImage}
+                          loading="lazy" src={itemImage}
                           alt={item.title}
                           className="w-full h-full object-cover"
                         />
@@ -675,7 +675,7 @@ export const MotorsDetail = () => {
               <X className="w-8 h-8" />
             </button>
             <img
-              src={primaryImage}
+              loading="lazy" src={primaryImage}
               alt={listing.title}
               className="max-w-full max-h-full object-contain"
               onClick={(e) => e.stopPropagation()}

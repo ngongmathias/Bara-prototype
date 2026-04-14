@@ -529,7 +529,7 @@ export const CountryListingsPage = () => {
           <div className="flex items-center space-x-4">
             {country?.flag_url && (
               <img
-                src={country.flag_url}
+                loading="lazy" src={country.flag_url}
                 alt={`${country.name} flag`}
                 className="w-8 h-6 rounded shadow-sm"
               />
@@ -731,7 +731,7 @@ export const CountryListingsPage = () => {
                     >
                       <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         {business.logo_url ? (
-                          <img src={business.logo_url} alt={business.name} className="w-full h-full object-cover rounded-lg" />
+                          <img loading="lazy" src={business.logo_url} alt={business.name} className="w-full h-full object-cover rounded-lg" />
                         ) : (
                           <Building2 className="w-6 h-6 text-gray-300" />
                         )}
@@ -781,7 +781,7 @@ export const CountryListingsPage = () => {
                                 onClick={() => handleBusinessClick(business)}
                               >
                                 {businessImage ? (
-                                  <img src={businessImage} alt={business.name} className="w-full h-full object-cover" />
+                                  <img loading="lazy" src={businessImage} alt={business.name} className="w-full h-full object-cover" />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <Building2 className="w-12 h-12 text-gray-300" />
@@ -912,7 +912,7 @@ export const CountryListingsPage = () => {
 
                             <div className="bg-gray-100 h-48 flex items-center justify-center relative">
                               {businessImage ? (
-                                <img src={businessImage} alt={business.name} className="w-full h-full object-cover" />
+                                <img loading="lazy" src={businessImage} alt={business.name} className="w-full h-full object-cover" />
                               ) : (
                                 <Building2 className="w-16 h-16 text-gray-300" />
                               )}

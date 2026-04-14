@@ -461,7 +461,7 @@ export const ListingDetailPage = () => {
               <div className="relative aspect-video bg-gray-100">
                 {primaryImage ? (
                   <img
-                    src={primaryImage}
+                    loading="lazy" src={primaryImage}
                     alt={listing.title}
                     className="w-full h-full object-contain cursor-pointer"
                     onClick={() => setShowImageModal(true)}
@@ -523,7 +523,7 @@ export const ListingDetailPage = () => {
                         }`}
                     >
                       <img
-                        src={image.image_url}
+                        loading="lazy" src={image.image_url}
                         alt={`Thumbnail ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
@@ -690,7 +690,7 @@ export const ListingDetailPage = () => {
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="flex items-center gap-3 mb-3">
                   {partner?.logo_url ? (
-                    <img src={partner.logo_url} alt={partner.display_name} className="w-12 h-12 rounded-full object-cover" />
+                    <img loading="lazy" src={partner.logo_url} alt={partner.display_name} className="w-12 h-12 rounded-full object-cover" />
                   ) : (
                     <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
                       <User className="w-6 h-6 text-gray-600" />
@@ -811,7 +811,7 @@ export const ListingDetailPage = () => {
                     <div className="relative w-full h-48 bg-gray-100">
                       {itemImage && (
                         <img
-                          src={itemImage}
+                          loading="lazy" src={itemImage}
                           alt={item.title}
                           className="w-full h-full object-cover"
                         />
@@ -997,7 +997,7 @@ export const ListingDetailPage = () => {
               <X className="w-8 h-8" />
             </button>
             <img
-              src={primaryImage}
+              loading="lazy" src={primaryImage}
               alt={listing.title}
               className="max-w-full max-h-full object-contain"
               onClick={(e) => e.stopPropagation()}

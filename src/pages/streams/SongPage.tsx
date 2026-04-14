@@ -116,7 +116,7 @@ export default function SongPage() {
                 {/* Song Card */}
                 <div className="flex flex-col items-center text-center">
                     <img
-                        src={song.cover_url}
+                        loading="lazy" src={song.cover_url}
                         alt={song.title}
                         className="w-64 h-64 rounded-xl shadow-2xl object-cover mb-6"
                         onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}

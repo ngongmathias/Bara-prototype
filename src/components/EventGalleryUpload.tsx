@@ -185,7 +185,7 @@ export const EventGalleryUpload: React.FC<EventGalleryUploadProps> = ({
                 {galleryImages.map((imageUrl, index) => (
                   <div key={index} className="relative group">
                     <img
-                      src={imageUrl}
+                      loading="lazy" src={imageUrl}
                       alt={`Gallery ${index + 1}`}
                       className="w-full h-32 object-cover rounded-lg"
                     />
@@ -236,7 +236,7 @@ export const EventGalleryUpload: React.FC<EventGalleryUploadProps> = ({
                   {previews.map((preview, index) => (
                     <div key={index} className="relative group">
                       <img
-                        src={preview}
+                        loading="lazy" src={preview}
                         alt={`Preview ${index + 1}`}
                         className="w-full h-32 object-cover rounded-lg"
                       />

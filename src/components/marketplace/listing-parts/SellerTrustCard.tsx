@@ -39,7 +39,7 @@ export const SellerTrustCard: React.FC<SellerTrustCardProps> = ({
       <div className="flex items-center gap-3 mb-3">
         {partner?.logo_url ? (
           <img
-            src={partner.logo_url}
+            loading="lazy" src={partner.logo_url}
             alt={displayName}
             className="w-12 h-12 rounded-full object-cover"
           />

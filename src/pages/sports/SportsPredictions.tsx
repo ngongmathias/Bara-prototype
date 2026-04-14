@@ -337,7 +337,7 @@ export default function SportsPredictions() {
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
                               {match.league.logo && (
-                                <img src={match.league.logo} alt="" className="w-4 h-4" />
+                                <img loading="lazy" src={match.league.logo} alt="" className="w-4 h-4" />
                               )}
                               <span className="text-xs text-gray-500 font-medium">
                                 {match.league.name}
@@ -350,7 +350,7 @@ export default function SportsPredictions() {
                           <div className="grid grid-cols-3 items-center gap-2 mb-4">
                             <div className="text-center">
                               {match.teams.home.logo && (
-                                <img src={match.teams.home.logo} alt="" className="w-10 h-10 mx-auto mb-1" />
+                                <img loading="lazy" src={match.teams.home.logo} alt="" className="w-10 h-10 mx-auto mb-1" />
                               )}
                               <p className="text-xs font-bold text-gray-800 truncate">{match.teams.home.name}</p>
                             </div>
@@ -359,7 +359,7 @@ export default function SportsPredictions() {
                             </div>
                             <div className="text-center">
                               {match.teams.away.logo && (
-                                <img src={match.teams.away.logo} alt="" className="w-10 h-10 mx-auto mb-1" />
+                                <img loading="lazy" src={match.teams.away.logo} alt="" className="w-10 h-10 mx-auto mb-1" />
                               )}
                               <p className="text-xs font-bold text-gray-800 truncate">{match.teams.away.name}</p>
                             </div>

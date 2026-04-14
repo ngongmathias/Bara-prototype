@@ -379,7 +379,7 @@ export const AdminCountryInfo: React.FC = () => {
                   <div className="flex items-center space-x-3">
                     {country?.flag_url && (
                       <img 
-                        src={country.flag_url} 
+                        loading="lazy" src={country.flag_url} 
                         alt={`${country.name} flag`}
                         className="w-8 h-6 rounded shadow-sm"
                       />
@@ -400,25 +400,25 @@ export const AdminCountryInfo: React.FC = () => {
                 <div className="flex gap-2 pb-3 border-b">
                   {info.flag_url && (
                     <div className="flex flex-col items-center">
-                      <img src={info.flag_url} alt="Flag" className="w-12 h-8 object-cover rounded border" />
+                      <img loading="lazy" src={info.flag_url} alt="Flag" className="w-12 h-8 object-cover rounded border" />
                       <span className="text-xs text-gray-500 mt-1">Flag</span>
                     </div>
                   )}
                   {info.coat_of_arms_url && (
                     <div className="flex flex-col items-center">
-                      <img src={info.coat_of_arms_url} alt="Coat of Arms" className="w-12 h-12 object-contain rounded border" />
+                      <img loading="lazy" src={info.coat_of_arms_url} alt="Coat of Arms" className="w-12 h-12 object-contain rounded border" />
                       <span className="text-xs text-gray-500 mt-1">Coat</span>
                     </div>
                   )}
                   {info.leader_image_url && (
                     <div className="flex flex-col items-center">
-                      <img src={info.leader_image_url} alt="Leader" className="w-12 h-12 object-cover rounded-full border" />
+                      <img loading="lazy" src={info.leader_image_url} alt="Leader" className="w-12 h-12 object-cover rounded-full border" />
                       <span className="text-xs text-gray-500 mt-1">Leader</span>
                     </div>
                   )}
                   {info.monument_image_url && (
                     <div className="flex flex-col items-center">
-                      <img src={info.monument_image_url} alt="Monument" className="w-12 h-12 object-cover rounded border" />
+                      <img loading="lazy" src={info.monument_image_url} alt="Monument" className="w-12 h-12 object-cover rounded border" />
                       <span className="text-xs text-gray-500 mt-1">Monument</span>
                     </div>
                   )}
@@ -469,25 +469,25 @@ export const AdminCountryInfo: React.FC = () => {
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {info.flag_url && (
                               <div className="text-center">
-                                <img src={info.flag_url} alt="Flag" className="w-full h-20 object-contain rounded border bg-white mb-2" />
+                                <img loading="lazy" src={info.flag_url} alt="Flag" className="w-full h-20 object-contain rounded border bg-white mb-2" />
                                 <span className="text-xs text-gray-600">Flag</span>
                               </div>
                             )}
                             {info.coat_of_arms_url && (
                               <div className="text-center">
-                                <img src={info.coat_of_arms_url} alt="Coat of Arms" className="w-full h-20 object-contain rounded border bg-white mb-2" />
+                                <img loading="lazy" src={info.coat_of_arms_url} alt="Coat of Arms" className="w-full h-20 object-contain rounded border bg-white mb-2" />
                                 <span className="text-xs text-gray-600">Coat of Arms</span>
                               </div>
                             )}
                             {info.leader_image_url && (
                               <div className="text-center">
-                                <img src={info.leader_image_url} alt="Leader" className="w-full h-20 object-cover rounded border bg-white mb-2" />
+                                <img loading="lazy" src={info.leader_image_url} alt="Leader" className="w-full h-20 object-cover rounded border bg-white mb-2" />
                                 <span className="text-xs text-gray-600">Leader</span>
                               </div>
                             )}
                             {info.monument_image_url && (
                               <div className="text-center">
-                                <img src={info.monument_image_url} alt="Monument" className="w-full h-20 object-cover rounded border bg-white mb-2" />
+                                <img loading="lazy" src={info.monument_image_url} alt="Monument" className="w-full h-20 object-cover rounded border bg-white mb-2" />
                                 <span className="text-xs text-gray-600">Monument</span>
                               </div>
                             )}
@@ -1087,7 +1087,7 @@ export const AdminCountryInfo: React.FC = () => {
                       {formData.flag_url && (
                         <div className="relative">
                           <img 
-                            src={formData.flag_url} 
+                            loading="lazy" src={formData.flag_url} 
                             alt="Flag preview"
                             className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
                           />
@@ -1131,7 +1131,7 @@ export const AdminCountryInfo: React.FC = () => {
                       {formData.coat_of_arms_url && (
                         <div className="relative">
                           <img 
-                            src={formData.coat_of_arms_url} 
+                            loading="lazy" src={formData.coat_of_arms_url} 
                             alt="Coat of arms preview"
                             className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
                           />
@@ -1175,7 +1175,7 @@ export const AdminCountryInfo: React.FC = () => {
                       {formData.leader_image_url && (
                         <div className="relative">
                           <img 
-                            src={formData.leader_image_url} 
+                            loading="lazy" src={formData.leader_image_url} 
                             alt="Leader preview"
                             className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
                           />
@@ -1219,7 +1219,7 @@ export const AdminCountryInfo: React.FC = () => {
                       {formData.monument_image_url && (
                         <div className="relative">
                           <img 
-                            src={formData.monument_image_url} 
+                            loading="lazy" src={formData.monument_image_url} 
                             alt="Monument preview"
                             className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
                           />
@@ -1329,7 +1329,7 @@ export const AdminCountryInfo: React.FC = () => {
                     {formData.ad_image_url && (
                       <div className="relative">
                         <img 
-                          src={formData.ad_image_url} 
+                          loading="lazy" src={formData.ad_image_url} 
                           alt="Ad preview"
                           className="w-full max-w-md h-48 object-contain border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 p-2"
                         />

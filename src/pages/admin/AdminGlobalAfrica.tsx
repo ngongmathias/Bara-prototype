@@ -831,7 +831,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                       {formData.flag_url && (
                         <div className="relative">
                           <img
-                            src={formData.flag_url}
+                            loading="lazy" src={formData.flag_url}
                             alt="Flag preview"
                             className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
                           />
@@ -875,7 +875,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                       {formData.emblem_url && (
                         <div className="relative">
                           <img
-                            src={formData.emblem_url}
+                            loading="lazy" src={formData.emblem_url}
                             alt="Emblem preview"
                             className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
                           />
@@ -919,7 +919,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                       {formData.leader_image_url && (
                         <div className="relative">
                           <img
-                            src={formData.leader_image_url}
+                            loading="lazy" src={formData.leader_image_url}
                             alt="Leader preview"
                             className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
                           />
@@ -963,7 +963,7 @@ export const AdminGlobalAfrica: React.FC = () => {
                       {formData.landmark_image_url && (
                         <div className="relative">
                           <img
-                            src={formData.landmark_image_url}
+                            loading="lazy" src={formData.landmark_image_url}
                             alt="Landmark preview"
                             className="w-full h-24 object-contain border border-gray-300 rounded-lg bg-gray-50"
                           />

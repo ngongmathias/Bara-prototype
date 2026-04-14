@@ -43,7 +43,8 @@
       "Bash(curl -s -H \"User-Agent: WhatsApp/2.24.2.75 A\" \"https://www.baraafrika.com/events/0deeab0c-6619-4dc9-98d7-24bdc5a5c494\")",
       "Bash(curl:*)",
       "Bash(git fetch:*)",
-      "mcp__claude_ai_Vercel__list_deployments"
+      "mcp__claude_ai_Vercel__list_deployments",
+      "Bash(wait)"
     ]
   }
 }

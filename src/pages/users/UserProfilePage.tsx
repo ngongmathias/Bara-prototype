@@ -184,7 +184,7 @@ export const UserProfilePage = () => {
             <div className="flex-shrink-0">
               {user.imageUrl ? (
                 <img
-                  src={user.imageUrl}
+                  loading="lazy" src={user.imageUrl}
                   alt={user.fullName || 'User'}
                   className="h-20 w-20 rounded-full object-cover border-4 border-blue-100"
                 />

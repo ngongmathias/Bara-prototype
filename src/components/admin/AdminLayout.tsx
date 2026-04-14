@@ -128,7 +128,7 @@ export const AdminLayout = ({ children, title, subtitle }: AdminLayoutProps) => 
                   <div className="w-8 h-8 bg-gradient-to-br from-yp-blue to-yp-green rounded-full flex items-center justify-center">
                     {user?.imageUrl ? (
                       <img 
-                        src={user.imageUrl} 
+                        loading="lazy" src={user.imageUrl} 
                         alt="Profile" 
                         className="w-8 h-8 rounded-full object-cover"
                       />

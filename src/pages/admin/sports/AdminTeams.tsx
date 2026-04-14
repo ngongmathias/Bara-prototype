@@ -294,7 +294,7 @@ export const AdminTeams = () => {
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 {t.logo_url ? (
-                                                    <img src={t.logo_url} alt={t.name} className="w-8 h-8 rounded-full object-cover" />
+                                                    <img loading="lazy" src={t.logo_url} alt={t.name} className="w-8 h-8 rounded-full object-cover" />
                                                 ) : (
                                                     <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"><Users className="h-4 w-4 text-gray-400" /></div>
                                                 )}
@@ -385,7 +385,7 @@ export const AdminTeams = () => {
                             <div className="mt-1">
                                 {logoPreview ? (
                                     <div className="relative inline-block">
-                                        <img src={logoPreview} alt="Logo preview" className="w-16 h-16 rounded-full object-cover border" />
+                                        <img loading="lazy" src={logoPreview} alt="Logo preview" className="w-16 h-16 rounded-full object-cover border" />
                                         <button onClick={() => { setLogoFile(null); setLogoPreview(null); }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X className="h-3 w-3" /></button>
                                     </div>
                                 ) : (

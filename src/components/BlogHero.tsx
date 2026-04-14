@@ -12,7 +12,7 @@ export const BlogHero = ({ post, onReadMore }: BlogHeroProps) => {
       {post.featured_image && (
         <div className="absolute inset-0">
           <img
-            src={post.featured_image}
+            loading="lazy" src={post.featured_image}
             alt={post.title}
             className="w-full h-full object-cover opacity-40"
           />
@@ -46,7 +46,7 @@ export const BlogHero = ({ post, onReadMore }: BlogHeroProps) => {
               <div className="flex items-center gap-2">
                 {post.author.avatar_url ? (
                   <img
-                    src={post.author.avatar_url}
+                    loading="lazy" src={post.author.avatar_url}
                     alt={post.author.display_name}
                     className="w-8 h-8 rounded-full"
                   />

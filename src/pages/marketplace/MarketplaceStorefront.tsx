@@ -134,7 +134,7 @@ export const MarketplaceStorefront = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="relative -mt-16 flex items-end gap-4 pb-4">
             {partner.logo_url ? (
-              <img src={partner.logo_url} alt={partner.display_name} className="w-28 h-28 rounded-full object-cover bg-white border-4 border-white shadow-lg" />
+              <img loading="lazy" src={partner.logo_url} alt={partner.display_name} className="w-28 h-28 rounded-full object-cover bg-white border-4 border-white shadow-lg" />
             ) : (
               <div className="w-28 h-28 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center text-3xl font-bold text-gray-400">
                 {partner.display_name?.charAt(0) || '?'}
@@ -281,7 +281,7 @@ export const MarketplaceStorefront = () => {
                   className="text-left bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
                 >
                   <div className="aspect-square bg-gray-100 relative">
-                    <img src={img} alt={ad.title} className="w-full h-full object-cover" />
+                    <img loading="lazy" src={img} alt={ad.title} className="w-full h-full object-cover" />
                     {ad.status === 'sold' && (
                       <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
                         <div className="bg-red-600 text-white text-xl font-bold px-5 py-2 rounded-lg transform -rotate-12">

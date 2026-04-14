@@ -55,7 +55,7 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                                     <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4 px-2">Now Playing</h3>
                                     <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 flex items-center gap-4">
                                         <div className="relative group flex-shrink-0">
-                                            <img src={currentSong.cover_url} className="w-12 h-12 rounded-lg object-cover" alt="" />
+                                            <img loading="lazy" src={currentSong.cover_url} className="w-12 h-12 rounded-lg object-cover" alt="" />
                                             {isPlaying && (
                                                 <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/40 rounded-lg">
                                                     <div className="w-1 h-3 bg-gray-900 rounded-full animate-bars"></div>
@@ -91,7 +91,7 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                                                     onClick={() => play(song)}
                                                 >
                                                     <div className="w-10 h-10 relative flex-shrink-0">
-                                                        <img src={song.cover_url} className="w-full h-full rounded shadow-md object-cover" alt="" />
+                                                        <img loading="lazy" src={song.cover_url} className="w-full h-full rounded shadow-md object-cover" alt="" />
                                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
                                                             <Play size={16} fill="white" />
                                                         </div>

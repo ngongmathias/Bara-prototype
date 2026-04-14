@@ -335,7 +335,7 @@ export const AdminEventsSlideshow = () => {
                         <TableRow key={img.id}>
                           <TableCell>
                             <div className="w-20 h-12 overflow-hidden rounded relative">
-                              <img src={img.video_thumbnail || img.image_url} alt={img.image_alt_text || 'slide'} className="w-full h-full object-cover" />
+                              <img loading="lazy" src={img.video_thumbnail || img.image_url} alt={img.image_alt_text || 'slide'} className="w-full h-full object-cover" />
                               {img.media_type === 'video' && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                                   <Play className="w-3 h-3 text-white" />
@@ -413,7 +413,7 @@ export const AdminEventsSlideshow = () => {
                         <div className="flex items-start gap-4">
                           <div className="w-24 h-16 overflow-hidden rounded relative flex-shrink-0">
                             <img 
-                              src={submission.thumbnail_url || submission.media_url} 
+                              loading="lazy" src={submission.thumbnail_url || submission.media_url} 
                               alt={submission.alt_text || 'submission'} 
                               className="w-full h-full object-cover" 
                             />
@@ -522,7 +522,7 @@ export const AdminEventsSlideshow = () => {
                     {form.media_type === 'video' ? (
                       <video src={preview} className="max-h-56 mx-auto rounded" controls />
                     ) : (
-                      <img src={preview} alt="preview" className="max-h-56 mx-auto rounded" />
+                      <img loading="lazy" src={preview} alt="preview" className="max-h-56 mx-auto rounded" />
                     )}
                   </div>
                 ) : (
@@ -552,7 +552,7 @@ export const AdminEventsSlideshow = () => {
               {form.media_type === 'video' && (
                 <div className="border-2 border-dashed rounded p-4 text-center">
                   {thumbnailPreview ? (
-                    <img src={thumbnailPreview} alt="thumbnail preview" className="max-h-32 mx-auto rounded" />
+                    <img loading="lazy" src={thumbnailPreview} alt="thumbnail preview" className="max-h-32 mx-auto rounded" />
                   ) : (
                     <>
                       <ImageIcon className="w-6 h-6 text-gray-400 mx-auto mb-2" />

@@ -356,7 +356,7 @@ export const AdminTournaments = () => {
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 {t.logo_url ? (
-                                                    <img src={t.logo_url} alt={t.name} className="w-8 h-8 rounded object-cover" />
+                                                    <img loading="lazy" src={t.logo_url} alt={t.name} className="w-8 h-8 rounded object-cover" />
                                                 ) : (
                                                     <div className="w-8 h-8 rounded bg-gray-200 flex items-center justify-center"><Trophy className="h-4 w-4 text-gray-400" /></div>
                                                 )}
@@ -449,7 +449,7 @@ export const AdminTournaments = () => {
                             <div className="mt-1">
                                 {logoPreview ? (
                                     <div className="relative inline-block">
-                                        <img src={logoPreview} alt="Logo preview" className="w-16 h-16 rounded object-cover border" />
+                                        <img loading="lazy" src={logoPreview} alt="Logo preview" className="w-16 h-16 rounded object-cover border" />
                                         <button onClick={() => { setLogoFile(null); setLogoPreview(null); }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X className="h-3 w-3" /></button>
                                     </div>
                                 ) : (
@@ -512,7 +512,7 @@ export const AdminTournaments = () => {
                                 <div key={tt.id} className="flex items-center justify-between border rounded-lg p-2">
                                     <div className="flex items-center gap-2">
                                         {tt.teams?.logo_url ? (
-                                            <img src={tt.teams.logo_url} alt="" className="w-6 h-6 rounded-full object-cover" />
+                                            <img loading="lazy" src={tt.teams.logo_url} alt="" className="w-6 h-6 rounded-full object-cover" />
                                         ) : (
                                             <div className="w-6 h-6 rounded-full bg-gray-200" />
                                         )}

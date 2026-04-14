@@ -113,7 +113,7 @@ export default function MovieDetailPage() {
         {/* Backdrop hero */}
         <div className="relative h-[300px] sm:h-[420px] overflow-hidden">
           <img
-            src={movie.backdrop_url || movie.poster_url}
+            loading="lazy" src={movie.backdrop_url || movie.poster_url}
             alt={movie.title}
             className="w-full h-full object-cover"
             onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&h=600&fit=crop'; }}
@@ -131,7 +131,7 @@ export default function MovieDetailPage() {
           <div className="flex gap-6 items-end mb-8">
             {/* Poster */}
             <img
-              src={movie.poster_url}
+              loading="lazy" src={movie.poster_url}
               alt={movie.title}
               className="w-28 sm:w-40 flex-shrink-0 rounded-xl shadow-2xl border-2 border-white/20"
               onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop'; }}
@@ -233,7 +233,7 @@ export default function MovieDetailPage() {
                   >
                     <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-2 shadow-md">
                       <img
-                        src={(m as any).poster_url}
+                        loading="lazy" src={(m as any).poster_url}
                         alt={m.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop'; }}

@@ -247,7 +247,7 @@ export const AdminArtists = () => {
                                     <Label>Profile Image</Label>
                                     {imagePreview ? (
                                         <div className="relative inline-block">
-                                            <img src={imagePreview} alt="Artist" className="w-20 h-20 rounded-full object-cover border" />
+                                            <img loading="lazy" src={imagePreview} alt="Artist" className="w-20 h-20 rounded-full object-cover border" />
                                             <button onClick={() => { setImageFile(null); setImagePreview(null); setFormData({ ...formData, image_url: "" }); }} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5"><X className="h-3 w-3" /></button>
                                         </div>
                                     ) : (
@@ -305,7 +305,7 @@ export const AdminArtists = () => {
                                             <div className="flex items-center gap-3">
                                                 <div className="h-10 w-10 bg-gray-100 rounded-full overflow-hidden flex items-center justify-center">
                                                     {artist.image_url ? (
-                                                        <img src={artist.image_url} alt={artist.name} className="h-full w-full object-cover" />
+                                                        <img loading="lazy" src={artist.image_url} alt={artist.name} className="h-full w-full object-cover" />
                                                     ) : (
                                                         <Mic2 className="h-5 w-5 text-gray-400" />
                                                     )}

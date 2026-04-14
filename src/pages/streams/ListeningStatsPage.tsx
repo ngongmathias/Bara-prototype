@@ -154,7 +154,7 @@ export default function ListeningStatsPage() {
                     <div key={a.key} className="flex items-center gap-4 p-3 bg-white border border-gray-100 rounded-lg">
                       <span className="text-sm font-bold text-gray-400 w-6">#{idx + 1}</span>
                       {a.imageUrl ? (
-                        <img src={a.imageUrl} alt={a.label} className="w-10 h-10 rounded-full object-cover" />
+                        <img loading="lazy" src={a.imageUrl} alt={a.label} className="w-10 h-10 rounded-full object-cover" />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-bold">
                           {a.label.charAt(0)}

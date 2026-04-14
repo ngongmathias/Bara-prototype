@@ -62,7 +62,7 @@ export const CartPage = () => {
                         className="flex gap-4 p-4"
                       >
                         <img
-                          src={item.image_url || '/placeholder.jpg'}
+                          loading="lazy" src={item.image_url || '/placeholder.jpg'}
                           alt={item.title || 'Item'}
                           className="w-20 h-20 rounded-lg object-cover flex-shrink-0 cursor-pointer"
                           onClick={() => navigate(`/marketplace/ad/${item.listing_id}`)}

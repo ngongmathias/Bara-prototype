@@ -109,7 +109,7 @@ export const MyPurchases = () => {
                 return (
                   <div key={tx.id} className="border border-gray-200 rounded-lg p-4 flex gap-4">
                     <img
-                      src={img}
+                      loading="lazy" src={img}
                       alt={tx.listing?.title || 'Item'}
                       className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                     />

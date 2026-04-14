@@ -287,7 +287,7 @@ export const AdminEbooks = () => {
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 {e.cover_url ? (
-                                                    <img src={e.cover_url} alt={e.title} className="w-10 h-14 rounded object-cover" />
+                                                    <img loading="lazy" src={e.cover_url} alt={e.title} className="w-10 h-14 rounded object-cover" />
                                                 ) : (
                                                     <div className="w-10 h-14 rounded bg-gray-200 flex items-center justify-center"><BookOpen className="h-4 w-4 text-gray-400" /></div>
                                                 )}
@@ -370,7 +370,7 @@ export const AdminEbooks = () => {
                             <div className="mt-1">
                                 {coverPreview ? (
                                     <div className="relative inline-block">
-                                        <img src={coverPreview} alt="Cover preview" className="w-20 h-28 rounded object-cover border" />
+                                        <img loading="lazy" src={coverPreview} alt="Cover preview" className="w-20 h-28 rounded object-cover border" />
                                         <button onClick={() => { setCoverFile(null); setCoverPreview(null); setFormData({ ...formData, cover_url: "" }); }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X className="h-3 w-3" /></button>
                                     </div>
                                 ) : (

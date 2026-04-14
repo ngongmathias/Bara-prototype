@@ -233,7 +233,7 @@ export default function SearchPage() {
                                                     onClick={() => play(song)}
                                                 >
                                                     <div className="relative w-12 h-12">
-                                                        <img src={song.cover_url} className="w-12 h-12 rounded object-cover" alt="" />
+                                                        <img loading="lazy" src={song.cover_url} className="w-12 h-12 rounded object-cover" alt="" />
                                                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                             {isCurrent && isPlaying ? <Pause size={20} fill="white" /> : <Play size={20} fill="white" />}
                                                         </div>
@@ -273,7 +273,7 @@ export default function SearchPage() {
                                             >
                                                 <div className="relative mb-4 aspect-square">
                                                     <img
-                                                        src={artist.image_url || '/placeholder-artist.png'}
+                                                        loading="lazy" src={artist.image_url || '/placeholder-artist.png'}
                                                         className="w-full h-full object-cover rounded-full shadow-2xl"
                                                         alt={artist.name}
                                                     />
@@ -301,7 +301,7 @@ export default function SearchPage() {
                                             >
                                                 <div className="relative mb-4 aspect-square">
                                                     <img
-                                                        src={album.cover_url || '/placeholder-album.png'}
+                                                        loading="lazy" src={album.cover_url || '/placeholder-album.png'}
                                                         className="w-full h-full rounded-md object-cover shadow-2xl"
                                                         alt={album.title}
                                                     />
@@ -352,7 +352,7 @@ export default function SearchPage() {
                                                 className="bg-white/5 rounded-xl overflow-hidden hover:bg-white/10 transition group flex gap-3"
                                             >
                                                 <img
-                                                    src={ev.cover_image || '/placeholder.svg'}
+                                                    loading="lazy" src={ev.cover_image || '/placeholder.svg'}
                                                     alt={ev.title}
                                                     className="w-24 h-24 object-cover flex-shrink-0"
                                                 />
@@ -384,7 +384,7 @@ export default function SearchPage() {
                                                     className="bg-white/5 rounded-lg overflow-hidden hover:bg-white/10 transition"
                                                 >
                                                     <div className="aspect-square bg-gray-800">
-                                                        {primary && <img src={primary.image_url} alt={ad.title} className="w-full h-full object-cover" />}
+                                                        {primary && <img loading="lazy" src={primary.image_url} alt={ad.title} className="w-full h-full object-cover" />}
                                                     </div>
                                                     <div className="p-2">
                                                         <h3 className="font-bold text-white text-xs truncate">{ad.title}</h3>
@@ -409,7 +409,7 @@ export default function SearchPage() {
                                                 className="bg-white/5 rounded-xl overflow-hidden hover:bg-white/10 transition flex gap-3"
                                             >
                                                 {post.cover_image && (
-                                                    <img src={post.cover_image} alt={post.title} className="w-28 h-28 object-cover flex-shrink-0" />
+                                                    <img loading="lazy" src={post.cover_image} alt={post.title} className="w-28 h-28 object-cover flex-shrink-0" />
                                                 )}
                                                 <div className="py-2 pr-3 min-w-0">
                                                     <h3 className="font-bold text-white truncate">{post.title}</h3>

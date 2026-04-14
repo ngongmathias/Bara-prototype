@@ -1227,7 +1227,7 @@ const HeroSlideshow = () => {
             />
           ) : (
             <img
-              src={s.image_url}
+              loading="lazy" src={s.image_url}
               alt={s.title || 'slide'}
               className="w-full h-full object-cover"
             />

@@ -431,7 +431,7 @@ export const AdminBlog = () => {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {post.author?.avatar_url ? (
-                              <img src={post.author.avatar_url} alt={post.author.display_name} className="w-6 h-6 rounded-full" />
+                              <img loading="lazy" src={post.author.avatar_url} alt={post.author.display_name} className="w-6 h-6 rounded-full" />
                             ) : (
                               <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                                 <Users className="w-3 h-3 text-gray-500" />

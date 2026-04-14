@@ -206,7 +206,7 @@ export default function PlaylistPage() {
                         <div className="flex items-end gap-6">
                             {/* Playlist Cover */}
                             {coverUrl ? (
-                                <img src={coverUrl} alt={playlistTitle} className="w-56 h-56 rounded shadow-2xl object-cover flex-shrink-0" />
+                                <img loading="lazy" src={coverUrl} alt={playlistTitle} className="w-56 h-56 rounded shadow-2xl object-cover flex-shrink-0" />
                             ) : (
                                 <div className="w-56 h-56 rounded shadow-2xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center flex-shrink-0">
                                     <Music size={100} className="text-gray-500" />
@@ -298,7 +298,7 @@ export default function PlaylistPage() {
                                             {/* Title and Artist */}
                                             <div className="flex gap-3 items-center min-w-0">
                                                 <img
-                                                    src={track.cover_url || '/placeholder.svg'}
+                                                    loading="lazy" src={track.cover_url || '/placeholder.svg'}
                                                     alt={track.title}
                                                     className="w-10 h-10 rounded object-cover flex-shrink-0"
                                                 />

@@ -206,7 +206,7 @@ export const UserSavedItems = () => {
           >
             <div className="h-10 w-10 rounded overflow-hidden bg-gray-100 flex-shrink-0">
               {item.image ? (
-                <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
+                <img loading="lazy" src={item.image} alt={item.title} className="h-full w-full object-cover" />
               ) : (
                 <div className="h-full w-full flex items-center justify-center text-gray-300">{icon}</div>
               )}

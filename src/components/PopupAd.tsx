@@ -65,14 +65,14 @@ export default function PopupAd({
           {linkUrl ? (
             <a href={linkUrl} target="_blank" rel="noopener noreferrer" onClick={handleClose} className="flex items-center justify-center">
               <img
-                src={imageUrl}
+                loading="lazy" src={imageUrl}
                 alt="Advertisement"
                 className="max-w-full max-h-[70vh] sm:max-h-[600px] w-auto h-auto object-contain rounded-lg"
               />
             </a>
           ) : (
             <img
-              src={imageUrl}
+              loading="lazy" src={imageUrl}
               alt="Advertisement"
               className="max-w-full max-h-[70vh] sm:max-h-[600px] w-auto h-auto object-contain rounded-lg"
             />

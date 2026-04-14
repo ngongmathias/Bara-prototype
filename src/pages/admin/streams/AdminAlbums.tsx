@@ -346,7 +346,7 @@ export const AdminAlbums = () => {
                                             <div className="flex items-center gap-3">
                                                 <div className="h-12 w-12 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
                                                     {album.cover_url ? (
-                                                        <img src={album.cover_url} alt={album.title} className="h-full w-full object-cover" />
+                                                        <img loading="lazy" src={album.cover_url} alt={album.title} className="h-full w-full object-cover" />
                                                     ) : (
                                                         <Disc className="h-6 w-6 text-gray-400" />
                                                     )}

@@ -153,7 +153,7 @@ export default function LibraryPage() {
                                 >
                                     <div className="relative mb-4 aspect-square">
                                         <img
-                                            src={item.image_url}
+                                            loading="lazy" src={item.image_url}
                                             className={`w-full h-full object-cover shadow-2xl ${item.type === 'artist' ? 'rounded-full' : 'rounded-lg'}`}
                                             alt={item.title}
                                         />

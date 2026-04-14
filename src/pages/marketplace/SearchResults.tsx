@@ -1364,7 +1364,7 @@ export const SearchResults = () => {
                     <div className="relative w-full h-48 bg-gray-100">
                       {primaryImage ? (
                         <img
-                          src={primaryImage}
+                          loading="lazy" src={primaryImage}
                           alt={listing.title}
                           className="w-full h-full object-cover"
                         />

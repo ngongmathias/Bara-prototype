@@ -133,7 +133,7 @@ export const UserMyEbooks = () => {
                 <div key={ebook.id} className="flex items-center gap-4 p-4 hover:bg-gray-50">
                   <div className="h-16 w-12 rounded overflow-hidden bg-gray-100 flex-shrink-0">
                     {ebook.cover_url ? (
-                      <img src={ebook.cover_url} alt={ebook.title} className="h-full w-full object-cover" />
+                      <img loading="lazy" src={ebook.cover_url} alt={ebook.title} className="h-full w-full object-cover" />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center"><BookOpen className="h-5 w-5 text-gray-300" /></div>
                     )}

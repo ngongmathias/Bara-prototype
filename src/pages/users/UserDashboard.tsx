@@ -171,7 +171,7 @@ export const UserDashboard = () => {
 
                       <img
 
-                        src={user.imageUrl}
+                        loading="lazy" src={user.imageUrl}
 
                         alt={user.fullName || 'User'}
 

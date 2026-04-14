@@ -60,7 +60,7 @@ export const QRGeneratorTool: React.FC = () => {
       {qrCode && (
         <div className="bg-gray-50 rounded-xl p-6 space-y-4">
           <div className="flex justify-center">
-            <img src={qrCode} alt="QR Code" className="border-4 border-white shadow-lg rounded-lg" />
+            <img loading="lazy" src={qrCode} alt="QR Code" className="border-4 border-white shadow-lg rounded-lg" />
           </div>
           <Button
             onClick={downloadQR}

@@ -162,7 +162,7 @@ export default function LikedSongsPage() {
                                         </div>
 
                                         <div className="flex items-center gap-3 min-w-0">
-                                            <img src={song.cover_url} className="w-10 h-10 rounded shadow-md object-cover" alt="" />
+                                            <img loading="lazy" src={song.cover_url} className="w-10 h-10 rounded shadow-md object-cover" alt="" />
                                             <div className="min-w-0">
                                                 <div className={`font-bold truncate ${isCurrent ? 'text-[#1DB954]' : 'text-gray-900'}`}>{song.title}</div>
                                                 <div className="text-sm text-gray-500 truncate md:hidden">{song.artist}{ftMap[song.id] || ''}</div>

@@ -756,7 +756,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                             {bannerCountries[banner.id] && bannerCountries[banner.id].length > 0 ? (
                               bannerCountries[banner.id].map((country) => (
                                 <div key={country.id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded text-xs">
-                                  {country.flag_url && <img src={country.flag_url} alt={country.name} className="w-4 h-3" />}
+                                  {country.flag_url && <img loading="lazy" src={country.flag_url} alt={country.name} className="w-4 h-3" />}
                                   <span>{country.name}</span>
                                 </div>
                               ))
@@ -764,7 +764,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                               <div className="flex items-center space-x-2">
                                 {banner.country_flag_url && (
                                   <img
-                                    src={banner.country_flag_url}
+                                    loading="lazy" src={banner.country_flag_url}
                                     alt={banner.country_name}
                                     className="w-4 h-3"
                                   />
@@ -931,7 +931,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                 <div>
                   <h4 className="font-medium mb-2">Banner Image</h4>
                   <img
-                    src={selectedBanner.banner_image_url}
+                    loading="lazy" src={selectedBanner.banner_image_url}
                     alt={selectedBanner.banner_alt_text || selectedBanner.company_name}
                     className="w-full h-32 object-cover rounded-lg"
                   />
@@ -953,7 +953,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       {selectedBanner.country_flag_url && (
                         <img
-                          src={selectedBanner.country_flag_url}
+                          loading="lazy" src={selectedBanner.country_flag_url}
                           alt={selectedBanner.country_name}
                           className="w-6 h-4"
                         />
@@ -1074,7 +1074,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                         className="rounded border-gray-300"
                       />
                       <div className="flex items-center space-x-2">
-                        {c.flag_url && (<img src={c.flag_url} alt={c.name} className="w-5 h-4" />)}
+                        {c.flag_url && (<img loading="lazy" src={c.flag_url} alt={c.name} className="w-5 h-4" />)}
                         <span className="text-sm">{c.name}</span>
                       </div>
                     </label>
@@ -1086,7 +1086,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                       const country = countries.find(c => c.id === countryId);
                       return country ? (
                         <div key={countryId} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-                          {country.flag_url && <img src={country.flag_url} alt={country.name} className="w-4 h-3" />}
+                          {country.flag_url && <img loading="lazy" src={country.flag_url} alt={country.name} className="w-4 h-3" />}
                           <span>{country.name}</span>
                           <button
                             type="button"
@@ -1107,7 +1107,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                   {newBannerImageUrl ? (
                     <div className="space-y-3">
-                      <img src={newBannerImageUrl} alt="Banner preview" className="max-h-32 mx-auto rounded" />
+                      <img loading="lazy" src={newBannerImageUrl} alt="Banner preview" className="max-h-32 mx-auto rounded" />
                       <div className="flex items-center justify-center gap-2">
                         <Button
                           type="button"
@@ -1390,7 +1390,7 @@ export const AdminSponsoredBanners: React.FC = () => {
 
                 {editBannerImageUrl && !editBannerImage && (
                   <div className="border rounded p-2">
-                    <img src={editBannerImageUrl} alt="Current banner" className="max-h-32 mx-auto" />
+                    <img loading="lazy" src={editBannerImageUrl} alt="Current banner" className="max-h-32 mx-auto" />
                     <p className="text-xs text-gray-500 text-center mt-1">Current image</p>
                   </div>
                 )}
@@ -1431,7 +1431,7 @@ export const AdminSponsoredBanners: React.FC = () => {
                         }}
                         className="rounded"
                       />
-                      {country.flag_url && <img src={country.flag_url} alt={country.name} className="w-5 h-4" />}
+                      {country.flag_url && <img loading="lazy" src={country.flag_url} alt={country.name} className="w-5 h-4" />}
                       <span className="text-sm">{country.name}</span>
                     </label>
                   ))}
