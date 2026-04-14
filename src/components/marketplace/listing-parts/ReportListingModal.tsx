@@ -76,9 +76,7 @@ export const ReportListingModal: React.FC<ReportListingModalProps> = ({
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold">Report Listing</h3>
-              <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-                <X className="w-6 h-6" />
-              </button>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600" aria-label="Close"><X className="w-6 h-6" /></button>
             </div>
             <p className="text-gray-600 mb-4">
               Please tell us why you're reporting this listing

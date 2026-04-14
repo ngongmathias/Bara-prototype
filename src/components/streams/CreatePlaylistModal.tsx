@@ -141,9 +141,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                         <Music className="text-[#1DB954]" size={24} />
                         {step === 'details' ? 'Create Playlist' : 'Add Songs'}
                     </h2>
-                    <button onClick={step === 'songs' ? handleFinish : onClose} className="text-gray-400 hover:text-gray-700 transition-colors">
-                        <X size={24} />
-                    </button>
+                    <button onClick={step === 'songs' ? handleFinish : onClose} className="text-gray-400 hover:text-gray-700 transition-colors" aria-label="Close"><X size={24} /></button>
                 </div>
 
                 {step === 'details' ? (

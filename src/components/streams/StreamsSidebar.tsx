@@ -53,9 +53,7 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
                     <button
                         onClick={handleCreatePlaylist}
                         className="p-1 hover:bg-gray-200 rounded-full transition text-gray-500 hover:text-gray-900"
-                    >
-                        <Plus size={20} />
-                    </button>
+                     aria-label="Add"><Plus size={20} /></button>
                 </div>
 
                 <div className="flex-grow overflow-y-auto p-2 space-y-4 scrollbar-hide">

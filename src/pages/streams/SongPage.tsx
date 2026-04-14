@@ -155,9 +155,7 @@ export default function SongPage() {
                         >
                             <Heart size={24} fill={isLiked ? 'currentColor' : 'none'} />
                         </button>
-                        <button onClick={handleShare} className="text-gray-400 hover:text-white transition hover:scale-110">
-                            <Share2 size={22} />
-                        </button>
+                        <button onClick={handleShare} className="text-gray-400 hover:text-white transition hover:scale-110" aria-label="Share"><Share2 size={22} /></button>
                     </div>
 
                     {/* Credits */}

@@ -190,9 +190,7 @@ export const BlogCard = ({ post, onReadMore }: BlogCardProps) => {
               disabled={busy}
               className="p-1.5 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
               title={liked ? 'Unlike' : 'Like'}
-            >
-              <Heart className={`w-4 h-4 ${liked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
-            </button>
+             aria-label="Like"><Heart className={`w-4 h-4 ${liked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} /></button>
 
             {/* Bookmark Button */}
             <button
@@ -200,9 +198,7 @@ export const BlogCard = ({ post, onReadMore }: BlogCardProps) => {
               disabled={busy}
               className="p-1.5 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
               title={bookmarked ? 'Remove bookmark' : 'Bookmark'}
-            >
-              <Bookmark className={`w-4 h-4 ${bookmarked ? 'fill-blue-500 text-blue-500' : 'text-gray-400'}`} />
-            </button>
+             aria-label="Bookmark"><Bookmark className={`w-4 h-4 ${bookmarked ? 'fill-blue-500 text-blue-500' : 'text-gray-400'}`} /></button>
 
             {/* Share Button */}
             <div className="relative">

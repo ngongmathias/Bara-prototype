@@ -322,18 +322,14 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                 >
                                     <Shuffle size={20} />
                                 </button>
-                                <button onClick={prev} className="text-white/80 hover:text-white hover:scale-110 transition-all active:scale-95">
-                                    <SkipBack size={28} fill="currentColor" />
-                                </button>
+                                <button onClick={prev} className="text-white/80 hover:text-white hover:scale-110 transition-all active:scale-95" aria-label="Previous"><SkipBack size={28} fill="currentColor" /></button>
                                 <button
                                     onClick={togglePlay}
                                     className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_4px_24px_rgba(255,255,255,0.15)]"
                                 >
                                     {isPlaying ? <Pause fill="black" size={26} /> : <Play fill="black" size={26} className="ml-0.5" />}
                                 </button>
-                                <button onClick={next} className="text-white/80 hover:text-white hover:scale-110 transition-all active:scale-95">
-                                    <SkipForward size={28} fill="currentColor" />
-                                </button>
+                                <button onClick={next} className="text-white/80 hover:text-white hover:scale-110 transition-all active:scale-95" aria-label="Next"><SkipForward size={28} fill="currentColor" /></button>
                                 <button
                                     onClick={() => setRepeatMode(repeatMode === 'none' ? 'all' : repeatMode === 'all' ? 'one' : 'none')}
                                     className={`transition-all hover:scale-110 relative ${repeatMode !== 'none' ? 'text-[#1DB954]' : 'text-white/30 hover:text-white'}`}

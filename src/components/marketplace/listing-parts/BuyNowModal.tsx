@@ -77,9 +77,7 @@ export const BuyNowModal: React.FC<BuyNowModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full p-6 z-10">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-          <X className="w-5 h-5" />
-        </button>
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600" aria-label="Close"><X className="w-5 h-5" /></button>
 
         <h3 className="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
           <ShoppingBag className="w-5 h-5" /> Buy Now

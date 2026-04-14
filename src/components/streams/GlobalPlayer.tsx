@@ -239,18 +239,14 @@ export function GlobalPlayer() {
                         >
                             <Shuffle size={18} />
                         </button>
-                        <button onClick={prev} className="text-gray-400 hover:text-white transition">
-                            <SkipBack size={20} fill="currentColor" />
-                        </button>
+                        <button onClick={prev} className="text-gray-400 hover:text-white transition" aria-label="Previous"><SkipBack size={20} fill="currentColor" /></button>
                         <button
                             onClick={togglePlay}
                             className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition shadow-[0_0_20px_rgba(255,255,255,0.3)]"
                         >
                             {isPlaying ? <Pause fill="black" size={20} /> : <Play fill="black" size={20} className="ml-1" />}
                         </button>
-                        <button onClick={next} className="text-gray-400 hover:text-white transition">
-                            <SkipForward size={20} fill="currentColor" />
-                        </button>
+                        <button onClick={next} className="text-gray-400 hover:text-white transition" aria-label="Next"><SkipForward size={20} fill="currentColor" /></button>
                         <button
                             onClick={() => setRepeatMode(repeatMode === 'none' ? 'all' : repeatMode === 'all' ? 'one' : 'none')}
                             className={`transition-colors relative hidden md:block ${repeatMode !== 'none' ? 'text-[#1DB954]' : 'text-gray-400 hover:text-white'}`}

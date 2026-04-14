@@ -236,21 +236,13 @@ export default function PlaylistPage() {
                         <button
                             onClick={handlePlayAll}
                             className="w-14 h-14 rounded-full bg-[#1DB954] hover:scale-105 transition flex items-center justify-center shadow-xl active:scale-95"
-                        >
-                            <Play className="w-6 h-6 text-black ml-1" fill="black" />
-                        </button>
+                         aria-label="Play"><Play className="w-6 h-6 text-black ml-1" fill="black" /></button>
                         <button className="text-gray-500 hover:text-gray-900 transition">
                             <Shuffle className="w-7 h-7" />
                         </button>
-                        <button className="text-gray-500 hover:text-gray-900 transition">
-                            <Heart className="w-7 h-7" />
-                        </button>
-                        <button onClick={handleShare} className="text-gray-500 hover:text-gray-900 transition" title="Share playlist">
-                            <Share2 className="w-7 h-7" />
-                        </button>
-                        <button className="text-gray-500 hover:text-gray-900 transition">
-                            <MoreHorizontal className="w-7 h-7" />
-                        </button>
+                        <button className="text-gray-500 hover:text-gray-900 transition" aria-label="Like"><Heart className="w-7 h-7" /></button>
+                        <button onClick={handleShare} className="text-gray-500 hover:text-gray-900 transition" title="Share playlist" aria-label="Share"><Share2 className="w-7 h-7" /></button>
+                        <button className="text-gray-500 hover:text-gray-900 transition" aria-label="More options"><MoreHorizontal className="w-7 h-7" /></button>
                     </div>
                 </div>
 

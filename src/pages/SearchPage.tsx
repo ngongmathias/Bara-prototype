@@ -277,9 +277,7 @@ export default function SearchPage() {
                                                         className="w-full h-full object-cover rounded-full shadow-2xl"
                                                         alt={artist.name}
                                                     />
-                                                    <button className="absolute bottom-4 right-0 w-10 h-10 rounded-full bg-[#1DB954] text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl translate-y-2 group-hover:translate-y-0">
-                                                        <Play size={20} fill="black" className="ml-1" />
-                                                    </button>
+                                                    <button className="absolute bottom-4 right-0 w-10 h-10 rounded-full bg-[#1DB954] text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl translate-y-2 group-hover:translate-y-0" aria-label="Play"><Play size={20} fill="black" className="ml-1" /></button>
                                                 </div>
                                                 <h3 className="font-bold truncate text-white text-sm">{artist.name}</h3>
                                                 <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Artist</p>
@@ -305,9 +303,7 @@ export default function SearchPage() {
                                                         className="w-full h-full rounded-md object-cover shadow-2xl"
                                                         alt={album.title}
                                                     />
-                                                    <button className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#1DB954] text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl translate-y-2 group-hover:translate-y-0">
-                                                        <Play size={20} fill="black" className="ml-1" />
-                                                    </button>
+                                                    <button className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#1DB954] text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl translate-y-2 group-hover:translate-y-0" aria-label="Play"><Play size={20} fill="black" className="ml-1" /></button>
                                                 </div>
                                                 <h3 className="font-bold truncate text-white text-sm">{album.title}</h3>
                                                 <p className="text-xs text-gray-400">{album.artists?.name}</p>

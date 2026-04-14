@@ -638,11 +638,7 @@ export const AdminSidebar = ({ isOpen, onToggle }: AdminSidebarProps) => {
 
               className="lg:hidden p-1 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white"
 
-            >
-
-              <X className="w-5 h-5" />
-
-            </button>
+             aria-label="Close"><X className="w-5 h-5" /></button>
 
           </div>
 

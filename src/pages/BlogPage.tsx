@@ -151,9 +151,7 @@ export const BlogPage = () => {
             <button
               type="submit"
               className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-black transition-colors"
-            >
-              <Search className="w-5 h-5" />
-            </button>
+             aria-label="Search"><Search className="w-5 h-5" /></button>
           </form>
         </div>
 

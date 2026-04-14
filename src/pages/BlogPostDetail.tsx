@@ -535,8 +535,7 @@ export const BlogPostDetail = () => {
                   ? 'bg-red-100 text-red-600'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
-              >
-                <Heart className="w-5 h-5" fill={isLiked ? 'currentColor' : 'none'} />
+               aria-label="Like"><Heart className="w-5 h-5" fill={isLiked ? 'currentColor' : 'none'} />
                 {likesCount > 0 && <span className="text-sm font-medium">{likesCount}</span>}
               </button>
 
@@ -546,9 +545,7 @@ export const BlogPostDetail = () => {
                   ? 'bg-blue-100 text-blue-600'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
-              >
-                <Bookmark className="w-5 h-5" fill={isBookmarked ? 'currentColor' : 'none'} />
-              </button>
+               aria-label="Bookmark"><Bookmark className="w-5 h-5" fill={isBookmarked ? 'currentColor' : 'none'} /></button>
 
               <button
                 onClick={() => openShare({

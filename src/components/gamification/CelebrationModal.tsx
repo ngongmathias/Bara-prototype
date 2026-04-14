@@ -137,9 +137,7 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
                         <button
                             onClick={onClose}
                             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 transition-colors z-20"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
+                         aria-label="Close"><X className="w-5 h-5" /></button>
                     </motion.div>
                 </div>
             )}

@@ -168,8 +168,7 @@ export default function MoviesPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold px-6 py-3 rounded-lg transition-colors">
-                      <Play className="w-5 h-5" fill="white" /> Watch Now
+                    <button className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold px-6 py-3 rounded-lg transition-colors" aria-label="Play"><Play className="w-5 h-5" fill="white" /> Watch Now
                     </button>
                     <button className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-bold px-6 py-3 rounded-lg transition-colors backdrop-blur-sm">
                       More Info
@@ -222,8 +221,7 @@ export default function MoviesPage() {
                     <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Trending Now</h2>
                   </div>
                   <button className="text-sm font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1">
-                    See all <ChevronRight className="w-4 h-4" />
-                  </button>
+                    See all <ChevronRight className="w-4 h-4" /></button>
                 </div>
                 <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 snap-x -mx-2 px-2">
                   {trendingMovies.map((movie) => (
@@ -236,9 +234,7 @@ export default function MoviesPage() {
                           onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop'; }}
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                          <button className="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-xl">
-                            <Play className="w-5 h-5 ml-0.5" fill="white" />
-                          </button>
+                          <button className="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-xl" aria-label="Play"><Play className="w-5 h-5 ml-0.5" fill="white" /></button>
                         </div>
                         <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                           <Star className="w-3 h-3 text-white" fill="currentColor" /> {movie.rating}
@@ -271,9 +267,7 @@ export default function MoviesPage() {
                           onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&h=600&fit=crop'; }}
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                          <button className="w-14 h-14 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-xl">
-                            <Play className="w-6 h-6 ml-0.5" fill="white" />
-                          </button>
+                          <button className="w-14 h-14 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-xl" aria-label="Play"><Play className="w-6 h-6 ml-0.5" fill="white" /></button>
                         </div>
                         {movie.is_free && (
                           <div className="absolute top-2 left-2 bg-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">FREE</div>

@@ -135,9 +135,7 @@ export default function CreditPage() {
                             <button
                                 onClick={handlePlayAll}
                                 className="w-12 h-12 rounded-full bg-gray-900 hover:bg-gray-800 hover:scale-105 transition flex items-center justify-center shadow-lg active:scale-95"
-                            >
-                                <Play fill="white" className="w-5 h-5 ml-0.5 text-white" />
-                            </button>
+                             aria-label="Play"><Play fill="white" className="w-5 h-5 ml-0.5 text-white" /></button>
                             <span className="text-sm font-semibold text-gray-500">Play All</span>
                         </div>
                     </div>

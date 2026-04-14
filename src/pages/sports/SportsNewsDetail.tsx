@@ -210,9 +210,7 @@ export default function SportsNewsDetail() {
                                         onClick={handleShare}
                                         className="p-2 rounded-full hover:bg-gray-100 transition"
                                         title="Share"
-                                    >
-                                        <Share2 size={16} className="text-gray-600" />
-                                    </button>
+                                     aria-label="Share"><Share2 size={16} className="text-gray-600" /></button>
                                     <a
                                         href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(article.title)}`}
                                         target="_blank"

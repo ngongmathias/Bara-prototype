@@ -609,9 +609,7 @@ function QuickAccessTile({ title, gradient, icon, to }: { title: string; gradien
                 <span className="text-xl sm:text-2xl">{icon}</span>
             </div>
             <h3 className="font-bold text-sm sm:text-base text-gray-900 truncate pr-12">{title}</h3>
-            <button className="absolute right-2 w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95">
-                <Play size={20} fill="white" className="ml-1" />
-            </button>
+            <button className="absolute right-2 w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95" aria-label="Play"><Play size={20} fill="white" className="ml-1" /></button>
         </Link>
     );
 }
@@ -629,9 +627,7 @@ function RadioCard({ title, images, color, footer }: { title: string; images: st
                 <div className="absolute bottom-4 left-4 right-4">
                     <h3 className="text-xl font-black text-white leading-tight tracking-tighter truncate">{title}</h3>
                 </div>
-                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20">
-                    <Play size={24} fill="white" className="ml-1" />
-                </button>
+                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20" aria-label="Play"><Play size={24} fill="white" className="ml-1" /></button>
             </div>
             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{title} Radio</h3>
             <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">{footer}</p>
@@ -655,9 +651,7 @@ function ChartCard({ title, type, gradient, footer }: { title: string; type: str
                     <div className="h-4 w-[2px] bg-white/40" />
                     <span className="text-[10px] font-bold text-white uppercase tracking-widest opacity-80">{type}</span>
                 </div>
-                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20">
-                    <Play size={24} fill="white" className="ml-1" />
-                </button>
+                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20" aria-label="Play"><Play size={24} fill="white" className="ml-1" /></button>
             </div>
             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{title}</h3>
             <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">{footer}</p>

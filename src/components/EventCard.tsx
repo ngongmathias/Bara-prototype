@@ -199,19 +199,15 @@ export const EventCard = ({
             onClick={toggleSave}
             className="bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
             title={isSaved ? "Remove from saved" : "Save event"}
-          >
-            <Heart
+           aria-label="Like"><Heart
               className={`w-4 h-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`}
-            />
-          </button>
+            /></button>
           {/* Share Button */}
           <button
             onClick={handleShare}
             className="bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
             title="Share event"
-          >
-            <Share2 className="w-4 h-4 text-gray-700" />
-          </button>
+           aria-label="Share"><Share2 className="w-4 h-4 text-gray-700" /></button>
           {showShareMenu && (
             <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-xl p-2 z-10 min-w-[140px]">
               <button

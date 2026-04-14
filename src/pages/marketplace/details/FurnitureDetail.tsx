@@ -272,15 +272,11 @@ export const FurnitureDetail = () => {
                     <button
                       onClick={handlePrevImage}
                       className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors"
-                    >
-                      <ChevronLeft className="w-6 h-6" />
-                    </button>
+                     aria-label="Previous"><ChevronLeft className="w-6 h-6" /></button>
                     <button
                       onClick={handleNextImage}
                       className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors"
-                    >
-                      <ChevronRight className="w-6 h-6" />
-                    </button>
+                     aria-label="Next"><ChevronRight className="w-6 h-6" /></button>
                     <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
                       {currentImageIndex + 1} / {listing.images.length}
                     </div>

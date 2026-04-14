@@ -409,9 +409,7 @@ export const Header = () => {
               {/* Panel Header */}
               <div className="flex items-center justify-between p-4 border-b">
                 <h2 className="text-base font-bold font-comfortaa">Menu</h2>
-                <button onClick={closeMobileMenu} className="p-1 hover:bg-gray-100 rounded-lg">
-                  <X className="w-5 h-5" />
-                </button>
+                <button onClick={closeMobileMenu} className="p-1 hover:bg-gray-100 rounded-lg" aria-label="Close"><X className="w-5 h-5" /></button>
               </div>
 
               {/* Scrollable Content */}

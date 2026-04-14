@@ -42,9 +42,7 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                             <button
                                 onClick={onClose}
                                 className="w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition-colors"
-                            >
-                                <X size={20} />
-                            </button>
+                             aria-label="Close"><X size={20} /></button>
                         </div>
 
                         {/* Content */}

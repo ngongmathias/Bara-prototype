@@ -58,9 +58,7 @@ export default function ArtistsPage() {
                                                 target.src = '/placeholder-artist.png';
                                             }}
                                         />
-                                        <button className="absolute bottom-6 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
-                                            <Play size={24} fill="black" className="ml-1" />
-                                        </button>
+                                        <button className="absolute bottom-6 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10" aria-label="Play"><Play size={24} fill="black" className="ml-1" /></button>
                                     </div>
                                     <h3 className="font-bold truncate text-gray-900 mb-1 text-sm">{artist.name}</h3>
                                     <p className="text-xs text-gray-500">Artist</p>

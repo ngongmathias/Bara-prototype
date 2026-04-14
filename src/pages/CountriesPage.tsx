@@ -277,11 +277,7 @@ export const CountriesPage = () => {
 
                         className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
 
-                      >
-
-                        <X className="w-4 h-4 text-gray-400" />
-
-                      </button>
+                       aria-label="Close"><X className="w-4 h-4 text-gray-400" /></button>
 
                     )}
 

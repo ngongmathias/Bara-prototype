@@ -99,10 +99,8 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
       disabled={loading}
       className={`p-2 rounded-full hover:bg-gray-100 transition-colors ${className}`}
       title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-    >
-      <Heart
+     aria-label="Like"><Heart
         className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
-      />
-    </button>
+      /></button>
   );
 };

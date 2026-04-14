@@ -367,9 +367,7 @@ export default function ArtistPage() {
                                                 alt={album.title}
                                                 className="w-full h-full object-cover rounded shadow-lg"
                                             />
-                                            <button className="absolute right-2 bottom-2 w-10 h-10 bg-[#1DB954] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl transform translate-y-2 group-hover:translate-y-0 active:scale-95">
-                                                <Play fill="black" className="w-5 h-5 ml-1 text-black" />
-                                            </button>
+                                            <button className="absolute right-2 bottom-2 w-10 h-10 bg-[#1DB954] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl transform translate-y-2 group-hover:translate-y-0 active:scale-95" aria-label="Play"><Play fill="black" className="w-5 h-5 ml-1 text-black" /></button>
                                         </div>
                                         <h3 className="font-bold text-sm mb-1 truncate">{album.title}</h3>
                                         <p className="text-xs text-gray-500">{new Date(album.release_date).getFullYear()} • Album</p>

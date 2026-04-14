@@ -360,11 +360,7 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
 
                     </div>
 
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-
-                        <X className="w-5 h-5" />
-
-                    </button>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors" aria-label="Close"><X className="w-5 h-5" /></button>
 
                 </div>
 
