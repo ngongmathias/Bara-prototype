@@ -465,7 +465,7 @@
 | 21.1.1 | **Earn coins everywhere** — listen (+1), attend event (+5), post ad (+3), write blog (+10), share (+2), daily streak (+1-7 scaling) | P0 | ☐ |
 | 21.1.2 | **Spend coins** — boost ad, highlight blog post, tip artist, unlock badge frame | P0 | ☐ |
 | 21.1.3 | **Leaderboard** — weekly/monthly top earners with tier badges (Bronze, Silver, Gold, Diamond) | P1 | ✅ |
-| 21.1.4 | **Coin animation** — floating "+5 coins" rising from action point, monochrome and clean | P1 | ☐ |
+| 21.1.4 | **Coin animation** — floating "+5 coins" rising from action point, monochrome and clean | P1 | ✅ |
 
 ### 21.2 User Profile & Social
 

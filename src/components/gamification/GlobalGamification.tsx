@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGamification } from '@/hooks/useGamification';
 import { FloatingXP } from './FloatingXP';
+import { FloatingCoins } from './FloatingCoins';
 import { CelebrationModal } from './CelebrationModal';
 
 export const GlobalGamification: React.FC = () => {
@@ -9,6 +10,7 @@ export const GlobalGamification: React.FC = () => {
     return (
         <>
             <FloatingXP />
+            <FloatingCoins />
             <CelebrationModal
                 isOpen={celebration.isOpen}
                 onClose={() => setCelebration(false)}

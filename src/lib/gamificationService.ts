@@ -160,6 +160,14 @@ export const emitXPEvent = (amount: number, reason: string) => {
 
 };
 
+export const emitCoinEvent = (amount: number, reason: string) => {
+
+    const event = new CustomEvent('bara_coin_gain', { detail: { amount, reason } });
+
+    window.dispatchEvent(event);
+
+};
+
 
 
 export class GamificationService {
@@ -360,6 +368,8 @@ export class GamificationService {
 
             if (levelUpBonus > 0) {
 
+                emitCoinEvent(levelUpBonus, `Level Up to ${newLevel}`);
+
                 await supabase.from('gamification_history').insert({
 
                     user_id: userId,
@@ -523,7 +533,7 @@ export class GamificationService {
 
             if (error) throw error;
 
-
+            emitCoinEvent(amount, reason);
 
             await supabase.from('gamification_history').insert({
 
