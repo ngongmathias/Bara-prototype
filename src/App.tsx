@@ -281,6 +281,7 @@ import SongPage from "./pages/streams/SongPage";
 import CreditPage from "./pages/streams/CreditPage";
 
 import LibraryPage from "./pages/streams/LibraryPage";
+import ListeningStatsPage from "./pages/streams/ListeningStatsPage";
 
 import ArtistDashboard from "@/pages/streams/ArtistDashboard";
 
@@ -425,6 +426,8 @@ const AppRoutes = () => {
           <Route path="liked" element={<UserAuthGuard><LikedSongsPage /></UserAuthGuard>} />
 
           <Route path="library" element={<UserAuthGuard><LibraryPage /></UserAuthGuard>} />
+
+          <Route path="stats" element={<UserAuthGuard><ListeningStatsPage /></UserAuthGuard>} />
 
           <Route path="podcasts" element={<PodcastsPage />} />
 

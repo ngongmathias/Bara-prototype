@@ -1,4 +1,4 @@
-import { Home, Search, Library, Plus, Heart, Globe, Mic2, Film, BookOpen, Headphones, Gamepad2 } from 'lucide-react';
+import { Home, Search, Library, Plus, Heart, Globe, Mic2, Film, BookOpen, Headphones, Gamepad2, BarChart3 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
@@ -29,6 +29,7 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
                 <XPProgressBar />
                 <SidebarLink to="/streams" icon={<Home size={24} />} label="Home" active={isActive('/streams')} />
                 <SidebarLink to="/streams/search" icon={<Search size={24} />} label="Search" active={isActive('/streams/search')} />
+                <SidebarLink to="/streams/stats" icon={<BarChart3 size={24} />} label="Your Stats" active={isActive('/streams/stats')} />
                 <SidebarLink to="/streams/creator" icon={<Mic2 size={24} className="text-[#1DB954]" />} label="Creator Portal" active={isActive('/streams/creator')} />
             </div>
 
