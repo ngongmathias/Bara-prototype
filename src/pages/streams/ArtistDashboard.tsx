@@ -58,6 +58,8 @@ export default function ArtistDashboard() {
     const [featuredOnSongs, setFeaturedOnSongs] = useState<(MySong & { primary_artist: string })[]>([]);
     const [loading, setLoading] = useState(true);
     const [isBoosting, setIsBoosting] = useState(false);
+    const [dailyStreams, setDailyStreams] = useState<Array<{ date: string; count: number }>>([]);
+    const [followerCount, setFollowerCount] = useState(0);
 
     const ownPlays = songs.reduce((acc, s) => acc + (s.plays || 0), 0);
     const featuredPlays = featuredOnSongs.reduce((acc, s) => acc + (s.plays || 0), 0);
@@ -108,6 +110,46 @@ export default function ArtistDashboard() {
 
             setSongs(songsRes.data || []);
             setAlbums(albumsRes.data || []);
+
+            // Fetch streams-over-time (last 30 days) from play_history for this artist's songs
+            const songIds = (songsRes.data || []).map((s: any) => s.id);
+            if (songIds.length > 0) {
+                try {
+                    const since = new Date();
+                    since.setDate(since.getDate() - 30);
+                    const { data: plays } = await supabase
+                        .from('play_history')
+                        .select('played_at')
+                        .in('song_id', songIds)
+                        .gte('played_at', since.toISOString());
+
+                    const byDay = new Map<string, number>();
+                    (plays || []).forEach((row: any) => {
+                        const d = new Date(row.played_at);
+                        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                        byDay.set(key, (byDay.get(key) || 0) + 1);
+                    });
+                    const buckets: Array<{ date: string; count: number }> = [];
+                    for (let i = 29; i >= 0; i--) {
+                        const d = new Date();
+                        d.setDate(d.getDate() - i);
+                        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                        buckets.push({ date: key, count: byDay.get(key) || 0 });
+                    }
+                    setDailyStreams(buckets);
+                } catch (err) {
+                    console.warn('Could not fetch daily streams', err);
+                }
+            }
+
+            // Follower count (best-effort)
+            try {
+                const { count } = await supabase
+                    .from('artist_followers')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('artist_id', artist.id);
+                setFollowerCount(count || 0);
+            } catch { /* table may not exist */ }
 
             // Fetch songs this artist is featured on
             try {
@@ -545,6 +587,65 @@ export default function ArtistDashboard() {
                         {activeTab === 'analytics' && (
                             <div className="space-y-6">
                                 <h2 className="text-xl font-bold text-gray-900">Performance Analytics</h2>
+
+                                {/* Streams over time (30 days) */}
+                                <Card className="border-none shadow-sm">
+                                    <CardHeader>
+                                        <CardTitle className="text-lg">Streams (Last 30 Days)</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {dailyStreams.length === 0 || dailyStreams.every((d) => d.count === 0) ? (
+                                            <p className="text-gray-500 text-center py-8 text-sm">No streams recorded in the last 30 days yet.</p>
+                                        ) : (
+                                            <>
+                                                <div className="flex items-end gap-1 h-40">
+                                                    {(() => {
+                                                        const max = Math.max(...dailyStreams.map((d) => d.count), 1);
+                                                        return dailyStreams.map((d) => {
+                                                            const pct = (d.count / max) * 100;
+                                                            return (
+                                                                <div
+                                                                    key={d.date}
+                                                                    className="flex-1 bg-[#1DB954]/20 hover:bg-[#1DB954] transition-colors rounded-t relative group"
+                                                                    style={{ height: `${pct}%`, minHeight: d.count > 0 ? '4px' : '2px' }}
+                                                                    title={`${d.date}: ${d.count} streams`}
+                                                                >
+                                                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap">
+                                                                        {d.count}
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        });
+                                                    })()}
+                                                </div>
+                                                <div className="flex justify-between text-[10px] text-gray-400 mt-2">
+                                                    <span>{dailyStreams[0]?.date.slice(5)}</span>
+                                                    <span>{dailyStreams[Math.floor(dailyStreams.length / 2)]?.date.slice(5)}</span>
+                                                    <span>Today</span>
+                                                </div>
+                                                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-sm">
+                                                    <span className="text-gray-500">Total last 30 days</span>
+                                                    <span className="font-bold text-gray-900">
+                                                        {dailyStreams.reduce((acc, d) => acc + d.count, 0).toLocaleString()} streams
+                                                    </span>
+                                                </div>
+                                            </>
+                                        )}
+                                    </CardContent>
+                                </Card>
+
+                                {/* Followers */}
+                                <Card className="border-none shadow-sm">
+                                    <CardContent className="pt-5 flex items-center justify-between">
+                                        <div>
+                                            <div className="text-sm text-gray-500 font-medium mb-1">Followers</div>
+                                            <div className="text-3xl font-black text-gray-900">{followerCount.toLocaleString()}</div>
+                                        </div>
+                                        <div className="text-xs text-gray-400 text-right max-w-[180px]">
+                                            Follower growth chart coming soon — needs historical snapshots.
+                                        </div>
+                                    </CardContent>
+                                </Card>
 
                                 {/* Top Songs by Plays */}
                                 <Card className="border-none shadow-sm">
