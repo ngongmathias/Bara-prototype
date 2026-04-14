@@ -358,7 +358,7 @@
 |---|------|----------|--------|
 | 18.2.1 | **Going / Interested RSVP** — buttons with attendee count + avatars. `event_rsvps` table (partially exists from 7.31) | P0 | ☐ |
 | 18.2.2 | **"How to Get Tickets" section** — prominent display of organizer's payment/ticket instructions | P0 | ☐ |
-| 18.2.3 | **Early bird pricing display** — support multiple ticket tiers in description | P1 | ☐ |
+| 18.2.3 | **Early bird pricing display** — support multiple ticket tiers in description | P1 | ✅ |
 | 18.2.4 | **Post-event** — prompt attendees to rate (1-5 stars), upload photos, leave review. `event_reviews` table | P1 | ☐ |
 
 ### 18.3 Organizer Profiles (Event Storefronts)

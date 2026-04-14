@@ -136,6 +136,37 @@ export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => 
         return 'Paid Event (Price TBD)';
     };
 
+    // Parse ticket tiers from description. Matches lines like:
+    //   "Early Bird: $20 (before March 1)"
+    //   "VIP: 50,000 XAF"
+    //   "Regular - $35"
+    const ticketTiers = (() => {
+        const desc = event.description || '';
+        if (!desc) return [] as Array<{ name: string; price: string; note?: string }>;
+        const lines = desc.split(/\r?\n/);
+        const tierRegex = /^\s*[-*•]?\s*(Early\s*Bird|Regular|Standard|VIP|Premium|Gold|Silver|Bronze|General\s*Admission|Student|Group)\s*[:\-–]\s*(.+?)\s*$/i;
+        const found: Array<{ name: string; price: string; note?: string }> = [];
+        for (const line of lines) {
+            const m = line.match(tierRegex);
+            if (!m) continue;
+            const rest = m[2];
+            // Split off parenthetical or "before/until" note
+            const noteMatch = rest.match(/(.+?)\s*[\(\[]([^)\]]+)[\)\]]\s*$/)
+                || rest.match(/(.+?)\s+(before|until|ends)\s+(.+)$/i);
+            if (noteMatch) {
+                found.push({
+                    name: m[1].replace(/\s+/g, ' '),
+                    price: noteMatch[1].trim(),
+                    note: (noteMatch[2] || `${noteMatch[2] || ''} ${noteMatch[3] || ''}`).trim(),
+                });
+            } else {
+                found.push({ name: m[1].replace(/\s+/g, ' '), price: rest.trim() });
+            }
+            if (found.length >= 6) break;
+        }
+        return found;
+    })();
+
     return (
         <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="flex items-center justify-between p-4 mb-6">
@@ -313,6 +344,39 @@ export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => 
                         </div>
 
                         {/* Social Links would go here */}
+
+                        {ticketTiers.length > 0 && (
+                            <div className="pt-6 border-t border-gray-200">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-3">Ticket Tiers</h3>
+                                <div className="space-y-2">
+                                    {ticketTiers.map((tier, idx) => (
+                                        <div
+                                            key={`${tier.name}-${idx}`}
+                                            className={`flex items-center justify-between p-3 border rounded-lg ${
+                                                /early/i.test(tier.name)
+                                                    ? 'bg-green-50 border-green-200'
+                                                    : /vip|premium|gold/i.test(tier.name)
+                                                        ? 'bg-amber-50 border-amber-200'
+                                                        : 'bg-gray-50 border-gray-200'
+                                            }`}
+                                        >
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-semibold text-gray-900">{tier.name}</span>
+                                                    {/early/i.test(tier.name) && (
+                                                        <span className="text-[10px] font-bold uppercase bg-green-600 text-white px-2 py-0.5 rounded">Save</span>
+                                                    )}
+                                                </div>
+                                                {tier.note && (
+                                                    <div className="text-xs text-gray-500 mt-0.5">{tier.note}</div>
+                                                )}
+                                            </div>
+                                            <div className="text-right font-bold text-gray-900">{tier.price}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="pt-6 space-y-3">
                             <Button
