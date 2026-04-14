@@ -11,6 +11,7 @@ import { ScrollReveal, SkeletonCard } from "@/components/animations";
 import { FullscreenMapModal } from "@/components/FullscreenMapModal";
 import { InteractiveEventsMap } from "@/components/InteractiveEventsMap";
 import { EventDetail } from "@/components/EventDetail";
+import { trackRecent } from "@/lib/recentActivity";
 import { SimilarEvents } from "@/components/SimilarEvents";
 import { TicketPurchaseModal } from "@/components/TicketPurchaseModal";
 import { Input } from "@/components/ui/input";
@@ -372,6 +373,14 @@ export const EventsPage = () => {
     if (!initialLoadDone) return;
     if (selectedEvent) {
       window.history.replaceState(null, '', `/events/${selectedEvent.id}`);
+      trackRecent({
+        id: selectedEvent.id,
+        kind: 'event',
+        title: selectedEvent.title,
+        subtitle: selectedEvent.venue_name || selectedEvent.city_name || undefined,
+        imageUrl: selectedEvent.event_image_url || (selectedEvent.event_images && selectedEvent.event_images[0]),
+        href: `/events/${selectedEvent.id}`,
+      });
     } else {
       window.history.replaceState(null, '', '/events');
     }

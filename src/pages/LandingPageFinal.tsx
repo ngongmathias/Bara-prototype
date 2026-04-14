@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DancingBaraLogo } from '@/components/landing/DancingBaraLogo';
 import { RSSFeeds } from '@/components/landing/RSSFeeds';
+import { ContinueWhereYouLeftOff } from '@/components/landing/ContinueWhereYouLeftOff';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
@@ -306,6 +307,9 @@ export const LandingPageFinal = () => {
             })}
           </div>
         </motion.div>
+
+        {/* Continue where you left off */}
+        <ContinueWhereYouLeftOff />
 
         {/* RSS Feeds - Updates based on selected country */}
         <motion.div

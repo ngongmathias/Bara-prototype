@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useRef, useEffect } from 'r
 import { supabase } from '@/lib/supabase';
 
 import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
+import { trackRecent } from '@/lib/recentActivity';
 
 import { useUser } from '@clerk/clerk-react';
 
@@ -448,6 +449,18 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
 
         setCurrentSong(song);
+
+        // Track for "Continue where you left off"
+        try {
+          trackRecent({
+            id: song.id,
+            kind: 'song',
+            title: song.title,
+            subtitle: song.artist,
+            imageUrl: song.cover_url,
+            href: `/streams/song/${song.id}`,
+          });
+        } catch { /* ignore */ }
 
         // Check if this is a paid preview
         const isPaid = song.price && song.price > 0 && !purchasedSongsRef.current.includes(song.id);

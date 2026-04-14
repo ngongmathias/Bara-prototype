@@ -8,6 +8,7 @@ import { BottomBannerAd } from '@/components/BottomBannerAd';
 import { ReviewsSection } from '@/components/marketplace/listing-parts/ReviewsSection';
 import { QASection } from '@/components/marketplace/listing-parts/QASection';
 import { SEO } from '@/components/SEO';
+import { trackRecent } from '@/lib/recentActivity';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
@@ -116,6 +117,18 @@ export const ListingDetailPage = () => {
       };
 
       setListing(transformedListing);
+
+      // Track for "Continue where you left off"
+      const primaryImg = transformedListing.images?.find((i: any) => i.is_primary)?.image_url
+        || transformedListing.images?.[0]?.image_url;
+      trackRecent({
+        id: transformedListing.id,
+        kind: 'ad',
+        title: transformedListing.title,
+        subtitle: `${transformedListing.currency || ''} ${transformedListing.price || ''}`.trim(),
+        imageUrl: primaryImg,
+        href: `/marketplace/ad/${transformedListing.id}`,
+      });
 
       // Fetch partner/seller profile for trust signals (non-blocking)
       if (data.created_by) {

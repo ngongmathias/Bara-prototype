@@ -268,7 +268,7 @@
 | # | Task | Priority | Status |
 |---|------|----------|--------|
 | 16.5.1 | **Onboarding tour** — 3-5 step guided tour for new users (react-joyride or similar) highlighting search, streams, marketplace, events, coins | P1 | ☐ |
-| 16.5.2 | **"Continue where you left off"** section on home page — recently viewed events, last played song, last viewed ad | P1 | ☐ |
+| 16.5.2 | **"Continue where you left off"** section on home page — recently viewed events, last played song, last viewed ad | P1 | ✅ |
 | 16.5.3 | **Weekly digest email** opt-in — "Your week on BARA" with top events, new songs, trending ads (see Phase 22) | P2 | ☐ |
 
 ---
