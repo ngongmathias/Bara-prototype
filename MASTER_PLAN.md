@@ -334,7 +334,7 @@
 | 17.5.1 | **Mini player** enhancements — add: progress bar scrubbing, volume slider (desktop), heart/like, queue toggle, "expand to full Now Playing" | P0 | ☐ |
 | 17.5.2 | **"Add to Playlist" modal** — searchable list of user's playlists + "Create new playlist" at top | P0 | ☐ |
 | 17.5.3 | **Waveform visualization** — audio waveform animating with playback on Now Playing/Song detail (Web Audio API or pre-generated). Subtle, monochrome | P2 | ☐ |
-| 17.5.4 | **Song context menu** — right-click/long-press: Play, Play Next, Add to Queue, Add to Playlist, Go to Artist, Go to Album, Share, Like/Unlike | P1 | ☐ |
+| 17.5.4 | **Song context menu** — right-click/long-press: Play, Play Next, Add to Queue, Add to Playlist, Go to Artist, Go to Album, Share, Like/Unlike | P1 | ✅ |
 
 ---
 

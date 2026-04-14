@@ -1,5 +1,6 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { StreamsSidebar } from './StreamsSidebar';
+import { SongContextMenuProvider } from './SongContextMenu';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, Link } from 'react-router-dom';
 import { Music, Film, BookOpen, Headphones, Gamepad2, LayoutGrid } from 'lucide-react';
@@ -18,6 +19,7 @@ export function StreamsLayout({ children }: { children: React.ReactNode }) {
 
     return (
         <MainLayout>
+            <SongContextMenuProvider>
             <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 overflow-hidden">
                 <StreamsSidebar className="w-64 flex-shrink-0 hidden lg:flex border-r border-gray-200 sticky top-0 h-[calc(100vh-64px)] overflow-y-auto" />
                 <div className="flex-grow min-w-0 bg-white relative">
@@ -60,6 +62,7 @@ export function StreamsLayout({ children }: { children: React.ReactNode }) {
                     </AnimatePresence>
                 </div>
             </div>
+            </SongContextMenuProvider>
         </MainLayout>
     );
 }

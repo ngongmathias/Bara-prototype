@@ -81,6 +81,8 @@ interface AudioPlayerContextType {
 
     addToQueue: (song: Song) => void;
 
+    playNext: (song: Song) => void;
+
     playAlbum: (songs: Song[], startIndex?: number) => void;
 
     toggleShuffle: () => void;
@@ -711,6 +713,16 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     };
 
+    const playNext = (song: Song) => {
+        setQueue(prev => {
+            const idx = queueIndexRef.current;
+            const filtered = prev.filter(s => s.id !== song.id);
+            const insertAt = idx >= 0 ? Math.min(idx + 1, filtered.length) : filtered.length;
+            const next = [...filtered.slice(0, insertAt), song, ...filtered.slice(insertAt)];
+            return next;
+        });
+    };
+
 
 
     const playAlbum = (songs: Song[], startIndex = 0) => {
@@ -870,6 +882,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 setVolume,
 
                 addToQueue,
+
+                playNext,
 
                 playAlbum,
 

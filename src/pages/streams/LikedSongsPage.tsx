@@ -5,9 +5,11 @@ import { Heart, Play, Pause, Clock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
+import { useSongContextMenu } from '@/components/streams/SongContextMenu';
 
 export default function LikedSongsPage() {
     const { likedSongs, playAlbum, currentSong, isPlaying, toggleLike, play } = useAudioPlayer();
+    const { handlers: contextMenuHandlers } = useSongContextMenu();
     const [songs, setSongs] = useState<Song[]>([]);
     const [ftMap, setFtMap] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
@@ -144,6 +146,7 @@ export default function LikedSongsPage() {
                                         key={song.id}
                                         className="grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 rounded-lg group hover:bg-gray-100 transition-colors items-center cursor-pointer"
                                         onClick={() => play(song)}
+                                        {...contextMenuHandlers(song)}
                                     >
                                         <div className="text-gray-500 flex items-center justify-center">
                                             {isCurrent && isPlaying ? (

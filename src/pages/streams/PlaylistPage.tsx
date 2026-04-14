@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
+import { useSongContextMenu } from '@/components/streams/SongContextMenu';
 import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,6 +18,7 @@ interface PlaylistData {
 export default function PlaylistPage() {
     const { id } = useParams();
     const { play, playAlbum, currentSong, isPlaying, togglePlay } = useAudioPlayer();
+    const { handlers: contextMenuHandlers } = useSongContextMenu();
     const { toast } = useToast();
     const [playlist, setPlaylist] = useState<PlaylistData | null>(null);
     const [tracks, setTracks] = useState<Song[]>([]);
@@ -277,6 +279,7 @@ export default function PlaylistPage() {
                                             key={track.id}
                                             className={`grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 rounded group hover:bg-gray-100 cursor-pointer ${isCurrentTrack ? 'bg-gray-50' : ''}`}
                                             onClick={() => handlePlayTrack(track)}
+                                            {...contextMenuHandlers(track)}
                                         >
                                             {/* Track Number / Play Button */}
                                             <div className="flex items-center justify-center text-gray-500 group-hover:text-gray-900 w-8">

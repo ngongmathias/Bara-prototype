@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
+import { useSongContextMenu } from '@/components/streams/SongContextMenu';
 import { Play, Pause } from 'lucide-react';
 import { SkeletonCard } from '@/components/animations/SkeletonCard';
 import { ScrollReveal } from '@/components/animations/ScrollReveal';
 
 export default function TrendingSongsPage() {
     const { play, playAlbum, currentSong, isPlaying } = useAudioPlayer();
+    const { handlers: contextMenuHandlers } = useSongContextMenu();
     const [songs, setSongs] = useState<Song[]>([]);
     const [ftMap, setFtMap] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
@@ -87,7 +89,7 @@ export default function TrendingSongsPage() {
                 ) : (
                     <ScrollReveal className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                         {songs.map(song => (
-                            <div key={song.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col h-full shadow-lg">
+                            <div key={song.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col h-full shadow-lg" {...contextMenuHandlers(song)}>
                                 <div className="relative mb-4 aspect-square shadow-2xl">
                                     <img
                                         src={song.cover_url}
