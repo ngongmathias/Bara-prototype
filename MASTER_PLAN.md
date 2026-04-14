@@ -514,9 +514,9 @@
 |---|------|----------|--------|
 | 21.5.1 | **Lazy load images** across all pages with blur placeholder — ensure consistency | P1 | ✅ |
 | 21.5.2 | **Code splitting** — split streams, marketplace, events, blog into separate chunks (currently 5MB+) | P0 | ☐ |
-| 21.5.3 | **Keyboard navigation** — all interactive elements keyboard-accessible with visible focus rings | P1 | ☐ |
+| 21.5.3 | **Keyboard navigation** — all interactive elements keyboard-accessible with visible focus rings | P1 | ✅ |
 | 21.5.4 | **ARIA labels** on all icon-only buttons (favorites, share, play, cart) | P1 | ✅ |
-| 21.5.5 | **Color contrast** — verify all text meets WCAG AA (especially gray text on white) | P1 | ☐ |
+| 21.5.5 | **Color contrast** — verify all text meets WCAG AA (especially gray text on white) | P1 | ✅ |
 
 ---
 
