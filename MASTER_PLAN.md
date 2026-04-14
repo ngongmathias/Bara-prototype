@@ -367,7 +367,7 @@
 |---|------|----------|--------|
 | 18.3.1 | **Organizer page** at `/events/organizer/:slug` — name, bio, photo, verification, all events, ratings, follower count, "Message Organizer", "Follow" | P0 | ☐ |
 | 18.3.2 | **Supabase table**: `event_organizers(id, user_id, display_name, slug, bio, profile_image_url, cover_image_url, verification_level, created_at)` — auto-created on first event post | P0 | ☐ |
-| 18.3.3 | **"Message Organizer"** — private 1-on-1 chat via existing messaging system | P1 | ☐ |
+| 18.3.3 | **"Message Organizer"** — private 1-on-1 chat via existing messaging system | P1 | ✅ |
 | 18.3.4 | **"View all events by this organizer"** link on every event detail page | P0 | ☐ |
 | 18.3.5 | **Event series** — support recurring events linked on organizer profile | P2 | ☐ |
 | 18.3.6 | **Organizer analytics** — events created, total RSVPs, attendees, average rating | P1 | ☐ |

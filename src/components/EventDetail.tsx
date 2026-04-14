@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, MapPin, Maximize2, Share2 } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Maximize2, Share2, MessageCircle } from 'lucide-react';
 import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { InteractiveEventsMap } from "@/components/InteractiveEventsMap";
 import { EventCountdown } from "@/components/EventCountdown";
 import { useShare } from '@/context/ShareContext';
+import { MessagingService } from '@/lib/MessagingService';
+import { useUser } from '@clerk/clerk-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface EventDetailProps {
     event: DatabaseEvent;
@@ -16,6 +20,37 @@ interface EventDetailProps {
 
 export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => {
     const { openShare } = useShare();
+    const { user } = useUser();
+    const { toast } = useToast();
+    const navigate = useNavigate();
+    const [messagingOrganizer, setMessagingOrganizer] = useState(false);
+
+    const organizerUserId = (event as any).organizer_id || (event as any).created_by_user_id;
+
+    const handleMessageOrganizer = async () => {
+        if (!user) {
+            toast({ title: 'Sign in required', description: 'Please sign in to message the organizer.', variant: 'destructive' });
+            return;
+        }
+        if (!organizerUserId) {
+            toast({ title: 'Unavailable', description: 'This organizer is not set up for direct messages.', variant: 'destructive' });
+            return;
+        }
+        if (organizerUserId === user.id) {
+            toast({ title: 'That\'s you', description: 'You are the organizer of this event.' });
+            return;
+        }
+        try {
+            setMessagingOrganizer(true);
+            const conversationId = await MessagingService.startConversation(user.id, organizerUserId);
+            navigate(`/messages?conversation=${conversationId}`);
+        } catch (err) {
+            console.error('Failed to start conversation', err);
+            toast({ title: 'Error', description: 'Could not open conversation.', variant: 'destructive' });
+        } finally {
+            setMessagingOrganizer(false);
+        }
+    };
 
     const handleShare = () => {
         openShare({
@@ -258,6 +293,17 @@ export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => 
                                 <div>
                                     <p className="text-sm text-gray-500 uppercase tracking-wide">Organizer</p>
                                     <p className="text-gray-700 font-medium">{event.organizer_name}</p>
+                                    {organizerUserId && (
+                                        <button
+                                            type="button"
+                                            onClick={handleMessageOrganizer}
+                                            disabled={messagingOrganizer}
+                                            className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 disabled:opacity-60"
+                                        >
+                                            <MessageCircle className="w-4 h-4" />
+                                            {messagingOrganizer ? 'Opening…' : 'Message Organizer'}
+                                        </button>
+                                    )}
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-500 uppercase tracking-wide">Capacity</p>
