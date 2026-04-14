@@ -480,7 +480,7 @@
 | # | Task | Priority | Status |
 |---|------|----------|--------|
 | 21.3.1 | **Bottom navigation bar** on mobile — Home, Events, Streams, Marketplace, Profile. Black bar, white icons. Always visible | P0 | ☐ |
-| 21.3.2 | **Pull-to-refresh** on all feed pages | P1 | ☐ |
+| 21.3.2 | **Pull-to-refresh** on all feed pages | P1 | ✅ |
 | 21.3.3 | **Swipe gestures** — swipe left on song = add to queue, right = like. Swipe left on ad card = hide, right = favorite | P2 | ☐ |
 | 21.3.4 | **PWA enhancements** — add-to-homescreen prompt, offline cache, push notifications via service worker | P2 | ☐ |
 

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { DiscoverMore } from '@/components/DiscoverMore';
+import { PullToRefresh } from '@/components/PullToRefresh';
 
 /** Strip HTML tags from RSS feed descriptions */
 function stripHtml(html: string): string {
@@ -119,6 +120,7 @@ export default function NewsPage() {
 
   return (
     <MainLayout>
+      <PullToRefresh onRefresh={handleRefresh}>
       <div className="min-h-screen bg-white">
         {/* Hero Section */}
         <div className="bg-gray-900 text-white">
@@ -318,6 +320,7 @@ export default function NewsPage() {
           </div>
         </div>
       </div>
+      </PullToRefresh>
     </MainLayout>
   );
 }

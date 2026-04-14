@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { MarketplaceListing, MarketplaceSubcategory } from '@/types/marketplace';
 import { Search, MapPin } from 'lucide-react';
+import { PullToRefresh } from '@/components/PullToRefresh';
 
 export const ClassifiedsPage = () => {
   const navigate = useNavigate();
@@ -68,6 +69,11 @@ export const ClassifiedsPage = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    setLoading(true);
+    await fetchData();
+  };
+
   // Mock category counts
   const categoryData = [
     { name: 'FURNITURE, HOME & GARDEN', count: 54969 },
@@ -83,6 +89,7 @@ export const ClassifiedsPage = () => {
       <Header />
       <TopBannerAd />
 
+      <PullToRefresh onRefresh={handleRefresh}>
       <main className="flex-1">
         {/* Hero Section */}
         <section 
@@ -218,6 +225,7 @@ export const ClassifiedsPage = () => {
           </div>
         </section>
       </main>
+      </PullToRefresh>
 
       <BottomBannerAd />
       <Footer />

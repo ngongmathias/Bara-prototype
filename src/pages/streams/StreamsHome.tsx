@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
+import { PullToRefresh } from '@/components/PullToRefresh';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { Play, Pause, Clock, Search, Star, Sparkles } from 'lucide-react';
@@ -50,6 +51,7 @@ export default function StreamsHome() {
     const [featuredArtistsMap, setFeaturedArtistsMap] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [refreshKey, setRefreshKey] = useState(0);
     const searchRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -209,7 +211,12 @@ export default function StreamsHome() {
         };
 
         fetchData();
-    }, [clerkUser?.id]);
+    }, [clerkUser?.id, refreshKey]);
+
+    const handleRefresh = async () => {
+        setRefreshKey(k => k + 1);
+        await new Promise(r => setTimeout(r, 600));
+    };
 
     // Fetch featured artists for all displayed songs
     useEffect(() => {
@@ -309,6 +316,7 @@ export default function StreamsHome() {
                 description="Listen to the latest trending African music, explore popular artists, and discover new releases on Bara Afrika Streams."
                 keywords={['African Music', 'Music Streaming', 'Bara Streams', 'Afrobeats', 'Highlife']}
             />
+            <PullToRefresh onRefresh={handleRefresh}>
             <div className="min-h-screen pb-32">
                 <main className="p-4 sm:p-8 max-w-[1400px] mx-auto">
                     {/* Greeting + Search */}
@@ -588,6 +596,7 @@ export default function StreamsHome() {
                     )}
                 </main>
             </div>
+            </PullToRefresh>
             <DiscoverMore exclude={['Streams']} maxItems={3} />
         </StreamsLayout>
     );
