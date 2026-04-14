@@ -59,9 +59,9 @@ export const AchievementHall: React.FC<AchievementHallProps> = ({ userId }) => {
                 {achievements.map((achievement) => {
                     const isEarned = earnedIds.includes(achievement.id);
                     return (
-                        <Card key={achievement.id} className={`${isEarned ? 'bg-white border-yellow-200 shadow-md' : 'bg-gray-50 opacity-60 grayscale border-dashed'} transition-all duration-300`}>
+                        <Card key={achievement.id} className={`${isEarned ? 'bg-white border-gray-900 shadow-md' : 'bg-gray-50 opacity-60 border-dashed'} transition-all duration-300`}>
                             <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                                <div className={`p-3 rounded-full ${isEarned ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-200 text-gray-500'}`}>
+                                <div className={`p-3 rounded-full ${isEarned ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-500'}`}>
                                     {isEarned ? <Award size={24} /> : <Lock size={20} />}
                                 </div>
                                 <div className="space-y-1">
