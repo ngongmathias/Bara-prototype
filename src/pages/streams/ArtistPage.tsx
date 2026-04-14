@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
@@ -15,6 +15,7 @@ export default function ArtistPage() {
     const [topTracks, setTopTracks] = useState<Song[]>([]);
     const [featuredOnTracks, setFeaturedOnTracks] = useState<(Song & { primary_artist: string; plays: number })[]>([]);
     const [albums, setAlbums] = useState<any[]>([]);
+    const [relatedArtists, setRelatedArtists] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [following, setFollowing] = useState(false);
 
@@ -91,6 +92,48 @@ export default function ArtistPage() {
                     .eq('artist_id', id)
                     .order('release_date', { ascending: false });
                 setAlbums(albumsData || []);
+
+                // Fetch related artists ("Fans also like")
+                try {
+                    const collected = new Map<string, any>();
+                    // Tier 1: same genre + same country
+                    if (artistData?.genre && artistData?.country) {
+                        const { data } = await supabase
+                            .from('artists')
+                            .select('id, name, image_url, genre, country, is_verified, monthly_listeners')
+                            .eq('genre', artistData.genre)
+                            .eq('country', artistData.country)
+                            .neq('id', id)
+                            .order('monthly_listeners', { ascending: false, nullsFirst: false })
+                            .limit(6);
+                        (data || []).forEach((a: any) => collected.set(a.id, a));
+                    }
+                    // Tier 2: same genre
+                    if (collected.size < 6 && artistData?.genre) {
+                        const { data } = await supabase
+                            .from('artists')
+                            .select('id, name, image_url, genre, country, is_verified, monthly_listeners')
+                            .eq('genre', artistData.genre)
+                            .neq('id', id)
+                            .order('monthly_listeners', { ascending: false, nullsFirst: false })
+                            .limit(6);
+                        (data || []).forEach((a: any) => { if (!collected.has(a.id)) collected.set(a.id, a); });
+                    }
+                    // Tier 3: same country
+                    if (collected.size < 6 && artistData?.country) {
+                        const { data } = await supabase
+                            .from('artists')
+                            .select('id, name, image_url, genre, country, is_verified, monthly_listeners')
+                            .eq('country', artistData.country)
+                            .neq('id', id)
+                            .order('monthly_listeners', { ascending: false, nullsFirst: false })
+                            .limit(6);
+                        (data || []).forEach((a: any) => { if (!collected.has(a.id)) collected.set(a.id, a); });
+                    }
+                    setRelatedArtists(Array.from(collected.values()).slice(0, 6));
+                } catch (err) {
+                    console.error('Error fetching related artists:', err);
+                }
 
             } catch (error) {
                 console.error('Error fetching artist data:', error);
@@ -380,6 +423,33 @@ export default function ArtistPage() {
                                                 </span>
                                             </div>
                                         </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {/* Fans Also Like */}
+                        {relatedArtists.length > 0 && (
+                            <section className="mb-12">
+                                <h2 className="text-2xl font-comfortaa font-semibold mb-6">Fans Also Like</h2>
+                                <div className="flex overflow-x-auto scrollbar-hide gap-6 pb-4">
+                                    {relatedArtists.map((a) => (
+                                        <Link
+                                            key={a.id}
+                                            to={`/streams/artist/${a.id}`}
+                                            className="bg-white border border-gray-100 p-4 rounded-lg hover:bg-gray-50 transition cursor-pointer min-w-[160px] flex flex-col items-center text-center"
+                                        >
+                                            <img
+                                                src={a.image_url || '/placeholder-music.png'}
+                                                alt={a.name}
+                                                className="w-28 h-28 rounded-full object-cover shadow-md mb-3"
+                                            />
+                                            <div className="flex items-center gap-1 justify-center">
+                                                <h3 className="font-bold text-sm truncate">{a.name}</h3>
+                                                {a.is_verified && <BadgeCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />}
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-1">{a.genre || 'Artist'}</p>
+                                        </Link>
                                     ))}
                                 </div>
                             </section>
