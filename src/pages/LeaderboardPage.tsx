@@ -21,11 +21,18 @@ interface LeaderboardEntry {
 }
 
 type Tab = 'xp' | 'coins' | 'streak';
+type Period = 'week' | 'month' | 'all';
 
 const TABS: { key: Tab; label: string; icon: typeof Trophy }[] = [
   { key: 'xp', label: 'Top XP', icon: TrendingUp },
   { key: 'coins', label: 'Most Coins', icon: Coins },
   { key: 'streak', label: 'Longest Streak', icon: Flame },
+];
+
+const PERIODS: { key: Period; label: string }[] = [
+  { key: 'week', label: 'This week' },
+  { key: 'month', label: 'This month' },
+  { key: 'all', label: 'All-time' },
 ];
 
 function getRankIcon(rank: number) {
@@ -49,6 +56,7 @@ function getPrestigeColor(level: number): string {
 export default function LeaderboardPage() {
   const { user } = useUser();
   const [tab, setTab] = useState<Tab>('xp');
+  const [period, setPeriod] = useState<Period>('week');
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRank, setUserRank] = useState<number | null>(null);
@@ -57,19 +65,77 @@ export default function LeaderboardPage() {
     const fetchLeaderboard = async () => {
       setLoading(true);
       try {
-        const orderCol = tab === 'xp' ? 'total_xp' : tab === 'coins' ? 'bara_coins' : 'daily_streak';
+        // Streak tab ignores period (streak is inherently a running state)
+        if (tab === 'streak' || period === 'all') {
+          const orderCol = tab === 'xp' ? 'total_xp' : tab === 'coins' ? 'bara_coins' : 'daily_streak';
+          const { data, error } = await supabase
+            .from('gamification_profiles')
+            .select('user_id, total_xp, current_level, bara_coins, daily_streak')
+            .order(orderCol, { ascending: false })
+            .limit(50);
+          if (error) throw error;
+          setEntries(data || []);
+          if (user?.id && data) {
+            const idx = data.findIndex((e) => e.user_id === user.id);
+            setUserRank(idx >= 0 ? idx + 1 : null);
+          }
+          return;
+        }
 
-        const { data, error } = await supabase
+        // Weekly / monthly: aggregate from gamification_history
+        const sinceDate = new Date();
+        sinceDate.setDate(sinceDate.getDate() - (period === 'week' ? 7 : 30));
+        const historyType = tab === 'xp' ? 'xp_gain' : 'coin_gain';
+
+        const { data: historyRows, error: histErr } = await supabase
+          .from('gamification_history')
+          .select('user_id, amount')
+          .eq('type', historyType)
+          .gte('created_at', sinceDate.toISOString());
+        if (histErr) throw histErr;
+
+        const totals = new Map<string, number>();
+        (historyRows || []).forEach((row: any) => {
+          totals.set(row.user_id, (totals.get(row.user_id) || 0) + (row.amount || 0));
+        });
+
+        const topIds = Array.from(totals.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 50)
+          .map(([id]) => id);
+
+        if (topIds.length === 0) {
+          setEntries([]);
+          setUserRank(null);
+          return;
+        }
+
+        const { data: profiles, error: profErr } = await supabase
           .from('gamification_profiles')
           .select('user_id, total_xp, current_level, bara_coins, daily_streak')
-          .order(orderCol, { ascending: false })
-          .limit(50);
+          .in('user_id', topIds);
+        if (profErr) throw profErr;
 
-        if (error) throw error;
-        setEntries(data || []);
+        const profileMap = new Map<string, LeaderboardEntry>();
+        (profiles || []).forEach((p: any) => profileMap.set(p.user_id, p));
 
-        if (user?.id && data) {
-          const idx = data.findIndex(e => e.user_id === user.id);
+        const ranked: LeaderboardEntry[] = topIds.map((id) => {
+          const base = profileMap.get(id) || {
+            user_id: id,
+            total_xp: 0,
+            current_level: 1,
+            bara_coins: 0,
+            daily_streak: 0,
+          };
+          const periodTotal = totals.get(id) || 0;
+          return tab === 'xp'
+            ? { ...base, total_xp: periodTotal }
+            : { ...base, bara_coins: periodTotal };
+        });
+
+        setEntries(ranked);
+        if (user?.id) {
+          const idx = ranked.findIndex((e) => e.user_id === user.id);
           setUserRank(idx >= 0 ? idx + 1 : null);
         }
       } catch (error) {
@@ -79,7 +145,7 @@ export default function LeaderboardPage() {
       }
     };
     fetchLeaderboard();
-  }, [tab, user]);
+  }, [tab, period, user]);
 
   const getValue = (entry: LeaderboardEntry) => {
     if (tab === 'xp') return `${entry.total_xp.toLocaleString()} XP`;
@@ -101,7 +167,7 @@ export default function LeaderboardPage() {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-bold mb-6">
             <Trophy className="w-4 h-4" />
-            Weekly Leaderboard
+            {period === 'week' ? 'Weekly' : period === 'month' ? 'Monthly' : 'All-time'} Leaderboard
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-gray-900 font-comfortaa mb-3">
             Top Community Members
@@ -132,7 +198,7 @@ export default function LeaderboardPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-4">
           {TABS.map(({ key, label, icon: Icon }) => (
             <Button
               key={key}
@@ -145,6 +211,25 @@ export default function LeaderboardPage() {
             </Button>
           ))}
         </div>
+
+        {/* Period selector (hidden for streak — streak is a running state) */}
+        {tab !== 'streak' && (
+          <div className="flex gap-2 mb-6">
+            {PERIODS.map((p) => (
+              <button
+                key={p.key}
+                onClick={() => setPeriod(p.key)}
+                className={`flex-1 text-sm font-semibold py-2 rounded-lg border transition ${
+                  period === p.key
+                    ? 'bg-purple-600 text-white border-purple-600'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-purple-300'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Leaderboard Table */}
         <Card>
