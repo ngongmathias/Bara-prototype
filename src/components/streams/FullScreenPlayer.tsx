@@ -97,13 +97,53 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
         return () => { cancelled = true; };
     }, [currentSong?.album_id]);
 
-    // Pick accent color from song ID
+    // Extract dominant color from album art via canvas (desaturated for subtle ambience)
     useEffect(() => {
-        if (!currentSong) return;
-        const colors = ['#1DB954', '#8B5CF6', '#EC4899', '#F59E0B', '#3B82F6', '#EF4444', '#14B8A6', '#6366F1'];
-        const hash = currentSong.id.charCodeAt(0) + currentSong.id.charCodeAt(1);
-        setDominantColor(colors[hash % colors.length]);
-    }, [currentSong?.id]);
+        if (!currentSong?.cover_url) { setDominantColor('#1DB954'); return; }
+        let cancelled = false;
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            if (cancelled) return;
+            try {
+                const size = 32;
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+                ctx.drawImage(img, 0, 0, size, size);
+                const { data } = ctx.getImageData(0, 0, size, size);
+                let r = 0, g = 0, b = 0, count = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                    const a = data[i + 3];
+                    if (a < 128) continue;
+                    const pr = data[i], pg = data[i + 1], pb = data[i + 2];
+                    const max = Math.max(pr, pg, pb);
+                    const min = Math.min(pr, pg, pb);
+                    if (max - min < 20) continue; // skip near-grey
+                    if (max < 40 || min > 220) continue; // skip near-black/white
+                    r += pr; g += pg; b += pb; count += 1;
+                }
+                if (count === 0) { setDominantColor('#1DB954'); return; }
+                r = Math.round(r / count);
+                g = Math.round(g / count);
+                b = Math.round(b / count);
+                // Desaturate 30% toward grey
+                const grey = Math.round((r + g + b) / 3);
+                const mix = 0.3;
+                r = Math.round(r * (1 - mix) + grey * mix);
+                g = Math.round(g * (1 - mix) + grey * mix);
+                b = Math.round(b * (1 - mix) + grey * mix);
+                setDominantColor(`rgb(${r}, ${g}, ${b})`);
+            } catch {
+                setDominantColor('#1DB954');
+            }
+        };
+        img.onerror = () => { if (!cancelled) setDominantColor('#1DB954'); };
+        img.src = currentSong.cover_url;
+        return () => { cancelled = true; };
+    }, [currentSong?.id, currentSong?.cover_url]);
 
     if (!currentSong) return null;
 
@@ -142,8 +182,8 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                     animate={{ y: 0 }}
                     exit={{ y: '100%' }}
                     transition={{ type: 'spring', damping: 30, stiffness: 250 }}
-                    className="fixed inset-0 z-[2147483647] flex flex-col text-white select-none"
-                    style={{ background: '#0a0a0a' }}
+                    className="fixed inset-0 z-[2147483647] flex flex-col text-white select-none transition-colors duration-1000"
+                    style={{ background: `linear-gradient(to bottom, ${dominantColor}, #0a0a0a 70%)` }}
                 >
                     {/* Ambient background glow from cover art */}
                     <div className="absolute inset-0 overflow-hidden pointer-events-none">
