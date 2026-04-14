@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
-import { Play, Pause, Search as SearchIcon, Loader2, Heart } from 'lucide-react';
+import { Play, Pause, Search as SearchIcon, Loader2, Heart, Calendar, ShoppingBag, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface SearchResults {
@@ -9,25 +9,31 @@ interface SearchResults {
     artists: any[];
     albums: any[];
     teams: any[];
+    events: any[];
+    ads: any[];
+    blogPosts: any[];
 }
 
 export default function SearchPage() {
     const { play, currentSong, isPlaying, toggleLike, likedSongs } = useAudioPlayer();
     const [searchQuery, setSearchQuery] = useState("");
-    const [activeCategory, setActiveCategory] = useState<'all' | 'sports' | 'music'>('all');
+    const [activeCategory, setActiveCategory] = useState<'all' | 'sports' | 'music' | 'events' | 'marketplace' | 'blog'>('all');
     const [isSearching, setIsSearching] = useState(false);
     const [results, setResults] = useState<SearchResults>({
         songs: [],
         artists: [],
         albums: [],
-        teams: []
+        teams: [],
+        events: [],
+        ads: [],
+        blogPosts: [],
     });
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchResults = async () => {
             if (!searchQuery.trim()) {
-                setResults({ songs: [], artists: [], albums: [], teams: [] });
+                setResults({ songs: [], artists: [], albums: [], teams: [], events: [], ads: [], blogPosts: [] });
                 setIsSearching(false);
                 return;
             }
@@ -64,6 +70,31 @@ export default function SearchPage() {
                     .ilike('name', `%${searchQuery}%`)
                     .limit(5);
 
+                // Search Events
+                const { data: eventsData } = await supabase
+                    .from('events')
+                    .select('id, title, cover_image, start_date, location_name, category')
+                    .ilike('title', `%${searchQuery}%`)
+                    .eq('status', 'published')
+                    .limit(6);
+
+                // Search Marketplace Ads
+                const { data: adsData } = await supabase
+                    .from('marketplace_listings')
+                    .select('id, title, price, currency, marketplace_listing_images(image_url, is_primary)')
+                    .ilike('title', `%${searchQuery}%`)
+                    .eq('status', 'active')
+                    .limit(6);
+
+                // Search Blog Posts
+                const { data: blogData } = await supabase
+                    .from('blog_posts')
+                    .select('id, slug, title, excerpt, cover_image, published_at')
+                    .or(`title.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%`)
+                    .eq('status', 'published')
+                    .order('published_at', { ascending: false })
+                    .limit(6);
+
                 setResults({
                     songs: (songsData || []).map(song => ({
                         id: song.id,
@@ -77,7 +108,10 @@ export default function SearchPage() {
                     })),
                     artists: artistsData || [],
                     albums: albumsData || [],
-                    teams: teamsData || []
+                    teams: teamsData || [],
+                    events: eventsData || [],
+                    ads: adsData || [],
+                    blogPosts: blogData || [],
                 });
             } catch (error) {
                 console.error('Search error:', error);
@@ -136,6 +170,21 @@ export default function SearchPage() {
                                 label="Sports"
                                 active={activeCategory === 'sports'}
                                 onClick={() => setActiveCategory('sports')}
+                            />
+                            <CategoryPill
+                                label="Events"
+                                active={activeCategory === 'events'}
+                                onClick={() => setActiveCategory('events')}
+                            />
+                            <CategoryPill
+                                label="Marketplace"
+                                active={activeCategory === 'marketplace'}
+                                onClick={() => setActiveCategory('marketplace')}
+                            />
+                            <CategoryPill
+                                label="Blog"
+                                active={activeCategory === 'blog'}
+                                onClick={() => setActiveCategory('blog')}
                             />
                         </div>
                     )}
@@ -291,7 +340,91 @@ export default function SearchPage() {
                                 </section>
                             )}
 
-                            {isSearching && !loading && results.songs.length === 0 && results.artists.length === 0 && results.albums.length === 0 && results.teams.length === 0 && (
+                            {/* Events Section */}
+                            {(activeCategory === 'all' || activeCategory === 'events') && results.events.length > 0 && (
+                                <section>
+                                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><Calendar size={22} /> Events</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {results.events.map((ev) => (
+                                            <Link
+                                                key={ev.id}
+                                                to={`/events?event=${ev.id}`}
+                                                className="bg-white/5 rounded-xl overflow-hidden hover:bg-white/10 transition group flex gap-3"
+                                            >
+                                                <img
+                                                    src={ev.cover_image || '/placeholder.svg'}
+                                                    alt={ev.title}
+                                                    className="w-24 h-24 object-cover flex-shrink-0"
+                                                />
+                                                <div className="py-2 pr-3 min-w-0 flex flex-col justify-center">
+                                                    <h3 className="font-bold text-white truncate">{ev.title}</h3>
+                                                    <p className="text-xs text-gray-400 truncate">{ev.location_name}</p>
+                                                    {ev.start_date && (
+                                                        <p className="text-xs text-gray-500 mt-1">{new Date(ev.start_date).toLocaleDateString()}</p>
+                                                    )}
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Marketplace Ads Section */}
+                            {(activeCategory === 'all' || activeCategory === 'marketplace') && results.ads.length > 0 && (
+                                <section>
+                                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><ShoppingBag size={22} /> Marketplace</h2>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                        {results.ads.map((ad) => {
+                                            const imgs = ad.marketplace_listing_images || [];
+                                            const primary = imgs.find((i: any) => i.is_primary) || imgs[0];
+                                            return (
+                                                <Link
+                                                    key={ad.id}
+                                                    to={`/marketplace/listing/${ad.id}`}
+                                                    className="bg-white/5 rounded-lg overflow-hidden hover:bg-white/10 transition"
+                                                >
+                                                    <div className="aspect-square bg-gray-800">
+                                                        {primary && <img src={primary.image_url} alt={ad.title} className="w-full h-full object-cover" />}
+                                                    </div>
+                                                    <div className="p-2">
+                                                        <h3 className="font-bold text-white text-xs truncate">{ad.title}</h3>
+                                                        <p className="text-xs text-[#1DB954] font-black mt-1">{ad.currency || ''} {ad.price?.toLocaleString() || ''}</p>
+                                                    </div>
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Blog Posts Section */}
+                            {(activeCategory === 'all' || activeCategory === 'blog') && results.blogPosts.length > 0 && (
+                                <section>
+                                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><FileText size={22} /> Blog</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {results.blogPosts.map((post) => (
+                                            <Link
+                                                key={post.id}
+                                                to={`/blog/${post.slug || post.id}`}
+                                                className="bg-white/5 rounded-xl overflow-hidden hover:bg-white/10 transition flex gap-3"
+                                            >
+                                                {post.cover_image && (
+                                                    <img src={post.cover_image} alt={post.title} className="w-28 h-28 object-cover flex-shrink-0" />
+                                                )}
+                                                <div className="py-2 pr-3 min-w-0">
+                                                    <h3 className="font-bold text-white truncate">{post.title}</h3>
+                                                    <p className="text-xs text-gray-400 line-clamp-2 mt-1">{post.excerpt}</p>
+                                                    {post.published_at && (
+                                                        <p className="text-[10px] text-gray-500 mt-1">{new Date(post.published_at).toLocaleDateString()}</p>
+                                                    )}
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
+                            {isSearching && !loading && results.songs.length === 0 && results.artists.length === 0 && results.albums.length === 0 && results.teams.length === 0 && results.events.length === 0 && results.ads.length === 0 && results.blogPosts.length === 0 && (
                                 <div className="text-center py-20">
                                     <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-5">
                                         <SearchIcon className="w-8 h-8 text-gray-500" />
