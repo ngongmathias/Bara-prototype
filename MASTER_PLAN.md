@@ -415,7 +415,7 @@
 | 19.4.2 | **Store reviews/ratings** — buyers rate experience (1-5 stars + text). `store_reviews` table | P1 | ✅ Done (table + aggregate trigger updating `marketplace_partners.avg_rating/rating_count`; review UI on MarketplaceStorefront) |
 | 19.4.3 | **Store analytics for sellers** — views, clicks, favorites, messages chart over time | P1 | ☐ |
 | 19.4.4 | **"Follow Store"** — notifications when store adds new ads | P1 | ✅ Done (`store_followers` table + trigger notifying followers on new active listing; `FollowStoreButton` on storefront) |
-| 19.4.5 | **Store banner customization** — ensure prominent with CTA area | P1 | ☐ |
+| 19.4.5 | **Store banner customization** — ensure prominent with CTA area | P1 | ✅ Done (`banner_headline`, `banner_cta_text`, `banner_cta_url` columns; editor fields; overlay on storefront) |
 
 ---
 

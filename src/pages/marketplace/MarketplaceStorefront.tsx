@@ -130,9 +130,31 @@ export const MarketplaceStorefront = () => {
       {/* Cover + profile */}
       <div className="relative">
         <div
-          className="h-48 md:h-64 bg-gradient-to-r from-blue-600 to-indigo-600"
+          className="h-48 md:h-64 bg-gradient-to-r from-blue-600 to-indigo-600 relative"
           style={partner.cover_url ? { backgroundImage: `url(${partner.cover_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
-        />
+        >
+          {(partner.banner_headline || partner.banner_cta_text) && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <div className="text-center max-w-2xl px-4">
+                {partner.banner_headline && (
+                  <h2 className="text-xl md:text-3xl font-black text-white drop-shadow-lg mb-3">
+                    {partner.banner_headline}
+                  </h2>
+                )}
+                {partner.banner_cta_text && partner.banner_cta_url && (
+                  <a
+                    href={partner.banner_cta_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-block bg-white text-gray-900 hover:bg-gray-100 font-bold px-6 py-2.5 rounded-full shadow-lg"
+                  >
+                    {partner.banner_cta_text}
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
         <div className="max-w-6xl mx-auto px-4">
           <div className="relative -mt-16 flex items-end gap-4 pb-4">
             {partner.logo_url ? (

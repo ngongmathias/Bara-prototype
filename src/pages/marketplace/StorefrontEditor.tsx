@@ -38,6 +38,9 @@ export const StorefrontEditor = () => {
     website: '',
     city: '',
     country_id: '',
+    banner_headline: '',
+    banner_cta_text: '',
+    banner_cta_url: '',
   });
 
   useEffect(() => {
@@ -74,6 +77,9 @@ export const StorefrontEditor = () => {
           website: partnerData.website || '',
           city: partnerData.city || '',
           country_id: partnerData.country_id || '',
+          banner_headline: partnerData.banner_headline || '',
+          banner_cta_text: partnerData.banner_cta_text || '',
+          banner_cta_url: partnerData.banner_cta_url || '',
         });
       }
     } catch (error) {
@@ -262,6 +268,45 @@ export const StorefrontEditor = () => {
                     className="mt-2"
                   />
                   <p className="text-xs text-gray-500 mt-1">Wide image recommended (1200x400px)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Banner CTA */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 mb-1">Banner Call-to-Action</h2>
+            <p className="text-sm text-gray-500 mb-4">Prominent headline + button that appears on top of your store banner.</p>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="banner_headline">Headline</Label>
+                <Input
+                  id="banner_headline"
+                  placeholder="e.g. New season drop — up to 40% off"
+                  value={formData.banner_headline}
+                  maxLength={80}
+                  onChange={(e) => setFormData({ ...formData, banner_headline: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="banner_cta_text">Button label</Label>
+                  <Input
+                    id="banner_cta_text"
+                    placeholder="e.g. Shop now"
+                    value={formData.banner_cta_text}
+                    maxLength={30}
+                    onChange={(e) => setFormData({ ...formData, banner_cta_text: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="banner_cta_url">Button link</Label>
+                  <Input
+                    id="banner_cta_url"
+                    placeholder="https://..."
+                    value={formData.banner_cta_url}
+                    onChange={(e) => setFormData({ ...formData, banner_cta_url: e.target.value })}
+                  />
                 </div>
               </div>
             </div>
