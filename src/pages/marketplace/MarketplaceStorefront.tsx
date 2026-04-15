@@ -8,6 +8,7 @@ import { ShieldCheck, Star, Clock, MapPin, Mail, Phone, Globe, Edit, Share2 } fr
 import { FaWhatsapp } from 'react-icons/fa';
 import { useUser } from '@clerk/clerk-react';
 import { useShare } from '@/context/ShareContext';
+import { FollowStoreButton } from '@/components/marketplace/FollowStoreButton';
 
 export const MarketplaceStorefront = () => {
   const { slug } = useParams();
@@ -147,6 +148,9 @@ export const MarketplaceStorefront = () => {
               </div>
             </div>
             <div className="flex gap-2 pb-2">
+              {!isOwner && (
+                <FollowStoreButton partnerId={partner.id} />
+              )}
               <button
                 onClick={() => openShare({
                   title: `${partner.display_name} — Bara Marketplace Store`,
