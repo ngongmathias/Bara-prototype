@@ -554,7 +554,7 @@
 | # | Template | Description | Priority | Status |
 |---|----------|-------------|----------|--------|
 | 22.3.1 | `NewMessageEmail` | "You have a new message from {sender}" — smart throttling: skip if user online, batch if multiple within 10min | P0 | ☐ |
-| 22.3.2 | `SongUploadedEmail` | "Your song '{title}' is now live" — sent to artists when song processed | P1 | ☐ |
+| 22.3.2 | `SongUploadedEmail` | "Your song '{title}' is now live" — sent to artists when song processed | P1 | ✅ Done (template + send-email switch + wired in UploadSongPage) |
 | 22.3.3 | `EventReminderEmail` | "{eventName} is tomorrow!" — 24h before, to RSVP'd users. Needs cron job | P0 | ☐ |
 | 22.3.4 | `OfferReceivedEmail` | "Offer of {amount} on '{adTitle}'" — to seller. Money-related = must be email | P0 | ☐ |
 | 22.3.5 | `OfferAcceptedEmail` | "Your offer on '{adTitle}' was accepted!" — to buyer | P0 | ☐ |

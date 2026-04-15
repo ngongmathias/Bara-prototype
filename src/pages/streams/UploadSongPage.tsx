@@ -179,7 +179,7 @@ export default function UploadSongPage() {
             }
 
             // Insert song record
-            const { error: insertError } = await supabase
+            const { data: insertedSong, error: insertError } = await supabase
                 .from('songs')
                 .insert({
                     title: title.trim(),
@@ -191,11 +191,30 @@ export default function UploadSongPage() {
                     duration: duration || null,
                     plays: 0,
                     price: price ? parseFloat(price) : null,
-                });
+                })
+                .select('id')
+                .single();
 
             if (insertError) throw insertError;
 
             setUploadProgress(100);
+
+            const authorEmail = user?.primaryEmailAddress?.emailAddress;
+            if (authorEmail) {
+                supabase.functions.invoke('send-email', {
+                    body: {
+                        to: authorEmail,
+                        subject: `"${title}" is now live on Bara Streams`,
+                        type: 'song_uploaded',
+                        data: {
+                            artistName: user?.firstName ?? user?.fullName ?? 'Artist',
+                            songTitle: title,
+                            songId: insertedSong?.id ?? '',
+                            coverUrl: coverUrl || undefined,
+                        },
+                    },
+                }).catch(console.error);
+            }
 
             toast({ title: 'Upload complete!', description: `"${title}" has been uploaded successfully.` });
             setTimeout(() => navigate('/streams/creator'), 1500);

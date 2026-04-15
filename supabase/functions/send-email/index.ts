@@ -26,6 +26,8 @@ import { BlogApprovedEmail } from "../_shared/emails/BlogApprovedEmail.tsx";
 
 import { BlogDeclinedEmail } from "../_shared/emails/BlogDeclinedEmail.tsx";
 
+import { SongUploadedEmail } from "../_shared/emails/SongUploadedEmail.tsx";
+
 import React from "npm:react@18.2.0";
 
 
@@ -267,6 +269,14 @@ Deno.serve(async (req) => {
                 case 'blog_declined':
 
                     html = await renderAsync(React.createElement(BlogDeclinedEmail, templateData));
+
+                    break;
+
+                case 'song_uploaded':
+
+                case 'song_published':
+
+                    html = await renderAsync(React.createElement(SongUploadedEmail, templateData));
 
                     break;
 
