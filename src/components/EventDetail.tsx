@@ -10,6 +10,7 @@ import { useShare } from '@/context/ShareContext';
 import { MessagingService } from '@/lib/MessagingService';
 import { useUser } from '@clerk/clerk-react';
 import { useToast } from '@/hooks/use-toast';
+import { EventReviews } from '@/components/events/EventReviews';
 
 interface EventDetailProps {
     event: DatabaseEvent;
@@ -391,6 +392,11 @@ export const EventDetail = ({ event, onBack, onRegister }: EventDetailProps) => 
                             </p>
                         </div>
                     </div>
+                </div>
+
+                {/* Post-event reviews (18.2.4) */}
+                <div className="mt-10 pt-8 border-t border-gray-200">
+                    <EventReviews eventId={event.id} startDate={event.start_date} />
                 </div>
             </div>
 
