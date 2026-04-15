@@ -9,6 +9,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import { useUser } from '@clerk/clerk-react';
 import { useShare } from '@/context/ShareContext';
 import { FollowStoreButton } from '@/components/marketplace/FollowStoreButton';
+import { StoreReviews } from '@/components/marketplace/StoreReviews';
 
 export const MarketplaceStorefront = () => {
   const { slug } = useParams();
@@ -303,6 +304,10 @@ export const MarketplaceStorefront = () => {
             })}
           </div>
         )}
+
+        <div className="mt-12 border-t pt-8">
+          <StoreReviews partnerId={partner.id} ownerUserId={partner.owner_user_id} />
+        </div>
       </main>
 
       <Footer />
