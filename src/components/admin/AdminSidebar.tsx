@@ -444,6 +444,18 @@ const adminMenuItems = [
 
   {
 
+    title: "Email Log",
+
+    icon: Mail,
+
+    path: "/admin/email-log",
+
+    description: "Transactional email delivery history"
+
+  },
+
+  {
+
     title: "Economy & Points",
 
     icon: BarChart3,

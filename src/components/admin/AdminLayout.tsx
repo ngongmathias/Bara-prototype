@@ -81,6 +81,7 @@ export const AdminLayout = ({ children, title, subtitle }: AdminLayoutProps) => 
     if (path === "/admin/analytics") return "Analytics";
     if (path === "/admin/reports") return "Reports";
     if (path === "/admin/security") return "Security";
+    if (path === "/admin/email-log") return "Email Log";
     return "Admin Panel";
   };
 

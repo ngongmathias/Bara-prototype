@@ -90,6 +90,8 @@ import { AdminManagement } from "./pages/admin/AdminManagement";
 
 import { AdminRSSFeeds } from "./pages/admin/AdminRSSFeeds";
 
+import { AdminEmailLog } from "./pages/admin/AdminEmailLog";
+
 import { AdminSettings } from "./pages/admin/AdminSettings";
 
 import ContactMessagesPage from "./pages/admin/ContactMessagesPage";
@@ -832,6 +834,8 @@ const AppRoutes = () => {
           <Route path="admin-management" element={<AdminAuthGuard><AdminManagement /></AdminAuthGuard>} />
 
           <Route path="rss-feeds" element={<AdminAuthGuard><AdminRSSFeeds /></AdminAuthGuard>} />
+
+          <Route path="email-log" element={<AdminAuthGuard><AdminEmailLog /></AdminAuthGuard>} />
 
           <Route path="settings" element={<AdminAuthGuard><AdminSettings /></AdminAuthGuard>} />
 

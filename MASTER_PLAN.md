@@ -588,7 +588,7 @@
 | # | Task | Priority | Status |
 |---|------|----------|--------|
 | 22.5.1 | Ensure ALL emails go through `email_queue` — never send directly from frontend | P0 | ☐ |
-| 22.5.2 | **Admin email log** — table: recipient, subject, type, status (sent/failed/pending), sent_at. Filterable | P1 | ☐ |
+| 22.5.2 | **Admin email log** — table: recipient, subject, type, status (sent/failed/pending), sent_at. Filterable | P1 | ✅ Done (`/admin/email-log` — status+type filter, search, stats cards) |
 
 ### 22.6 "From" Address
 
