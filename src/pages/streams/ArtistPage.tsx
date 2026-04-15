@@ -6,6 +6,7 @@ import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { SEO } from '@/components/SEO';
 import { Loader2, Play, Pause, BadgeCheck, Share2 } from 'lucide-react';
 import { useShare } from '@/context/ShareContext';
+import { FollowUserButton } from '@/components/FollowUserButton';
 
 export default function ArtistPage() {
     const { id } = useParams();
@@ -17,7 +18,6 @@ export default function ArtistPage() {
     const [albums, setAlbums] = useState<any[]>([]);
     const [relatedArtists, setRelatedArtists] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [following, setFollowing] = useState(false);
 
     useEffect(() => {
         if (!id) return;
@@ -243,13 +243,10 @@ export default function ArtistPage() {
                             </button>
                         )}
 
-                        {/* Follow Button */}
-                        <button
-                            onClick={() => setFollowing(!following)}
-                            className={`px-8 py-1.5 rounded-full font-bold transition bg-transparent border border-gray-500 text-gray-900 hover:border-white hover:scale-105 active:scale-95 text-sm uppercase tracking-widest`}
-                        >
-                            {following ? 'Following' : 'Follow'}
-                        </button>
+                        {/* Follow Button — persists via user_follows */}
+                        {artist.user_id ? (
+                            <FollowUserButton targetUserId={artist.user_id} variant="pill" />
+                        ) : null}
 
                         {/* Share Button */}
                         <button

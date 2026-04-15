@@ -472,7 +472,7 @@
 | # | Task | Priority | Status |
 |---|------|----------|--------|
 | 21.2.1 | **Public profile page** — avatar, bio, country, joined date, interests, followed artists, events attending, blog posts, marketplace rating | P0 | ☐ |
-| 21.2.2 | **Follow/connect system** — follow users, see public activity (events, playlists, posts) | P1 | ☐ |
+| 21.2.2 | **Follow/connect system** — follow users, see public activity (events, playlists, posts) | P1 | ✅ Done (`user_follows` table with RLS; `FollowUserButton` component; ArtistPage follow button now persists via `artists.user_id`) |
 | 21.2.3 | **Achievement badges** — "Early Adopter", "Music Lover (1000 songs)", "Event Explorer (10 events)", "Top Seller", "Prolific Writer". Black/white badge icons | P1 | ✅ |
 
 ### 21.3 Mobile-First Polish
