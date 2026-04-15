@@ -11,12 +11,22 @@ import {
     Text,
 } from "npm:@react-email/components@1.0.7";
 import * as React from "npm:react@18.3.1";
+import {
+    baseUrl,
+    btnContainer,
+    button,
+    container,
+    footer,
+    footerLink,
+    h1,
+    logo,
+    main,
+    text,
+} from "./emailStyles.ts";
 
 interface WelcomeEmailProps {
     userFirstname?: string;
 }
-
-const baseUrl = "https://baraafrika.com";
 
 export const WelcomeEmail = ({
     userFirstname = "Apps",
@@ -49,11 +59,11 @@ export const WelcomeEmail = ({
                 <Text style={footer}>
                     &copy; 2026 Bara Afrika. All rights reserved.
                     <br />
-                    <Link href={`${baseUrl}/users/dashboard/settings`} style={{ color: "#8898aa" }}>
+                    <Link href={`${baseUrl}/users/dashboard/settings`} style={footerLink}>
                         Email Preferences
                     </Link>
                     {" · "}
-                    <Link href={`${baseUrl}/contact-us`} style={{ color: "#8898aa" }}>
+                    <Link href={`${baseUrl}/contact-us`} style={footerLink}>
                         Contact Us
                     </Link>
                 </Text>
@@ -63,61 +73,3 @@ export const WelcomeEmail = ({
 );
 
 export default WelcomeEmail;
-
-const main = {
-    backgroundColor: "#ffffff",
-    fontFamily: '"Comfortaa", "Helvetica Neue", Helvetica, Arial, sans-serif',
-};
-
-const container = {
-    margin: "0 auto",
-    padding: "20px 0 48px",
-    maxWidth: "560px",
-};
-
-const logo = {
-    margin: "0 auto",
-    marginBottom: "24px",
-};
-
-const h1 = {
-    fontSize: "24px",
-    fontWeight: "bold",
-    textAlign: "center" as const,
-    margin: "30px 0",
-    padding: "0",
-    color: "#1a1a1a",
-};
-
-const text = {
-    fontSize: "16px",
-    lineHeight: "26px",
-    color: "#333",
-    marginBottom: "20px",
-};
-
-const btnContainer = {
-    textAlign: "center" as const,
-    marginTop: "32px",
-    marginBottom: "32px",
-};
-
-const button = {
-    backgroundColor: "#000000",
-    borderRadius: "100px",
-    color: "#FFD700", // Bara Yellow text
-    fontSize: "16px",
-    textDecoration: "none",
-    textAlign: "center" as const,
-    display: "block",
-    padding: "12px 24px",
-    fontWeight: "bold",
-};
-
-const footer = {
-    color: "#8898aa",
-    fontSize: "12px",
-    marginBottom: "24px",
-    textAlign: "center" as const,
-};
-

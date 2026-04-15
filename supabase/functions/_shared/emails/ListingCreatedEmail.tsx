@@ -12,6 +12,18 @@ import {
 } from "npm:@react-email/components@1.0.7";
 import * as React from "npm:react@18.3.1";
 
+import {
+    baseUrl,
+    btnContainer,
+    button,
+    container,
+    footer,
+    h1,
+    logo,
+    main,
+    text,
+} from "./emailStyles.ts";
+
 interface ListingCreatedEmailProps {
     userFirstname?: string;
     listingTitle?: string;
@@ -22,7 +34,6 @@ interface ListingCreatedEmailProps {
     location?: string;
 }
 
-const baseUrl = "https://baraafrika.com";
 
 export const ListingCreatedEmail = ({
     userFirstname = "User",
@@ -98,62 +109,6 @@ export const ListingCreatedEmail = ({
 
 export default ListingCreatedEmail;
 
-const main = {
-    backgroundColor: "#ffffff",
-    fontFamily: '"Comfortaa", "Helvetica Neue", Helvetica, Arial, sans-serif',
-};
-
-const container = {
-    margin: "0 auto",
-    padding: "20px 0 48px",
-    maxWidth: "560px",
-};
-
-const logo = {
-    margin: "0 auto",
-    marginBottom: "24px",
-};
-
-const h1 = {
-    fontSize: "24px",
-    fontWeight: "bold",
-    textAlign: "center" as const,
-    margin: "30px 0",
-    padding: "0",
-    color: "#1a1a1a",
-};
-
-const text = {
-    fontSize: "16px",
-    lineHeight: "26px",
-    color: "#333",
-    marginBottom: "20px",
-};
-
-const btnContainer = {
-    textAlign: "center" as const,
-    marginTop: "32px",
-    marginBottom: "32px",
-};
-
-const button = {
-    backgroundColor: "#000000",
-    borderRadius: "100px",
-    color: "#FFD700", // Bara Yellow text
-    fontSize: "16px",
-    textDecoration: "none",
-    textAlign: "center" as const,
-    display: "block",
-    padding: "12px 24px",
-    fontWeight: "bold",
-};
-
-const footer = {
-    color: "#8898aa",
-    fontSize: "12px",
-    marginBottom: "24px",
-    textAlign: "center" as const,
-};
 
 const adDetails = {
     backgroundColor: "#f6f6f6",

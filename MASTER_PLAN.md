@@ -532,7 +532,7 @@
 | 22.1.2 | **Remove emojis** from headings (🎉 etc.) | P0 | ☐ |
 | 22.1.3 | **Consistent layout** — logo → heading → greeting → body → primary CTA → optional secondary CTA → footer | P0 | ☐ |
 | 22.1.4 | **Specific deep-links** — "View Your Event" → `/events/{eventId}`, NOT `/events` | P0 | ☐ |
-| 22.1.5 | **Extract shared styles** into `emailStyles.ts` — main, container, logo, h1, text, button, footer | P1 | ☐ |
+| 22.1.5 | **Extract shared styles** into `emailStyles.ts` — main, container, logo, h1, text, button, footer | P1 | ✅ Done (`supabase/functions/_shared/emails/emailStyles.ts`; all 13 templates refactored) |
 
 ### 22.2 Wire Up Existing Templates (never triggered)
 
