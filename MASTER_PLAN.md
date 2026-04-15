@@ -405,7 +405,7 @@
 | 19.3.2 | **Public Q&A section** — separate from private chat. Buyer asks, seller answers publicly. Reduces repetitive questions. `marketplace_ad_questions` table | P0 | ☐ |
 | 19.3.3 | **"Make an Offer"** — buyer proposes price, seller accepts/counters/declines. `marketplace_offers` table (exists from Phase 11) | P0 | ✅ Exists |
 | 19.3.4 | **Safety tips** — dismissible banner on ad detail: "Meet in public places", "Don't share banking info", "Inspect before paying" | P1 | ✅ |
-| 19.3.5 | **Seller response time** — "Usually responds within X hours" from historical chat data | P1 | ☐ |
+| 19.3.5 | **Seller response time** — "Usually responds within X hours" from historical chat data | P1 | ✅ Done (EWMA trigger on `messages` insert updating `marketplace_partners.response_time_hours`; already rendered on storefront) |
 
 ### 19.4 Storefront Enhancements
 
