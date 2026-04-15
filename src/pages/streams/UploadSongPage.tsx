@@ -35,6 +35,7 @@ export default function UploadSongPage() {
     const [title, setTitle] = useState('');
     const [genre, setGenre] = useState('');
     const [description, setDescription] = useState('');
+    const [lyrics, setLyrics] = useState('');
     const [albumId, setAlbumId] = useState<string>('');
     const [albums, setAlbums] = useState<any[]>([]);
 
@@ -191,6 +192,7 @@ export default function UploadSongPage() {
                     duration: duration || null,
                     plays: 0,
                     price: price ? parseFloat(price) : null,
+                    lyrics: lyrics.trim() || null,
                 })
                 .select('id')
                 .single();
@@ -341,6 +343,17 @@ export default function UploadSongPage() {
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Tell listeners about this track..."
                             className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] min-h-[100px] resize-none"
+                        />
+                    </div>
+
+                    {/* Lyrics */}
+                    <div className="space-y-2">
+                        <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Lyrics (Optional)</Label>
+                        <Textarea
+                            value={lyrics}
+                            onChange={(e) => setLyrics(e.target.value)}
+                            placeholder="Paste lyrics here, one line per verse..."
+                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] min-h-[180px] resize-y font-mono text-sm"
                         />
                     </div>
 

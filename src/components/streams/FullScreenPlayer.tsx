@@ -17,6 +17,7 @@ import {
     Disc3,
     X,
     ExternalLink,
+    Mic2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
@@ -51,10 +52,33 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
     } = useAudioPlayer();
 
     const { toast } = useToast();
-    const [activeTab, setActiveTab] = useState<'now' | 'queue'>('now');
+    const [activeTab, setActiveTab] = useState<'now' | 'queue' | 'lyrics'>('now');
     const [featuredArtists, setFeaturedArtists] = useState<string[]>([]);
     const [albumInfo, setAlbumInfo] = useState<{ title: string; cover_url: string } | null>(null);
     const [dominantColor, setDominantColor] = useState('#1DB954');
+    const [lyrics, setLyrics] = useState<string | null>(null);
+    const [lyricsLoading, setLyricsLoading] = useState(false);
+
+    useEffect(() => {
+        if (!currentSong?.id) { setLyrics(null); return; }
+        let cancelled = false;
+        setLyricsLoading(true);
+        (async () => {
+            try {
+                const { data } = await supabase
+                    .from('songs')
+                    .select('lyrics')
+                    .eq('id', currentSong.id)
+                    .maybeSingle();
+                if (!cancelled) setLyrics(data?.lyrics ?? null);
+            } catch {
+                if (!cancelled) setLyrics(null);
+            } finally {
+                if (!cancelled) setLyricsLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [currentSong?.id]);
 
     // Fetch featured artists
     useEffect(() => {
@@ -357,10 +381,19 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                 {!currentSong.artist_id && <div />}
 
                                 <div className="flex items-center gap-3">
+                                    {/* Lyrics toggle */}
+                                    <button
+                                        onClick={() => setActiveTab(activeTab === 'lyrics' ? 'now' : 'lyrics')}
+                                        className={`p-2 rounded-full transition-colors ${activeTab === 'lyrics' ? 'text-[#1DB954]' : 'text-white/30 hover:text-white'}`}
+                                        aria-label="Toggle lyrics"
+                                    >
+                                        <Mic2 size={20} />
+                                    </button>
                                     {/* Queue toggle (visible on mobile) */}
                                     <button
                                         onClick={() => setActiveTab(activeTab === 'queue' ? 'now' : 'queue')}
                                         className={`p-2 rounded-full transition-colors lg:hidden ${activeTab === 'queue' ? 'text-[#1DB954]' : 'text-white/30 hover:text-white'}`}
+                                        aria-label="Toggle queue"
                                     >
                                         <ListMusic size={20} />
                                     </button>
@@ -471,6 +504,51 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                                         </div>
                                                     </button>
                                                 ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* LYRICS PANEL (overlay on top of content when active) */}
+                        <AnimatePresence>
+                            {activeTab === 'lyrics' && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute inset-0 z-30 bg-black/85 backdrop-blur-md flex flex-col"
+                                >
+                                    <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 flex-shrink-0">
+                                        <div>
+                                            <h3 className="text-sm font-bold text-white/60 uppercase tracking-wider flex items-center gap-2">
+                                                <Mic2 size={14} /> Lyrics
+                                            </h3>
+                                            <div className="text-white text-base font-semibold mt-1">{currentSong.title}</div>
+                                        </div>
+                                        <button
+                                            onClick={() => setActiveTab('now')}
+                                            className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                                            aria-label="Close lyrics"
+                                        >
+                                            <X size={20} />
+                                        </button>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto px-6 md:px-12 py-8 min-h-0">
+                                        {lyricsLoading ? (
+                                            <div className="text-center text-white/40">Loading lyrics...</div>
+                                        ) : lyrics && lyrics.trim() ? (
+                                            <pre className="whitespace-pre-wrap text-center text-white text-lg md:text-xl leading-relaxed font-sans max-w-2xl mx-auto">
+                                                {lyrics}
+                                            </pre>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center text-center text-white/50 py-12">
+                                                <Mic2 size={40} className="mb-3 text-white/20" />
+                                                <p className="text-base mb-2">Lyrics not available</p>
+                                                <p className="text-xs text-white/30 max-w-xs">
+                                                    Are you the artist? Add lyrics from your creator portal to let fans sing along.
+                                                </p>
                                             </div>
                                         )}
                                     </div>

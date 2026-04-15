@@ -285,7 +285,7 @@
 | 17.1.2 | **Desktop layout** — two-column: left 60% massive album art, right side: song info, lyrics, queue. Blurred art bleeds into background with dark gradient overlay | P0 | ☐ |
 | 17.1.3 | **Mobile layout** — full-screen vertical: large art at top (full width), info + controls below, swipe up for queue/lyrics | P0 | ☐ |
 | 17.1.4 | **Background ambience** — extract dominant color from album art, use as subtle desaturated gradient behind player | P1 | ✅ |
-| 17.1.5 | **Lyrics display** — scrolling lyrics synced with playback (from `lyrics` column on `songs` table). "Lyrics not available" CTA for artists to add them | P1 | ☐ |
+| 17.1.5 | **Lyrics display** — scrolling lyrics synced with playback (from `lyrics` column on `songs` table). "Lyrics not available" CTA for artists to add them | P1 | ✅ Done (`lyrics` column; lyrics tab in FullScreenPlayer with Mic2 toggle; "Lyrics not available" CTA; upload form field) |
 | 17.1.6 | **Queue panel** — always visible on desktop (right sidebar), slide-up drawer on mobile. Drag-to-reorder, remove from queue. "Nothing queued" suggests Browse/search | P0 | ☐ |
 | 17.1.7 | **Progress bar** — full-width, scrubbable, elapsed/remaining time, timestamp tooltip on hover | P0 | ☐ |
 | 17.1.8 | **Controls row** — centered: shuffle, prev, play/pause (large), next, repeat. Below: volume (desktop), heart/like, add-to-playlist, share | P0 | ☐ |
