@@ -3,6 +3,7 @@ import { Heart } from 'lucide-react';
 import { createAuthenticatedSupabaseClient } from '@/lib/supabase';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface FavoriteButtonProps {
   listingId: string;
@@ -13,6 +14,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
   const { user } = useUser();
   const { getToken } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -68,6 +70,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
           .eq('user_id', user.id)
           .eq('listing_id', listingId);
         setIsFavorite(false);
+        toast({ title: 'Removed from favorites' });
       } else {
         const { error: insertError } = await supabase
           .from('marketplace_favorites')
@@ -81,9 +84,11 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
             setIsFavorite(true);
           } else {
             console.error('Error adding favorite:', insertError);
+            toast({ title: 'Could not save', description: insertError.message, variant: 'destructive' });
           }
         } else {
           setIsFavorite(true);
+          toast({ title: 'Added to favorites' });
         }
       }
     } catch (error) {

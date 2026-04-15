@@ -242,7 +242,7 @@
 | 16.2.1 | **Button feedback** — all clickable elements: subtle scale (0.97) on press via `active:scale-[0.97]` on shadcn Button base | P1 | ✅ Done |
 | 16.2.2 | **Page transitions** — `AnimatePresence` with fade+slide (150ms) on route changes | P2 | ☐ |
 | 16.2.3 | **Skeleton loaders** — every data-fetching section shows content-shaped skeletons (not spinners). Extend to ALL sections | P1 | ✅ Done (streams: Trending/NewReleases/Artists/Library/Movies/Ebooks/StreamsHome) |
-| 16.2.4 | **Toast notifications** — consistent `useToast` for all user actions (cart, like, save, share, error) everywhere | P1 | ☐ |
+| 16.2.4 | **Toast notifications** — consistent `useToast` for all user actions (cart, like, save, share, error) everywhere | P1 | ✅ Done (FavoriteButton add/remove/error; CartContext add/update/remove/clear) |
 | 16.2.5 | **Scroll-triggered animations** — cards fade-in-up on viewport enter via `ScrollReveal`. Ensure it wraps all card grids | P2 | ✅ Done (BlogPage, MarketplacePage, Artists/TrendingSongs/NewReleases; EventsPage already wrapped) |
 | 16.2.6 | **Celebration animations** — confetti/sparkle on milestones (first ad, 10th event, streak achievement) | P2 | ☐ |
 

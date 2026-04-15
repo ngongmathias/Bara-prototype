@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { createAuthenticatedSupabaseClient } from '@/lib/supabase';
+import { toast } from '@/hooks/use-toast';
 
 export interface CartItem {
   id?: string; // DB id (only for synced items)
@@ -123,6 +124,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setItems(updated);
     writeLocalCart(updated);
+    toast({ title: existing ? 'Cart updated' : 'Added to cart', description: item.title });
 
     if (user) {
       const supabase = await getAuthenticatedClient();
@@ -144,6 +146,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
     setItems(updated);
     writeLocalCart(updated);
+    toast({ title: 'Removed from cart' });
 
     if (user) {
       const supabase = await getAuthenticatedClient();
@@ -190,6 +193,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearCart = useCallback(async () => {
     setItems([]);
     writeLocalCart([]);
+    toast({ title: 'Cart cleared' });
     if (user) {
       const supabase = await getAuthenticatedClient();
       await supabase.from('marketplace_cart_items').delete().eq('user_id', user.id);
