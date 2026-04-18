@@ -49,6 +49,7 @@ export default function StreamsHome() {
     const [promotedSongs, setPromotedSongs] = useState<(Song & { featured_badge?: string })[]>([]);
     const [personalizedSongs, setPersonalizedSongs] = useState<Song[]>([]);
     const [featuredArtistsMap, setFeaturedArtistsMap] = useState<Record<string, string>>({});
+    const [spotlight, setSpotlight] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [refreshKey, setRefreshKey] = useState(0);
@@ -105,6 +106,20 @@ export default function StreamsHome() {
                     .eq('is_public', true)
                     .limit(6);
                 setPlatformPlaylists(playlistData || []);
+
+                // Artist Spotlight
+                try {
+                    const today = new Date().toISOString().split('T')[0];
+                    const { data: spotlightData } = await supabase
+                        .from('featured_artists')
+                        .select('*, artists(id, name, image_url, bio, genre)')
+                        .lte('start_date', today)
+                        .gte('end_date', today)
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .maybeSingle();
+                    setSpotlight(spotlightData);
+                } catch { /* featured_artists table may not exist yet */ }
 
                 // Promoted Songs (Platform Picks / Editor's Choice)
                 try {
@@ -361,6 +376,44 @@ export default function StreamsHome() {
                                 <QuickAccessTile title="Afrobeats Mix" gradient="from-gray-600 to-gray-700" icon="🌍" to="/streams/search?q=Afrobeats" />
                                 <QuickAccessTile title="Amapiano Mix" gradient="from-gray-500 to-gray-600" icon="🎹" to="/streams/search?q=Amapiano" />
                             </div>
+
+                            {/* Artist Spotlight */}
+                            {spotlight?.artists && (
+                                <Link
+                                    to={`/streams/artist/${spotlight.artists.id}`}
+                                    className="relative block w-full rounded-xl overflow-hidden group"
+                                >
+                                    <div className="flex flex-col sm:flex-row items-center bg-gradient-to-r from-gray-900 to-gray-700 text-white p-6 sm:p-10 gap-6">
+                                        <img
+                                            src={spotlight.artists.image_url || '/placeholder-artist.png'}
+                                            alt={spotlight.artists.name}
+                                            className="w-28 h-28 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-white/20 shadow-2xl flex-shrink-0"
+                                        />
+                                        <div className="flex-1 text-center sm:text-left">
+                                            <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Artist Spotlight</p>
+                                            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight" style={{ fontFamily: 'Comfortaa, sans-serif' }}>
+                                                {spotlight.artists.name}
+                                            </h2>
+                                            {spotlight.headline && (
+                                                <p className="text-lg text-gray-300 mt-1">{spotlight.headline}</p>
+                                            )}
+                                            <p className="text-sm text-gray-400 mt-2 line-clamp-2">
+                                                {spotlight.description || spotlight.artists.bio || ''}
+                                            </p>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    handlePlayArtist(spotlight.artists.id);
+                                                }}
+                                                className="mt-4 inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-6 py-2.5 rounded-full hover:bg-gray-200 transition text-sm"
+                                            >
+                                                <Play size={16} fill="currentColor" /> Play top tracks
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Link>
+                            )}
 
                             {/* Platform Picks / Editor's Choice */}
                             {promotedSongs.length > 0 && (
