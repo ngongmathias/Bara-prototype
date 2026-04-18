@@ -10,8 +10,8 @@ import { motion } from "framer-motion";
 import { GamificationService } from "@/lib/gamificationService";
 import { MonetizationService } from "@/lib/monetizationService";
 import { useToast } from "@/hooks/use-toast";
-import { useUser } from "@clerk/clerk-react";
-import { supabase } from "@/lib/supabase";
+import { useUser, useAuth } from "@clerk/clerk-react";
+import { supabase, createAuthenticatedSupabaseClient } from "@/lib/supabase";
 import { Link } from "react-router-dom";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
 import {
@@ -48,6 +48,7 @@ type TabType = 'overview' | 'songs' | 'albums' | 'analytics';
 
 export default function ArtistDashboard() {
     const { user } = useUser();
+    const { getToken } = useAuth();
     const { toast } = useToast();
     const { play, currentSong, isPlaying, togglePlay } = useAudioPlayer();
     const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -56,6 +57,7 @@ export default function ArtistDashboard() {
     const [songs, setSongs] = useState<MySong[]>([]);
     const [albums, setAlbums] = useState<MyAlbum[]>([]);
     const [featuredOnSongs, setFeaturedOnSongs] = useState<(MySong & { primary_artist: string })[]>([]);
+    const [picks, setPicks] = useState<{ id: string; song_id: string; display_order: number; note: string | null }[]>([]);
     const [loading, setLoading] = useState(true);
     const [isBoosting, setIsBoosting] = useState(false);
     const [dailyStreams, setDailyStreams] = useState<Array<{ date: string; count: number }>>([]);
@@ -178,10 +180,51 @@ export default function ArtistDashboard() {
                     );
                 }
             } catch { /* song_artists table may not exist */ }
+
+            // Fetch artist picks
+            try {
+                const { data: picksData } = await supabase
+                    .from('artist_picks')
+                    .select('id, song_id, display_order, note')
+                    .eq('artist_id', artist.id)
+                    .order('display_order');
+                setPicks(picksData || []);
+            } catch { /* artist_picks table may not exist */ }
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const togglePick = async (songId: string) => {
+        if (!artistId) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            if (!token) return;
+            const client = await createAuthenticatedSupabaseClient(token);
+            const existing = picks.find(p => p.song_id === songId);
+            if (existing) {
+                await client.from('artist_picks').delete().eq('id', existing.id);
+                setPicks(prev => prev.filter(p => p.id !== existing.id));
+                toast({ title: 'Pick removed' });
+            } else {
+                if (picks.length >= 5) {
+                    toast({ title: 'Max 5 picks', description: 'Remove one before adding another.' });
+                    return;
+                }
+                const nextOrder = picks.length > 0 ? Math.max(...picks.map(p => p.display_order)) + 1 : 0;
+                const { data, error } = await client
+                    .from('artist_picks')
+                    .insert({ artist_id: artistId, song_id: songId, display_order: nextOrder })
+                    .select('id, song_id, display_order, note')
+                    .single();
+                if (error) throw error;
+                if (data) setPicks(prev => [...prev, data]);
+                toast({ title: 'Added to your picks' });
+            }
+        } catch (e: any) {
+            toast({ title: 'Error', description: e.message });
         }
     };
 
@@ -481,6 +524,9 @@ export default function ArtistDashboard() {
                                                                 />
                                                                 <span className={`font-medium truncate ${currentSong?.id === song.id ? 'text-[#1DB954]' : 'text-gray-900'}`}>
                                                                     {song.title}
+                                                                    {picks.some(p => p.song_id === song.id) && (
+                                                                        <Star size={12} className="inline ml-1 fill-amber-400 text-amber-400" />
+                                                                    )}
                                                                 </span>
                                                             </div>
                                                         </TableCell>
@@ -512,6 +558,10 @@ export default function ArtistDashboard() {
                                                                         toast({ title: 'Copied!', description: 'Song link copied to clipboard.' });
                                                                     }}>
                                                                         <Share2 size={14} className="mr-2" /> Copy Link
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem onClick={() => togglePick(song.id)}>
+                                                                        <Star size={14} className={`mr-2 ${picks.some(p => p.song_id === song.id) ? 'fill-amber-400 text-amber-400' : ''}`} />
+                                                                        {picks.some(p => p.song_id === song.id) ? 'Remove Pick' : 'Add to Picks'}
                                                                     </DropdownMenuItem>
                                                                     <DropdownMenuItem onClick={() => handleDeleteSong(song.id)} className="text-red-600">
                                                                         <Trash2 size={14} className="mr-2" /> Delete

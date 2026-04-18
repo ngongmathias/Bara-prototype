@@ -16,6 +16,7 @@ export default function ArtistPage() {
     const [topTracks, setTopTracks] = useState<Song[]>([]);
     const [featuredOnTracks, setFeaturedOnTracks] = useState<(Song & { primary_artist: string; plays: number })[]>([]);
     const [albums, setAlbums] = useState<any[]>([]);
+    const [artistPicks, setArtistPicks] = useState<(Song & { note?: string })[]>([]);
     const [relatedArtists, setRelatedArtists] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -84,6 +85,30 @@ export default function ArtistPage() {
                         setFeaturedOnTracks(formatted);
                     }
                 } catch { /* song_artists table may not exist yet */ }
+
+                // Fetch Artist Picks
+                try {
+                    const { data: picksData } = await supabase
+                        .from('artist_picks')
+                        .select('display_order, note, songs(id, title, file_url, cover_url, duration, artist_id, album_id, albums(title))')
+                        .eq('artist_id', id)
+                        .order('display_order')
+                        .limit(5);
+                    if (picksData) {
+                        setArtistPicks(picksData.filter((p: any) => p.songs).map((p: any) => ({
+                            id: p.songs.id,
+                            title: p.songs.title,
+                            artist: artistData?.name || 'Unknown Artist',
+                            file_url: p.songs.file_url,
+                            cover_url: p.songs.cover_url || '/placeholder-music.png',
+                            duration: p.songs.duration,
+                            artist_id: p.songs.artist_id,
+                            album_id: p.songs.album_id,
+                            album_title: p.songs.albums?.title,
+                            note: p.note,
+                        })));
+                    }
+                } catch { /* artist_picks table may not exist yet */ }
 
                 // Fetch Albums
                 const { data: albumsData } = await supabase
@@ -322,30 +347,34 @@ export default function ArtistPage() {
                             </div>
                         </section>
 
-                        {/* Artist's Pick */}
-                        {topTracks.length > 0 && (
+                        {/* Artist's Picks */}
+                        {(artistPicks.length > 0 || topTracks.length > 0) && (
                             <section className="mb-12">
-                                <h2 className="text-2xl font-comfortaa font-semibold mb-6">Artist's Pick</h2>
-                                <div className="flex gap-6">
-                                    <div className="flex items-start gap-4 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl p-5 max-w-md">
-                                        <img
-                                            loading="lazy" src={topTracks[0].cover_url}
-                                            alt={topTracks[0].title}
-                                            className="w-20 h-20 rounded-lg object-cover shadow-md flex-shrink-0"
-                                        />
-                                        <div className="min-w-0">
-                                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Posted by the artist</p>
-                                            <h3 className="font-bold text-gray-900 truncate">{topTracks[0].title}</h3>
-                                            <p className="text-sm text-gray-500 mt-0.5">{topTracks[0].album_title || 'Single'}</p>
-                                            <button
-                                                onClick={() => handlePlaySong(topTracks[0])}
-                                                className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#1DB954] hover:underline"
-                                            >
-                                                <Play fill="currentColor" className="w-4 h-4" />
-                                                Play now
-                                            </button>
+                                <h2 className="text-2xl font-comfortaa font-semibold mb-6">Artist's Pick{artistPicks.length > 1 ? 's' : ''}</h2>
+                                <div className="flex flex-wrap gap-4">
+                                    {(artistPicks.length > 0 ? artistPicks : [topTracks[0]]).map((track) => (
+                                        <div key={track.id} className="flex items-start gap-4 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl p-5 max-w-sm w-full sm:w-auto">
+                                            <img
+                                                loading="lazy" src={track.cover_url}
+                                                alt={track.title}
+                                                className="w-20 h-20 rounded-lg object-cover shadow-md flex-shrink-0"
+                                            />
+                                            <div className="min-w-0">
+                                                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">
+                                                    {(track as any).note || 'Posted by the artist'}
+                                                </p>
+                                                <h3 className="font-bold text-gray-900 truncate">{track.title}</h3>
+                                                <p className="text-sm text-gray-500 mt-0.5">{track.album_title || 'Single'}</p>
+                                                <button
+                                                    onClick={() => handlePlaySong(track)}
+                                                    className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#1DB954] hover:underline"
+                                                >
+                                                    <Play fill="currentColor" className="w-4 h-4" />
+                                                    Play now
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    ))}
                                 </div>
                             </section>
                         )}

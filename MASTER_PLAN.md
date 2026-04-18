@@ -325,7 +325,7 @@
 | 17.4.2 | **Artist Spotlight** — rotating featured artist on StreamsHome: full-width banner, large photo, bold Comfortaa name, bio snippet, "Play top tracks". Weekly rotation via `featured_artists` table | P1 | ✅ Done |
 | 17.4.3 | **"Behind the music"** — artists add "story behind this song" text, shown expandable on song detail page | P2 | ☐ |
 | 17.4.4 | **Artist analytics** enhancements — streams over time ✅, follower count ✅, (TODO: top countries, demographics, playlist adds, follower growth over time) | P1 | 🟡 |
-| 17.4.5 | **"Artist Picks"** — verified artists pin 3-5 tracks to top of profile | P1 | ☐ |
+| 17.4.5 | **"Artist Picks"** — verified artists pin 3-5 tracks to top of profile | P1 | ✅ Done |
 
 ### 17.5 Music Player Polish
 
