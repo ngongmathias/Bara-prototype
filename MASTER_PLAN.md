@@ -303,7 +303,7 @@
 | 17.2.1 | **"Made for You" daily mixes** — 3-5 personalized playlists from listening history by mood/genre. Expand `personalizedSongs` into proper named playlists with cover art | P0 | ☐ |
 | 17.2.2 | **Genre/mood browsing page** — clean grid of genre cards (Afrobeats, Amapiano, Gospel, Highlife, Bongo Flava, Gqom, etc.). Bold black/white, large typography. Each leads to curated page with top songs, artists, playlists | P0 | ☐ |
 | 17.2.3 | **"Fans also like"** on artist pages — related artists by shared listeners or genre | P1 | ✅ |
-| 17.2.4 | **New Release Radar** — personalized playlist of new releases from followed + similar artists, auto-updated weekly | P1 | ☐ |
+| 17.2.4 | **New Release Radar** — personalized playlist of new releases from followed + similar artists, auto-updated weekly | P1 | ✅ Done |
 | 17.2.5 | **Listening stats dashboard** — total minutes this week/month, top genres, top artists, streak counter | P1 | ✅ |
 | 17.2.6 | **Song/artist radio** — "Start Radio" button creates infinite auto-playing queue of similar music | P2 | ☐ |
 
