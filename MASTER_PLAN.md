@@ -312,7 +312,7 @@
 | # | Task | Priority | Status |
 |---|------|----------|--------|
 | 17.3.1 | **Activity feed** — "Friends are listening to..." on StreamsHome (opt-in privacy toggle). Long-term infrastructure build | P2 | ☐ |
-| 17.3.2 | **Collaborative playlists** — multiple users add songs via join link. Contributor avatars on playlist cover | P1 | ☐ |
+| 17.3.2 | **Collaborative playlists** — multiple users add songs via join link. Contributor avatars on playlist cover | P1 | ✅ Done |
 | 17.3.3 | **Song comments** — short comments on song detail page. Likes on comments for surfacing best ones | P2 | ☐ |
 | 17.3.4 | **Artist follow system** — follow button, follower count, "new release" notifications | P0 | ☐ |
 | 17.3.5 | **Share currently playing** — one-tap share with beautiful card (album art, title, artist, BARA link) | P0 | ☐ |

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
-import { supabase } from '@/lib/supabase';
+import { supabase, createAuthenticatedSupabaseClient } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useSongContextMenu } from '@/components/streams/SongContextMenu';
-import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music, Share2 } from 'lucide-react';
+import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music, Share2, Users, Link2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useUser, useAuth } from '@clerk/clerk-react';
 
 interface PlaylistData {
     id: string;
@@ -13,17 +14,25 @@ interface PlaylistData {
     description: string;
     cover_url: string;
     created_at: string;
+    created_by?: string;
+    is_collaborative?: boolean;
+    invite_code?: string;
 }
 
 export default function PlaylistPage() {
     const { id } = useParams();
+    const [searchParams] = useSearchParams();
     const { play, playAlbum, currentSong, isPlaying, togglePlay } = useAudioPlayer();
     const { handlers: contextMenuHandlers } = useSongContextMenu();
     const { toast } = useToast();
+    const { user } = useUser();
+    const { getToken } = useAuth();
     const [playlist, setPlaylist] = useState<PlaylistData | null>(null);
     const [tracks, setTracks] = useState<Song[]>([]);
     const [likedTracks, setLikedTracks] = useState<string[]>([]);
     const [ftMap, setFtMap] = useState<Record<string, string>>({});
+    const [collaborators, setCollaborators] = useState<string[]>([]);
+    const [isCollaborator, setIsCollaborator] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -39,6 +48,19 @@ export default function PlaylistPage() {
 
             if (playlistData) {
                 setPlaylist(playlistData);
+
+                // Fetch collaborators
+                try {
+                    const { data: collabs } = await supabase
+                        .from('playlist_collaborators')
+                        .select('user_id')
+                        .eq('playlist_id', playlistData.id);
+                    const ids = (collabs || []).map((c: any) => c.user_id);
+                    setCollaborators(ids);
+                    setIsCollaborator(
+                        playlistData.created_by === user?.id || ids.includes(user?.id || '')
+                    );
+                } catch { /* table may not exist */ }
             }
 
             // Fetch songs in this playlist (via playlist_songs junction table)
@@ -181,6 +203,48 @@ export default function PlaylistPage() {
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     };
 
+    // Auto-join via invite code in URL
+    useEffect(() => {
+        const inviteCode = searchParams.get('invite');
+        if (!inviteCode || !user?.id || !id) return;
+        (async () => {
+            try {
+                const token = await getToken({ template: 'supabase' });
+                if (!token) return;
+                const client = await createAuthenticatedSupabaseClient(token);
+                await client
+                    .from('playlist_collaborators')
+                    .upsert({ playlist_id: id, user_id: user.id }, { onConflict: 'playlist_id,user_id' });
+                setIsCollaborator(true);
+                setCollaborators(prev => prev.includes(user.id) ? prev : [...prev, user.id]);
+                toast({ title: 'Joined playlist', description: 'You can now add songs.' });
+            } catch { /* ignore */ }
+        })();
+    }, [searchParams, user?.id, id]);
+
+    const copyInviteLink = async () => {
+        if (!playlist || !id) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            if (!token) return;
+            const client = await createAuthenticatedSupabaseClient(token);
+            let code = playlist.invite_code;
+            if (!code) {
+                code = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
+                await client
+                    .from('playlists')
+                    .update({ is_collaborative: true, invite_code: code })
+                    .eq('id', id);
+                setPlaylist(prev => prev ? { ...prev, is_collaborative: true, invite_code: code! } : prev);
+            }
+            const link = `${window.location.origin}/streams/playlist/${id}?invite=${code}`;
+            await navigator.clipboard.writeText(link);
+            toast({ title: 'Invite link copied!' });
+        } catch (e: any) {
+            toast({ title: 'Error', description: e.message });
+        }
+    };
+
     const totalDuration = tracks.reduce((sum, t) => sum + (t.duration || 0), 0);
 
     if (loading) {
@@ -215,7 +279,14 @@ export default function PlaylistPage() {
 
                             {/* Playlist Info */}
                             <div className="flex-1 pb-4">
-                                <div className="text-xs font-bold mb-2 uppercase tracking-tight">Playlist</div>
+                                <div className="text-xs font-bold mb-2 uppercase tracking-tight flex items-center gap-2">
+                                    Playlist
+                                    {playlist?.is_collaborative && (
+                                        <span className="inline-flex items-center gap-1 bg-[#1DB954]/20 text-[#1DB954] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                            <Users size={10} /> Collaborative
+                                        </span>
+                                    )}
+                                </div>
                                 <h1 className="text-5xl md:text-8xl font-black mb-6 leading-tight tracking-tighter text-gray-900">{playlistTitle}</h1>
                                 <p className="text-gray-600 text-sm mb-4 font-medium">{playlistDesc}</p>
                                 <div className="flex items-center gap-2 text-sm font-bold">
@@ -242,6 +313,20 @@ export default function PlaylistPage() {
                         </button>
                         <button className="text-gray-500 hover:text-gray-900 transition" aria-label="Like"><Heart className="w-7 h-7" /></button>
                         <button onClick={handleShare} className="text-gray-500 hover:text-gray-900 transition" title="Share playlist" aria-label="Share"><Share2 className="w-7 h-7" /></button>
+                        {playlist?.created_by === user?.id && (
+                            <button
+                                onClick={copyInviteLink}
+                                className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition border border-gray-300 rounded-full px-3 py-1.5"
+                                title="Copy invite link for collaborators"
+                            >
+                                <Link2 size={14} /> Invite
+                            </button>
+                        )}
+                        {collaborators.length > 0 && (
+                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                                <Users size={14} /> {collaborators.length + 1} contributors
+                            </span>
+                        )}
                         <button className="text-gray-500 hover:text-gray-900 transition" aria-label="More options"><MoreHorizontal className="w-7 h-7" /></button>
                     </div>
                 </div>
