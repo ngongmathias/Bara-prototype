@@ -24,8 +24,10 @@ import { useEvents, useEventCategories } from '@/hooks/useEvents';
 import { EventsService } from '@/lib/eventsService';
 import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
-import { supabase } from '@/lib/supabase';
+import { supabase, createAuthenticatedSupabaseClient } from '@/lib/supabase';
 import { SEO } from '@/components/SEO';
+import { useUser, useAuth } from '@clerk/clerk-react';
+import { InterestPicker } from '@/components/events/InterestPicker';
 import { MonetizationService } from '@/lib/monetizationService';
 import { useToast } from '@/hooks/use-toast';
 import { useShare } from '@/context/ShareContext';
@@ -57,6 +59,10 @@ export const EventsPage = () => {
   const [urlCountryFilter, setUrlCountryFilter] = useState<string | null>(null);
   const [ticketModalOpen, setTicketModalOpen] = useState(false);
   const [ticketModalEvent, setTicketModalEvent] = useState<DatabaseEvent | null>(null);
+  const [recommendedEvents, setRecommendedEvents] = useState<DatabaseEvent[]>([]);
+  const [showInterestPicker, setShowInterestPicker] = useState(false);
+  const { user: clerkUser } = useUser();
+  const { getToken } = useAuth();
 
   const parseDate = (value?: string | null) => {
     if (!value) return null;
@@ -367,6 +373,30 @@ export const EventsPage = () => {
     fetchDirectEvent();
     return () => { cancelled = true; };
   }, [allLoadedEvents, splatParam]);
+
+  // Fetch interest-based recommendations
+  useEffect(() => {
+    if (!clerkUser?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = await getToken({ template: 'supabase' });
+        if (!token || cancelled) return;
+        const client = await createAuthenticatedSupabaseClient(token);
+        const { data: interests } = await client
+          .from('user_interests')
+          .select('category_slug')
+          .eq('user_id', clerkUser.id);
+        if (!interests || interests.length === 0 || cancelled) return;
+        const slugs = new Set(interests.map(i => i.category_slug));
+        const matching = activeEvents.filter(e =>
+          e.category && slugs.has(e.category)
+        ).slice(0, 8);
+        if (!cancelled) setRecommendedEvents(matching);
+      } catch { /* ignore */ }
+    })();
+    return () => { cancelled = true; };
+  }, [clerkUser?.id, activeEvents]);
 
   // Update URL when viewing event details (only after initial load to prevent premature redirect)
   useEffect(() => {
@@ -797,6 +827,66 @@ export const EventsPage = () => {
                   <>
                     {(activeEventsTotal + pastEventsTotal) > 0 ? (
                       <>
+                        {/* Interest Picker + Recommended */}
+                        {clerkUser && (
+                          <>
+                            {showInterestPicker && (
+                              <InterestPicker onDone={() => setShowInterestPicker(false)} />
+                            )}
+                            {recommendedEvents.length > 0 && (
+                              <div className="mb-12">
+                                <div className="flex items-center justify-between mb-4">
+                                  <div>
+                                    <h2 className="text-2xl font-bold text-gray-900">Recommended for You</h2>
+                                    <p className="text-sm text-gray-500">Based on your interests</p>
+                                  </div>
+                                  <button
+                                    onClick={() => setShowInterestPicker(p => !p)}
+                                    className="text-sm text-gray-500 hover:text-gray-900 underline"
+                                  >
+                                    Edit interests
+                                  </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                  {recommendedEvents.map(event => (
+                                    <div key={event.id} onClick={() => handleViewEvent(event)} className="cursor-pointer">
+                                      <EventCard
+                                        id={event.id}
+                                        title={event.title}
+                                        date={formatEventDate(event.start_date, event.end_date)}
+                                        time={formatEventTime(event.start_date, event.end_date)}
+                                        location={event.city_name ? `${event.city_name}, ${event.country_name}` : event.venue_address || ''}
+                                        imageUrl={event.event_image_url || ''}
+                                        category={event.category_name || event.category}
+                                        hashtags={event.tags || []}
+                                        startDate={event.start_date}
+                                        endDate={event.end_date}
+                                        isFree={event.is_free}
+                                        entryFee={event.entry_fee}
+                                        priceDisplay={getEventPriceDisplay(event)}
+                                        currency={event.currency}
+                                        onViewEvent={(id) => {
+                                          const ev = allLoadedEvents.find(e => e.id === id);
+                                          if (ev) handleViewEvent(ev);
+                                        }}
+                                        onLocationClick={handleLocationClick}
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {recommendedEvents.length === 0 && !showInterestPicker && (
+                              <button
+                                onClick={() => setShowInterestPicker(true)}
+                                className="mb-8 text-sm text-[#1DB954] hover:underline font-medium"
+                              >
+                                Set your interests for personalized event recommendations
+                              </button>
+                            )}
+                          </>
+                        )}
+
                         {/* Active Events Section */}
                         {activeEvents.length > 0 && (
                           <div className="mb-12">

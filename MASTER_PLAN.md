@@ -347,7 +347,7 @@
 | # | Task | Priority | Status |
 |---|------|----------|--------|
 | 18.1.1 | **"Events near me"** — browser geolocation (with permission), sort by distance | P0 | ☐ |
-| 18.1.2 | **Interest-based recommendations** — users pick interests during onboarding (Music, Sports, Tech, Food, Art, Networking), surface matching events | P1 | ☐ |
+| 18.1.2 | **Interest-based recommendations** — users pick interests during onboarding (Music, Sports, Tech, Food, Art, Networking), surface matching events | P1 | ✅ Done |
 | 18.1.3 | **"Happening Now" live indicator** — pulsing black dot + "LIVE" text on events currently in progress | P1 | ✅ Done (EventTimingBadge on cards + EventCountdown "Live Now" on detail) |
 | 18.1.4 | **Event countdown** — live countdown timer on event detail page | P1 | ✅ Done (EventCountdown: Starts-in d/h/m/s, Live Now, Ended states, auto-tick) |
 | 18.1.5 | **Weather widget** — forecast for event date + location (free API like OpenWeatherMap) | P2 | ☐ |
