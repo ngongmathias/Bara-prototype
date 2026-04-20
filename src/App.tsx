@@ -153,6 +153,7 @@ import EditListing from "./pages/marketplace/EditListing";
 import MarketplaceStorefront from "./pages/marketplace/MarketplaceStorefront";
 
 import StorefrontEditor from "./pages/marketplace/StorefrontEditor";
+import StoreAnalyticsPage from "./pages/marketplace/StoreAnalyticsPage";
 
 import { CommunityPage } from "./pages/communities/CommunityPage";
 
@@ -630,6 +631,7 @@ const AppRoutes = () => {
           <Route path="store/:slug" element={<MarketplaceStorefront />} />
 
           <Route path="storefront/edit" element={<StorefrontEditor />} />
+          <Route path="storefront/analytics" element={<StoreAnalyticsPage />} />
 
           <Route path="favorites" element={<MyFavorites />} />
 

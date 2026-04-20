@@ -193,6 +193,14 @@ export const MarketplaceStorefront = () => {
                   <Edit className="w-4 h-4" /> Edit Store
                 </button>
               )}
+              {isOwner && (
+                <button
+                  onClick={() => navigate(`/marketplace/storefront/analytics`)}
+                  className="inline-flex items-center gap-1.5 bg-white/90 hover:bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-lg"
+                >
+                  Analytics
+                </button>
+              )}
             </div>
           </div>
         </div>
