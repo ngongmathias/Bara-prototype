@@ -474,6 +474,24 @@ export const UserDashboard = () => {
 
 
 
+                  <Link to="/users/dashboard/organizer-analytics">
+
+                    <Button
+
+                      variant={isActive('/users/dashboard/organizer-analytics') ? 'default' : 'ghost'}
+
+                      className="w-full justify-start"
+
+                    >
+
+                      <Calendar className="mr-3 h-4 w-4" />
+
+                      Organizer Analytics
+
+                    </Button>
+
+                  </Link>
+
                   <Link to="/users/dashboard/profile">
 
                     <Button

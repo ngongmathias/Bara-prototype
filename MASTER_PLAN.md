@@ -370,7 +370,7 @@
 | 18.3.3 | **"Message Organizer"** — private 1-on-1 chat via existing messaging system | P1 | ✅ |
 | 18.3.4 | **"View all events by this organizer"** link on every event detail page | P0 | ☐ |
 | 18.3.5 | **Event series** — support recurring events linked on organizer profile | P2 | ☐ |
-| 18.3.6 | **Organizer analytics** — events created, total RSVPs, attendees, average rating | P1 | ☐ |
+| 18.3.6 | **Organizer analytics** — events created, total RSVPs, attendees, average rating | P1 | ✅ Done |
 
 ---
 

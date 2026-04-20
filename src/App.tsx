@@ -324,6 +324,7 @@ import { UserMyPlaylists } from "./pages/users/UserMyPlaylists";
 import { UserSavedItems } from "./pages/users/UserSavedItems";
 
 import { OrganizerRegistrationsPage } from "./pages/users/OrganizerRegistrationsPage";
+import { OrganizerAnalyticsPage } from "./pages/users/OrganizerAnalyticsPage";
 
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 
@@ -724,6 +725,7 @@ const AppRoutes = () => {
             <Route path="my-playlists" element={<UserMyPlaylists />} />
 
             <Route path="saved" element={<UserSavedItems />} />
+            <Route path="organizer-analytics" element={<OrganizerAnalyticsPage />} />
 
           </Route>
 
