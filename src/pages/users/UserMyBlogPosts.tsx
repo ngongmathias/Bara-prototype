@@ -19,6 +19,8 @@ import {
   Clock,
   Trash2,
   Archive,
+  Heart,
+  MessageCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,6 +32,8 @@ interface MyPost {
   image_url: string | null;
   status: string;
   view_count: number;
+  likes_count: number;
+  comment_count: number;
   reading_time: number | null;
   decline_reason: string | null;
   created_at: string;
@@ -68,7 +72,7 @@ export const UserMyBlogPosts = () => {
 
       const { data, error } = await supabase
         .from("blog_posts")
-        .select("id, title, slug, excerpt, featured_image, status, view_count, reading_time, decline_reason, created_at")
+        .select("id, title, slug, excerpt, featured_image, status, view_count, likes_count, reading_time, decline_reason, created_at")
         .eq("author_id", author.id)
         .order("created_at", { ascending: false });
 
@@ -76,8 +80,30 @@ export const UserMyBlogPosts = () => {
         if (error.code === "42P01") { setLoading(false); return; }
         throw error;
       }
-      // Map featured_image → image_url for display
-      setPosts((data || []).map(p => ({ ...p, image_url: p.featured_image })));
+
+      // Fetch comment counts per post
+      const postIds = (data || []).map(p => p.id);
+      let commentMap: Record<string, number> = {};
+      if (postIds.length > 0) {
+        try {
+          const { data: comments } = await supabase
+            .from("blog_comments")
+            .select("post_id")
+            .in("post_id", postIds);
+          if (comments) {
+            for (const c of comments) {
+              commentMap[c.post_id] = (commentMap[c.post_id] || 0) + 1;
+            }
+          }
+        } catch { /* blog_comments may not exist */ }
+      }
+
+      setPosts((data || []).map(p => ({
+        ...p,
+        image_url: p.featured_image,
+        likes_count: p.likes_count || 0,
+        comment_count: commentMap[p.id] || 0,
+      })));
     } catch (e) {
       console.error(e);
     } finally {
@@ -121,6 +147,8 @@ export const UserMyBlogPosts = () => {
   const publishedCount = posts.filter(p => p.status === 'published').length;
   const draftCount    = posts.filter(p => p.status === 'draft').length;
   const totalViews    = posts.reduce((sum, p) => sum + (p.view_count || 0), 0);
+  const totalLikes    = posts.reduce((sum, p) => sum + (p.likes_count || 0), 0);
+  const totalComments = posts.reduce((sum, p) => sum + (p.comment_count || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -143,10 +171,18 @@ export const UserMyBlogPosts = () => {
 
       {/* Insights summary */}
       {posts.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <div className="bg-white border rounded-xl p-4 text-center">
             <div className="flex items-center justify-center gap-1 text-gray-400 text-xs mb-1"><TrendingUp className="h-3 w-3" /> Total Views</div>
             <p className="text-2xl font-bold text-gray-900">{totalViews.toLocaleString()}</p>
+          </div>
+          <div className="bg-white border rounded-xl p-4 text-center">
+            <div className="flex items-center justify-center gap-1 text-red-500 text-xs mb-1"><Heart className="h-3 w-3" /> Likes</div>
+            <p className="text-2xl font-bold text-gray-900">{totalLikes.toLocaleString()}</p>
+          </div>
+          <div className="bg-white border rounded-xl p-4 text-center">
+            <div className="flex items-center justify-center gap-1 text-blue-500 text-xs mb-1"><MessageCircle className="h-3 w-3" /> Comments</div>
+            <p className="text-2xl font-bold text-gray-900">{totalComments.toLocaleString()}</p>
           </div>
           <div className="bg-white border rounded-xl p-4 text-center">
             <div className="flex items-center justify-center gap-1 text-green-600 text-xs mb-1"><Eye className="h-3 w-3" /> Published</div>
@@ -229,10 +265,12 @@ export const UserMyBlogPosts = () => {
                         <p className="text-xs text-gray-500 truncate">{post.excerpt}</p>
                       </div>
 
-                      {/* Views + reading time */}
+                      {/* Views, likes, comments, reading time */}
                       <div className="flex flex-col items-end gap-0.5 hidden sm:flex">
-                        <div className="flex items-center gap-1 text-sm text-gray-500">
-                          <Eye className="h-3 w-3" /> {post.view_count || 0}
+                        <div className="flex items-center gap-3 text-sm text-gray-500">
+                          <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> {post.view_count || 0}</span>
+                          <span className="flex items-center gap-1"><Heart className="h-3 w-3" /> {post.likes_count || 0}</span>
+                          <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" /> {post.comment_count || 0}</span>
                         </div>
                         {post.reading_time && (
                           <div className="flex items-center gap-1 text-xs text-gray-400">
