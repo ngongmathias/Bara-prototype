@@ -143,6 +143,7 @@
 | 4 | **Admin: Movies + Podcasts management pages** (`/admin/movies`, `/admin/podcasts`) | 7.50 |
 | 5 | **Cross-device testing** — mobile (375px), tablet (768px), desktop (1440px) all pages | 7A-0.2 |
 | 6 | ~~**Blog post likes** — needs `blog_post_likes` table + RLS (currently localStorage)~~ ✅ Done Apr 13 — migration created, BlogPostDetail wired to Supabase | 10.4 |
+| 7 | **Deploy `send-email` edge function with idempotency guard + audit `email_queue` webhook in Supabase Dashboard** (INSERT-only, single registration). Code fix `4ddca2e` is merged but not yet deployed; until then duplicate confirmation emails are still going out in production. | 22.5.3 / 22.5.4 |
 
 ### Important Pre-Launch (P1)
 
@@ -587,8 +588,12 @@
 
 | # | Task | Priority | Status |
 |---|------|----------|--------|
-| 22.5.1 | Ensure ALL emails go through `email_queue` — never send directly from frontend | P0 | ☐ |
+| 22.5.1 | Ensure ALL emails go through `email_queue` — never send directly from frontend. Remaining call sites that still bypass the queue: `AdminMarketplace.updateListingStatus` (rejection path, after Apr 22 fix), `AdminBlog.handleApprove`, `AdminBlog.handleDecline`, `UserBlogEditor` (submission), `UploadSongPage` (song uploaded). Each must enqueue via DB trigger or explicit `email_queue` insert. | P0 | 🟡 In progress |
 | 22.5.2 | **Admin email log** — table: recipient, subject, type, status (sent/failed/pending), sent_at. Filterable | P1 | ✅ Done (`/admin/email-log` — status+type filter, search, stats cards) |
+| 22.5.3 | **Duplicate-email bug fix — `send-email` idempotency guard.** Apr 22, 2026: users reported the same event confirmation email arriving twice. Root cause: edge function had no idempotency check, so when it self-updated `email_queue.status='sent'` and the Supabase DB webhook was wired to INSERT+UPDATE (or registered twice), the email re-sent on the self-update. Code fix landed (`4ddca2e`): early-return on any webhook with `body.type !== 'INSERT'` or payload `status !== 'pending'`. **Still pending:** deploy `send-email` edge function (`supabase functions deploy send-email`) and verify in production. | P0 | 🟡 Code merged — deploy pending |
+| 22.5.4 | **Supabase Dashboard webhook audit on `email_queue`** — confirm the webhook is registered exactly once, fires on INSERT only (not UPDATE/DELETE), and points at the deployed `send-email` function. This is the infra-side counterpart of 22.5.3. | P0 | ☐ |
+| 22.5.5 | **Verify duplicate emails are gone end-to-end after 22.5.3 + 22.5.4 deploy** — register for a free event, register for a paid event, approve a marketplace listing, submit a banner, sign up a new user. Each should produce exactly one email per logical action in `email_queue` and exactly one delivery in Resend. | P0 | ☐ |
+| 22.5.6 | **AdminMarketplace double-send fix (Apr 22, 2026, `4ddca2e`).** Direct `send-email` invoke for `listing_approved` removed; DB trigger `tr_marketplace_listing_email` is now the only path. Rejection path retained (no DB trigger branch). Follow-up: extend `handle_marketplace_listing_email` with a `listing_rejected` branch so 22.5.1 can fully retire the direct invoke. | P1 | 🟡 Approval done — rejection trigger branch pending |
 
 ### 22.6 "From" Address
 
@@ -770,6 +775,7 @@ User profile visibility ──→ Team decision required
 *Phase 15 (Payment Integration) planned: Apr 11, 2026*
 ***April 13, 2026 — MAJOR RESTRUCTURE: Merged REVAMP_PROMPT.md into MASTER_PLAN.md as Phases 16-24. Archived completed phases 1-14 to MASTER_PLAN_ARCHIVE.md. Added START HERE section for multi-AI compatibility. Added RULES section. Refreshed OPEN ITEMS, DEPENDENCIES, METRICS, and RISK REGISTER.***
 *April 13, 2026 — Phase 16 implementation sprint: notifications table + RLS + realtime (16.4.1-4), NotificationBell redesign (black/white design system, 17 notification types with icons), blog_post_likes table replacing localStorage (Active Work #6), EmptyState component + improved no-results on 4 search pages (16.1.5), button press feedback on all Buttons (16.2.1), share audit + ArtistPage share + BlogPostDetail unified to useShare (16.3.1).*
+*April 22, 2026 — Duplicate confirmation email investigation. Diagnosed two paths: (1) `send-email` edge function had no idempotency guard, so the self-update of `email_queue.status='sent'` re-fired the DB webhook and re-delivered the email; (2) `AdminMarketplace.updateListingStatus` was double-sending listing_approved (DB trigger + direct invoke). Code fixes merged in `4ddca2e`. Open: deploy edge function (22.5.3), audit Supabase webhook to INSERT-only (22.5.4), verify end-to-end (22.5.5), migrate remaining direct `send-email` calls in AdminBlog/UserBlogEditor/UploadSongPage to the queue (22.5.1), add `listing_rejected` branch to marketplace trigger (22.5.6).*
 
 ---
 
