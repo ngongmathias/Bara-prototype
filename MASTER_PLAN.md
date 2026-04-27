@@ -144,6 +144,12 @@
 | 5 | **Cross-device testing** — mobile (375px), tablet (768px), desktop (1440px) all pages | 7A-0.2 |
 | 6 | ~~**Blog post likes** — needs `blog_post_likes` table + RLS (currently localStorage)~~ ✅ Done Apr 13 — migration created, BlogPostDetail wired to Supabase | 10.4 |
 | 7 | **Deploy `send-email` edge function with idempotency guard + audit `email_queue` webhook in Supabase Dashboard** (INSERT-only, single registration). Code fix `4ddca2e` is merged but not yet deployed; until then duplicate confirmation emails are still going out in production. | 22.5.3 / 22.5.4 |
+| 8 | **Sign-up / login bugs (Clerk)** — Maj Mlinzi case: tried to register as "Maj theGeezer", told username already taken; full Clerk flow audit needed across all entry points. | 25.1.1 |
+| 9 | **Chrome sign-up popup never closes** — sign-up modal stays open forever in Chrome (works in Firefox). Reproduces blocking new-user onboarding on the most-used browser. | 25.1.2 |
+| 10 | **Blog comments — permissions error** — users hitting RLS / permissions error when trying to comment on blog posts. Audit `blog_comments` RLS + Clerk JWT mapping. | 25.1.3 |
+| 11 | **SSL certificate not Secure** — site not showing as Secure (https) in browser. Confirm Vercel SSL provisioned correctly for `baraafrika.com` + all subdomains, fix mixed content if any. | 25.1.4 |
+| 12 | **About Us copy replacement** — replace current About Us body with the new "ORIGINS: BARA Afrika" 4-paragraph copy and replace tagline "Est 2024, Rwanda" with "Made by Africans for Africans and friends of Africa". | 25.3 |
+| 13 | **Music UX/UI parity with josplay.com** — Music is the most important Streams pillar; bring listening experience to parity with https://music.josplay.com/ (player UX, browse, artist pages). | 25.2.3 |
 
 ### Important Pre-Launch (P1)
 
@@ -714,6 +720,135 @@
 
 ---
 
+## Phase 25 — Team & Stakeholder Feedback (April 23–28, 2026)
+
+> Comprehensive feedback round from Marlon and the wider team (WhatsApp + meetings, mid-to-late April 2026).
+> Treat every item here as required scope; do not drop items without explicit team sign-off. Items overlap with Pre-Launch Blockers #8–13 above where flagged P0.
+
+### 25.1 Auth & Account Bugs (P0)
+
+- [ ] **25.1.1 Sign-up / login full audit (Clerk)** — Maj Mlinzi reported he tried to register as **"Maj theGeezer"** and was told the username is already taken even though it should be free. Reproduce, fix the Clerk username uniqueness/availability check, and walk through every sign-up + login entry point (header, modal, dedicated `/sign-in` page, mobile drawer, post-action prompts). Confirm error messages are human-readable and recovery paths work.
+- [ ] **25.1.2 Chrome sign-up popup never closes** — In Chrome, after sign-up the modal stays open indefinitely; in Firefox it closes correctly. Investigate Clerk modal close handler vs Chrome event handling, fix, regression-test on Chrome / Edge / Safari / Firefox / mobile Chrome / mobile Safari.
+- [ ] **25.1.3 Blog comments permissions error** — Users get a permissions error when commenting on blog posts. Audit `blog_comments` RLS, confirm the Clerk → Supabase JWT carries `sub` correctly, fix the policy, add a test case, and verify on Marlon / Maj's accounts.
+- [ ] **25.1.4 SSL certificate "Not Secure"** — Browser shows site as not secure. Verify Vercel SSL is provisioned for `baraafrika.com`, `www.baraafrika.com`, and any subdomain (api, admin if used). Fix any mixed-content (`http://` assets, scripts) and confirm green padlock on Chrome, Firefox, Safari, mobile.
+
+### 25.2 Streams Status & Parity (P0)
+
+- [ ] **25.2.1 E-books operational status check** — Confirm e-books section is fully working end-to-end: browse, detail page, "read" / preview, admin upload, storage bucket, RLS. Document any gaps and fix them.
+- [ ] **25.2.2 Super Admin permissions verification** — Verify Super Admin role has full permissions across all Streams admin areas (Music, Movies, E-books, Podcasts, Gaming) and content moderation flows. Test create / edit / delete / publish / unpublish on each.
+- [ ] **25.2.3 Music UX/UI parity with josplay.com** — Music is the **most important pillar** of Streams. Benchmark https://music.josplay.com/ and bring our listening experience to parity or better: player UX, queue handling, browse-by-genre, artist pages, album pages, playlists, search results. Produce a gap analysis first, then implement in passes.
+
+### 25.3 About Us Page — Copy Update (P0)
+
+- [ ] Replace the current About Us body copy with the new **"ORIGINS: BARA Afrika"** copy (4 paragraphs, ending: *"We are one. We are home. We are your bridge to New Africa."*). Final copy provided by Marlon — paste verbatim.
+- [ ] Replace the tagline **"Est 2024, Rwanda"** with **"Made by Africans for Africans and friends of Africa"** wherever it appears (footer, About page hero, marketing cards).
+- [ ] Audit any other "About / Mission / Story" surfaces (footer, marketing site if any, email templates, social meta) for stale copy and align with the new wording.
+
+### 25.4 Marketplace Categories Restructure (P1)
+
+> Team finding: there is a **mismatch between Admin-side categories and User-side categories**. Audit and reconcile, then restructure into 4 Main Categories with the subcategories below. Migrate existing `marketplace_listings` to the new taxonomy without breaking live ads.
+
+#### 25.4.1 Audit
+- [ ] Diff Admin category list vs User-facing category list, document every mismatch
+- [ ] Decide on canonical taxonomy source (DB table) and migrate both Admin + User UI to read from it
+
+#### 25.4.2 Main Category — Electronics
+Subcategories:
+- [ ] TVs
+- [ ] Home Audio
+- [ ] Portable Audio
+- [ ] Video
+- [ ] Computers / Laptops
+- [ ] Computer Accessories & Components
+- [ ] Gaming & Accessories
+- [ ] Cameras
+- [ ] Camera Accessories
+- [ ] Smart Home
+- [ ] Vehicle Electronics
+- [ ] Specialized Electronics
+
+#### 25.4.3 Main Category — Appliances
+Subcategories:
+- [ ] Refrigerators & Freezers
+- [ ] Ovens & Ranges
+- [ ] Dishwashers
+- [ ] Microwaves
+- [ ] Range Hoods & Ventilation
+- [ ] Food Prep
+- [ ] Cooking & Heating
+- [ ] Coffee & Espresso
+- [ ] Cleaning Appliances (Vacuum / Steam / Irons)
+- [ ] Washing Machines & Dryers
+
+#### 25.4.4 Main Category — Climate Control
+Subcategories:
+- [ ] Air Conditioners
+- [ ] Fans
+- [ ] Heaters
+- [ ] Air Purifiers & Dehumidifiers
+
+#### 25.4.5 Main Category — Mobile Phones & Tablets
+Subcategories:
+- [ ] Mobile Phones
+- [ ] Tablets & E-Readers
+- [ ] Accessories
+- [ ] Wearable Tech
+
+#### 25.4.6 Migration & Wiring
+- [ ] Update `categoryFieldConfigs.ts` (or DB-backed equivalent) with the new tree
+- [ ] Migrate existing `marketplace_listings` rows to the closest new (sub)category
+- [ ] Update mega-menu, marketplace search filters, post-ad form, admin moderation filters
+- [ ] Update SEO meta titles for category landing pages
+
+### 25.5 BARA Global — Gallery & Key Listings (P1)
+
+> New admin-managed surfaces on the BARA Global country pages.
+
+#### 25.5.1 Gallery
+- [ ] Admin-only photo upload UI (no public submissions)
+- [ ] Specify and enforce **ideal dimensions and max file size** (decide and document — likely 1920×1080 max, 500 KB target after compression). Add client-side resize/compress step before upload.
+- [ ] Storage bucket + RLS (admins write, public read)
+- [ ] Public gallery viewer on the country landing page (grid + lightbox)
+
+#### 25.5.2 Key Listings
+Admin-side fields for each Key Listing entry:
+- [ ] **Main Category Type** (enum): Government Ministry, Regulator, Agency, Sports Federation, Charity, NGO
+- [ ] **Description** — free text, **100 words max** (enforce char/word counter)
+- [ ] **Web Link** — must be `https://` (validate)
+- [ ] **Logo** — icon-size limit (square, e.g. ≤ 256×256, ≤ 100 KB)
+- [ ] **Location / Address** — free text
+- [ ] **Telephone** — optional, with country code
+- [ ] Public listing on the country landing page, grouped by Main Category Type
+- [ ] Admin CRUD page
+
+### 25.6 Payments — Phase 15 Expansion (P1, blocks monetization)
+
+> Expands the existing Phase 15 (Flutterwave) plan based on team feedback.
+
+- [ ] **25.6.1 MTN MoMo direct integration** — direct API integration (not via aggregator) + MTN compliance / KYB sign-off
+- [ ] **25.6.2 MTN MoMo multi-country** — extend to 15+ African countries where MTN MoMo operates (Ghana, South Africa, Nigeria, Cameroon, Côte d'Ivoire, Uganda, Rwanda, Zambia, Benin, Congo-B, Liberia, Guinea-Conakry, Guinea-Bissau, Sudan, etc.)
+- [ ] **25.6.3 Visa / Mastercard acceptance** — card payments via Flutterwave or direct PSP, including 3DS support
+- [ ] **25.6.4 PAPPS integration** — Pan-African Payment & Settlement System integration for cross-border payments
+- [ ] **25.6.5 Payment screen UX** — checkout / pay screen must offer at least **3 payment methods** clearly visible, with method selection persisted per user
+- [ ] **25.6.6 Documentation** — user-facing docs ("How payments work on BARA"), seller docs ("How payouts work")
+
+### 25.7 Monetization & Referrals (P1)
+
+- [ ] **25.7.1 Identify current ad provider** — confirm whether the current "AdChoices" labelled ads are Google AdSense or another network; document publisher account IDs and where ad code is wired in
+- [ ] **25.7.2 Google AdSense onboarding** — apply / verify, enable PPC + CPM + Auto Ads, target the standard ~68% publisher revenue share. Wire `ads.txt`, AdSense site verification, and place ad slots without breaking the black/white design system
+- [ ] **25.7.3 Affiliate Marketing program** — register BARA as an affiliate publisher with major networks (Amazon Associates where allowed in our African markets, Awin, CJ, Impact, region-specific networks) and identify content surfaces (blog, marketplace categories, e-books) where affiliate links fit
+- [ ] **25.7.4 CPA (Cost-per-Action) marketing** — register for CPA networks, identify offer types that fit African audiences (financial products, telco offers, app installs)
+- [ ] **25.7.5 Outbound "Refer-a-Friend" programs** — research and join external refer-a-friend programs we can promote to our users (e.g. fintech, ride-hailing, telco) for additional revenue
+- [ ] **25.7.6 BARA's own referral program** — design our internal "invite a friend" flow on top of BARA Coins (separate from external refer-a-friend partnerships)
+
+### 25.8 Cyber Security Authority (CSA) Meeting (P1, compliance)
+
+- [ ] **25.8.1 Compliance & Data Protection Certificate** — engage CSA, complete required filings, obtain Data Protection Certificate
+- [ ] **25.8.2 Offer assistance for CSA awareness** — propose BARA as a partner for CSA's public-awareness campaigns (content slots in BARA Global / Blog, joint announcements). Document the offer, send a formal letter
+- [ ] **25.8.3 Internal security posture review** — before the CSA meeting, run a self-audit (RLS, secrets, third-party data sharing, data retention) and prepare a one-pager
+
+---
+
 ## DEPENDENCIES MAP
 
 ```
@@ -776,6 +911,7 @@ User profile visibility ──→ Team decision required
 ***April 13, 2026 — MAJOR RESTRUCTURE: Merged REVAMP_PROMPT.md into MASTER_PLAN.md as Phases 16-24. Archived completed phases 1-14 to MASTER_PLAN_ARCHIVE.md. Added START HERE section for multi-AI compatibility. Added RULES section. Refreshed OPEN ITEMS, DEPENDENCIES, METRICS, and RISK REGISTER.***
 *April 13, 2026 — Phase 16 implementation sprint: notifications table + RLS + realtime (16.4.1-4), NotificationBell redesign (black/white design system, 17 notification types with icons), blog_post_likes table replacing localStorage (Active Work #6), EmptyState component + improved no-results on 4 search pages (16.1.5), button press feedback on all Buttons (16.2.1), share audit + ArtistPage share + BlogPostDetail unified to useShare (16.3.1).*
 *April 22, 2026 — Duplicate confirmation email investigation. Diagnosed two paths: (1) `send-email` edge function had no idempotency guard, so the self-update of `email_queue.status='sent'` re-fired the DB webhook and re-delivered the email; (2) `AdminMarketplace.updateListingStatus` was double-sending listing_approved (DB trigger + direct invoke). Code fixes merged in `4ddca2e`. Open: deploy edge function (22.5.3), audit Supabase webhook to INSERT-only (22.5.4), verify end-to-end (22.5.5), migrate remaining direct `send-email` calls in AdminBlog/UserBlogEditor/UploadSongPage to the queue (22.5.1), add `listing_rejected` branch to marketplace trigger (22.5.6).*
+*April 23–28, 2026 — **Phase 25 added: Team & Stakeholder Feedback** from Marlon and team. Added six new P0 blockers (sign-up/login bugs incl. Maj Mlinzi "Maj theGeezer" username case, Chrome sign-up popup never closes, blog comments permissions error, SSL not Secure, About Us copy replacement to "ORIGINS: BARA Afrika" + "Made by Africans for Africans and friends of Africa", Music UX/UI parity with josplay.com). New Phase 25 sub-sections: 25.1 Auth bugs, 25.2 Streams status (e-books, Super Admin perms, Music parity), 25.3 About Us copy, 25.4 Marketplace category restructure into 4 main categories (Electronics, Appliances, Climate Control, Mobile Phones & Tablets) with full subcategory specs + admin/user category mismatch audit, 25.5 BARA Global Gallery (admin-only photo upload) + Key Listings (Govt Ministry/Regulator/Agency/Sports Federation/Charity/NGO with description ≤100 words, https web link, icon-size logo, address, optional tel), 25.6 Payments expansion (MTN MoMo direct + 15+ African countries, Visa/Mastercard, PAPPS, ≥3 payment methods at checkout), 25.7 Monetization (identify current ad provider/AdSense, AdSense onboarding PPC+CPM+Auto Ads ~68%, affiliate marketing, CPA, outbound refer-a-friend, internal referral program), 25.8 Cyber Security Authority engagement (Data Protection Certificate, partnership offer for CSA awareness).*
 
 ---
 
