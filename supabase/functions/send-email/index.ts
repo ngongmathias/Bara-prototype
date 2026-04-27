@@ -118,6 +118,41 @@ Deno.serve(async (req) => {
 
 
 
+        // Idempotency guard: only INSERT webhooks should send email. The edge function
+        // itself updates status to 'sent'/'failed' after dispatch, and if the DB webhook
+        // is configured for UPDATE as well (or registered twice) we'd loop and send the
+        // same email twice. Skip anything that isn't a fresh pending INSERT.
+
+        if (isWebhook && body.type && body.type !== 'INSERT') {
+
+            console.log(`Skipping non-INSERT webhook (op=${body.type}) for queue row ${queueId}`);
+
+            return new Response(JSON.stringify({ skipped: true, reason: `op=${body.type}` }), {
+
+                status: 200,
+
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+
+            });
+
+        }
+
+        if (isWebhook && (payload as any).status && (payload as any).status !== 'pending') {
+
+            console.log(`Skipping already-processed queue row ${queueId} (status=${(payload as any).status})`);
+
+            return new Response(JSON.stringify({ skipped: true, reason: `status=${(payload as any).status}` }), {
+
+                status: 200,
+
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+
+            });
+
+        }
+
+
+
         // Extract basic fields
 
         // Note: For queue records, fields are in the record itself (payload)

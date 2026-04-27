@@ -144,23 +144,20 @@ export const AdminMarketplace = () => {
 
       if (error) throw error;
 
-      // Send email notification
-      if (listingDetails && (newStatus === 'active' || newStatus === 'rejected')) {
-        const emailType = newStatus === 'active' ? 'listing_approved' : 'listing_rejected';
-        const emailSubject = newStatus === 'active'
-          ? 'Marketplace Ad Approved - Bara Afrika'
-          : 'Marketplace Ad Update - Bara Afrika';
-
+      // Approval emails are handled by the DB trigger on marketplace_listings
+      // (tr_marketplace_listing_email → listing_approved). We only need to send
+      // the rejection email here since the trigger has no rejection branch.
+      if (listingDetails && newStatus === 'rejected') {
         await supabase.functions.invoke('send-email', {
           body: {
             to: listingDetails.seller_email,
-            subject: emailSubject,
-            type: emailType,
+            subject: 'Marketplace Ad Update - Bara Afrika',
+            type: 'listing_rejected',
             data: {
               userFirstname: listingDetails.seller_name.split(' ')[0],
               listingTitle: listingDetails.title,
               listingId: listingDetails.id,
-              reason: newStatus === 'rejected' ? 'Does not meet community guidelines' : undefined
+              reason: 'Does not meet community guidelines',
             },
           },
         });
