@@ -722,12 +722,43 @@
 
 ## Phase 25 — Team & Stakeholder Feedback (April 23–28, 2026)
 
-> Comprehensive feedback round from Marlon and the wider team (WhatsApp + meetings, mid-to-late April 2026).
+> Comprehensive feedback round from Marlon and the wider team (WhatsApp + Saturday morning call, mid-to-late April 2026).
 > Treat every item here as required scope; do not drop items without explicit team sign-off. Items overlap with Pre-Launch Blockers #8–13 above where flagged P0.
+
+### 25.0 Source & Team Priority Labels (verbatim)
+
+The Saturday morning call (call ID `222320694136853`) classified items with these labels — preserved here for traceability. Internal P0/P1 labels in this plan layer on top of, not replace, the team's own classification.
+
+| Team label | Item | Phase ref |
+|------------|------|-----------|
+| **High Priority** | Cyber Security Authority (CSA) Meeting — Compliance, Data Protection Certificate, offer assistance for CSA awareness | 25.8 |
+| Medium Priority | SSL Certificate issue (https NOT Secure) | 25.1.4 |
+| Medium Priority | BARA Marketplace categories — align Admin & User sides + 4 Main Categories restructure | 25.4 |
+| Medium Priority | BARA Global — add Gallery and Key Listings area | 25.5 |
+
+### 25.0.1 Meeting agenda (Marlon → Mathias)
+
+Open meeting request topics — to be scheduled, agenda items:
+- [ ] **BARA Streams** review (status of each pillar, priorities, parity gaps) — see 25.2
+- [ ] **BARA Coins** — earn / spend balance review (also tracked under Active Work P1 #10)
+- [ ] **BARA Sports** — current state, manual content workflow, what's blocking handover
+
+### 25.0.2 Screenshots referenced (NOT YET INSPECTED)
+
+Marlon's message referenced two inline images (`Image #5`, `Image #6`) and attached two more screenshots:
+- **Image #5** — example of a payment screen showing 3 payment methods (used as the "≥ 3 methods" reference for 25.6.5)
+- **Image #6** — screenshot of a user still having trouble with login + commenting (relevant to 25.1.1, 25.1.3)
+- `WhatsApp Image 2026-04-24 at 7.45.52 AM.jpeg` — content not yet reviewed
+- `ff9534fb-e987-40ee-816f-8ca2cb576ace.jpeg` — content not yet reviewed
+
+> ⚠️ **Action**: Open these four images, transcribe any UI text / error messages, and append the findings here before beginning implementation. Don't assume the screenshots only restate what's in the message — they may contain specific error strings, account names, browser versions, or stack traces that change the fix.
 
 ### 25.1 Auth & Account Bugs (P0)
 
-- [ ] **25.1.1 Sign-up / login full audit (Clerk)** — Maj Mlinzi reported he tried to register as **"Maj theGeezer"** and was told the username is already taken even though it should be free. Reproduce, fix the Clerk username uniqueness/availability check, and walk through every sign-up + login entry point (header, modal, dedicated `/sign-in` page, mobile drawer, post-action prompts). Confirm error messages are human-readable and recovery paths work.
+- [ ] **25.1.1 Sign-up / login full audit (Clerk)** — Maj Mlinzi reported he tried to register as **"Maj theGeezer"** and was told the username is already taken even though it should be free. Reproduce, fix the Clerk username uniqueness/availability check, and walk through every sign-up + login entry point (header, modal, dedicated `/sign-in` page, mobile drawer, post-action prompts). Confirm error messages are human-readable and recovery paths work. Team has had **more than one complaint** about this.
+- [ ] **25.1.1.a Sign-up UX — "as quick and painless as possible"** — Marlon's directive. Reduce required fields to absolute minimum, defer optional profile fields to post-sign-up, single-screen flow where possible. Goal: time-to-account < 30s on mobile.
+- [ ] **25.1.1.b Investigate alternatives to current 3rd-party (Clerk) flow** — team asked: *"is there a better way to do it while still using a 3rd party?"* Action: evaluate whether the current Clerk flow can be customized further, or if Clerk's native components vs hosted pages would be smoother; document trade-offs before deciding.
+- [ ] **25.1.1.c Non-user QA pass** — Marlon: *"Have you tried logging in as a non-User and checked the experience?"* Run through the platform from a fresh device / incognito with no account, document every friction point and dead-end (e.g. comment, like, save, RSVP gates), and fix the worst.
 - [ ] **25.1.2 Chrome sign-up popup never closes** — In Chrome, after sign-up the modal stays open indefinitely; in Firefox it closes correctly. Investigate Clerk modal close handler vs Chrome event handling, fix, regression-test on Chrome / Edge / Safari / Firefox / mobile Chrome / mobile Safari.
 - [ ] **25.1.3 Blog comments permissions error** — Users get a permissions error when commenting on blog posts. Audit `blog_comments` RLS, confirm the Clerk → Supabase JWT carries `sub` correctly, fix the policy, add a test case, and verify on Marlon / Maj's accounts.
 - [ ] **25.1.4 SSL certificate "Not Secure"** — Browser shows site as not secure. Verify Vercel SSL is provisioned for `baraafrika.com`, `www.baraafrika.com`, and any subdomain (api, admin if used). Fix any mixed-content (`http://` assets, scripts) and confirm green padlock on Chrome, Firefox, Safari, mobile.
@@ -753,46 +784,54 @@
 - [ ] Decide on canonical taxonomy source (DB table) and migrate both Admin + User UI to read from it
 
 #### 25.4.2 Main Category — Electronics
-Subcategories:
-- [ ] TVs
-- [ ] Home Audio
-- [ ] Portable Audio
-- [ ] Video
-- [ ] Computers / Laptops
-- [ ] Computer Accessories & Components
-- [ ] Gaming & Accessories
-- [ ] Cameras
-- [ ] Camera Accessories
-- [ ] Smart Home
-- [ ] Vehicle Electronics
-- [ ] Specialized Electronics
+Subcategories (with item-level examples from team — used as picker tags / placeholder text on post-ad form):
+- [ ] **TVs** — LED, QLED, OLED, Smart TVs, CRT TVs
+- [ ] **Home Audio** — Soundbars, speakers, AV receivers, subwoofers
+- [ ] **Portable Audio** — Headphones, earphones, MP3 players, Bluetooth speakers
+- [ ] **Video** — Projectors, Blu-ray / DVD players, streaming devices (Chromecast / Roku)
+- [ ] **Computers | Laptops & Notebooks** — Ultrabooks, refurbished laptops, tower PCs, workstations, office computers
+- [ ] **Computer Accessories & Components** — CPUs, RAM, graphics cards, hard drives (HDD/SSD), motherboards, monitors, keyboards, mice, printers, scanners, routers, modems, cables
+- [ ] **Gaming & Accessories** — Gaming laptops, gaming consoles, accessories (controllers, headsets, VR headsets, steering wheels)
+- [ ] **Cameras** — DSLR, mirrorless, point-and-shoot, action cameras (GoPro), drones
+- [ ] **Camera Accessories** — Lenses, tripods, flashes, memory cards
+- [ ] **Smart Home** — Smart security cameras, smart plugs, smart thermostats, doorbell cameras
+- [ ] **Vehicle Electronics** — Car stereos, GPS units, dash cams, amplifiers
+- [ ] **Specialized Electronics**:
+  - Electronic Components — sensors, relays, circuit boards
+  - Office Electronics — fax machines, copiers, paper shredders, etc.
 
 #### 25.4.3 Main Category — Appliances
-Subcategories:
-- [ ] Refrigerators & Freezers
-- [ ] Ovens & Ranges
-- [ ] Dishwashers
-- [ ] Microwaves
-- [ ] Range Hoods & Ventilation
-- [ ] Food Prep
-- [ ] Cooking & Heating
-- [ ] Coffee & Espresso
-- [ ] Cleaning Appliances (Vacuum / Steam / Irons)
-- [ ] Washing Machines & Dryers
+Subcategories (with item-level examples):
+- [ ] **Refrigerators & Freezers** — upright, chest, french door, mini-fridges
+- [ ] **Ovens & Ranges** — electric stoves, gas stoves, built-in ovens, hobs, cooking ranges
+- [ ] **Dishwashers** — freestanding, integrated, slimline
+- [ ] **Microwaves** — countertop, built-in
+- [ ] **Range Hoods & Ventilation** — kitchen exhaust fans
+- [ ] **Food Prep** — blenders, mixers, food processors, juicers
+- [ ] **Cooking & Heating** — air fryers, rice cookers, toasters, toaster ovens, slow cookers, electric kettles
+- [ ] **Coffee & Espresso** — electric kettles, coffee makers, espresso machines
+- [ ] **Cleaning Appliances**:
+  - Vacuum Cleaners — cordless, corded, robot, hand-held
+  - Steam Cleaners & Carpet Washers
+  - Irons & Steamers — clothes irons, garment steamers
+- [ ] **Washing Machines & Dryers**:
+  - Washing Machines — front loaders, top loaders, semi-automatic
+  - Clothes Dryers — vented, condenser, heat pump
+  - Washer & Dryer Sets / Combos — combined units or matched sets
 
 #### 25.4.4 Main Category — Climate Control
-Subcategories:
-- [ ] Air Conditioners
-- [ ] Fans
-- [ ] Heaters
-- [ ] Air Purifiers & Dehumidifiers
+Subcategories (with item-level examples):
+- [ ] **Air Conditioners** — window, split, portable
+- [ ] **Fans** — pedestal, ceiling, desk
+- [ ] **Heaters** — room heaters, electric heaters
+- [ ] **Air Purifiers & Dehumidifiers**
 
 #### 25.4.5 Main Category — Mobile Phones & Tablets
-Subcategories:
-- [ ] Mobile Phones
-- [ ] Tablets & E-Readers
-- [ ] Accessories
-- [ ] Wearable Tech
+Subcategories (with item-level examples):
+- [ ] **Mobile Phones** — smartphones (Android / iOS), feature phones, refurbished phones
+- [ ] **Tablets & E-Readers** — iPad, Android tablets, Kindle, e-readers
+- [ ] **Accessories** — cases, covers, chargers, power banks, screen protectors, styluses
+- [ ] **Wearable Tech** — smartwatches, fitness trackers
 
 #### 25.4.6 Migration & Wiring
 - [ ] Update `categoryFieldConfigs.ts` (or DB-backed equivalent) with the new tree
@@ -815,7 +854,7 @@ Admin-side fields for each Key Listing entry:
 - [ ] **Main Category Type** (enum): Government Ministry, Regulator, Agency, Sports Federation, Charity, NGO
 - [ ] **Description** — free text, **100 words max** (enforce char/word counter)
 - [ ] **Web Link** — must be `https://` (validate)
-- [ ] **Logo** — icon-size limit (square, e.g. ≤ 256×256, ≤ 100 KB)
+- [ ] **Logo** — ability to upload a logo with **icon-size limit (similar to Coat of Arms)** — square, e.g. ≤ 256×256, ≤ 100 KB
 - [ ] **Location / Address** — free text
 - [ ] **Telephone** — optional, with country code
 - [ ] Public listing on the country landing page, grouped by Main Category Type
@@ -912,6 +951,7 @@ User profile visibility ──→ Team decision required
 *April 13, 2026 — Phase 16 implementation sprint: notifications table + RLS + realtime (16.4.1-4), NotificationBell redesign (black/white design system, 17 notification types with icons), blog_post_likes table replacing localStorage (Active Work #6), EmptyState component + improved no-results on 4 search pages (16.1.5), button press feedback on all Buttons (16.2.1), share audit + ArtistPage share + BlogPostDetail unified to useShare (16.3.1).*
 *April 22, 2026 — Duplicate confirmation email investigation. Diagnosed two paths: (1) `send-email` edge function had no idempotency guard, so the self-update of `email_queue.status='sent'` re-fired the DB webhook and re-delivered the email; (2) `AdminMarketplace.updateListingStatus` was double-sending listing_approved (DB trigger + direct invoke). Code fixes merged in `4ddca2e`. Open: deploy edge function (22.5.3), audit Supabase webhook to INSERT-only (22.5.4), verify end-to-end (22.5.5), migrate remaining direct `send-email` calls in AdminBlog/UserBlogEditor/UploadSongPage to the queue (22.5.1), add `listing_rejected` branch to marketplace trigger (22.5.6).*
 *April 23–28, 2026 — **Phase 25 added: Team & Stakeholder Feedback** from Marlon and team. Added six new P0 blockers (sign-up/login bugs incl. Maj Mlinzi "Maj theGeezer" username case, Chrome sign-up popup never closes, blog comments permissions error, SSL not Secure, About Us copy replacement to "ORIGINS: BARA Afrika" + "Made by Africans for Africans and friends of Africa", Music UX/UI parity with josplay.com). New Phase 25 sub-sections: 25.1 Auth bugs, 25.2 Streams status (e-books, Super Admin perms, Music parity), 25.3 About Us copy, 25.4 Marketplace category restructure into 4 main categories (Electronics, Appliances, Climate Control, Mobile Phones & Tablets) with full subcategory specs + admin/user category mismatch audit, 25.5 BARA Global Gallery (admin-only photo upload) + Key Listings (Govt Ministry/Regulator/Agency/Sports Federation/Charity/NGO with description ≤100 words, https web link, icon-size logo, address, optional tel), 25.6 Payments expansion (MTN MoMo direct + 15+ African countries, Visa/Mastercard, PAPPS, ≥3 payment methods at checkout), 25.7 Monetization (identify current ad provider/AdSense, AdSense onboarding PPC+CPM+Auto Ads ~68%, affiliate marketing, CPA, outbound refer-a-friend, internal referral program), 25.8 Cyber Security Authority engagement (Data Protection Certificate, partnership offer for CSA awareness).*
+*April 28, 2026 — **Phase 25 second pass** after re-reading the original Marlon message verbatim from the conversation transcript. Filled in detail that was lost in the first pass: (a) marketplace sub-sub-category item lists for every subcategory across all 4 Main Categories (TVs LED/QLED/OLED/Smart/CRT, Home Audio soundbars/AV receivers/subs, Cameras DSLR/mirrorless/GoPro/drones, Refrigerators upright/chest/french door/mini, Cleaning Appliances vacuum types + steam + irons, Washing Machines front/top/semi-auto, Mobile Phones smartphones/feature/refurbished, etc.); (b) Key Listings logo "similar to Coat of Arms" reference preserved; (c) Sign-up UX directives split out — "as quick and painless as possible" (25.1.1.a), 3rd-party alternative evaluation (25.1.1.b), non-user QA pass (25.1.1.c); (d) team's verbatim priority labels (CSA = High Priority, SSL / Marketplace categories / BARA Global = Medium Priority) preserved in new section 25.0; (e) Meeting Request agenda items — BARA Streams, BARA Coins, BARA Sports — captured in 25.0.1; (f) explicit gap-flag for the four screenshots referenced in the message (Image #5 payment screen, Image #6 login/comment trouble, plus two attached jpegs) that must still be inspected and transcribed (25.0.2).*
 
 ---
 
