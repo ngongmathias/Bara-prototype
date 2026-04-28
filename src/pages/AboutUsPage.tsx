@@ -81,17 +81,20 @@ const AboutUsPage = () => {
                   {t('about.overview.title')}
                 </h2>
                 <p className="text-lg text-gray-600 mb-6 font-roboto">
-                  {t('about.overview.description')}
+                  {t('about.overview.paragraph1')}
                 </p>
                 <p className="text-lg text-gray-600 mb-6 font-roboto">
-                  {t('about.overview.mission')}
+                  {t('about.overview.paragraph2')}
                 </p>
-                <div className="flex items-center space-x-4">
+                <p className="text-lg text-gray-600 mb-6 font-roboto">
+                  {t('about.overview.paragraph3')}
+                </p>
+                <p className="text-lg text-gray-600 mb-6 font-roboto">
+                  {t('about.overview.paragraph4')}
+                </p>
+                <div className="flex items-center">
                   <Badge variant="secondary" className="text-sm font-roboto">
-                    {t('about.overview.established')}
-                  </Badge>
-                  <Badge variant="secondary" className="text-sm font-roboto">
-                    {t('about.overview.location')}
+                    {t('about.overview.tagline')}
                   </Badge>
                 </div>
               </div>

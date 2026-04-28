@@ -100,17 +100,22 @@
   },
   "about": {
     "hero": {
-      "title": "About Bara",
-      "subtitle": "Connecting communities with trusted local businesses",
+      "title": "About BARA Afrika",
+      "subtitle": "We are one. We are home. We are your bridge to New Africa.",
       "learnMore": "Learn More",
       "contactUs": "Contact Us"
     },
     "overview": {
-      "title": "Our Story",
-      "description": "Bara is Rwanda's premier business directory platform, dedicated to connecting local communities with trusted businesses. We believe in the power of local commerce and strive to make it easier for people to discover and connect with the best services in their area.",
-      "mission": "Our mission is to empower local businesses by providing them with a digital presence while helping consumers make informed decisions about where to shop, dine, and receive services.",
-      "established": "Est. 2024",
-      "location": "Rwanda"
+      "title": "ORIGINS: BARA Afrika",
+      "paragraph1": "In the heart of a rising continent, a vision ignited—not merely to connect, but to reunite. BARA Afrika emerged from a simple yet profound truth: Bara—meaning \"continent,\" \"land,\" or \"home\" in KiSwahili—is wherever Global Africa lives. From Lagos to Kingston, Nairobi to New York, Bamako to Bahia, one people, one future.",
+      "paragraph2": "BARA Afrika — the \"super platform\" realized: A technological super-bridge uniting continental Africa, the Caribbean, and African descendants worldwide. Frustrated by fragmented tools and invisible opportunities, the founders built a digital homeland — a single, vibrant space to grow networks, unlock trade, discover opportunities & events and thrive together.",
+      "paragraph3": "With a suite of powerful mini-apps — Business Listings, Events, Marketplace, Communities, Global, Tools, Sports, Streams, Blog, and News — BARA turns connection into currency. Our gamified rewards system fuels engagement, transforming everyday behavior into real-world value. Every click, every conversation, every trade builds collective prosperity.",
+      "paragraph4": "\"Let's Go Far Together.\" That's our call — the ancient, timeless call of the ancestors. We are intentional, pan-African, unifying, youthful, informational, tech-savvy and unstoppable. BARA Afrika is the first unified super platform for Global Africa — energizing trade, igniting tourism, amplifying entertainment, and rewiring connection. We are one. We are home. We are your bridge to New Africa.",
+      "tagline": "Made by Africans for Africans and friends of Africa",
+      "description": "In the heart of a rising continent, a vision ignited—not merely to connect, but to reunite. BARA Afrika emerged from a simple yet profound truth: Bara—meaning \"continent,\" \"land,\" or \"home\" in KiSwahili—is wherever Global Africa lives. From Lagos to Kingston, Nairobi to New York, Bamako to Bahia, one people, one future.",
+      "mission": "BARA Afrika — the \"super platform\" realized: A technological super-bridge uniting continental Africa, the Caribbean, and African descendants worldwide.",
+      "established": "Made by Africans for Africans and friends of Africa",
+      "location": ""
     },
     "stats": {
       "users": "Active Users",
