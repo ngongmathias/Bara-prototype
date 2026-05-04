@@ -801,8 +801,25 @@ Marlon's message referenced two inline images (`Image #5`, `Image #6`) and attac
 > Team finding: there is a **mismatch between Admin-side categories and User-side categories**. Audit and reconcile, then restructure into 4 Main Categories with the subcategories below. Migrate existing `marketplace_listings` to the new taxonomy without breaking live ads.
 
 #### 25.4.1 Audit
-- [ ] Diff Admin category list vs User-facing category list, document every mismatch
-- [ ] Decide on canonical taxonomy source (DB table) and migrate both Admin + User UI to read from it
+- [x] **Diff Admin vs User category list** ✅ Done May 6. Found **5 different category lists** in the codebase, all slightly different:
+
+  | Source | Count | Slugs |
+  |---|---|---|
+  | DB seed (`20260102_seed_marketplace_categories.sql`) | 7 | property-sale, property-rent, motors, classifieds, jobs, furniture-garden, mobile-tablets |
+  | Root-level legacy SQL (`ADD_MISSING_CATEGORIES.sql` + `UPDATE_CATEGORY_NAMES.sql`, manually run) | 13 | Adds electronics, fashion, services, kids-babies, pets, hobbies, business-industrial; deletes classifieds |
+  | `src/pages/MarketplacePage.tsx` hardcoded array | 12 | Same 12 as above minus property-rent (only 1 property tile shown on home) |
+  | `src/config/categoryFieldConfigs.ts` (post-form) | 11 | **Different slugs**: `property` (vs DB `property-sale`/`property-rent`), `home-furniture` (vs `furniture-garden`), `businesses` (vs `business-industrial`); no `mobile-tablets` field config at all |
+  | `src/pages/admin/AdminMarketplaceCategories.tsx` HARDCODED_CATEGORY_SLUGS | 13 | Yet another list with `business-industrial` etc. |
+
+  **Root cause of Marlon's "Admin vs User mismatch" complaint:** the slug mismatches in `categoryFieldConfigs.ts` mean the post-ad form renders the wrong fields (or none) for property-sale/property-rent/furniture-garden/mobile-tablets/business-industrial. Every cross-source change has historically been done in only some sources, leaving the others stale.
+
+- [ ] **Decide on canonical taxonomy source (DB table) and migrate both Admin + User UI to read from it.** Recommendation: keep `marketplace_categories` + `marketplace_subcategories` as the single source of truth; `categoryFieldConfigs.ts` keeps its field configs but keys them by DB slug; `MarketplacePage.tsx` and `AdminMarketplaceCategories.tsx` stop hardcoding lists and read from the DB. Pending sign-off.
+
+- [ ] **Spec ambiguity to resolve before 25.4.2–6:** the plan calls for "4 Main Categories restructure" with Electronics / Appliances / Climate Control / Mobile Phones & Tablets — but all 4 are consumer-electronics buckets. Two possible reads:
+  - **(A) Strict 4** — entire marketplace narrows to consumer electronics; Motors / Property / Jobs / Fashion / Pets / Kids&Babies / Hobbies / Services / Businesses&Industrial / Furniture&Garden get removed from marketplace (moved elsewhere or deleted).
+  - **(B) 4 new top-level categories added alongside existing ones** — the 4 new finer-grained electronics categories replace the current "Electronics & Appliances" + "Mobile & Tablets" buckets; everything else stays. End state: ~14 main categories.
+
+  Reading (B) fits the spec text better (subcategory lists in 25.4.2–5 are electronics-only) and is far less destructive given live listings in Motors/Property/Jobs. **Need Marlon's confirmation** before executing 25.4.2–6.
 
 #### 25.4.2 Main Category — Electronics
 Subcategories (with item-level examples from team — used as picker tags / placeholder text on post-ad form):
