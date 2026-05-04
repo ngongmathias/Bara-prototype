@@ -223,7 +223,7 @@ export const PostListing = () => {
 
         });
 
-        navigate('/user/sign-in?redirect=/marketplace/post');
+        navigate('/user/sign-in?redirect_url=/marketplace/post');
 
         return;
 

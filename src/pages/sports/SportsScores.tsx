@@ -380,7 +380,7 @@ export default function SportsScores() {
 
                                 <p className="text-xs font-medium text-white/80 leading-relaxed">Sign in to follow your favorite teams and get personalized score notifications and news updates across all your devices.</p>
 
-                                <Link to="/sign-in" className="mt-4 inline-block bg-white text-[#cc0000] px-4 py-1.5 rounded text-[11px] font-black uppercase tracking-widest hover:bg-gray-100 transition-colors">Sign In Now</Link>
+                                <Link to="/user/sign-in?redirect_url=/sports/scores" className="mt-4 inline-block bg-white text-[#cc0000] px-4 py-1.5 rounded text-[11px] font-black uppercase tracking-widest hover:bg-gray-100 transition-colors">Sign In Now</Link>
 
                             </div>
 

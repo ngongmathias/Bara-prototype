@@ -16,7 +16,7 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
 
     const handleCreatePlaylist = () => {
         if (!clerkUser) {
-            navigate('/sign-in');
+            navigate(`/user/sign-in?redirect_url=${encodeURIComponent(location.pathname)}`);
             return;
         }
         setIsModalOpen(true);
