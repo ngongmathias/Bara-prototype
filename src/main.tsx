@@ -4,25 +4,13 @@ import App from './App.tsx'
 import './index.css'
 import './lib/i18n' // Initialize i18n
 
-// Clerk configuration
+// Clerk configuration (v5 — see https://clerk.com/docs/upgrade-guides/react-router-v5)
 const clerkConfig = {
   publishableKey: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '',
-  signIn: {
-    // Redirect to home page after sign in
-    afterSignInUrl: '/',
-    // Don't automatically redirect, let Clerk handle new users
-    fallbackRedirectUrl: '',
-  },
-  signUp: {
-    // Don't automatically create accounts
-    automatic: false,
-    // Redirect to home page after sign up
-    afterSignUpUrl: '/',
-  },
-  // Session management
-  session: {
-    singleSessionMode: false,
-  },
+  // Fallback redirects when a flow isn't triggered with its own redirect_url.
+  // Each <SignIn>/<SignUp> page sets its own forceRedirectUrl to /auth/finish.
+  signInFallbackRedirectUrl: '/',
+  signUpFallbackRedirectUrl: '/',
   appearance: {
     variables: {
       colorPrimary: '#000000',

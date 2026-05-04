@@ -201,7 +201,7 @@ export const UserSignInPage = () => {
 
             signUpForceRedirectUrl={`/auth/finish?mode=sign_up&redirect_url=${encodeURIComponent(redirectUrl)}`}
 
-            afterSignInUrl={finishUrl}
+            forceRedirectUrl={finishUrl}
 
             appearance={{
 

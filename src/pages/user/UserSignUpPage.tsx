@@ -50,7 +50,7 @@ export const UserSignUpPage = () => {
 
             signInUrl={signInUrl}
 
-            afterSignUpUrl={finishUrl}
+            forceRedirectUrl={finishUrl}
 
             appearance={{
 

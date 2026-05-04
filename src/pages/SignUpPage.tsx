@@ -20,7 +20,7 @@ export const SignUpPage = () => {
             routing="path" 
             path="/sign-up"
             signInUrl="/sign-in"
-            afterSignUpUrl={finishUrl}
+            forceRedirectUrl={finishUrl}
             appearance={{
               elements: {
                 formButtonPrimary: 'bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200',
