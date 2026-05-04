@@ -93,7 +93,7 @@ export const MyFavorites = () => {
           <div className="text-center">
             <h2 className="text-2xl font-bold text-black mb-4 font-comfortaa">Sign In Required</h2>
             <p className="text-gray-600 mb-6 font-roboto">Please sign in to view your favorites</p>
-            <Button onClick={() => navigate('/user/sign-in')} className="bg-black hover:bg-gray-800">
+            <Button onClick={() => navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`)} className="bg-black hover:bg-gray-800">
               Sign In
             </Button>
           </div>

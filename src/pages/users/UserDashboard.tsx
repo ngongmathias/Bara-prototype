@@ -125,7 +125,7 @@ export const UserDashboard = () => {
 
   if (!isSignedIn) {
 
-    return <Navigate to="/user/sign-in" replace />;
+    return <Navigate to={`/user/sign-in?redirect_url=${encodeURIComponent(location.pathname)}`} replace />;
 
   }
 

@@ -44,7 +44,7 @@ export default function ProfileThemesPage() {
 
   const handlePurchase = async (themeId: string) => {
     if (!isSignedIn) {
-      navigate('/user/sign-in');
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
     setPurchasing(themeId);
@@ -70,7 +70,7 @@ export default function ProfileThemesPage() {
 
   const handleAdFree = async () => {
     if (!isSignedIn) {
-      navigate('/user/sign-in');
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
     const result = await activateAdFree();

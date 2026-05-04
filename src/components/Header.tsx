@@ -361,10 +361,10 @@ export const Header = () => {
               </DropdownMenu>
             ) : (
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={() => navigate('/user/sign-in')} className="hidden xl:inline-flex text-sm">
+                <Button variant="ghost" size="sm" onClick={() => navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`)} className="hidden xl:inline-flex text-sm">
                   Sign In
                 </Button>
-                <Button variant="default" size="sm" onClick={() => navigate('/user/sign-up')} className="text-sm">
+                <Button variant="default" size="sm" onClick={() => navigate(`/user/sign-up?redirect_url=${encodeURIComponent(window.location.pathname)}`)} className="text-sm">
                   Sign Up
                 </Button>
               </div>
@@ -436,7 +436,7 @@ export const Header = () => {
                         variant="default"
                         className="w-full"
                         size="sm"
-                        onClick={() => { navigate('/user/sign-up'); closeMobileMenu(); }}
+                        onClick={() => { navigate(`/user/sign-up?redirect_url=${encodeURIComponent(window.location.pathname)}`); closeMobileMenu(); }}
                       >
                         Create Account
                       </Button>
@@ -444,7 +444,7 @@ export const Header = () => {
                         variant="outline"
                         className="w-full"
                         size="sm"
-                        onClick={() => { navigate('/user/sign-in'); closeMobileMenu(); }}
+                        onClick={() => { navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`); closeMobileMenu(); }}
                       >
                         Sign In
                       </Button>

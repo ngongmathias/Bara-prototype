@@ -69,7 +69,7 @@ export const MyPurchases = () => {
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Sign In Required</h2>
-            <Button onClick={() => navigate('/user/sign-in')}>Sign In</Button>
+            <Button onClick={() => navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`)}>Sign In</Button>
           </div>
         </main>
         <Footer />

@@ -48,7 +48,7 @@ export default function ArtistVerificationPage() {
 
   const handleSubscribe = () => {
     if (!isSignedIn) {
-      navigate('/user/sign-in');
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
     setLoading(true);
@@ -126,8 +126,8 @@ export default function ArtistVerificationPage() {
                 </Button>
               ) : (
                 <Button
-                  onClick={() => navigate('/user/sign-in')}
-                  className="w-full py-6 bg-black hover:bg-gray-800 text-gray-900 font-black text-base rounded-xl"
+                  onClick={() => navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`)}
+                  className="w-full py-6 bg-black hover:bg-gray-800 text-white font-black text-base rounded-xl"
                 >
                   Sign In to Subscribe
                   <ArrowRight className="w-5 h-5 ml-2" />

@@ -253,7 +253,7 @@ export const ListingDetailPage = () => {
   const handleBaraChat = async () => {
     if (!user) {
       toast({ title: 'Please sign in', description: 'You need to be signed in to chat with sellers.' });
-      navigate('/user/sign-in');
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 

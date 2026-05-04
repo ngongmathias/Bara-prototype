@@ -60,7 +60,7 @@ export const CategoryPostForm = () => {
         description: 'Please sign in to post a listing',
         variant: 'destructive',
       });
-      navigate('/user/sign-in');
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
     if (clerkUser) {

@@ -130,7 +130,7 @@ export default function SportsPredictions() {
 
   const handlePlaceBet = async (match: Match) => {
     if (!user || !isSignedIn) {
-      navigate('/user/sign-in');
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 
@@ -466,7 +466,7 @@ export default function SportsPredictions() {
               {!isSignedIn ? (
                 <div className="text-center py-12 bg-white rounded-2xl">
                   <p className="text-gray-500 mb-4">Sign in to see your predictions</p>
-                  <Button onClick={() => navigate('/user/sign-in')}>Sign In</Button>
+                  <Button onClick={() => navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`)}>Sign In</Button>
                 </div>
               ) : myPredictions.length === 0 ? (
                 <div className="text-center py-12 bg-white rounded-2xl">

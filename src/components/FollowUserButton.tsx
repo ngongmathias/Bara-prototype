@@ -52,7 +52,7 @@ export const FollowUserButton: React.FC<FollowUserButtonProps> = ({
 
     const toggle = async () => {
         if (!user) {
-            navigate('/user/sign-in');
+            navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
             return;
         }
         setLoading(true);

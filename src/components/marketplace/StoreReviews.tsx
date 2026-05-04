@@ -80,7 +80,7 @@ export const StoreReviews: React.FC<StoreReviewsProps> = ({ partnerId, ownerUser
     useEffect(() => { load(); }, [partnerId, user?.id]);
 
     const submit = async () => {
-        if (!user) { navigate('/user/sign-in'); return; }
+        if (!user) { navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`); return; }
         setSubmitting(true);
         try {
             const token = await getToken({ template: 'supabase' });

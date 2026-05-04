@@ -207,7 +207,7 @@ export default function InvitePage() {
               <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">Sign in to get your referral link</h3>
               <p className="text-gray-600 mb-4">Create an account or sign in to start inviting friends.</p>
-              <Button onClick={() => navigate('/user/sign-in')} className="bg-black hover:bg-gray-800">
+              <Button onClick={() => navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`)} className="bg-black hover:bg-gray-800">
                 Sign In
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>

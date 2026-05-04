@@ -56,7 +56,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ listingId, class
     e.stopPropagation();
 
     if (!user) {
-      navigate('/user/sign-in');
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 

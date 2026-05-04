@@ -424,7 +424,7 @@ export function GlobalPlayer() {
                             </button>
                         ) : (
                             <a
-                                href="/user/sign-in"
+                                href={`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`}
                                 className="flex items-center gap-2 bg-white text-black font-bold px-5 py-2.5 rounded-full hover:bg-gray-200 transition text-sm whitespace-nowrap flex-shrink-0"
                             >
                                 Sign In

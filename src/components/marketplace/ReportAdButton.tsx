@@ -40,7 +40,7 @@ export const ReportAdButton = ({ listingId, className, variant = 'outline', size
 
   const handleSubmit = async () => {
     if (!user) {
-      navigate('/user/sign-in');
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 

@@ -554,7 +554,7 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
 
                             <p className="text-center text-sm text-gray-500">
 
-                                You need to <a href="/user/sign-in" className="text-blue-600 underline">sign in</a> to register.
+                                You need to <a href={`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`} className="text-black font-medium underline">sign in</a> to register.
 
                             </p>
 

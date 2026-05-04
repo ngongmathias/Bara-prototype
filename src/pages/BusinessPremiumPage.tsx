@@ -120,7 +120,7 @@ export default function BusinessPremiumPage() {
       return;
     }
     if (!isSignedIn) {
-      navigate('/user/sign-in');
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
     toast({
@@ -248,7 +248,7 @@ export default function BusinessPremiumPage() {
                     </Button>
                   ) : (
                     <Button
-                      onClick={() => navigate('/user/sign-in')}
+                      onClick={() => navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`)}
                       variant="outline"
                       className="w-full py-5 font-bold rounded-xl"
                     >

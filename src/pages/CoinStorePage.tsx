@@ -94,7 +94,7 @@ export default function CoinStorePage() {
 
   const handlePurchase = async (packId: string) => {
     if (!isSignedIn || !user) {
-      navigate('/user/sign-in');
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 
