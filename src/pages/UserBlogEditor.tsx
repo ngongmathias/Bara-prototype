@@ -249,20 +249,20 @@ export const UserBlogEditor = () => {
         await blogPostsService.create(postData);
       }
 
-      // Send submission confirmation email (fire-and-forget)
+      // Enqueue submission confirmation email (fire-and-forget)
       const authorEmail = user?.primaryEmailAddress?.emailAddress;
       if (authorEmail) {
-        supabase.functions.invoke('send-email', {
-          body: {
-            to: authorEmail,
-            subject: 'Your article has been submitted — Bara Afrika Blog',
+        supabase.from('email_queue').insert({
+          to_email: authorEmail,
+          subject: 'Your article has been submitted — Bara Afrika Blog',
+          metadata: {
             type: 'blog_submitted',
             data: {
               authorName: user?.firstName ?? user?.fullName ?? 'Contributor',
               articleTitle: formData.title ?? 'Your Article',
             },
           },
-        }).catch(console.error);
+        }).then(({ error }) => { if (error) console.error(error); });
       }
 
       toast({

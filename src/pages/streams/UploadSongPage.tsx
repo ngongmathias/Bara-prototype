@@ -203,10 +203,10 @@ export default function UploadSongPage() {
 
             const authorEmail = user?.primaryEmailAddress?.emailAddress;
             if (authorEmail) {
-                supabase.functions.invoke('send-email', {
-                    body: {
-                        to: authorEmail,
-                        subject: `"${title}" is now live on Bara Streams`,
+                supabase.from('email_queue').insert({
+                    to_email: authorEmail,
+                    subject: `"${title}" is now live on Bara Streams`,
+                    metadata: {
                         type: 'song_uploaded',
                         data: {
                             artistName: user?.firstName ?? user?.fullName ?? 'Artist',
@@ -215,7 +215,7 @@ export default function UploadSongPage() {
                             coverUrl: coverUrl || undefined,
                         },
                     },
-                }).catch(console.error);
+                }).then(({ error }) => { if (error) console.error(error); });
             }
 
             toast({ title: 'Upload complete!', description: `"${title}" has been uploaded successfully.` });

@@ -158,13 +158,13 @@ export const AdminBlog = () => {
           GamificationService.addCoins(authorUserId, 25, 'Blog article published'),
         ]);
 
-        // Send approval email (fire-and-forget — don't block the UI)
+        // Enqueue approval email (fire-and-forget — don't block the UI)
         const authorEmail = await getAuthorEmail(authorUserId);
         if (authorEmail) {
-          supabase.functions.invoke('send-email', {
-            body: {
-              to: authorEmail,
-              subject: 'Your article is live on Bara Afrika!',
+          supabase.from('email_queue').insert({
+            to_email: authorEmail,
+            subject: 'Your article is live on Bara Afrika!',
+            metadata: {
               type: 'blog_approved',
               data: {
                 authorName: post?.author?.display_name ?? 'Contributor',
@@ -174,7 +174,7 @@ export const AdminBlog = () => {
                 coinsEarned: 25,
               },
             },
-          }).catch(console.error);
+          }).then(({ error }) => { if (error) console.error(error); });
         }
       }
 
@@ -201,16 +201,16 @@ export const AdminBlog = () => {
         decline_reason: declineModal.reason.trim(),
       } as any);
 
-      // Send decline email (fire-and-forget)
+      // Enqueue decline email (fire-and-forget)
       const post = posts.find(p => p.id === declineModal.postId);
       const authorUserId = post?.author?.user_id;
       if (authorUserId) {
         const authorEmail = await getAuthorEmail(authorUserId);
         if (authorEmail) {
-          supabase.functions.invoke('send-email', {
-            body: {
-              to: authorEmail,
-              subject: 'Feedback on your Bara Afrika blog submission',
+          supabase.from('email_queue').insert({
+            to_email: authorEmail,
+            subject: 'Feedback on your Bara Afrika blog submission',
+            metadata: {
               type: 'blog_declined',
               data: {
                 authorName: post?.author?.display_name ?? 'Contributor',
@@ -219,7 +219,7 @@ export const AdminBlog = () => {
                 declineReason: declineModal.reason.trim(),
               },
             },
-          }).catch(console.error);
+          }).then(({ error }) => { if (error) console.error(error); });
         }
       }
 

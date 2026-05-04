@@ -146,9 +146,9 @@
 | 7 | **Deploy `send-email` edge function with idempotency guard + audit `email_queue` webhook in Supabase Dashboard** (INSERT-only, single registration). Code fix `4ddca2e` is merged but not yet deployed; until then duplicate confirmation emails are still going out in production. | 22.5.3 / 22.5.4 |
 | 8 | **Sign-up / login bugs (Clerk)** — Maj Mlinzi case: tried to register as "Maj theGeezer", told username already taken; full Clerk flow audit needed across all entry points. | 25.1.1 |
 | 9 | **Chrome sign-up popup never closes** — sign-up modal stays open forever in Chrome (works in Firefox). Reproduces blocking new-user onboarding on the most-used browser. | 25.1.2 |
-| 10 | **Blog comments — permissions error** — users hitting RLS / permissions error when trying to comment on blog posts. Audit `blog_comments` RLS + Clerk JWT mapping. | 25.1.3 |
+| 10 | ~~**Blog comments — permissions error** — users hitting RLS / permissions error when trying to comment on blog posts. Audit `blog_comments` RLS + Clerk JWT mapping.~~ ✅ Done May 4 — missing GRANTs on `blog_comments` + `blog_comment_likes` added (commit `a986918`) | 25.1.3 |
 | 11 | **SSL certificate not Secure** — site not showing as Secure (https) in browser. Confirm Vercel SSL provisioned correctly for `baraafrika.com` + all subdomains, fix mixed content if any. | 25.1.4 |
-| 12 | **About Us copy replacement** — replace current About Us body with the new "ORIGINS: BARA Afrika" 4-paragraph copy and replace tagline "Est 2024, Rwanda" with "Made by Africans for Africans and friends of Africa". | 25.3 |
+| 12 | ~~**About Us copy replacement** — replace current About Us body with the new "ORIGINS: BARA Afrika" 4-paragraph copy and replace tagline "Est 2024, Rwanda" with "Made by Africans for Africans and friends of Africa".~~ ✅ Done May 4 — copy replaced (commit `80f71da`) | 25.3 |
 | 13 | **Music UX/UI parity with josplay.com** — Music is the most important Streams pillar; bring listening experience to parity with https://music.josplay.com/ (player UX, browse, artist pages). | 25.2.3 |
 
 ### Important Pre-Launch (P1)
@@ -594,12 +594,12 @@
 
 | # | Task | Priority | Status |
 |---|------|----------|--------|
-| 22.5.1 | Ensure ALL emails go through `email_queue` — never send directly from frontend. Remaining call sites that still bypass the queue: `AdminMarketplace.updateListingStatus` (rejection path, after Apr 22 fix), `AdminBlog.handleApprove`, `AdminBlog.handleDecline`, `UserBlogEditor` (submission), `UploadSongPage` (song uploaded). Each must enqueue via DB trigger or explicit `email_queue` insert. | P0 | 🟡 In progress |
+| 22.5.1 | Ensure ALL emails go through `email_queue` — never send directly from frontend. ~~Remaining call sites that still bypass the queue: `AdminMarketplace.updateListingStatus` (rejection path, after Apr 22 fix), `AdminBlog.handleApprove`, `AdminBlog.handleDecline`, `UserBlogEditor` (submission), `UploadSongPage` (song uploaded).~~ ✅ Done May 4 — all five call sites migrated. AdminBlog/UserBlogEditor/UploadSongPage now insert into `email_queue` with `metadata.{type,data}` shape. AdminMarketplace rejection now uses the trigger (see 22.5.6). Sweep confirms zero `supabase.functions.invoke('send-email', ...)` calls remain in `src/`. | P0 | ✅ Done |
 | 22.5.2 | **Admin email log** — table: recipient, subject, type, status (sent/failed/pending), sent_at. Filterable | P1 | ✅ Done (`/admin/email-log` — status+type filter, search, stats cards) |
 | 22.5.3 | **Duplicate-email bug fix — `send-email` idempotency guard.** Apr 22, 2026: users reported the same event confirmation email arriving twice. Root cause: edge function had no idempotency check, so when it self-updated `email_queue.status='sent'` and the Supabase DB webhook was wired to INSERT+UPDATE (or registered twice), the email re-sent on the self-update. Code fix landed (`4ddca2e`): early-return on any webhook with `body.type !== 'INSERT'` or payload `status !== 'pending'`. **Still pending:** deploy `send-email` edge function (`supabase functions deploy send-email`) and verify in production. | P0 | 🟡 Code merged — deploy pending |
 | 22.5.4 | **Supabase Dashboard webhook audit on `email_queue`** — confirm the webhook is registered exactly once, fires on INSERT only (not UPDATE/DELETE), and points at the deployed `send-email` function. This is the infra-side counterpart of 22.5.3. | P0 | ☐ |
 | 22.5.5 | **Verify duplicate emails are gone end-to-end after 22.5.3 + 22.5.4 deploy** — register for a free event, register for a paid event, approve a marketplace listing, submit a banner, sign up a new user. Each should produce exactly one email per logical action in `email_queue` and exactly one delivery in Resend. | P0 | ☐ |
-| 22.5.6 | **AdminMarketplace double-send fix (Apr 22, 2026, `4ddca2e`).** Direct `send-email` invoke for `listing_approved` removed; DB trigger `tr_marketplace_listing_email` is now the only path. Rejection path retained (no DB trigger branch). Follow-up: extend `handle_marketplace_listing_email` with a `listing_rejected` branch so 22.5.1 can fully retire the direct invoke. | P1 | 🟡 Approval done — rejection trigger branch pending |
+| 22.5.6 | **AdminMarketplace double-send fix (Apr 22, 2026, `4ddca2e`).** Direct `send-email` invoke for `listing_approved` removed; DB trigger `tr_marketplace_listing_email` is now the only path. ~~Rejection path retained (no DB trigger branch). Follow-up: extend `handle_marketplace_listing_email` with a `listing_rejected` branch so 22.5.1 can fully retire the direct invoke.~~ ✅ Done May 4 — `listing_rejected` branch added in migration `20260504_marketplace_listing_rejected_email.sql`; `AdminMarketplace.updateListingStatus` rejection invoke removed. Trigger now handles all three states (created/approved/rejected). | P1 | ✅ Done |
 
 ### 22.6 "From" Address
 
@@ -760,8 +760,8 @@ Marlon's message referenced two inline images (`Image #5`, `Image #6`) and attac
 - [ ] **25.1.1.b Investigate alternatives to current 3rd-party (Clerk) flow** — team asked: *"is there a better way to do it while still using a 3rd party?"* Action: evaluate whether the current Clerk flow can be customized further, or if Clerk's native components vs hosted pages would be smoother; document trade-offs before deciding.
 - [ ] **25.1.1.c Non-user QA pass** — Marlon: *"Have you tried logging in as a non-User and checked the experience?"* Run through the platform from a fresh device / incognito with no account, document every friction point and dead-end (e.g. comment, like, save, RSVP gates), and fix the worst.
 - [ ] **25.1.2 Chrome sign-up popup never closes** — In Chrome, after sign-up the modal stays open indefinitely; in Firefox it closes correctly. Investigate Clerk modal close handler vs Chrome event handling, fix, regression-test on Chrome / Edge / Safari / Firefox / mobile Chrome / mobile Safari.
-- [ ] **25.1.3 Blog comments permissions error** — Users get a permissions error when commenting on blog posts. Audit `blog_comments` RLS, confirm the Clerk → Supabase JWT carries `sub` correctly, fix the policy, add a test case, and verify on Marlon / Maj's accounts.
-- [ ] **25.1.4 SSL certificate "Not Secure"** — Browser shows site as not secure. Verify Vercel SSL is provisioned for `baraafrika.com`, `www.baraafrika.com`, and any subdomain (api, admin if used). Fix any mixed-content (`http://` assets, scripts) and confirm green padlock on Chrome, Firefox, Safari, mobile.
+- [x] **25.1.3 Blog comments permissions error** ✅ Done May 4 (commit `a986918`) — root cause was missing GRANTs on `blog_comments` + `blog_comment_likes`, not RLS. Verify on Marlon / Maj's accounts post-deploy.
+- [x] **25.1.4 SSL certificate "Not Secure"** ✅ Audited May 4 — infrastructure is healthy. Apex + www both serve valid Let's Encrypt R12 certs (renewed May 3, valid until Aug 1, Vercel auto-managed). HTTP→HTTPS is 308 Permanent Redirect on both. HSTS `max-age=63072000` (2 years). Code is clean — no `http://` asset/script/fetch URLs (only SVG XML namespace + protocol-relative Google Translate `//translate.google.com/...` which inherits HTTPS). **Likely cause of Marlon's report:** browser cached an old `http://` visit before HSTS was set, or he hit an uncovered subdomain. Action: confirm with Marlon which exact URL showed "Not Secure" + whether it reproduces in incognito on a fresh device. No code changes needed.
 
 ### 25.2 Streams Status & Parity (P0)
 
@@ -769,10 +769,10 @@ Marlon's message referenced two inline images (`Image #5`, `Image #6`) and attac
 - [ ] **25.2.2 Super Admin permissions verification** — Verify Super Admin role has full permissions across all Streams admin areas (Music, Movies, E-books, Podcasts, Gaming) and content moderation flows. Test create / edit / delete / publish / unpublish on each.
 - [ ] **25.2.3 Music UX/UI parity with josplay.com** — Music is the **most important pillar** of Streams. Benchmark https://music.josplay.com/ and bring our listening experience to parity or better: player UX, queue handling, browse-by-genre, artist pages, album pages, playlists, search results. Produce a gap analysis first, then implement in passes.
 
-### 25.3 About Us Page — Copy Update (P0)
+### 25.3 About Us Page — Copy Update (P0) ✅ Done May 4
 
-- [ ] Replace the current About Us body copy with the new **"ORIGINS: BARA Afrika"** copy (4 paragraphs, ending: *"We are one. We are home. We are your bridge to New Africa."*). Final copy provided by Marlon — paste verbatim.
-- [ ] Replace the tagline **"Est 2024, Rwanda"** with **"Made by Africans for Africans and friends of Africa"** wherever it appears (footer, About page hero, marketing cards).
+- [x] Replace the current About Us body copy with the new **"ORIGINS: BARA Afrika"** copy (4 paragraphs, ending: *"We are one. We are home. We are your bridge to New Africa."*). Final copy provided by Marlon — paste verbatim. ✅ commit `80f71da`
+- [x] Replace the tagline **"Est 2024, Rwanda"** with **"Made by Africans for Africans and friends of Africa"** wherever it appears (footer, About page hero, marketing cards). ✅ commit `80f71da`
 - [ ] Audit any other "About / Mission / Story" surfaces (footer, marketing site if any, email templates, social meta) for stale copy and align with the new wording.
 
 ### 25.4 Marketplace Categories Restructure (P1)

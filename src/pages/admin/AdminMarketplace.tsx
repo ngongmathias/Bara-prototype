@@ -127,16 +127,6 @@ export const AdminMarketplace = () => {
 
   const updateListingStatus = async (listingId: string, newStatus: string) => {
     try {
-      // Get listing details first to send email
-      const { data: listingDetails } = await supabase
-        .from('marketplace_listings')
-        .select(`
-          *,
-          marketplace_categories(name)
-        `)
-        .eq('id', listingId)
-        .single();
-
       const { error } = await supabase
         .from('marketplace_listings')
         .update({ status: newStatus })
@@ -144,24 +134,8 @@ export const AdminMarketplace = () => {
 
       if (error) throw error;
 
-      // Approval emails are handled by the DB trigger on marketplace_listings
-      // (tr_marketplace_listing_email → listing_approved). We only need to send
-      // the rejection email here since the trigger has no rejection branch.
-      if (listingDetails && newStatus === 'rejected') {
-        await supabase.functions.invoke('send-email', {
-          body: {
-            to: listingDetails.seller_email,
-            subject: 'Marketplace Ad Update - Bara Afrika',
-            type: 'listing_rejected',
-            data: {
-              userFirstname: listingDetails.seller_name.split(' ')[0],
-              listingTitle: listingDetails.title,
-              listingId: listingDetails.id,
-              reason: 'Does not meet community guidelines',
-            },
-          },
-        });
-      }
+      // Approval and rejection emails are handled by the DB trigger
+      // (tr_marketplace_listing_email → listing_approved / listing_rejected).
 
       toast({
         title: 'Success',
