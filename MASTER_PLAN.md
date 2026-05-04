@@ -755,8 +755,29 @@ Marlon's message referenced two inline images (`Image #5`, `Image #6`) and attac
 
 ### 25.1 Auth & Account Bugs (P0)
 
-- [ ] **25.1.1 Sign-up / login full audit (Clerk)** — Maj Mlinzi reported he tried to register as **"Maj theGeezer"** and was told the username is already taken even though it should be free. Reproduce, fix the Clerk username uniqueness/availability check, and walk through every sign-up + login entry point (header, modal, dedicated `/sign-in` page, mobile drawer, post-action prompts). Confirm error messages are human-readable and recovery paths work. Team has had **more than one complaint** about this.
-- [ ] **25.1.1.a Sign-up UX — "as quick and painless as possible"** — Marlon's directive. Reduce required fields to absolute minimum, defer optional profile fields to post-sign-up, single-screen flow where possible. Goal: time-to-account < 30s on mobile.
+- [x] **25.1.1 Sign-up / login full audit (Clerk)** ✅ Code-side audit done May 5 (commit `4011eee`). **Findings:**
+
+  **Code fixed (3 mis-routed entry points):**
+  - `StreamsSidebar` "Create Playlist" sent users to `/sign-in` (admin sign-in!) instead of `/user/sign-in`. Fixed + now preserves location as `redirect_url`.
+  - `SportsScores` "Sign In Now" CTA linked to admin `/sign-in`. Fixed to `/user/sign-in?redirect_url=/sports/scores`.
+  - `PostListing` pre-auth redirect used `?redirect=` (wrong param name) — the auth flow reads `?redirect_url=`, so the return-to URL was silently dropped. Fixed.
+
+  **Clerk v5 redirect API migration** (commit `1efc1c4`, see 25.1.2) — fixes a class of post-auth navigation failures across browsers, including the "popup never closes" symptom.
+
+  **Maj theGeezer "username already taken" — three possible causes:**
+  1. Username genuinely taken (someone — possibly Maj himself in an abandoned earlier attempt — already reserved it). Check Clerk Dashboard → Users for `maj_thegeezer` / `MajtheGeezer` / `majthegeezer` (Clerk treats usernames case-insensitively).
+  2. Reserved-words list in Clerk Dashboard → User & Authentication → Username settings — some words are blocked.
+  3. The username field is required at all (current Clerk Dashboard config). **Recommendation:** drop the username requirement entirely (see 25.1.1.a). Sign up with email + password only; let users pick a display name post-sign-up if/when needed. This eliminates the bug class permanently and shortens the form.
+
+  **Action items for Marlon (Clerk Dashboard, dev.clerk.com):**
+  - [ ] Search for existing accounts matching `majthegeezer` (any case, with/without spaces). Delete or reassign if it's an orphan.
+  - [ ] User & Authentication → Email, Phone, Username → set Username to **off** (recommended) OR **optional**. Email + password only.
+  - [ ] User & Authentication → Restrictions → review reserved-words list. Remove anything not strictly needed.
+  - [ ] Customization → Account portal → confirm post-sign-up redirect is **not** overriding our `forceRedirectUrl=/auth/finish`.
+  - [ ] After changes, retest sign-up as `Maj theGeezer` with a fresh email and confirm it succeeds without the username collision.
+
+  **Other entry-point friction noted (handled in 25.1.1.c non-user QA pass):** ~20 places navigate to `/user/sign-in` without preserving `redirect_url`, so users land on home `/` after sign-in instead of returning to the action they tried to take (favoriting, following, posting review, RSVP, etc.).
+- [x] **25.1.1.a Sign-up UX — "as quick and painless as possible"** ✅ Code-side May 5. UserSignUpPage now uses Clerk `layout.showOptionalFields: false` (hides non-required fields by default, user can expand if they want), `socialButtonsPlacement: 'top'` (one-tap social sign-up if Dashboard has Google/Apple enabled), tightened heading copy ("Sign up — takes a few seconds"), reduced mobile padding. Also fixed design-system violation: button + sign-up CTA card were `bg-blue-600` → now `bg-black` per the strict black/white/gray rule. **Field-level trimming still requires Clerk Dashboard action by Marlon** — turn off Username field (drops it from required), keep Email + Password. Re-evaluate first/last name fields: probably keep optional only, asked once post-sign-up if needed.
 - [ ] **25.1.1.b Investigate alternatives to current 3rd-party (Clerk) flow** — team asked: *"is there a better way to do it while still using a 3rd party?"* Action: evaluate whether the current Clerk flow can be customized further, or if Clerk's native components vs hosted pages would be smoother; document trade-offs before deciding.
 - [ ] **25.1.1.c Non-user QA pass** — Marlon: *"Have you tried logging in as a non-User and checked the experience?"* Run through the platform from a fresh device / incognito with no account, document every friction point and dead-end (e.g. comment, like, save, RSVP gates), and fix the worst.
 - [x] **25.1.2 Chrome sign-up popup never closes** ✅ Fix landed May 5 — root cause was deprecated Clerk v4 API on v5.46. `ClerkProvider` had bogus nested `signIn`/`signUp` config keys (silently ignored in v5) and every `<SignIn>` / `<SignUp>` page used deprecated `afterSignInUrl` / `afterSignUpUrl` props. Firefox tolerated the deprecated path; Chrome's stricter cross-origin handling could drop the post-auth redirect, leaving the form open. Migrated 5 files to v5: `forceRedirectUrl` on each `<SignIn>` / `<SignUp>`, and `signInFallbackRedirectUrl` / `signUpFallbackRedirectUrl` on `ClerkProvider`. **Needs Marlon to retest in Chrome / Edge / Safari / Firefox / mobile Chrome / mobile Safari** — couldn't reproduce live, so the fix is best-guess based on the symptom + Clerk v5 migration guide.

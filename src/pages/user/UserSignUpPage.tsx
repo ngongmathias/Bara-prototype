@@ -20,31 +20,31 @@ export const UserSignUpPage = () => {
 
   return (
 
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
 
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-md w-full space-y-4 sm:space-y-6">
 
         <div className="text-center">
 
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">
 
-            Create Your Account
+            Sign up
 
           </h2>
 
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-gray-600">
 
-            Join to save favorites and manage your preferences
+            Takes a few seconds.
 
           </p>
 
         </div>
 
-        <div className="mt-8 space-y-6">
+        <div>
 
-          <SignUp 
+          <SignUp
 
-            routing="path" 
+            routing="path"
 
             path="/user/sign-up"
 
@@ -54,9 +54,19 @@ export const UserSignUpPage = () => {
 
             appearance={{
 
+              layout: {
+
+                socialButtonsPlacement: 'top',
+
+                socialButtonsVariant: 'blockButton',
+
+                showOptionalFields: false,
+
+              },
+
               elements: {
 
-                formButtonPrimary: 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200',
+                formButtonPrimary: 'bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200',
 
                 card: 'bg-white shadow-lg border border-gray-200 rounded-lg p-6',
 
