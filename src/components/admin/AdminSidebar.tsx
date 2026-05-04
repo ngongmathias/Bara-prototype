@@ -142,6 +142,18 @@ const adminMenuItems = [
 
   {
 
+    title: "Country Key Listings",
+
+    icon: Building2,
+
+    path: "/admin/country-key-listings",
+
+    description: "Ministries, regulators, agencies, NGOs"
+
+  },
+
+  {
+
     title: "Categories",
 
     icon: FolderOpen,

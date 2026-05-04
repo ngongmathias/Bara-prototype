@@ -889,16 +889,17 @@ Subcategories (with item-level examples):
 
 Files: `supabase/migrations/20260507_country_gallery.sql`, `src/components/CountryGallery.tsx`, `src/components/admin/CountryGalleryManager.tsx`, `src/pages/admin/AdminCountryGallery.tsx`. Wired into `CountryDetailPage`, `App.tsx`, `AdminSidebar`, `AdminLayout`.
 
-#### 25.5.2 Key Listings
+#### 25.5.2 Key Listings ✅ Done May 7
 Admin-side fields for each Key Listing entry:
-- [ ] **Main Category Type** (enum): Government Ministry, Regulator, Agency, Sports Federation, Charity, NGO
-- [ ] **Description** — free text, **100 words max** (enforce char/word counter)
-- [ ] **Web Link** — must be `https://` (validate)
-- [ ] **Logo** — ability to upload a logo with **icon-size limit (similar to Coat of Arms)** — square, e.g. ≤ 256×256, ≤ 100 KB
-- [ ] **Location / Address** — free text
-- [ ] **Telephone** — optional, with country code
-- [ ] Public listing on the country landing page, grouped by Main Category Type
-- [ ] Admin CRUD page
+- [x] **Main Category Type** (enum) — Postgres enum `country_key_listing_type` with 6 values: government_ministry, regulator, agency, sports_federation, charity, ngo. Labels rendered via shared `src/lib/countryKeyListingTypes.ts` so admin + public agree.
+- [x] **Description** — Textarea with live word counter; 100-word cap enforced in form validation (`countWords` util). Counter turns red over the limit, save blocked.
+- [x] **Web Link** — Both client-side (`/^https:\/\//i.test`) and DB-side `CHECK (web_link IS NULL OR web_link ~* '^https://')` validation.
+- [x] **Logo** — Square icon up to 100 KB (bucket-enforced). New `country-key-listing-logos` Supabase Storage bucket separate from country-gallery so the size cap can be tighter. Frontend pre-validates size and rejects oversized uploads with a toast.
+- [x] **Address + Telephone** — Free-text fields, both optional.
+- [x] **Public listing** on country landing page — new `CountryKeyListings` component mounted on `CountryDetailPage` after the gallery, renders entries grouped by listing type with logo, description, web link, address (with map pin icon), tel: link. Section is fully hidden when a country has no listings.
+- [x] **Admin CRUD page** — `/admin/country-key-listings` with country picker, list-by-type view, add/edit dialog, sidebar entry, page guide.
+
+Migration: `supabase/migrations/20260508_country_key_listings.sql`. Files: `src/lib/countryKeyListingTypes.ts`, `src/components/CountryKeyListings.tsx`, `src/components/admin/CountryKeyListingsManager.tsx`, `src/pages/admin/AdminCountryKeyListings.tsx`. Wired into `CountryDetailPage`, `App.tsx`, `AdminSidebar`, `AdminLayout`.
 
 ### 25.6 Payments — Phase 15 Expansion (P1, blocks monetization)
 

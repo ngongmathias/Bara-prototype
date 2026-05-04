@@ -48,6 +48,8 @@ import { BottomBannerAd } from "@/components/BottomBannerAd";
 
 import { CountryGallery } from "@/components/CountryGallery";
 
+import { CountryKeyListings } from "@/components/CountryKeyListings";
+
 
 
 interface Country {
@@ -740,6 +742,28 @@ export const CountryDetailPage: React.FC = () => {
               title="Gallery"
 
               subtitle={`Photos from ${country.name}.`}
+
+            />
+
+          </div>
+
+        </div>
+
+        {/* Key Listings (admin-managed institutional directory) */}
+
+        <div className="bg-gray-50/40">
+
+          <div className="max-w-6xl mx-auto px-6 py-10">
+
+            <CountryKeyListings
+
+              countryId={country.id}
+
+              countryName={country.name}
+
+              title="Key Listings"
+
+              subtitle={`Important institutions in ${country.name} — ministries, regulators, agencies, sports federations, charities, and NGOs.`}
 
             />
 
