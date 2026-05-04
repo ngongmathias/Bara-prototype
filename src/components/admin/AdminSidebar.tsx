@@ -130,6 +130,18 @@ const adminMenuItems = [
 
   {
 
+    title: "Country Gallery",
+
+    icon: Image,
+
+    path: "/admin/country-gallery",
+
+    description: "Per-country photo galleries"
+
+  },
+
+  {
+
     title: "Categories",
 
     icon: FolderOpen,

@@ -881,11 +881,13 @@ Subcategories (with item-level examples):
 
 > New admin-managed surfaces on the BARA Global country pages.
 
-#### 25.5.1 Gallery
-- [ ] Admin-only photo upload UI (no public submissions)
-- [ ] Specify and enforce **ideal dimensions and max file size** (decide and document — likely 1920×1080 max, 500 KB target after compression). Add client-side resize/compress step before upload.
-- [ ] Storage bucket + RLS (admins write, public read)
-- [ ] Public gallery viewer on the country landing page (grid + lightbox)
+#### 25.5.1 Gallery ✅ Done May 7
+- [x] **Admin-only photo upload UI** — new page at `/admin/country-gallery` with country picker + `CountryGalleryManager` component (multi-file picker, captions, reorder via up/down arrows, delete). Sidebar entry added under "Country Info".
+- [x] **Dimensions and file size** — frontend pre-resizes to 1920px on the longest side, JPEG-compresses with quality stepping down (0.85 → 0.5) until under ~500 KB. Hard limit 5 MB per file (oversized rejected with toast). Bucket also enforces 5 MB and JPEG/PNG/WebP MIME allow-list.
+- [x] **Storage bucket + RLS** — new `country-gallery` bucket. Public read; INSERT/UPDATE/DELETE require authenticated. Admin gating happens in the frontend via `AdminAuthGuard`, matching the existing `country-flags` / `country-leaders` / `country-monuments` bucket convention.
+- [x] **Public gallery viewer** — new `CountryGallery` component mounted on `CountryDetailPage` (between hero and sponsored banner). Responsive grid (2/3/4 cols), captions on hover, fullscreen Dialog lightbox with prev/next navigation, keyboard arrow-key support, photo counter. Section is fully hidden when a country has no photos.
+
+Files: `supabase/migrations/20260507_country_gallery.sql`, `src/components/CountryGallery.tsx`, `src/components/admin/CountryGalleryManager.tsx`, `src/pages/admin/AdminCountryGallery.tsx`. Wired into `CountryDetailPage`, `App.tsx`, `AdminSidebar`, `AdminLayout`.
 
 #### 25.5.2 Key Listings
 Admin-side fields for each Key Listing entry:

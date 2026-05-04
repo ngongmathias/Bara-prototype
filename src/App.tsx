@@ -72,6 +72,8 @@ import { AdminCountries } from "./pages/admin/AdminCountries";
 
 import { AdminCountryInfo } from "./pages/admin/AdminCountryInfo";
 
+import { AdminCountryGallery } from "./pages/admin/AdminCountryGallery";
+
 import { AdminBusinesses } from "./pages/admin/AdminBusinesses";
 
 import { AdminEventsEnhanced as AdminEvents } from "./pages/admin/AdminEventsEnhanced";
@@ -816,6 +818,8 @@ const AppRoutes = () => {
           <Route path="countries" element={<AdminAuthGuard><AdminCountries /></AdminAuthGuard>} />
 
           <Route path="country-info" element={<AdminAuthGuard><AdminCountryInfo /></AdminAuthGuard>} />
+
+          <Route path="country-gallery" element={<AdminAuthGuard><AdminCountryGallery /></AdminAuthGuard>} />
 
           <Route path="businesses" element={<AdminAuthGuard><AdminBusinesses /></AdminAuthGuard>} />
 

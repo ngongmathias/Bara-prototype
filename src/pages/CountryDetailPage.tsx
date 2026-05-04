@@ -46,6 +46,8 @@ import { TopBannerAd } from "@/components/TopBannerAd";
 
 import { BottomBannerAd } from "@/components/BottomBannerAd";
 
+import { CountryGallery } from "@/components/CountryGallery";
+
 
 
 interface Country {
@@ -722,6 +724,28 @@ export const CountryDetailPage: React.FC = () => {
         </div>
 
 
+
+        {/* Gallery (admin-managed photos for this country) */}
+
+        <div className="bg-white">
+
+          <div className="max-w-6xl mx-auto px-6 py-10">
+
+            <CountryGallery
+
+              countryId={country.id}
+
+              countryName={country.name}
+
+              title="Gallery"
+
+              subtitle={`Photos from ${country.name}.`}
+
+            />
+
+          </div>
+
+        </div>
 
         {/* Sponsored Banner */}
 
