@@ -140,7 +140,7 @@
 | 1 | **Clerk production keys** — app runs on dev keys with strict rate limits | 7.42 |
 | 2 | **Emails: audit + setup** — @baraafrika.com transactional email (Resend), SPF/DKIM | 7.51 |
 | 3 | **Streams: verify `audio-files` + `cover-art` storage buckets + RLS** | 7A-1.5 |
-| 4 | **Admin: Movies + Podcasts management pages** (`/admin/movies`, `/admin/podcasts`) | 7.50 |
+| 4 | ~~**Admin: Movies + Podcasts management pages** (`/admin/movies`, `/admin/podcasts`)~~ ✅ Confirmed May 8 — `AdminMovies` (525 LOC) and `AdminPodcasts` (375 LOC) both exist with full CRUD; routes are at `/admin/streams/movies` and `/admin/streams/podcasts`. DB tables exist in `20260319_sprint7_test_data.sql`. | 7.50 |
 | 5 | **Cross-device testing** — mobile (375px), tablet (768px), desktop (1440px) all pages | 7A-0.2 |
 | 6 | ~~**Blog post likes** — needs `blog_post_likes` table + RLS (currently localStorage)~~ ✅ Done Apr 13 — migration created, BlogPostDetail wired to Supabase | 10.4 |
 | 7 | **Deploy `send-email` edge function with idempotency guard + audit `email_queue` webhook in Supabase Dashboard** (INSERT-only, single registration). Code fix `4ddca2e` is merged but not yet deployed; until then duplicate confirmation emails are still going out in production. | 22.5.3 / 22.5.4 |
@@ -786,9 +786,57 @@ Marlon's message referenced two inline images (`Image #5`, `Image #6`) and attac
 
 ### 25.2 Streams Status & Parity (P0)
 
-- [ ] **25.2.1 E-books operational status check** — Confirm e-books section is fully working end-to-end: browse, detail page, "read" / preview, admin upload, storage bucket, RLS. Document any gaps and fix them.
-- [ ] **25.2.2 Super Admin permissions verification** — Verify Super Admin role has full permissions across all Streams admin areas (Music, Movies, E-books, Podcasts, Gaming) and content moderation flows. Test create / edit / delete / publish / unpublish on each.
-- [ ] **25.2.3 Music UX/UI parity with josplay.com** — Music is the **most important pillar** of Streams. Benchmark https://music.josplay.com/ and bring our listening experience to parity or better: player UX, queue handling, browse-by-genre, artist pages, album pages, playlists, search results. Produce a gap analysis first, then implement in passes.
+- [x] **25.2.1 E-books operational status check** ✅ Done May 8 (commit pending). **Findings:**
+
+  Frontend was already fully built: `EbooksPage` (listing with search/genre/sort), `EbookDetailPage` (single book view), `AdminEbooks` (full CRUD with cover + file upload), `UserMyEbooks` (creator dashboard). All four files explicitly handle Postgres error code `42P01` (undefined_table) by falling back to a static seed list — meaning the **`ebooks` table never actually existed in the codebase** (no migration created it). Same for the **`ebooks` storage bucket** referenced by `AdminEbooks` line 55.
+
+  In other words: the section was running on graceful fallback the entire time and was non-functional in any environment without manual setup.
+
+  **Fix landed:** new migration `20260509_ebooks.sql` creates the `ebooks` table (matching the schema the frontend was already coded against — title, author, description, genre, year, pages, language, country, cover_url, file_url, is_featured, is_free, price, download_count, uploaded_by Clerk ID, timestamps), adds public-read RLS + authenticated-write (admin gating in frontend), creates the `ebooks` storage bucket with 50 MB cap and PDF/EPUB/image MIME allow-list, sets up updated_at trigger and indexes.
+
+  **Read / preview gap (deferred):** `EbookDetailPage` shows the cover and metadata but has no in-browser reader — the "Download" CTA just opens `file_url` in a new tab. A proper PDF.js / EPUB.js reader is a larger feature that wasn't in scope for this audit. Tracked here as a future-phase item.
+- [x] **25.2.2 Super Admin permissions verification** ✅ Code-side audit done May 8. **Findings:**
+
+  **Direct answer: yes, Super Admin has full permissions across all Streams admin areas.** Every Streams admin route (`AdminSongs`, `AdminAlbums`, `AdminArtists`, `AdminMovies`, `AdminEbooks`, `AdminPodcasts`, `AdminStreamsDashboard`) is wrapped in `<AdminAuthGuard>`. The guard reads `admin_users.role` and `admin_users.permissions` from the DB, and `super_admin` (the highest role) gets full access — including create/edit/delete/publish/unpublish on every entity.
+
+  **Caveat (worth flagging, separate from 25.2.2):** the guard treats all admin roles the same — it just checks `is_admin === true`. The `role` field (`super_admin`/`admin`/`moderator`) is read into `adminInfo` but **never enforced anywhere in the frontend**. So in practice a `moderator` can do everything a `super_admin` can on the Streams pages. If Marlon wants role separation (e.g. moderators can edit but not delete songs), that's a follow-up task — not in 25.2.2 scope.
+
+  **Bonus finding from this audit:** Pre-Launch Blocker P0 item #4 ("Admin: Movies + Podcasts management pages") is **also stale**. Both `AdminMovies.tsx` (525 lines) and `AdminPodcasts.tsx` (375 lines) exist with full CRUD; both DB tables exist in `20260319_sprint7_test_data.sql`. Marked below.
+- [ ] **25.2.3 Music UX/UI parity with josplay.com** — implementation deferred. **Gap analysis done May 8.**
+
+  **Current BARA Streams music surface (what exists):**
+  - Discovery: `StreamsHome`, `StreamsHub`, `TrendingSongsPage`, `NewReleasesPage`
+  - Artist: `ArtistsPage` (list), `ArtistPage` (profile, with Artist Picks + Artist Spotlight), `ArtistDashboard`, `ArtistVerificationPage`
+  - Playlists: `PlaylistPage`, `CreatePlaylistModal` (with collaborative-playlist support)
+  - User: `LibraryPage`, `LikedSongsPage`, `ListeningStatsPage`
+  - Single: `SongPage`, `CreditPage` (producer/songwriter)
+  - Creator: `UploadSongPage` (with lyrics field), `CreateAlbumPage`
+  - Player: `GlobalPlayer`, `FullScreenPlayer` (with lyrics tab), `QueueDrawer`, `SongContextMenu`, `AudioPlayerContext` (queue, shuffle/repeat, sleep timer, playback rate, keyboard shortcuts)
+  - Personalization: Release Radar (already shipped — personalized new releases from followed artists)
+
+  **Critical missing surfaces vs typical music-streaming UX (josplay.com-style):**
+  - **No `AlbumPage.tsx`** — albums browsable only via artist page; no dedicated album-detail surface with track list, total duration, follow-album button
+  - **No music-only landing** — `StreamsHome` mixes all pillars (music, movies, ebooks, podcasts); no `MusicPage.tsx` that's pure music
+  - **No music search page** — `StreamsSidebar` links to `/streams/search` but no `SearchPage.tsx` exists in `src/pages/streams/`
+  - **No genre browse** — no `GenrePage.tsx`; the "browse by genre" path doesn't exist (Phase 17.2.2 in plan)
+
+  **Player gaps vs Phase 17 spec already in this plan:**
+  - 17.1.1–17.1.8 — Now Playing immersive redesign (full-width blurred album art, two-column desktop / vertical mobile, scrollable synced lyrics already shipped via 17.1.5)
+  - 17.5.1 — Mini player enhancements (scrubbing, volume slider, heart, queue toggle)
+  - 17.5.2 — Add-to-playlist modal
+  - 17.3.4 — Artist follow system (button + count + new-release notifications)
+  - 17.3.5 — Share currently-playing card with album art
+  - 17.4.1 — Verification badges rendered everywhere artist name appears
+  - 17.2.1 — "Made for You" daily mixes
+  - 17.2.2 — Genre/mood browse page (Afrobeats, Amapiano, Gospel, Highlife, Bongo Flava, Gqom)
+  - 17.2.6 — Song / artist radio
+
+  **Recommended multi-pass implementation roadmap (3 passes):**
+  - **Pass 1 (foundation, 1 sprint)** — `MusicPage.tsx` (music-only landing), `AlbumPage.tsx`, music `SearchPage.tsx`, genre browse page (17.2.2). These four pages are blocking gaps that any josplay.com user would notice on minute one.
+  - **Pass 2 (player polish, 1 sprint)** — Mini player enhancements (17.5.1), add-to-playlist modal (17.5.2), Now Playing immersive redesign (17.1.1–17.1.8), verification badges (17.4.1), share currently-playing (17.3.5).
+  - **Pass 3 (personalization & social, 1 sprint)** — Artist follow system (17.3.4), "Made for You" daily mixes (17.2.1), song/artist radio (17.2.6).
+
+  Pulling 25.2.3 from this week's scope on user OK; will resurface the day Marlon next reviews Streams roadmap.
 
 ### 25.3 About Us Page — Copy Update (P0) ✅ Done May 4
 
@@ -914,7 +962,20 @@ Migration: `supabase/migrations/20260508_country_key_listings.sql`. Files: `src/
 
 ### 25.7 Monetization & Referrals (P1)
 
-- [ ] **25.7.1 Identify current ad provider** — confirm whether the current "AdChoices" labelled ads are Google AdSense or another network; document publisher account IDs and where ad code is wired in
+- [x] **25.7.1 Identify current ad provider** ✅ Done May 8. **Findings:**
+
+  **Current ad system: 100% in-house, no third-party ad network.** Codebase sweep confirms **zero** references to Google AdSense, `adsbygoogle`, `googletagservices`, AdChoices SDK, Awin, CJ, Impact, or any external ad network. No `ads.txt` file in `public/`. No publisher IDs anywhere.
+
+  **What the current ads actually are:**
+  - **DB tables** — `sponsored_banners` (managed via `AdminSponsoredBanners`), `sponsored_ads` (`AdminSponsoredAds`), `sponsored_banner_analytics` (click tracking), `country_info.ad_*` columns for per-country page ads.
+  - **Storage buckets** — `country-page-ads` for per-country images, banner images uploaded directly via `sponsored_banners.banner_image_url`.
+  - **Components** — `BannerAd`, `TopBannerAd`, `BottomBannerAd` all fetch active rows from `sponsored_banners` and render them as `<img>` linked to the sponsor's `company_website`.
+  - **Service** — `MonetizationService.trackInteraction(bannerId, 'banner', 'impression' | 'click', bidValue)` writes impression/click rows; banners carry a `bid_per_click` field.
+  - **Admin** — `AdminSponsoredAds`, `AdminSponsoredBanners`, plus per-country ad fields in `AdminCountryInfo`.
+
+  Sponsors pay BARA directly to be displayed; there's no programmatic auction or external publisher network. The "AdChoices" label Marlon mentioned must be cosmetic, not the actual Google AdChoices framework.
+
+  **Implication for 25.7.2 (AdSense onboarding):** all foundation work is still pending — apply for AdSense, verify domain, add `ads.txt` to `public/`, add AdSense site-verification meta tag to `index.html`, decide ad-slot placement (and how to keep them off the strict black/white/gray design pages, or accept the visual cost).
 - [ ] **25.7.2 Google AdSense onboarding** — apply / verify, enable PPC + CPM + Auto Ads, target the standard ~68% publisher revenue share. Wire `ads.txt`, AdSense site verification, and place ad slots without breaking the black/white design system
 - [ ] **25.7.3 Affiliate Marketing program** — register BARA as an affiliate publisher with major networks (Amazon Associates where allowed in our African markets, Awin, CJ, Impact, region-specific networks) and identify content surfaces (blog, marketplace categories, e-books) where affiliate links fit
 - [ ] **25.7.4 CPA (Cost-per-Action) marketing** — register for CPA networks, identify offer types that fit African audiences (financial products, telco offers, app installs)
@@ -992,6 +1053,8 @@ User profile visibility ──→ Team decision required
 *April 13, 2026 — Phase 16 implementation sprint: notifications table + RLS + realtime (16.4.1-4), NotificationBell redesign (black/white design system, 17 notification types with icons), blog_post_likes table replacing localStorage (Active Work #6), EmptyState component + improved no-results on 4 search pages (16.1.5), button press feedback on all Buttons (16.2.1), share audit + ArtistPage share + BlogPostDetail unified to useShare (16.3.1).*
 *April 22, 2026 — Duplicate confirmation email investigation. Diagnosed two paths: (1) `send-email` edge function had no idempotency guard, so the self-update of `email_queue.status='sent'` re-fired the DB webhook and re-delivered the email; (2) `AdminMarketplace.updateListingStatus` was double-sending listing_approved (DB trigger + direct invoke). Code fixes merged in `4ddca2e`. Open: deploy edge function (22.5.3), audit Supabase webhook to INSERT-only (22.5.4), verify end-to-end (22.5.5), migrate remaining direct `send-email` calls in AdminBlog/UserBlogEditor/UploadSongPage to the queue (22.5.1), add `listing_rejected` branch to marketplace trigger (22.5.6).*
 *April 23–28, 2026 — **Phase 25 added: Team & Stakeholder Feedback** from Marlon and team. Added six new P0 blockers (sign-up/login bugs incl. Maj Mlinzi "Maj theGeezer" username case, Chrome sign-up popup never closes, blog comments permissions error, SSL not Secure, About Us copy replacement to "ORIGINS: BARA Afrika" + "Made by Africans for Africans and friends of Africa", Music UX/UI parity with josplay.com). New Phase 25 sub-sections: 25.1 Auth bugs, 25.2 Streams status (e-books, Super Admin perms, Music parity), 25.3 About Us copy, 25.4 Marketplace category restructure into 4 main categories (Electronics, Appliances, Climate Control, Mobile Phones & Tablets) with full subcategory specs + admin/user category mismatch audit, 25.5 BARA Global Gallery (admin-only photo upload) + Key Listings (Govt Ministry/Regulator/Agency/Sports Federation/Charity/NGO with description ≤100 words, https web link, icon-size logo, address, optional tel), 25.6 Payments expansion (MTN MoMo direct + 15+ African countries, Visa/Mastercard, PAPPS, ≥3 payment methods at checkout), 25.7 Monetization (identify current ad provider/AdSense, AdSense onboarding PPC+CPM+Auto Ads ~68%, affiliate marketing, CPA, outbound refer-a-friend, internal referral program), 25.8 Cyber Security Authority engagement (Data Protection Certificate, partnership offer for CSA awareness).*
+*May 4–8, 2026 — **Phase 25 execution week** (Mon–Fri sprint). 11 commits landed: blog comments grants, email_queue refactor (22.5.1 + 22.5.6 closing the duplicate-email saga), Clerk v5 migration (25.1.2 — likely fix for "popup never closes in Chrome"), full Clerk audit (25.1.1) with 3 mis-routed entry points fixed and Clerk Dashboard action list documented for Marlon, sign-up trim (25.1.1.a) with `showOptionalFields: false` and 2 design-system blue→black fixes, non-user QA pass (25.1.1.c) with 21 sign-in entry points updated to preserve `redirect_url`, marketplace categories audit (25.4.1) finding **5 different category lists** in the codebase (25.4.2–6 paused awaiting Marlon's A/B call on the "4 Main Categories" scope ambiguity), BARA Global Gallery (25.5.1) with admin upload + client-side resize/compress + lightbox, BARA Global Key Listings (25.5.2) with 6-type enum + 100-word description counter + https-validated web links + ≤100 KB icon logos, e-books backfill (25.2.1) with the missing `ebooks` table + storage bucket migration (frontend was already coded for it with graceful fallback). Audit findings: Super Admin has full Streams permissions ✅ but role enforcement is binary — moderator = admin in practice (25.2.2). Current ad system is 100% in-house `sponsored_banners` — zero AdSense / external ad-network code anywhere (25.7.1), so Phase 25.7.2 onboarding work is fully greenfield. Music parity (25.2.3) deferred with 3-pass roadmap documented. Pre-Launch Blocker P0 #4 (Movies/Podcasts admin) confirmed already shipped and marked stale.*
+
 *April 28, 2026 — **Phase 25 second pass** after re-reading the original Marlon message verbatim from the conversation transcript. Filled in detail that was lost in the first pass: (a) marketplace sub-sub-category item lists for every subcategory across all 4 Main Categories (TVs LED/QLED/OLED/Smart/CRT, Home Audio soundbars/AV receivers/subs, Cameras DSLR/mirrorless/GoPro/drones, Refrigerators upright/chest/french door/mini, Cleaning Appliances vacuum types + steam + irons, Washing Machines front/top/semi-auto, Mobile Phones smartphones/feature/refurbished, etc.); (b) Key Listings logo "similar to Coat of Arms" reference preserved; (c) Sign-up UX directives split out — "as quick and painless as possible" (25.1.1.a), 3rd-party alternative evaluation (25.1.1.b), non-user QA pass (25.1.1.c); (d) team's verbatim priority labels (CSA = High Priority, SSL / Marketplace categories / BARA Global = Medium Priority) preserved in new section 25.0; (e) Meeting Request agenda items — BARA Streams, BARA Coins, BARA Sports — captured in 25.0.1; (f) explicit gap-flag for the four screenshots referenced in the message (Image #5 payment screen, Image #6 login/comment trouble, plus two attached jpegs) that must still be inspected and transcribed (25.0.2).*
 
 ---
