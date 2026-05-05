@@ -541,18 +541,30 @@
 | 22.1.4 | **Specific deep-links** — "View Your Event" → `/events/{eventId}`, NOT `/events` | P0 | ✅ Done May 5 — most templates already used specific URLs from earlier work (Listing/Blog/Song all carry their item id). Real fixes: (a) `EventApprovedEmail` already accepted an `eventId` prop but the link pointed to `/events` — fixed to `/events/${eventId}` with `/users/dashboard/events` fallback when id missing; (b) `WelcomeEmail` "Go to Dashboard" pointed at `baseUrl` (homepage) — now points at `/users/dashboard`. **Bug discovered and fixed alongside:** `handle_event_approval_email` was writing flat `metadata: { event_id, type }` instead of the nested `metadata: { type, data: {...} }` shape the send-email function reads, so `EventApprovedEmail` had been rendering with all defaults (no organizer name, no event name, no event id) — meaning the deep-link would have been broken even after the template fix. New migration `20260510_event_approval_email_payload.sql` upgrades the trigger to the nested shape and includes `eventId` in the data. |
 | 22.1.5 | **Extract shared styles** into `emailStyles.ts` — main, container, logo, h1, text, button, footer | P1 | ✅ Done (`supabase/functions/_shared/emails/emailStyles.ts`; all 13 templates refactored) |
 
-### 22.2 Wire Up Existing Templates (never triggered)
+### 22.2 Wire Up Existing Templates ✅ Audited + closed May 5
 
-| Template | Trigger Point | File to Edit | Status |
-|----------|---------------|--------------|--------|
-| `WelcomeEmail` | New user sign-up (Clerk webhook or first login) | Clerk webhook / App.tsx | ☐ |
-| `EventSubmittedEmail` | User submits new event | Event creation handler | ☐ |
-| `EventApprovedEmail` | Admin approves event | AdminEvents.tsx | ☐ |
-| `EventRejectedEmail` | Admin rejects event | AdminEvents.tsx | ☐ |
-| `ListingCreatedEmail` | User posts marketplace ad | PostListing.tsx | ☐ |
-| `TicketPurchasedEmail` | User RSVPs / gets tickets | Event RSVP handler | ☐ |
-| `BannerRequestEmail` | User submits banner request | Banner form handler | ☐ |
-| `ContactFormConfirmationEmail` | User submits contact form | Contact page handler | ☐ |
+**Audit found that 11 of 14 templates already fire** — the plan was stale. Real wiring gaps were narrower than listed.
+
+| Template | Trigger Point | Status |
+|----------|---------------|--------|
+| `WelcomeEmail` | `handle_welcome_email` trigger on `clerk_users` INSERT | ✅ Wired (template_standards.sql) |
+| `EventSubmittedEmail` | `handle_event_creation_email` trigger on `events` INSERT | ✅ Wired (template_standards.sql) |
+| `EventApprovedEmail` | `handle_event_approval_email` trigger on `events` UPDATE | ✅ Wired (just upgraded payload May 5 — `20260510_event_approval_email_payload.sql`) |
+| `EventRejectedEmail` | (admin event approve/reject UI does not exist) | ⚠️ **Cannot wire — admin event moderation flow doesn't exist in code.** Both `AdminEvents.tsx` and `AdminEventsEnhanced.tsx` only do create/edit/delete. The DB trigger watches `approved_at` and `event_status='upcoming'` for approvals but there's no rejection signal. **Action:** build admin event approve/reject UI (separate task) before this template can fire. |
+| `ListingCreatedEmail` | `handle_marketplace_listing_email` INSERT branch | ✅ Wired |
+| `ListingApprovedEmail` | Same trigger, UPDATE→`active` branch | ✅ Wired |
+| `ListingRejectedEmail` | Same trigger, UPDATE→`rejected` branch | ✅ Wired (last week) |
+| `TicketPurchasedEmail` | `handle_event_registration_email` trigger | ✅ Wired (4 sub-types: ticket_free, ticket_paid_confirmed, ticket_reserved_pending, ticket_purchased) |
+| `BannerRequestEmail` | `handle_banner_submission_email` trigger | ✅ Wired (just upgraded payload May 5 — was using flat metadata so template rendered with defaults) |
+| `ContactFormConfirmationEmail` | `handle_contact_message_email` trigger on `contact_messages` INSERT | ✅ **Newly wired May 5** — `20260511_contact_and_banner_email_payload.sql`. Was the only template with no caller at all. |
+| `BlogSubmittedEmail` | `UserBlogEditor` enqueue | ✅ Wired (Mon May 4) |
+| `BlogApprovedEmail` | `AdminBlog.handleApprove` enqueue | ✅ Wired (Mon May 4) |
+| `BlogDeclinedEmail` | `AdminBlog.handleDecline` enqueue | ✅ Wired (Mon May 4) |
+| `SongUploadedEmail` | `UploadSongPage` enqueue | ✅ Wired (Mon May 4) |
+
+**Bonus: `'banner_approved'` half-wired** — the existing banner trigger emits a `'banner_approved'` type on submission_status update, but there's no React Email template for it and no `case` in send-email. New migration includes a fallback `html_content` so the email at least delivers a basic plain-HTML message. A dedicated `BannerApprovedEmail.tsx` template can be added later if the team wants richer styling.
+
+**Conclusion:** Phase 22.2 effectively closed. Only `EventRejectedEmail` stays ☐ and depends on first building the admin event moderation UI — tracked as a separate follow-up.
 
 ### 22.3 Create NEW Email Templates + Triggers
 
