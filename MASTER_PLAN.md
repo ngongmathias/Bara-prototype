@@ -535,10 +535,10 @@
 
 | # | Task | Priority | Status |
 |---|------|----------|--------|
-| 22.1.1 | **Button style** — change ALL templates from gold/yellow (#FFD700) text to white (#ffffff) text on black (#000000) background | P0 | ☐ |
-| 22.1.2 | **Remove emojis** from headings (🎉 etc.) | P0 | ☐ |
-| 22.1.3 | **Consistent layout** — logo → heading → greeting → body → primary CTA → optional secondary CTA → footer | P0 | ☐ |
-| 22.1.4 | **Specific deep-links** — "View Your Event" → `/events/{eventId}`, NOT `/events` | P0 | ☐ |
+| 22.1.1 | **Button style** — change ALL templates from gold/yellow (#FFD700) text to white (#ffffff) text on black (#000000) background | P0 | ✅ Done May 5 — single line in `emailStyles.ts` (`color: "#FFD700"` → `"#ffffff"`); cascades to all 14 templates. |
+| 22.1.2 | **Remove emojis** from headings (🎉 etc.) | P0 | ✅ Done May 5 — audit found exactly one offender (`EventApprovedEmail` heading "🎉 Event Approved!" → "Event Approved"). All 13 other templates were already clean. Trigger subject line also de-emojified ("✅ Event Live!" → "Event Live:"). |
+| 22.1.3 | **Consistent layout** — logo → heading → greeting → body → primary CTA → optional secondary CTA → footer | P0 | ✅ Verified May 5 — every template already follows the canonical structure. No changes needed. |
+| 22.1.4 | **Specific deep-links** — "View Your Event" → `/events/{eventId}`, NOT `/events` | P0 | ✅ Done May 5 — most templates already used specific URLs from earlier work (Listing/Blog/Song all carry their item id). Real fixes: (a) `EventApprovedEmail` already accepted an `eventId` prop but the link pointed to `/events` — fixed to `/events/${eventId}` with `/users/dashboard/events` fallback when id missing; (b) `WelcomeEmail` "Go to Dashboard" pointed at `baseUrl` (homepage) — now points at `/users/dashboard`. **Bug discovered and fixed alongside:** `handle_event_approval_email` was writing flat `metadata: { event_id, type }` instead of the nested `metadata: { type, data: {...} }` shape the send-email function reads, so `EventApprovedEmail` had been rendering with all defaults (no organizer name, no event name, no event id) — meaning the deep-link would have been broken even after the template fix. New migration `20260510_event_approval_email_payload.sql` upgrades the trigger to the nested shape and includes `eventId` in the data. |
 | 22.1.5 | **Extract shared styles** into `emailStyles.ts` — main, container, logo, h1, text, button, footer | P1 | ✅ Done (`supabase/functions/_shared/emails/emailStyles.ts`; all 13 templates refactored) |
 
 ### 22.2 Wire Up Existing Templates (never triggered)

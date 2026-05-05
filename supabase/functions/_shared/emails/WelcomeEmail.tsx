@@ -49,7 +49,7 @@ export const WelcomeEmail = ({
                     Thank you for joining Bara Afrika, the heartbeat of African commerce and community.
                 </Text>
                 <Section style={btnContainer}>
-                    <Link style={button} href={baseUrl}>
+                    <Link style={button} href={`${baseUrl}/users/dashboard`}>
                         Go to Dashboard
                     </Link>
                 </Section>

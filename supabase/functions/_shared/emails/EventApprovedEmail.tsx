@@ -47,7 +47,7 @@ export const EventApprovedEmail = ({
                     alt="Bara Afrika"
                     style={logo}
                 />
-                <Heading style={h1}>🎉 Event Approved!</Heading>
+                <Heading style={h1}>Event Approved</Heading>
                 <Text style={text}>Hi {organizerName},</Text>
                 <Text style={text}>
                     Great news! <strong>{eventName}</strong> has been approved and is now live on the Bara Afrika Events Calendar.
@@ -56,7 +56,7 @@ export const EventApprovedEmail = ({
                     Your event is now visible to thousands of users across the platform. Share the link below to spread the word!
                 </Text>
                 <Section style={btnContainer}>
-                    <Link style={button} href={`${baseUrl}/events`}>
+                    <Link style={button} href={eventId ? `${baseUrl}/events/${eventId}` : `${baseUrl}/users/dashboard/events`}>
                         View Your Event
                     </Link>
                 </Section>

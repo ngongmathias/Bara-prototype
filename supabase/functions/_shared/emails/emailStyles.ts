@@ -44,7 +44,7 @@ export const btnContainer = {
 export const button = {
     backgroundColor: "#000000",
     borderRadius: "100px",
-    color: "#FFD700",
+    color: "#ffffff",
     fontSize: "16px",
     textDecoration: "none",
     textAlign: "center" as const,
