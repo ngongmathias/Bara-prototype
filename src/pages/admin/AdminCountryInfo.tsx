@@ -34,7 +34,6 @@ import { db } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { uploadImage } from '@/lib/storage';
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CountryGalleryManager } from '@/components/admin/CountryGalleryManager';
 import { CountryKeyListingsManager } from '@/components/admin/CountryKeyListingsManager';
 
@@ -707,14 +706,6 @@ export const AdminCountryInfo: React.FC = () => {
               </DialogTitle>
             </DialogHeader>
 
-            <Tabs defaultValue="info" className="w-full">
-              <TabsList className="mb-4">
-                <TabsTrigger value="info">Country Info</TabsTrigger>
-                <TabsTrigger value="gallery" disabled={!dialogCountryId}>Gallery</TabsTrigger>
-                <TabsTrigger value="listings" disabled={!dialogCountryId}>Key Listings</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="info">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Basic Information */}
               <div className="space-y-4">
@@ -1420,36 +1411,33 @@ export const AdminCountryInfo: React.FC = () => {
                 {editingInfo ? 'Update' : 'Create'}
               </Button>
             </div>
-              </TabsContent>
 
-              <TabsContent value="gallery">
-                {dialogCountryId ? (
+            <div className="space-y-8 border-t pt-6 mt-6">
+              <p className="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
+                The Gallery and Key Listings below save on their own as you add, edit,
+                or delete items — they do not depend on the Cancel / {editingInfo ? 'Update' : 'Create'} buttons above.
+              </p>
+              {dialogCountryId ? (
+                <>
                   <CountryGalleryManager
-                    key={dialogCountryId}
+                    key={`gallery-${dialogCountryId}`}
                     countryId={dialogCountryId}
                     countryName={dialogCountryName}
                   />
-                ) : (
-                  <p className="text-sm text-gray-500 py-8 text-center">
-                    Select a country in the Country Info tab first.
-                  </p>
-                )}
-              </TabsContent>
-
-              <TabsContent value="listings">
-                {dialogCountryId ? (
-                  <CountryKeyListingsManager
-                    key={dialogCountryId}
-                    countryId={dialogCountryId}
-                    countryName={dialogCountryName}
-                  />
-                ) : (
-                  <p className="text-sm text-gray-500 py-8 text-center">
-                    Select a country in the Country Info tab first.
-                  </p>
-                )}
-              </TabsContent>
-            </Tabs>
+                  <div className="border-t pt-8">
+                    <CountryKeyListingsManager
+                      key={`listings-${dialogCountryId}`}
+                      countryId={dialogCountryId}
+                      countryName={dialogCountryName}
+                    />
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-gray-500 py-4 text-center">
+                  Select a country above to manage its gallery and key listings.
+                </p>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       </div>
