@@ -41,4 +41,5 @@ export const countWords = (text: string): number => {
 };
 
 export const KEY_LISTING_DESCRIPTION_MAX_WORDS = 100;
-export const KEY_LISTING_LOGO_MAX_BYTES = 100 * 1024;
+/** Logo upload ceiling — matches the country-key-listing-logos storage bucket. */
+export const KEY_LISTING_LOGO_MAX_BYTES = 5 * 1024 * 1024;

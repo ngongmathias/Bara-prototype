@@ -41,14 +41,14 @@ export const AdminCountryKeyListings = () => {
                     description="Curate the directory of important institutions per country page: ministries, regulators, agencies, sports federations, charities, NGOs."
                     features={[
                         'Per-country directory grouped by 6 institution types.',
-                        'Each entry: name, ≤100-word description (counter enforced), https web link, address, telephone, square icon logo (≤100 KB).',
+                        'Each entry: name, ≤100-word description (counter enforced), https web link, address, telephone, square icon logo (≤5 MB).',
                         'Logos stored in country-key-listing-logos bucket. Public read; only admins can write.',
                         'Public page renders entries grouped by type; section is hidden when a country has no listings.',
                     ]}
                     workflow={[
                         'Pick a country.',
                         'Click "Add listing", choose type, fill in name (required) and other fields.',
-                        'Optionally upload a logo (square, ≤100 KB).',
+                        'Optionally upload a logo (square recommended, ≤5 MB).',
                         'Save. Use the edit/delete buttons on existing entries.',
                     ]}
                 />

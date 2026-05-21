@@ -126,7 +126,7 @@ export const CountryKeyListingsManager = ({ countryId, countryName }: CountryKey
         if (file.size > KEY_LISTING_LOGO_MAX_BYTES) {
             toast({
                 title: 'Logo too large',
-                description: 'Please upload a logo under 100 KB. Try compressing or resizing first.',
+                description: 'Please upload a logo under 5 MB.',
                 variant: 'destructive',
             });
             return;
@@ -441,7 +441,7 @@ export const CountryKeyListingsManager = ({ countryId, countryName }: CountryKey
                                             </Button>
                                         )}
                                     </div>
-                                    <p className="text-xs text-gray-500">Square icon, max 100 KB. JPEG / PNG / WebP / SVG.</p>
+                                    <p className="text-xs text-gray-500">Square icon recommended. JPEG / PNG / WebP / SVG.</p>
                                 </div>
                             </div>
                         </div>
