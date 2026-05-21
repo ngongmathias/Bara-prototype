@@ -130,30 +130,6 @@ const adminMenuItems = [
 
   {
 
-    title: "Country Gallery",
-
-    icon: Image,
-
-    path: "/admin/country-gallery",
-
-    description: "Per-country photo galleries"
-
-  },
-
-  {
-
-    title: "Country Key Listings",
-
-    icon: Building2,
-
-    path: "/admin/country-key-listings",
-
-    description: "Ministries, regulators, agencies, NGOs"
-
-  },
-
-  {
-
     title: "Categories",
 
     icon: FolderOpen,

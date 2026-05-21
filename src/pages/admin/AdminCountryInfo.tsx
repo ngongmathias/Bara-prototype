@@ -34,6 +34,9 @@ import { db } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { uploadImage } from '@/lib/storage';
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CountryGalleryManager } from '@/components/admin/CountryGalleryManager';
+import { CountryKeyListingsManager } from '@/components/admin/CountryKeyListingsManager';
 
 
 interface Country {
@@ -266,6 +269,11 @@ export const AdminCountryInfo: React.FC = () => {
     
     return matchesSearch && matchesCountry;
   });
+
+  // Country targeted by the edit dialog — drives the Gallery / Key Listings
+  // tabs, which key off countries.id (not country_info.id).
+  const dialogCountryId = formData.country_id || '';
+  const dialogCountryName = countries.find((c) => c.id === dialogCountryId)?.name || '';
 
   const formatValue = (value: any): string => {
     if (value === null || value === undefined) return 'Not set';
@@ -698,7 +706,15 @@ export const AdminCountryInfo: React.FC = () => {
                 {editingInfo ? 'Edit Country Information' : 'Add Country Information'}
               </DialogTitle>
             </DialogHeader>
-            
+
+            <Tabs defaultValue="info" className="w-full">
+              <TabsList className="mb-4">
+                <TabsTrigger value="info">Country Info</TabsTrigger>
+                <TabsTrigger value="gallery" disabled={!dialogCountryId}>Gallery</TabsTrigger>
+                <TabsTrigger value="listings" disabled={!dialogCountryId}>Key Listings</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="info">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Basic Information */}
               <div className="space-y-4">
@@ -1404,6 +1420,36 @@ export const AdminCountryInfo: React.FC = () => {
                 {editingInfo ? 'Update' : 'Create'}
               </Button>
             </div>
+              </TabsContent>
+
+              <TabsContent value="gallery">
+                {dialogCountryId ? (
+                  <CountryGalleryManager
+                    key={dialogCountryId}
+                    countryId={dialogCountryId}
+                    countryName={dialogCountryName}
+                  />
+                ) : (
+                  <p className="text-sm text-gray-500 py-8 text-center">
+                    Select a country in the Country Info tab first.
+                  </p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="listings">
+                {dialogCountryId ? (
+                  <CountryKeyListingsManager
+                    key={dialogCountryId}
+                    countryId={dialogCountryId}
+                    countryName={dialogCountryName}
+                  />
+                ) : (
+                  <p className="text-sm text-gray-500 py-8 text-center">
+                    Select a country in the Country Info tab first.
+                  </p>
+                )}
+              </TabsContent>
+            </Tabs>
           </DialogContent>
         </Dialog>
       </div>
