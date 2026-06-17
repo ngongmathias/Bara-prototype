@@ -432,7 +432,14 @@ export class GamificationService {
 
 
 
-            if (diffDays === 1) {
+            if (!profile.consecutive_days || profile.consecutive_days < 1) {
+
+                // First ever check-in (brand-new profile) — count today as day 1
+
+                newStreak = 1;
+                streakChanged = true;
+
+            } else if (diffDays === 1) {
 
                 // Streak continued
 
@@ -441,13 +448,13 @@ export class GamificationService {
 
             } else if (diffDays > 1) {
 
-                // Streak broken
+                // Streak broken — restart at day 1
 
                 newStreak = 1;
                 streakChanged = true;
 
             }
-            // diffDays === 0: same day, streak count unchanged but we still track the mission below
+            // diffDays === 0 with an existing streak: same day, no change
 
 
 
@@ -469,6 +476,11 @@ export class GamificationService {
                     .from('gamification_profiles')
 
                     .update({
+
+                        // Keep both columns in sync: the service tracks the streak in
+                        // consecutive_days, but Header + LeaderboardPage read daily_streak.
+
+                        daily_streak: newStreak,
 
                         consecutive_days: newStreak,
 
