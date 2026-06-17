@@ -40,6 +40,8 @@ export const AdminMarketplaceCategories = () => {
     'property-rent',
     'mobile-tablets',
     'electronics',
+    'appliances',
+    'climate-control',
     'furniture-garden',
     'fashion',
     'pets',

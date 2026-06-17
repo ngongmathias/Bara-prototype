@@ -1335,6 +1335,136 @@ export const categoryFieldConfigs: CategoryConfig[] = [
         ]
       }
     ]
+  },
+
+  // MOBILE PHONES & TABLETS (Phase 25.4)
+  {
+    categorySlug: 'mobile-tablets',
+    categoryName: 'Mobile Phones & Tablets',
+    imageGuidance: 'Upload clear photos of the device, screen on, and any accessories or original box',
+    imageRequired: true,
+    variantDimensions: [
+      { key: 'storage', label: 'Storage', presets: ['32GB', '64GB', '128GB', '256GB', '512GB', '1TB'] },
+      { key: 'color', label: 'Color', presets: ['Black', 'White', 'Silver', 'Gold', 'Blue', 'Green', 'Purple'] },
+    ],
+    priceField: {
+      label: 'Price',
+      required: false,
+      placeholder: 'e.g., 500',
+      priceTypeOptions: [
+        { value: 'fixed', label: 'Fixed' },
+        { value: 'negotiable', label: 'Negotiable' },
+        { value: 'contact', label: 'Contact for Price' },
+      ],
+    },
+    fields: [
+      { name: 'device_type', label: 'Device Type', type: 'select', required: true, options: [
+        { value: 'mobile_phone', label: 'Mobile Phone' },
+        { value: 'tablet', label: 'Tablet' },
+        { value: 'e_reader', label: 'E-Reader' },
+        { value: 'smartwatch', label: 'Smartwatch / Wearable' },
+        { value: 'accessory', label: 'Accessory' },
+      ] },
+      { name: 'brand', label: 'Brand', type: 'text', required: true, placeholder: 'e.g., Apple, Samsung, Tecno' },
+      { name: 'model', label: 'Model', type: 'text', required: true, placeholder: 'e.g., iPhone 15 Pro' },
+      { name: 'storage', label: 'Storage', type: 'text', required: false, placeholder: 'e.g., 256GB' },
+      { name: 'ram', label: 'RAM', type: 'text', required: false, placeholder: 'e.g., 8GB' },
+      { name: 'color', label: 'Color', type: 'text', required: false, placeholder: 'e.g., Black' },
+      { name: 'screen_size', label: 'Screen Size', type: 'text', required: false, placeholder: 'e.g., 6.1 inch' },
+      { name: 'warranty', label: 'Warranty', type: 'select', required: false, options: [
+        { value: 'no', label: 'No Warranty' },
+        { value: 'yes', label: 'Under Warranty' },
+        { value: '1year', label: '1 Year' },
+        { value: '2year', label: '2 Years' },
+      ] },
+      { name: 'accessories', label: 'Accessories Included', type: 'multiselect', required: false, options: [
+        { value: 'charger', label: 'Charger' },
+        { value: 'case', label: 'Case' },
+        { value: 'earphones', label: 'Earphones' },
+        { value: 'box', label: 'Original Box' },
+        { value: 'cable', label: 'Cable' },
+      ] },
+    ],
+  },
+
+  // APPLIANCES (Phase 25.4)
+  {
+    categorySlug: 'appliances',
+    categoryName: 'Appliances',
+    imageGuidance: 'Upload photos showing the appliance from multiple angles, model/spec label, and condition',
+    imageRequired: true,
+    priceField: {
+      label: 'Price',
+      required: false,
+      placeholder: 'e.g., 300',
+      priceTypeOptions: [
+        { value: 'fixed', label: 'Fixed' },
+        { value: 'negotiable', label: 'Negotiable' },
+        { value: 'free', label: 'Free' },
+      ],
+    },
+    fields: [
+      { name: 'appliance_type', label: 'Appliance Type', type: 'select', required: true, options: [
+        { value: 'refrigerator', label: 'Refrigerator / Freezer' },
+        { value: 'oven_range', label: 'Oven / Range / Stove' },
+        { value: 'dishwasher', label: 'Dishwasher' },
+        { value: 'microwave', label: 'Microwave' },
+        { value: 'washing_machine', label: 'Washing Machine / Dryer' },
+        { value: 'food_prep', label: 'Food Prep (blender, mixer, etc.)' },
+        { value: 'cooking', label: 'Cooking & Heating (air fryer, kettle, etc.)' },
+        { value: 'coffee', label: 'Coffee & Espresso' },
+        { value: 'cleaning', label: 'Cleaning (vacuum, steam, iron)' },
+        { value: 'other', label: 'Other' },
+      ] },
+      { name: 'brand', label: 'Brand', type: 'text', required: true, placeholder: 'e.g., LG, Samsung, Hisense' },
+      { name: 'model', label: 'Model', type: 'text', required: false, placeholder: 'e.g., model number' },
+      { name: 'capacity', label: 'Capacity', type: 'text', required: false, placeholder: 'e.g., 300L, 8kg' },
+      { name: 'energy_rating', label: 'Energy Rating', type: 'text', required: false, placeholder: 'e.g., A++' },
+      { name: 'color', label: 'Color', type: 'text', required: false, placeholder: 'e.g., Silver' },
+      { name: 'warranty', label: 'Warranty', type: 'select', required: false, options: [
+        { value: 'no', label: 'No Warranty' },
+        { value: 'yes', label: 'Under Warranty' },
+        { value: '1year', label: '1 Year' },
+        { value: '2year', label: '2 Years' },
+      ] },
+    ],
+  },
+
+  // CLIMATE CONTROL (Phase 25.4)
+  {
+    categorySlug: 'climate-control',
+    categoryName: 'Climate Control',
+    imageGuidance: 'Upload photos showing the unit, model/spec label, and condition',
+    imageRequired: true,
+    priceField: {
+      label: 'Price',
+      required: false,
+      placeholder: 'e.g., 250',
+      priceTypeOptions: [
+        { value: 'fixed', label: 'Fixed' },
+        { value: 'negotiable', label: 'Negotiable' },
+        { value: 'free', label: 'Free' },
+      ],
+    },
+    fields: [
+      { name: 'unit_type', label: 'Type', type: 'select', required: true, options: [
+        { value: 'air_conditioner', label: 'Air Conditioner' },
+        { value: 'fan', label: 'Fan' },
+        { value: 'heater', label: 'Heater' },
+        { value: 'air_purifier', label: 'Air Purifier' },
+        { value: 'dehumidifier', label: 'Dehumidifier' },
+      ] },
+      { name: 'brand', label: 'Brand', type: 'text', required: true, placeholder: 'e.g., Midea, Gree, LG' },
+      { name: 'capacity_btu', label: 'Capacity / BTU', type: 'text', required: false, placeholder: 'e.g., 12000 BTU' },
+      { name: 'coverage_area', label: 'Coverage Area', type: 'text', required: false, placeholder: 'e.g., 20 m²' },
+      { name: 'color', label: 'Color', type: 'text', required: false, placeholder: 'e.g., White' },
+      { name: 'warranty', label: 'Warranty', type: 'select', required: false, options: [
+        { value: 'no', label: 'No Warranty' },
+        { value: 'yes', label: 'Under Warranty' },
+        { value: '1year', label: '1 Year' },
+        { value: '2year', label: '2 Years' },
+      ] },
+    ],
   }
 ];
 
