@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 2.5cm; line-height: 1.5; color: #000; }
+  h1 { font-size: 16pt; font-weight: bold; color: #2E4F7A; border-bottom: 2px solid #2E75B6; padding-bottom: 4pt; margin-bottom: 8pt; }
+  h2 { font-size: 13pt; font-weight: bold; color: #2E4F7A; margin-top: 18pt; margin-bottom: 6pt; }
+  h3 { font-size: 12pt; font-weight: bold; margin-top: 12pt; margin-bottom: 4pt; }
+  p { margin: 6pt 0; }
+  .placeholder { background: #FFFF99; font-weight: bold; }
+  ul { margin: 6pt 0; padding-left: 22pt; }
+  li { margin: 4pt 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10pt 0; font-size: 11pt; }
+  th { background: #2E75B6; color: #fff; border: 1px solid #666; padding: 7pt 8pt; text-align: left; font-weight: bold; }
+  td { border: 1px solid #AAAAAA; padding: 6pt 8pt; vertical-align: top; }
+  tr:nth-child(even) td { background: #F0F4FF; }
+  .yes { color: #006600; font-weight: bold; }
+  .cover-table td { border: none; padding: 3pt 0; }
+  .cover-table { border: none; margin-bottom: 20pt; }
+  .section-note { background: #EBF5FF; border-left: 4px solid #2E75B6; padding: 8pt 12pt; margin: 8pt 0; font-size: 11pt; }
+</style>
+</head>
+<body>
+
+<h1>Security Controls Summary — Bara Afrika</h1>
+
+<table class="cover-table">
+  <tr><td style="width:160px;"><strong>Organization:</strong></td><td><span class="placeholder">[LEGAL ENTITY NAME]</span> (Bara Afrika)</td></tr>
+  <tr><td><strong>Website:</strong></td><td>www.baraafrika.com</td></tr>
+  <tr><td><strong>Date:</strong></td><td><span class="placeholder">[DATE]</span></td></tr>
+  <tr><td><strong>Owner / DPO:</strong></td><td><span class="placeholder">[DPO / RESPONSIBLE PERSON NAME]</span></td></tr>
+  <tr><td><strong>Version:</strong></td><td>1.0 — Initial (DPO submission)</td></tr>
+</table>
+
+<div class="section-note">
+This document summarizes the technical and organizational security measures implemented by Bara Afrika to protect personal data processed on the platform. It is submitted as a supporting attachment for the DPO authorization applications for cross-border storage and transfer of personal data.
+</div>
+
+<h2>1. Identity and Access Management</h2>
+<table>
+  <tr><th style="width:35%">Control</th><th>Implementation Detail</th></tr>
+  <tr><td>Authentication</td><td>User authentication is handled by <strong>Clerk</strong>, an EU-based identity provider (Germany/Ireland). Clerk handles session management, token issuance, and credential security.</td></tr>
+  <tr><td>Admin access control</td><td>Admin access is restricted to users explicitly listed in the <code>admin_users</code> database table. Access is tiered: <strong>super_admin / admin / moderator</strong>.</td></tr>
+  <tr><td>Principle of least privilege</td><td>Admin roles are separated by permission level. The Supabase <strong>service role key</strong> (full DB access) is restricted to server-side / edge function contexts only — never exposed to the frontend client.</td></tr>
+  <tr><td>Service account management</td><td>API keys and secrets are stored as <strong>environment variables</strong>, not in source code or client-side bundles. The <code>.env</code> file is excluded from version control.</td></tr>
+</table>
+
+<h2>2. Data Storage and Processing</h2>
+<table>
+  <tr><th style="width:35%">Control</th><th>Implementation Detail</th></tr>
+  <tr><td>Primary data storage</td><td><strong>Supabase</strong> managed PostgreSQL database and object storage. Region: Zurich, Switzerland (<code>eu-central-2</code>). All platform data (user profiles, UGC, events, listings, streams data) is stored here.</td></tr>
+  <tr><td>Authentication data</td><td>Managed by <strong>Clerk</strong> (Germany / Ireland). Identity data (name, email, phone, session) is held in Clerk's EU infrastructure.</td></tr>
+  <tr><td>Email delivery</td><td>Transactional emails (account notifications, ticket confirmations, listing approvals, etc.) are sent via <strong>Resend</strong> (United States). Email content is minimal and transactional; no bulk marketing.</td></tr>
+  <tr><td>Row Level Security (RLS)</td><td>Supabase RLS policies are applied on user data tables where applicable, ensuring users can only access their own data through the platform API.</td></tr>
+  <tr><td>Data minimization</td><td>Only data necessary for each feature is collected. Sensitive data categories (health, biometric, political, etc.) are not collected. Phone number is optional.</td></tr>
+</table>
+
+<h2>3. Encryption</h2>
+<table>
+  <tr><th style="width:35%">Control</th><th>Implementation Detail</th></tr>
+  <tr><td>Data in transit</td><td>All external traffic uses <strong>HTTPS / TLS</strong>. This applies to: frontend-to-API calls, Supabase API calls, Clerk authentication flows, Resend API calls (via Supabase Edge Function).</td></tr>
+  <tr><td>Data at rest — Supabase</td><td><strong>AES-256 encryption at rest</strong> for all database data and object storage. Encrypted backups maintained. (Per Supabase DPA, attached.)</td></tr>
+  <tr><td>Data at rest — Clerk</td><td>Encryption at rest per Clerk security practices (per Clerk compliance documentation, attached).</td></tr>
+  <tr><td>Data at rest — Resend</td><td>Encryption at rest per Resend's infrastructure (per Resend DPA / terms, attached).</td></tr>
+</table>
+
+<h2>4. Logging and Monitoring</h2>
+<table>
+  <tr><th style="width:35%">Control</th><th>Implementation Detail</th></tr>
+  <tr><td>Admin activity audit log</td><td>Admin management actions (adding/removing admins, role changes) are logged to the <code>admin_activity_log</code> table in Supabase. Schema created in migration <code>20241211_create_admin_users_secure.sql</code>.</td></tr>
+  <tr><td>Application logs</td><td>Supabase provides project-level logs for Edge Function invocations, database query activity, and authentication events via the Supabase dashboard.</td></tr>
+  <tr><td>Email delivery logs</td><td>Resend provides delivery status and event logs for sent emails (accessible via Resend dashboard).</td></tr>
+  <tr><td>Authentication logs</td><td>Clerk provides authentication event logs (sign-in attempts, session activity) via Clerk dashboard.</td></tr>
+</table>
+
+<h2>5. Backups and Disaster Recovery</h2>
+<table>
+  <tr><th style="width:35%">Control</th><th>Implementation Detail</th></tr>
+  <tr><td>Database backups</td><td>Supabase provides <strong>managed automated backups</strong> for the database. Backup schedule and retention are governed by the Supabase plan and DPA. Recovery is performed via Supabase's point-in-time recovery capabilities.</td></tr>
+  <tr><td>DR strategy</td><td>Disaster recovery relies on Supabase's managed infrastructure. In the event of an incident, restoration is from Supabase backups. No separate DR infrastructure is maintained independently by Bara Afrika at this stage.</td></tr>
+</table>
+
+<h2>6. Incident Response</h2>
+<table>
+  <tr><th style="width:35%">Control</th><th>Implementation Detail</th></tr>
+  <tr><td>Breach response playbook</td><td>An internal breach response process is documented at <code>compliance/BREACH_RESPONSE_PLAYBOOK_DRAFT.md</code>. This covers: identification, containment, investigation, notification, documentation.</td></tr>
+  <tr><td>Vendor incident notification</td><td>Supabase DPA requires security incident notification <strong>within 48 hours</strong> of becoming aware of a breach affecting customer data. Clerk and Resend provide incident notification per their contractual terms.</td></tr>
+  <tr><td>DPO notification readiness</td><td>A designated responsible person (DPO contact) is identified to receive vendor breach notifications and coordinate the Bara Afrika response. The DPO breach report form is referenced: https://dpo.gov.rw/fileadmin/DPO/Services/Personal-Data-Breach-Report-Form.pdf</td></tr>
+</table>
+
+<h2>7. Vendor and Contractual Safeguards</h2>
+<table>
+  <tr><th style="width:35%">Vendor</th><th>Contract / DPA in Place</th></tr>
+  <tr><td>Supabase</td><td class="yes">YES — Supabase Data Processing Addendum (DPA) attached to submission. Covers: data processing obligations, sub-processors (Schedule 3), security measures, breach notification, data deletion.</td></tr>
+  <tr><td>Clerk</td><td class="yes">YES — Clerk Terms of Service and DPA / Privacy documentation attached.</td></tr>
+  <tr><td>Resend</td><td class="yes">YES — Resend Terms of Service and DPA / Privacy documentation attached.</td></tr>
+</table>
+
+<h2>8. Email Templates Handled (Transactional Only)</h2>
+<p>The following types of transactional emails are sent via the <code>supabase/functions/send-email</code> Edge Function and Resend. All are operational notifications — no bulk marketing:</p>
+<ul>
+  <li>Welcome email (account registration)</li>
+  <li>Ticket purchased / ticket confirmation</li>
+  <li>Marketplace listing created / approved / rejected</li>
+  <li>Event submitted / approved / rejected</li>
+  <li>Banner request notifications</li>
+  <li>Contact form confirmation</li>
+  <li>Blog submitted / approved / declined</li>
+  <li>Song uploaded / published</li>
+</ul>
+
+<h2>9. Ongoing Governance</h2>
+<ul>
+  <li>Admin access reviewed periodically (at minimum, quarterly)</li>
+  <li>Vendor registers and privacy documentation updated when features or vendors change</li>
+  <li>This Security Controls Summary to be updated whenever significant changes are made to the security architecture</li>
+  <li>DPO authorization applications to be updated if new cross-border vendors or data categories are added</li>
+</ul>
+
+<p style="margin-top:30pt;"><strong>Owner:</strong> <span class="placeholder">[DPO / RESPONSIBLE PERSON NAME]</span></p>
+<p><strong>Signature:</strong> ______________________________ &nbsp;&nbsp; <strong>Date:</strong> ______________</p>
+
+</body>
+</html>

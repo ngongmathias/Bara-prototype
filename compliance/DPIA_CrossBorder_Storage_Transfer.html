@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 2.5cm; line-height: 1.5; color: #000; }
+  h1 { font-size: 14pt; font-weight: bold; margin-top: 20pt; margin-bottom: 6pt; border-bottom: 1px solid #2E75B6; padding-bottom: 3pt; color: #2E4F7A; }
+  h2 { font-size: 12pt; font-weight: bold; margin-top: 14pt; margin-bottom: 4pt; }
+  h3 { font-size: 12pt; font-weight: bold; font-style: italic; margin-top: 10pt; margin-bottom: 4pt; }
+  p { margin: 6pt 0; }
+  .placeholder { background: #FFFF99; font-weight: bold; }
+  ul { margin: 6pt 0; padding-left: 20pt; }
+  li { margin: 3pt 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10pt 0; font-size: 11pt; }
+  th { background: #2E75B6; color: #fff; border: 1px solid #999; padding: 6pt 8pt; text-align: left; font-weight: bold; }
+  td { border: 1px solid #AAAAAA; padding: 5pt 8pt; vertical-align: top; }
+  tr:nth-child(even) td { background: #F5F8FF; }
+  .cover { margin-bottom: 30pt; }
+  .cover table { border: none; }
+  .cover td { border: none; padding: 3pt 8pt; }
+  .approval-box { border: 1px solid #999; padding: 12pt; margin-top: 10pt; }
+  .risk-high { background: #FFD7D7; }
+  .risk-medium { background: #FFF3CD; }
+  .risk-low { background: #D4EDDA; }
+</style>
+</head>
+<body>
+
+<h1 style="font-size:18pt; border-bottom: 2px solid #2E75B6; color:#2E4F7A;">Data Protection Impact Assessment (DPIA)<br>
+Cross-Border Storage &amp; Transfer of Personal Data</h1>
+
+<table class="cover" style="margin-bottom:30pt;">
+  <tr><td><strong>Organization:</strong></td><td><span class="placeholder">[LEGAL ENTITY NAME]</span> (Bara Afrika)</td></tr>
+  <tr><td><strong>Platform:</strong></td><td>www.baraafrika.com</td></tr>
+  <tr><td><strong>Document type:</strong></td><td>Data Protection Impact Assessment (DPIA)</td></tr>
+  <tr><td><strong>Scope:</strong></td><td>Cross-border storage and transfer of personal data to Supabase (Switzerland), Clerk (Germany/Ireland), and Resend (United States)</td></tr>
+  <tr><td><strong>Date:</strong></td><td><span class="placeholder">[DATE — e.g. 20 June 2026]</span></td></tr>
+  <tr><td><strong>Owner / DPO:</strong></td><td><span class="placeholder">[DPO / RESPONSIBLE PERSON NAME, EMAIL]</span></td></tr>
+  <tr><td><strong>Version:</strong></td><td>1.0 (Initial — for DPO submission)</td></tr>
+</table>
+
+<h1>1. Introduction and Purpose</h1>
+
+<p>This Data Protection Impact Assessment (DPIA) has been prepared in accordance with <strong>Law No 058/2021 of 13/10/2021 relating to the protection of personal data and privacy in Rwanda</strong>. It assesses the privacy risks associated with the cross-border storage and transfer of personal data for the Bara Afrika digital platform and the measures taken to mitigate those risks.</p>
+
+<p>This document is submitted as a supporting attachment for:</p>
+<ul>
+  <li>Application for Authorization to <strong>Store</strong> Personal Data Outside Rwanda</li>
+  <li>Application for Authorization to <strong>Transfer</strong> Personal Data Outside Rwanda</li>
+</ul>
+
+<h1>2. Processing Overview</h1>
+
+<h2>2.1 Product Description</h2>
+<p>Bara Afrika is a digital platform that provides the following services to users, businesses, and creators in Rwanda and the region:</p>
+<ul>
+  <li>User account registration and profiles (authentication via Clerk)</li>
+  <li>Business discovery: marketplace listings, reviews, and ratings</li>
+  <li>Events creation, promotion, and ticketing (with ticket purchase confirmations)</li>
+  <li>Music / content streams: song discovery, play history, likes, playlists</li>
+  <li>Blog and community content: creation, submission, approval workflows</li>
+  <li>Admin management: content moderation, listing and event approval, user management</li>
+</ul>
+
+<h2>2.2 Data Subjects</h2>
+<table>
+  <tr>
+    <th>Category</th>
+    <th>Description</th>
+    <th>Projected Year-1 Count</th>
+  </tr>
+  <tr>
+    <td>Users / account holders</td>
+    <td>Registered end-users of the platform</td>
+    <td>~1,000</td>
+  </tr>
+  <tr>
+    <td>Businesses / merchants</td>
+    <td>Marketplace listing owners, sellers</td>
+    <td>~200</td>
+  </tr>
+  <tr>
+    <td>Event organizers / attendees</td>
+    <td>Organizers submitting events; attendees purchasing tickets</td>
+    <td>~100</td>
+  </tr>
+  <tr>
+    <td>Artists / content creators</td>
+    <td>Music/content creators uploading songs and content</td>
+    <td>Subset of ~1,000 users</td>
+  </tr>
+  <tr>
+    <td>Administrators</td>
+    <td>Internal staff with elevated platform access</td>
+    <td>&lt;10</td>
+  </tr>
+</table>
+
+<h2>2.3 Personal Data Categories</h2>
+<table>
+  <tr>
+    <th>Data Category</th>
+    <th>Specific Fields</th>
+    <th>Vendor(s) Processing</th>
+  </tr>
+  <tr>
+    <td>Identity &amp; contact</td>
+    <td>Name, email address, phone number (where provided by user)</td>
+    <td>Clerk, Supabase, Resend</td>
+  </tr>
+  <tr>
+    <td>Authentication &amp; account</td>
+    <td>Clerk user ID, session tokens, login timestamps</td>
+    <td>Clerk</td>
+  </tr>
+  <tr>
+    <td>Profile data</td>
+    <td>Profile image, location preference</td>
+    <td>Supabase</td>
+  </tr>
+  <tr>
+    <td>User-generated content (UGC)</td>
+    <td>Reviews, marketplace listings, event posts, images, blog posts, song uploads</td>
+    <td>Supabase</td>
+  </tr>
+  <tr>
+    <td>Usage / behavioural data</td>
+    <td>Play history, liked songs, playlists, event interactions</td>
+    <td>Supabase</td>
+  </tr>
+  <tr>
+    <td>Technical / operational logs</td>
+    <td>IP address (as applicable), device/browser metadata, login timestamps</td>
+    <td>Supabase, Clerk</td>
+  </tr>
+  <tr>
+    <td>Transactional email data</td>
+    <td>Email address, email content (notification type, event/listing name), delivery status</td>
+    <td>Resend</td>
+  </tr>
+</table>
+
+<h2>2.4 Special Categories of Sensitive Data</h2>
+<p>Bara Afrika does <strong>not</strong> intentionally collect or process special categories of personal data (health, biometric, genetic, racial or ethnic origin, political opinions, religious beliefs, criminal record data, or data concerning a person's sex life). If users incidentally include such information in free-text fields, it is treated as incidental user-generated content and is not sought or used by the platform.</p>
+
+<h1>3. Purpose and Lawful Basis</h1>
+
+<h2>3.1 Purpose of Processing</h2>
+<ul>
+  <li>Providing and operating the Bara Afrika platform and its services</li>
+  <li>Authenticating users and managing identity</li>
+  <li>Storing platform data and user-generated content</li>
+  <li>Sending transactional and service notification emails</li>
+  <li>Maintaining security, fraud prevention, and abuse monitoring</li>
+  <li>Administering the platform and moderating content</li>
+</ul>
+
+<h2>3.2 Lawful Basis</h2>
+<ul>
+  <li><strong>Contract / service performance:</strong> Core platform functions (account creation, listing/event submission, ticket purchase) are necessary to perform the service the data subject has subscribed to</li>
+  <li><strong>Legitimate interests:</strong> Security monitoring, audit logging, fraud and abuse prevention, service reliability</li>
+  <li><strong>Consent:</strong> Only where optional features are involved (e.g., optional marketing communications, where applicable)</li>
+</ul>
+
+<h1>4. Necessity and Proportionality</h1>
+
+<h2>4.1 Necessity of Cross-Border Processing</h2>
+<p>The cross-border storage and transfer of personal data to these vendors is technically necessary because:</p>
+<ul>
+  <li>Supabase provides the managed database and object storage infrastructure that underpins all platform operations; no equivalent managed service is available locally in Rwanda</li>
+  <li>Clerk provides user authentication and identity management; its EU-based infrastructure offers established security controls and GDPR compliance that reduce risk for data subjects</li>
+  <li>Resend provides transactional email delivery for service notifications (account confirmation, event tickets, listing approvals, etc.) that are functionally necessary for platform operation</li>
+</ul>
+
+<h2>4.2 Data Minimization</h2>
+<ul>
+  <li>Only data necessary for each service function is collected and shared with each vendor</li>
+  <li>Sensitive personal data categories are not collected</li>
+  <li>Users provide contact details voluntarily (phone is optional)</li>
+  <li>Operational logs are collected only to the extent necessary for security and debugging</li>
+</ul>
+
+<h2>4.3 Retention</h2>
+<ul>
+  <li>Account data is retained while the account is active</li>
+  <li>Logs are retained for limited periods (security/debugging purposes)</li>
+  <li>Data deletion requests are handled in accordance with applicable law and Bara Afrika's data rights procedure</li>
+  <li>Supabase data is retained as per Bara Afrika's configuration; vendor-side retention is governed by the respective DPA</li>
+</ul>
+
+<h1>5. Cross-Border Storage and Transfers</h1>
+
+<h2>5.1 Vendors and Destination Countries</h2>
+<table>
+  <tr>
+    <th>Vendor</th>
+    <th>Role</th>
+    <th>Destination Country</th>
+    <th>Region/Datacenter</th>
+    <th>Frequency</th>
+  </tr>
+  <tr>
+    <td>Supabase</td>
+    <td>Database &amp; Object Storage</td>
+    <td>Switzerland</td>
+    <td>Zurich (<code>eu-central-2</code>)</td>
+    <td>Continuous / recurring</td>
+  </tr>
+  <tr>
+    <td>Clerk</td>
+    <td>Authentication &amp; Identity</td>
+    <td>Germany (primary), Ireland (backup)</td>
+    <td>EU</td>
+    <td>Continuous / recurring</td>
+  </tr>
+  <tr>
+    <td>Resend</td>
+    <td>Transactional Email</td>
+    <td>United States</td>
+    <td>AWS (US)</td>
+    <td>Recurring (event-triggered)</td>
+  </tr>
+</table>
+
+<h2>5.2 Nature and Frequency</h2>
+<p>All transfers are continuous or event-triggered during normal platform operation. They occur via secure API calls (HTTPS/TLS) initiated by the platform backend (Supabase Edge Functions for email, or directly from the frontend for Clerk authentication flows).</p>
+
+<h1>6. Risk Assessment</h1>
+
+<h2>6.1 Identified Risks</h2>
+
+<table>
+  <tr>
+    <th>Risk</th>
+    <th>Severity</th>
+    <th>Likelihood</th>
+    <th>Mitigating Controls</th>
+    <th>Residual Risk</th>
+  </tr>
+  <tr>
+    <td>Unauthorized access to personal data at rest (vendor breach)</td>
+    <td>High</td>
+    <td>Low</td>
+    <td>Vendor encryption at rest (AES-256), access controls, vendor security certifications, DPA in place</td>
+    <td class="risk-low">Low</td>
+  </tr>
+  <tr>
+    <td>Unauthorized interception of data in transit</td>
+    <td>High</td>
+    <td>Low</td>
+    <td>TLS/HTTPS enforced for all API calls and frontend traffic</td>
+    <td class="risk-low">Low</td>
+  </tr>
+  <tr>
+    <td>Unauthorized access via compromised credentials</td>
+    <td>High</td>
+    <td>Low-Medium</td>
+    <td>Secrets management (env vars, not in client code), least privilege, role-based access, key rotation procedures</td>
+    <td class="risk-medium">Low-Medium</td>
+  </tr>
+  <tr>
+    <td>Excessive data collection / data subject rights violation</td>
+    <td>Medium</td>
+    <td>Low</td>
+    <td>Data minimization, no sensitive categories collected, data rights request procedure in place</td>
+    <td class="risk-low">Low</td>
+  </tr>
+  <tr>
+    <td>Vendor subprocessor risk (unauthorized sub-transfer)</td>
+    <td>Medium</td>
+    <td>Low</td>
+    <td>DPAs include sub-processor obligations; sub-processor lists reviewed (Supabase DPA Schedule 3)</td>
+    <td class="risk-low">Low</td>
+  </tr>
+  <tr>
+    <td>Data loss / unavailability</td>
+    <td>Medium</td>
+    <td>Low</td>
+    <td>Supabase managed backups and DR, provider SLAs, ability to restore from backup</td>
+    <td class="risk-low">Low</td>
+  </tr>
+  <tr>
+    <td>Misconfiguration of access controls (RLS, admin roles)</td>
+    <td>High</td>
+    <td>Low-Medium</td>
+    <td>Supabase Row Level Security (RLS) on user data tables, tiered admin roles (super_admin/admin/moderator), service role key restricted to backend only</td>
+    <td class="risk-medium">Low-Medium</td>
+  </tr>
+  <tr>
+    <td>Delayed breach notification</td>
+    <td>Medium</td>
+    <td>Low</td>
+    <td>Supabase DPA provides 48-hour incident notification; Breach Response Playbook documented; DPO contact designated</td>
+    <td class="risk-low">Low</td>
+  </tr>
+</table>
+
+<h1>7. Measures to Address Risks</h1>
+
+<h2>7.1 Organizational Measures</h2>
+<ul>
+  <li>Designated privacy / security responsible person (DPO contact)</li>
+  <li>Incident response and breach handling procedure: <code>compliance/BREACH_RESPONSE_PLAYBOOK_DRAFT.md</code></li>
+  <li>Vendor due diligence: DPAs reviewed and maintained for all three vendors</li>
+  <li>Data rights request procedure documented: <code>compliance/DATA_REQUESTS_AND_RIGHTS_DRAFT.md</code></li>
+  <li>Privacy Policy and Terms of Service drafted and to be published before launch</li>
+</ul>
+
+<h2>7.2 Technical Measures</h2>
+<ul>
+  <li>TLS / HTTPS for all data in transit (enforced at infrastructure level)</li>
+  <li>Role-based access control: admin roles tiered (super_admin / admin / moderator) controlled by <code>admin_users</code> table</li>
+  <li>Principle of least privilege: service role key used only in server/edge function contexts, not exposed to frontend</li>
+  <li>Supabase Row Level Security (RLS): applied to user data tables where applicable</li>
+  <li>Admin activity audit log: <code>admin_activity_log</code> table records admin management actions</li>
+  <li>Secrets management: API keys and credentials stored as environment variables, not in client-side code or source repository</li>
+  <li>Managed backups via Supabase (see Supabase DPA for backup/DR details)</li>
+</ul>
+
+<h2>7.3 Contractual Safeguards</h2>
+<ul>
+  <li><strong>Supabase DPA:</strong> Data Processing Addendum in place; covers sub-processors, breach notification within 48 hours, data deletion, encryption at rest, access controls, and audit trails. Attached as evidence.</li>
+  <li><strong>Clerk Terms / DPA:</strong> Contractual data processing obligations in place for EU-based identity provider. Attached as evidence.</li>
+  <li><strong>Resend Terms / DPA:</strong> Contractual data processing obligations in place for email delivery provider. Attached as evidence.</li>
+  <li>Rwanda DPO Standard Contractual Clauses (SCCs) attached where applicable.</li>
+</ul>
+
+<h1>8. Residual Risk and Conclusion</h1>
+
+<p>Following the application of the technical, organizational, and contractual safeguards described above, the residual risk of the cross-border storage and transfer of personal data is assessed as <strong>acceptable</strong>. The remaining low-to-medium residual risks are inherent to any cloud-hosted platform and are proportionate to the benefits provided.</p>
+
+<p><strong>Decision:</strong> Proceed with cross-border storage and transfer of personal data to Supabase (Switzerland), Clerk (Germany/Ireland), and Resend (United States), subject to obtaining supervisory authorization from NCSA / DPO and maintaining ongoing compliance with Law No 058/2021.</p>
+
+<h2>Ongoing Review</h2>
+<ul>
+  <li>This DPIA will be reviewed when new vendors are added, data categories change, or a data breach occurs</li>
+  <li>Admin access will be reviewed periodically</li>
+  <li>Privacy documentation will be updated when features or vendors change</li>
+</ul>
+
+<h1>9. Approvals</h1>
+
+<div class="approval-box">
+  <p><strong>DPO / Responsible Person:</strong></p>
+  <p>Name: <span class="placeholder">[DPO / RESPONSIBLE PERSON NAME]</span></p>
+  <p>Signature: ______________________________ &nbsp;&nbsp;&nbsp; Date: ______________</p>
+  <br>
+  <p><strong>Executive Sign-off:</strong></p>
+  <p>Name: <span class="placeholder">[AUTHORIZED SIGNATORY NAME, TITLE]</span></p>
+  <p>Signature: ______________________________ &nbsp;&nbsp;&nbsp; Date: ______________</p>
+</div>
+
+</body>
+</html>

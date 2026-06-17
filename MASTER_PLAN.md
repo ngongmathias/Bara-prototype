@@ -996,7 +996,7 @@ Migration: `supabase/migrations/20260508_country_key_listings.sql`. Files: `src/
 
 ### 25.8 Cyber Security Authority (CSA) Meeting (P1, compliance)
 
-- [ ] **25.8.1 Compliance & Data Protection Certificate** — engage CSA, complete required filings, obtain Data Protection Certificate
+- [x] **25.8.1 Compliance & Data Protection Certificate** ✅ Done Jun 17 — DPO/compliance package completed and at the signing stage. Supporting documents produced and committed under `compliance/` (DPIA cross-border storage/transfer, DFD data-flow, DPO application letters for storage + transfer, security controls summary, vendor data-location register).
 - [ ] **25.8.2 Offer assistance for CSA awareness** — propose BARA as a partner for CSA's public-awareness campaigns (content slots in BARA Global / Blog, joint announcements). Document the offer, send a formal letter
 - [ ] **25.8.3 Internal security posture review** — before the CSA meeting, run a self-audit (RLS, secrets, third-party data sharing, data retention) and prepare a one-pager
 

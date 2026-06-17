@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; font-size: 11pt; margin: 2cm; line-height: 1.4; color: #000; }
+  h1 { font-size: 16pt; font-weight: bold; color: #2E4F7A; border-bottom: 2px solid #2E75B6; padding-bottom: 4pt; margin-bottom: 8pt; }
+  h2 { font-size: 13pt; font-weight: bold; color: #2E4F7A; margin-top: 18pt; margin-bottom: 6pt; }
+  h3 { font-size: 12pt; font-weight: bold; margin-top: 10pt; margin-bottom: 4pt; }
+  p { margin: 5pt 0; }
+  .placeholder { background: #FFFF99; font-weight: bold; }
+  ul { margin: 5pt 0; padding-left: 20pt; }
+  li { margin: 3pt 0; }
+  table { border-collapse: collapse; margin: 8pt 0; font-size: 10.5pt; }
+  th { background: #2E75B6; color: #fff; border: 1px solid #666; padding: 6pt 8pt; text-align: left; font-weight: bold; }
+  td { border: 1px solid #AAAAAA; padding: 5pt 8pt; vertical-align: top; }
+  .cover-table td { border: none; padding: 2pt 0; }
+  .dfd-box { display: inline-block; border: 2px solid #2E75B6; background: #EBF5FF; padding: 8pt 14pt; border-radius: 6px; font-weight: bold; text-align: center; font-size: 10.5pt; min-width: 120px; }
+  .dfd-external { display: inline-block; border: 2px solid #555; background: #E8E8E8; padding: 8pt 14pt; border-radius: 6px; font-weight: bold; text-align: center; font-size: 10.5pt; min-width: 120px; }
+  .dfd-vendor { display: inline-block; border: 2px solid #006600; background: #D4EDDA; padding: 8pt 14pt; border-radius: 6px; font-weight: bold; text-align: center; font-size: 10.5pt; min-width: 120px; }
+  .dfd-row { display: flex; align-items: center; gap: 10px; margin: 12px 0; flex-wrap: wrap; }
+  .arrow { font-size: 20pt; color: #2E75B6; line-height: 1; }
+  .arrow-label { font-size: 9pt; color: #444; display: block; text-align: center; margin-top: 2px; }
+  .tls-badge { background: #006600; color: white; font-size: 8pt; padding: 1px 5px; border-radius: 3px; display: inline-block; vertical-align: middle; }
+  .section-note { background: #FFF8DC; border-left: 4px solid #DAA520; padding: 8pt 12pt; margin: 8pt 0; font-size: 10.5pt; }
+  .country-badge { font-size: 9pt; color: #555; display: block; }
+</style>
+</head>
+<body>
+
+<h1>Data Flow Diagram (DFD) — Bara Afrika</h1>
+
+<table class="cover-table" style="margin-bottom:16pt;">
+  <tr><td style="width:140px;"><strong>Organization:</strong></td><td><span class="placeholder">[LEGAL ENTITY NAME]</span> (Bara Afrika)</td></tr>
+  <tr><td><strong>Website:</strong></td><td>www.baraafrika.com</td></tr>
+  <tr><td><strong>Date:</strong></td><td><span class="placeholder">[DATE]</span></td></tr>
+  <tr><td><strong>Purpose:</strong></td><td>DPO submission — Data Flow Diagram (DFD) for cross-border storage and transfer authorization</td></tr>
+</table>
+
+<div class="section-note">
+  <strong>How to read this document:</strong> This DFD describes all personal data flows between data subjects (users in Rwanda), the Bara Afrika platform, and third-party service providers outside Rwanda. All external communications use HTTPS / TLS encryption.
+</div>
+
+<h2>1. System Entities (Nodes)</h2>
+
+<table style="width:100%;">
+  <tr>
+    <th style="width:25%">Entity</th>
+    <th style="width:15%">Type</th>
+    <th style="width:20%">Location</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><strong>User</strong> (Rwanda / Global)</td>
+    <td>External entity (data subject)</td>
+    <td>Rwanda (primarily)</td>
+    <td>End-user accessing Bara Afrika via web browser. Includes registered users, businesses/sellers, event organizers/attendees, artists/creators.</td>
+  </tr>
+  <tr>
+    <td><strong>Bara Afrika Web App</strong> (Browser / Client)</td>
+    <td>Internal — frontend</td>
+    <td>User's device (Rwanda)</td>
+    <td>React/Next.js single-page application running in the user's browser. Communicates with Clerk for auth and Supabase for data.</td>
+  </tr>
+  <tr>
+    <td><strong>Frontend Hosting</strong> (Vercel / CDN)</td>
+    <td>External — hosting</td>
+    <td><span class="placeholder">[Vercel global CDN / confirm hosting]</span></td>
+    <td>Hosts the compiled web application. Serves static assets and the Next.js app. No personal data is stored long-term by the CDN.</td>
+  </tr>
+  <tr>
+    <td><strong>Clerk</strong> (Auth Provider)</td>
+    <td>External — vendor</td>
+    <td>Germany (primary), Ireland (backup) — EU</td>
+    <td>Manages user authentication, sessions, and identity. Holds: name, email, phone, Clerk user ID, session tokens.</td>
+  </tr>
+  <tr>
+    <td><strong>Supabase</strong> (DB + Storage)</td>
+    <td>External — vendor</td>
+    <td>Zurich, Switzerland (eu-central-2)</td>
+    <td>Managed PostgreSQL database and object storage. Holds: all platform data (profiles, UGC, events, listings, streams, logs).</td>
+  </tr>
+  <tr>
+    <td><strong>Supabase Edge Function: send-email</strong></td>
+    <td>Internal — backend</td>
+    <td>Runs within Supabase (Switzerland)</td>
+    <td>Serverless function that receives email triggers from the database and calls the Resend API to send transactional emails.</td>
+  </tr>
+  <tr>
+    <td><strong>Resend Email API</strong></td>
+    <td>External — vendor</td>
+    <td>United States (AWS)</td>
+    <td>Email delivery provider. Receives email address, subject, and transactional HTML content. Delivers emails to the user's inbox.</td>
+  </tr>
+  <tr>
+    <td><strong>Admin User</strong> (Internal)</td>
+    <td>Internal — privileged user</td>
+    <td>Rwanda (Bara Afrika team)</td>
+    <td>Admin staff accessing the platform admin interface. Has elevated access controlled by the admin_users table.</td>
+  </tr>
+</table>
+
+<h2>2. Data Flows</h2>
+
+<h3>Flow A — User Authentication</h3>
+<div class="dfd-row">
+  <div class="dfd-external">User<br><span class="country-badge">Rwanda</span></div>
+  <span class="arrow">→<br><span class="arrow-label">Sign-in / sign-up<br>credentials <span class="tls-badge">TLS</span></span></span>
+  <div class="dfd-box">Bara Afrika<br>Web App<br><span class="country-badge">User's browser</span></div>
+  <span class="arrow">⇄<br><span class="arrow-label">Auth request /<br>session token <span class="tls-badge">TLS</span></span></span>
+  <div class="dfd-vendor">Clerk<br><span class="country-badge">Germany / Ireland</span></div>
+</div>
+<ul>
+  <li>User enters credentials in the Bara Afrika web app</li>
+  <li>App sends authentication request to Clerk over HTTPS/TLS</li>
+  <li>Clerk returns session token; app stores token in browser (secure, httpOnly cookies managed by Clerk)</li>
+  <li><strong>Data involved:</strong> email address, password (hashed by Clerk), name, phone (optional), Clerk user ID, session token</li>
+  <li><strong>Destination outside Rwanda:</strong> Clerk — Germany / Ireland</li>
+</ul>
+
+<h3>Flow B — Platform Data Operations (Storage)</h3>
+<div class="dfd-row">
+  <div class="dfd-box">Bara Afrika<br>Web App<br><span class="country-badge">User's browser</span></div>
+  <span class="arrow">⇄<br><span class="arrow-label">API calls (read/write)<br><span class="tls-badge">TLS</span></span></span>
+  <div class="dfd-vendor">Supabase DB<br><span class="country-badge">Switzerland (Zurich)</span></div>
+</div>
+<ul>
+  <li>All platform CRUD operations: user profiles, reviews, marketplace listings, event data, streams (play history, likes, playlists), blog posts, admin data</li>
+  <li>Access controlled by: Supabase JWT auth (Clerk token), Row Level Security (RLS) policies, and admin role checks</li>
+  <li><strong>Data involved:</strong> all personal data categories (name, email, profile, UGC, usage data, logs)</li>
+  <li><strong>Destination outside Rwanda:</strong> Supabase — Switzerland</li>
+</ul>
+
+<h3>Flow B2 — Object / Image Storage</h3>
+<div class="dfd-row">
+  <div class="dfd-box">Bara Afrika<br>Web App<br><span class="country-badge">User's browser</span></div>
+  <span class="arrow">→<br><span class="arrow-label">Image upload <span class="tls-badge">TLS</span></span></span>
+  <div class="dfd-vendor">Supabase Storage<br><span class="country-badge">Switzerland (Zurich)</span></div>
+</div>
+<ul>
+  <li>Users upload images for: profile photos, event posters, listing photos, blog images, song artwork</li>
+  <li>Stored in Supabase Object Storage (same Switzerland region)</li>
+  <li><strong>Data involved:</strong> image files (may include personal appearance / profile photos)</li>
+  <li><strong>Destination outside Rwanda:</strong> Supabase — Switzerland</li>
+</ul>
+
+<h3>Flow C — Transactional Email Delivery</h3>
+<div class="dfd-row">
+  <div class="dfd-vendor">Supabase DB<br><span class="country-badge">Switzerland</span></div>
+  <span class="arrow">→<br><span class="arrow-label">Webhook trigger<br>(email_queue INSERT)</span></span>
+  <div class="dfd-box">Edge Function<br>send-email<br><span class="country-badge">Switzerland</span></div>
+  <span class="arrow">→<br><span class="arrow-label">Email request <span class="tls-badge">TLS</span></span></span>
+  <div class="dfd-vendor">Resend API<br><span class="country-badge">United States</span></div>
+  <span class="arrow">→<br><span class="arrow-label">Email delivered</span></span>
+  <div class="dfd-external">User<br>(inbox)<br><span class="country-badge">Rwanda</span></div>
+</div>
+<ul>
+  <li>When platform events occur (ticket purchase, listing approval, account creation, etc.), a record is written to the <code>email_queue</code> table in Supabase</li>
+  <li>A Supabase database webhook triggers the <code>send-email</code> Edge Function</li>
+  <li>The Edge Function renders the appropriate HTML email template and calls the Resend API over HTTPS/TLS</li>
+  <li>Resend delivers the email to the user's email address</li>
+  <li><strong>Data involved:</strong> email address, email subject, transactional HTML content (event name, listing status, etc.)</li>
+  <li><strong>Destination outside Rwanda:</strong> Resend — United States</li>
+  <li><strong>Email types:</strong> welcome, ticket confirmation, listing created/approved/rejected, event submitted/approved/rejected, banner request, contact form confirmation, blog submitted/approved/declined, song uploaded</li>
+</ul>
+
+<h3>Flow D — Admin Operations</h3>
+<div class="dfd-row">
+  <div class="dfd-external">Admin User<br><span class="country-badge">Rwanda (Bara Afrika team)</span></div>
+  <span class="arrow">→<br><span class="arrow-label">Browser access <span class="tls-badge">TLS</span></span></span>
+  <div class="dfd-box">Admin UI<br>(Web App)<br><span class="country-badge">Browser</span></div>
+  <span class="arrow">⇄<br><span class="arrow-label">Admin actions <span class="tls-badge">TLS</span></span></span>
+  <div class="dfd-vendor">Supabase DB<br><span class="country-badge">Switzerland</span></div>
+</div>
+<ul>
+  <li>Admin users access the platform's admin interface (same web app, restricted routes)</li>
+  <li>Admin actions: content approval/rejection, user management, listing and event moderation</li>
+  <li>Admin management actions (adding/removing admins, role changes) are logged to <code>admin_activity_log</code> table</li>
+  <li>Admin access verified via Clerk session + <code>admin_users</code> table check</li>
+  <li><strong>Data involved:</strong> all platform data (read/write with elevated privileges)</li>
+</ul>
+
+<h2>3. Access Controls on Data Flows</h2>
+<table style="width:100%;">
+  <tr>
+    <th>Flow</th>
+    <th>Access Control</th>
+    <th>Encryption</th>
+  </tr>
+  <tr>
+    <td>User → Clerk (Auth)</td>
+    <td>Clerk session management; credential verification</td>
+    <td>HTTPS / TLS</td>
+  </tr>
+  <tr>
+    <td>Web App → Supabase DB</td>
+    <td>Clerk JWT token verification; Row Level Security (RLS) policies; anon/service role separation</td>
+    <td>HTTPS / TLS</td>
+  </tr>
+  <tr>
+    <td>Web App → Supabase Storage</td>
+    <td>Supabase storage policies; Clerk JWT</td>
+    <td>HTTPS / TLS</td>
+  </tr>
+  <tr>
+    <td>Edge Function → Resend</td>
+    <td>RESEND_API_KEY (environment variable, server-side only)</td>
+    <td>HTTPS / TLS</td>
+  </tr>
+  <tr>
+    <td>Admin → Admin UI → Supabase</td>
+    <td>Clerk session + admin_users table role check; admin_activity_log for management actions</td>
+    <td>HTTPS / TLS</td>
+  </tr>
+</table>
+
+<h2>4. Boundaries and Scope</h2>
+<ul>
+  <li><strong>Rwanda boundary:</strong> User devices (browsers), Admin devices, the Bara Afrika team</li>
+  <li><strong>Outside Rwanda:</strong> Clerk (Germany/Ireland), Supabase (Switzerland), Resend (USA), Frontend Hosting (CDN)</li>
+  <li><strong>No bulk data exports:</strong> All data flows are API-based and tied to individual user sessions / platform events. No bulk data files are transferred outside Rwanda.</li>
+  <li><strong>No analytics providers:</strong> No Google Analytics, GTM, Mixpanel, PostHog, or similar third-party analytics are currently integrated.</li>
+</ul>
+
+<p style="margin-top:30pt;"><strong>Prepared by:</strong> <span class="placeholder">[DPO / RESPONSIBLE PERSON NAME]</span></p>
+<p><strong>Signature:</strong> ______________________________ &nbsp;&nbsp; <strong>Date:</strong> ______________</p>
+
+</body>
+</html>

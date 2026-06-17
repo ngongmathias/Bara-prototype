@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; font-size: 11pt; margin: 2cm; line-height: 1.4; color: #000; }
+  h1 { font-size: 16pt; font-weight: bold; color: #2E4F7A; border-bottom: 2px solid #2E75B6; padding-bottom: 4pt; margin-bottom: 6pt; }
+  h2 { font-size: 12pt; font-weight: bold; margin-top: 16pt; margin-bottom: 6pt; }
+  p { margin: 5pt 0; }
+  .placeholder { background: #FFFF99; font-weight: bold; }
+  table { border-collapse: collapse; width: 100%; margin: 10pt 0; font-size: 10.5pt; }
+  th { background: #2E75B6; color: #fff; border: 1px solid #666; padding: 7pt 8pt; text-align: left; font-weight: bold; }
+  td { border: 1px solid #AAAAAA; padding: 5pt 8pt; vertical-align: top; }
+  tr:nth-child(even) td { background: #F0F4FF; }
+  .yes { color: #006600; font-weight: bold; }
+  .no { color: #CC0000; }
+  .note { font-size: 10pt; color: #555; font-style: italic; margin-top: 8pt; }
+</style>
+</head>
+<body>
+
+<h1>Vendor &amp; Data Location Register — Bara Afrika</h1>
+
+<table style="border:none; margin-bottom:16pt;">
+  <tr style="background:none;"><td style="border:none; padding:2pt 0; width:160px;"><strong>Organization:</strong></td><td style="border:none; padding:2pt 0;"><span class="placeholder">[LEGAL ENTITY NAME]</span> (Bara Afrika)</td></tr>
+  <tr style="background:none;"><td style="border:none; padding:2pt 0;"><strong>Date:</strong></td><td style="border:none; padding:2pt 0;"><span class="placeholder">[DATE]</span></td></tr>
+  <tr style="background:none;"><td style="border:none; padding:2pt 0;"><strong>Prepared by:</strong></td><td style="border:none; padding:2pt 0;"><span class="placeholder">[DPO / RESPONSIBLE PERSON]</span></td></tr>
+  <tr style="background:none;"><td style="border:none; padding:2pt 0;"><strong>Version:</strong></td><td style="border:none; padding:2pt 0;">1.0 — Initial (DPO submission)</td></tr>
+</table>
+
+<h2>1. Third-Party Vendor Register</h2>
+
+<table>
+  <tr>
+    <th style="width:10%">Vendor</th>
+    <th style="width:12%">Purpose</th>
+    <th style="width:20%">Personal Data Processed</th>
+    <th style="width:13%">Storage / Processing Location</th>
+    <th style="width:10%">Country</th>
+    <th style="width:8%">Storage Outside Rwanda?</th>
+    <th style="width:8%">Transfer Outside Rwanda?</th>
+    <th style="width:19%">Contract Evidence</th>
+  </tr>
+  <tr>
+    <td><strong>Supabase</strong></td>
+    <td>Managed PostgreSQL database &amp; object storage (all platform data)</td>
+    <td>Name, email, phone (where provided), profile image, Clerk user ID, UGC (reviews, listings, events, photos, blog posts, songs), usage data (play history, likes, playlists), operational logs, admin activity logs</td>
+    <td>Zurich, Switzerland (<code>eu-central-2</code>). DR: as per Supabase service configuration / DPA</td>
+    <td>Switzerland</td>
+    <td class="yes">YES</td>
+    <td class="yes">YES</td>
+    <td>Supabase DPA (attached); Supabase Terms of Service: https://supabase.com/terms</td>
+  </tr>
+  <tr>
+    <td><strong>Clerk</strong></td>
+    <td>User authentication &amp; identity management</td>
+    <td>Name, email address, phone number (where provided), Clerk user ID, session tokens, authentication metadata</td>
+    <td>Germany (primary datacenter); Ireland (backup). EU-based infrastructure.</td>
+    <td>Germany / Ireland</td>
+    <td class="yes">YES</td>
+    <td class="yes">YES</td>
+    <td>Clerk Terms of Service: https://clerk.com/legal/terms; Clerk DPA / Privacy documentation (attached)</td>
+  </tr>
+  <tr>
+    <td><strong>Resend</strong></td>
+    <td>Transactional &amp; service email delivery</td>
+    <td>Email address, email content (notification type, event/listing name, confirmation details), email delivery metadata (timestamps, delivery status)</td>
+    <td>United States (AWS infrastructure)</td>
+    <td>United States</td>
+    <td class="yes">YES</td>
+    <td class="yes">YES</td>
+    <td>Resend Terms of Service: https://resend.com/legal/terms-of-service; Resend DPA / Privacy documentation (attached)</td>
+  </tr>
+  <tr>
+    <td><strong>Vercel</strong> <em>(if used for hosting)</em></td>
+    <td>Frontend web application hosting</td>
+    <td>HTTP request data, IP addresses (via CDN edge nodes), no personal data stored long-term by host</td>
+    <td>Global CDN (multiple regions). <span class="placeholder">[Confirm Vercel project region if applicable]</span></td>
+    <td>Global / US</td>
+    <td class="yes">YES (if used)</td>
+    <td class="yes">YES (if used)</td>
+    <td>Vercel Terms of Service / DPA: https://vercel.com/legal/terms</td>
+  </tr>
+</table>
+
+<h2>2. Analytics Providers</h2>
+<table>
+  <tr>
+    <th>Vendor</th>
+    <th>Status</th>
+    <th>Notes</th>
+  </tr>
+  <tr>
+    <td>Google Analytics / GTM</td>
+    <td class="no">NOT INTEGRATED</td>
+    <td>No Google Analytics, GTM, or similar SDK in codebase as of this date</td>
+  </tr>
+  <tr>
+    <td>Mixpanel / PostHog / Segment / Amplitude</td>
+    <td class="no">NOT INTEGRATED</td>
+    <td>No third-party analytics SDK integrated as of this date</td>
+  </tr>
+</table>
+
+<p class="note">Note: If analytics providers are added in future, this register must be updated and the Privacy Policy amended before deploying the change.</p>
+
+<h2>3. Payment Processors</h2>
+<table>
+  <tr>
+    <th>Vendor</th>
+    <th>Status</th>
+    <th>Notes</th>
+  </tr>
+  <tr>
+    <td><span class="placeholder">[Payment provider — e.g. Stripe, Flutterwave, MTN MoMo]</span></td>
+    <td><span class="placeholder">[INTEGRATED / NOT YET INTEGRATED]</span></td>
+    <td><span class="placeholder">[Note the data processed and location if applicable]</span></td>
+  </tr>
+</table>
+
+<p class="note">Note: If a payment processor is added, update this register and include the vendor's DPA / terms in the DPO submission pack.</p>
+
+<h2>4. Summary of Data Flows Outside Rwanda</h2>
+
+<table>
+  <tr>
+    <th>Destination Country</th>
+    <th>Vendor(s)</th>
+    <th>Data Categories</th>
+    <th>Authorization Status</th>
+  </tr>
+  <tr>
+    <td>Switzerland</td>
+    <td>Supabase</td>
+    <td>All platform personal data</td>
+    <td><span class="placeholder">[Pending DPO authorization]</span></td>
+  </tr>
+  <tr>
+    <td>Germany / Ireland</td>
+    <td>Clerk</td>
+    <td>Identity &amp; authentication data</td>
+    <td><span class="placeholder">[Pending DPO authorization]</span></td>
+  </tr>
+  <tr>
+    <td>United States</td>
+    <td>Resend</td>
+    <td>Email address &amp; transactional email content</td>
+    <td><span class="placeholder">[Pending DPO authorization]</span></td>
+  </tr>
+</table>
+
+<h2>5. Notes</h2>
+<ul>
+  <li>This register should be reviewed and updated whenever a new vendor is added or an existing vendor changes their data processing locations.</li>
+  <li>All vendors listed process personal data outside Rwanda. Authorization applications have been submitted (or are being submitted) to NCSA / DPO accordingly.</li>
+  <li>The <em>Storage Outside Rwanda</em> column refers to data being stored at rest in infrastructure outside Rwanda. The <em>Transfer Outside Rwanda</em> column refers to data being transmitted to recipients outside Rwanda.</li>
+  <li>Supabase subprocessors are listed in Supabase DPA Schedule 3 (attached).</li>
+</ul>
+
+<p style="margin-top:30pt;"><strong>Signed:</strong> ______________________________ &nbsp;&nbsp; <strong>Date:</strong> ______________</p>
+<p><span class="placeholder">[DPO / RESPONSIBLE PERSON NAME, TITLE]</span></p>
+
+</body>
+</html>

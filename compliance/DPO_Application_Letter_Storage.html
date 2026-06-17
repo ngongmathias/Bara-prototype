@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 2.5cm; line-height: 1.5; color: #000; }
+  .highlight { background: #FFFF99; }
+  h1 { font-size: 14pt; font-weight: bold; margin-top: 18pt; margin-bottom: 6pt; }
+  h2 { font-size: 12pt; font-weight: bold; margin-top: 14pt; margin-bottom: 4pt; }
+  h3 { font-size: 12pt; font-weight: bold; font-style: italic; margin-top: 10pt; margin-bottom: 4pt; }
+  p { margin: 6pt 0; }
+  .placeholder { background: #FFFF99; font-weight: bold; }
+  .letterhead { margin-bottom: 30pt; }
+  .addressee { margin-bottom: 20pt; }
+  .subject { font-weight: bold; margin-bottom: 20pt; }
+  .salutation { margin-bottom: 14pt; }
+  .signature-block { margin-top: 40pt; }
+  ul { margin: 6pt 0; padding-left: 20pt; }
+  li { margin: 3pt 0; }
+</style>
+</head>
+<body>
+
+<div class="letterhead">
+  <p><strong>Bara Afrika</strong><br>
+  <span class="placeholder">[LEGAL ENTITY NAME — e.g. "Bara Afrika Ltd"]</span><br>
+  <span class="placeholder">[LEGAL ADDRESS, Kigali, Rwanda]</span><br>
+  Phone: <span class="placeholder">[COMPANY PHONE]</span><br>
+  Email: <span class="placeholder">[COMPLIANCE EMAIL — e.g. compliance@baraafrika.com]</span><br>
+  Website: www.baraafrika.com</p>
+</div>
+
+<div class="addressee">
+  <p><strong>To:</strong> Chief Executive Officer<br>
+  National Cyber Security Authority (NCSA)<br>
+  <strong>Via:</strong> Data Protection &amp; Privacy Office (DPO)<br>
+  Email: registration@dpo.gov.rw / dpp@ncsa.gov.rw</p>
+</div>
+
+<p><strong>Date:</strong> <span class="placeholder">[DATE — e.g. 20 June 2026]</span></p>
+
+<p class="subject">Subject: Application for Authorization to Store Personal Data Outside Rwanda — Bara Afrika</p>
+
+<p class="salutation">Dear Chief Executive Officer,</p>
+
+<p>I write on behalf of <strong><span class="placeholder">[LEGAL ENTITY NAME]</span></strong> ("Bara Afrika", "we", "us"), a private organization operating a digital platform available at <strong>www.baraafrika.com</strong>.</p>
+
+<p>Pursuant to <strong>Law No 058/2021 of 13/10/2021 relating to the protection of personal data and privacy in Rwanda</strong>, we hereby apply for authorization to <strong>store personal data outside Rwanda</strong>.</p>
+
+<h1>1. Applicant Details</h1>
+<ul>
+  <li><strong>Organization name:</strong> <span class="placeholder">[LEGAL ENTITY NAME]</span></li>
+  <li><strong>Registration as data controller/processor:</strong> Controller — Data Controller registration submitted / <span class="placeholder">[registration number if issued]</span></li>
+  <li><strong>Type of organization:</strong> Private</li>
+  <li><strong>Sector:</strong> Other — Technology / Digital Platform</li>
+  <li><strong>Address:</strong> <span class="placeholder">[LEGAL ADDRESS, Kigali, Rwanda]</span></li>
+  <li><strong>Phone:</strong> <span class="placeholder">[COMPANY PHONE]</span></li>
+  <li><strong>Email:</strong> <span class="placeholder">[COMPLIANCE EMAIL]</span></li>
+  <li><strong>Website:</strong> www.baraafrika.com</li>
+</ul>
+
+<h2>Data Protection Officer / Responsible Contact</h2>
+<ul>
+  <li><strong>Name:</strong> <span class="placeholder">[DPO / RESPONSIBLE PERSON NAME]</span></li>
+  <li><strong>Phone:</strong> <span class="placeholder">[DPO PHONE]</span></li>
+  <li><strong>Email:</strong> <span class="placeholder">[DPO EMAIL]</span></li>
+</ul>
+
+<h1>2. Description of the Platform and Data Subjects</h1>
+
+<p>Bara Afrika is a digital platform that provides the following services to users in Rwanda and the region:</p>
+<ul>
+  <li>User accounts and profiles</li>
+  <li>Business and marketplace listings (reviews, discovery)</li>
+  <li>Events creation, promotion and ticketing</li>
+  <li>Music/content streams (play history, likes, playlists)</li>
+  <li>Blog and community content</li>
+</ul>
+
+<p>The platform processes personal data relating to the following categories of data subjects:</p>
+<ul>
+  <li>Users / account holders (~1,000 projected Year 1)</li>
+  <li>Businesses / merchants and marketplace participants (~200 projected Year 1)</li>
+  <li>Event organizers and attendees (~100 projected Year 1)</li>
+  <li>Artists / content creators</li>
+  <li>Administrators (internal staff)</li>
+</ul>
+
+<p>Personal data elements may include:</p>
+<ul>
+  <li>Identifiers and contact details: name, email address, phone number (where provided by user)</li>
+  <li>Account and authentication metadata: platform user identifiers (Clerk user ID), session metadata</li>
+  <li>User-generated content: reviews, listings, event submissions, profile images, blog posts</li>
+  <li>Operational logs and usage data: play history, likes, playlists, login timestamps, device/browser metadata as applicable</li>
+</ul>
+
+<p>We do <strong>not</strong> intentionally collect special categories of sensitive personal data (health, biometric, political, religious, criminal records, etc.).</p>
+
+<h1>3. Where the Personal Data is Stored Outside Rwanda</h1>
+
+<p>Bara Afrika uses the following cloud service providers to store personal data outside Rwanda. These vendors were selected for their security posture, reliability, scalability, and compliance documentation.</p>
+
+<h3>3.1 Supabase (Database and Storage)</h3>
+<ul>
+  <li><strong>Function:</strong> Managed PostgreSQL database and object storage for all platform data</li>
+  <li><strong>Primary region:</strong> Central Europe — Zurich (<code>eu-central-2</code>)</li>
+  <li><strong>Country:</strong> Switzerland</li>
+  <li><strong>DR / Backups:</strong> Managed by Supabase as per service configuration and DPA</li>
+  <li><strong>Sub-processors:</strong> As listed in Supabase DPA Schedule 3 (attached)</li>
+  <li><strong>Applicable laws:</strong> Swiss Federal Act on Data Protection (nFADP) and EU data protection where applicable</li>
+</ul>
+
+<h3>3.2 Clerk (Authentication and Identity Management)</h3>
+<ul>
+  <li><strong>Function:</strong> User authentication, identity management, session tokens</li>
+  <li><strong>Primary location:</strong> Germany (EU)</li>
+  <li><strong>Backup location:</strong> Ireland (EU)</li>
+  <li><strong>Country:</strong> Germany / Ireland</li>
+  <li><strong>Sub-processors:</strong> As per Clerk subprocessors / DPA documentation (attached)</li>
+  <li><strong>Applicable laws:</strong> EU General Data Protection Regulation (GDPR)</li>
+</ul>
+
+<h3>3.3 Resend (Transactional Email Delivery)</h3>
+<ul>
+  <li><strong>Function:</strong> Delivery of transactional and service emails (account notifications, event confirmations, listing approvals, etc.)</li>
+  <li><strong>Location:</strong> United States (AWS infrastructure)</li>
+  <li><strong>Country:</strong> United States</li>
+  <li><strong>Sub-processors:</strong> As per Resend DPA / terms documentation (attached)</li>
+  <li><strong>Applicable laws:</strong> US data protection laws; contractual safeguards via DPA</li>
+</ul>
+
+<h1>4. Reasons for Storing Personal Data Outside Rwanda</h1>
+
+<p>We request authorization to store personal data outside Rwanda for the following reasons:</p>
+<ul>
+  <li>The selected vendors provide reputable managed cloud infrastructure with established security controls, compliance certifications, and contractual data protection commitments</li>
+  <li>Supabase's Zurich region provides encryption at rest, encrypted backups, access controls, audit trails, and incident notification as documented in their DPA</li>
+  <li>Clerk's EU-based infrastructure (Germany/Ireland) offers robust identity and authentication services under GDPR governance, reducing risk and providing established security controls</li>
+  <li>Resend enables reliable transactional email delivery with contractual data processing safeguards</li>
+  <li>Local Rwanda-based alternatives offering equivalent managed infrastructure, security certifications, and service levels are not currently available</li>
+  <li>The use of these vendors enables availability, scalability, managed backups, and disaster recovery capabilities necessary for continuity of service</li>
+</ul>
+
+<h1>5. Safeguards and Security Measures</h1>
+
+<h2>5.1 Measures implemented by Bara Afrika</h2>
+<ul>
+  <li>Role-based access controls for all administrative access</li>
+  <li>Principle of least privilege — admin roles tiered (super_admin / admin / moderator)</li>
+  <li>Admin management actions logged in <code>admin_activity_log</code> audit table</li>
+  <li>Encrypted transport: all external traffic uses HTTPS / TLS</li>
+  <li>Supabase Row Level Security (RLS) applied to user data tables where applicable</li>
+  <li>Secrets management: API keys and credentials stored as environment variables, never in client-side code or source repository</li>
+  <li>Incident response process and breach reporting readiness (see Breach Response Playbook)</li>
+  <li>Data minimization: only data necessary for the service is collected; sensitive categories not requested</li>
+</ul>
+
+<h2>5.2 Measures implemented by service providers</h2>
+<ul>
+  <li><strong>Supabase:</strong> AES-256 encryption at rest, encrypted backups, least privilege access controls, audit trails, monitoring, security incident notification within 48 hours (per DPA) — see Supabase DPA attached</li>
+  <li><strong>Clerk:</strong> EU-compliant identity infrastructure, GDPR-aligned data processing, access controls and security measures per their compliance documentation — see Clerk terms/DPA attached</li>
+  <li><strong>Resend:</strong> Contractual data processing safeguards, secure email delivery infrastructure — see Resend terms/DPA attached</li>
+</ul>
+
+<h1>6. Attachments</h1>
+<p>We attach the following supporting documents as required by the form:</p>
+<ol>
+  <li>Completed <strong>Application Form — Authorization to Store Personal Data Outside Rwanda</strong></li>
+  <li>Hosting agreements with service providers:
+    <ul>
+      <li>Supabase Data Processing Addendum (DPA)</li>
+      <li>Supabase Terms of Service</li>
+      <li>Clerk Terms of Service / DPA</li>
+      <li>Resend Terms of Service / DPA</li>
+    </ul>
+  </li>
+  <li><strong>Data Protection Impact Assessment (DPIA)</strong> for hosting personal data outside Rwanda</li>
+  <li>Supporting documentation: Security Controls Summary, Vendor &amp; Data Location Register</li>
+</ol>
+
+<p>We respectfully request that NCSA / DPO grants authorization to store personal data outside Rwanda as described above.</p>
+
+<p>We confirm that we will notify NCSA / DPO of any material changes to vendors, data categories, or storage locations.</p>
+
+<p>Yours faithfully,</p>
+
+<div class="signature-block">
+  <p><strong><span class="placeholder">[AUTHORIZED SIGNATORY NAME]</span></strong><br>
+  <span class="placeholder">[TITLE / POSITION — e.g. Chief Executive Officer]</span><br>
+  For and on behalf of <strong><span class="placeholder">[LEGAL ENTITY NAME]</span></strong></p>
+  <p>Signature: ____________________________</p>
+  <p>Date: <span class="placeholder">[DATE]</span></p>
+</div>
+
+</body>
+</html>
