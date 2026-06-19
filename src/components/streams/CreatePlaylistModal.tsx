@@ -138,7 +138,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
             <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-h-[85vh] flex flex-col">
                 <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
                     <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
-                        <Music className="text-[#1DB954]" size={24} />
+                        <Music className="text-gray-900" size={24} />
                         {step === 'details' ? 'Create Playlist' : 'Add Songs'}
                     </h2>
                     <button onClick={step === 'songs' ? handleFinish : onClose} className="text-gray-400 hover:text-gray-700 transition-colors" aria-label="Close"><X size={24} /></button>
@@ -155,7 +155,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="e.g. My Summer Vibes"
-                                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#1DB954] focus:ring-[#1DB954]"
+                                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-gray-900"
                                 autoFocus
                             />
                         </div>
@@ -169,7 +169,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 placeholder="Tell us about this playlist..."
-                                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#1DB954] focus:ring-[#1DB954] min-h-[100px] resize-none"
+                                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-gray-900 min-h-[100px] resize-none"
                             />
                         </div>
 
@@ -177,7 +177,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                             <Button type="button" variant="ghost" onClick={onClose} className="flex-1 text-gray-700 hover:bg-gray-100 font-bold">
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={loading} className="flex-1 bg-[#1DB954] text-black hover:bg-[#1ed760] font-black tracking-tight">
+                            <Button type="submit" disabled={loading} className="flex-1 bg-gray-900 text-white hover:bg-black font-black tracking-tight">
                                 {loading ? <Loader2 className="animate-spin" size={20} /> : (
                                     <span className="flex items-center gap-1">Next <ArrowRight size={16} /></span>
                                 )}
@@ -194,7 +194,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Search for songs to add..."
-                                    className="pl-9 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#1DB954] focus:ring-[#1DB954]"
+                                    className="pl-9 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-gray-900"
                                     autoFocus
                                 />
                             </div>
@@ -206,7 +206,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                         <div className="flex-1 overflow-y-auto p-2">
                             {loadingSongs ? (
                                 <div className="flex justify-center py-8">
-                                    <Loader2 className="animate-spin text-[#1DB954]" size={24} />
+                                    <Loader2 className="animate-spin text-gray-900" size={24} />
                                 </div>
                             ) : songsToShow.length === 0 ? (
                                 <p className="text-gray-400 text-sm text-center py-8">
@@ -235,7 +235,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                                                 disabled={isAdded}
                                                 className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition ${
                                                     isAdded
-                                                        ? 'bg-[#1DB954] text-black'
+                                                        ? 'bg-gray-900 text-white'
                                                         : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                                                 }`}
                                             >
@@ -248,7 +248,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                         </div>
 
                         <div className="p-4 border-t border-gray-200 shrink-0">
-                            <Button onClick={handleFinish} className="w-full bg-[#1DB954] text-black hover:bg-[#1ed760] font-black">
+                            <Button onClick={handleFinish} className="w-full bg-gray-900 text-white hover:bg-black font-black">
                                 Done ({addedSongIds.size} song{addedSongIds.size !== 1 ? 's' : ''} added)
                             </Button>
                         </div>

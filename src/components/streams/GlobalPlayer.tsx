@@ -1,10 +1,11 @@
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
-import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List, Share2, Maximize2, Lock, ShoppingCart, MoreHorizontal, Timer, Gauge } from 'lucide-react';
+import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List, Share2, Maximize2, Lock, ShoppingCart, MoreHorizontal, Timer, Gauge, ListPlus } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { GamificationService } from '@/lib/gamificationService';
 import { QueueDrawer } from './QueueDrawer';
 import { FullScreenPlayer } from './FullScreenPlayer';
+import { AddToPlaylistModal } from './AddToPlaylistModal';
 import { ShareDialog } from '@/components/ShareDialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -59,6 +60,7 @@ export function GlobalPlayer() {
     const [isQueueOpen, setIsQueueOpen] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
+    const [isAddToPlaylistOpen, setIsAddToPlaylistOpen] = useState(false);
     const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
     const previousVolumeRef = useRef(1);
     const { user, isSignedIn } = useUser();
@@ -204,9 +206,9 @@ export function GlobalPlayer() {
                         />
                         {isPlaying && (
                             <div className="absolute inset-0 flex items-center justify-center gap-[2px] bg-black/20 rounded">
-                                <div className="w-[3px] bg-[#1DB954] rounded-full animate-bars" style={{ animationDelay: '0s' }}></div>
-                                <div className="w-[3px] bg-[#1DB954] rounded-full animate-bars" style={{ animationDelay: '0.2s' }}></div>
-                                <div className="w-[3px] bg-[#1DB954] rounded-full animate-bars" style={{ animationDelay: '0.4s' }}></div>
+                                <div className="w-[3px] bg-white rounded-full animate-bars" style={{ animationDelay: '0s' }}></div>
+                                <div className="w-[3px] bg-white rounded-full animate-bars" style={{ animationDelay: '0.2s' }}></div>
+                                <div className="w-[3px] bg-white rounded-full animate-bars" style={{ animationDelay: '0.4s' }}></div>
                             </div>
                         )}
                     </div>
@@ -214,7 +216,7 @@ export function GlobalPlayer() {
                         className="min-w-0 mr-4 cursor-pointer group"
                         onClick={() => setIsFullScreen(true)}
                     >
-                        <div className="font-bold truncate text-white hover:underline tracking-tight transition-colors group-hover:text-[#1DB954]">
+                        <div className="font-bold truncate text-white hover:underline tracking-tight transition-colors group-hover:text-white">
                             {currentSong.title}
                         </div>
                         <div className="text-xs text-gray-400 truncate hover:text-white transition-colors font-medium">
@@ -223,7 +225,7 @@ export function GlobalPlayer() {
                     </div>
                     <button
                         onClick={() => toggleLike(currentSong.id)}
-                        className={`transition-all hover:scale-110 flex-shrink-0 ${isLiked ? 'text-[#1DB954]' : 'text-gray-400 hover:text-white'}`}
+                        className={`transition-all hover:scale-110 flex-shrink-0 ${isLiked ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                     >
                         <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
                     </button>
@@ -234,7 +236,7 @@ export function GlobalPlayer() {
                     <div className="flex items-center gap-4 md:gap-6">
                         <button
                             onClick={toggleShuffle}
-                            className={`transition-colors hidden md:block ${isShuffle ? 'text-[#1DB954]' : 'text-gray-400 hover:text-white'}`}
+                            className={`transition-colors hidden md:block ${isShuffle ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                             title="Shuffle"
                         >
                             <Shuffle size={18} />
@@ -249,11 +251,11 @@ export function GlobalPlayer() {
                         <button onClick={next} className="text-gray-400 hover:text-white transition" aria-label="Next"><SkipForward size={20} fill="currentColor" /></button>
                         <button
                             onClick={() => setRepeatMode(repeatMode === 'none' ? 'all' : repeatMode === 'all' ? 'one' : 'none')}
-                            className={`transition-colors relative hidden md:block ${repeatMode !== 'none' ? 'text-[#1DB954]' : 'text-gray-400 hover:text-white'}`}
+                            className={`transition-colors relative hidden md:block ${repeatMode !== 'none' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                         >
                             <Repeat size={18} />
                             {repeatMode === 'one' && (
-                                <span className="absolute -top-1 -right-1 bg-[#1DB954] text-[8px] text-white w-3 h-3 rounded-full flex items-center justify-center font-bold">1</span>
+                                <span className="absolute -top-1 -right-1 bg-white text-[8px] text-white w-3 h-3 rounded-full flex items-center justify-center font-bold">1</span>
                             )}
                         </button>
                     </div>
@@ -272,7 +274,7 @@ export function GlobalPlayer() {
                                 title={formatTime(progress)}
                             />
                             <div
-                                className="absolute top-0 left-0 h-full bg-white group-hover/progress:bg-[#1DB954] transition-colors z-10"
+                                className="absolute top-0 left-0 h-full bg-white group-hover/progress:bg-white transition-colors z-10"
                                 style={{ width: `${(progress / (duration || 1)) * 100}%` }}
                             />
                         </div>
@@ -283,8 +285,16 @@ export function GlobalPlayer() {
                 {/* Volume & Extra Controls */}
                 <div className="flex items-center gap-4 flex-1 justify-end min-w-0 md:min-w-[200px]">
                     <button
+                        onClick={() => setIsAddToPlaylistOpen(true)}
+                        className="text-gray-400 hover:text-white transition-colors"
+                        title="Add to playlist"
+                        aria-label="Add to playlist"
+                    >
+                        <ListPlus size={20} />
+                    </button>
+                    <button
                         onClick={() => setIsQueueOpen(!isQueueOpen)}
-                        className={`transition-colors ${isQueueOpen ? 'text-[#1DB954]' : 'text-gray-400 hover:text-white'}`}
+                        className={`transition-colors ${isQueueOpen ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                         title="Queue"
                     >
                         <List size={20} />
@@ -312,7 +322,7 @@ export function GlobalPlayer() {
                         >
                             <MoreHorizontal size={18} />
                             {(playbackRate !== 1 || sleepTimerMinutes !== null || sleepTimerEndOfTrack) && (
-                                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#1DB954]" />
+                                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-white" />
                             )}
                         </button>
                         {isExtrasOpen && (
@@ -343,9 +353,9 @@ export function GlobalPlayer() {
                                         <div className="flex items-center justify-between text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                                             <span className="flex items-center gap-1.5"><Timer size={12} /> Sleep Timer</span>
                                             {sleepTimerRemainingMs !== null && (
-                                                <span className="text-[#1DB954] tabular-nums">{formatRemaining(sleepTimerRemainingMs)}</span>
+                                                <span className="text-white tabular-nums">{formatRemaining(sleepTimerRemainingMs)}</span>
                                             )}
-                                            {sleepTimerEndOfTrack && <span className="text-[#1DB954]">end of track</span>}
+                                            {sleepTimerEndOfTrack && <span className="text-white">end of track</span>}
                                         </div>
                                         <div className="flex flex-col gap-1">
                                             {SLEEP_OPTIONS.map((opt) => {
@@ -386,7 +396,7 @@ export function GlobalPlayer() {
                                 className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
                             />
                             <div
-                                className="absolute top-0 left-0 h-full bg-white group-hover/volume:bg-[#1DB954] transition-colors"
+                                className="absolute top-0 left-0 h-full bg-white group-hover/volume:bg-white transition-colors"
                                 style={{ width: `${volume * 100}%` }}
                             />
                         </div>
@@ -398,7 +408,7 @@ export function GlobalPlayer() {
             {isPreviewing && currentSong.price && currentSong.price > 0 && (
                 <div className="absolute inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center z-30 rounded-t-lg">
                     <div className="flex items-center gap-6 px-6">
-                        <Lock className="w-6 h-6 text-amber-400 flex-shrink-0" />
+                        <Lock className="w-6 h-6 text-gray-300 flex-shrink-0" />
                         <div className="min-w-0">
                             <p className="text-white font-bold text-sm truncate">Preview ended</p>
                             <p className="text-gray-400 text-xs truncate">
@@ -417,7 +427,7 @@ export function GlobalPlayer() {
                                         toast({ title: 'Purchase failed', description: result.message, variant: 'destructive' });
                                     }
                                 }}
-                                className="flex items-center gap-2 bg-[#1DB954] text-black font-bold px-5 py-2.5 rounded-full hover:bg-[#1ed760] transition text-sm whitespace-nowrap flex-shrink-0"
+                                className="flex items-center gap-2 bg-white text-black font-bold px-5 py-2.5 rounded-full hover:bg-gray-200 transition text-sm whitespace-nowrap flex-shrink-0"
                             >
                                 <ShoppingCart size={16} />
                                 Buy {currentSong.price} coins
@@ -438,6 +448,13 @@ export function GlobalPlayer() {
             <QueueDrawer isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} />
 
             <FullScreenPlayer isOpen={isFullScreen} onClose={() => setIsFullScreen(false)} />
+
+            <AddToPlaylistModal
+                isOpen={isAddToPlaylistOpen}
+                onClose={() => setIsAddToPlaylistOpen(false)}
+                songId={currentSong.id}
+                songTitle={currentSong.title}
+            />
 
             <ShareDialog
                 open={isShareOpen}

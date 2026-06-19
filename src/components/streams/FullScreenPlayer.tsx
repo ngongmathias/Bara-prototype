@@ -55,7 +55,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
     const [activeTab, setActiveTab] = useState<'now' | 'queue' | 'lyrics'>('now');
     const [featuredArtists, setFeaturedArtists] = useState<string[]>([]);
     const [albumInfo, setAlbumInfo] = useState<{ title: string; cover_url: string } | null>(null);
-    const [dominantColor, setDominantColor] = useState('#1DB954');
+    const [dominantColor, setDominantColor] = useState('#404040');
     const [lyrics, setLyrics] = useState<string | null>(null);
     const [lyricsLoading, setLyricsLoading] = useState(false);
 
@@ -123,7 +123,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
 
     // Extract dominant color from album art via canvas (desaturated for subtle ambience)
     useEffect(() => {
-        if (!currentSong?.cover_url) { setDominantColor('#1DB954'); return; }
+        if (!currentSong?.cover_url) { setDominantColor('#404040'); return; }
         let cancelled = false;
         const img = new Image();
         img.crossOrigin = 'anonymous';
@@ -149,7 +149,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                     if (max < 40 || min > 220) continue; // skip near-black/white
                     r += pr; g += pg; b += pb; count += 1;
                 }
-                if (count === 0) { setDominantColor('#1DB954'); return; }
+                if (count === 0) { setDominantColor('#404040'); return; }
                 r = Math.round(r / count);
                 g = Math.round(g / count);
                 b = Math.round(b / count);
@@ -161,10 +161,10 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                 b = Math.round(b * (1 - mix) + grey * mix);
                 setDominantColor(`rgb(${r}, ${g}, ${b})`);
             } catch {
-                setDominantColor('#1DB954');
+                setDominantColor('#404040');
             }
         };
-        img.onerror = () => { if (!cancelled) setDominantColor('#1DB954'); };
+        img.onerror = () => { if (!cancelled) setDominantColor('#404040'); };
         img.src = currentSong.cover_url;
         return () => { cancelled = true; };
     }, [currentSong?.id, currentSong?.cover_url]);
@@ -305,7 +305,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                     </div>
                                     <button
                                         onClick={() => toggleLike(currentSong.id)}
-                                        className={`p-2 rounded-full flex-shrink-0 transition-all hover:scale-110 ${isLiked ? 'text-[#1DB954]' : 'text-white/30 hover:text-white'}`}
+                                        className={`p-2 rounded-full flex-shrink-0 transition-all hover:scale-110 ${isLiked ? 'text-white' : 'text-white/30 hover:text-white'}`}
                                     >
                                         <Heart size={24} fill={isLiked ? 'currentColor' : 'none'} />
                                     </button>
@@ -342,7 +342,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                             <div className="flex items-center justify-center gap-7 md:gap-8 mb-4 md:mb-6 flex-shrink-0">
                                 <button
                                     onClick={toggleShuffle}
-                                    className={`transition-all hover:scale-110 ${isShuffle ? 'text-[#1DB954]' : 'text-white/30 hover:text-white'}`}
+                                    className={`transition-all hover:scale-110 ${isShuffle ? 'text-white' : 'text-white/30 hover:text-white'}`}
                                 >
                                     <Shuffle size={20} />
                                 </button>
@@ -356,11 +356,11 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                 <button onClick={next} className="text-white/80 hover:text-white hover:scale-110 transition-all active:scale-95" aria-label="Next"><SkipForward size={28} fill="currentColor" /></button>
                                 <button
                                     onClick={() => setRepeatMode(repeatMode === 'none' ? 'all' : repeatMode === 'all' ? 'one' : 'none')}
-                                    className={`transition-all hover:scale-110 relative ${repeatMode !== 'none' ? 'text-[#1DB954]' : 'text-white/30 hover:text-white'}`}
+                                    className={`transition-all hover:scale-110 relative ${repeatMode !== 'none' ? 'text-white' : 'text-white/30 hover:text-white'}`}
                                 >
                                     <Repeat size={20} />
                                     {repeatMode === 'one' && (
-                                        <span className="absolute -top-1 -right-1 bg-[#1DB954] text-[7px] text-white w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold">1</span>
+                                        <span className="absolute -top-1 -right-1 bg-white text-[7px] text-black w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold">1</span>
                                     )}
                                 </button>
                             </div>
@@ -384,7 +384,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                     {/* Lyrics toggle */}
                                     <button
                                         onClick={() => setActiveTab(activeTab === 'lyrics' ? 'now' : 'lyrics')}
-                                        className={`p-2 rounded-full transition-colors ${activeTab === 'lyrics' ? 'text-[#1DB954]' : 'text-white/30 hover:text-white'}`}
+                                        className={`p-2 rounded-full transition-colors ${activeTab === 'lyrics' ? 'text-white' : 'text-white/30 hover:text-white'}`}
                                         aria-label="Toggle lyrics"
                                     >
                                         <Mic2 size={20} />
@@ -392,7 +392,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                     {/* Queue toggle (visible on mobile) */}
                                     <button
                                         onClick={() => setActiveTab(activeTab === 'queue' ? 'now' : 'queue')}
-                                        className={`p-2 rounded-full transition-colors lg:hidden ${activeTab === 'queue' ? 'text-[#1DB954]' : 'text-white/30 hover:text-white'}`}
+                                        className={`p-2 rounded-full transition-colors lg:hidden ${activeTab === 'queue' ? 'text-white' : 'text-white/30 hover:text-white'}`}
                                         aria-label="Toggle queue"
                                     >
                                         <ListMusic size={20} />
@@ -458,7 +458,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                                 onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}
                                             />
                                             <div className="flex-1 min-w-0">
-                                                <div className="text-sm font-semibold text-[#1DB954] truncate">{currentSong.title}</div>
+                                                <div className="text-sm font-semibold text-white truncate">{currentSong.title}</div>
                                                 <div className="text-xs text-white/40 truncate">{artistDisplay}</div>
                                             </div>
                                             {isPlaying && (
@@ -466,7 +466,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                                     {[0, 0.12, 0.24].map((d, i) => (
                                                         <motion.div
                                                             key={i}
-                                                            className="w-[3px] rounded-full bg-[#1DB954]"
+                                                            className="w-[3px] rounded-full bg-white"
                                                             animate={{ height: ['4px', '14px', '6px', '12px', '4px'] }}
                                                             transition={{ duration: 1, repeat: Infinity, delay: d }}
                                                         />

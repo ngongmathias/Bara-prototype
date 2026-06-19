@@ -30,7 +30,7 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
                 <SidebarLink to="/streams" icon={<Home size={24} />} label="Home" active={isActive('/streams')} />
                 <SidebarLink to="/streams/search" icon={<Search size={24} />} label="Search" active={isActive('/streams/search')} />
                 <SidebarLink to="/streams/stats" icon={<BarChart3 size={24} />} label="Your Stats" active={isActive('/streams/stats')} />
-                <SidebarLink to="/streams/creator" icon={<Mic2 size={24} className="text-[#1DB954]" />} label="Creator Portal" active={isActive('/streams/creator')} />
+                <SidebarLink to="/streams/creator" icon={<Mic2 size={24} className="text-gray-900" />} label="Creator Portal" active={isActive('/streams/creator')} />
             </div>
 
             {/* Browse Content Types */}

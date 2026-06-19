@@ -292,7 +292,7 @@ const PlaylistPicker: React.FC<{ song: Song; onDone: () => void; onBack: () => v
                                 className="w-full flex items-center justify-between gap-3 px-3 py-2 hover:bg-gray-100 transition text-left text-sm"
                             >
                                 <span className="truncate">{pl.title}</span>
-                                {added && <Check size={14} className="text-[#1DB954]" />}
+                                {added && <Check size={14} className="text-gray-900" />}
                             </button>
                         );
                     })}
