@@ -74,7 +74,7 @@ export default function ArtistVerificationPage() {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero */}
         <div className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-bold mb-6">
+          <div className="inline-flex items-center gap-2 bg-gray-100 text-gray-800 px-4 py-2 rounded-full text-sm font-bold mb-6">
             <BadgeCheck className="w-4 h-4" />
             Artist Verification
           </div>
@@ -82,19 +82,19 @@ export default function ArtistVerificationPage() {
             Stand out as a verified artist
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto font-roboto">
-            Get the blue badge, unlock premium tools, and grow your audience on Bara Afrika Streams.
+            Get the verified badge, unlock premium tools, and grow your audience on Bara Afrika Streams.
           </p>
         </div>
 
         {/* Pricing Card */}
         <div className="max-w-md mx-auto mb-16">
-          <Card className="border-2 border-blue-500 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-blue-500 text-gray-900 text-[10px] font-bold px-3 py-1 rounded-bl-lg">
+          <Card className="border-2 border-gray-900 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 bg-gray-900 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
               RECOMMENDED
             </div>
             <CardHeader className="text-center pt-8">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Crown className="w-8 h-8 text-blue-600" />
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Crown className="w-8 h-8 text-gray-900" />
               </div>
               <CardTitle className="text-2xl font-black">Verified Artist</CardTitle>
               <div className="mt-3">
@@ -106,7 +106,7 @@ export default function ArtistVerificationPage() {
               <ul className="space-y-3">
                 {BENEFITS.map((b) => (
                   <li key={b.title} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <Check className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" />
                     <div>
                       <span className="text-sm font-bold text-gray-900">{b.title}</span>
                       <p className="text-xs text-gray-500">{b.description}</p>
@@ -119,7 +119,7 @@ export default function ArtistVerificationPage() {
                 <Button
                   onClick={handleSubscribe}
                   disabled={loading}
-                  className="w-full py-6 bg-blue-600 hover:bg-blue-700 text-gray-900 font-black text-base rounded-xl"
+                  className="w-full py-6 bg-gray-900 hover:bg-black text-white font-black text-base rounded-xl"
                 >
                   Get Verified
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -150,7 +150,7 @@ export default function ArtistVerificationPage() {
                 <tr className="border-b-2 border-gray-200">
                   <th className="text-left py-3 px-4 text-sm font-bold text-gray-500">Feature</th>
                   <th className="text-center py-3 px-4 text-sm font-bold text-gray-500">Free Artist</th>
-                  <th className="text-center py-3 px-4 text-sm font-bold text-blue-600">
+                  <th className="text-center py-3 px-4 text-sm font-bold text-gray-900">
                     <div className="flex items-center justify-center gap-1">
                       <BadgeCheck className="w-4 h-4" />
                       Verified
@@ -165,7 +165,7 @@ export default function ArtistVerificationPage() {
                     <td className="py-3 px-4 text-center text-sm">
                       {typeof row.free === 'boolean' ? (
                         row.free ? (
-                          <Check className="w-4 h-4 text-green-500 mx-auto" />
+                          <Check className="w-4 h-4 text-gray-900 mx-auto" />
                         ) : (
                           <span className="text-gray-600">—</span>
                         )
@@ -176,7 +176,7 @@ export default function ArtistVerificationPage() {
                     <td className="py-3 px-4 text-center text-sm">
                       {typeof row.verified === 'boolean' ? (
                         row.verified ? (
-                          <Check className="w-4 h-4 text-blue-600 mx-auto" />
+                          <Check className="w-4 h-4 text-gray-900 mx-auto" />
                         ) : (
                           <span className="text-gray-600">—</span>
                         )

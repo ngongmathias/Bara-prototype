@@ -153,13 +153,10 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                 r = Math.round(r / count);
                 g = Math.round(g / count);
                 b = Math.round(b / count);
-                // Desaturate 30% toward grey
+                // Fully desaturate to grey — the design system is monochrome, so the
+                // ambient glow tracks the cover's brightness only, never its hue.
                 const grey = Math.round((r + g + b) / 3);
-                const mix = 0.3;
-                r = Math.round(r * (1 - mix) + grey * mix);
-                g = Math.round(g * (1 - mix) + grey * mix);
-                b = Math.round(b * (1 - mix) + grey * mix);
-                setDominantColor(`rgb(${r}, ${g}, ${b})`);
+                setDominantColor(`rgb(${grey}, ${grey}, ${grey})`);
             } catch {
                 setDominantColor('#404040');
             }

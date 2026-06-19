@@ -144,7 +144,7 @@ export default function MovieDetailPage() {
               </div>
               <h1 className="text-2xl sm:text-4xl font-bold text-white leading-tight">{movie.title}</h1>
               <div className="flex items-center gap-4 mt-2 text-white/70 text-sm flex-wrap">
-                {movie.rating && <span className="flex items-center gap-1"><Star className="w-4 h-4 text-yellow-400" fill="currentColor" /> {movie.rating}</span>}
+                {movie.rating && <span className="flex items-center gap-1"><Star className="w-4 h-4 text-gray-900" fill="currentColor" /> {movie.rating}</span>}
                 {movie.duration_minutes && <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {formatDuration(movie.duration_minutes)}</span>}
                 {movie.view_count > 0 && <span className="flex items-center gap-1"><Eye className="w-4 h-4" /> {movie.view_count.toLocaleString()} views</span>}
               </div>

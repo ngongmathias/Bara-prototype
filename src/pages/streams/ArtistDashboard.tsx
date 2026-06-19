@@ -563,7 +563,7 @@ export default function ArtistDashboard() {
                                                                         <Star size={14} className={`mr-2 ${picks.some(p => p.song_id === song.id) ? 'fill-gray-900 text-gray-900' : ''}`} />
                                                                         {picks.some(p => p.song_id === song.id) ? 'Remove Pick' : 'Add to Picks'}
                                                                     </DropdownMenuItem>
-                                                                    <DropdownMenuItem onClick={() => handleDeleteSong(song.id)} className="text-red-600">
+                                                                    <DropdownMenuItem onClick={() => handleDeleteSong(song.id)} className="text-gray-700">
                                                                         <Trash2 size={14} className="mr-2" /> Delete
                                                                     </DropdownMenuItem>
                                                                 </DropdownMenuContent>
