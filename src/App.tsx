@@ -238,6 +238,7 @@ import CoinStorePage from "./pages/CoinStorePage";
 import InvitePage from "./pages/InvitePage";
 
 import LeaderboardPage from "./pages/LeaderboardPage";
+import GamificationPage from "./pages/GamificationPage";
 
 import BusinessPremiumPage from "./pages/BusinessPremiumPage";
 
@@ -780,6 +781,8 @@ const AppRoutes = () => {
         <Route path="/invite" element={<InvitePage />} />
 
         <Route path="/leaderboard" element={<LeaderboardPage />} />
+
+        <Route path="/gamification" element={<GamificationPage />} />
 
         <Route path="/business-premium" element={<BusinessPremiumPage />} />
 

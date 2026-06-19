@@ -291,7 +291,7 @@ export const Header = () => {
                   <DropdownMenuItem onClick={() => navigate('/gamification')}>
                     <Trophy className="w-4 h-4 mr-2" /> Missions & Achievements
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/gamification?tab=leaderboard')}>
+                  <DropdownMenuItem onClick={() => navigate('/leaderboard')}>
                     <Users className="w-4 h-4 mr-2" /> Leaderboard
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

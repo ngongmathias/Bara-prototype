@@ -285,26 +285,6 @@ export const UserDashboard = () => {
 
 
 
-                  <Link to="/listings">
-
-                    <Button
-
-                      variant={isActive('/listings') ? 'default' : 'ghost'}
-
-                      className="w-full justify-start"
-
-                    >
-
-                      <Building className="mr-3 h-4 w-4" />
-
-                      My Listings
-
-                    </Button>
-
-                  </Link>
-
-
-
                   <Link to="/marketplace/my-ads">
 
                     <Button
@@ -524,7 +504,7 @@ export const UserDashboard = () => {
 
                       <Palette className="mr-3 h-4 w-4" />
 
-                      Coin Shop
+                      Profile Themes
 
                     </Button>
 
