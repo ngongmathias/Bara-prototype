@@ -4,7 +4,14 @@
 -- UploadSongPage uploads both audio and cover art to a bucket named 'music'
 -- (supabase.storage.from('music')), but no migration ever created it. Without
 -- the bucket + policies, every song upload fails, so Streams has no content.
--- This provisions it idempotently (public read; authenticated write).
+-- This provisions it idempotently (public read; write open to the app's
+-- tokenless anon client, matching how AdminSongs + UploadSongPage talk to
+-- Supabase today).
+--
+-- HARDENING FOLLOW-UP: anon write on a public bucket means anyone with the
+-- (public) anon key could upload. Before/at launch, switch the two upload call
+-- sites to the Clerk-authed client (createAuthenticatedSupabaseClient) and
+-- restrict these policies to `authenticated`, or move to signed uploads.
 -- ============================================================
 
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
@@ -37,17 +44,17 @@ USING (bucket_id = 'music');
 DROP POLICY IF EXISTS "Authenticated users can upload music" ON storage.objects;
 CREATE POLICY "Authenticated users can upload music"
 ON storage.objects FOR INSERT
-TO authenticated
+TO anon, authenticated
 WITH CHECK (bucket_id = 'music');
 
 DROP POLICY IF EXISTS "Authenticated users can update music" ON storage.objects;
 CREATE POLICY "Authenticated users can update music"
 ON storage.objects FOR UPDATE
-TO authenticated
+TO anon, authenticated
 USING (bucket_id = 'music');
 
 DROP POLICY IF EXISTS "Authenticated users can delete music" ON storage.objects;
 CREATE POLICY "Authenticated users can delete music"
 ON storage.objects FOR DELETE
-TO authenticated
+TO anon, authenticated
 USING (bucket_id = 'music');
