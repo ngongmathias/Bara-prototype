@@ -314,14 +314,14 @@ export default function StreamsHome() {
     };
 
     const getBadgeStyle = (badge: string) => {
-        if (badge === 'platform_pick') return 'bg-amber-500 text-white';
-        if (badge === 'editors_choice') return 'bg-purple-600 text-white';
+        if (badge === 'platform_pick') return 'bg-gray-900 text-white';
+        if (badge === 'editors_choice') return 'bg-gray-700 text-white';
         return 'bg-gray-700 text-white';
     };
 
     const getBadgeLabel = (badge: string) => {
-        if (badge === 'platform_pick') return '🏆 Platform Pick';
-        if (badge === 'editors_choice') return "✨ Editor's Choice";
+        if (badge === 'platform_pick') return 'Platform Pick';
+        if (badge === 'editors_choice') return "Editor's Choice";
         return badge;
     };
 
@@ -456,7 +456,7 @@ export default function StreamsHome() {
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
                                             <p className="text-xs text-gray-500 truncate mt-auto">
                                                 {song.artist}{featuredArtistsMap[song.id] || ''}
-                                                {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-amber-600">${song.price.toFixed(2)}</span>}
+                                                {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
                                             </p>
                                         </div>
                                     ))}
@@ -511,7 +511,7 @@ export default function StreamsHome() {
                                             <div className="relative mb-4 aspect-square shadow-2xl">
                                                 <img loading="lazy" src={song.cover_url} alt={song.title} className="w-full h-full object-cover rounded-md shadow-lg"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
-                                                <div className="absolute top-2 left-2 bg-purple-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <div className="absolute top-2 left-2 bg-gray-900 text-white text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
                                                     <Sparkles size={8} /> For You
                                                 </div>
                                                 <button onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
@@ -522,7 +522,7 @@ export default function StreamsHome() {
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
                                             <p className="text-xs text-gray-500 truncate mt-auto">
                                                 {song.artist}{featuredArtistsMap[song.id] || ''}
-                                                {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-amber-600">${song.price.toFixed(2)}</span>}
+                                                {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
                                             </p>
                                         </div>
                                     ))}
@@ -548,7 +548,7 @@ export default function StreamsHome() {
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
                                             <p className="text-xs text-gray-500 truncate mt-auto">
                                                 {song.artist}{featuredArtistsMap[song.id] || ''}
-                                                {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-amber-600">${song.price.toFixed(2)}</span>}
+                                                {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
                                             </p>
                                         </div>
                                     ))
@@ -577,7 +577,7 @@ export default function StreamsHome() {
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
                                             <p className="text-xs text-gray-500 truncate mt-auto">
                                                 {song.artist}{featuredArtistsMap[song.id] || ''}
-                                                {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-amber-600">${song.price.toFixed(2)}</span>}
+                                                {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
                                             </p>
                                         </div>
                                     ))
@@ -637,11 +637,11 @@ export default function StreamsHome() {
                             {/* Popular Radio */}
                             <Section title="Popular radio" showAllLink="/streams/search?q=radio">
                                 {[
-                                    { id: 'r1', title: 'Mike Kayihura', images: ['https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=200&h=200&fit=crop'], color: 'bg-[#509bf5]', footer: 'With Andy Bumuntu, Yvan Buravan, Igor...' },
-                                    { id: 'r2', title: 'Kivumbi King', images: ['https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-[#9b50f5]', footer: 'With Amalon, Nel Ngabo, Ish Kevin and more' },
-                                    { id: 'r3', title: 'The Ben', images: ['https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-[#f5509b]', footer: 'With Meddy, Bruce Melodie, Christopher...' },
-                                    { id: 'r4', title: 'Bruce Melodie', images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-[#50f59b]', footer: 'With Davis D, Chriss Eazy, Juno Kizigenza and more' },
-                                    { id: 'r5', title: 'Rema', images: ['https://plus.unsplash.com/premium_photo-1661601614051-9e7978280628?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-[#f59b50]', footer: 'With Shallipopi, ODUMODUBLVCK, Kizz...' }
+                                    { id: 'r1', title: 'Mike Kayihura', images: ['https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=200&h=200&fit=crop'], color: 'bg-gray-800', footer: 'With Andy Bumuntu, Yvan Buravan, Igor...' },
+                                    { id: 'r2', title: 'Kivumbi King', images: ['https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-gray-700', footer: 'With Amalon, Nel Ngabo, Ish Kevin and more' },
+                                    { id: 'r3', title: 'The Ben', images: ['https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-gray-900', footer: 'With Meddy, Bruce Melodie, Christopher...' },
+                                    { id: 'r4', title: 'Bruce Melodie', images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-gray-600', footer: 'With Davis D, Chriss Eazy, Juno Kizigenza and more' },
+                                    { id: 'r5', title: 'Rema', images: ['https://plus.unsplash.com/premium_photo-1661601614051-9e7978280628?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-gray-700', footer: 'With Shallipopi, ODUMODUBLVCK, Kizz...' }
                                 ].map(radio => (
                                     <RadioCard key={radio.id} {...radio} />
                                 ))}
@@ -650,11 +650,11 @@ export default function StreamsHome() {
                             {/* Featured Charts */}
                             <Section title="Featured Charts" showAllLink="/streams/trending">
                                 {[
-                                    { id: 'c1', title: 'Top Songs Africa', type: 'Weekly Music Charts', gradient: 'from-[#4e3c92] to-[#6a54bd]', footer: 'Your weekly update of the most played tracks...' },
-                                    { id: 'c2', title: 'Top Songs Nigeria', type: 'Weekly Music Charts', gradient: 'from-[#e91e63] to-[#ff4081]', footer: 'Your weekly update of the most played tracks...' },
-                                    { id: 'c3', title: 'Top 50 Africa', type: 'Daily Update', gradient: 'from-[#009688] to-[#26a69a]', footer: 'Your daily update of the most played tracks right...' },
-                                    { id: 'c4', title: 'Top 50 South Africa', type: 'Daily Update', gradient: 'from-[#f44336] to-[#ef5350]', footer: 'Your daily update of the most played tracks right...' },
-                                    { id: 'c5', title: 'Viral 50 Africa', type: 'Daily Update', gradient: 'from-[#4caf50] to-[#66bb6a]', footer: 'Your daily update of the most viral tracks right...' }
+                                    { id: 'c1', title: 'Top Songs Africa', type: 'Weekly Music Charts', gradient: 'from-gray-900 to-gray-700', footer: 'Your weekly update of the most played tracks...' },
+                                    { id: 'c2', title: 'Top Songs Nigeria', type: 'Weekly Music Charts', gradient: 'from-gray-800 to-gray-600', footer: 'Your weekly update of the most played tracks...' },
+                                    { id: 'c3', title: 'Top 50 Africa', type: 'Daily Update', gradient: 'from-gray-700 to-gray-500', footer: 'Your daily update of the most played tracks right...' },
+                                    { id: 'c4', title: 'Top 50 South Africa', type: 'Daily Update', gradient: 'from-gray-800 to-gray-600', footer: 'Your daily update of the most played tracks right...' },
+                                    { id: 'c5', title: 'Viral 50 Africa', type: 'Daily Update', gradient: 'from-gray-600 to-gray-400', footer: 'Your daily update of the most viral tracks right...' }
                                 ].map(chart => (
                                     <ChartCard key={chart.id} {...chart} />
                                 ))}
