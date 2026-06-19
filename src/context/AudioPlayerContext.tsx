@@ -83,6 +83,12 @@ interface AudioPlayerContextType {
 
     playNext: (song: Song) => void;
 
+    removeFromQueue: (index: number) => void;
+
+    reorderQueue: (from: number, to: number) => void;
+
+    clearQueue: () => void;
+
     playAlbum: (songs: Song[], startIndex?: number) => void;
 
     toggleShuffle: () => void;
@@ -798,6 +804,39 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
 
 
+    const removeFromQueue = (index: number) => {
+        const qi = queueIndexRef.current;
+        const prev = queueRef.current;
+        if (index < 0 || index >= prev.length || index === qi) return; // never drop the now-playing track
+        setQueue(prev.filter((_, i) => i !== index));
+        if (index < qi) setQueueIndex(qi - 1); // keep the index pointing at the current song
+    };
+
+    const reorderQueue = (from: number, to: number) => {
+        const prev = queueRef.current;
+        if (from < 0 || from >= prev.length || to < 0 || to >= prev.length || from === to) return;
+        const currentId = currentSongRef.current?.id;
+        const arr = [...prev];
+        const [moved] = arr.splice(from, 1);
+        arr.splice(to, 0, moved);
+        setQueue(arr);
+        if (currentId) {
+            const newIdx = arr.findIndex(s => s.id === currentId);
+            if (newIdx !== -1) setQueueIndex(newIdx);
+        }
+    };
+
+    const clearQueue = () => {
+        const current = currentSongRef.current;
+        if (current) {
+            setQueue([current]);
+            setQueueIndex(0);
+        } else {
+            setQueue([]);
+            setQueueIndex(-1);
+        }
+    };
+
     const playAlbum = (songs: Song[], startIndex = 0) => {
 
         setQueue(songs);
@@ -957,6 +996,12 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 addToQueue,
 
                 playNext,
+
+                removeFromQueue,
+
+                reorderQueue,
+
+                clearQueue,
 
                 playAlbum,
 
