@@ -63,7 +63,7 @@
 | F1 Playback | 🟡 | Solid basics in `AudioPlayerContext` (play/seek/shuffle/repeat/rate/sleep-timer, error+timeout handling). **Missing: gapless, crossfade, loudness normalization.** |
 | F2 OS integration | ✅ | **Media Session API wired** (`AudioPlayerContext`): metadata + artwork, play/pause/next/prev/seek action handlers (via ref, never stale), playbackState, and lock-screen position state. Cast/"Connect to device" remains a stretch. |
 | F3 Queue | ✅ | `QueueDrawer` rebuilt: real **drag-to-reorder**, per-track **remove**, **clear**, now-playing + up-next. Context gained `removeFromQueue`/`reorderQueue`/`clearQueue` (index-safe). Add-to-queue / play-next already in `SongContextMenu`. Contrast bug fixed (clean light drawer). Mobile touch-drag is a later polish. |
-| F4 Search | 🟡 | Music search routes to the **global federated `SearchPage`** — not music-scoped, no instant typeahead, no typo tolerance. Recent searches exist app-wide. |
+| F4 Search | ✅ | Dedicated `MusicSearchPage` at `/streams/search`: instant debounced typeahead, results grouped (Songs / Artists / Albums / Playlists), recent searches (localStorage), rich no-results state. **Typo tolerance** via `search_songs` pg_trgm RPC (graceful ILIKE fallback if the migration isn't applied). |
 | F5 Library | 🟡 | Liked ✅, playlists + collaborative ✅, recently played ✅, follow-artist ✅. **No saved-albums, no offline.** |
 | F6 Discovery | 🟡 | Personalised Home ✅, Release Radar ✅, **genre browse ✅ (new)**, "Fans also like" ✅. **Daily mixes are one generic row (not named multi-mixes); no radio/autoplay.** |
 | F7 Now Playing | 🟡 | `FullScreenPlayer` is strong (immersive, grey ambient, queue, go-to-artist/album, share, lyrics tab). **Lyrics are static `<pre>` text — not time-synced.** |
@@ -89,7 +89,7 @@
 **Tier 1 — makes it feel like a real app (do first)**
 1. ~~**Media Session API** (F2)~~ ✅ **Done Jun 20** — lock-screen/notification/hardware controls + artwork + position state in `AudioPlayerContext`.
 2. ~~**Finish the Queue** (F3)~~ ✅ **Done Jun 20** — drag-to-reorder, remove, clear; contrast fixed; add-to-queue/play-next already in the context menu.
-3. **Dedicated music Search** (F4) — instant typeahead, scoped tabs, typo tolerance, recent searches. ← next
+3. ~~**Dedicated music Search** (F4)~~ ✅ **Done Jun 20** — instant typeahead, grouped results, recent searches, typo tolerance (pg_trgm RPC + ILIKE fallback). **Tier 1 complete.**
 
 **Tier 2 — depth & stickiness**
 4. **Radio / infinite autoplay** (F6) — "Start radio" from any song/artist.

@@ -285,6 +285,7 @@ import TrendingSongsPage from "./pages/streams/TrendingSongsPage";
 import NewReleasesPage from "./pages/streams/NewReleasesPage";
 import AlbumPage from "./pages/streams/AlbumPage";
 import GenrePage from "./pages/streams/GenrePage";
+import MusicSearchPage from "./pages/streams/MusicSearchPage";
 
 import LikedSongsPage from "./pages/streams/LikedSongsPage";
 import SongPage from "./pages/streams/SongPage";
@@ -422,7 +423,7 @@ const AppRoutes = () => {
 
           <Route path="music/*" element={<StreamsHome />} />
 
-          <Route path="search" element={<SearchPage />} />
+          <Route path="search" element={<MusicSearchPage />} />
 
           <Route path="playlist/:id" element={<PlaylistPage />} />
 
