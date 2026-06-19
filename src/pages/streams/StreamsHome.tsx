@@ -10,6 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { SEO } from '@/components/SEO';
 import { DiscoverMore } from '@/components/DiscoverMore';
 import { useUser } from '@clerk/clerk-react';
+import { GENRES } from './GenrePage';
 
 // Batch-fetch featured artists for a list of song IDs and return a map: songId -> "ft. A, B"
 async function fetchFeaturedArtistsMap(songIds: string[]): Promise<Record<string, string>> {
@@ -377,6 +378,19 @@ export default function StreamsHome() {
                                 <QuickAccessTile title="Amapiano Mix" gradient="from-gray-500 to-gray-600" icon="🎹" to="/streams/search?q=Amapiano" />
                             </div>
 
+                            {/* Browse by genre */}
+                            <Section title="Browse by genre" showAllLink="/streams/genres">
+                                {GENRES.slice(0, 8).map((g, i) => (
+                                    <Link
+                                        key={g.slug}
+                                        to={`/streams/genre/${g.slug}`}
+                                        className={`relative aspect-[4/3] min-w-[180px] sm:min-w-[200px] snap-start rounded-xl overflow-hidden bg-gradient-to-br ${['from-gray-900 to-gray-700', 'from-gray-700 to-gray-500', 'from-gray-800 to-gray-600', 'from-gray-600 to-gray-400'][i % 4]} p-5 flex flex-col justify-end group shadow-sm hover:shadow-xl transition-shadow`}
+                                    >
+                                        <h3 className="text-2xl font-black text-white leading-none tracking-tight" style={{ fontFamily: 'Comfortaa, sans-serif' }}>{g.name}</h3>
+                                    </Link>
+                                ))}
+                            </Section>
+
                             {/* Artist Spotlight */}
                             {spotlight?.artists && (
                                 <Link
@@ -602,18 +616,18 @@ export default function StreamsHome() {
                             <Section title="Popular albums and singles" showAllLink="/streams/new-releases">
                                 {newReleases.length > 0 ? (
                                     newReleases.map(album => (
-                                        <div key={album.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
+                                        <Link to={`/streams/album/${album.id}`} key={album.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
                                                 <img loading="lazy" src={album.cover_url} alt={album.title} className="w-full h-full object-cover rounded-md shadow-lg"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&h=300&fit=crop'; }} />
-                                                <button onClick={(e) => { e.stopPropagation(); handlePlayAlbum(album.id); }}
+                                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePlayAlbum(album.id); }}
                                                     className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
                                                     <Play size={24} fill="white" className="ml-1" />
                                                 </button>
                                             </div>
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm">{album.title}</h3>
                                             <p className="text-xs text-gray-500 truncate mt-auto">{album.artists?.name}</p>
-                                        </div>
+                                        </Link>
                                     ))
                                 ) : (
                                     <p className="text-gray-500 min-w-full py-12 text-center">No albums found.</p>
