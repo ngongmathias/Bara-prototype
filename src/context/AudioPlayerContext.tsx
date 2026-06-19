@@ -640,6 +640,79 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
 
 
+    // ===== Media Session API — OS lock-screen / notification / hardware keys =====
+    // Keep the latest control fns in a ref so the once-bound action handlers
+    // never invoke a stale closure.
+    const mediaControlsRef = useRef({ togglePlay, pause, next, prev, seek });
+    useEffect(() => { mediaControlsRef.current = { togglePlay, pause, next, prev, seek }; });
+    const isPlayingRef = useRef(isPlaying);
+    useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
+
+    // Bind action handlers once
+    useEffect(() => {
+        if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
+        const ms = navigator.mediaSession;
+        const actions: [MediaSessionAction, (d: MediaSessionActionDetails) => void][] = [
+            ['play', () => { if (!isPlayingRef.current) mediaControlsRef.current.togglePlay(); }],
+            ['pause', () => { if (isPlayingRef.current) mediaControlsRef.current.pause(); }],
+            ['previoustrack', () => mediaControlsRef.current.prev()],
+            ['nexttrack', () => mediaControlsRef.current.next()],
+            ['seekbackward', (d) => {
+                const offset = d.seekOffset || 10;
+                mediaControlsRef.current.seek(Math.max((audioRef.current?.currentTime || 0) - offset, 0));
+            }],
+            ['seekforward', (d) => {
+                const offset = d.seekOffset || 10;
+                const dur = audioRef.current?.duration || 0;
+                mediaControlsRef.current.seek(Math.min((audioRef.current?.currentTime || 0) + offset, dur));
+            }],
+            ['seekto', (d) => { if (d.seekTime != null) mediaControlsRef.current.seek(d.seekTime); }],
+            ['stop', () => mediaControlsRef.current.pause()],
+        ];
+        actions.forEach(([action, handler]) => {
+            try { ms.setActionHandler(action, handler); } catch { /* unsupported on this browser */ }
+        });
+        return () => {
+            actions.forEach(([action]) => {
+                try { ms.setActionHandler(action, null); } catch { /* noop */ }
+            });
+        };
+    }, []);
+
+    // Metadata (title / artist / album / artwork) on song change
+    useEffect(() => {
+        if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
+        if (!currentSong) { navigator.mediaSession.metadata = null; return; }
+        const art = currentSong.cover_url || '/placeholder-music.png';
+        try {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: currentSong.title,
+                artist: currentSong.artist,
+                album: currentSong.album_title || 'BARA Streams',
+                artwork: [96, 128, 192, 256, 384, 512].map((s) => ({ src: art, sizes: `${s}x${s}`, type: 'image/jpeg' })),
+            });
+        } catch { /* noop */ }
+    }, [currentSong?.id]);
+
+    // Playback state
+    useEffect(() => {
+        if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
+        navigator.mediaSession.playbackState = currentSong ? (isPlaying ? 'playing' : 'paused') : 'none';
+    }, [isPlaying, currentSong?.id]);
+
+    // Position state — drives the lock-screen scrubber
+    useEffect(() => {
+        if (typeof navigator === 'undefined' || !('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) return;
+        if (!duration || !isFinite(duration)) return;
+        try {
+            navigator.mediaSession.setPositionState({
+                duration,
+                position: Math.min(progress, duration),
+                playbackRate: audioRef.current?.playbackRate || 1,
+            });
+        } catch { /* invalid state during track transitions */ }
+    }, [progress, duration]);
+
     const setVolume = (vol: number) => {
 
         const newVol = Math.max(0, Math.min(1, vol));

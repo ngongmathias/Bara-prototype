@@ -61,7 +61,7 @@
 | # | Status | Notes (files) |
 |---|--------|---------------|
 | F1 Playback | 🟡 | Solid basics in `AudioPlayerContext` (play/seek/shuffle/repeat/rate/sleep-timer, error+timeout handling). **Missing: gapless, crossfade, loudness normalization.** |
-| F2 OS integration | ❌ | **No Media Session API** anywhere — no lock-screen/notification/hardware-key controls or artwork. Background audio works (HTML5 audio) but feels non-native. Highest-leverage gap. |
+| F2 OS integration | ✅ | **Media Session API wired** (`AudioPlayerContext`): metadata + artwork, play/pause/next/prev/seek action handlers (via ref, never stale), playbackState, and lock-screen position state. Cast/"Connect to device" remains a stretch. |
 | F3 Queue | 🟡 | `QueueDrawer` shows now-playing + up-next, but **drag-to-reorder is decorative** (grip icon, no DnD), **no remove** (`Trash2` imported, unused), **no clear**. Context (`addToQueue`/`playNext`) exists but isn't surfaced in the drawer. **Bug: white text on `bg-gray-50` = invisible.** |
 | F4 Search | 🟡 | Music search routes to the **global federated `SearchPage`** — not music-scoped, no instant typeahead, no typo tolerance. Recent searches exist app-wide. |
 | F5 Library | 🟡 | Liked ✅, playlists + collaborative ✅, recently played ✅, follow-artist ✅. **No saved-albums, no offline.** |
@@ -87,8 +87,8 @@
 ## PART D — PRIORITISED GAP ROADMAP (to reach the bar)
 
 **Tier 1 — makes it feel like a real app (do first)**
-1. **Media Session API** (F2) — lock-screen/notification/hardware controls + artwork + position state. High impact, ~1 focused change in `AudioPlayerContext`.
-2. **Finish the Queue** (F3) — drag-to-reorder, remove, clear, surface add-to-queue/play-next; fix the contrast bug.
+1. ~~**Media Session API** (F2)~~ ✅ **Done Jun 20** — lock-screen/notification/hardware controls + artwork + position state in `AudioPlayerContext`.
+2. **Finish the Queue** (F3) — drag-to-reorder, remove, clear, surface add-to-queue/play-next; fix the contrast bug. ← next
 3. **Dedicated music Search** (F4) — instant typeahead, scoped tabs, typo tolerance, recent searches.
 
 **Tier 2 — depth & stickiness**
