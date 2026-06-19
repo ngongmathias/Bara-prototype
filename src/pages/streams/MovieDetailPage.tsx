@@ -140,7 +140,7 @@ export default function MovieDetailPage() {
               <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <span className="text-white/70 text-sm">{movie.year}</span>
                 {movie.genre && <span className="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">{movie.genre}</span>}
-                {movie.is_free && <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">FREE</span>}
+                {movie.is_free && <span className="bg-gray-900 text-white text-xs font-bold px-2 py-0.5 rounded-full">FREE</span>}
               </div>
               <h1 className="text-2xl sm:text-4xl font-bold text-white leading-tight">{movie.title}</h1>
               <div className="flex items-center gap-4 mt-2 text-white/70 text-sm flex-wrap">
@@ -238,7 +238,7 @@ export default function MovieDetailPage() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop'; }}
                       />
-                      {(m as any).is_free && <div className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">FREE</div>}
+                      {(m as any).is_free && <div className="absolute top-2 left-2 bg-gray-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">FREE</div>}
                     </div>
                     <p className="font-semibold text-gray-900 text-sm truncate">{m.title}</p>
                     <p className="text-xs text-gray-500">{(m as any).year} · {m.genre}</p>

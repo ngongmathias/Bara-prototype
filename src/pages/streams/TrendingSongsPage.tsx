@@ -103,15 +103,15 @@ export default function TrendingSongsPage() {
                                     />
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
-                                        className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                        className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
                                     >
-                                        {currentSong?.id === song.id && isPlaying ? <Pause size={24} fill="black" /> : <Play size={24} fill="black" className="ml-1" />}
+                                        {currentSong?.id === song.id && isPlaying ? <Pause size={24} fill="white" /> : <Play size={24} fill="white" className="ml-1" />}
                                     </button>
                                 </div>
                                 <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
                                 <p className="text-xs text-gray-500 truncate mt-auto">
                                     {song.artist}{ftMap[song.id] || ''}
-                                    {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-amber-600">${song.price.toFixed(2)}</span>}
+                                    {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
                                 </p>
                             </div>
                         ))}

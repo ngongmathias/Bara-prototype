@@ -277,7 +277,7 @@ export default function ArtistDashboard() {
                         Upload your first song to create your artist profile. Your music catalog and stats will appear here.
                     </p>
                     <Link to="/streams/creator/upload">
-                        <Button className="bg-[#1DB954] hover:bg-[#1aa34a] text-white font-bold px-8 py-3 text-lg">
+                        <Button className="bg-gray-900 hover:bg-gray-800 text-white font-bold px-8 py-3 text-lg">
                             <Upload className="mr-2" size={20} />
                             Upload Your First Song
                         </Button>
@@ -326,10 +326,10 @@ export default function ArtistDashboard() {
                                 {/* Stats Grid */}
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                                     {[
-                                        { label: 'Total Streams', value: stats.totalPlays.toLocaleString(), icon: Play, color: 'bg-green-50 text-green-600' },
-                                        { label: 'Featured Streams', value: stats.featuredPlays.toLocaleString(), icon: Star, color: 'bg-yellow-50 text-yellow-600' },
-                                        { label: 'Tracks', value: stats.tracks, icon: Music, color: 'bg-blue-50 text-blue-600' },
-                                        { label: 'Monthly Listeners', value: stats.fans.toLocaleString(), icon: Users, color: 'bg-pink-50 text-pink-600' }
+                                        { label: 'Total Streams', value: stats.totalPlays.toLocaleString(), icon: Play, color: 'bg-gray-100 text-gray-700' },
+                                        { label: 'Featured Streams', value: stats.featuredPlays.toLocaleString(), icon: Star, color: 'bg-gray-100 text-gray-700' },
+                                        { label: 'Tracks', value: stats.tracks, icon: Music, color: 'bg-gray-100 text-gray-700' },
+                                        { label: 'Monthly Listeners', value: stats.fans.toLocaleString(), icon: Users, color: 'bg-gray-100 text-gray-700' }
                                     ].map((stat, i) => (
                                         <motion.div
                                             key={stat.label}
@@ -353,7 +353,7 @@ export default function ArtistDashboard() {
                                 {/* Quick Actions */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <Link to="/streams/creator/upload">
-                                        <div className="bg-gradient-to-br from-[#1DB954] to-[#1aa34a] p-6 rounded-xl cursor-pointer hover:scale-[1.02] transition-transform shadow-lg">
+                                        <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-xl cursor-pointer hover:scale-[1.02] transition-transform shadow-lg">
                                             <Upload className="text-white mb-3" size={28} />
                                             <h3 className="font-bold text-lg text-white">Upload Music</h3>
                                             <p className="text-white/80 text-sm">Release a new single or track</p>
@@ -361,7 +361,7 @@ export default function ArtistDashboard() {
                                     </Link>
                                     <Link to="/streams/creator/albums">
                                         <div className="bg-gray-900 p-6 rounded-xl cursor-pointer hover:bg-gray-800 transition-colors shadow-lg">
-                                            <Plus className="text-[#1DB954] mb-3" size={28} />
+                                            <Plus className="text-gray-900 mb-3" size={28} />
                                             <h3 className="font-bold text-lg text-white">Create Album</h3>
                                             <p className="text-gray-400 text-sm">Organize tracks into an EP or Album</p>
                                         </div>
@@ -383,7 +383,7 @@ export default function ArtistDashboard() {
                                                 >
                                                     <button
                                                         onClick={() => handlePlaySong(song)}
-                                                        className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#1DB954] group-hover:text-white transition-colors"
+                                                        className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 group-hover:bg-gray-900 group-hover:text-white transition-colors"
                                                     >
                                                         {currentSong?.id === song.id && isPlaying ? (
                                                             <Pause size={16} fill="currentColor" />
@@ -432,7 +432,7 @@ export default function ArtistDashboard() {
                                                 >
                                                     <button
                                                         onClick={() => handlePlaySong(song)}
-                                                        className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#1DB954] group-hover:text-white transition-colors"
+                                                        className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 group-hover:bg-gray-900 group-hover:text-white transition-colors"
                                                     >
                                                         {currentSong?.id === song.id && isPlaying ? (
                                                             <Pause size={16} fill="currentColor" />
@@ -470,7 +470,7 @@ export default function ArtistDashboard() {
                                 <div className="flex items-center justify-between">
                                     <h2 className="text-xl font-bold text-gray-900">{songs.length} Tracks</h2>
                                     <Link to="/streams/creator/upload">
-                                        <Button className="bg-[#1DB954] hover:bg-[#1aa34a] text-white">
+                                        <Button className="bg-gray-900 hover:bg-gray-800 text-white">
                                             <Upload size={16} className="mr-2" /> Upload New
                                         </Button>
                                     </Link>
@@ -504,7 +504,7 @@ export default function ArtistDashboard() {
                                                         <TableCell>
                                                             <button
                                                                 onClick={() => handlePlaySong(song)}
-                                                                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 group-hover:text-white group-hover:bg-[#1DB954] transition-all"
+                                                                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 group-hover:text-white group-hover:bg-gray-900 transition-all"
                                                             >
                                                                 {currentSong?.id === song.id && isPlaying ? (
                                                                     <Pause size={14} fill="currentColor" />
@@ -522,10 +522,10 @@ export default function ArtistDashboard() {
                                                                     className="w-10 h-10 rounded object-cover bg-gray-200"
                                                                     onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}
                                                                 />
-                                                                <span className={`font-medium truncate ${currentSong?.id === song.id ? 'text-[#1DB954]' : 'text-gray-900'}`}>
+                                                                <span className={`font-medium truncate ${currentSong?.id === song.id ? 'text-gray-900' : 'text-gray-900'}`}>
                                                                     {song.title}
                                                                     {picks.some(p => p.song_id === song.id) && (
-                                                                        <Star size={12} className="inline ml-1 fill-amber-400 text-amber-400" />
+                                                                        <Star size={12} className="inline ml-1 fill-gray-900 text-gray-900" />
                                                                     )}
                                                                 </span>
                                                             </div>
@@ -560,7 +560,7 @@ export default function ArtistDashboard() {
                                                                         <Share2 size={14} className="mr-2" /> Copy Link
                                                                     </DropdownMenuItem>
                                                                     <DropdownMenuItem onClick={() => togglePick(song.id)}>
-                                                                        <Star size={14} className={`mr-2 ${picks.some(p => p.song_id === song.id) ? 'fill-amber-400 text-amber-400' : ''}`} />
+                                                                        <Star size={14} className={`mr-2 ${picks.some(p => p.song_id === song.id) ? 'fill-gray-900 text-gray-900' : ''}`} />
                                                                         {picks.some(p => p.song_id === song.id) ? 'Remove Pick' : 'Add to Picks'}
                                                                     </DropdownMenuItem>
                                                                     <DropdownMenuItem onClick={() => handleDeleteSong(song.id)} className="text-red-600">
@@ -584,7 +584,7 @@ export default function ArtistDashboard() {
                                 <div className="flex items-center justify-between">
                                     <h2 className="text-xl font-bold text-gray-900">{albums.length} Albums</h2>
                                     <Link to="/streams/creator/albums">
-                                        <Button className="bg-[#1DB954] hover:bg-[#1aa34a] text-white">
+                                        <Button className="bg-gray-900 hover:bg-gray-800 text-white">
                                             <Plus size={16} className="mr-2" /> Create Album
                                         </Button>
                                     </Link>
@@ -656,7 +656,7 @@ export default function ArtistDashboard() {
                                                             return (
                                                                 <div
                                                                     key={d.date}
-                                                                    className="flex-1 bg-[#1DB954]/20 hover:bg-[#1DB954] transition-colors rounded-t relative group"
+                                                                    className="flex-1 bg-gray-900/20 hover:bg-gray-900 transition-colors rounded-t relative group"
                                                                     style={{ height: `${pct}%`, minHeight: d.count > 0 ? '4px' : '2px' }}
                                                                     title={`${d.date}: ${d.count} streams`}
                                                                 >
@@ -726,7 +726,7 @@ export default function ArtistDashboard() {
                                                                     <div className="font-medium text-gray-900 text-sm truncate">{song.title}</div>
                                                                     <div className="h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
                                                                         <motion.div
-                                                                            className="h-full bg-[#1DB954] rounded-full"
+                                                                            className="h-full bg-gray-900 rounded-full"
                                                                             initial={{ width: 0 }}
                                                                             animate={{ width: `${pct}%` }}
                                                                             transition={{ delay: i * 0.1, duration: 0.6 }}
@@ -780,17 +780,17 @@ export default function ArtistDashboard() {
                                 </div>
 
                                 {/* Promote section */}
-                                <Card className="border-none shadow-sm border-l-4 border-l-yellow-500">
+                                <Card className="border-none shadow-sm border-l-4 border-l-gray-900">
                                     <CardHeader className="pb-2">
                                         <CardTitle className="flex items-center gap-2 text-lg">
-                                            <Zap className="text-yellow-500" size={20} />
+                                            <Zap className="text-gray-900" size={20} />
                                             Promote Your Track
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <p className="text-sm text-gray-500 mb-4">Boost your latest release to the top of the "Trending" feed for 24 hours.</p>
                                         <Button
-                                            className="bg-yellow-500 text-black hover:bg-yellow-400 font-bold flex items-center gap-2"
+                                            className="bg-gray-900 text-white hover:bg-black font-bold flex items-center gap-2"
                                             disabled={isBoosting || songs.length === 0}
                                             onClick={async () => {
                                                 if (!user || songs.length === 0) return;

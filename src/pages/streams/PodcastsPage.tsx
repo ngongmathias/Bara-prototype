@@ -15,12 +15,12 @@ const FALLBACK_PODCASTS = [
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
-    'Entrepreneurship': 'from-amber-600 to-orange-700',
-    'Technology': 'from-blue-600 to-indigo-700',
-    'Culture': 'from-purple-600 to-violet-700',
-    'True Crime': 'from-red-700 to-rose-800',
-    'Comedy': 'from-yellow-500 to-amber-600',
-    'Finance': 'from-emerald-600 to-teal-700',
+    'Entrepreneurship': 'from-gray-700 to-gray-900',
+    'Technology': 'from-gray-600 to-gray-800',
+    'Culture': 'from-gray-800 to-black',
+    'True Crime': 'from-gray-700 to-gray-900',
+    'Comedy': 'from-gray-500 to-gray-700',
+    'Finance': 'from-gray-600 to-gray-800',
 };
 
 interface Podcast {

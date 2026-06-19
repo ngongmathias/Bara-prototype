@@ -251,7 +251,7 @@ export default function PlaylistPage() {
         return (
             <StreamsLayout>
                 <div className="min-h-screen bg-black text-gray-900 flex items-center justify-center">
-                    <Loader2 className="w-10 h-10 animate-spin text-[#1DB954]" />
+                    <Loader2 className="w-10 h-10 animate-spin text-white" />
                 </div>
             </StreamsLayout>
         );
@@ -265,7 +265,7 @@ export default function PlaylistPage() {
         <StreamsLayout>
             <div className="min-h-screen bg-black text-gray-900 pb-24">
                 {/* Hero Header */}
-                <div className="bg-gradient-to-b from-blue-900/60 to-[#121212] pt-16 pb-6 px-8">
+                <div className="bg-gradient-to-b from-gray-800 to-[#121212] pt-16 pb-6 px-8">
                     <div className="max-w-7xl mx-auto">
                         <div className="flex items-end gap-6">
                             {/* Playlist Cover */}
@@ -282,7 +282,7 @@ export default function PlaylistPage() {
                                 <div className="text-xs font-bold mb-2 uppercase tracking-tight flex items-center gap-2">
                                     Playlist
                                     {playlist?.is_collaborative && (
-                                        <span className="inline-flex items-center gap-1 bg-[#1DB954]/20 text-[#1DB954] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                        <span className="inline-flex items-center gap-1 bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                                             <Users size={10} /> Collaborative
                                         </span>
                                     )}
@@ -306,7 +306,7 @@ export default function PlaylistPage() {
                     <div className="max-w-7xl mx-auto flex items-center gap-8">
                         <button
                             onClick={handlePlayAll}
-                            className="w-14 h-14 rounded-full bg-[#1DB954] hover:scale-105 transition flex items-center justify-center shadow-xl active:scale-95"
+                            className="w-14 h-14 rounded-full bg-white hover:scale-105 transition flex items-center justify-center shadow-xl active:scale-95"
                          aria-label="Play"><Play className="w-6 h-6 text-black ml-1" fill="black" /></button>
                         <button className="text-gray-500 hover:text-gray-900 transition">
                             <Shuffle className="w-7 h-7" />
@@ -362,12 +362,12 @@ export default function PlaylistPage() {
                                             <div className="flex items-center justify-center text-gray-500 group-hover:text-gray-900 w-8">
                                                 {isCurrentTrack && isPlaying ? (
                                                     <div className="flex items-end gap-[2px] h-3">
-                                                        <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '60%' }}></div>
-                                                        <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '100%', animationDelay: '0.2s' }}></div>
-                                                        <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0.4s' }}></div>
+                                                        <div className="w-[3px] bg-white rounded-full animate-pulse" style={{ height: '60%' }}></div>
+                                                        <div className="w-[3px] bg-white rounded-full animate-pulse" style={{ height: '100%', animationDelay: '0.2s' }}></div>
+                                                        <div className="w-[3px] bg-white rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0.4s' }}></div>
                                                     </div>
                                                 ) : (
-                                                    <span className={`text-sm group-hover:hidden ${isCurrentTrack ? 'text-[#1DB954]' : ''}`}>{index + 1}</span>
+                                                    <span className={`text-sm group-hover:hidden ${isCurrentTrack ? 'text-white' : ''}`}>{index + 1}</span>
                                                 )}
                                                 <Play className="w-4 h-4 hidden group-hover:block" fill="currentColor" />
                                             </div>
@@ -380,7 +380,7 @@ export default function PlaylistPage() {
                                                     className="w-10 h-10 rounded object-cover flex-shrink-0"
                                                 />
                                                 <div className="min-w-0 flex-1">
-                                                    <div className={`font-bold truncate transition text-sm ${isCurrentTrack ? 'text-[#1DB954]' : 'group-hover:text-gray-900'}`}>
+                                                    <div className={`font-bold truncate transition text-sm ${isCurrentTrack ? 'text-white' : 'group-hover:text-gray-900'}`}>
                                                         {track.title}
                                                     </div>
                                                     <div className="text-sm text-gray-500 truncate">{track.artist}{ftMap[track.id] || ''}</div>
@@ -396,7 +396,7 @@ export default function PlaylistPage() {
                                             <div className="flex items-center justify-end gap-6 pr-4">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); toggleLike(track.id); }}
-                                                    className={`opacity-0 group-hover:opacity-100 transition ${likedTracks.includes(track.id) ? 'text-[#1DB954] !opacity-100' : 'text-gray-500 hover:text-gray-900'}`}
+                                                    className={`opacity-0 group-hover:opacity-100 transition ${likedTracks.includes(track.id) ? 'text-white !opacity-100' : 'text-gray-500 hover:text-gray-900'}`}
                                                 >
                                                     <Heart size={18} fill={likedTracks.includes(track.id) ? "currentColor" : "none"} />
                                                 </button>

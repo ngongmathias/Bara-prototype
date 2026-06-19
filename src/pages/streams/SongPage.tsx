@@ -151,7 +151,7 @@ export default function SongPage() {
                         </Button>
                         <button
                             onClick={() => toggleLike(song.id)}
-                            className={`transition hover:scale-110 ${isLiked ? 'text-green-500' : 'text-gray-400 hover:text-white'}`}
+                            className={`transition hover:scale-110 ${isLiked ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                         >
                             <Heart size={24} fill={isLiked ? 'currentColor' : 'none'} />
                         </button>

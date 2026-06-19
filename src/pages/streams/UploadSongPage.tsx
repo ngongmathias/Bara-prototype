@@ -248,11 +248,11 @@ export default function UploadSongPage() {
                         <input ref={audioInputRef} type="file" accept="audio/*,.mp3,.wav,.ogg,.flac,.aac,.m4a" onChange={handleAudioSelect} className="hidden" />
                         <div
                             onClick={() => audioInputRef.current?.click()}
-                            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${audioFile ? 'border-[#1DB954] bg-[#1DB954]/5' : 'border-gray-700 hover:border-gray-500 bg-gray-50'}`}
+                            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${audioFile ? 'border-gray-900 bg-gray-900/5' : 'border-gray-700 hover:border-gray-500 bg-gray-50'}`}
                         >
                             {audioFile ? (
                                 <div className="flex items-center justify-center gap-3">
-                                    <CheckCircle className="text-[#1DB954]" size={24} />
+                                    <CheckCircle className="text-gray-900" size={24} />
                                     <div>
                                         <p className="text-gray-900 font-bold">{audioFile.name}</p>
                                         <p className="text-gray-500 text-sm">{(audioFile.size / (1024 * 1024)).toFixed(1)} MB</p>
@@ -297,7 +297,7 @@ export default function UploadSongPage() {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Enter track title"
-                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] h-12"
+                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-gray-900 focus:ring-gray-900 h-12"
                             required
                         />
                     </div>
@@ -342,7 +342,7 @@ export default function UploadSongPage() {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Tell listeners about this track..."
-                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] min-h-[100px] resize-none"
+                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-gray-900 focus:ring-gray-900 min-h-[100px] resize-none"
                         />
                     </div>
 
@@ -353,7 +353,7 @@ export default function UploadSongPage() {
                             value={lyrics}
                             onChange={(e) => setLyrics(e.target.value)}
                             placeholder="Paste lyrics here, one line per verse..."
-                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] min-h-[180px] resize-y font-mono text-sm"
+                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-gray-900 focus:ring-gray-900 min-h-[180px] resize-y font-mono text-sm"
                         />
                     </div>
 
@@ -369,7 +369,7 @@ export default function UploadSongPage() {
                                 value={price}
                                 onChange={(e) => setPrice(e.target.value)}
                                 placeholder="0.00 (free)"
-                                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] h-12 pl-8"
+                                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-gray-900 focus:ring-gray-900 h-12 pl-8"
                             />
                         </div>
                         <p className="text-xs text-gray-500">
@@ -382,11 +382,11 @@ export default function UploadSongPage() {
                         <div className="space-y-2">
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-500 font-bold">Uploading...</span>
-                                <span className="text-[#1DB954] font-bold">{uploadProgress}%</span>
+                                <span className="text-gray-900 font-bold">{uploadProgress}%</span>
                             </div>
                             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-[#1DB954] rounded-full transition-all duration-500"
+                                    className="h-full bg-gray-900 rounded-full transition-all duration-500"
                                     style={{ width: `${uploadProgress}%` }}
                                 />
                             </div>
@@ -397,7 +397,7 @@ export default function UploadSongPage() {
                     <Button
                         type="submit"
                         disabled={uploading || !audioFile || !title.trim()}
-                        className="w-full h-14 bg-[#1DB954] text-black hover:bg-[#1ed760] font-black text-lg rounded-xl disabled:opacity-50"
+                        className="w-full h-14 bg-gray-900 text-white hover:bg-black font-black text-lg rounded-xl disabled:opacity-50"
                     >
                         {uploading ? (
                             <span className="flex items-center gap-2"><Loader2 className="animate-spin" size={20} /> Uploading...</span>

@@ -157,7 +157,7 @@ export default function MoviesPage() {
                     <span>{featured.year}</span>
                     <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {formatDuration(featured.duration_minutes)}</span>
                     <span className="bg-white/20 px-2 py-0.5 rounded text-xs">{featured.genre}</span>
-                    {featured.is_free && <span className="bg-green-600 px-2 py-0.5 rounded text-xs font-bold">FREE</span>}
+                    {featured.is_free && <span className="bg-gray-900 px-2 py-0.5 rounded text-xs font-bold">FREE</span>}
                   </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400 mb-5">
                     {featured.director && <span>Dir: {featured.director}</span>}
@@ -240,7 +240,7 @@ export default function MoviesPage() {
                           <Star className="w-3 h-3 text-white" fill="currentColor" /> {movie.rating}
                         </div>
                         {movie.is_free && (
-                          <div className="absolute top-2 left-2 bg-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">FREE</div>
+                          <div className="absolute top-2 left-2 bg-gray-900 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">FREE</div>
                         )}
                       </div>
                       <h3 className="font-bold text-gray-900 text-sm truncate">{movie.title}</h3>
@@ -270,7 +270,7 @@ export default function MoviesPage() {
                           <button className="w-14 h-14 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-xl" aria-label="Play"><Play className="w-6 h-6 ml-0.5" fill="white" /></button>
                         </div>
                         {movie.is_free && (
-                          <div className="absolute top-2 left-2 bg-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">FREE</div>
+                          <div className="absolute top-2 left-2 bg-gray-900 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">FREE</div>
                         )}
                       </div>
                       <div className="p-4">

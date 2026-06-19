@@ -7,6 +7,7 @@ import { SEO } from '@/components/SEO';
 import { Loader2, Play, Pause, BadgeCheck, Share2 } from 'lucide-react';
 import { useShare } from '@/context/ShareContext';
 import { FollowUserButton } from '@/components/FollowUserButton';
+import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
 
 export default function ArtistPage() {
     const { id } = useParams();
@@ -178,7 +179,7 @@ export default function ArtistPage() {
         return (
             <StreamsLayout>
                 <div className="min-h-screen bg-white text-gray-900 flex items-center justify-center">
-                    <Loader2 className="w-10 h-10 animate-spin text-[#1DB954]" />
+                    <Loader2 className="w-10 h-10 animate-spin text-gray-900" />
                 </div>
             </StreamsLayout>
         );
@@ -235,10 +236,12 @@ export default function ArtistPage() {
                         <div className="flex items-end gap-6 pb-6">
                             {/* Artist Info */}
                             <div className="flex-1">
+                                {artist.is_verified && (
                                 <div className="flex items-center gap-2 mb-3">
-                                    <BadgeCheck className="text-blue-400 w-6 h-6 fill-blue-400/20" />
+                                    <VerifiedBadge size={22} />
                                     <span className="text-sm font-bold">Verified Artist</span>
                                 </div>
+                                )}
                                 <h1 className="text-5xl md:text-8xl font-black mb-6 leading-none tracking-tighter text-gray-900">{artist.name}</h1>
                                 <p className="text-sm font-bold text-gray-600">
                                     {(() => {
@@ -262,9 +265,9 @@ export default function ArtistPage() {
                         {topTracks.length > 0 && (
                             <button
                                 onClick={() => handlePlaySong(topTracks[0])}
-                                className="w-14 h-14 rounded-full bg-[#1DB954] hover:scale-105 transition flex items-center justify-center shadow-xl active:scale-95"
+                                className="w-14 h-14 rounded-full bg-gray-900 hover:scale-105 transition flex items-center justify-center shadow-xl active:scale-95"
                             >
-                                <Play fill="black" className="w-6 h-6 ml-1 text-black" />
+                                <Play fill="white" className="w-6 h-6 ml-1 text-white" />
                             </button>
                         )}
 
@@ -306,13 +309,13 @@ export default function ArtistPage() {
                                         <div className="text-gray-500 flex justify-center w-8">
                                             {currentSong?.id === track.id && isPlaying ? (
                                                 <div className="flex items-end gap-[2px] h-3">
-                                                    <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '60%' }}></div>
-                                                    <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '100%', animationDelay: '0.2s' }}></div>
-                                                    <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0.4s' }}></div>
+                                                    <div className="w-[3px] bg-gray-900 rounded-full animate-pulse" style={{ height: '60%' }}></div>
+                                                    <div className="w-[3px] bg-gray-900 rounded-full animate-pulse" style={{ height: '100%', animationDelay: '0.2s' }}></div>
+                                                    <div className="w-[3px] bg-gray-900 rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0.4s' }}></div>
                                                 </div>
                                             ) : (
                                                 <>
-                                                    <span className={`group-hover:hidden ${currentSong?.id === track.id ? 'text-[#1DB954]' : ''}`}>{index + 1}</span>
+                                                    <span className={`group-hover:hidden ${currentSong?.id === track.id ? 'text-gray-900' : ''}`}>{index + 1}</span>
                                                     <Play fill="white" className="w-4 h-4 hidden group-hover:block" />
                                                 </>
                                             )}
@@ -322,7 +325,7 @@ export default function ArtistPage() {
                                         <div className="flex gap-3 items-center min-w-0">
                                             <img loading="lazy" src={track.cover_url} alt={track.title} className="w-10 h-10 object-cover rounded" />
                                             <div className="min-w-0 flex-1">
-                                                <div className={`font-bold truncate transition text-sm ${currentSong?.id === track.id ? 'text-[#1DB954]' : 'text-gray-900'}`}>
+                                                <div className={`font-bold truncate transition text-sm ${currentSong?.id === track.id ? 'text-gray-900' : 'text-gray-900'}`}>
                                                     {track.title}
                                                 </div>
                                                 <div className="text-sm text-gray-500 flex items-center gap-2">
@@ -367,7 +370,7 @@ export default function ArtistPage() {
                                                 <p className="text-sm text-gray-500 mt-0.5">{track.album_title || 'Single'}</p>
                                                 <button
                                                     onClick={() => handlePlaySong(track)}
-                                                    className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#1DB954] hover:underline"
+                                                    className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-gray-900 hover:underline"
                                                 >
                                                     <Play fill="currentColor" className="w-4 h-4" />
                                                     Play now
@@ -393,7 +396,7 @@ export default function ArtistPage() {
                                                 alt={album.title}
                                                 className="w-full h-full object-cover rounded shadow-lg"
                                             />
-                                            <button className="absolute right-2 bottom-2 w-10 h-10 bg-[#1DB954] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl transform translate-y-2 group-hover:translate-y-0 active:scale-95" aria-label="Play"><Play fill="black" className="w-5 h-5 ml-1 text-black" /></button>
+                                            <button className="absolute right-2 bottom-2 w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl transform translate-y-2 group-hover:translate-y-0 active:scale-95" aria-label="Play"><Play fill="white" className="w-5 h-5 ml-1 text-white" /></button>
                                         </div>
                                         <h3 className="font-bold text-sm mb-1 truncate">{album.title}</h3>
                                         <p className="text-xs text-gray-500">{new Date(album.release_date).getFullYear()} • Album</p>
@@ -416,13 +419,13 @@ export default function ArtistPage() {
                                             <div className="text-gray-500 flex justify-center w-8">
                                                 {currentSong?.id === track.id && isPlaying ? (
                                                     <div className="flex items-end gap-[2px] h-3">
-                                                        <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '60%' }}></div>
-                                                        <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '100%', animationDelay: '0.2s' }}></div>
-                                                        <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0.4s' }}></div>
+                                                        <div className="w-[3px] bg-gray-900 rounded-full animate-pulse" style={{ height: '60%' }}></div>
+                                                        <div className="w-[3px] bg-gray-900 rounded-full animate-pulse" style={{ height: '100%', animationDelay: '0.2s' }}></div>
+                                                        <div className="w-[3px] bg-gray-900 rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0.4s' }}></div>
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <span className={`group-hover:hidden ${currentSong?.id === track.id ? 'text-[#1DB954]' : ''}`}>{index + 1}</span>
+                                                        <span className={`group-hover:hidden ${currentSong?.id === track.id ? 'text-gray-900' : ''}`}>{index + 1}</span>
                                                         <Play fill="white" className="w-4 h-4 hidden group-hover:block" />
                                                     </>
                                                 )}
@@ -430,7 +433,7 @@ export default function ArtistPage() {
                                             <div className="flex gap-3 items-center min-w-0">
                                                 <img loading="lazy" src={track.cover_url} alt={track.title} className="w-10 h-10 object-cover rounded" />
                                                 <div className="min-w-0 flex-1">
-                                                    <div className={`font-bold truncate transition text-sm ${currentSong?.id === track.id ? 'text-[#1DB954]' : 'text-gray-900'}`}>
+                                                    <div className={`font-bold truncate transition text-sm ${currentSong?.id === track.id ? 'text-gray-900' : 'text-gray-900'}`}>
                                                         {track.title}
                                                     </div>
                                                     <div className="text-xs text-gray-500 truncate">
@@ -470,7 +473,7 @@ export default function ArtistPage() {
                                             />
                                             <div className="flex items-center gap-1 justify-center">
                                                 <h3 className="font-bold text-sm truncate">{a.name}</h3>
-                                                {a.is_verified && <BadgeCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />}
+                                                {a.is_verified && <VerifiedBadge size={16} />}
                                             </div>
                                             <p className="text-xs text-gray-500 mt-1">{a.genre || 'Artist'}</p>
                                         </Link>

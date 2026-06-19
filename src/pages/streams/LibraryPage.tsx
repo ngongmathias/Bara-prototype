@@ -124,21 +124,21 @@ export default function LibraryPage() {
                             {(filter === 'all' || filter === 'playlists') && (
                                 <Link
                                     to="/streams/liked"
-                                    className="col-span-2 bg-gradient-to-br from-[#450aef] to-[#8d67e1] rounded-lg p-6 hover:scale-[1.02] transition-transform shadow-xl relative overflow-hidden group h-[220px] flex flex-col justify-end"
+                                    className="col-span-2 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg p-6 hover:scale-[1.02] transition-transform shadow-xl relative overflow-hidden group h-[220px] flex flex-col justify-end"
                                 >
                                     <div className="flex-1 flex flex-col gap-4">
-                                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <Heart size={24} fill="white" className="text-gray-900" />
+                                        <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <Heart size={24} fill="white" className="text-white" />
                                         </div>
                                         <div className="space-y-1">
-                                            <h2 className="text-3xl font-black text-gray-900 tracking-widest leading-none">LIKED</h2>
-                                            <h2 className="text-3xl font-black text-gray-900 tracking-widest leading-none">SONGS</h2>
+                                            <h2 className="text-3xl font-black text-white tracking-widest leading-none">LIKED</h2>
+                                            <h2 className="text-3xl font-black text-white tracking-widest leading-none">SONGS</h2>
                                         </div>
                                     </div>
                                     <div className="mt-4">
-                                        <p className="text-gray-900 font-bold">{likedSongs.length} liked songs</p>
+                                        <p className="text-white font-bold">{likedSongs.length} liked songs</p>
                                     </div>
-                                    <div className="absolute bottom-6 right-6 w-12 h-12 bg-[#1DB954] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl translate-y-2 group-hover:translate-y-0 text-black">
+                                    <div className="absolute bottom-6 right-6 w-12 h-12 bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl translate-y-2 group-hover:translate-y-0 text-black">
                                         <Play size={24} fill="black" className="ml-1" />
                                     </div>
                                 </Link>
@@ -158,8 +158,8 @@ export default function LibraryPage() {
                                             alt={item.title}
                                         />
                                         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg" />
-                                        <div className="absolute right-2 bottom-2 w-12 h-12 bg-[#1DB954] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl translate-y-2 group-hover:translate-y-0 hover:scale-105 text-black">
-                                            <Play size={24} fill="black" className="ml-1" />
+                                        <div className="absolute right-2 bottom-2 w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl translate-y-2 group-hover:translate-y-0 hover:scale-105 text-white">
+                                            <Play size={24} fill="white" className="ml-1" />
                                         </div>
                                     </div>
                                     <h3 className="font-black text-gray-900 truncate text-lg tracking-tight">{item.title}</h3>

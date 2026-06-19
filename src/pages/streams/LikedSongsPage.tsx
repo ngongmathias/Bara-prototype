@@ -78,11 +78,11 @@ export default function LikedSongsPage() {
 
     return (
         <StreamsLayout>
-            <div className="min-h-screen bg-gradient-to-b from-green-900/40 to-black p-8">
+            <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white p-8">
                 {/* Header */}
                 <div className="flex flex-col md:row items-end gap-6 mb-8 mt-12">
-                    <div className="w-52 h-52 bg-gradient-to-br from-[#1DB954] to-[#15803d] shadow-2xl flex items-center justify-center rounded-lg relative group overflow-hidden">
-                        <Heart size={100} fill="white" className="text-gray-900 drop-shadow-lg" />
+                    <div className="w-52 h-52 bg-gradient-to-br from-gray-700 to-gray-900 shadow-2xl flex items-center justify-center rounded-lg relative group overflow-hidden">
+                        <Heart size={100} fill="white" className="text-white drop-shadow-lg" />
                     </div>
                     <div className="flex flex-col gap-2 flex-1">
                         <span className="text-sm font-black uppercase tracking-widest text-gray-900/80">Playlist</span>
@@ -100,15 +100,15 @@ export default function LikedSongsPage() {
                     <Button
                         onClick={handlePlayAll}
                         disabled={songs.length === 0}
-                        className="w-14 h-14 rounded-full bg-[#1DB954] hover:bg-[#1ed760] hover:scale-105 transition-all text-black flex items-center justify-center shadow-xl disabled:opacity-50"
+                        className="w-14 h-14 rounded-full bg-gray-900 hover:bg-black hover:scale-105 transition-all text-white flex items-center justify-center shadow-xl disabled:opacity-50"
                     >
-                        <Play size={28} fill="black" className="ml-1" />
+                        <Play size={28} fill="white" className="ml-1" />
                     </Button>
                 </div>
 
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20">
-                        <Loader2 className="w-10 h-10 animate-spin text-[#1DB954]" />
+                        <Loader2 className="w-10 h-10 animate-spin text-gray-900" />
                         <p className="mt-4 text-gray-500 font-bold">Resonance incoming...</p>
                     </div>
                 ) : songs.length === 0 ? (
@@ -151,12 +151,12 @@ export default function LikedSongsPage() {
                                         <div className="text-gray-500 flex items-center justify-center">
                                             {isCurrent && isPlaying ? (
                                                 <div className="flex items-end gap-[2px] h-3">
-                                                    <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '60%' }}></div>
-                                                    <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '100%', animationDelay: '0.2s' }}></div>
-                                                    <div className="w-[3px] bg-[#1DB954] rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0.4s' }}></div>
+                                                    <div className="w-[3px] bg-gray-900 rounded-full animate-pulse" style={{ height: '60%' }}></div>
+                                                    <div className="w-[3px] bg-gray-900 rounded-full animate-pulse" style={{ height: '100%', animationDelay: '0.2s' }}></div>
+                                                    <div className="w-[3px] bg-gray-900 rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0.4s' }}></div>
                                                 </div>
                                             ) : (
-                                                <span className={`text-sm font-bold group-hover:hidden ${isCurrent ? 'text-[#1DB954]' : ''}`}>{index + 1}</span>
+                                                <span className={`text-sm font-bold group-hover:hidden ${isCurrent ? 'text-gray-900' : ''}`}>{index + 1}</span>
                                             )}
                                             <Play className="w-4 h-4 hidden group-hover:block" fill="currentColor" />
                                         </div>
@@ -164,7 +164,7 @@ export default function LikedSongsPage() {
                                         <div className="flex items-center gap-3 min-w-0">
                                             <img loading="lazy" src={song.cover_url} className="w-10 h-10 rounded shadow-md object-cover" alt="" />
                                             <div className="min-w-0">
-                                                <div className={`font-bold truncate ${isCurrent ? 'text-[#1DB954]' : 'text-gray-900'}`}>{song.title}</div>
+                                                <div className={`font-bold truncate ${isCurrent ? 'text-gray-900' : 'text-gray-900'}`}>{song.title}</div>
                                                 <div className="text-sm text-gray-500 truncate md:hidden">{song.artist}{ftMap[song.id] || ''}</div>
                                             </div>
                                         </div>
@@ -176,7 +176,7 @@ export default function LikedSongsPage() {
                                         <div className="flex items-center justify-end gap-6 pr-4">
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); toggleLike(song.id); }}
-                                                className="text-[#1DB954] hover:scale-110 transition-transform"
+                                                className="text-gray-900 hover:scale-110 transition-transform"
                                             >
                                                 <Heart size={18} fill="currentColor" />
                                             </button>

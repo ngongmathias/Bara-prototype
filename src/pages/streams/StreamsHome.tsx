@@ -11,6 +11,7 @@ import { SEO } from '@/components/SEO';
 import { DiscoverMore } from '@/components/DiscoverMore';
 import { useUser } from '@clerk/clerk-react';
 import { GENRES } from './GenrePage';
+import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
 
 // Batch-fetch featured artists for a list of song IDs and return a map: songId -> "ft. A, B"
 async function fetchFeaturedArtistsMap(songIds: string[]): Promise<Record<string, string>> {
@@ -602,7 +603,7 @@ export default function StreamsHome() {
                                                         <Play size={24} fill="white" className="ml-1" />
                                                     </button>
                                                 </div>
-                                                <h3 className="font-bold truncate text-gray-900 mb-1 text-sm">{artist.name}</h3>
+                                                <h3 className="font-bold truncate text-gray-900 mb-1 text-sm flex items-center justify-center gap-1">{artist.name}{artist.is_verified && <VerifiedBadge size={13} />}</h3>
                                                 <p className="text-xs text-gray-500">Artist</p>
                                             </div>
                                         </Link>

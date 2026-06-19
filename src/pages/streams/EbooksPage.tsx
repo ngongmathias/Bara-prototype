@@ -414,7 +414,7 @@ export default function EbooksPage() {
                           )}
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                           <div className="absolute top-2 left-2">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${book.is_free ? 'bg-green-500 text-white' : 'bg-orange-500 text-white'}`}>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${book.is_free ? 'bg-gray-900 text-white' : 'bg-gray-500 text-white'}`}>
                               {book.is_free ? 'FREE' : `${book.price} coins`}
                             </span>
                           </div>

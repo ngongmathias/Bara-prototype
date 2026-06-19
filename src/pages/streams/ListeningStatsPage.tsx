@@ -180,10 +180,10 @@ export default function ListeningStatsPage() {
                   {topGenres.map((g) => (
                     <span
                       key={g.key}
-                      className="inline-flex items-center gap-2 bg-purple-50 text-purple-800 border border-purple-200 px-3 py-1.5 rounded-full text-sm font-semibold"
+                      className="inline-flex items-center gap-2 bg-gray-100 text-gray-800 border border-gray-200 px-3 py-1.5 rounded-full text-sm font-semibold"
                     >
                       {g.label}
-                      <span className="text-xs text-purple-500">{g.count}</span>
+                      <span className="text-xs text-gray-500">{g.count}</span>
                     </span>
                   ))}
                 </div>

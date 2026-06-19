@@ -167,7 +167,7 @@ export default function CreateAlbumPage() {
                                 <p className="text-gray-500 text-sm mb-1">Upload album cover art.</p>
                                 <p className="text-gray-500 text-xs">Recommended: 1000×1000px, JPG or PNG</p>
                                 {coverFile && (
-                                    <div className="flex items-center gap-2 mt-3 text-[#1DB954]">
+                                    <div className="flex items-center gap-2 mt-3 text-gray-900">
                                         <CheckCircle size={16} />
                                         <span className="text-sm font-bold">{coverFile.name}</span>
                                     </div>
@@ -183,7 +183,7 @@ export default function CreateAlbumPage() {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Enter album title"
-                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] h-12"
+                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-gray-900 focus:ring-gray-900 h-12"
                             required
                         />
                     </div>
@@ -221,7 +221,7 @@ export default function CreateAlbumPage() {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Tell listeners about this album..."
-                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-[#1DB954] focus:ring-[#1DB954] min-h-[100px] resize-none"
+                            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-gray-900 focus:ring-gray-900 min-h-[100px] resize-none"
                         />
                     </div>
 
@@ -229,7 +229,7 @@ export default function CreateAlbumPage() {
                     <Button
                         type="submit"
                         disabled={saving || !title.trim()}
-                        className="w-full h-14 bg-[#1DB954] text-black hover:bg-[#1ed760] font-black text-lg rounded-xl disabled:opacity-50"
+                        className="w-full h-14 bg-gray-900 text-white hover:bg-black font-black text-lg rounded-xl disabled:opacity-50"
                     >
                         {saving ? (
                             <span className="flex items-center gap-2"><Loader2 className="animate-spin" size={20} /> Creating...</span>

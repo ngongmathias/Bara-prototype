@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { SEO } from '@/components/SEO';
 import { Play, Pause, ArrowLeft, Music2 } from 'lucide-react';
+import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
 
 interface Genre { name: string; slug: string; blurb: string; }
 
@@ -95,7 +96,7 @@ function GenreDetail({ genre, slug }: { genre?: Genre; slug: string }) {
       try {
         const [{ data: songData }, { data: artistData }] = await Promise.all([
           supabase.from('songs').select('*, artists(name)').ilike('genre', `%${name}%`).order('plays', { ascending: false }).limit(40),
-          supabase.from('artists').select('id, name, image_url').ilike('genre', `%${name}%`).limit(12),
+          supabase.from('artists').select('id, name, image_url, is_verified').ilike('genre', `%${name}%`).limit(12),
         ]);
         if (!active) return;
         setSongs((songData || []).map(mapSong));
@@ -155,7 +156,7 @@ function GenreDetail({ genre, slug }: { genre?: Genre; slug: string }) {
                           <img src={a.image_url} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                         </div>
-                        <span className="mt-2 text-sm font-bold text-gray-900 text-center truncate w-full">{a.name}</span>
+                        <span className="mt-2 text-sm font-bold text-gray-900 text-center truncate w-full inline-flex items-center justify-center gap-1">{a.name}{a.is_verified && <VerifiedBadge size={13} />}</span>
                       </Link>
                     ))}
                   </div>

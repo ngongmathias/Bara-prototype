@@ -128,7 +128,7 @@ export default function NewReleasesPage() {
                 {isSignedIn && (
                     <section className="mb-12">
                         <div className="flex items-center gap-3 mb-4">
-                            <Radar className="w-6 h-6 text-[#1DB954]" />
+                            <Radar className="w-6 h-6 text-gray-900" />
                             <h2 className="text-2xl font-bold tracking-tight text-gray-900">Release Radar</h2>
                             <span className="text-sm text-gray-500">New from artists you follow (last 30 days)</span>
                         </div>
@@ -142,7 +142,7 @@ export default function NewReleasesPage() {
                             <div className="bg-white border border-gray-100 rounded-lg p-6 text-center">
                                 <p className="text-gray-600 mb-2">Your radar is quiet.</p>
                                 <p className="text-sm text-gray-500">
-                                    Follow artists on their <Link to="/streams/artists" className="text-[#1DB954] hover:underline">profiles</Link> to see their new releases here.
+                                    Follow artists on their <Link to="/streams/artists" className="text-gray-900 hover:underline">profiles</Link> to see their new releases here.
                                 </p>
                             </div>
                         ) : (
@@ -163,9 +163,9 @@ export default function NewReleasesPage() {
                                             />
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); playRadar(i); }}
-                                                className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95"
+                                                className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-gray-900 text-black flex items-center justify-center transition-all shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95"
                                             >
-                                                <Play size={20} fill="black" className="ml-0.5" />
+                                                <Play size={20} fill="white" className="ml-0.5" />
                                             </button>
                                         </div>
                                         <h3 className="font-semibold truncate text-gray-900 text-sm">{song.title}</h3>
@@ -201,9 +201,9 @@ export default function NewReleasesPage() {
                                     />
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handlePlayAlbum(album.id); }}
-                                        className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-[#1DB954] text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
+                                        className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-black flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10"
                                     >
-                                        <Play size={24} fill="black" className="ml-1" />
+                                        <Play size={24} fill="white" className="ml-1" />
                                     </button>
                                 </div>
                                 <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{album.title}</h3>
