@@ -412,7 +412,6 @@ const AppRoutes = () => {
 
 
 
-      <ErrorBoundary>
       <Suspense fallback={<RouteFallback />}>
       <Routes>
 
@@ -940,7 +939,6 @@ const AppRoutes = () => {
 
       </Routes>
       </Suspense>
-      </ErrorBoundary>
 
     </NotificationsProvider>
 
@@ -982,11 +980,15 @@ const App = () => (
 
             <BrowserRouter>
 
-              <AuthLogger />
+              <ErrorBoundary>
 
-              <AppRoutes />
+                <AuthLogger />
 
-              <GlobalPlayer />
+                <AppRoutes />
+
+                <GlobalPlayer />
+
+              </ErrorBoundary>
 
             </BrowserRouter>
 

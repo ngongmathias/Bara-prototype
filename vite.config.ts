@@ -16,4 +16,10 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Keep function/component names through minification so production stack
+  // traces name the real component (e.g. "GlobalPlayer") instead of "U_t" —
+  // essential for diagnosing render/hook errors reported from prod.
+  esbuild: {
+    keepNames: true,
+  },
 }));
