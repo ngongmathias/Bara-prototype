@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Loader2, Music, Search, Plus, Check, ListPlus } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { Input } from '@/components/ui/input';
@@ -103,7 +104,9 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ isOpen, 
 
   const filtered = playlists.filter((p) => p.title.toLowerCase().includes(query.trim().toLowerCase()));
 
-  return (
+  // Portal to document.body so the fixed overlay covers the full viewport even
+  // when opened from inside a transformed ancestor (e.g. StreamsLayout).
+  return createPortal(
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <div
         className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-h-[85vh] flex flex-col"
@@ -176,6 +179,7 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ isOpen, 
           </>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

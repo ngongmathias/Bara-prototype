@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Loader2, Music, Search, Plus, Check, ArrowRight } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { Button } from '@/components/ui/button';
@@ -133,7 +134,11 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
 
     const songsToShow = searchQuery.trim() ? searchResults : recommendedSongs;
 
-    return (
+    // Render via a portal to document.body so the fixed overlay covers the whole
+    // viewport. Inside StreamsLayout the content lives in a transformed
+    // (framer-motion) column, which would otherwise make `position: fixed`
+    // relative to that column — blurring only the side of the page.
+    return createPortal(
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-h-[85vh] flex flex-col">
                 <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
@@ -255,6 +260,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                     </div>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
