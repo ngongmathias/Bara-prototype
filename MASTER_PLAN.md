@@ -1071,8 +1071,10 @@ Control/Mobile taxonomy + field configs, idempotent additive DB migration
   (karaoke) lyrics** (`parseLyrics` in `FullScreenPlayer`: LRC `[mm:ss]` parsing,
   active-line highlight + auto-scroll off `progress`, tap-to-seek, reduced-motion
   aware, plain-text fallback; upload form documents the format).
-- **Tier 3 (next):** gapless/crossfade/normalization, saved albums + offline/PWA,
-  perf (code-split, virtualise) + a11y + device-matrix pass.
+- **Tier 3 (in progress):** ~~perf code-split~~ ✅ + ~~list virtualise~~ ✅ +
+  ~~a11y pass~~ ✅ (#10), ~~**saved albums**~~ ✅ (#9 — `user_album_saves` +
+  AlbumPage Save toggle + Library "Albums" filter). **Remaining:** gapless /
+  crossfade / normalization (#8), offline/PWA (#9), device-matrix pass (#10).
 
 ### 26.6 Compliance ✅
 DPO/compliance package completed and at signing stage (25.8.1); supporting docs
@@ -1082,7 +1084,8 @@ committed under `compliance/`.
 `20260617` (gamification) ✅ applied · `20260618` (categories) ✅ applied ·
 `20260619` (music bucket + songs RLS) ✅ applied · `20260620_music_search_trgm.sql`
 ✅ applied (search typo-tolerance live) · `20260621_new_release_notifications.sql`
-✅ applied (new-release notifications live).
+✅ applied (new-release notifications live) · `20260621_saved_albums.sql`
+⬜ **required for Saved Albums** (creates `user_album_saves`; run in SQL Editor).
 
 ---
 

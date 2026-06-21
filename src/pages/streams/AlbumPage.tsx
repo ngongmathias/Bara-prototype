@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
+import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
-import { Play, Pause, Shuffle, Clock, Heart, ArrowLeft, Music2, Disc3 } from 'lucide-react';
+import { Play, Pause, Shuffle, Clock, Heart, ArrowLeft, Music2, Disc3, Check, Plus } from 'lucide-react';
 
 interface AlbumInfo {
   id: string;
@@ -27,10 +29,14 @@ export default function AlbumPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { playAlbum, togglePlay, currentSong, isPlaying, toggleLike, likedSongs } = useAudioPlayer();
+  const { user } = useUser();
+  const { toast } = useToast();
 
   const [album, setAlbum] = useState<AlbumInfo | null>(null);
   const [tracks, setTracks] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saved, setSaved] = useState(false);
+  const [savePending, setSavePending] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -72,6 +78,56 @@ export default function AlbumPage() {
     })();
     return () => { active = false; };
   }, [id]);
+
+  // Is this album already saved to the user's library?
+  useEffect(() => {
+    if (!id || !user?.id) { setSaved(false); return; }
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from('user_album_saves')
+        .select('album_id')
+        .eq('user_id', user.id)
+        .eq('album_id', id)
+        .maybeSingle();
+      if (active) setSaved(!!data);
+    })();
+    return () => { active = false; };
+  }, [id, user?.id]);
+
+  const toggleSave = async () => {
+    if (!id) return;
+    if (!user?.id) {
+      toast({ title: 'Sign in to save albums', description: 'Saved albums live in Your Library.' });
+      return;
+    }
+    if (savePending) return;
+    setSavePending(true);
+    const next = !saved;
+    setSaved(next); // optimistic
+    try {
+      if (next) {
+        const { error } = await supabase
+          .from('user_album_saves')
+          .insert({ user_id: user.id, album_id: id });
+        if (error) throw error;
+        toast({ title: 'Saved to Your Library' });
+      } else {
+        const { error } = await supabase
+          .from('user_album_saves')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('album_id', id);
+        if (error) throw error;
+        toast({ title: 'Removed from Your Library' });
+      }
+    } catch {
+      setSaved(!next); // revert on failure
+      toast({ title: 'Something went wrong', description: 'Please try again.' });
+    } finally {
+      setSavePending(false);
+    }
+  };
 
   const totalSeconds = tracks.reduce((a, t) => a + (t.duration || 0), 0);
   const totalLabel = totalSeconds >= 3600
@@ -154,6 +210,19 @@ export default function AlbumPage() {
             className="inline-flex items-center gap-2 border-2 border-gray-300 text-gray-700 font-bold px-5 py-2.5 rounded-full hover:border-gray-900 hover:text-gray-900 transition disabled:opacity-40"
           >
             <Shuffle size={18} /> Shuffle
+          </button>
+          <button
+            onClick={toggleSave}
+            disabled={loading || !album}
+            aria-pressed={saved}
+            aria-label={saved ? 'Remove album from your library' : 'Save album to your library'}
+            className={`inline-flex items-center gap-2 font-bold px-5 py-2.5 rounded-full border-2 transition disabled:opacity-40 active:scale-[0.98] ${
+              saved
+                ? 'bg-gray-900 text-white border-gray-900 hover:bg-black'
+                : 'border-gray-300 text-gray-700 hover:border-gray-900 hover:text-gray-900'
+            }`}
+          >
+            {saved ? <><Check size={18} /> Saved</> : <><Plus size={18} /> Save</>}
           </button>
         </div>
 

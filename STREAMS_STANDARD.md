@@ -64,7 +64,7 @@
 | F2 OS integration | ✅ | **Media Session API wired** (`AudioPlayerContext`): metadata + artwork, play/pause/next/prev/seek action handlers (via ref, never stale), playbackState, and lock-screen position state. Cast/"Connect to device" remains a stretch. |
 | F3 Queue | ✅ | `QueueDrawer` rebuilt: real **drag-to-reorder**, per-track **remove**, **clear**, now-playing + up-next. Context gained `removeFromQueue`/`reorderQueue`/`clearQueue` (index-safe). Add-to-queue / play-next already in `SongContextMenu`. Contrast bug fixed (clean light drawer). Mobile touch-drag is a later polish. |
 | F4 Search | ✅ | Dedicated `MusicSearchPage` at `/streams/search`: instant debounced typeahead, results grouped (Songs / Artists / Albums / Playlists), recent searches (localStorage), rich no-results state. **Typo tolerance** via `search_songs` pg_trgm RPC (graceful ILIKE fallback if the migration isn't applied). |
-| F5 Library | 🟡 | Liked ✅, playlists + collaborative ✅, recently played ✅, follow-artist ✅. **No saved-albums, no offline.** |
+| F5 Library | 🟡 | Liked ✅, playlists + collaborative ✅, recently played ✅, follow-artist ✅, **saved albums ✅ (new — Save/Saved toggle on `AlbumPage`, persisted in `user_album_saves`; surfaced in `LibraryPage` with an "Albums" filter pill)**. **Offline/PWA still missing.** |
 | F6 Discovery | ✅ | Personalised Home ✅, Release Radar ✅, genre browse ✅, "Fans also like" ✅, radio/infinite autoplay ✅, **named daily mixes ✅ (new — `buildDailyMixes` clusters listening history by top genres + top artist into titled "Daily Mix N" cards on the home, click to play)**. |
 | F7 Now Playing | ✅ | `FullScreenPlayer` is strong (immersive, grey ambient, queue, go-to-artist/album, share). **Time-synced (karaoke) lyrics ✅ (new — `parseLyrics` reads LRC-style `[mm:ss]`/`[mm:ss.xx]` tags, highlights + auto-scrolls the active line off `progress`, tap a line to seek, "SYNCED" badge; gracefully falls back to plain `<pre>` text when a song has no timestamps).** |
 | F8 Social | 🟡 | Follow ✅, collaborative playlists ✅, share ✅, OG previews ✅. **No activity feed.** |
@@ -99,7 +99,7 @@
 
 **Tier 3 — polish & scale**
 8. **Gapless + crossfade + normalization** (F1).
-9. **Saved albums** + **offline/PWA** (F5).
+9. ~~**Saved albums**~~ ✅ **Done Jun 21** (`user_album_saves` table + Save toggle on AlbumPage + Albums filter in Library) · **offline/PWA** still pending (F5).
 10. **Performance**: ~~code-split /streams~~ ✅ **Done Jun 21** (all pages `React.lazy` + `<Suspense>`), ~~virtualise long lists~~ ✅ **Done Jun 21** (`useWindowVirtualizer` on LikedSongsPage + PlaylistPage via `@tanstack/react-virtual`); **a11y pass** + **device matrix pass** (D3/D5/D6) still pending.
 
 ---

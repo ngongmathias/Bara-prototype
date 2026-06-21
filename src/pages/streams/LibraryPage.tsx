@@ -11,7 +11,7 @@ import { useUser } from '@clerk/clerk-react';
 
 interface LibraryItem {
     id: string;
-    type: 'playlist' | 'artist';
+    type: 'playlist' | 'artist' | 'album';
     title: string;
     subtitle: string;
     image_url: string;
@@ -20,7 +20,7 @@ interface LibraryItem {
 export default function LibraryPage() {
     const { likedSongs } = useAudioPlayer();
     const [items, setItems] = useState<LibraryItem[]>([]);
-    const [filter, setFilter] = useState<'all' | 'playlists' | 'artists'>('all');
+    const [filter, setFilter] = useState<'all' | 'playlists' | 'artists' | 'albums'>('all');
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -47,6 +47,13 @@ export default function LibraryPage() {
                 .select('*, artists(*)')
                 .eq('user_id', user.id);
 
+            // Fetch Saved Albums
+            const { data: albumsData } = await supabase
+                .from('user_album_saves')
+                .select('created_at, albums(id, title, cover_url, artists(name))')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
             const formattedPlaylists: LibraryItem[] = (playlistsData || []).map(p => ({
                 id: p.playlists.id,
                 type: 'playlist',
@@ -63,7 +70,17 @@ export default function LibraryPage() {
                 image_url: a.artists.image_url || '/placeholder-artist.png'
             }));
 
-            setItems([...formattedPlaylists, ...formattedArtists]);
+            const formattedAlbums: LibraryItem[] = (albumsData || [])
+                .filter((a: any) => a.albums)
+                .map((a: any) => ({
+                    id: a.albums.id,
+                    type: 'album',
+                    title: a.albums.title,
+                    subtitle: `Album • ${a.albums.artists?.name || 'Unknown Artist'}`,
+                    image_url: a.albums.cover_url || '/placeholder-music.png'
+                }));
+
+            setItems([...formattedPlaylists, ...formattedAlbums, ...formattedArtists]);
         } catch (err) {
             console.error('Error fetching library:', err);
         } finally {
@@ -83,6 +100,7 @@ export default function LibraryPage() {
         if (filter === 'all') return true;
         if (filter === 'playlists') return item.type === 'playlist';
         if (filter === 'artists') return item.type === 'artist';
+        if (filter === 'albums') return item.type === 'album';
         return true;
     });
 
@@ -94,6 +112,7 @@ export default function LibraryPage() {
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex gap-3">
                             <FilterPill label="Playlists" active={filter === 'playlists'} onClick={() => setFilter(filter === 'playlists' ? 'all' : 'playlists')} />
+                            <FilterPill label="Albums" active={filter === 'albums'} onClick={() => setFilter(filter === 'albums' ? 'all' : 'albums')} />
                             <FilterPill label="Artists" active={filter === 'artists'} onClick={() => setFilter(filter === 'artists' ? 'all' : 'artists')} />
                         </div>
                         <Button
