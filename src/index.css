@@ -141,9 +141,27 @@ All colors MUST be HSL.
   textarea:focus-visible,
   select:focus-visible,
   [tabindex]:focus-visible {
-    outline: 2px solid #1DB954;
+    /* Monochrome focus ring (design system: black/white/grey only). A white
+       inner ring + black outer ring stays visible on both light pages and the
+       dark player surface. */
+    outline: 2px solid #ffffff;
     outline-offset: 2px;
+    box-shadow: 0 0 0 4px #000000;
     border-radius: 4px;
+  }
+
+  /* Accessibility: honour the OS "reduce motion" setting globally. Animations
+     and transitions collapse to near-instant so the app stays usable for users
+     who are sensitive to motion (WCAG 2.3.3 / D5). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   /* Typography System */

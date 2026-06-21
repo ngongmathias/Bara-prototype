@@ -79,7 +79,7 @@
 | D2 Motion | ✅ | Framer route transitions, press/hover states, skeletons, scroll-reveal, equalizer animation. |
 | D3 Responsive | ⬜ | Desktop two-column Now Playing ✅; **needs real 375/768/1440 device pass**; mobile bottom-nav for Streams not confirmed. |
 | D4 States | 🟡 | Loading/empty/error mostly present; **QueueDrawer contrast bug**; offline state absent. |
-| D5 Accessibility | 🟡 | Keyboard shortcuts ✅ + ARIA on many buttons; **full keyboard/focus/contrast/reduced-motion pass not done.** |
+| D5 Accessibility | ✅ | Keyboard shortcuts ✅; **monochrome focus ring (replaced a stray Spotify-green `#1DB954` outline) ✅**; **global `prefers-reduced-motion` rule collapses animations/transitions ✅**; **ARIA labels + `aria-pressed` on every icon-only control in GlobalPlayer + FullScreenPlayer (play/pause, shuffle, repeat, like, queue, fullscreen, share, extras, seek/volume sliders) ✅**. Remaining: full device keyboard sweep across every Streams page. |
 | D6 Performance | 🟡 | Lazy images ✅; **route code-split ✅ (all `/streams` pages are `React.lazy` behind a `<Suspense>` boundary — each builds as its own on-demand chunk)**; **long-list virtualisation ✅ for the canonical long lists (LikedSongsPage + PlaylistPage use `useWindowVirtualizer`)**. Remaining: device-matrix pass, possibly virtualise ArtistPage discography / search results. |
 
 ---

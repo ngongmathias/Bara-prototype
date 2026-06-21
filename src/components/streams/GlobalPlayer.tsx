@@ -225,6 +225,8 @@ export function GlobalPlayer() {
                     </div>
                     <button
                         onClick={() => toggleLike(currentSong.id)}
+                        aria-label={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
+                        aria-pressed={isLiked}
                         className={`transition-all hover:scale-110 flex-shrink-0 ${isLiked ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                     >
                         <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
@@ -238,12 +240,15 @@ export function GlobalPlayer() {
                             onClick={toggleShuffle}
                             className={`transition-colors hidden md:block ${isShuffle ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                             title="Shuffle"
+                            aria-label="Shuffle"
+                            aria-pressed={isShuffle}
                         >
                             <Shuffle size={18} />
                         </button>
                         <button onClick={prev} className="text-gray-400 hover:text-white transition" aria-label="Previous"><SkipBack size={20} fill="currentColor" /></button>
                         <button
                             onClick={togglePlay}
+                            aria-label={isPlaying ? 'Pause' : 'Play'}
                             className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition shadow-[0_0_20px_rgba(255,255,255,0.3)]"
                         >
                             {isPlaying ? <Pause fill="black" size={20} /> : <Play fill="black" size={20} className="ml-1" />}
@@ -251,11 +256,13 @@ export function GlobalPlayer() {
                         <button onClick={next} className="text-gray-400 hover:text-white transition" aria-label="Next"><SkipForward size={20} fill="currentColor" /></button>
                         <button
                             onClick={() => setRepeatMode(repeatMode === 'none' ? 'all' : repeatMode === 'all' ? 'one' : 'none')}
+                            aria-label={repeatMode === 'one' ? 'Repeat one' : repeatMode === 'all' ? 'Repeat all' : 'Enable repeat'}
+                            aria-pressed={repeatMode !== 'none'}
                             className={`transition-colors relative hidden md:block ${repeatMode !== 'none' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                         >
                             <Repeat size={18} />
                             {repeatMode === 'one' && (
-                                <span className="absolute -top-1 -right-1 bg-white text-[8px] text-white w-3 h-3 rounded-full flex items-center justify-center font-bold">1</span>
+                                <span className="absolute -top-1 -right-1 bg-white text-[8px] text-black w-3 h-3 rounded-full flex items-center justify-center font-bold">1</span>
                             )}
                         </button>
                     </div>
@@ -272,6 +279,7 @@ export function GlobalPlayer() {
                                 onChange={(e) => seek(parseFloat(e.target.value))}
                                 className="absolute inset-0 w-full opacity-0 cursor-pointer z-20"
                                 title={formatTime(progress)}
+                                aria-label="Seek"
                             />
                             <div
                                 className="absolute top-0 left-0 h-full bg-white group-hover/progress:bg-white transition-colors z-10"
@@ -296,6 +304,8 @@ export function GlobalPlayer() {
                         onClick={() => setIsQueueOpen(!isQueueOpen)}
                         className={`transition-colors ${isQueueOpen ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                         title="Queue"
+                        aria-label="Queue"
+                        aria-pressed={isQueueOpen}
                     >
                         <List size={20} />
                     </button>
@@ -303,6 +313,7 @@ export function GlobalPlayer() {
                         onClick={() => setIsFullScreen(true)}
                         className="text-gray-400 hover:text-white transition-colors"
                         title="Full Screen"
+                        aria-label="Open full screen player"
                     >
                         <Maximize2 size={18} />
                     </button>
@@ -310,6 +321,7 @@ export function GlobalPlayer() {
                         onClick={() => setIsShareOpen(true)}
                         className="text-gray-400 hover:text-white transition-colors"
                         title="Share"
+                        aria-label="Share"
                     >
                         <Share2 size={18} />
                     </button>
@@ -319,6 +331,7 @@ export function GlobalPlayer() {
                             className="text-gray-400 hover:text-white transition-colors relative"
                             title="Playback speed & sleep timer"
                             aria-label="Playback speed and sleep timer"
+                            aria-pressed={isExtrasOpen}
                         >
                             <MoreHorizontal size={18} />
                             {(playbackRate !== 1 || sleepTimerMinutes !== null || sleepTimerEndOfTrack) && (

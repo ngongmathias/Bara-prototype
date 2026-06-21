@@ -373,6 +373,8 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                     </div>
                                     <button
                                         onClick={() => toggleLike(currentSong.id)}
+                                        aria-label={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
+                                        aria-pressed={isLiked}
                                         className={`p-2 rounded-full flex-shrink-0 transition-all hover:scale-110 ${isLiked ? 'text-white' : 'text-white/30 hover:text-white'}`}
                                     >
                                         <Heart size={24} fill={isLiked ? 'currentColor' : 'none'} />
@@ -388,6 +390,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                         min="0"
                                         max={duration || 100}
                                         value={progress || 0}
+                                        aria-label="Seek"
                                         onChange={(e) => seek(parseFloat(e.target.value))}
                                         className="absolute inset-0 w-full opacity-0 cursor-pointer z-20"
                                     />
@@ -410,6 +413,8 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                             <div className="flex items-center justify-center gap-7 md:gap-8 mb-4 md:mb-6 flex-shrink-0">
                                 <button
                                     onClick={toggleShuffle}
+                                    aria-label="Shuffle"
+                                    aria-pressed={isShuffle}
                                     className={`transition-all hover:scale-110 ${isShuffle ? 'text-white' : 'text-white/30 hover:text-white'}`}
                                 >
                                     <Shuffle size={20} />
@@ -417,6 +422,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                 <button onClick={prev} className="text-white/80 hover:text-white hover:scale-110 transition-all active:scale-95" aria-label="Previous"><SkipBack size={28} fill="currentColor" /></button>
                                 <button
                                     onClick={togglePlay}
+                                    aria-label={isPlaying ? 'Pause' : 'Play'}
                                     className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_4px_24px_rgba(255,255,255,0.15)]"
                                 >
                                     {isPlaying ? <Pause fill="black" size={26} /> : <Play fill="black" size={26} className="ml-0.5" />}
@@ -424,6 +430,8 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                 <button onClick={next} className="text-white/80 hover:text-white hover:scale-110 transition-all active:scale-95" aria-label="Next"><SkipForward size={28} fill="currentColor" /></button>
                                 <button
                                     onClick={() => setRepeatMode(repeatMode === 'none' ? 'all' : repeatMode === 'all' ? 'one' : 'none')}
+                                    aria-label={repeatMode === 'one' ? 'Repeat one' : repeatMode === 'all' ? 'Repeat all' : 'Enable repeat'}
+                                    aria-pressed={repeatMode !== 'none'}
                                     className={`transition-all hover:scale-110 relative ${repeatMode !== 'none' ? 'text-white' : 'text-white/30 hover:text-white'}`}
                                 >
                                     <Repeat size={20} />
@@ -469,6 +477,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                     <div className="hidden md:flex items-center gap-2 w-28">
                                         <button
                                             onClick={() => setVolume(volume === 0 ? 0.7 : 0)}
+                                            aria-label={volume === 0 ? 'Unmute' : 'Mute'}
                                             className="text-white/30 hover:text-white transition-colors flex-shrink-0"
                                         >
                                             {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
@@ -480,6 +489,7 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                                 max="1"
                                                 step="0.01"
                                                 value={volume}
+                                                aria-label="Volume"
                                                 onChange={(e) => setVolume(parseFloat(e.target.value))}
                                                 className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
                                             />
