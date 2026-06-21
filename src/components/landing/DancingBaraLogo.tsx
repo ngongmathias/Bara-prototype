@@ -80,20 +80,21 @@ export const DancingBaraLogo = () => {
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
           >
             <div className="bg-gray-900 rounded-3xl px-10 py-8 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] h-full flex flex-col items-center justify-center text-center">
-              <h2 className="text-2xl font-bold text-white tracking-tight mb-4">BARA</h2>
-              <p className="text-gray-300 text-sm leading-relaxed max-w-[280px]">
-                The Swahili word for continent, mainland, our bedrock, the heart of the land.
+              <p className="text-gray-200 text-sm sm:text-base leading-relaxed max-w-[300px] mb-3">
+                <span className="font-black text-white">BARA</span> – Kiswahili (or Swahili) for continent, land, home.
               </p>
-              <p className="text-gray-400 text-sm mt-4 leading-relaxed max-w-[280px]">
-                Not a collection of distant coasts, but one united body — <span className="text-white font-semibold">We Are One!</span>
+              <p className="text-base sm:text-lg font-bold text-white tracking-wide mb-3">
+                One Land | One People | One Future
               </p>
-              <div className="flex items-center gap-3 mt-5 text-white text-xs font-bold tracking-[0.15em] uppercase">
-                <span>One land</span>
-                <span className="text-gray-600">|</span>
-                <span>One people</span>
-                <span className="text-gray-600">|</span>
-                <span>One future</span>
-              </div>
+              <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-[300px] mb-4">
+                With over 200 million speakers, Kiswahili is Africa's most far-reaching indigenous tongue.
+              </p>
+              <p className="text-white text-sm sm:text-base font-bold max-w-[300px] mb-1">
+                BARA Afrika | “Your Bridge to Today's Afrika!”
+              </p>
+              <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-[300px]">
+                A pan-African super platform connecting the global Afrikan family through trade, tourism, networking, entertainment, and beyond.
+              </p>
               <p className="text-gray-600 text-[10px] mt-4">Tap to flip back</p>
             </div>
           </div>
