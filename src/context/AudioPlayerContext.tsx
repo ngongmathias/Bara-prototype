@@ -89,6 +89,10 @@ interface AudioPlayerContextType {
 
     clearQueue: () => void;
 
+    isRadio: boolean;
+
+    startRadio: (song: Song) => Promise<void>;
+
     playAlbum: (songs: Song[], startIndex?: number) => void;
 
     toggleShuffle: () => void;
@@ -153,6 +157,12 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const sleepTimerDeadlineRef = useRef<number | null>(null);
     const sleepTimerEndOfTrackRef = useRef(false);
     useEffect(() => { sleepTimerEndOfTrackRef.current = sleepTimerEndOfTrack; }, [sleepTimerEndOfTrack]);
+
+    // Radio / infinite autoplay
+    const [radioSeed, setRadioSeed] = useState<{ songId: string; artistId?: string; genre?: string } | null>(null);
+    const radioSeedRef = useRef(radioSeed);
+    useEffect(() => { radioSeedRef.current = radioSeed; }, [radioSeed]);
+    const extendRadioRef = useRef<() => void>(() => {});
 
     const hasAwardedXP = useRef<string | null>(null);
 
@@ -261,6 +271,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 } else if (repeatModeRef.current === 'all') {
                     setQueueIndex(0);
                     play(q[0]);
+                } else if (radioSeedRef.current) {
+                    extendRadioRef.current();
                 } else {
                     setIsPlaying(false);
                     audio.currentTime = 0;
@@ -586,6 +598,10 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
             play(queue[0]);
 
+        } else if (radioSeedRef.current) {
+
+            extendRadioRef.current();
+
         } else {
 
             setIsPlaying(false);
@@ -837,7 +853,83 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
     };
 
+    // ===== Radio / infinite autoplay =====
+    const radioMap = (s: any): Song => ({
+        id: s.id, title: s.title,
+        artist: s.artists?.name || 'Unknown Artist',
+        file_url: s.file_url, cover_url: s.cover_url || '/placeholder-music.png',
+        duration: s.duration, artist_id: s.artist_id, album_id: s.album_id, price: s.price ?? null,
+    });
+
+    const fetchRadioSongs = async (
+        seed: { artistId?: string; genre?: string },
+        excludeIds: string[],
+        limit = 20,
+    ): Promise<Song[]> => {
+        const ors: string[] = [];
+        if (seed.genre) ors.push(`genre.ilike.%${seed.genre}%`);
+        if (seed.artistId) ors.push(`artist_id.eq.${seed.artistId}`);
+        let pool: any[] = [];
+        if (ors.length > 0) {
+            const { data } = await supabase
+                .from('songs').select('*, artists(name)')
+                .or(ors.join(','))
+                .order('plays', { ascending: false })
+                .limit(80);
+            pool = data || [];
+        }
+        // Top up with popular songs if the seed pool is thin
+        if (pool.length < limit) {
+            const { data } = await supabase
+                .from('songs').select('*, artists(name)')
+                .order('plays', { ascending: false })
+                .limit(80);
+            pool = [...pool, ...(data || [])];
+        }
+        const seen = new Set(excludeIds);
+        const unique = pool.filter(s => s.file_url && !seen.has(s.id) && (seen.add(s.id), true));
+        // Shuffle for variety
+        for (let i = unique.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [unique[i], unique[j]] = [unique[j], unique[i]];
+        }
+        return unique.slice(0, limit).map(radioMap);
+    };
+
+    const startRadio = async (song: Song) => {
+        let genre: string | undefined;
+        let artistId = song.artist_id;
+        try {
+            const { data } = await supabase.from('songs').select('genre, artist_id').eq('id', song.id).maybeSingle();
+            genre = data?.genre || undefined;
+            artistId = artistId || data?.artist_id || undefined;
+        } catch { /* ignore */ }
+        const seed = { songId: song.id, artistId, genre };
+        setRadioSeed(seed);
+        radioSeedRef.current = seed;
+        const more = await fetchRadioSongs(seed, [song.id], 20);
+        setQueue([song, ...more]);
+        setQueueIndex(0);
+        play(song);
+    };
+
+    // Called when the queue runs out while radio is active — appends more and continues.
+    const extendRadio = async () => {
+        const seed = radioSeedRef.current;
+        if (!seed) { setIsPlaying(false); return; }
+        const q = queueRef.current;
+        const more = await fetchRadioSongs(seed, q.map(s => s.id), 20);
+        if (more.length === 0) { setIsPlaying(false); return; }
+        const startAt = q.length;
+        setQueue([...q, ...more]);
+        setQueueIndex(startAt);
+        play(more[0]);
+    };
+    useEffect(() => { extendRadioRef.current = extendRadio; });
+
     const playAlbum = (songs: Song[], startIndex = 0) => {
+
+        setRadioSeed(null); // explicit album/playlist play ends radio mode
 
         setQueue(songs);
 
@@ -1002,6 +1094,10 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 reorderQueue,
 
                 clearQueue,
+
+                isRadio: !!radioSeed,
+
+                startRadio,
 
                 playAlbum,
 

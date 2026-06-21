@@ -4,14 +4,14 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { SEO } from '@/components/SEO';
-import { Loader2, Play, Pause, BadgeCheck, Share2 } from 'lucide-react';
+import { Loader2, Play, Pause, BadgeCheck, Share2, Radio } from 'lucide-react';
 import { useShare } from '@/context/ShareContext';
 import { FollowUserButton } from '@/components/FollowUserButton';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
 
 export default function ArtistPage() {
     const { id } = useParams();
-    const { play, currentSong, isPlaying, togglePlay } = useAudioPlayer();
+    const { play, currentSong, isPlaying, togglePlay, startRadio } = useAudioPlayer();
     const { openShare } = useShare();
     const [artist, setArtist] = useState<any>(null);
     const [topTracks, setTopTracks] = useState<Song[]>([]);
@@ -268,6 +268,17 @@ export default function ArtistPage() {
                                 className="w-14 h-14 rounded-full bg-gray-900 hover:scale-105 transition flex items-center justify-center shadow-xl active:scale-95"
                             >
                                 <Play fill="white" className="w-6 h-6 ml-1 text-white" />
+                            </button>
+                        )}
+
+                        {/* Radio — infinite autoplay seeded from this artist */}
+                        {topTracks.length > 0 && (
+                            <button
+                                onClick={() => startRadio(topTracks[0])}
+                                className="inline-flex items-center gap-2 border-2 border-gray-300 text-gray-700 font-bold px-5 py-2.5 rounded-full hover:border-gray-900 hover:text-gray-900 transition"
+                                title="Start a radio based on this artist"
+                            >
+                                <Radio size={18} /> Radio
                             </button>
                         )}
 

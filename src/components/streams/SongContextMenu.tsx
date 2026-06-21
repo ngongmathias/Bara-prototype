@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import {
-    Play, ListPlus, Plus, User, Disc, Share2, Heart, HeartOff, Loader2, Music, Check,
+    Play, ListPlus, Plus, User, Disc, Share2, Heart, HeartOff, Loader2, Music, Check, Radio,
 } from 'lucide-react';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useToast } from '@/hooks/use-toast';
@@ -104,7 +104,7 @@ interface MenuProps {
 
 const Menu: React.FC<MenuProps> = ({ state, onClose, playlistPickerOpen, setPlaylistPickerOpen }) => {
     const { song, x, y } = state;
-    const { play, playNext, addToQueue, toggleLike, likedSongs } = useAudioPlayer();
+    const { play, playNext, addToQueue, toggleLike, likedSongs, startRadio } = useAudioPlayer();
     const navigate = useNavigate();
     const { user } = useUser();
     const { toast } = useToast();
@@ -136,6 +136,12 @@ const Menu: React.FC<MenuProps> = ({ state, onClose, playlistPickerOpen, setPlay
     const handleAddToQueue = () => {
         addToQueue(song);
         toast({ title: 'Added to queue', description: `"${song.title}" queued` });
+        onClose();
+    };
+
+    const handleStartRadio = () => {
+        startRadio(song);
+        toast({ title: 'Starting radio', description: `Based on "${song.title}"` });
         onClose();
     };
 
@@ -200,6 +206,7 @@ const Menu: React.FC<MenuProps> = ({ state, onClose, playlistPickerOpen, setPlay
             <MenuItem icon={<Play size={16} />} label="Play" onClick={handlePlay} />
             <MenuItem icon={<ListPlus size={16} />} label="Play next" onClick={handlePlayNext} />
             <MenuItem icon={<Plus size={16} />} label="Add to queue" onClick={handleAddToQueue} />
+            <MenuItem icon={<Radio size={16} />} label="Start radio" onClick={handleStartRadio} />
             <MenuItem
                 icon={<Music size={16} />}
                 label="Add to playlist"

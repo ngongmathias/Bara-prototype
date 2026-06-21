@@ -65,7 +65,7 @@
 | F3 Queue | ✅ | `QueueDrawer` rebuilt: real **drag-to-reorder**, per-track **remove**, **clear**, now-playing + up-next. Context gained `removeFromQueue`/`reorderQueue`/`clearQueue` (index-safe). Add-to-queue / play-next already in `SongContextMenu`. Contrast bug fixed (clean light drawer). Mobile touch-drag is a later polish. |
 | F4 Search | ✅ | Dedicated `MusicSearchPage` at `/streams/search`: instant debounced typeahead, results grouped (Songs / Artists / Albums / Playlists), recent searches (localStorage), rich no-results state. **Typo tolerance** via `search_songs` pg_trgm RPC (graceful ILIKE fallback if the migration isn't applied). |
 | F5 Library | 🟡 | Liked ✅, playlists + collaborative ✅, recently played ✅, follow-artist ✅. **No saved-albums, no offline.** |
-| F6 Discovery | 🟡 | Personalised Home ✅, Release Radar ✅, **genre browse ✅ (new)**, "Fans also like" ✅. **Daily mixes are one generic row (not named multi-mixes); no radio/autoplay.** |
+| F6 Discovery | 🟡 | Personalised Home ✅, Release Radar ✅, genre browse ✅, "Fans also like" ✅, **radio / infinite autoplay ✅ (new — `startRadio` seeds from a song/artist by genre+artist, auto-extends forever; entry points in song context menu + ArtistPage)**. **Still: named multi daily-mixes.** |
 | F7 Now Playing | 🟡 | `FullScreenPlayer` is strong (immersive, grey ambient, queue, go-to-artist/album, share, lyrics tab). **Lyrics are static `<pre>` text — not time-synced.** |
 | F8 Social | 🟡 | Follow ✅, collaborative playlists ✅, share ✅, OG previews ✅. **No activity feed.** |
 | F9 Creator | ✅ | Verified badges (new), artist pages, dashboard+analytics, upload (audio/cover/lyrics), album creation. Claim/verify 🟡. |
@@ -92,7 +92,7 @@
 3. ~~**Dedicated music Search** (F4)~~ ✅ **Done Jun 20** — instant typeahead, grouped results, recent searches, typo tolerance (pg_trgm RPC + ILIKE fallback). **Tier 1 complete.**
 
 **Tier 2 — depth & stickiness**
-4. **Radio / infinite autoplay** (F6) — "Start radio" from any song/artist.
+4. ~~**Radio / infinite autoplay** (F6)~~ ✅ **Done Jun 21** — `startRadio` (genre+artist seed, infinite auto-extend); entry points in song context menu + ArtistPage. ← Tier 2 started
 5. **Named daily mixes** (F6) — 3–5 personalised, titled mixes with covers.
 6. **New-release notifications** from followed artists (F10) — leverages existing notifications table.
 7. **Time-synced lyrics** (F7) — LRC-style timing; karaoke scroll.
