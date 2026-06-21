@@ -8,7 +8,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { HelmetProvider } from 'react-helmet-async';
 
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Outlet } from "react-router-dom";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { SongContextMenuProvider } from "@/components/streams/SongContextMenu";
 
 import { CountrySelectionProvider } from "@/context/CountrySelectionContext";
 
@@ -358,6 +360,16 @@ const RouteFallback = () => (
   </div>
 );
 
+// Layout route for /streams/*: hoists SongContextMenuProvider above every
+// Streams page so pages can call useSongContextMenu() in their own body
+// (the provider previously lived inside StreamsLayout, i.e. *below* its
+// consumers, which threw and blanked those pages).
+const StreamsRouteLayout = () => (
+  <SongContextMenuProvider>
+    <Outlet />
+  </SongContextMenuProvider>
+);
+
 const AppRoutes = () => {
 
   // Use the auth logging hook to track all authentication events
@@ -400,6 +412,7 @@ const AppRoutes = () => {
 
 
 
+      <ErrorBoundary>
       <Suspense fallback={<RouteFallback />}>
       <Routes>
 
@@ -411,7 +424,7 @@ const AppRoutes = () => {
 
         {/* Mini-Apps Routes - Isolated with wildcard catch-alls to prevent fall-through */}
 
-        <Route path="/streams/*">
+        <Route path="/streams/*" element={<StreamsRouteLayout />}>
 
           <Route index element={<StreamsHub />} />
 
@@ -927,6 +940,7 @@ const AppRoutes = () => {
 
       </Routes>
       </Suspense>
+      </ErrorBoundary>
 
     </NotificationsProvider>
 
