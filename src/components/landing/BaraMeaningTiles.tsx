@@ -63,18 +63,17 @@ export function BaraMeaningTiles() {
             className="[grid-area:1/1] w-full rounded-2xl border border-gray-900 bg-gray-900 text-white flex flex-col items-center justify-center text-center px-6 py-6 sm:px-8"
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
           >
-            <h3 className="text-2xl sm:text-3xl font-black tracking-tight mb-2">BARA</h3>
             <p className="text-sm sm:text-base text-gray-200 leading-relaxed mb-3">
-              Kiswahili (or Swahili) for <span className="text-white font-semibold">continent, land, home</span>.
+              <span className="font-black text-white">BARA</span> – Kiswahili (or Swahili) for continent, land, home.
             </p>
             <p className="text-base sm:text-lg font-bold text-white tracking-wide mb-3">
-              One Land &nbsp;|&nbsp; One People &nbsp;|&nbsp; One Future
+              One Land | One People | One Future
             </p>
             <p className="text-xs sm:text-sm text-gray-300 leading-relaxed mb-4">
               With over 200 million speakers, Kiswahili is Africa's most far-reaching indigenous tongue.
             </p>
             <p className="text-sm sm:text-base font-bold text-white mb-1">
-              BARA Afrika &nbsp;|&nbsp; <span className="italic font-semibold text-gray-100">"Your Bridge to Today's Afrika!"</span>
+              BARA Afrika | “Your Bridge to Today's Afrika!”
             </p>
             <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
               A pan-African super platform connecting the global Afrikan family through trade, tourism, networking, entertainment, and beyond.
