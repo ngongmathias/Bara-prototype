@@ -1076,6 +1076,38 @@ Control/Mobile taxonomy + field configs, idempotent additive DB migration
   AlbumPage Save toggle + Library "Albums" filter). **Remaining:** gapless /
   crossfade / normalization (#8), offline/PWA (#9), device-matrix pass (#10).
 
+### 26.7 Stability fixes + Auth redesign (Jun 21–22) ✅
+- **Streams stability (production-blank-page hunt):**
+  - `SongContextMenuProvider` hoisted to a `/streams` layout route (was rendered
+    *inside* `StreamsLayout`, below its consumers → "useSongContextMenu must be
+    used within…" crash that blanked the section).
+  - **App-wide `ErrorBoundary`** now wraps the whole app incl. the root-level
+    `GlobalPlayer` (a crash there used to blank everything with nothing to catch it).
+  - **React #310 fix in `GlobalPlayer`** — a `useRef` (swipe gesture) sat *after*
+    `if (!currentSong) return null`, so starting a song changed the hook count and
+    crashed the player. Moved above the early return.
+  - **`esbuild keepNames`** in `vite.config.ts` so prod stack traces name the real
+    component (this is what pinpointed `GlobalPlayer`).
+  - Route **code-split** all `/streams` pages behind `<Suspense>`.
+- **Playlist fixes:** Create/AddToPlaylist modals now render via `createPortal`
+  (overlay was only blurring the side, contained by a transformed ancestor);
+  add-song button gives optimistic feedback + error toast; `UserMyPlaylists`
+  queried a non-existent `user_id` → fixed to `created_by`; grant migration so the
+  anon client can write `playlist_songs`/`playlists`.
+- **Landing:** BARA flip tile (`DancingBaraLogo`) copy updated to the new
+  Kiswahili / "Your Bridge to Today's Afrika!" messaging.
+- **Auth redesign (Clerk can't hold DOB/Gender/Country):**
+  - `/user/sign-up` is now a **custom form** (`useSignUp`) collecting First/Last,
+    DOB, Gender, Country, Phone (+dial code), Email, Username, Password, with the
+    Clerk email-code verification step. Extra fields persist to the Supabase
+    `clerk_users` profile (`20260622_user_profile_fields.sql`).
+  - **Google registration allowed without a password** via a new
+    `/auth/complete-profile` step (new OAuth users fill the same fields; existing
+    users skip). `AuthFinishPage` unified: link by email if already registered,
+    new OAuth → complete-profile, admin email/password sign-up still creates a row.
+  - **Admin → Users** dashboard now surfaces username/country/phone/DOB/gender per
+    user and includes them in the CSV export.
+
 ### 26.6 Compliance ✅
 DPO/compliance package completed and at signing stage (25.8.1); supporting docs
 committed under `compliance/`.
@@ -1084,8 +1116,9 @@ committed under `compliance/`.
 `20260617` (gamification) ✅ applied · `20260618` (categories) ✅ applied ·
 `20260619` (music bucket + songs RLS) ✅ applied · `20260620_music_search_trgm.sql`
 ✅ applied (search typo-tolerance live) · `20260621_new_release_notifications.sql`
-✅ applied (new-release notifications live) · `20260621_saved_albums.sql`
-⬜ **required for Saved Albums** (creates `user_album_saves`; run in SQL Editor).
+✅ applied · `20260621_saved_albums.sql` ✅ applied (Saved Albums live) ·
+`20260621_playlist_songs_anon_write.sql` ✅ applied (playlist song-adds work) ·
+`20260622_user_profile_fields.sql` ✅ applied (registration profile fields live).
 
 ---
 
