@@ -80,7 +80,7 @@
 | D3 Responsive | ⬜ | Desktop two-column Now Playing ✅; **needs real 375/768/1440 device pass**; mobile bottom-nav for Streams not confirmed. |
 | D4 States | 🟡 | Loading/empty/error mostly present; **QueueDrawer contrast bug**; offline state absent. |
 | D5 Accessibility | 🟡 | Keyboard shortcuts ✅ + ARIA on many buttons; **full keyboard/focus/contrast/reduced-motion pass not done.** |
-| D6 Performance | 🟡 | Lazy images ✅; **route code-split + long-list virtualisation not confirmed** (bundle is large per MASTER_PLAN R3). |
+| D6 Performance | 🟡 | Lazy images ✅; **route code-split ✅ (all `/streams` pages are `React.lazy` behind a `<Suspense>` boundary — each builds as its own on-demand chunk)**; **long-list virtualisation ✅ for the canonical long lists (LikedSongsPage + PlaylistPage use `useWindowVirtualizer`)**. Remaining: device-matrix pass, possibly virtualise ArtistPage discography / search results. |
 
 ---
 
@@ -100,7 +100,7 @@
 **Tier 3 — polish & scale**
 8. **Gapless + crossfade + normalization** (F1).
 9. **Saved albums** + **offline/PWA** (F5).
-10. **Performance**: code-split /streams, virtualise long lists; **a11y pass**; **device matrix pass** (D3/D5/D6).
+10. **Performance**: ~~code-split /streams~~ ✅ **Done Jun 21** (all pages `React.lazy` + `<Suspense>`), ~~virtualise long lists~~ ✅ **Done Jun 21** (`useWindowVirtualizer` on LikedSongsPage + PlaylistPage via `@tanstack/react-virtual`); **a11y pass** + **device matrix pass** (D3/D5/D6) still pending.
 
 ---
 

@@ -44,7 +44,22 @@
       "Bash(curl:*)",
       "Bash(git fetch:*)",
       "mcp__claude_ai_Vercel__list_deployments",
-      "Bash(wait)"
+      "Bash(wait)",
+      "Bash(node scripts/email-styles-codemod.mjs)",
+      "Bash(git -C /c/Users/Hp/Bara-Prototype add MASTER_PLAN.md)",
+      "Bash(git -C /c/Users/Hp/Bara-Prototype commit -m ' *)",
+      "Bash(git -C /c/Users/Hp/Bara-Prototype push origin main)",
+      "Bash(python3 -c ' *)",
+      "Bash(node -e ' *)",
+      "Bash(node *)",
+      "Bash(git -C /c/Users/Hp/Bara-Prototype add TEAM_UPDATE_2026-04-28.md)",
+      "Bash(git -C /c/Users/Hp/Bara-Prototype add src/pages/AboutUsPage.tsx src/locales/en.json)",
+      "Bash(openssl s_client -connect www.baraafrika.com:443 -servername www.baraafrika.com)",
+      "Bash(openssl x509 *)",
+      "Bash(openssl s_client -connect baraafrika.com:443 -servername baraafrika.com)",
+      "Bash(supabase --version)",
+      "Bash(supabase projects *)",
+      "Bash(supabase functions *)"
     ]
   }
 }

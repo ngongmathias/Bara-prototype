@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { Heart, Play, Pause, Clock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -76,6 +77,24 @@ export default function LikedSongsPage() {
         }
     };
 
+    // Window-based list virtualisation: only the rows in view (+overscan) are in
+    // the DOM, so a 500+ song collection stays smooth. The list scrolls with the
+    // page, so we offset by the list's distance from the top of the document.
+    const listRef = useRef<HTMLDivElement>(null);
+    const [scrollMargin, setScrollMargin] = useState(0);
+    useLayoutEffect(() => {
+        if (listRef.current) {
+            setScrollMargin(listRef.current.getBoundingClientRect().top + window.scrollY);
+        }
+    }, [songs.length, loading]);
+
+    const rowVirtualizer = useWindowVirtualizer({
+        count: songs.length,
+        estimateSize: () => 56,
+        overscan: 10,
+        scrollMargin,
+    });
+
     return (
         <StreamsLayout>
             <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white p-8">
@@ -137,13 +156,26 @@ export default function LikedSongsPage() {
                             <div className="flex justify-end pr-8"><Clock size={16} /></div>
                         </div>
 
-                        {/* Song List */}
-                        <div className="space-y-1">
-                            {songs.map((song, index) => {
+                        {/* Song List (virtualised) */}
+                        <div
+                            ref={listRef}
+                            style={{ height: rowVirtualizer.getTotalSize(), position: 'relative' }}
+                        >
+                            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                                const index = virtualRow.index;
+                                const song = songs[index];
                                 const isCurrent = currentSong?.id === song.id;
                                 return (
                                     <div
                                         key={song.id}
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: `${virtualRow.size}px`,
+                                            transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
+                                        }}
                                         className="grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 rounded-lg group hover:bg-gray-100 transition-colors items-center cursor-pointer"
                                         onClick={() => play(song)}
                                         {...contextMenuHandlers(song)}

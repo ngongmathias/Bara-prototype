@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase, createAuthenticatedSupabaseClient } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
@@ -247,6 +248,23 @@ export default function PlaylistPage() {
 
     const totalDuration = tracks.reduce((sum, t) => sum + (t.duration || 0), 0);
 
+    // Window-based list virtualisation — keeps long playlists (500+ tracks) smooth
+    // by only rendering the rows in view. The list scrolls with the page.
+    const listRef = useRef<HTMLDivElement>(null);
+    const [scrollMargin, setScrollMargin] = useState(0);
+    useLayoutEffect(() => {
+        if (listRef.current) {
+            setScrollMargin(listRef.current.getBoundingClientRect().top + window.scrollY);
+        }
+    }, [tracks.length, loading]);
+
+    const rowVirtualizer = useWindowVirtualizer({
+        count: tracks.length,
+        estimateSize: () => 56,
+        overscan: 10,
+        scrollMargin,
+    });
+
     if (loading) {
         return (
             <StreamsLayout>
@@ -348,12 +366,25 @@ export default function PlaylistPage() {
                                 <p className="text-sm">Add songs from the Streams home page to get started.</p>
                             </div>
                         ) : (
-                            <div>
-                                {tracks.map((track, index) => {
+                            <div
+                                ref={listRef}
+                                style={{ height: rowVirtualizer.getTotalSize(), position: 'relative' }}
+                            >
+                                {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                                    const index = virtualRow.index;
+                                    const track = tracks[index];
                                     const isCurrentTrack = currentSong?.id === track.id;
                                     return (
                                         <div
                                             key={track.id}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: `${virtualRow.size}px`,
+                                                transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
+                                            }}
                                             className={`grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 rounded group hover:bg-gray-100 cursor-pointer ${isCurrentTrack ? 'bg-gray-50' : ''}`}
                                             onClick={() => handlePlayTrack(track)}
                                             {...contextMenuHandlers(track)}
