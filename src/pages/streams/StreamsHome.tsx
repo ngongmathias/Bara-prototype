@@ -12,6 +12,7 @@ import { DiscoverMore } from '@/components/DiscoverMore';
 import { useUser } from '@clerk/clerk-react';
 import { GENRES } from './GenrePage';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
+import { buildDailyMixes, DailyMix } from '@/lib/dailyMixes';
 
 // Batch-fetch featured artists for a list of song IDs and return a map: songId -> "ft. A, B"
 async function fetchFeaturedArtistsMap(songIds: string[]): Promise<Record<string, string>> {
@@ -50,6 +51,7 @@ export default function StreamsHome() {
     const [platformPlaylists, setPlatformPlaylists] = useState<any[]>([]);
     const [promotedSongs, setPromotedSongs] = useState<(Song & { featured_badge?: string })[]>([]);
     const [personalizedSongs, setPersonalizedSongs] = useState<Song[]>([]);
+    const [dailyMixes, setDailyMixes] = useState<DailyMix[]>([]);
     const [featuredArtistsMap, setFeaturedArtistsMap] = useState<Record<string, string>>({});
     const [spotlight, setSpotlight] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
@@ -228,6 +230,12 @@ export default function StreamsHome() {
         };
 
         fetchData();
+    }, [clerkUser?.id, refreshKey]);
+
+    // Named daily mixes from listening history
+    useEffect(() => {
+        if (!clerkUser) { setDailyMixes([]); return; }
+        buildDailyMixes(clerkUser.id).then(setDailyMixes).catch(() => {});
     }, [clerkUser?.id, refreshKey]);
 
     const handleRefresh = async () => {
@@ -465,8 +473,24 @@ export default function StreamsHome() {
                             )}
 
                             {/* Made For You - Curated Mixes */}
-                            <Section title="Made For You">
-                                {platformPlaylists.length > 0 ? (
+                            <Section title="Made for you" subtitle="Daily mixes from your listening">
+                                {dailyMixes.length > 0 ? (
+                                    dailyMixes.map(mix => (
+                                        <div key={mix.id} onClick={() => playAlbum(mix.songs, 0)} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-sm">
+                                            <div className="relative mb-4 aspect-square rounded-md overflow-hidden shadow-lg">
+                                                <img loading="lazy" src={mix.cover_url} alt={mix.subtitle} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                                                <div className="absolute bottom-2 left-3 right-3">
+                                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">Daily Mix</p>
+                                                    <p className="text-base font-black text-white truncate capitalize">{mix.subtitle}</p>
+                                                </div>
+                                                <button onClick={(e) => { e.stopPropagation(); playAlbum(mix.songs, 0); }} className="absolute top-2 right-2 w-11 h-11 rounded-full bg-gray-900 text-white flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 transition-all hover:scale-105 active:scale-95" aria-label="Play mix"><Play size={20} fill="white" className="ml-0.5" /></button>
+                                            </div>
+                                            <h3 className="font-bold truncate text-gray-900 mb-1 text-sm">{mix.title}</h3>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest truncate">{mix.songs.length} songs</p>
+                                        </div>
+                                    ))
+                                ) : platformPlaylists.length > 0 ? (
                                     platformPlaylists.map(pl => (
                                         <div key={pl.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
