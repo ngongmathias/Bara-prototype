@@ -36,6 +36,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
     const [recommendedSongs, setRecommendedSongs] = useState<SongItem[]>([]);
     const [searchResults, setSearchResults] = useState<SongItem[]>([]);
     const [addedSongIds, setAddedSongIds] = useState<Set<string>>(new Set());
+    const [addingSongId, setAddingSongId] = useState<string | null>(null);
     const [loadingSongs, setLoadingSongs] = useState(false);
 
     useEffect(() => {
@@ -74,15 +75,21 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
     };
 
     const addSongToPlaylist = async (songId: string) => {
-        if (!playlistId || addedSongIds.has(songId)) return;
+        if (!playlistId || addedSongIds.has(songId) || addingSongId === songId) return;
         const position = addedSongIds.size;
+        // Optimistic: flip the button to "added" immediately so the tap registers.
+        setAddingSongId(songId);
+        setAddedSongIds(prev => new Set(prev).add(songId));
         const { error } = await supabase.from('playlist_songs').insert({
             playlist_id: playlistId,
             song_id: songId,
             position,
         });
-        if (!error) {
-            setAddedSongIds(prev => new Set(prev).add(songId));
+        setAddingSongId(null);
+        if (error) {
+            // Roll back the optimistic add and tell the user something went wrong.
+            setAddedSongIds(prev => { const next = new Set(prev); next.delete(songId); return next; });
+            toast({ title: "Couldn't add song", description: error.message, variant: 'destructive' });
         }
     };
 
@@ -237,14 +244,17 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
                                             </div>
                                             <button
                                                 onClick={() => addSongToPlaylist(song.id)}
-                                                disabled={isAdded}
-                                                className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition ${
+                                                disabled={isAdded || addingSongId === song.id}
+                                                aria-label={isAdded ? 'Added' : 'Add to playlist'}
+                                                className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                                                     isAdded
-                                                        ? 'bg-gray-900 text-white'
-                                                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                                        ? 'bg-gray-900 text-white scale-110'
+                                                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300 hover:scale-105 active:scale-95'
                                                 }`}
                                             >
-                                                {isAdded ? <Check size={14} /> : <Plus size={14} />}
+                                                {addingSongId === song.id
+                                                    ? <Loader2 size={14} className="animate-spin" />
+                                                    : isAdded ? <Check size={14} /> : <Plus size={14} />}
                                             </button>
                                         </div>
                                     );
