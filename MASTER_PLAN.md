@@ -139,17 +139,17 @@
 |---|------|--------|
 | 1 | **Clerk production keys** — app runs on dev keys with strict rate limits | 7.42 |
 | 2 | **Emails: audit + setup** — @baraafrika.com transactional email (Resend), SPF/DKIM | 7.51 |
-| 3 | **Streams: verify `audio-files` + `cover-art` storage buckets + RLS** | 7A-1.5 |
+| 3 | ~~**Streams: verify `audio-files` + `cover-art` storage buckets + RLS**~~ ✅ Done Jun 19 — the upload code actually uses a single **`music`** bucket (not `audio-files`/`cover-art`), which **no migration had ever created** → song uploads silently failed. Added `20260619_streams_music_bucket.sql` (public read, anon+auth write) + `20260619_streams_songs_write_rls.sql` (songs/albums/song_artists INSERT/UPDATE/DELETE policies, `songs.price` column, artists anon grant). Both applied. | 7A-1.5 |
 | 4 | ~~**Admin: Movies + Podcasts management pages** (`/admin/movies`, `/admin/podcasts`)~~ ✅ Confirmed May 8 — `AdminMovies` (525 LOC) and `AdminPodcasts` (375 LOC) both exist with full CRUD; routes are at `/admin/streams/movies` and `/admin/streams/podcasts`. DB tables exist in `20260319_sprint7_test_data.sql`. | 7.50 |
 | 5 | **Cross-device testing** — mobile (375px), tablet (768px), desktop (1440px) all pages | 7A-0.2 |
 | 6 | ~~**Blog post likes** — needs `blog_post_likes` table + RLS (currently localStorage)~~ ✅ Done Apr 13 — migration created, BlogPostDetail wired to Supabase | 10.4 |
-| 7 | **Deploy `send-email` edge function with idempotency guard + audit `email_queue` webhook in Supabase Dashboard** (INSERT-only, single registration). Code fix `4ddca2e` is merged but not yet deployed; until then duplicate confirmation emails are still going out in production. | 22.5.3 / 22.5.4 |
+| 7 | ~~**Deploy `send-email` edge function with idempotency guard**~~ ✅ Deployed Jun 18 via `supabase functions deploy send-email` (project `sqxybqvrctegnejbkpwg`) — duplicate-email guard now live. **Still open:** audit the `email_queue` webhook in the Supabase Dashboard to confirm it's INSERT-only / registered once (22.5.4). | 22.5.3 / 22.5.4 |
 | 8 | **Sign-up / login bugs (Clerk)** — Maj Mlinzi case: tried to register as "Maj theGeezer", told username already taken; full Clerk flow audit needed across all entry points. | 25.1.1 |
 | 9 | **Chrome sign-up popup never closes** — sign-up modal stays open forever in Chrome (works in Firefox). Reproduces blocking new-user onboarding on the most-used browser. | 25.1.2 |
 | 10 | ~~**Blog comments — permissions error** — users hitting RLS / permissions error when trying to comment on blog posts. Audit `blog_comments` RLS + Clerk JWT mapping.~~ ✅ Done May 4 — missing GRANTs on `blog_comments` + `blog_comment_likes` added (commit `a986918`) | 25.1.3 |
 | 11 | **SSL certificate not Secure** — site not showing as Secure (https) in browser. Confirm Vercel SSL provisioned correctly for `baraafrika.com` + all subdomains, fix mixed content if any. | 25.1.4 |
 | 12 | ~~**About Us copy replacement** — replace current About Us body with the new "ORIGINS: BARA Afrika" 4-paragraph copy and replace tagline "Est 2024, Rwanda" with "Made by Africans for Africans and friends of Africa".~~ ✅ Done May 4 — copy replaced (commit `80f71da`) | 25.3 |
-| 13 | **Music UX/UI parity with josplay.com** — Music is the most important Streams pillar; bring listening experience to parity with https://music.josplay.com/ (player UX, browse, artist pages). | 25.2.3 |
+| 13 | 🟡 **Music UX/UI parity** — now driven by **`STREAMS_STANDARD.md`** (Spotify-grade spec + audit). **Tier 1 complete (Jun 20):** Media Session API, full queue (reorder/remove/clear), dedicated music search. Pass 1 (AlbumPage, genre browse) + Pass 2 (add-to-playlist, verification badges, full monochrome sweep) also done. **Remaining:** Tier 2 (radio, daily mixes, new-release notifications, synced lyrics) + Tier 3 (gapless/crossfade, offline, perf/a11y). | 25.2.3 / Phase 26 |
 
 ### Important Pre-Launch (P1)
 
@@ -814,7 +814,7 @@ Marlon's message referenced two inline images (`Image #5`, `Image #6`) and attac
   **Caveat (worth flagging, separate from 25.2.2):** the guard treats all admin roles the same — it just checks `is_admin === true`. The `role` field (`super_admin`/`admin`/`moderator`) is read into `adminInfo` but **never enforced anywhere in the frontend**. So in practice a `moderator` can do everything a `super_admin` can on the Streams pages. If Marlon wants role separation (e.g. moderators can edit but not delete songs), that's a follow-up task — not in 25.2.2 scope.
 
   **Bonus finding from this audit:** Pre-Launch Blocker P0 item #4 ("Admin: Movies + Podcasts management pages") is **also stale**. Both `AdminMovies.tsx` (525 lines) and `AdminPodcasts.tsx` (375 lines) exist with full CRUD; both DB tables exist in `20260319_sprint7_test_data.sql`. Marked below.
-- [ ] **25.2.3 Music UX/UI parity with josplay.com** — implementation deferred. **Gap analysis done May 8.**
+- [~] **25.2.3 Music UX/UI parity with josplay.com** — 🟢 **Now in active execution (Jun 17–21) — see Phase 26 + `STREAMS_STANDARD.md`.** Original gap analysis (May 8) below is largely addressed: AlbumPage, genre browse, dedicated music search, add-to-playlist, verification badges, Media Session, full queue, and the complete monochrome design sweep are all shipped. Remaining is Tier 2/3 polish.
 
   **Current BARA Streams music surface (what exists):**
   - Discovery: `StreamsHome`, `StreamsHub`, `TrendingSongsPage`, `NewReleasesPage`
@@ -1002,6 +1002,85 @@ Migration: `supabase/migrations/20260508_country_key_listings.sql`. Files: `src/
 
 ---
 
+## PHASE 26 — PLATFORM REPAIR & STREAMS SPOTIFY-GRADE OVERHAUL (June 17–21, 2026)
+
+> A focused work cycle: fixed several silently-broken systems (rewards, song
+> uploads), shipped pending infra, executed marketplace categories option B, and
+> drove BARA Streams toward a Spotify-grade bar. **The Streams spec, verification
+> method and live audit now live in `STREAMS_STANDARD.md`** — treat that as the
+> source of truth for Streams quality.
+
+### 26.1 Rewards / gamification system repair ✅
+Root cause: `gamification_profiles` RLS (migration `20260412`) required the Clerk
+JWT, but `GamificationService` uses the tokenless anon client → every coins/XP/
+streak write was silently blocked, `getProfile` returned null, and `daily_login`
+(tracked after the null-profile guard) never fired.
+- `20260617_fix_gamification_clerk_rls.sql` — Clerk-TEXT ids + open RLS on
+  `gamification_profiles`/`user_achievements`/`gamification_history`; restored a
+  correct `reset_daily_missions_for_user`. **Applied.**
+- Service: count day 1 immediately for new profiles; write `daily_streak` in
+  sync with `consecutive_days` (Header + LeaderboardPage read `daily_streak`).
+- `AdminGamification` rebuilt from mock data → live stats, real XP leaderboard
+  with Clerk names, mission completion counts, recent activity, and a working
+  grant/deduct coins + XP "User Controls" panel. (Maps to Phase 21.1.)
+- **Hardening follow-up:** move coin/XP mutations to SECURITY DEFINER RPCs before
+  coins carry real value (currently open RLS, matching the rest of the app).
+
+### 26.2 Infra / ops ✅
+- **`send-email` edge function deployed** (Blocker #7 / 22.5.3). Webhook audit
+  (22.5.4) still pending in the dashboard.
+- **Streams `music` storage bucket + song-write RLS** (Blocker #3 / 7A-1.5) —
+  see that row. Unblocked admin + creator song uploads end-to-end.
+
+### 26.3 Marketplace categories — option B ✅
+Executed 25.4 option B (see that section): canonical
+`src/config/marketplaceCategories.ts`, new Electronics/Appliances/Climate
+Control/Mobile taxonomy + field configs, idempotent additive DB migration
+`20260618_marketplace_categories_phase254.sql`. Remaining: 25.4.6 listing remap.
+
+### 26.4 UX fixes ✅
+- **Coins navbar dropdown** — "Missions & Achievements" / "Leaderboard" were dead
+  links (`/gamification` route never existed). Built a real `/gamification` hub
+  page (missions + achievements tabs + profile summary); repointed Leaderboard to
+  `/leaderboard`.
+- **User dashboard menu** — removed the nonsensical "My Listings → /listings"
+  (public directory) item; relabeled "Coin Shop" → "Profile Themes".
+
+### 26.5 Streams Spotify-grade overhaul 🟢 (tracked in `STREAMS_STANDARD.md`)
+- **Pass 1 ✅** — `AlbumPage` (`/streams/album/:id`), genre browse + detail
+  (`/streams/genres`, `/streams/genre/:slug`). (MusicPage = existing StreamsHome.)
+- **Pass 2 ✅** — `AddToPlaylistModal` (17.5.2) wired into the player; confirmed
+  17.5.1 mini-player + 17.1.x Now-Playing already built.
+- **Verification badges (17.4.1) ✅** — `VerifiedBadge` on ArtistPage / ArtistsPage
+  / StreamsHome / GenrePage; fixed ArtistPage showing "Verified" unconditionally.
+- **Design sweep ✅** — entire Streams section converted to strict black/white/grey
+  (removed all Spotify-green/amber/blue/purple; FullScreenPlayer ambient glow now
+  fully desaturated). Mechanically verified zero colour classes in
+  `src/{pages,components}/streams`.
+- **Tier 1 ✅ (Jun 20):**
+  1. **Media Session API** — lock-screen/notification/hardware-key controls +
+     artwork + position state in `AudioPlayerContext`.
+  2. **Full queue** — `removeFromQueue`/`reorderQueue`/`clearQueue` + rebuilt
+     `QueueDrawer` (drag-reorder, remove, clear; contrast bug fixed).
+  3. **Dedicated music search** — `MusicSearchPage` at `/streams/search` (instant
+     typeahead, grouped, recent searches) + `search_songs` pg_trgm RPC for typo
+     tolerance (`20260620_music_search_trgm.sql`, graceful ILIKE fallback).
+- **Tier 2 (next):** radio / infinite autoplay → named daily mixes → new-release
+  notifications from followed artists → time-synced lyrics.
+- **Tier 3:** gapless/crossfade/normalization, saved albums + offline/PWA,
+  perf (code-split, virtualise) + a11y + device-matrix pass.
+
+### 26.6 Compliance ✅
+DPO/compliance package completed and at signing stage (25.8.1); supporting docs
+committed under `compliance/`.
+
+### ⚠️ Migrations to apply (Supabase SQL Editor) — status
+`20260617` (gamification) ✅ applied · `20260618` (categories) ✅ applied ·
+`20260619` (music bucket + songs RLS) ✅ applied · `20260620_music_search_trgm.sql`
+⬜ **optional, recommended** (turns on search typo-tolerance; search works without it).
+
+---
+
 ## DEPENDENCIES MAP
 
 ```
@@ -1068,6 +1147,8 @@ User profile visibility ──→ Team decision required
 *May 4–8, 2026 — **Phase 25 execution week** (Mon–Fri sprint). 11 commits landed: blog comments grants, email_queue refactor (22.5.1 + 22.5.6 closing the duplicate-email saga), Clerk v5 migration (25.1.2 — likely fix for "popup never closes in Chrome"), full Clerk audit (25.1.1) with 3 mis-routed entry points fixed and Clerk Dashboard action list documented for Marlon, sign-up trim (25.1.1.a) with `showOptionalFields: false` and 2 design-system blue→black fixes, non-user QA pass (25.1.1.c) with 21 sign-in entry points updated to preserve `redirect_url`, marketplace categories audit (25.4.1) finding **5 different category lists** in the codebase (25.4.2–6 paused awaiting Marlon's A/B call on the "4 Main Categories" scope ambiguity), BARA Global Gallery (25.5.1) with admin upload + client-side resize/compress + lightbox, BARA Global Key Listings (25.5.2) with 6-type enum + 100-word description counter + https-validated web links + ≤100 KB icon logos, e-books backfill (25.2.1) with the missing `ebooks` table + storage bucket migration (frontend was already coded for it with graceful fallback). Audit findings: Super Admin has full Streams permissions ✅ but role enforcement is binary — moderator = admin in practice (25.2.2). Current ad system is 100% in-house `sponsored_banners` — zero AdSense / external ad-network code anywhere (25.7.1), so Phase 25.7.2 onboarding work is fully greenfield. Music parity (25.2.3) deferred with 3-pass roadmap documented. Pre-Launch Blocker P0 #4 (Movies/Podcasts admin) confirmed already shipped and marked stale.*
 
 *April 28, 2026 — **Phase 25 second pass** after re-reading the original Marlon message verbatim from the conversation transcript. Filled in detail that was lost in the first pass: (a) marketplace sub-sub-category item lists for every subcategory across all 4 Main Categories (TVs LED/QLED/OLED/Smart/CRT, Home Audio soundbars/AV receivers/subs, Cameras DSLR/mirrorless/GoPro/drones, Refrigerators upright/chest/french door/mini, Cleaning Appliances vacuum types + steam + irons, Washing Machines front/top/semi-auto, Mobile Phones smartphones/feature/refurbished, etc.); (b) Key Listings logo "similar to Coat of Arms" reference preserved; (c) Sign-up UX directives split out — "as quick and painless as possible" (25.1.1.a), 3rd-party alternative evaluation (25.1.1.b), non-user QA pass (25.1.1.c); (d) team's verbatim priority labels (CSA = High Priority, SSL / Marketplace categories / BARA Global = Medium Priority) preserved in new section 25.0; (e) Meeting Request agenda items — BARA Streams, BARA Coins, BARA Sports — captured in 25.0.1; (f) explicit gap-flag for the four screenshots referenced in the message (Image #5 payment screen, Image #6 login/comment trouble, plus two attached jpegs) that must still be inspected and transcribed (25.0.2).*
+
+*June 17–21, 2026 — **Phase 26 added: Platform Repair & Streams Spotify-Grade Overhaul.** (1) **Rewards repair** — diagnosed that `gamification_profiles` JWT-RLS vs the tokenless anon client silently blocked all coins/XP/streak writes; migration `20260617` (Clerk-TEXT + open RLS) + service fixes (day-1 streak, `daily_streak`/`consecutive_days` sync) + rebuilt `AdminGamification` from mock → live data with a grant/deduct control panel. (2) **Infra** — deployed `send-email` (Blocker #7); created the missing Streams `music` storage bucket + song-write RLS + `songs.price` (`20260619`, Blocker #3) which had been silently failing all uploads. (3) **Marketplace categories option B** executed (`20260618`): canonical `marketplaceCategories.ts` + Electronics/Appliances/Climate Control/Mobile taxonomy. (4) **UX fixes** — built the missing `/gamification` hub (coins-dropdown dead links), cleaned the dashboard menu. (5) **Streams Spotify-grade** — created `STREAMS_STANDARD.md` (spec + verify method + audit + tiered roadmap); shipped Pass 1 (AlbumPage, genre browse), Pass 2 (add-to-playlist modal), verification badges, a complete monochrome design sweep (zero colour classes remain in streams), and **Tier 1**: Media Session API, full queue (reorder/remove/clear), dedicated typo-tolerant music search (`20260620` pg_trgm RPC). Tier 2 (radio, daily mixes, new-release notifications, synced lyrics) is next. (6) DPO/compliance package at signing stage (25.8.1). Migrations `20260617/18/19` applied; `20260620` optional.*
 
 ---
 
