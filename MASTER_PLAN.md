@@ -1081,7 +1081,8 @@ committed under `compliance/`.
 ### ⚠️ Migrations to apply (Supabase SQL Editor) — status
 `20260617` (gamification) ✅ applied · `20260618` (categories) ✅ applied ·
 `20260619` (music bucket + songs RLS) ✅ applied · `20260620_music_search_trgm.sql`
-⬜ **optional, recommended** (turns on search typo-tolerance; search works without it).
+✅ applied (search typo-tolerance live) · `20260621_new_release_notifications.sql`
+✅ applied (new-release notifications live).
 
 ---
 

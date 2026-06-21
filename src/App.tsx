@@ -16,7 +16,7 @@ import { useAuthLogging } from "@/hooks/useAuthLogging";
 
 import { ScrollToTop } from "@/components/ScrollToTop";
 
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -270,47 +270,34 @@ import SportsTeams from "./pages/sports/SportsTeams";
 
 import SportsNewsDetail from "./pages/sports/SportsNewsDetail";
 
-import StreamsHome from "./pages/streams/StreamsHome";
-
-import StreamsHub from "./pages/streams/StreamsHub";
-
-import PlaylistPage from "./pages/streams/PlaylistPage";
-
-import ArtistPage from "./pages/streams/ArtistPage";
-
-import ArtistsPage from "./pages/streams/ArtistsPage";
-
-import TrendingSongsPage from "./pages/streams/TrendingSongsPage";
-
-import NewReleasesPage from "./pages/streams/NewReleasesPage";
-import AlbumPage from "./pages/streams/AlbumPage";
-import GenrePage from "./pages/streams/GenrePage";
-import MusicSearchPage from "./pages/streams/MusicSearchPage";
-
-import LikedSongsPage from "./pages/streams/LikedSongsPage";
-import SongPage from "./pages/streams/SongPage";
-import CreditPage from "./pages/streams/CreditPage";
-
-import LibraryPage from "./pages/streams/LibraryPage";
-import ListeningStatsPage from "./pages/streams/ListeningStatsPage";
-
-import ArtistDashboard from "@/pages/streams/ArtistDashboard";
-
-import ArtistVerificationPage from "./pages/streams/ArtistVerificationPage";
-
-import UploadSongPage from "./pages/streams/UploadSongPage";
-
-import CreateAlbumPage from "./pages/streams/CreateAlbumPage";
+// /streams pages are route code-split (lazy) to shrink the initial bundle — they
+// load on demand behind the <Suspense> boundary on the /streams route block.
+const StreamsHome = lazy(() => import("./pages/streams/StreamsHome"));
+const StreamsHub = lazy(() => import("./pages/streams/StreamsHub"));
+const PlaylistPage = lazy(() => import("./pages/streams/PlaylistPage"));
+const ArtistPage = lazy(() => import("./pages/streams/ArtistPage"));
+const ArtistsPage = lazy(() => import("./pages/streams/ArtistsPage"));
+const TrendingSongsPage = lazy(() => import("./pages/streams/TrendingSongsPage"));
+const NewReleasesPage = lazy(() => import("./pages/streams/NewReleasesPage"));
+const AlbumPage = lazy(() => import("./pages/streams/AlbumPage"));
+const GenrePage = lazy(() => import("./pages/streams/GenrePage"));
+const MusicSearchPage = lazy(() => import("./pages/streams/MusicSearchPage"));
+const LikedSongsPage = lazy(() => import("./pages/streams/LikedSongsPage"));
+const SongPage = lazy(() => import("./pages/streams/SongPage"));
+const CreditPage = lazy(() => import("./pages/streams/CreditPage"));
+const LibraryPage = lazy(() => import("./pages/streams/LibraryPage"));
+const ListeningStatsPage = lazy(() => import("./pages/streams/ListeningStatsPage"));
+const ArtistDashboard = lazy(() => import("@/pages/streams/ArtistDashboard"));
+const ArtistVerificationPage = lazy(() => import("./pages/streams/ArtistVerificationPage"));
+const UploadSongPage = lazy(() => import("./pages/streams/UploadSongPage"));
+const CreateAlbumPage = lazy(() => import("./pages/streams/CreateAlbumPage"));
+const PodcastsPage = lazy(() => import("./pages/streams/PodcastsPage"));
+const MoviesPage = lazy(() => import("./pages/streams/MoviesPage"));
+const MovieDetailPage = lazy(() => import("./pages/streams/MovieDetailPage"));
+const EbooksPage = lazy(() => import("./pages/streams/EbooksPage"));
+const EbookDetailPage = lazy(() => import("./pages/streams/EbookDetailPage"));
 
 import SportsNewsList from "./pages/sports/SportsNewsList";
-
-import PodcastsPage from "./pages/streams/PodcastsPage";
-
-import MoviesPage from "./pages/streams/MoviesPage";
-import MovieDetailPage from "./pages/streams/MovieDetailPage";
-
-import EbooksPage from "./pages/streams/EbooksPage";
-import EbookDetailPage from "./pages/streams/EbookDetailPage";
 
 import SearchPage from "./pages/SearchPage";
 
@@ -361,7 +348,15 @@ const queryClient = new QueryClient();
 
 import { useWelcomeEmail } from "@/hooks/useWelcomeEmail";
 
-
+// Minimal monochrome fallback shown while a lazy (code-split) route chunk loads.
+const RouteFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-gray-900 animate-spin" />
+      <span className="sr-only">Loading…</span>
+    </div>
+  </div>
+);
 
 const AppRoutes = () => {
 
@@ -405,6 +400,7 @@ const AppRoutes = () => {
 
 
 
+      <Suspense fallback={<RouteFallback />}>
       <Routes>
 
         <Route path="/" element={<LandingPage />} />
@@ -930,6 +926,7 @@ const AppRoutes = () => {
         <Route path="*" element={<NotFound />} />
 
       </Routes>
+      </Suspense>
 
     </NotificationsProvider>
 
