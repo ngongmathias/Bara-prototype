@@ -31,11 +31,15 @@ export interface DatabaseUser {
   email: string;
   first_name?: string;
   last_name?: string;
+  full_name?: string;
+  username?: string;
   phone?: string;
   avatar_url?: string;
   role: string;
   country?: string;
   city?: string;
+  date_of_birth?: string;
+  gender?: string;
   created_at: string;
   updated_at: string;
 }
@@ -371,7 +375,7 @@ export class UserLogService {
    * Export users to CSV format
    */
   static exportUsersToCSV(users: (DatabaseUser | AdminUser)[]): string {
-    const headers = ['ID', 'Email', 'Name', 'Role', 'Phone', 'Country', 'City', 'Created Date', 'Last Updated'];
+    const headers = ['ID', 'Email', 'Name', 'Username', 'Role', 'Phone', 'Country', 'Date of Birth', 'Gender', 'City', 'Created Date', 'Last Updated'];
 
     const csvContent = [
       headers.join(','),
@@ -380,14 +384,18 @@ export class UserLogService {
         const fullName = isAdmin
           ? `${(user as AdminUser).first_name || ''} ${(user as AdminUser).last_name || ''}`.trim() || 'N/A'
           : `${(user as DatabaseUser).first_name || ''} ${(user as DatabaseUser).last_name || ''}`.trim() || 'N/A';
+        const dbUser = user as DatabaseUser;
         return [
           user.id,
           `"${user.email}"`,
           `"${fullName}"`,
+          `"${dbUser.username || 'N/A'}"`,
           user.role || 'N/A',
-          `"${(user as DatabaseUser).phone || 'N/A'}"`,
-          `"${(user as DatabaseUser).country || 'N/A'}"`,
-          `"${(user as DatabaseUser).city || 'N/A'}"`,
+          `"${dbUser.phone || 'N/A'}"`,
+          `"${dbUser.country || 'N/A'}"`,
+          `"${dbUser.date_of_birth || 'N/A'}"`,
+          `"${dbUser.gender || 'N/A'}"`,
+          `"${dbUser.city || 'N/A'}"`,
           new Date(user.created_at).toLocaleDateString(),
           new Date(user.updated_at).toLocaleDateString()
         ].join(',');

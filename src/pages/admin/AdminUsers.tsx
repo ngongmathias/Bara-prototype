@@ -500,6 +500,19 @@ export const AdminUsers = () => {
                                   </div>
                                   <div className="text-sm text-gray-500">{user.email}</div>
                                   <div className="text-xs text-gray-400">ID: {user.id}</div>
+                                  {(('username' in user && user.username) ||
+                                    ('country' in user && user.country) ||
+                                    ('phone' in user && user.phone) ||
+                                    ('date_of_birth' in user && user.date_of_birth) ||
+                                    ('gender' in user && user.gender)) && (
+                                    <div className="mt-1.5 space-y-0.5 text-xs text-gray-500">
+                                      {'username' in user && user.username && <div>@{user.username}</div>}
+                                      {'country' in user && user.country && <div>📍 {user.country}</div>}
+                                      {'phone' in user && user.phone && <div>📞 {user.phone}</div>}
+                                      {'date_of_birth' in user && user.date_of_birth && <div>🎂 {user.date_of_birth}</div>}
+                                      {'gender' in user && user.gender && <div>{user.gender}</div>}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </TableCell>
