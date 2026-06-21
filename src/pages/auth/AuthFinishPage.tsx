@@ -30,61 +30,68 @@ export const AuthFinishPage = () => {
 
     const run = async () => {
       try {
-        const userEmail = user.primaryEmailAddress?.emailAddress || '';
+        const userEmail = (user.primaryEmailAddress?.emailAddress || '').toLowerCase();
+        const isOAuth = (user.externalAccounts?.length ?? 0) > 0;
 
-        if (mode === 'sign_in') {
-          const { data: existing, error: existingErr } = await supabase
-            .from('clerk_users')
-            .select('id')
-            .eq('clerk_user_id', user.id)
-            .maybeSingle();
+        const { data: existing, error: existingErr } = await supabase
+          .from('clerk_users')
+          .select('id')
+          .eq('clerk_user_id', user.id)
+          .maybeSingle();
+        if (existingErr) {
+          throw new Error('Unable to verify your account. Please try again.');
+        }
 
-          if (existingErr) {
-            throw new Error('Unable to verify your account. Please try again.');
-          }
-
-          if (!existing?.id) {
-            // No platform account linked to this Clerk user id. Reconcile by email
-            // in case they registered with email/password and are now signing in
-            // with Google (same verified email → link, don't block).
+        if (!existing?.id) {
+          // Reconcile by email first: someone who registered with email/password
+          // and is now signing in with Google (same verified email) should link to
+          // their existing profile, not be treated as a new user.
+          let linked = false;
+          if (userEmail) {
             const { data: byEmail } = await supabase
               .from('clerk_users')
               .select('id')
-              .eq('email', userEmail.toLowerCase())
+              .eq('email', userEmail)
               .maybeSingle();
-
             if (byEmail?.id) {
               await supabase
                 .from('clerk_users')
                 .update({ clerk_user_id: user.id, updated_at: new Date().toISOString() })
                 .eq('id', byEmail.id);
+              linked = true;
+            }
+          }
+
+          if (!linked) {
+            if (isOAuth) {
+              // New Google/social user — collect the registration profile (DOB,
+              // gender, country, phone, username). No password needed.
+              navigate(`/auth/complete-profile?redirect_url=${encodeURIComponent(redirectUrl)}`);
+              return;
+            }
+            if (mode === 'sign_up') {
+              // Email/password sign-up via a prebuilt widget (e.g. the admin
+              // sign-up) — create the minimal profile row as before.
+              const flagKey = `bara_platform_user_created_${user.id}`;
+              if (!sessionStorage.getItem(flagKey)) {
+                const ok = await ClerkSupabaseBridge.ensureDatabaseUser({
+                  id: user.id,
+                  email: userEmail,
+                  firstName: user.firstName || undefined,
+                  lastName: user.lastName || undefined,
+                });
+                if (!ok) {
+                  throw new Error('Failed to create your user profile. Please try again.');
+                }
+                sessionStorage.setItem(flagKey, '1');
+              }
             } else {
-              // Not registered. Sign-in (including Google) is only for existing
-              // accounts — registration must go through the full form first.
-              setError('No BARA account found. Please register first — Google sign-in works once you have an account.');
+              // Email/password sign-in with no platform account → register first.
+              setError('No BARA account found. Please register first.');
               await clerk.signOut();
               navigate(`/user/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`);
               return;
             }
-          }
-        }
-
-        if (mode === 'sign_up') {
-          const flagKey = `bara_platform_user_created_${user.id}`;
-
-          if (!sessionStorage.getItem(flagKey)) {
-            const ok = await ClerkSupabaseBridge.ensureDatabaseUser({
-              id: user.id,
-              email: userEmail,
-              firstName: user.firstName || undefined,
-              lastName: user.lastName || undefined,
-            });
-
-            if (!ok) {
-              throw new Error('Failed to create your user profile. Please try again.');
-            }
-
-            sessionStorage.setItem(flagKey, '1');
           }
         }
 

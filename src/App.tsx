@@ -250,6 +250,8 @@ import AdminBlogEditor from "./pages/admin/AdminBlogEditor";
 
 import AuthFinishPage from "./pages/auth/AuthFinishPage";
 
+import CompleteProfilePage from "./pages/auth/CompleteProfilePage";
+
 import SSOCallbackPage from "./pages/auth/SSOCallbackPage";
 
 import SportsHome from "./pages/sports/SportsHome";
@@ -826,6 +828,8 @@ const AppRoutes = () => {
         <Route path="/sso-callback" element={<SSOCallbackPage />} />
 
         <Route path="/auth/finish" element={<AuthFinishPage />} />
+
+        <Route path="/auth/complete-profile" element={<CompleteProfilePage />} />
 
 
 
