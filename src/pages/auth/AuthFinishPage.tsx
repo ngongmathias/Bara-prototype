@@ -43,27 +43,25 @@ export const AuthFinishPage = () => {
             throw new Error('Unable to verify your account. Please try again.');
           }
 
-          const isOAuth = (user.externalAccounts?.length ?? 0) > 0;
-
           if (!existing?.id) {
-            if (isOAuth) {
-              // OAuth user with no platform record → implicit sign-up
-              const flagKey = `bara_platform_user_created_${user.id}`;
-              if (!sessionStorage.getItem(flagKey)) {
-                const ok = await ClerkSupabaseBridge.ensureDatabaseUser({
-                  id: user.id,
-                  email: userEmail,
-                  firstName: user.firstName || undefined,
-                  lastName: user.lastName || undefined,
-                });
-                if (!ok) {
-                  throw new Error('Failed to create your user profile. Please try again.');
-                }
-                sessionStorage.setItem(flagKey, '1');
-              }
+            // No platform account linked to this Clerk user id. Reconcile by email
+            // in case they registered with email/password and are now signing in
+            // with Google (same verified email → link, don't block).
+            const { data: byEmail } = await supabase
+              .from('clerk_users')
+              .select('id')
+              .eq('email', userEmail.toLowerCase())
+              .maybeSingle();
+
+            if (byEmail?.id) {
+              await supabase
+                .from('clerk_users')
+                .update({ clerk_user_id: user.id, updated_at: new Date().toISOString() })
+                .eq('id', byEmail.id);
             } else {
-              // Email/password sign-in with no existing record → strict block
-              setError('No account found for this sign-in. Please use Sign Up to create an account.');
+              // Not registered. Sign-in (including Google) is only for existing
+              // accounts — registration must go through the full form first.
+              setError('No BARA account found. Please register first — Google sign-in works once you have an account.');
               await clerk.signOut();
               navigate(`/user/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`);
               return;
