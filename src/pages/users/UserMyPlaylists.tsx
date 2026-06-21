@@ -32,7 +32,7 @@ export const UserMyPlaylists = () => {
             const { data, error } = await supabase
                 .from("playlists")
                 .select("id, title, description, cover_url, created_at")
-                .eq("user_id", user!.id)
+                .eq("created_by", user!.id)
                 .order("created_at", { ascending: false });
 
             if (error) {
