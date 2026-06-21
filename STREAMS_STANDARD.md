@@ -66,7 +66,7 @@
 | F4 Search | ✅ | Dedicated `MusicSearchPage` at `/streams/search`: instant debounced typeahead, results grouped (Songs / Artists / Albums / Playlists), recent searches (localStorage), rich no-results state. **Typo tolerance** via `search_songs` pg_trgm RPC (graceful ILIKE fallback if the migration isn't applied). |
 | F5 Library | 🟡 | Liked ✅, playlists + collaborative ✅, recently played ✅, follow-artist ✅. **No saved-albums, no offline.** |
 | F6 Discovery | ✅ | Personalised Home ✅, Release Radar ✅, genre browse ✅, "Fans also like" ✅, radio/infinite autoplay ✅, **named daily mixes ✅ (new — `buildDailyMixes` clusters listening history by top genres + top artist into titled "Daily Mix N" cards on the home, click to play)**. |
-| F7 Now Playing | 🟡 | `FullScreenPlayer` is strong (immersive, grey ambient, queue, go-to-artist/album, share, lyrics tab). **Lyrics are static `<pre>` text — not time-synced.** |
+| F7 Now Playing | ✅ | `FullScreenPlayer` is strong (immersive, grey ambient, queue, go-to-artist/album, share). **Time-synced (karaoke) lyrics ✅ (new — `parseLyrics` reads LRC-style `[mm:ss]`/`[mm:ss.xx]` tags, highlights + auto-scrolls the active line off `progress`, tap a line to seek, "SYNCED" badge; gracefully falls back to plain `<pre>` text when a song has no timestamps).** |
 | F8 Social | 🟡 | Follow ✅, collaborative playlists ✅, share ✅, OG previews ✅. **No activity feed.** |
 | F9 Creator | ✅ | Verified badges (new), artist pages, dashboard+analytics, upload (audio/cover/lyrics), album creation. Claim/verify 🟡. |
 | F10 Engagement | ✅ | Listening stats ✅, achievements ✅, **new-release notifications ✅ (new — `tr_notify_new_song` trigger fans a `new_song_from_artist` notification to followers via user_follows + user_artist_follows; resilient + anti-spam guarded; surfaces live via the existing bell/realtime)**. Weekly recap still pending. |
@@ -95,7 +95,7 @@
 4. ~~**Radio / infinite autoplay** (F6)~~ ✅ **Done Jun 21** — `startRadio` (genre+artist seed, infinite auto-extend); entry points in song context menu + ArtistPage. ← Tier 2 started
 5. ~~**Named daily mixes** (F6)~~ ✅ **Done Jun 21** — `buildDailyMixes` builds titled mixes from history (top genres + top artist) on the music home.
 6. ~~**New-release notifications** from followed artists (F10)~~ ✅ **Done Jun 21** — `tr_notify_new_song` trigger (`20260621_new_release_notifications.sql`). Apply in SQL Editor.
-7. **Time-synced lyrics** (F7) — LRC-style timing; karaoke scroll.
+7. ~~**Time-synced lyrics** (F7)~~ ✅ **Done Jun 21** — `parseLyrics` parses LRC `[mm:ss]` tags in `FullScreenPlayer`; active line highlights + auto-scrolls off `progress` (respects reduced-motion), tap-to-seek, "SYNCED" badge; plain-text fallback intact. Upload form documents the optional format. **Tier 2 complete.**
 
 **Tier 3 — polish & scale**
 8. **Gapless + crossfade + normalization** (F1).

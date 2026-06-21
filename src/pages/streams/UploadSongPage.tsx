@@ -352,9 +352,14 @@ export default function UploadSongPage() {
                         <Textarea
                             value={lyrics}
                             onChange={(e) => setLyrics(e.target.value)}
-                            placeholder="Paste lyrics here, one line per verse..."
+                            placeholder={"Paste lyrics here, one line per verse...\n\nTip: prefix each line with a [mm:ss] timestamp for karaoke-style synced lyrics, e.g.\n[00:12] First line\n[00:18] Second line"}
                             className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-gray-900 focus:ring-gray-900 min-h-[180px] resize-y font-mono text-sm"
                         />
+                        <p className="text-[11px] text-gray-500 leading-relaxed">
+                            Optional: start each line with a <span className="font-mono text-gray-700">[mm:ss]</span> timestamp
+                            (e.g. <span className="font-mono text-gray-700">[01:23]</span>) and lyrics will scroll &amp; highlight
+                            in time with the song. Lines without timestamps display as plain text.
+                        </p>
                     </div>
 
                     {/* Price */}

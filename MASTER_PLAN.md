@@ -1065,9 +1065,13 @@ Control/Mobile taxonomy + field configs, idempotent additive DB migration
   3. **Dedicated music search** — `MusicSearchPage` at `/streams/search` (instant
      typeahead, grouped, recent searches) + `search_songs` pg_trgm RPC for typo
      tolerance (`20260620_music_search_trgm.sql`, graceful ILIKE fallback).
-- **Tier 2 (next):** radio / infinite autoplay → named daily mixes → new-release
-  notifications from followed artists → time-synced lyrics.
-- **Tier 3:** gapless/crossfade/normalization, saved albums + offline/PWA,
+- **Tier 2 ✅ (Jun 21):** radio / infinite autoplay (`startRadio`) → named daily
+  mixes (`buildDailyMixes`) → new-release notifications from followed artists
+  (`tr_notify_new_song`, `20260621_new_release_notifications.sql`) → **time-synced
+  (karaoke) lyrics** (`parseLyrics` in `FullScreenPlayer`: LRC `[mm:ss]` parsing,
+  active-line highlight + auto-scroll off `progress`, tap-to-seek, reduced-motion
+  aware, plain-text fallback; upload form documents the format).
+- **Tier 3 (next):** gapless/crossfade/normalization, saved albums + offline/PWA,
   perf (code-split, virtualise) + a11y + device-matrix pass.
 
 ### 26.6 Compliance ✅

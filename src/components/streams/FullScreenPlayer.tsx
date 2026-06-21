@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import {
@@ -29,6 +29,48 @@ interface FullScreenPlayerProps {
     onClose: () => void;
 }
 
+interface LyricLine {
+    time: number | null; // seconds; null when the song has no timing
+    text: string;
+}
+
+// Parse LRC-style lyrics. If any line carries an [mm:ss] / [mm:ss.xx] timestamp
+// we treat the whole song as time-synced (karaoke). Otherwise we return the raw
+// lines so the existing plain-text rendering keeps working unchanged.
+const parseLyrics = (raw: string): { lines: LyricLine[]; synced: boolean } => {
+    const timeTag = /\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g;
+    const rawLines = raw.split(/\r?\n/);
+    const out: LyricLine[] = [];
+    let synced = false;
+
+    for (const line of rawLines) {
+        const matches = [...line.matchAll(timeTag)];
+        if (matches.length > 0) {
+            synced = true;
+            const text = line.replace(timeTag, '').trim();
+            for (const m of matches) {
+                const min = parseInt(m[1], 10);
+                const sec = parseInt(m[2], 10);
+                const frac = m[3] ? parseInt(m[3].padEnd(3, '0').slice(0, 3), 10) / 1000 : 0;
+                out.push({ time: min * 60 + sec + frac, text });
+            }
+        } else if (!/^\s*\[[a-z#]+:.*\]\s*$/i.test(line)) {
+            // Keep plain lyric lines; drop ID-tag-only lines like [ar:..]/[ti:..].
+            out.push({ time: null, text: line });
+        }
+    }
+
+    if (synced) {
+        return {
+            lines: out
+                .filter((l) => l.time !== null)
+                .sort((a, b) => (a.time as number) - (b.time as number)),
+            synced: true,
+        };
+    }
+    return { lines: out, synced: false };
+};
+
 export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onClose }) => {
     const {
         currentSong,
@@ -58,6 +100,35 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
     const [dominantColor, setDominantColor] = useState('#404040');
     const [lyrics, setLyrics] = useState<string | null>(null);
     const [lyricsLoading, setLyricsLoading] = useState(false);
+
+    const parsedLyrics = useMemo(
+        () => (lyrics && lyrics.trim() ? parseLyrics(lyrics) : null),
+        [lyrics]
+    );
+
+    // Index of the line that should be highlighted right now (last line whose
+    // timestamp is <= the current playback position). -1 before the first line.
+    const activeLineIdx = useMemo(() => {
+        if (!parsedLyrics?.synced) return -1;
+        const { lines } = parsedLyrics;
+        let idx = -1;
+        for (let i = 0; i < lines.length; i++) {
+            if ((lines[i].time as number) <= progress + 0.15) idx = i;
+            else break;
+        }
+        return idx;
+    }, [parsedLyrics, progress]);
+
+    const activeLineRef = useRef<HTMLParagraphElement | null>(null);
+
+    // Auto-scroll the active karaoke line into view (honours reduced motion).
+    useEffect(() => {
+        if (activeTab !== 'lyrics' || !parsedLyrics?.synced) return;
+        const el = activeLineRef.current;
+        if (!el) return;
+        const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+        el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+    }, [activeLineIdx, activeTab, parsedLyrics]);
 
     useEffect(() => {
         if (!currentSong?.id) { setLyrics(null); return; }
@@ -521,6 +592,11 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                         <div>
                                             <h3 className="text-sm font-bold text-white/60 uppercase tracking-wider flex items-center gap-2">
                                                 <Mic2 size={14} /> Lyrics
+                                                {parsedLyrics?.synced && (
+                                                    <span className="text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded bg-white/10 text-white/70">
+                                                        SYNCED
+                                                    </span>
+                                                )}
                                             </h3>
                                             <div className="text-white text-base font-semibold mt-1">{currentSong.title}</div>
                                         </div>
@@ -535,6 +611,30 @@ export const FullScreenPlayer: React.FC<FullScreenPlayerProps> = ({ isOpen, onCl
                                     <div className="flex-1 overflow-y-auto px-6 md:px-12 py-8 min-h-0">
                                         {lyricsLoading ? (
                                             <div className="text-center text-white/40">Loading lyrics...</div>
+                                        ) : parsedLyrics?.synced ? (
+                                            // Time-synced (karaoke) view: highlight + auto-scroll the active line.
+                                            <div className="max-w-2xl mx-auto space-y-4 py-[30vh]">
+                                                {parsedLyrics.lines.map((line, i) => {
+                                                    const isActive = i === activeLineIdx;
+                                                    const isPast = i < activeLineIdx;
+                                                    return (
+                                                        <p
+                                                            key={i}
+                                                            ref={isActive ? activeLineRef : null}
+                                                            onClick={() => line.time !== null && seek(line.time)}
+                                                            className={`text-center text-2xl md:text-3xl font-bold leading-tight cursor-pointer transition-all duration-300 ${
+                                                                isActive
+                                                                    ? 'text-white scale-100'
+                                                                    : isPast
+                                                                        ? 'text-white/25 hover:text-white/50'
+                                                                        : 'text-white/40 hover:text-white/60'
+                                                            }`}
+                                                        >
+                                                            {line.text || '♪'}
+                                                        </p>
+                                                    );
+                                                })}
+                                            </div>
                                         ) : lyrics && lyrics.trim() ? (
                                             <pre className="whitespace-pre-wrap text-center text-white text-lg md:text-xl leading-relaxed font-sans max-w-2xl mx-auto">
                                                 {lyrics}
