@@ -151,6 +151,11 @@ export function GlobalPlayer() {
         }
     }, [progress, duration, currentSong?.id, user?.id, isPlaying, lastTrackedSongId]);
 
+    // Ref for the mini-player swipe gesture. MUST be declared before the early
+    // return below — it is a hook, so skipping it when there is no current song
+    // changes the hook count between renders and throws React error #310.
+    const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
+
     // Early return AFTER all hooks to avoid React error #310
     if (!currentSong) return null;
 
@@ -163,7 +168,6 @@ export function GlobalPlayer() {
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
-    const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
     const handleTouchStart = (e: React.TouchEvent) => {
         const t = e.touches[0];
         touchStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
