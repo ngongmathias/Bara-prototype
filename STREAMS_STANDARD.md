@@ -69,7 +69,7 @@
 | F7 Now Playing | 🟡 | `FullScreenPlayer` is strong (immersive, grey ambient, queue, go-to-artist/album, share, lyrics tab). **Lyrics are static `<pre>` text — not time-synced.** |
 | F8 Social | 🟡 | Follow ✅, collaborative playlists ✅, share ✅, OG previews ✅. **No activity feed.** |
 | F9 Creator | ✅ | Verified badges (new), artist pages, dashboard+analytics, upload (audio/cover/lyrics), album creation. Claim/verify 🟡. |
-| F10 Engagement | 🟡 | Listening stats ✅, achievements ✅. **No new-release notifications from followed artists.** |
+| F10 Engagement | ✅ | Listening stats ✅, achievements ✅, **new-release notifications ✅ (new — `tr_notify_new_song` trigger fans a `new_song_from_artist` notification to followers via user_follows + user_artist_follows; resilient + anti-spam guarded; surfaces live via the existing bell/realtime)**. Weekly recap still pending. |
 
 ### Design / UX
 
@@ -94,7 +94,7 @@
 **Tier 2 — depth & stickiness**
 4. ~~**Radio / infinite autoplay** (F6)~~ ✅ **Done Jun 21** — `startRadio` (genre+artist seed, infinite auto-extend); entry points in song context menu + ArtistPage. ← Tier 2 started
 5. ~~**Named daily mixes** (F6)~~ ✅ **Done Jun 21** — `buildDailyMixes` builds titled mixes from history (top genres + top artist) on the music home.
-6. **New-release notifications** from followed artists (F10) — leverages existing notifications table.
+6. ~~**New-release notifications** from followed artists (F10)~~ ✅ **Done Jun 21** — `tr_notify_new_song` trigger (`20260621_new_release_notifications.sql`). Apply in SQL Editor.
 7. **Time-synced lyrics** (F7) — LRC-style timing; karaoke scroll.
 
 **Tier 3 — polish & scale**
