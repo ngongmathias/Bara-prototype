@@ -39,7 +39,7 @@ import {
     Play,
     Pause,
     Star,
-    StarOff
+    Plus
 } from "lucide-react";
 import { db, supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -101,26 +101,38 @@ export const AdminSongs = () => {
     });
     const [featuredArtistIds, setFeaturedArtistIds] = useState<string[]>([]);
 
+    const PAGE_SIZE = 20;
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+    // Artists + albums (for the dialog dropdowns) load once; songs are paginated.
     useEffect(() => {
-        fetchInitialData();
-    }, []);
-
-    const fetchInitialData = async () => {
-        try {
-            setLoading(true);
-            const [songsRes, artistsRes, albumsRes] = await Promise.all([
-                db.songs().select('*, artists(name), albums(title)').order('created_at', { ascending: false }),
+        (async () => {
+            const [artistsRes, albumsRes] = await Promise.all([
                 db.artists().select('id, name').order('name'),
-                db.albums().select('id, title, artist_id').order('title')
+                db.albums().select('id, title, artist_id').order('title'),
             ]);
-
-            if (songsRes.error) throw songsRes.error;
-            if (artistsRes.error) throw artistsRes.error;
-            if (albumsRes.error) throw albumsRes.error;
-
-            setSongs(songsRes.data || []);
             setArtists(artistsRes.data || []);
             setAlbums(albumsRes.data || []);
+        })();
+    }, []);
+
+    useEffect(() => {
+        const t = setTimeout(() => fetchSongs(page, searchTerm), 250);
+        return () => clearTimeout(t);
+    }, [page, searchTerm]);
+
+    const fetchSongs = async (pageNum = page, search = searchTerm) => {
+        try {
+            setLoading(true);
+            const from = (pageNum - 1) * PAGE_SIZE;
+            let q = db.songs().select('*, artists(name), albums(title)', { count: 'exact' }).order('created_at', { ascending: false });
+            if (search.trim()) q = q.ilike('title', `%${search.trim()}%`);
+            const { data, count, error } = await q.range(from, from + PAGE_SIZE - 1);
+            if (error) throw error;
+            setSongs(data || []);
+            setTotal(count || 0);
         } catch (error) {
             console.error(error);
             toast({ title: "Error", description: "Failed to fetch data", variant: "destructive" });
@@ -251,7 +263,7 @@ export const AdminSongs = () => {
             }
 
             setIsDialogOpen(false);
-            fetchInitialData();
+            fetchSongs();
             resetForm();
         } catch (error) {
             console.error(error);
@@ -277,7 +289,7 @@ export const AdminSongs = () => {
             }
 
             toast({ title: "Success", description: "Song deleted" });
-            fetchInitialData();
+            fetchSongs();
         } catch (error) {
             console.error(error);
             toast({ title: "Error", description: "Failed to delete song", variant: "destructive" });
@@ -358,16 +370,11 @@ export const AdminSongs = () => {
                 title: nextBadge ? 'Song promoted!' : 'Promotion removed',
                 description: nextBadge === 'platform_pick' ? '🏆 Marked as Platform Pick' : nextBadge === 'editors_choice' ? "✨ Marked as Editor's Choice" : 'Song is no longer featured'
             });
-            fetchInitialData();
+            fetchSongs();
         } catch (error) {
             toast({ title: 'Error', description: 'Failed to update badge', variant: 'destructive' });
         }
     };
-
-    const filteredSongs = songs.filter(s =>
-        s.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.artists?.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
     return (
         <AdminLayout title="Songs" subtitle="Manage music tracks and uploads">
@@ -386,10 +393,10 @@ export const AdminSongs = () => {
                     <div className="relative w-72">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
                         <Input
-                            placeholder="Search songs or artists..."
+                            placeholder="Search songs by title..."
                             className="pl-8"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                         />
                     </div>
                     <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -397,7 +404,7 @@ export const AdminSongs = () => {
                         if (!open) resetForm();
                     }}>
                         <DialogTrigger asChild>
-                            <Button className="bg-brand-blue">
+                            <Button className="bg-gray-900 hover:bg-black">
                                 <Plus className="h-4 w-4 mr-2" />
                                 Add Song
                             </Button>
@@ -515,7 +522,7 @@ export const AdminSongs = () => {
                                     <Label>Audio File (.mp3)</Label>
                                     <Input
                                         type="file"
-                                        accept="audio/mp3,audio/wav"
+                                        accept="audio/*,.mp3,.wav,.ogg,.flac,.aac,.m4a"
                                         onChange={handleFileChange}
                                         className="cursor-pointer"
                                     />
@@ -563,7 +570,7 @@ export const AdminSongs = () => {
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={uploading}>Cancel</Button>
-                                <Button onClick={handleSave} className="bg-brand-blue" disabled={uploading}>
+                                <Button onClick={handleSave} className="bg-gray-900 hover:bg-black" disabled={uploading}>
                                     {uploading ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -596,12 +603,12 @@ export const AdminSongs = () => {
                                         <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
                                     </TableCell>
                                 </TableRow>
-                            ) : filteredSongs.length === 0 ? (
+                            ) : songs.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={7} className="text-center py-8 text-gray-500">No songs found.</TableCell>
                                 </TableRow>
                             ) : (
-                                filteredSongs.map((song) => (
+                                songs.map((song) => (
                                     <TableRow key={song.id}>
                                         <TableCell>
                                             <Button
@@ -625,7 +632,7 @@ export const AdminSongs = () => {
                                                 <div className="flex items-center gap-2">
                                                     <div className="font-medium">{song.title}</div>
                                                     {song.featured_badge && (
-                                                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${song.featured_badge === 'platform_pick' ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700'}`}>
+                                                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${song.featured_badge === 'platform_pick' ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-900'}`}>
                                                             {song.featured_badge === 'platform_pick' ? '🏆' : '✨'}
                                                         </span>
                                                     )}
@@ -643,8 +650,8 @@ export const AdminSongs = () => {
                                             <button
                                                 onClick={() => handleToggleBadge(song)}
                                                 className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full transition ${
-                                                    song.featured_badge === 'platform_pick' ? 'bg-amber-100 text-amber-700' :
-                                                    song.featured_badge === 'editors_choice' ? 'bg-purple-100 text-purple-700' :
+                                                    song.featured_badge === 'platform_pick' ? 'bg-gray-900 text-white' :
+                                                    song.featured_badge === 'editors_choice' ? 'bg-gray-200 text-gray-900' :
                                                     'bg-gray-100 text-gray-400 hover:bg-gray-200'
                                                 }`}
                                                 title="Click to toggle: None → Platform Pick → Editor's Choice"
@@ -674,27 +681,17 @@ export const AdminSongs = () => {
                         </TableBody>
                     </Table>
                 </div>
+
+                {total > PAGE_SIZE && (
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                        <span>{total.toLocaleString()} songs · page {page} of {totalPages}</span>
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Previous</Button>
+                            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>Next</Button>
+                        </div>
+                    </div>
+                )}
             </div>
         </AdminLayout>
     );
 };
-
-function Plus(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-        </svg>
-    )
-}

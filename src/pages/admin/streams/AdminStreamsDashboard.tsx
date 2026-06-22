@@ -50,9 +50,9 @@ export const AdminStreamsDashboard = () => {
         <div className="mb-4 w-full flex justify-end">
           <AdminPageGuide 
             title="Streams Dashboard"
-            description="High-level analytics for Bara Streams."
-            features={["Track total plays", "Monitor storage quotas", "View trending artists"]}
-            workflow={["Review total plays to gauge platform health", "Check storage alerts for database limits"]}
+            description="High-level catalog metrics for Bara Streams."
+            features={["See total artists, albums, songs and plays", "Jump to manage artists, songs, albums, podcasts and movies"]}
+            workflow={["Review catalog size and total plays to gauge activity", "Use the cards below to manage each content type"]}
           />
         </div>
             <div className="p-6 space-y-6">
@@ -101,7 +101,7 @@ export const AdminStreamsDashboard = () => {
                     <Card className="hover:bg-gray-50 cursor-pointer transition-colors">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <Mic2 className="h-5 w-5 text-brand-blue" />
+                                <Mic2 className="h-5 w-5 text-gray-700" />
                                 Manage Artists
                             </CardTitle>
                         </CardHeader>
@@ -116,7 +116,7 @@ export const AdminStreamsDashboard = () => {
                     <Card className="hover:bg-gray-50 cursor-pointer transition-colors">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <Music className="h-5 w-5 text-brand-blue" />
+                                <Music className="h-5 w-5 text-gray-700" />
                                 Manage Songs
                             </CardTitle>
                         </CardHeader>
@@ -131,7 +131,7 @@ export const AdminStreamsDashboard = () => {
                     <Card className="hover:bg-gray-50 cursor-pointer transition-colors">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <Disc className="h-5 w-5 text-brand-blue" />
+                                <Disc className="h-5 w-5 text-gray-700" />
                                 Manage Albums
                             </CardTitle>
                         </CardHeader>
@@ -146,7 +146,7 @@ export const AdminStreamsDashboard = () => {
                     <Card className="hover:bg-gray-50 cursor-pointer transition-colors">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <Headphones className="h-5 w-5 text-brand-blue" />
+                                <Headphones className="h-5 w-5 text-gray-700" />
                                 Manage Podcasts
                             </CardTitle>
                         </CardHeader>
@@ -161,7 +161,7 @@ export const AdminStreamsDashboard = () => {
                     <Card className="hover:bg-gray-50 cursor-pointer transition-colors">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <Film className="h-5 w-5 text-brand-blue" />
+                                <Film className="h-5 w-5 text-gray-700" />
                                 Manage Movies
                             </CardTitle>
                         </CardHeader>

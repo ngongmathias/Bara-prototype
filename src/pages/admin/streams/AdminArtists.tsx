@@ -92,16 +92,27 @@ export const AdminArtists = () => {
         instagram_handle: ""
     });
 
-    useEffect(() => {
-        fetchArtists();
-    }, []);
+    const PAGE_SIZE = 20;
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-    const fetchArtists = async () => {
+    // Refetch on page change, and (debounced) when the search term changes.
+    useEffect(() => {
+        const t = setTimeout(() => fetchArtists(page, searchTerm), 250);
+        return () => clearTimeout(t);
+    }, [page, searchTerm]);
+
+    const fetchArtists = async (pageNum = page, search = searchTerm) => {
         try {
             setLoading(true);
-            const { data, error } = await db.artists().select('*').order('name');
+            const from = (pageNum - 1) * PAGE_SIZE;
+            let q = db.artists().select('*', { count: 'exact' }).order('name');
+            if (search.trim()) q = q.ilike('name', `%${search.trim()}%`);
+            const { data, count, error } = await q.range(from, from + PAGE_SIZE - 1);
             if (error) throw error;
             setArtists(data || []);
+            setTotal(count || 0);
         } catch (error) {
             console.error(error);
             toast({ title: "Error", description: "Failed to fetch artists", variant: "destructive" });
@@ -184,18 +195,14 @@ export const AdminArtists = () => {
         setIsDialogOpen(true);
     };
 
-    const filteredArtists = artists.filter(a =>
-        a.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
     return (
         <AdminLayout title="Artists" subtitle="Manage artists and profiles">
         <div className="mb-4 w-full flex justify-end">
           <AdminPageGuide 
             title="Bara Streams: Artists"
             description="Verify and manage artist profiles."
-            features={["Grant Verified checkmarks", "Review bio and social links", "Disable rogue artists"]}
-            workflow={["Review pending verifications", "Check provided social proofs", "Approve to unlock streaming royalties"]}
+            features={["Grant Verified checkmarks", "Edit name, bio, photo and social links", "Remove artists violating ToS"]}
+            workflow={["Review the artist's bio and socials", "Toggle the Verified badge", "Delete artists that violate the ToS"]}
           />
         </div>
             <div className="p-6 space-y-6">
@@ -206,7 +213,7 @@ export const AdminArtists = () => {
                             placeholder="Search artists..."
                             className="pl-8"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                         />
                     </div>
                     <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -214,7 +221,7 @@ export const AdminArtists = () => {
                         if (!open) resetForm();
                     }}>
                         <DialogTrigger asChild>
-                            <Button className="bg-brand-blue">
+                            <Button className="bg-gray-900 hover:bg-black">
                                 <Plus className="h-4 w-4 mr-2" />
                                 Add Artist
                             </Button>
@@ -290,7 +297,7 @@ export const AdminArtists = () => {
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={uploading}>Cancel</Button>
-                                <Button onClick={handleSave} className="bg-brand-blue" disabled={uploading}>
+                                <Button onClick={handleSave} className="bg-gray-900 hover:bg-black" disabled={uploading}>
                                     {uploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Uploading...</> : "Save Artist"}
                                 </Button>
                             </DialogFooter>
@@ -312,12 +319,12 @@ export const AdminArtists = () => {
                                 <TableRow>
                                     <TableCell colSpan={3} className="text-center py-8">Loading...</TableCell>
                                 </TableRow>
-                            ) : filteredArtists.length === 0 ? (
+                            ) : artists.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={3} className="text-center py-8">No artists found.</TableCell>
                                 </TableRow>
                             ) : (
-                                filteredArtists.map((artist) => (
+                                artists.map((artist) => (
                                     <TableRow key={artist.id}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
@@ -336,7 +343,7 @@ export const AdminArtists = () => {
                                         </TableCell>
                                         <TableCell>
                                             {artist.is_verified ? (
-                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-900 text-white">
                                                     Verified
                                                 </span>
                                             ) : (
@@ -361,6 +368,16 @@ export const AdminArtists = () => {
                         </TableBody>
                     </Table>
                 </div>
+
+                {total > PAGE_SIZE && (
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                        <span>{total.toLocaleString()} artists · page {page} of {totalPages}</span>
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Previous</Button>
+                            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>Next</Button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <AlertDialog open={!!artistToDelete} onOpenChange={(open) => !open && setArtistToDelete(null)}>

@@ -33,9 +33,9 @@ import {
     Edit,
     Trash2,
     Disc,
-    Image as ImageIcon,
     Loader2,
-    Calendar
+    Calendar,
+    Plus
 } from "lucide-react";
 import { db, supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -77,23 +77,31 @@ export const AdminAlbums = () => {
         genre: ""
     });
 
+    const PAGE_SIZE = 20;
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+    // Artists (for the dropdown) load once; albums are paginated.
     useEffect(() => {
-        fetchInitialData();
+        db.artists().select('id, name').order('name').then(({ data }) => setArtists(data || []));
     }, []);
 
-    const fetchInitialData = async () => {
+    useEffect(() => {
+        const t = setTimeout(() => fetchAlbums(page, searchTerm), 250);
+        return () => clearTimeout(t);
+    }, [page, searchTerm]);
+
+    const fetchAlbums = async (pageNum = page, search = searchTerm) => {
         try {
             setLoading(true);
-            const [albumsRes, artistsRes] = await Promise.all([
-                db.albums().select('*, artists(name)').order('created_at', { ascending: false }),
-                db.artists().select('id, name').order('name')
-            ]);
-
-            if (albumsRes.error) throw albumsRes.error;
-            if (artistsRes.error) throw artistsRes.error;
-
-            setAlbums(albumsRes.data || []);
-            setArtists(artistsRes.data || []);
+            const from = (pageNum - 1) * PAGE_SIZE;
+            let q = db.albums().select('*, artists(name)', { count: 'exact' }).order('created_at', { ascending: false });
+            if (search.trim()) q = q.ilike('title', `%${search.trim()}%`);
+            const { data, count, error } = await q.range(from, from + PAGE_SIZE - 1);
+            if (error) throw error;
+            setAlbums(data || []);
+            setTotal(count || 0);
         } catch (error) {
             console.error(error);
             toast({ title: "Error", description: "Failed to fetch data", variant: "destructive" });
@@ -154,7 +162,7 @@ export const AdminAlbums = () => {
             }
 
             setIsDialogOpen(false);
-            fetchInitialData();
+            fetchAlbums();
             resetForm();
         } catch (error) {
             console.error(error);
@@ -179,7 +187,7 @@ export const AdminAlbums = () => {
             }
 
             toast({ title: "Success", description: "Album deleted" });
-            fetchInitialData();
+            fetchAlbums();
         } catch (error) {
             console.error(error);
             toast({ title: "Error", description: "Failed to delete album", variant: "destructive" });
@@ -210,11 +218,6 @@ export const AdminAlbums = () => {
         setIsDialogOpen(true);
     };
 
-    const filteredAlbums = albums.filter(a =>
-        a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        a.artists?.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
     return (
         <AdminLayout title="Albums" subtitle="Manage albums and EP releases">
         <div className="mb-4 w-full flex justify-end">
@@ -230,10 +233,10 @@ export const AdminAlbums = () => {
                     <div className="relative w-72">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
                         <Input
-                            placeholder="Search albums or artists..."
+                            placeholder="Search albums by title..."
                             className="pl-8"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                         />
                     </div>
                     <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -241,7 +244,7 @@ export const AdminAlbums = () => {
                         if (!open) resetForm();
                     }}>
                         <DialogTrigger asChild>
-                            <Button className="bg-brand-blue">
+                            <Button className="bg-gray-900 hover:bg-black">
                                 <Plus className="h-4 w-4 mr-2" />
                                 Create Album
                             </Button>
@@ -308,7 +311,7 @@ export const AdminAlbums = () => {
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={uploading}>Cancel</Button>
-                                <Button onClick={handleSave} className="bg-brand-blue" disabled={uploading}>
+                                <Button onClick={handleSave} className="bg-gray-900 hover:bg-black" disabled={uploading}>
                                     {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                                     {editingAlbum ? 'Update Album' : 'Create Album'}
                                 </Button>
@@ -335,12 +338,12 @@ export const AdminAlbums = () => {
                                         <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
                                     </TableCell>
                                 </TableRow>
-                            ) : filteredAlbums.length === 0 ? (
+                            ) : albums.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="text-center py-8 text-gray-500">No albums found.</TableCell>
                                 </TableRow>
                             ) : (
-                                filteredAlbums.map((album) => (
+                                albums.map((album) => (
                                     <TableRow key={album.id}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
@@ -387,27 +390,17 @@ export const AdminAlbums = () => {
                         </TableBody>
                     </Table>
                 </div>
+
+                {total > PAGE_SIZE && (
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                        <span>{total.toLocaleString()} albums · page {page} of {totalPages}</span>
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Previous</Button>
+                            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>Next</Button>
+                        </div>
+                    </div>
+                )}
             </div>
         </AdminLayout>
     );
 };
-
-function Plus(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-        </svg>
-    )
-}
