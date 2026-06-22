@@ -12,6 +12,7 @@ import { MonetizationService } from "@/lib/monetizationService";
 import { getMonthlyListeners } from "@/lib/artistStats";
 import { EditSongModal } from "@/components/streams/EditSongModal";
 import { EditAlbumModal } from "@/components/streams/EditAlbumModal";
+import { EditArtistProfileModal } from "@/components/streams/EditArtistProfileModal";
 import { useToast } from "@/hooks/use-toast";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { supabase, createAuthenticatedSupabaseClient } from "@/lib/supabase";
@@ -68,6 +69,7 @@ export default function ArtistDashboard() {
     const [monthlyListeners, setMonthlyListeners] = useState(0);
     const [editingSong, setEditingSong] = useState<MySong | null>(null);
     const [editingAlbum, setEditingAlbum] = useState<MyAlbum | null>(null);
+    const [editingProfile, setEditingProfile] = useState(false);
 
     const ownPlays = songs.reduce((acc, s) => acc + (s.plays || 0), 0);
     const featuredPlays = featuredOnSongs.reduce((acc, s) => acc + (s.plays || 0), 0);
@@ -301,9 +303,16 @@ export default function ArtistDashboard() {
         <StreamsLayout>
             <div className="p-6 md:p-8 pb-32">
                 {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-1">Creator Portal</h1>
-                    <p className="text-gray-500">Welcome back, <span className="font-semibold text-gray-700">{artistName || user?.fullName}</span></p>
+                <div className="mb-8 flex items-start justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-1">Creator Portal</h1>
+                        <p className="text-gray-500">Welcome back, <span className="font-semibold text-gray-700">{artistName || user?.fullName}</span></p>
+                    </div>
+                    {artistId && (
+                        <Button variant="outline" onClick={() => setEditingProfile(true)} className="flex-shrink-0">
+                            <Edit2 size={16} className="mr-2" /> Edit Profile
+                        </Button>
+                    )}
                 </div>
 
                 {/* Tabs */}
@@ -861,6 +870,14 @@ export default function ArtistDashboard() {
                     album={{ id: editingAlbum.id, title: editingAlbum.title, cover_url: editingAlbum.cover_url }}
                     artistId={artistId}
                     onClose={() => setEditingAlbum(null)}
+                    onSaved={fetchMyData}
+                />
+            )}
+
+            {editingProfile && artistId && (
+                <EditArtistProfileModal
+                    artistId={artistId}
+                    onClose={() => setEditingProfile(false)}
                     onSaved={fetchMyData}
                 />
             )}

@@ -16,6 +16,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Upload, Music, Image, Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
+import { uploadToMusicWithProgress } from '@/lib/uploadWithProgress';
 
 const GENRES = [
     'Afrobeats', 'Amapiano', 'Highlife', 'Afropop', 'Bongo Flava',
@@ -38,6 +39,10 @@ export default function UploadSongPage() {
     const [lyrics, setLyrics] = useState('');
     const [albumId, setAlbumId] = useState<string>('');
     const [albums, setAlbums] = useState<any[]>([]);
+    const [producer, setProducer] = useState('');
+    const [songwriter, setSongwriter] = useState('');
+    const [featuredIds, setFeaturedIds] = useState<string[]>([]);
+    const [allArtists, setAllArtists] = useState<{ id: string; name: string }[]>([]);
 
     const [price, setPrice] = useState<string>('');
     const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -69,6 +74,10 @@ export default function UploadSongPage() {
                     .order('created_at', { ascending: false });
                 setAlbums(albumsData || []);
             }
+
+            // All artists (for crediting featured artists)
+            const { data: artistsList } = await supabase.from('artists').select('id, name').order('name');
+            setAllArtists(artistsList || []);
         };
 
         fetchArtistData();
@@ -131,37 +140,26 @@ export default function UploadSongPage() {
                 setArtistId(currentArtistId);
             }
 
-            setUploadProgress(30);
+            setUploadProgress(10);
 
-            // Upload audio file
+            // Upload audio file with REAL progress (maps to 10%→80% of the bar).
             const audioExt = audioFile.name.split('.').pop() || 'mp3';
             const audioPath = `songs/${user.id}/${Date.now()}.${audioExt}`;
-            const { error: audioUploadError } = await supabase.storage
-                .from('music')
-                .upload(audioPath, audioFile, { contentType: audioFile.type });
+            const fileUrl = await uploadToMusicWithProgress(audioPath, audioFile, (f) => {
+                setUploadProgress(10 + Math.round(f * 70));
+            });
 
-            if (audioUploadError) throw audioUploadError;
-
-            const { data: audioUrlData } = supabase.storage.from('music').getPublicUrl(audioPath);
-            const fileUrl = audioUrlData.publicUrl;
-
-            setUploadProgress(60);
+            setUploadProgress(82);
 
             // Upload cover art if provided
             let coverUrl = '';
             if (coverFile) {
                 const coverExt = coverFile.name.split('.').pop() || 'jpg';
                 const coverPath = `covers/${user.id}/${Date.now()}.${coverExt}`;
-                const { error: coverUploadError } = await supabase.storage
-                    .from('music')
-                    .upload(coverPath, coverFile, { contentType: coverFile.type });
-
-                if (coverUploadError) throw coverUploadError;
-                const { data: coverUrlData } = supabase.storage.from('music').getPublicUrl(coverPath);
-                coverUrl = coverUrlData.publicUrl;
+                coverUrl = await uploadToMusicWithProgress(coverPath, coverFile, () => {});
             }
 
-            setUploadProgress(80);
+            setUploadProgress(88);
 
             // Get audio duration
             let duration = 0;
@@ -194,11 +192,22 @@ export default function UploadSongPage() {
                     price: price ? parseFloat(price) : null,
                     lyrics: lyrics.trim() || null,
                     description: description.trim() || null,
+                    producer: producer.trim() || null,
+                    songwriter: songwriter.trim() || null,
                 })
                 .select('id')
                 .single();
 
             if (insertError) throw insertError;
+
+            // Credits: primary + featured artists (best-effort, like the admin flow).
+            try {
+                const entries = [
+                    { song_id: insertedSong.id, artist_id: currentArtistId, role: 'primary', display_order: 0 },
+                    ...featuredIds.map((aid, i) => ({ song_id: insertedSong.id, artist_id: aid, role: 'featured', display_order: i + 1 })),
+                ];
+                await supabase.from('song_artists').upsert(entries, { onConflict: 'song_id,artist_id,role' });
+            } catch { /* credits are non-critical */ }
 
             setUploadProgress(100);
 
@@ -335,6 +344,46 @@ export default function UploadSongPage() {
                             </Select>
                         </div>
                     )}
+
+                    {/* Featured Artists */}
+                    <div className="space-y-2">
+                        <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Featured Artists (Optional)</Label>
+                        {featuredIds.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                                {featuredIds.map((aid) => {
+                                    const a = allArtists.find((x) => x.id === aid);
+                                    return a ? (
+                                        <span key={aid} className="bg-gray-100 text-sm px-3 py-1 rounded-full flex items-center gap-1.5">
+                                            {a.name}
+                                            <button type="button" onClick={() => setFeaturedIds((p) => p.filter((id) => id !== aid))} className="text-gray-400 hover:text-gray-900">&times;</button>
+                                        </span>
+                                    ) : null;
+                                })}
+                            </div>
+                        )}
+                        <select
+                            value=""
+                            onChange={(e) => { const v = e.target.value; if (v && v !== artistId && !featuredIds.includes(v)) setFeaturedIds((p) => [...p, v]); }}
+                            className="w-full h-12 rounded-md bg-gray-50 border border-gray-200 px-3 text-gray-900 text-sm focus:border-gray-900 focus:outline-none"
+                        >
+                            <option value="">Add a featured artist…</option>
+                            {allArtists.filter((a) => a.id !== artistId && !featuredIds.includes(a.id)).map((a) => (
+                                <option key={a.id} value={a.id}>{a.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Producer / Songwriter */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Producer (Optional)</Label>
+                            <Input value={producer} onChange={(e) => setProducer(e.target.value)} placeholder="e.g. Don Jazzy" className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-gray-900 focus:ring-gray-900 h-12" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Songwriter (Optional)</Label>
+                            <Input value={songwriter} onChange={(e) => setSongwriter(e.target.value)} placeholder="e.g. Tiwa Savage" className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-gray-900 focus:ring-gray-900 h-12" />
+                        </div>
+                    </div>
 
                     {/* Description */}
                     <div className="space-y-2">
