@@ -8,6 +8,7 @@ import { Loader2, Play, Pause, BadgeCheck, Share2, Radio } from 'lucide-react';
 import { useShare } from '@/context/ShareContext';
 import { FollowUserButton } from '@/components/FollowUserButton';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
+import { getArtistSongIds, getMonthlyListeners } from '@/lib/artistStats';
 
 export default function ArtistPage() {
     const { id } = useParams();
@@ -19,6 +20,7 @@ export default function ArtistPage() {
     const [albums, setAlbums] = useState<any[]>([]);
     const [artistPicks, setArtistPicks] = useState<(Song & { note?: string })[]>([]);
     const [relatedArtists, setRelatedArtists] = useState<any[]>([]);
+    const [monthlyListeners, setMonthlyListeners] = useState(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -35,6 +37,13 @@ export default function ArtistPage() {
                     .eq('id', id)
                     .single();
                 setArtist(artistData);
+
+                // Real monthly listeners: distinct users who played any of this
+                // artist's songs in the last 30 days (no estimated/fake number).
+                getArtistSongIds(id)
+                    .then(getMonthlyListeners)
+                    .then(setMonthlyListeners)
+                    .catch(() => {});
 
                 // Fetch Top Tracks (by plays)
                 const { data: songsData } = await supabase
@@ -244,14 +253,9 @@ export default function ArtistPage() {
                                 )}
                                 <h1 className="text-5xl md:text-8xl font-black mb-6 leading-none tracking-tighter text-gray-900">{artist.name}</h1>
                                 <p className="text-sm font-bold text-gray-600">
-                                    {(() => {
-                                        const ownPlays = topTracks.reduce((acc, t) => acc + ((t as any).plays || 0), 0);
-                                        const featPlays = featuredOnTracks.reduce((acc, t) => acc + (t.plays || 0), 0);
-                                        const totalPlays = ownPlays + featPlays;
-                                        // Estimate monthly listeners as ~30% of total plays (reasonable approximation)
-                                        const listeners = Math.max(totalPlays * 0.3, artist.monthly_listeners || 0);
-                                        return listeners > 0 ? `${Math.round(listeners).toLocaleString()} monthly listeners` : 'New Artist';
-                                    })()}
+                                    {monthlyListeners > 0
+                                        ? `${monthlyListeners.toLocaleString()} monthly listener${monthlyListeners === 1 ? '' : 's'}`
+                                        : 'New Artist'}
                                 </p>
                             </div>
                         </div>

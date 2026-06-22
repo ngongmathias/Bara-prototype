@@ -1,13 +1,8 @@
-import { useState } from 'react';
-import { useUser } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { SEO } from '@/components/SEO';
-import { useToast } from '@/hooks/use-toast';
 import {
   BadgeCheck,
   Music,
@@ -15,7 +10,6 @@ import {
   Shield,
   Star,
   Zap,
-  ArrowRight,
   Check,
   Crown,
 } from 'lucide-react';
@@ -41,27 +35,6 @@ const COMPARISON = [
 ];
 
 export default function ArtistVerificationPage() {
-  const { isSignedIn } = useUser();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-
-  const handleSubscribe = () => {
-    if (!isSignedIn) {
-      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
-      return;
-    }
-    setLoading(true);
-    toast({
-      title: 'Verified Artist Activated! ✓',
-      description: 'All verification features are free during our launch period. Your badge will appear on your profile.',
-    });
-    setTimeout(() => {
-      setLoading(false);
-      navigate('/streams/creator');
-    }, 1000);
-  };
-
   return (
     <div className="min-h-screen bg-white">
       <SEO
@@ -90,7 +63,7 @@ export default function ArtistVerificationPage() {
         <div className="max-w-md mx-auto mb-16">
           <Card className="border-2 border-gray-900 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 bg-gray-900 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
-              RECOMMENDED
+              COMING SOON
             </div>
             <CardHeader className="text-center pt-8">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -115,27 +88,15 @@ export default function ArtistVerificationPage() {
                 ))}
               </ul>
 
-              {isSignedIn ? (
-                <Button
-                  onClick={handleSubscribe}
-                  disabled={loading}
-                  className="w-full py-6 bg-gray-900 hover:bg-black text-white font-black text-base rounded-xl"
-                >
-                  Get Verified
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`)}
-                  className="w-full py-6 bg-black hover:bg-gray-800 text-white font-black text-base rounded-xl"
-                >
-                  Sign In to Subscribe
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              )}
+              <Button
+                disabled
+                className="w-full py-6 bg-gray-900 text-white font-black text-base rounded-xl opacity-90 cursor-not-allowed"
+              >
+                Coming Soon
+              </Button>
 
               <p className="text-[10px] text-gray-500 text-center">
-                Cancel anytime. No long-term commitment.
+                Artist verification is launching soon. Pricing shown is indicative and may change.
               </p>
             </CardContent>
           </Card>

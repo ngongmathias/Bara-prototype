@@ -9,6 +9,7 @@ import {
 import { motion } from "framer-motion";
 import { GamificationService } from "@/lib/gamificationService";
 import { MonetizationService } from "@/lib/monetizationService";
+import { getMonthlyListeners } from "@/lib/artistStats";
 import { useToast } from "@/hooks/use-toast";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { supabase, createAuthenticatedSupabaseClient } from "@/lib/supabase";
@@ -62,6 +63,7 @@ export default function ArtistDashboard() {
     const [isBoosting, setIsBoosting] = useState(false);
     const [dailyStreams, setDailyStreams] = useState<Array<{ date: string; count: number }>>([]);
     const [followerCount, setFollowerCount] = useState(0);
+    const [monthlyListeners, setMonthlyListeners] = useState(0);
 
     const ownPlays = songs.reduce((acc, s) => acc + (s.plays || 0), 0);
     const featuredPlays = featuredOnSongs.reduce((acc, s) => acc + (s.plays || 0), 0);
@@ -70,7 +72,7 @@ export default function ArtistDashboard() {
         albums: albums.length,
         totalPlays: ownPlays,
         featuredPlays,
-        fans: Math.max(songs.length * 12, ownPlays * 3)
+        monthlyListeners,
     };
 
     useEffect(() => {
@@ -143,6 +145,10 @@ export default function ArtistDashboard() {
                     console.warn('Could not fetch daily streams', err);
                 }
             }
+
+            // Real monthly listeners = distinct users who played this artist's
+            // songs in the last 30 days (no fabricated numbers).
+            setMonthlyListeners(await getMonthlyListeners(songIds));
 
             // Follower count (best-effort)
             try {
@@ -329,7 +335,7 @@ export default function ArtistDashboard() {
                                         { label: 'Total Streams', value: stats.totalPlays.toLocaleString(), icon: Play, color: 'bg-gray-100 text-gray-700' },
                                         { label: 'Featured Streams', value: stats.featuredPlays.toLocaleString(), icon: Star, color: 'bg-gray-100 text-gray-700' },
                                         { label: 'Tracks', value: stats.tracks, icon: Music, color: 'bg-gray-100 text-gray-700' },
-                                        { label: 'Monthly Listeners', value: stats.fans.toLocaleString(), icon: Users, color: 'bg-gray-100 text-gray-700' }
+                                        { label: 'Monthly Listeners', value: stats.monthlyListeners.toLocaleString(), icon: Users, color: 'bg-gray-100 text-gray-700' }
                                     ].map((stat, i) => (
                                         <motion.div
                                             key={stat.label}
