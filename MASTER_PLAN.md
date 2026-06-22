@@ -1108,6 +1108,25 @@ Control/Mobile taxonomy + field configs, idempotent additive DB migration
   - **Admin → Users** dashboard now surfaces username/country/phone/DOB/gender per
     user and includes them in the CSV export.
 
+### 26.8 Creator + Admin streams overhaul (Jun 22–23) ✅
+Two full audits of the music-add flow + admin pages, then fixed everything found
+(we're **live**, so accuracy mattered):
+- **Real stats:** removed fabricated "monthly listeners" (tracks×12 / plays×0.3);
+  now a real 30-day distinct-listener count (`getMonthlyListeners`) on the Creator
+  dashboard + public ArtistPage.
+- **Monetization = Coming Soon:** ArtistVerificationPage no longer fakes a
+  "Get Verified" activation (it granted nothing); honest disabled CTA.
+- **Data-loss bugs:** song + album **description** now saved (new columns,
+  `20260622_streams_content_fields.sql`); album type written to `type` (was a
+  non-existent `album_type`); AdminArtists Twitter/Instagram inputs added.
+- **Artist self-service:** `EditSongModal` (title/genre/album/price/desc/lyrics/
+  cover/featured/producer/songwriter), `EditAlbumModal` (edit/delete + assign
+  tracks), `EditArtistProfileModal` (name/bio/photo/genre/country/socials).
+- **Upload:** real progress via XHR to a signed URL (`uploadToMusicWithProgress`,
+  safe fallback) + featured/producer/songwriter credits.
+- **Admin:** server-side **pagination** (Songs/Artists/Albums), monochrome colours,
+  honest page guides, deduped Plus icons, consistent audio formats.
+
 ### 26.6 Compliance ✅
 DPO/compliance package completed and at signing stage (25.8.1); supporting docs
 committed under `compliance/`.
@@ -1118,7 +1137,9 @@ committed under `compliance/`.
 ✅ applied (search typo-tolerance live) · `20260621_new_release_notifications.sql`
 ✅ applied · `20260621_saved_albums.sql` ✅ applied (Saved Albums live) ·
 `20260621_playlist_songs_anon_write.sql` ✅ applied (playlist song-adds work) ·
-`20260622_user_profile_fields.sql` ✅ applied (registration profile fields live).
+`20260622_user_profile_fields.sql` ✅ applied (registration profile fields live) ·
+`20260622_streams_content_fields.sql` ⬜ **run me** (adds songs/albums.description
+so descriptions stop being dropped).
 
 ---
 
