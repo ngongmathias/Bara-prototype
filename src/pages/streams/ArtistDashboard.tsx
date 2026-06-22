@@ -10,6 +10,8 @@ import { motion } from "framer-motion";
 import { GamificationService } from "@/lib/gamificationService";
 import { MonetizationService } from "@/lib/monetizationService";
 import { getMonthlyListeners } from "@/lib/artistStats";
+import { EditSongModal } from "@/components/streams/EditSongModal";
+import { EditAlbumModal } from "@/components/streams/EditAlbumModal";
 import { useToast } from "@/hooks/use-toast";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { supabase, createAuthenticatedSupabaseClient } from "@/lib/supabase";
@@ -64,6 +66,8 @@ export default function ArtistDashboard() {
     const [dailyStreams, setDailyStreams] = useState<Array<{ date: string; count: number }>>([]);
     const [followerCount, setFollowerCount] = useState(0);
     const [monthlyListeners, setMonthlyListeners] = useState(0);
+    const [editingSong, setEditingSong] = useState<MySong | null>(null);
+    const [editingAlbum, setEditingAlbum] = useState<MyAlbum | null>(null);
 
     const ownPlays = songs.reduce((acc, s) => acc + (s.plays || 0), 0);
     const featuredPlays = featuredOnSongs.reduce((acc, s) => acc + (s.plays || 0), 0);
@@ -565,6 +569,9 @@ export default function ArtistDashboard() {
                                                                     }}>
                                                                         <Share2 size={14} className="mr-2" /> Copy Link
                                                                     </DropdownMenuItem>
+                                                                    <DropdownMenuItem onClick={() => setEditingSong(song)}>
+                                                                        <Edit2 size={14} className="mr-2" /> Edit
+                                                                    </DropdownMenuItem>
                                                                     <DropdownMenuItem onClick={() => togglePick(song.id)}>
                                                                         <Star size={14} className={`mr-2 ${picks.some(p => p.song_id === song.id) ? 'fill-gray-900 text-gray-900' : ''}`} />
                                                                         {picks.some(p => p.song_id === song.id) ? 'Remove Pick' : 'Add to Picks'}
@@ -612,7 +619,7 @@ export default function ArtistDashboard() {
                                                 animate={{ opacity: 1, y: 0 }}
                                                 transition={{ delay: i * 0.08 }}
                                             >
-                                                <Card className="border-none shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
+                                                <Card onClick={() => setEditingAlbum(album)} className="border-none shadow-sm hover:shadow-md transition-shadow overflow-hidden group cursor-pointer">
                                                     <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
                                                         {album.cover_url ? (
                                                             <img loading="lazy" src={album.cover_url} alt={album.title} className="w-full h-full object-cover" />
@@ -621,8 +628,8 @@ export default function ArtistDashboard() {
                                                                 <Disc size={64} className="text-gray-300" />
                                                             </div>
                                                         )}
-                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                            <Play size={48} className="text-white" fill="white" />
+                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white">
+                                                            <Edit2 size={22} /> <span className="font-bold text-sm">Edit</span>
                                                         </div>
                                                     </div>
                                                     <CardContent className="pt-4 pb-4">
@@ -832,6 +839,31 @@ export default function ArtistDashboard() {
                     </>
                 )}
             </div>
+
+            {editingSong && artistId && (
+                <EditSongModal
+                    song={{
+                        id: editingSong.id,
+                        title: editingSong.title,
+                        genre: editingSong.genre,
+                        album_id: editingSong.album_id,
+                        cover_url: editingSong.cover_url,
+                    }}
+                    artistId={artistId}
+                    albums={albums.map((a) => ({ id: a.id, title: a.title }))}
+                    onClose={() => setEditingSong(null)}
+                    onSaved={fetchMyData}
+                />
+            )}
+
+            {editingAlbum && artistId && (
+                <EditAlbumModal
+                    album={{ id: editingAlbum.id, title: editingAlbum.title, cover_url: editingAlbum.cover_url }}
+                    artistId={artistId}
+                    onClose={() => setEditingAlbum(null)}
+                    onSaved={fetchMyData}
+                />
+            )}
         </StreamsLayout>
     );
 }
