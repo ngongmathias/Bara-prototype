@@ -243,6 +243,24 @@ export const AdminArtists = () => {
                                         placeholder="Artist biography..."
                                     />
                                 </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label>Twitter / X handle</Label>
+                                        <Input
+                                            value={formData.twitter_handle || ''}
+                                            onChange={(e) => setFormData({ ...formData, twitter_handle: e.target.value })}
+                                            placeholder="@artist"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Instagram handle</Label>
+                                        <Input
+                                            value={formData.instagram_handle || ''}
+                                            onChange={(e) => setFormData({ ...formData, instagram_handle: e.target.value })}
+                                            placeholder="@artist"
+                                        />
+                                    </div>
+                                </div>
                                 <div className="space-y-2">
                                     <Label>Profile Image</Label>
                                     {imagePreview ? (

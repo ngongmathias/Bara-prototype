@@ -193,6 +193,7 @@ export default function UploadSongPage() {
                     plays: 0,
                     price: price ? parseFloat(price) : null,
                     lyrics: lyrics.trim() || null,
+                    description: description.trim() || null,
                 })
                 .select('id')
                 .single();

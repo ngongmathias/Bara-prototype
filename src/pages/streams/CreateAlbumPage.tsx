@@ -115,7 +115,7 @@ export default function CreateAlbumPage() {
                     artist_id: currentArtistId,
                     cover_url: coverUrl || null,
                     release_date: releaseDate,
-                    album_type: albumType,
+                    type: albumType.toLowerCase(),
                     description: description.trim() || null,
                 });
 
@@ -210,7 +210,7 @@ export default function CreateAlbumPage() {
                             type="date"
                             value={releaseDate}
                             onChange={(e) => setReleaseDate(e.target.value)}
-                            className="bg-gray-50 border-gray-200 text-gray-900 h-12 [color-scheme:dark]"
+                            className="bg-gray-50 border-gray-200 text-gray-900 h-12"
                         />
                     </div>
 
