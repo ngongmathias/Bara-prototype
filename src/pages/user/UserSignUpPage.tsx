@@ -4,6 +4,7 @@ import { useSignUp, useSignIn } from '@clerk/clerk-react';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { COUNTRIES } from '@/data/countries';
+import { DateOfBirthPicker } from '@/components/DateOfBirthPicker';
 
 const GENDERS = ['Male', 'Female', 'Rather Not Say'] as const;
 
@@ -205,18 +206,17 @@ export const UserSignUpPage = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelCls}>Date of birth</label>
-                  <input type="date" className={inputCls} value={dob} onChange={(e) => setDob(e.target.value)} max={new Date().toISOString().slice(0, 10)} />
-                </div>
-                <div>
-                  <label className={labelCls}>Gender</label>
-                  <select className={inputCls} value={gender} onChange={(e) => setGender(e.target.value)}>
-                    <option value="" disabled>Select…</option>
-                    {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
-                  </select>
-                </div>
+              <div>
+                <label className={labelCls}>Date of birth</label>
+                <DateOfBirthPicker value={dob} onChange={setDob} className={inputCls} />
+              </div>
+
+              <div>
+                <label className={labelCls}>Gender</label>
+                <select className={inputCls} value={gender} onChange={(e) => setGender(e.target.value)}>
+                  <option value="" disabled>Select…</option>
+                  {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
               </div>
 
               <div>
@@ -230,17 +230,18 @@ export const UserSignUpPage = () => {
                 <label className={labelCls}>Phone number</label>
                 <div className="flex gap-2">
                   <select
-                    className={`${inputCls} w-28 flex-shrink-0`}
+                    className={`${inputCls} w-24 sm:w-28 flex-shrink-0`}
                     value={dialCode}
                     onChange={(e) => setDialCode(e.target.value)}
                     aria-label="Country code"
                   >
                     {sortedCountries.filter((c) => c.dial !== '+').map((c) => (
-                      <option key={c.iso2} value={c.dial}>{c.dial} ({c.iso2})</option>
+                      <option key={c.iso2} value={c.dial}>{c.iso2} {c.dial}</option>
                     ))}
                   </select>
-                  <input className={inputCls} value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" placeholder="712 345 678" autoComplete="tel-national" />
+                  <input className={`${inputCls} flex-1 min-w-0`} value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" inputMode="numeric" placeholder="712 345 678" autoComplete="tel-national" />
                 </div>
+                <p className="text-[11px] text-gray-400 mt-1">Pick your country code on the left, then type your number.</p>
               </div>
 
               <div>
