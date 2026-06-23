@@ -1127,6 +1127,20 @@ Two full audits of the music-add flow + admin pages, then fixed everything found
 - **Admin:** server-side **pagination** (Songs/Artists/Albums), monochrome colours,
   honest page guides, deduped Plus icons, consistent audio formats.
 
+### 26.9 Coins / rewards / XP deep-dive (Jun 23) ✅ (phase 1)
+Audited the whole economy, then acted on the decisions:
+- **Bara Coin = hybrid** target (free earn + cash-bought for real purchases later);
+  for now no real money flows in.
+- **Paid music deferred** — all songs free; price/purchase/preview hidden behind
+  `PAID_MUSIC_ENABLED` (`src/lib/features.ts`). (song.price was charged as raw
+  coins — broken — hence off.)
+- **Trust Rank removed** from the admin UI (did nothing).
+- **Sports betting paused** behind `SPORTS_BETTING_ENABLED`.
+- Fixed dead mission keys (`listen_songs`/`stream_music` were never seeded).
+- **⚠️ Open risk:** coins/XP are client-mutated via the anon client with open RLS
+  → self-grantable. Must move to a server-side Edge Function/RPC (+ Stripe webhook)
+  before coins carry real value / the top-up store reopens.
+
 ### 26.6 Compliance ✅
 DPO/compliance package completed and at signing stage (25.8.1); supporting docs
 committed under `compliance/`.
