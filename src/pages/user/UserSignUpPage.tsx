@@ -98,9 +98,11 @@ export const UserSignUpPage = () => {
       }
 
       await signUp.create({ emailAddress: email.trim(), password });
-      // Best-effort: set the name on the Clerk user too (ignored if Name isn't
-      // enabled on the Clerk instance — the profile is still saved to Supabase).
-      try { await signUp.update({ firstName: firstName.trim(), lastName: lastName.trim() }); } catch { /* noop */ }
+      // Best-effort: also set name + username on the Clerk user. Each is wrapped
+      // separately so a field that's disabled on the instance can't block sign-up
+      // (the profile is always saved to Supabase regardless).
+      try { await signUp.update({ firstName: firstName.trim(), lastName: lastName.trim() }); } catch { /* field may be disabled */ }
+      try { await signUp.update({ username: username.trim() }); } catch { /* field may be disabled */ }
 
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
       setStep('verify');
