@@ -44,6 +44,7 @@ import {
 import { db, supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+import { PAID_MUSIC_ENABLED } from '@/lib/features';
 
 
 interface Song {
@@ -506,6 +507,7 @@ export const AdminSongs = () => {
                                         />
                                     </div>
                                 </div>
+                                {PAID_MUSIC_ENABLED && (
                                 <div className="space-y-2">
                                     <Label>Price (USD) — leave empty for free</Label>
                                     <Input
@@ -518,6 +520,7 @@ export const AdminSongs = () => {
                                     />
                                     <p className="text-xs text-gray-500">Paid songs play a 25-second preview. Users must purchase to hear the full track.</p>
                                 </div>
+                                )}
                                 <div className="space-y-2">
                                     <Label>Audio File (.mp3)</Label>
                                     <Input

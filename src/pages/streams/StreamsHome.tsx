@@ -13,6 +13,7 @@ import { useUser } from '@clerk/clerk-react';
 import { GENRES } from './GenrePage';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
 import { buildDailyMixes, DailyMix } from '@/lib/dailyMixes';
+import { PAID_MUSIC_ENABLED } from '@/lib/features';
 
 // Batch-fetch featured artists for a list of song IDs and return a map: songId -> "ft. A, B"
 async function fetchFeaturedArtistsMap(songIds: string[]): Promise<Record<string, string>> {
@@ -465,7 +466,7 @@ export default function StreamsHome() {
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
                                             <p className="text-xs text-gray-500 truncate mt-auto">
                                                 {song.artist}{featuredArtistsMap[song.id] || ''}
-                                                {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
+                                                {PAID_MUSIC_ENABLED && song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
                                             </p>
                                         </div>
                                     ))}
@@ -547,7 +548,7 @@ export default function StreamsHome() {
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
                                             <p className="text-xs text-gray-500 truncate mt-auto">
                                                 {song.artist}{featuredArtistsMap[song.id] || ''}
-                                                {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
+                                                {PAID_MUSIC_ENABLED && song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
                                             </p>
                                         </div>
                                     ))}
@@ -573,7 +574,7 @@ export default function StreamsHome() {
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
                                             <p className="text-xs text-gray-500 truncate mt-auto">
                                                 {song.artist}{featuredArtistsMap[song.id] || ''}
-                                                {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
+                                                {PAID_MUSIC_ENABLED && song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
                                             </p>
                                         </div>
                                     ))
@@ -602,7 +603,7 @@ export default function StreamsHome() {
                                             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
                                             <p className="text-xs text-gray-500 truncate mt-auto">
                                                 {song.artist}{featuredArtistsMap[song.id] || ''}
-                                                {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
+                                                {PAID_MUSIC_ENABLED && song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
                                             </p>
                                         </div>
                                     ))

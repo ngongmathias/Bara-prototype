@@ -7,6 +7,7 @@ import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
 import { Play, Pause, Shuffle, Clock, Heart, ArrowLeft, Music2, Disc3, Check, Plus } from 'lucide-react';
+import { PAID_MUSIC_ENABLED } from '@/lib/features';
 
 interface AlbumInfo {
   id: string;
@@ -278,7 +279,7 @@ export default function AlbumPage() {
                         <p className={`font-bold text-sm truncate ${active ? 'text-gray-900' : 'text-gray-900'}`}>{track.title}</p>
                         <p className="text-xs text-gray-500 truncate">
                           {track.artist}
-                          {track.price && track.price > 0 ? <span className="ml-2 text-[10px] font-bold text-gray-700 border border-gray-300 rounded px-1">${track.price.toFixed(2)}</span> : null}
+                          {PAID_MUSIC_ENABLED && track.price && track.price > 0 ? <span className="ml-2 text-[10px] font-bold text-gray-700 border border-gray-300 rounded px-1">${track.price.toFixed(2)}</span> : null}
                         </p>
                       </div>
                     </div>

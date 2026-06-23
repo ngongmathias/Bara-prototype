@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 
 import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
 import { trackRecent } from '@/lib/recentActivity';
+import { PAID_MUSIC_ENABLED } from '@/lib/features';
 
 import { useUser } from '@clerk/clerk-react';
 
@@ -206,9 +207,10 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
             setProgress(audio.currentTime);
 
-            // Preview cutoff: paid songs stop at 25 seconds if not purchased
+            // Preview cutoff: paid songs stop at 25 seconds if not purchased.
+            // Disabled while paid music is deferred (all songs play in full).
             const song = currentSongRef.current;
-            if (song && song.price && song.price > 0 && !purchasedSongsRef.current.includes(song.id)) {
+            if (PAID_MUSIC_ENABLED && song && song.price && song.price > 0 && !purchasedSongsRef.current.includes(song.id)) {
                 if (audio.currentTime >= 25) {
                     audio.pause();
                     setIsPlaying(false);
@@ -482,8 +484,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
           });
         } catch { /* ignore */ }
 
-        // Check if this is a paid preview
-        const isPaid = song.price && song.price > 0 && !purchasedSongsRef.current.includes(song.id);
+        // Check if this is a paid preview (disabled while paid music is deferred)
+        const isPaid = PAID_MUSIC_ENABLED && song.price && song.price > 0 && !purchasedSongsRef.current.includes(song.id);
         setIsPreviewing(!!isPaid);
 
         audioRef.current.src = song.file_url;

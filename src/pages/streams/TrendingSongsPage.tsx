@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useSongContextMenu } from '@/components/streams/SongContextMenu';
 import { Play, Pause } from 'lucide-react';
+import { PAID_MUSIC_ENABLED } from '@/lib/features';
 import { SkeletonCard } from '@/components/animations/SkeletonCard';
 import { ScrollReveal } from '@/components/animations/ScrollReveal';
 
@@ -111,7 +112,7 @@ export default function TrendingSongsPage() {
                                 <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{song.title}</h3>
                                 <p className="text-xs text-gray-500 truncate mt-auto">
                                     {song.artist}{ftMap[song.id] || ''}
-                                    {song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
+                                    {PAID_MUSIC_ENABLED && song.price && song.price > 0 && <span className="ml-1.5 text-[10px] font-bold text-gray-700">${song.price.toFixed(2)}</span>}
                                 </p>
                             </div>
                         ))}

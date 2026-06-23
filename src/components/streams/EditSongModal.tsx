@@ -4,6 +4,7 @@ import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, X, Image as ImageIcon } from 'lucide-react';
+import { PAID_MUSIC_ENABLED } from '@/lib/features';
 
 const GENRES = [
   'Afrobeats', 'Amapiano', 'Highlife', 'Afropop', 'Bongo Flava',
@@ -197,10 +198,12 @@ export const EditSongModal = ({ song, artistId, albums, onClose, onSaved }: Prop
               </div>
             </div>
 
-            <div>
-              <label className={label}>Price (USD)</label>
-              <input className={input} type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00 (free)" />
-            </div>
+            {PAID_MUSIC_ENABLED && (
+              <div>
+                <label className={label}>Price (USD)</label>
+                <input className={input} type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00 (free)" />
+              </div>
+            )}
 
             <div>
               <label className={label}>Description</label>

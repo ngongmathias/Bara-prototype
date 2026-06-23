@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { Upload, Music, Image, Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
 import { uploadToMusicWithProgress } from '@/lib/uploadWithProgress';
+import { PAID_MUSIC_ENABLED } from '@/lib/features';
 
 const GENRES = [
     'Afrobeats', 'Amapiano', 'Highlife', 'Afropop', 'Bongo Flava',
@@ -412,25 +413,27 @@ export default function UploadSongPage() {
                         </p>
                     </div>
 
-                    {/* Price */}
-                    <div className="space-y-2">
-                        <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Price (Optional)</Label>
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
-                            <Input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={price}
-                                onChange={(e) => setPrice(e.target.value)}
-                                placeholder="0.00 (free)"
-                                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-gray-900 focus:ring-gray-900 h-12 pl-8"
-                            />
+                    {/* Price — hidden while paid music is deferred (all songs are free) */}
+                    {PAID_MUSIC_ENABLED && (
+                        <div className="space-y-2">
+                            <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Price (Optional)</Label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
+                                    placeholder="0.00 (free)"
+                                    className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-600 focus:border-gray-900 focus:ring-gray-900 h-12 pl-8"
+                                />
+                            </div>
+                            <p className="text-xs text-gray-500">
+                                Leave empty or set to 0 for free streaming. Set a price and listeners will hear a 25-second preview before purchasing.
+                            </p>
                         </div>
-                        <p className="text-xs text-gray-500">
-                            Leave empty or set to 0 for free streaming. Set a price and listeners will hear a 25-second preview before purchasing.
-                        </p>
-                    </div>
+                    )}
 
                     {/* Upload Progress */}
                     {uploading && (
