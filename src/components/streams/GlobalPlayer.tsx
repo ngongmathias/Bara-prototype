@@ -139,10 +139,9 @@ export function GlobalPlayer() {
             const isSignificantProgress = (progress / duration > 0.5) || (progress > 30);
             if (isSignificantProgress && lastTrackedSongId !== currentSong.id) {
                 setLastTrackedSongId(currentSong.id);
-                // Track mission progress (try multiple common key names)
+                // Track the seeded daily-listen mission (the other keys were never
+                // seeded as missions, so they were silent no-ops — removed).
                 GamificationService.trackMissionProgress(user.id, 'daily_listen');
-                GamificationService.trackMissionProgress(user.id, 'listen_songs');
-                GamificationService.trackMissionProgress(user.id, 'stream_music');
                 // Dispatch event so DailyMissions UI refreshes
                 window.dispatchEvent(new CustomEvent('bara_song_played', {
                     detail: { songId: currentSong.id, userId: user.id }

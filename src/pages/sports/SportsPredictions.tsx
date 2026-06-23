@@ -7,6 +7,7 @@ import { SportsSubNav } from '../../components/sports/SportsSubNav';
 import { useFixtures } from '../../hooks/useLiveScores';
 import { GamificationService } from '@/lib/gamificationService';
 import { useGamification } from '@/hooks/useGamification';
+import { SPORTS_BETTING_ENABLED } from '@/lib/features';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -129,6 +130,10 @@ export default function SportsPredictions() {
   };
 
   const handlePlaceBet = async (match: Match) => {
+    if (!SPORTS_BETTING_ENABLED) {
+      toast({ title: 'Predictions paused', description: 'Coin predictions are temporarily unavailable. Check back soon.' });
+      return;
+    }
     if (!user || !isSignedIn) {
       navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
       return;
@@ -247,6 +252,11 @@ export default function SportsPredictions() {
         <SportsSubNav />
 
         <div className="max-w-5xl mx-auto px-4 py-6">
+          {!SPORTS_BETTING_ENABLED && (
+            <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+              <span className="font-bold">Predictions are paused.</span> Coin predictions are temporarily unavailable while we review the feature. You can still browse fixtures.
+            </div>
+          )}
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>

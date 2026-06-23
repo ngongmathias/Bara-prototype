@@ -75,7 +75,6 @@ export const AdminUsers = () => {
   const [isEconomyDialogOpen, setIsEconomyDialogOpen] = useState(false);
   const [selectedUserForEconomy, setSelectedUserForEconomy] = useState<any>(null);
   const [editingCoins, setEditingCoins] = useState<number>(0);
-  const [editingTrust, setEditingTrust] = useState<number>(1.0);
   const [economyHistory, setEconomyHistory] = useState<any[]>([]);
 
   // Pagination state
@@ -517,29 +516,22 @@ export const AdminUsers = () => {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <Coins className="w-4 h-4 text-yellow-600" />
-                                  <span className="font-bold">{economyData[user.id]?.bara_coins || 0}</span>
-                                  <span className="text-xs text-gray-500 italic">Bara Coins</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Zap className="w-4 h-4 text-orange-500" />
-                                  <span className="font-medium text-xs">Trust: {economyData[user.id]?.trust_rank || 1.0}</span>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6"
-                                    onClick={() => {
-                                      setSelectedUserForEconomy(user);
-                                      setEditingCoins(economyData[user.id]?.bara_coins || 0);
-                                      setEditingTrust(economyData[user.id]?.trust_rank || 1.0);
-                                      setIsEconomyDialogOpen(true);
-                                    }}
-                                  >
-                                    <Edit className="w-3 h-3" />
-                                  </Button>
-                                </div>
+                              <div className="flex items-center gap-2">
+                                <Coins className="w-4 h-4 text-yellow-600" />
+                                <span className="font-bold">{economyData[user.id]?.bara_coins || 0}</span>
+                                <span className="text-xs text-gray-500 italic">Bara Coins</span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => {
+                                    setSelectedUserForEconomy(user);
+                                    setEditingCoins(economyData[user.id]?.bara_coins || 0);
+                                    setIsEconomyDialogOpen(true);
+                                  }}
+                                >
+                                  <Edit className="w-3 h-3" />
+                                </Button>
                               </div>
                             </TableCell>
                             <TableCell>
@@ -797,7 +789,7 @@ export const AdminUsers = () => {
               Economy God-Mode
             </DialogTitle>
             <DialogDescription>
-              Override economy balances and trust rankings for <strong>{selectedUserForEconomy?.email}</strong>.
+              Override the Bara Coins balance for <strong>{selectedUserForEconomy?.email}</strong>.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-6 py-4">
@@ -812,26 +804,6 @@ export const AdminUsers = () => {
                 onChange={(e) => setEditingCoins(parseInt(e.target.value))}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold flex items-center gap-2">
-                <Zap className="w-4 h-4 text-orange-500" />
-                Trust Rank Multiplier
-              </label>
-              <div className="flex items-center gap-4">
-                <Input
-                  type="number"
-                  step="0.1"
-                  value={editingTrust}
-                  onChange={(e) => setEditingTrust(parseFloat(e.target.value))}
-                />
-                <div className="flex flex-col text-[10px] text-gray-500 uppercase font-black">
-                  <span>Low: 1.0</span>
-                  <span>High: 10.0</span>
-                </div>
-              </div>
-              <p className="text-[10px] text-gray-500 italic mt-1 max-w-[300px]">Higher rank increases ad visibility in GSP auctions.</p>
-            </div>
-
             <div className="pt-4 border-t border-gray-100">
               <h4 className="text-sm font-bold font-comfortaa mb-2 text-gray-700">Recent Transactions</h4>
               <div className="max-h-[150px] overflow-y-auto space-y-2 pr-2 border rounded-lg bg-gray-50/50 p-2 custom-scrollbar">
@@ -861,7 +833,6 @@ export const AdminUsers = () => {
               onClick={async () => {
                 const success = await GamificationService.updateUserEconomy(selectedUserForEconomy.id, {
                   bara_coins: editingCoins,
-                  trust_rank: editingTrust
                 });
                 if (success) {
                   toast({
