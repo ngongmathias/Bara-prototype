@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { MousePointerClick } from 'lucide-react';
 
 const BARA_MEANINGS = [
   { language: 'Swahili', meaning: 'Blessing' },
@@ -63,13 +64,24 @@ export const DancingBaraLogo = () => {
                   transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                   className="mt-4"
                 >
-                  <img loading="lazy" src="/images/bara-text.png" alt="BARA Logo" className="w-80 h-auto drop-shadow-lg mx-auto" />
-                  <p className="text-center text-xs text-gray-500 tracking-[0.3em] uppercase mt-2">
-                    We Are Together
-                  </p>
+                  <img loading="lazy" src="/images/bara-text.png" alt="BARA Logo" className="w-72 sm:w-80 h-auto drop-shadow-lg mx-auto" />
                 </motion.div>
 
-                <p className="text-center text-[10px] text-gray-400 mt-4">Tap to discover what BARA means</p>
+                {/* What BARA does — front and centre */}
+                <p className="text-center font-roboto font-black text-gray-900 text-2xl sm:text-3xl leading-tight mt-4">
+                  Connecting Global Afrika
+                </p>
+
+                {/* Obvious call-to-action */}
+                <div className="flex justify-center mt-5">
+                  <motion.span
+                    animate={{ scale: [1, 1.06, 1] }}
+                    transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                    className="inline-flex items-center gap-2 bg-gray-900 text-white font-roboto font-medium text-sm sm:text-base px-5 py-2 rounded-full shadow-lg"
+                  >
+                    <MousePointerClick size={18} /> Tap to discover BARA
+                  </motion.span>
+                </div>
               </motion.div>
             </Link>
           </div>
@@ -80,22 +92,16 @@ export const DancingBaraLogo = () => {
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
           >
             <div className="bg-gray-900 rounded-3xl px-10 py-8 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] h-full flex flex-col items-center justify-center text-center">
-              <p className="text-gray-200 text-sm sm:text-base leading-relaxed max-w-[300px] mb-3">
-                <span className="font-black text-white">BARA</span> – Kiswahili (or Swahili) for continent, land, home.
+              <p className="font-roboto text-white text-lg sm:text-xl leading-relaxed max-w-[320px] mb-5">
+                <span className="font-black">BARA:</span> Swahili <span className="text-gray-300">(noun)</span> for{' '}
+                <span className="font-black">Continent | Land | Home</span>
               </p>
-              <p className="text-base sm:text-lg font-bold text-white tracking-wide mb-3">
-                One Land | One People | One Future
+              <p className="font-roboto text-gray-200 text-sm sm:text-base leading-relaxed max-w-[330px] mb-6">
+                A pan-African <span className="font-black text-white">“SuperPlatform”</span> connecting global Afrika through Trade, Tourism, Networking, Entertainment &amp; More.
               </p>
-              <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-[300px] mb-4">
-                With over 200 million speakers, Kiswahili is Africa's most far-reaching indigenous tongue.
+              <p className="font-roboto font-medium text-white text-sm sm:text-base">
+                Scroll to discover BARA's functions!
               </p>
-              <p className="text-white text-sm sm:text-base font-bold max-w-[300px] mb-1">
-                BARA Afrika | “Your Bridge to Today's Afrika!”
-              </p>
-              <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-[300px]">
-                A pan-African super platform connecting the global Afrikan family through trade, tourism, networking, entertainment, and beyond.
-              </p>
-              <p className="text-gray-600 text-[10px] mt-4">Tap to flip back</p>
             </div>
           </div>
         </motion.div>
