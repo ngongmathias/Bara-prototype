@@ -1,5 +1,6 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { StreamsSidebar } from './StreamsSidebar';
+import { StreamsMobileNav } from './StreamsMobileNav';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, Link } from 'react-router-dom';
 import { Music, Film, BookOpen, Headphones, Gamepad2, LayoutGrid } from 'lucide-react';
@@ -60,6 +61,7 @@ export function StreamsLayout({ children }: { children: React.ReactNode }) {
                     </AnimatePresence>
                 </div>
             </div>
+            <StreamsMobileNav />
         </MainLayout>
     );
 }

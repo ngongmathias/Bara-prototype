@@ -1,6 +1,7 @@
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
 import { Play, Pause, Heart, Shuffle, SkipBack, SkipForward, Repeat, Volume2, List, Share2, Maximize2, Lock, ShoppingCart, MoreHorizontal, Timer, Gauge, ListPlus } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { GamificationService } from '@/lib/gamificationService';
 import { QueueDrawer } from './QueueDrawer';
@@ -12,6 +13,10 @@ import { supabase } from '@/lib/supabase';
 
 export function GlobalPlayer() {
     const { toast } = useToast();
+    const { pathname } = useLocation();
+    // On Streams routes the mobile bottom-nav occupies the bottom 56px, so the
+    // mini-player sits above it on mobile (unchanged on desktop / other sections).
+    const onStreams = pathname.startsWith('/streams');
     const {
         currentSong,
         isPlaying,
@@ -188,7 +193,7 @@ export function GlobalPlayer() {
 
     return (
         <div
-            className="fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-xl border-t border-white/5 px-4 py-3 z-[200] text-white shadow-2xl"
+            className={`fixed left-0 right-0 bg-[#121212]/95 backdrop-blur-xl border-t border-white/5 px-4 py-3 z-[200] text-white shadow-2xl ${onStreams ? 'bottom-14 lg:bottom-0' : 'bottom-0'}`}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
         >

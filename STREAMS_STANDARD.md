@@ -100,7 +100,7 @@
 **Tier 3 — polish & scale**
 8. **Gapless + crossfade + normalization** (F1).
 9. ~~**Saved albums**~~ ✅ **Done Jun 21** (`user_album_saves` table + Save toggle on AlbumPage + Albums filter in Library) · **offline/PWA** still pending (F5).
-10. **Performance**: ~~code-split /streams~~ ✅ **Done Jun 21** (all pages `React.lazy` + `<Suspense>`), ~~virtualise long lists~~ ✅ **Done Jun 21** (`useWindowVirtualizer` on LikedSongsPage + PlaylistPage via `@tanstack/react-virtual`); **a11y pass** + **device matrix pass** (D3/D5/D6) still pending.
+10. **Performance**: ~~code-split /streams~~ ✅ **Done Jun 21** (all pages `React.lazy` + `<Suspense>`), ~~virtualise long lists~~ ✅ **Done Jun 21** (`useWindowVirtualizer` on LikedSongsPage + PlaylistPage via `@tanstack/react-virtual`); ~~a11y pass~~ ✅; **mobile bottom-nav** ✅ **Done Jun 30** (`StreamsMobileNav` — Home/Search/Library/Creator, `lg:hidden`; mini-player raised above it on `/streams` routes). Full device-matrix sweep + loudness/crossfade still pending.
 
 ---
 
