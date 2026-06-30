@@ -413,62 +413,36 @@ export class GamificationService {
             // Reset daily missions for this user if they haven't been reset today
             await this.resetDailyMissions(userId);
 
-            const now = new Date();
+            // Compare LOCAL calendar days (a "day" is the user's day, not UTC) and
+            // guard a missing/invalid last_activity_at so the streak can't get stuck.
+            const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+            const today = startOfDay(new Date());
 
-            const lastActivity = new Date(profile.last_activity_at);
+            const last = profile.last_activity_at ? new Date(profile.last_activity_at) : null;
+            const lastValid = !!last && !isNaN(last.getTime());
+            const diffDays = lastValid
+                ? Math.round((today - startOfDay(last as Date)) / (1000 * 60 * 60 * 24))
+                : Infinity;
 
-            // Compare calendar dates (UTC) instead of raw ms diff
-            const nowDate = new Date(now.toISOString().slice(0, 10));
-            const lastDate = new Date(lastActivity.toISOString().slice(0, 10));
-            const diffDays = Math.round((nowDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+            // Read the current streak from either column (defensive against drift).
+            const currentStreak = Number(profile.consecutive_days ?? profile.daily_streak ?? 0) || 0;
 
-
-
-            let newStreak = profile.consecutive_days;
-
-            let multiplier = profile.multiplier;
-
+            let newStreak = currentStreak;
             let streakChanged = false;
 
-
-
-            if (!profile.consecutive_days || profile.consecutive_days < 1) {
-
-                // First ever check-in (brand-new profile) — count today as day 1
-
+            if (!lastValid || currentStreak < 1 || diffDays >= 2) {
+                // Brand-new / broken streak → start (or restart) at day 1
                 newStreak = 1;
                 streakChanged = true;
-
             } else if (diffDays === 1) {
-
-                // Streak continued
-
-                newStreak += 1;
+                // Returned on the next calendar day → streak continues
+                newStreak = currentStreak + 1;
                 streakChanged = true;
-
-            } else if (diffDays > 1) {
-
-                // Streak broken — restart at day 1
-
-                newStreak = 1;
-                streakChanged = true;
-
             }
-            // diffDays === 0 with an existing streak: same day, no change
-
-
+            // diffDays <= 0 → already counted today (or clock skew): no change
 
             // MIT-level psychological scaling
-
-            if (newStreak >= 30) multiplier = 2.0;
-
-            else if (newStreak >= 7) multiplier = 1.5;
-
-            else if (newStreak >= 3) multiplier = 1.2;
-
-            else multiplier = 1.0;
-
-
+            const multiplier = newStreak >= 30 ? 2.0 : newStreak >= 7 ? 1.5 : newStreak >= 3 ? 1.2 : 1.0;
 
             if (streakChanged) {
                 const { error } = await supabase
@@ -486,7 +460,7 @@ export class GamificationService {
 
                         multiplier: multiplier,
 
-                        last_activity_at: now.toISOString()
+                        last_activity_at: new Date().toISOString()
 
                     })
 
@@ -498,11 +472,15 @@ export class GamificationService {
 
                 // Give a small daily bonus for returning
                 await this.addXP(userId, XP_REWARDS.SIGN_IN_BONUS, `Daily Streak: Day ${newStreak}`);
+
+                // Award streak achievements once the user reaches the milestones
+                if (newStreak >= 7) await this.awardAchievement(userId, 'streak_7');
+                if (newStreak >= 30) await this.awardAchievement(userId, 'streak_30');
             } else {
-                // Same day — just update last_activity_at
+                // Same day — just refresh last_activity_at
                 await supabase
                     .from('gamification_profiles')
-                    .update({ last_activity_at: now.toISOString() })
+                    .update({ last_activity_at: new Date().toISOString() })
                     .eq('user_id', userId);
             }
 
