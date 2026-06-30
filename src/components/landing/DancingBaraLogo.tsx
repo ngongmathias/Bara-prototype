@@ -67,8 +67,8 @@ export const DancingBaraLogo = () => {
                   <img loading="lazy" src="/images/bara-text.png" alt="BARA Logo" className="w-72 sm:w-80 h-auto drop-shadow-lg mx-auto" />
                 </motion.div>
 
-                {/* What BARA does — front and centre, constrained to the BARA wordmark width */}
-                <p className="text-center font-roboto font-black text-gray-900 text-2xl sm:text-3xl leading-tight mt-4 w-72 sm:w-80 mx-auto">
+                {/* What BARA does — one line, sized to fit under the BARA wordmark */}
+                <p className="text-center font-roboto font-black text-gray-900 text-lg sm:text-xl leading-tight mt-4 whitespace-nowrap">
                   Connecting Global Afrika
                 </p>
 
@@ -93,8 +93,9 @@ export const DancingBaraLogo = () => {
           >
             <div className="bg-gray-900 rounded-3xl px-10 py-8 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] h-full flex flex-col items-center justify-center text-center">
               <p className="font-roboto text-white text-lg sm:text-xl leading-relaxed max-w-[320px] mb-5">
-                <span className="font-black">BARA:</span> Swahili <span className="text-gray-300">(noun)</span> for{' '}
-                <span className="font-black">Continent | Land | Home</span>
+                <span className="font-black">BARA:</span> Swahili <span className="text-gray-300">(noun)</span>
+                <br />
+                <span className="font-black whitespace-nowrap">Continent | Land | Home</span>
               </p>
               <p className="font-roboto text-gray-200 text-sm sm:text-base leading-relaxed max-w-[330px] mb-6">
                 A pan-African <span className="font-black text-white">“SuperPlatform”</span> connecting global Afrika through Trade, Tourism, Networking, Entertainment &amp; More.
