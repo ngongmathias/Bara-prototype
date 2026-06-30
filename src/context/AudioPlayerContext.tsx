@@ -228,7 +228,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
                     if (clerkUser) {
 
-                        await GamificationService.addXP(clerkUser.id, XP_REWARDS.SONG_LISTEN, `Listened to ${song.title}`);
+                        // Capped daily listen-XP + first-listen achievement
+                        await GamificationService.awardSongListenXP(clerkUser.id, song.title);
 
                         hasAwardedXP.current = song.id;
 

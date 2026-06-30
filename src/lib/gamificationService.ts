@@ -400,6 +400,34 @@ export class GamificationService {
 
 
 
+    // Max songs per day that earn listen-XP (anti-farming: caps passive XP at
+    // DAILY_LISTEN_XP_CAP × SONG_LISTEN per day).
+    static DAILY_LISTEN_XP_CAP = 50;
+
+    /**
+     * Award XP for a song listen, but only up to a daily cap, and grant the
+     * first-listen achievement. Replaces a raw addXP so listening can't be farmed.
+     */
+    static async awardSongListenXP(userId: string, songTitle: string): Promise<void> {
+        try {
+            const startOfToday = new Date();
+            startOfToday.setHours(0, 0, 0, 0);
+            const { count } = await supabase
+                .from('gamification_history')
+                .select('id', { count: 'exact', head: true })
+                .eq('user_id', userId)
+                .ilike('reason', 'Listened to%')
+                .gte('created_at', startOfToday.toISOString());
+
+            if ((count || 0) >= this.DAILY_LISTEN_XP_CAP) return; // daily cap reached
+
+            await this.addXP(userId, XP_REWARDS.SONG_LISTEN, `Listened to ${songTitle}`);
+            await this.awardAchievement(userId, 'first_listen'); // idempotent
+        } catch (error) {
+            console.error('Error awarding listen XP:', error);
+        }
+    }
+
     static async checkDailyStreak(userId: string): Promise<void> {
 
         try {
