@@ -67,9 +67,9 @@ export const DancingBaraLogo = () => {
                   <img loading="lazy" src="/images/bara-text.png" alt="BARA Logo" className="w-72 sm:w-80 h-auto drop-shadow-lg mx-auto" />
                 </motion.div>
 
-                {/* What BARA does — one line, sized to fit under the BARA wordmark */}
-                <p className="text-center font-roboto font-black text-gray-900 text-lg sm:text-xl leading-tight mt-4 whitespace-nowrap">
-                  Connecting Global Afrika
+                {/* What BARA does — one line, justified to exactly the BARA wordmark width */}
+                <p className="w-72 sm:w-80 mx-auto flex justify-between font-roboto font-black text-gray-900 text-lg sm:text-xl leading-tight mt-4 whitespace-nowrap">
+                  <span>Connecting</span><span>Global</span><span>Afrika</span>
                 </p>
 
                 {/* Obvious call-to-action */}
