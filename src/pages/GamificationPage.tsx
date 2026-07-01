@@ -69,9 +69,14 @@ const GamificationPage = () => {
       <Header />
 
       <main className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-black font-comfortaa">Rewards</h1>
-          <p className="text-gray-500">Earn BARA Coins and XP as you explore. Complete daily missions, unlock achievements.</p>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black font-comfortaa">Rewards</h1>
+            <p className="text-gray-500">Earn BARA Coins and XP as you explore. Complete daily missions, unlock achievements.</p>
+          </div>
+          <Link to="/rewards" className="flex-shrink-0 text-sm font-bold text-gray-700 hover:text-gray-900 underline whitespace-nowrap mt-1">
+            How rewards work
+          </Link>
         </div>
 
         {/* Profile summary */}
