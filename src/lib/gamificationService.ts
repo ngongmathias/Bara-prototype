@@ -292,6 +292,54 @@ export class GamificationService {
 
 
 
+    /**
+     * "Your week on BARA" — activity over the last 7 days for the recap card.
+     */
+    static async getWeeklyRecap(userId: string): Promise<{
+        xp: number; coins: number; listens: number; topArtist: string | null; topGenre: string | null;
+    }> {
+        const empty = { xp: 0, coins: 0, listens: 0, topArtist: null, topGenre: null };
+        try {
+            const since = new Date();
+            since.setDate(since.getDate() - 7);
+            const sinceISO = since.toISOString();
+
+            const [{ data: hist }, { data: plays }] = await Promise.all([
+                supabase.from('gamification_history').select('type, amount').eq('user_id', userId).gte('created_at', sinceISO),
+                supabase.from('play_history').select('song_id').eq('user_id', userId).gte('played_at', sinceISO),
+            ]);
+
+            let xp = 0, coins = 0;
+            (hist || []).forEach((h: any) => {
+                if (h.type === 'xp_gain') xp += Number(h.amount) || 0;
+                else if (h.type === 'coin_gain' || h.type === 'coin_purchase') coins += Number(h.amount) || 0;
+            });
+
+            const listens = (plays || []).length;
+            let topArtist: string | null = null, topGenre: string | null = null;
+            if (listens > 0) {
+                const playCount: Record<string, number> = {};
+                (plays as any[]).forEach((p) => { playCount[p.song_id] = (playCount[p.song_id] || 0) + 1; });
+                const ids = Object.keys(playCount);
+                const { data: songs } = await supabase.from('songs').select('id, genre, artists(name)').in('id', ids);
+                const genreCount: Record<string, number> = {}, artistCount: Record<string, number> = {};
+                (songs || []).forEach((s: any) => {
+                    const c = playCount[s.id] || 0;
+                    if (s.genre) genreCount[s.genre] = (genreCount[s.genre] || 0) + c;
+                    const an = s.artists?.name;
+                    if (an) artistCount[an] = (artistCount[an] || 0) + c;
+                });
+                topGenre = Object.entries(genreCount).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+                topArtist = Object.entries(artistCount).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+            }
+
+            return { xp, coins, listens, topArtist, topGenre };
+        } catch (error) {
+            console.error('Error building weekly recap:', error);
+            return empty;
+        }
+    }
+
     static async addXP(userId: string, amount: number, reason: string): Promise<{ levelUp: boolean; newLevel: number } | null> {
 
         try {

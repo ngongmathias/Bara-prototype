@@ -25,6 +25,7 @@ const GamificationPage = () => {
   const [missions, setMissions] = useState<UserMission[]>([]);
   const [loadingMissions, setLoadingMissions] = useState(true);
   const [claiming, setClaiming] = useState<string | null>(null);
+  const [recap, setRecap] = useState<{ xp: number; coins: number; listens: number; topArtist: string | null; topGenre: string | null } | null>(null);
 
   const fetchMissions = async () => {
     if (!user) return;
@@ -35,7 +36,10 @@ const GamificationPage = () => {
   };
 
   useEffect(() => {
-    if (user) fetchMissions();
+    if (user) {
+      fetchMissions();
+      GamificationService.getWeeklyRecap(user.id).then(setRecap).catch(() => {});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
@@ -109,6 +113,35 @@ const GamificationPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Your last 7 days */}
+        {recap && (recap.xp > 0 || recap.coins > 0 || recap.listens > 0) && (
+          <Card className="border-none shadow-sm mb-6">
+            <CardContent className="p-6">
+              <h2 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
+                <Gift className="w-5 h-5" /> Your last 7 days
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <div className="text-2xl font-black text-gray-900">+{recap.xp.toLocaleString()}</div>
+                  <div className="text-[10px] uppercase font-bold text-gray-400 mt-1">XP earned</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-black text-gray-900">+{recap.coins.toLocaleString()}</div>
+                  <div className="text-[10px] uppercase font-bold text-gray-400 mt-1">Coins earned</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-black text-gray-900">{recap.listens.toLocaleString()}</div>
+                  <div className="text-[10px] uppercase font-bold text-gray-400 mt-1">Songs played</div>
+                </div>
+                <div>
+                  <div className="text-sm font-black text-gray-900 truncate">{recap.topArtist || recap.topGenre || '—'}</div>
+                  <div className="text-[10px] uppercase font-bold text-gray-400 mt-1">{recap.topArtist ? 'Top artist' : 'Top genre'}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="flex justify-end mb-4">
           <Link to="/leaderboard">
