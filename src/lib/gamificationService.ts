@@ -236,6 +236,9 @@ export class GamificationService {
 
                     }
 
+                    // Launch-period welcome badge (idempotent, non-blocking)
+                    this.awardAchievement(userId, 'early_adopter').catch(() => {});
+
                     return newProfile;
 
                 }
