@@ -10,6 +10,8 @@ import { Coins, Sparkles, Zap, ShoppingBag, Calendar, Music, TrendingUp, Gift, A
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
 import { GamificationService } from '@/lib/gamificationService';
+import { useAdFree } from '@/hooks/useAdFree';
+import { ShieldOff } from 'lucide-react';
 
 const coinPacks = [
   {
@@ -91,6 +93,26 @@ export default function CoinStorePage() {
   const { toast } = useToast();
   const [selectedPack, setSelectedPack] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState(false);
+  const { activateAdFree, isAdFree, timeRemaining, cost: adFreeCost, duration: adFreeHours } = useAdFree();
+  const [activatingAdFree, setActivatingAdFree] = useState(false);
+
+  const handleAdFree = async () => {
+    if (!isSignedIn || !user) {
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    setActivatingAdFree(true);
+    try {
+      const res = await activateAdFree();
+      toast({
+        title: res.success ? 'Ad-free activated!' : 'Could not activate',
+        description: res.message,
+        variant: res.success ? undefined : 'destructive',
+      });
+    } finally {
+      setActivatingAdFree(false);
+    }
+  };
 
   const handlePurchase = async (packId: string) => {
     if (!isSignedIn || !user) {
@@ -203,10 +225,10 @@ export default function CoinStorePage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { action: 'Daily Login', reward: '+5 coins', desc: 'Log in every day' },
-              { action: 'Write a Review', reward: '+10 coins', desc: 'Review a business' },
-              { action: 'Create an Event', reward: '+15 coins', desc: 'Host a community event' },
-              { action: 'Refer a Friend', reward: '+50 coins', desc: 'When they sign up' },
+              { action: 'Daily Spin', reward: 'up to 50', desc: 'Spin the wheel once a day' },
+              { action: 'Complete Missions', reward: 'coins + XP', desc: 'Daily goals on the Rewards page' },
+              { action: 'Level Up', reward: 'coins', desc: 'Every new level pays a bonus' },
+              { action: 'Achievements', reward: 'coins + XP', desc: 'Unlock milestone badges' },
             ].map((item) => (
               <div key={item.action} className="bg-white rounded-xl p-5 border border-gray-100">
                 <div className="flex items-center gap-2 mb-2">
@@ -225,6 +247,34 @@ export default function CoinStorePage() {
           <h2 className="text-2xl font-black text-gray-900 font-comfortaa mb-8 text-center">
             What Can You Do With Coins?
           </h2>
+
+          {/* Actionable perk: Ad-Free (the one perk that needs no context) */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-6 bg-gray-900 text-white rounded-xl mb-6">
+            <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <ShieldOff className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-bold">Ad-Free Browsing</h3>
+                <Badge variant="outline" className="text-xs font-bold text-yellow-300 border-yellow-400/40 bg-yellow-400/10">
+                  {adFreeCost} coins / {adFreeHours}h
+                </Badge>
+              </div>
+              <p className="text-sm text-gray-300 font-roboto">
+                {isAdFree
+                  ? `Active${timeRemaining() ? ` — ${timeRemaining()} left` : ''}. Enjoy an ad-free BARA.`
+                  : 'Spend coins to remove ads across BARA for 24 hours.'}
+              </p>
+            </div>
+            <Button
+              onClick={handleAdFree}
+              disabled={activatingAdFree || isAdFree}
+              className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold flex-shrink-0"
+            >
+              {isAdFree ? 'Active' : activatingAdFree ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Activating…</> : 'Activate'}
+            </Button>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {spendOptions.map((option) => {
               const Icon = option.icon;
