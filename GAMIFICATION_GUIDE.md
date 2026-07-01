@@ -216,10 +216,11 @@ and **~15–30 coins** per day before one-off actions.
    user's local calendar days and is defensive. (Streaks increment once per day.)
 3. ~~**No anti-abuse on listen-XP**~~ ✅ **Fixed** — `awardSongListenXP` caps listen-XP
    at 50 songs/day.
-4. **Unearnable achievements** — 🟡 partially fixed: `first_listen`, `streak_7`,
-   `streak_30` are now wired. Still unwired: `music_lover` (1,000 listens),
-   `first_purchase`, `event_host`, `top_seller`, `prolific_writer`, `event_explorer`,
-   `early_adopter` (need triggers/counts in the marketplace/events/blog flows).
+4. **Unearnable achievements** — ✅ mostly fixed: `first_listen`, `streak_7`,
+   `streak_30`, `music_lover` (1,000 listens), `first_purchase`, `event_host` and
+   `early_adopter` (granted on first profile creation) are now wired. Still unwired:
+   `top_seller` (10 sales), `prolific_writer` (10 blogs), `event_explorer` (10 events)
+   — count-based, need the sale-complete / blog-count / event-save flows.
 5. ~~**No weekly layer**~~ 🟡 improved — a **"Your last 7 days" recap** now shows on the
    Rewards hub (`getWeeklyRecap`). Still missing: weekly *missions*, seasons,
    leaderboard resets, and a push/notification recap.
@@ -227,7 +228,8 @@ and **~15–30 coins** per day before one-off actions.
 7. **Mission/achievement key drift** — keep the code's award keys and the seed in
    lockstep (e.g. `market_entry` vs `first_purchase`).
 8. **Coin economy has no anchor** — with the store disabled, coins only inflate;
-   nothing defines what 1 coin is worth (decide in Phase A).
+   nothing defines what 1 coin is worth (decide in Phase A). 🟡 Coins now have a
+   working, discoverable sink: **Ad-Free** is purchasable inline on the Coin Store.
 9. **No "How rewards work" for users** — ✅ **Fixed** — `/rewards` explains it.
 
 ---
