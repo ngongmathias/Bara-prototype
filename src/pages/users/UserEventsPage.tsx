@@ -40,6 +40,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useEvents, useEventCategories, useEventManagement, useCountries, useCitiesByCountry } from '@/hooks/useEvents';
 import { uploadEventImage, EventsService } from '@/lib/eventsService';
+import { GamificationService } from '@/lib/gamificationService';
 import { Event as DatabaseEvent } from '@/lib/eventsService';
 import { MultiHashtagInput } from '@/components/ui/multi-hashtag-input';
 import { EventGalleryUpload } from '@/components/EventGalleryUpload';
@@ -399,6 +400,8 @@ export const UserEventsPage = () => {
           title: 'Event created',
           description: 'Your event has been successfully created.',
         });
+        // Reward: event-host achievement (idempotent, non-blocking)
+        if (user?.id) GamificationService.awardAchievement(user.id, 'event_host').catch(() => {});
       }
 
       setIsDialogOpen(false);

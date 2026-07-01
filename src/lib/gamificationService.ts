@@ -471,6 +471,16 @@ export class GamificationService {
 
             await this.addXP(userId, XP_REWARDS.SONG_LISTEN, `Listened to ${songTitle}`);
             await this.awardAchievement(userId, 'first_listen'); // idempotent
+
+            // On the first listen of the day (cheap, once/day), check the
+            // 1,000-listen "Music Lover" milestone.
+            if ((count || 0) === 0) {
+                const { count: total } = await supabase
+                    .from('play_history')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('user_id', userId);
+                if ((total || 0) >= 1000) await this.awardAchievement(userId, 'music_lover');
+            }
         } catch (error) {
             console.error('Error awarding listen XP:', error);
         }

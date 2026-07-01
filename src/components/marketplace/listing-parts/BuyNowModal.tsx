@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { X, ShoppingBag, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useUser } from '@clerk/clerk-react';
+import { GamificationService } from '@/lib/gamificationService';
 import { useToast } from '@/hooks/use-toast';
 
 interface BuyNowModalProps {
@@ -63,6 +64,8 @@ export const BuyNowModal: React.FC<BuyNowModalProps> = ({
         title: 'Purchase request sent!',
         description: 'The seller will be notified. You\'ll hear back soon.',
       });
+      // Reward: first-purchase achievement (idempotent, non-blocking)
+      GamificationService.awardAchievement(user.id, 'first_purchase').catch(() => {});
       onSuccess?.();
       onClose();
     } catch (err: any) {
