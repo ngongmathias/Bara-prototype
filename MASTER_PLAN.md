@@ -1224,8 +1224,12 @@ economy settings live + Trust Rank columns dropped).
   `getMissions` alongside the daily reset. Progress hooked in GlobalPlayer /
   PostListing / TicketPurchaseModal. `/gamification` shows a dedicated **Weekly**
   section under the missions tab; the floating daily tray filters to daily-only.
-- [ ] **27.3.2 Weekly leaderboard seasons** — Monday reset, cosmetic crowns for last
-  week's top 10 (keep lifetime XP leaderboard as a second tab).
+- [x] **27.3.2 Weekly leaderboard seasons** — DONE Jul 6, 2026
+  (`20260706_weekly_leaderboard.sql`). `leaderboard_period(type, since, limit)`
+  RPC aggregates gamification_history; the "This week" tab is now Monday-anchored
+  (season resets Monday), with "All-time" kept as a tab. `leaderboard_last_week_top`
+  RPC drives a cosmetic **Champ crown** for last completed week's top 10
+  (computed on read; monochrome).
 - [ ] **27.3.3 Streak Shield** — 1 missed day forgiven per 30 days, extra shields
   purchasable (~50 coins): reduces streak-loss churn + a natural coin sink.
 - [ ] **27.3.4 Prestige perks** — Bronze: exclusive theme · Silver: 2× daily spin ·

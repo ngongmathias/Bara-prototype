@@ -60,6 +60,15 @@ export default function LeaderboardPage() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRank, setUserRank] = useState<number | null>(null);
+  const [lastWeekTop, setLastWeekTop] = useState<Set<string>>(new Set());
+
+  // Last completed week's top 10 — get a cosmetic crown across all views.
+  useEffect(() => {
+    supabase
+      .rpc('leaderboard_last_week_top', { p_limit: 10 })
+      .then(({ data }) => setLastWeekTop(new Set((data || []).map((r: any) => r.user_id))))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -82,56 +91,33 @@ export default function LeaderboardPage() {
           return;
         }
 
-        // Weekly / monthly: aggregate from gamification_history
-        const sinceDate = new Date();
-        sinceDate.setDate(sinceDate.getDate() - (period === 'week' ? 7 : 30));
+        // This week (Monday-anchored) / this month — aggregated server-side by
+        // the leaderboard_period RPC (weekly season resets every Monday).
+        const since = new Date();
+        if (period === 'week') {
+          const day = since.getDay(); // 0=Sun … 6=Sat
+          const backToMonday = day === 0 ? 6 : day - 1;
+          since.setDate(since.getDate() - backToMonday);
+          since.setHours(0, 0, 0, 0);
+        } else {
+          since.setDate(since.getDate() - 30);
+        }
         const historyType = tab === 'xp' ? 'xp_gain' : 'coin_gain';
 
-        const { data: historyRows, error: histErr } = await supabase
-          .from('gamification_history')
-          .select('user_id, amount')
-          .eq('type', historyType)
-          .gte('created_at', sinceDate.toISOString());
-        if (histErr) throw histErr;
-
-        const totals = new Map<string, number>();
-        (historyRows || []).forEach((row: any) => {
-          totals.set(row.user_id, (totals.get(row.user_id) || 0) + (row.amount || 0));
+        const { data, error } = await supabase.rpc('leaderboard_period', {
+          p_type: historyType,
+          p_since: since.toISOString(),
+          p_limit: 50,
         });
+        if (error) throw error;
 
-        const topIds = Array.from(totals.entries())
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 50)
-          .map(([id]) => id);
-
-        if (topIds.length === 0) {
-          setEntries([]);
-          setUserRank(null);
-          return;
-        }
-
-        const { data: profiles, error: profErr } = await supabase
-          .from('gamification_profiles')
-          .select('user_id, total_xp, current_level, bara_coins, daily_streak')
-          .in('user_id', topIds);
-        if (profErr) throw profErr;
-
-        const profileMap = new Map<string, LeaderboardEntry>();
-        (profiles || []).forEach((p: any) => profileMap.set(p.user_id, p));
-
-        const ranked: LeaderboardEntry[] = topIds.map((id) => {
-          const base = profileMap.get(id) || {
-            user_id: id,
-            total_xp: 0,
-            current_level: 1,
-            bara_coins: 0,
-            daily_streak: 0,
-          };
-          const periodTotal = totals.get(id) || 0;
-          return tab === 'xp'
-            ? { ...base, total_xp: periodTotal }
-            : { ...base, bara_coins: periodTotal };
-        });
+        const ranked: LeaderboardEntry[] = (data || []).map((r: any) => ({
+          user_id: r.user_id,
+          total_xp: tab === 'xp' ? Number(r.period_total) : Number(r.total_xp),
+          current_level: r.current_level,
+          bara_coins: tab === 'coins' ? Number(r.period_total) : Number(r.bara_coins),
+          daily_streak: r.daily_streak,
+        }));
 
         setEntries(ranked);
         if (user?.id) {
@@ -277,6 +263,11 @@ export default function LeaderboardPage() {
                           <p className={`text-sm font-bold truncate ${isCurrentUser ? 'text-purple-700' : 'text-gray-900'}`}>
                             {isCurrentUser ? 'You' : `User ${entry.user_id.slice(0, 6)}`}
                           </p>
+                          {lastWeekTop.has(entry.user_id) && (
+                            <span title="Last week's Top 10 champion" className="inline-flex items-center gap-0.5 text-[10px] font-black uppercase text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded">
+                              <Crown className="w-3 h-3" /> Champ
+                            </span>
+                          )}
                           <Badge className={`${getPrestigeColor(entry.current_level)} text-[10px] px-1.5 py-0`}>
                             Lv.{entry.current_level}
                           </Badge>
