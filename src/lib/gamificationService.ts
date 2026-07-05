@@ -574,6 +574,14 @@ export class GamificationService {
                 }
             }
 
+            // Referral activation: a referred user's FIRST claimed mission
+            // activates their referral (pays both parties + milestones,
+            // server-side & idempotent). Non-blocking; lazy import avoids a
+            // circular module load.
+            import('./referralService')
+                .then(({ ReferralService }) => ReferralService.activateOnFirstClaim(userId))
+                .catch(() => {});
+
             return true;
         } catch (error) {
             console.error('Error claiming mission reward:', error);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
+import { ReferralService } from '@/lib/referralService';
 import {
   Users,
   Copy,
@@ -24,34 +25,10 @@ import {
 } from 'lucide-react';
 
 const REFERRAL_REWARDS = [
-  {
-    milestone: 1,
-    reward: '50 Bara Coins',
-    icon: Coins,
-    color: 'text-yellow-600',
-    bg: 'bg-yellow-50',
-  },
-  {
-    milestone: 5,
-    reward: '300 Bara Coins + Ambassador Badge',
-    icon: Star,
-    color: 'text-blue-600',
-    bg: 'bg-blue-50',
-  },
-  {
-    milestone: 10,
-    reward: '1,000 Bara Coins',
-    icon: Trophy,
-    color: 'text-purple-600',
-    bg: 'bg-purple-50',
-  },
-  {
-    milestone: 25,
-    reward: '3,000 Bara Coins + Exclusive Profile Theme',
-    icon: Zap,
-    color: 'text-orange-600',
-    bg: 'bg-orange-50',
-  },
+  { milestone: 1, reward: '50 Bara Coins per friend', icon: Coins },
+  { milestone: 5, reward: '300 Bara Coins + Ambassador Badge', icon: Star },
+  { milestone: 10, reward: '1,000 Bara Coins', icon: Trophy },
+  { milestone: 25, reward: '3,000 Bara Coins + Exclusive Profile Theme', icon: Zap },
 ];
 
 const HOW_IT_WORKS = [
@@ -68,7 +45,7 @@ const HOW_IT_WORKS = [
   {
     step: 3,
     title: 'You both earn',
-    description: 'You earn 50 Bara Coins for each successful referral. Hit milestones for bigger rewards!',
+    description: 'When your friend claims their first mission, you earn 50 Bara Coins. Hit milestones for bigger rewards!',
   },
 ];
 
@@ -80,8 +57,26 @@ export default function InvitePage() {
   const [emailInput, setEmailInput] = useState('');
   const [sending, setSending] = useState(false);
 
-  const referralCode = user?.id ? user.id.slice(0, 8).toUpperCase() : 'XXXXXXXX';
-  const referralLink = `${window.location.origin}/user/sign-up?ref=${referralCode}`;
+  const [code, setCode] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [activated, setActivated] = useState(0);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    (async () => {
+      const stats = await ReferralService.getReferralStats(user.id);
+      if (cancelled) return;
+      setCode(stats.code);
+      setTotal(stats.total);
+      setActivated(stats.activated);
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  const referralCode = code || '········';
+  const referralLink = `${window.location.origin}/user/sign-up?ref=${code || ''}`;
+  const nextMilestone = [5, 10, 25].find((m) => m > activated) ?? null;
 
   const handleCopy = async () => {
     try {
@@ -138,7 +133,7 @@ export default function InvitePage() {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-bold mb-6">
+          <div className="inline-flex items-center gap-2 bg-gray-100 text-gray-900 px-4 py-2 rounded-full text-sm font-bold mb-6">
             <Gift className="w-4 h-4" />
             Referral Program
           </div>
@@ -146,17 +141,17 @@ export default function InvitePage() {
             Invite friends, earn rewards
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto font-roboto">
-            Share Bara Afrika with your network. You earn <strong>50 Bara Coins</strong> for every friend who joins,
-            and they get <strong>25 Bara Coins</strong> to start.
+            Share Bara Afrika with your network. You earn <strong>50 Bara Coins</strong> for every friend who joins and
+            gets started, and they get <strong>25 Bara Coins</strong> to begin.
           </p>
         </div>
 
         {/* Referral Link Card */}
         {isSignedIn ? (
-          <Card className="mb-12 border-2 border-green-200 bg-green-50/30">
+          <Card className="mb-12 border-2 border-gray-200 bg-gray-50/40">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Share2 className="w-5 h-5 text-green-600" />
+                <Share2 className="w-5 h-5 text-gray-700" />
                 Your Referral Link
               </CardTitle>
             </CardHeader>
@@ -167,8 +162,8 @@ export default function InvitePage() {
                   readOnly
                   className="bg-white font-mono text-sm"
                 />
-                <Button onClick={handleCopy} variant="outline" className="flex-shrink-0 min-w-[100px]">
-                  {copied ? <Check className="w-4 h-4 mr-1 text-green-600" /> : <Copy className="w-4 h-4 mr-1" />}
+                <Button onClick={handleCopy} variant="outline" className="flex-shrink-0 min-w-[100px]" disabled={!code}>
+                  {copied ? <Check className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
                   {copied ? 'Copied!' : 'Copy'}
                 </Button>
               </div>
@@ -182,7 +177,7 @@ export default function InvitePage() {
                     onChange={(e) => setEmailInput(e.target.value)}
                     className="bg-white"
                   />
-                  <Button onClick={handleEmailInvite} disabled={sending || !emailInput.trim()} className="flex-shrink-0">
+                  <Button onClick={handleEmailInvite} disabled={sending || !emailInput.trim()} className="flex-shrink-0 bg-black hover:bg-gray-800">
                     <Mail className="w-4 h-4 mr-1" />
                     Send
                   </Button>
@@ -193,10 +188,42 @@ export default function InvitePage() {
                 </Button>
               </div>
 
-              <div className="flex items-center gap-4 pt-2 text-sm text-gray-600">
+              {/* Live stats */}
+              <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-200">
+                <div className="text-center">
+                  <div className="text-2xl font-black text-gray-900">{total}</div>
+                  <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Invited</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-black text-gray-900">{activated}</div>
+                  <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Activated</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-black text-gray-900">{nextMilestone ? nextMilestone - activated : '—'}</div>
+                  <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                    {nextMilestone ? `To ${nextMilestone}` : 'Maxed'}
+                  </div>
+                </div>
+              </div>
+
+              {nextMilestone && (
+                <div>
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-black rounded-full transition-all"
+                      style={{ width: `${Math.min(100, (activated / nextMilestone) * 100)}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-2">
+                    {activated} of {nextMilestone} activated referrals toward your next milestone.
+                  </p>
+                </div>
+              )}
+
+              <div className="flex items-center gap-4 pt-1 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
                   <Users className="w-4 h-4" />
-                  <span>Your code: <strong className="text-gray-900">{referralCode}</strong></span>
+                  <span>Your code: <strong className="text-gray-900 font-mono">{referralCode}</strong></span>
                 </div>
               </div>
             </CardContent>
@@ -237,16 +264,22 @@ export default function InvitePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {REFERRAL_REWARDS.map((tier) => {
               const Icon = tier.icon;
+              const reached = activated >= tier.milestone;
               return (
-                <Card key={tier.milestone} className="text-center hover:shadow-md transition-shadow">
+                <Card key={tier.milestone} className={`text-center transition-shadow ${reached ? 'border-2 border-black' : 'hover:shadow-md'}`}>
                   <CardContent className="pt-6">
-                    <div className={`w-14 h-14 ${tier.bg} rounded-full flex items-center justify-center mx-auto mb-3`}>
-                      <Icon className={`w-7 h-7 ${tier.color}`} />
+                    <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Icon className="w-7 h-7 text-gray-900" />
                     </div>
                     <Badge variant="outline" className="mb-2 font-bold">
                       {tier.milestone} {tier.milestone === 1 ? 'Referral' : 'Referrals'}
                     </Badge>
                     <p className="text-sm font-bold text-gray-900 mt-2">{tier.reward}</p>
+                    {reached && (
+                      <p className="text-[10px] uppercase font-black text-gray-500 tracking-wider mt-2 flex items-center justify-center gap-1">
+                        <Check className="w-3 h-3" /> Unlocked
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               );
@@ -259,7 +292,7 @@ export default function InvitePage() {
           <h2 className="text-2xl font-bold text-center mb-8 font-comfortaa">Referral FAQ</h2>
           <div className="space-y-6">
             {[
-              { q: 'When do I get my coins?', a: 'Coins are credited instantly when your friend completes their account setup (email verification).' },
+              { q: 'When do I get my coins?', a: 'Your friend gets their 25 coins as soon as they finish signing up. You get your 50 coins when they claim their first mission — that’s when the referral activates.' },
               { q: 'Is there a limit to how many people I can refer?', a: 'No limit! Refer as many friends as you want and keep earning.' },
               { q: 'Can I refer someone who already has an account?', a: 'No, referral rewards only apply to new sign-ups.' },
               { q: 'Do my referral coins expire?', a: 'No, Bara Coins never expire. Use them whenever you want.' },

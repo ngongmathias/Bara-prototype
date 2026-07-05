@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useSignUp, useSignIn } from '@clerk/clerk-react';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { ReferralService } from '@/lib/referralService';
 import { COUNTRIES } from '@/data/countries';
 import { DateOfBirthPicker } from '@/components/DateOfBirthPicker';
 
@@ -17,8 +18,13 @@ export const UserSignUpPage = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const redirectUrl = searchParams.get('redirect_url') || '/';
+  const refCode = searchParams.get('ref');
   const signInUrl = `/user/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`;
   const finishUrl = `/auth/finish?mode=sign_up&redirect_url=${encodeURIComponent(redirectUrl)}`;
+
+  // Persist the referral code so it survives the Clerk verification / OAuth
+  // redirect and can be turned into a referral once the profile row exists.
+  useEffect(() => { ReferralService.stashRef(refCode); }, [refCode]);
 
   // Google sign-up: new Google users are routed to /auth/complete-profile (by
   // AuthFinishPage) to collect the same fields — so no password is needed.
@@ -149,7 +155,11 @@ export const UserSignUpPage = () => {
         return setError('That code was not accepted. Please check and try again.');
       }
       // Persist the registration profile to Supabase (the anon client is fine).
-      if (result.createdUserId) await saveProfile(result.createdUserId);
+      if (result.createdUserId) {
+        await saveProfile(result.createdUserId);
+        // Create the referral row now that the profile exists.
+        await ReferralService.createReferralOnSignup(result.createdUserId, refCode);
+      }
       await setActive({ session: result.createdSessionId });
       navigate(finishUrl);
     } catch (e: any) {

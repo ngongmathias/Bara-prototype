@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { COUNTRIES } from '@/data/countries';
 import { DateOfBirthPicker } from '@/components/DateOfBirthPicker';
+import { ReferralService } from '@/lib/referralService';
 
 const GENDERS = ['Male', 'Female', 'Rather Not Say'] as const;
 
@@ -109,6 +110,10 @@ export const CompleteProfilePage = () => {
       if (insertErr) {
         await supabase.from('clerk_users').update(row).eq('clerk_user_id', user.id);
       }
+
+      // Turn a captured ?ref= (stashed at sign-up before the OAuth redirect)
+      // into a pending referral now that the profile row exists.
+      await ReferralService.createReferralOnSignup(user.id, ReferralService.getRefFromUrl());
 
       // Best-effort: reflect the name on the Clerk user too.
       try { await user.update({ firstName: firstName.trim(), lastName: lastName.trim() }); } catch { /* noop */ }

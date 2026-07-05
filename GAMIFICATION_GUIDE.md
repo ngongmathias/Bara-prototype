@@ -102,7 +102,17 @@ casual users.
 | Blog published | +25 |
 | Spin wheel (coin segments) | 5–50 (avg ≈ **6.25/day**) |
 | Missions / achievements (coin_reward) | varies |
+| Referral — friend joins & claims 1st mission | **+25** friend / **+50** referrer |
+| Referral milestones (5 / 10 / 25 activated) | **+300 / +1,000 / +3,000** |
 | Admin grant (god-mode) | any |
+
+> **Referrals (Phase 27.2.2, wired Jul 6, 2026).** Each user has a stable
+> `referral_code` (md5-derived) shared via `/invite?ref=CODE`. A `?ref=` is
+> captured at sign-up (email form + OAuth), stored as a pending `referrals` row,
+> and **activated** on the referred user's first claimed mission — paying both
+> parties + referrer milestones (5 → Ambassador badge, 25 → `referral_champion`
+> theme) via the hardened coin RPCs. Guards: no self-referral, one referral per
+> user, milestones pay once.
 
 ### Streaks & the multiplier (`checkDailyStreak`)
 - Runs on app load when signed in. Compares today's date to `last_activity_at`.

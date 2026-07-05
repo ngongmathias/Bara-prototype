@@ -11,6 +11,9 @@ export interface ProfileTheme {
   preview: string; // CSS gradient or color
   textColor: string;
   accentColor: string;
+  // Locked themes can't be bought with coins — they're granted by an
+  // achievement/milestone (e.g. the referral_champion 25-referral reward).
+  locked?: boolean;
 }
 
 export const PROFILE_THEMES: ProfileTheme[] = [
@@ -86,6 +89,18 @@ export const PROFILE_THEMES: ProfileTheme[] = [
     textColor: 'text-white',
     accentColor: 'bg-red-600',
   },
+  {
+    // Phase 27.2.2 — exclusive reward for referring 25 friends. Not purchasable;
+    // granted by the referral_activate RPC at the 25-referral milestone.
+    id: 'referral_champion',
+    name: 'Referral Champion',
+    description: 'Exclusive — earned by referring 25 friends',
+    cost: 0,
+    locked: true,
+    preview: 'bg-gradient-to-br from-black via-gray-700 to-gray-300',
+    textColor: 'text-white',
+    accentColor: 'bg-black',
+  },
 ];
 
 export function useProfileTheme() {
@@ -122,6 +137,11 @@ export function useProfileTheme() {
 
     if (ownedThemes.includes(themeId)) {
       return { success: false, message: 'You already own this theme.' };
+    }
+
+    // Locked themes are earned (achievement/referral milestone), never bought.
+    if (theme.locked) {
+      return { success: false, message: 'This theme is earned, not bought.' };
     }
 
     setLoading(true);

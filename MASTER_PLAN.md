@@ -1202,12 +1202,19 @@ economy settings live + Trust Rank columns dropped).
   anon/authenticated (writes revoked). `GamificationService`, `DailySpinWheel`
   and `AdminGamification` call the RPCs (no client-side fallback — RPC errors
   surface). Coin store / betting / paid-music stay disabled (team decision).
-- [ ] **27.2.2 Referral program end-to-end** (UI already ships at `/invite`):
-  `referral_code` on `clerk_users` (+ backfill), capture `?ref=` at sign-up
-  (custom form + OAuth complete-profile path), `referrals` table, pay 50 coins to
-  referrer + 25 to friend on activation (first mission claim), milestone bonuses
-  (5 → 300 + Ambassador badge, 10 → 1,000, 25 → 3,000 + exclusive theme),
-  anti-self-referral guards, "referrals so far" counter on `/invite`.
+- [x] **27.2.2 Referral program end-to-end** — DONE Jul 6, 2026
+  (`20260706_referral_program.sql` + `referralService.ts`). `referral_code` on
+  `clerk_users` (md5-derived, backfilled, auto-set by trigger — replaces the old
+  near-identical `user.id.slice(0,8)`); `referrals` ledger (referred_user_id
+  UNIQUE). `?ref=` captured on the custom sign-up form AND the OAuth path
+  (`CompleteProfilePage`), stashed in sessionStorage through Clerk verification,
+  turned into a pending row once the profile exists. Activation = the referred
+  user's first claimed mission (hooked into `claimMissionReward` → `referral_activate`
+  RPC): pays 25 to the friend + 50 to the referrer, then milestones
+  (5 → +300 + Ambassador badge, 10 → +1,000, 25 → +3,000 + `referral_champion`
+  theme). Guards: no self-referral, one row per referred user, milestones pay
+  once (idempotent history check). `/invite` shows the real code, live
+  invited/activated counts + milestone progress (converted to monochrome).
 
 ### 27.3 Tier 2 — depth & retention ("make it a habit")
 - [ ] **27.3.1 Weekly missions** (e.g. listen 25 songs / post 1 ad / attend 1 event)
