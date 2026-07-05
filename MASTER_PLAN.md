@@ -1267,7 +1267,7 @@ economy settings live + Trust Rank columns dropped).
   "featured" marketplace slots, super-boost bundles, artist tipping (tips = the
   future creator-payout story).
 - [x] **27.4.3 Anti-abuse pass** (partial — server-side caps + observability panel)
-  — DONE Jul 6, 2026 (`20260706_anti_abuse.sql`). Daily backstop caps inside the
+  — DONE Jul 6, 2026 (`20260707_anti_abuse.sql`). Daily backstop caps inside the
   value RPCs: `economy_add_xp` stops past `limit.daily_xp_cap` (20,000) and
   `economy_add_coins` past `limit.daily_coin_gain_cap` (20,000), both admin-tunable
   (song-listen XP already capped at 50/day). A **Top earners (24h)** anomaly panel

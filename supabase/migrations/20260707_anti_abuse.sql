@@ -1,6 +1,10 @@
 -- ============================================================
 -- Phase 27.4.3 — Anti-abuse pass (server-side per-action caps)
 -- ============================================================
+-- ORDER: apply AFTER 20260706_prestige_perks.sql — this file's economy_add_coins
+-- keeps the Gold +5% bonus AND adds the daily cap, so it must be the final
+-- definition (hence the 20260707 prefix).
+-- ============================================================
 -- The economy RPCs are callable by the tokenless anon client, so add daily
 -- backstops directly inside the two value RPCs: a max XP-earned/day and max
 -- coins-earned/day per user. Limits are set well above any legitimate day
