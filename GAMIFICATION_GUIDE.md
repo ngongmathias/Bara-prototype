@@ -51,16 +51,21 @@ in daily) apply an XP **multiplier**. **Daily missions**, **achievements** and a
 ## 3. Levels & Prestige (the maths)
 
 **Formulas** (`gamificationService.ts`): base `1000`, exponent `1.5`.
-- XP needed to *reach* a level: `getXPForLevel(L) = floor(1000 × (L−1)^1.5)`
-- Level from XP: `calculateLevel(xp) = floor((xp/1000)^(1/1.5)) + 1`
+Phase 27.3.5 **flattened the early curve** — L2–L9 thresholds are halved so new
+users level up fast in week 1; L10+ keep the original cumulative XP so nobody at
+L10+ ever loses a level. The functions are piecewise:
+- `getXPForLevel(L)` = `floor(1000 × (L−1)^1.5 / 2)` for 2 ≤ L ≤ 9, else `floor(1000 × (L−1)^1.5)`.
+- `calculateLevel(xp)` inverts it (halved region capped at 9; original curve at ≥27,000 XP).
+- SQL `economy_level_from_xp` mirrors this; `scripts/verify-level-curve.mjs` proves no demotions.
 
-**Example thresholds** (cumulative XP needed):
+**Example thresholds** (cumulative XP needed, post-27.3.5):
 
 | Level | XP needed | Prestige tier |
 |---|---|---|
 | 1 | 0 | **Explorer** (1–10) |
-| 2 | 1,000 | Explorer |
-| 5 | 8,000 | Explorer |
+| 2 | 500 | Explorer |
+| 5 | 4,000 | Explorer |
+| 9 | 11,313 | Explorer |
 | 10 | 27,000 | Explorer |
 | 11 | 31,623 | **Bronze** (11–20) |
 | 21 | 89,443 | **Silver** (21–40) |

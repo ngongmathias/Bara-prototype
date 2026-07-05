@@ -106,14 +106,30 @@ export const getPrestigeTier = (level: number): PrestigeTier => {
 };
 
 
+// Phase 27.3.5 — flatten the early curve. Thresholds for levels 2–9 are HALVED
+// so new users level up quickly in week 1; levels ≥10 keep today's cumulative
+// XP (getXPForLevel(10) = 27,000) so nobody at L10+ ever loses a level. The two
+// functions are exact inverses; the SQL economy_level_from_xp mirrors this.
+const LEVEL10_XP = Math.floor(LEVEL_BASE_XP * Math.pow(9, LEVEL_MULTIPLIER)); // 27,000
+
 export const calculateLevel = (xp: number): number => {
-    if (xp < LEVEL_BASE_XP) return 1;
-    return Math.floor(Math.pow(xp / LEVEL_BASE_XP, 1 / LEVEL_MULTIPLIER)) + 1;
+    if (xp >= LEVEL10_XP) {
+        // Unchanged (original) curve from L10 up.
+        return Math.floor(Math.pow(xp / LEVEL_BASE_XP, 1 / LEVEL_MULTIPLIER)) + 1;
+    }
+    // Below L10: halved thresholds (reach level L at floor(500 · (L−1)^1.5)),
+    // capped at 9 since L10 requires the full 27,000.
+    if (xp < LEVEL_BASE_XP / 2) return 1;
+    return Math.min(9, Math.floor(Math.pow(xp / (LEVEL_BASE_XP / 2), 1 / LEVEL_MULTIPLIER)) + 1);
 };
 
 
 export const getXPForLevel = (level: number): number => {
     if (level <= 1) return 0;
+    if (level < 10) {
+        // Halved early thresholds.
+        return Math.floor((LEVEL_BASE_XP * Math.pow(level - 1, LEVEL_MULTIPLIER)) / 2);
+    }
     return Math.floor(LEVEL_BASE_XP * Math.pow(level - 1, LEVEL_MULTIPLIER));
 };
 

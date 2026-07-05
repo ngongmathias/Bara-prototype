@@ -1244,8 +1244,12 @@ economy settings live + Trust Rank columns dropped).
   (`perk.gold_coin_bonus_pct`, admin-tunable). Diamond (L71+): a free ad-free week
   per calendar month via `economy_grant_diamond_adfree` (idempotent, granted in
   `checkDailyStreak`). Perk list shown on `/rewards`.
-- [ ] **27.3.5 Flatten the early curve** — micro-levels below L10 (or halve early
-  thresholds) so new users level up in week 1.
+- [x] **27.3.5 Flatten the early curve** — DONE Jul 6, 2026. `calculateLevel` /
+  `getXPForLevel` are now piecewise: thresholds for L2–L9 are halved (L2 at 500 XP,
+  L5 at 4,000, L9 at 11,313) while L10+ keep today's cumulative XP (L10 = 27,000)
+  so nobody at L10+ ever drops. SQL `economy_level_from_xp` mirrors it
+  (`20260706_flatten_early_curve.sql`). `scripts/verify-level-curve.mjs` (run with
+  node) proves no XP total maps to a lower level than before + L10+ unchanged.
 - [ ] **27.3.6 Weekly recap email** — "Your week on BARA" via the existing
   `email_queue` (recap data already computed by `getWeeklyRecap`).
 
