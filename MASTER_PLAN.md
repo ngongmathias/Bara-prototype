@@ -1217,8 +1217,13 @@ economy settings live + Trust Rank columns dropped).
   invited/activated counts + milestone progress (converted to monochrome).
 
 ### 27.3 Tier 2 — depth & retention ("make it a habit")
-- [ ] **27.3.1 Weekly missions** (e.g. listen 25 songs / post 1 ad / attend 1 event)
-  with chunky coin rewards; `type='weekly'` already exists in the missions schema.
+- [x] **27.3.1 Weekly missions** — DONE Jul 6, 2026 (`20260706_weekly_missions.sql`).
+  Seeded 3 `type='weekly'` missions (`weekly_listen` 25 songs, `weekly_market_post`
+  1 ad, `weekly_event` 1 event; 150 XP / 50 coins each). `reset_weekly_missions_for_user`
+  RPC resets on the first activity of a new ISO week (Monday-anchored), called from
+  `getMissions` alongside the daily reset. Progress hooked in GlobalPlayer /
+  PostListing / TicketPurchaseModal. `/gamification` shows a dedicated **Weekly**
+  section under the missions tab; the floating daily tray filters to daily-only.
 - [ ] **27.3.2 Weekly leaderboard seasons** — Monday reset, cosmetic crowns for last
   week's top 10 (keep lifetime XP leaderboard as a second tab).
 - [ ] **27.3.3 Streak Shield** — 1 missed day forgiven per 30 days, extra shields

@@ -186,6 +186,8 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
 
                 await GamificationService.awardAchievement(user.id, 'event_goer');
 
+                await GamificationService.trackMissionProgress(user.id, 'weekly_event');
+
                 // Event Explorer: awarded at 10 lifetime event registrations (idempotent)
                 const { count: regCount } = await supabase
                     .from('event_registrations')
@@ -288,6 +290,8 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                 await GamificationService.addXP(user.id, await GamificationService.getSetting('xp.ticket_purchase'), `Registered for event: ${event.title}`);
 
                 await GamificationService.awardAchievement(user.id, 'event_goer');
+
+                await GamificationService.trackMissionProgress(user.id, 'weekly_event');
 
                 // Event Explorer: awarded at 10 lifetime event registrations (idempotent)
                 const { count: regCount } = await supabase

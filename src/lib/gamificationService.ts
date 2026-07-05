@@ -505,8 +505,9 @@ export class GamificationService {
 
     static async getMissions(userId: string): Promise<UserMission[]> {
         try {
-            // Reset daily missions if they haven't been reset today
+            // Reset daily + weekly missions if they're due for a reset
             await this.resetDailyMissions(userId);
+            await this.resetWeeklyMissions(userId);
 
             // Ensure the user has a row for every active mission (server-side).
             await supabase.rpc('economy_ensure_missions', { p_user_id: userId });
@@ -594,6 +595,14 @@ export class GamificationService {
             await supabase.rpc('reset_daily_missions_for_user', { p_user_id: userId });
         } catch (error) {
             console.error('Error resetting daily missions:', error);
+        }
+    }
+
+    static async resetWeeklyMissions(userId: string): Promise<void> {
+        try {
+            await supabase.rpc('reset_weekly_missions_for_user', { p_user_id: userId });
+        } catch (error) {
+            console.error('Error resetting weekly missions:', error);
         }
     }
 

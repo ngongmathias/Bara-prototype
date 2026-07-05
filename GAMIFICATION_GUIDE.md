@@ -167,6 +167,10 @@ and **~15–30 coins** per day before one-off actions.
   app (e.g. the player calls `daily_listen`, marketplace detail pages call
   `daily_market_view` / `daily_social_share`).
 - Daily missions **reset** once per day via the `reset_daily_missions_for_user` RPC.
+- **Weekly missions (Phase 27.3.1):** `weekly_listen` (25 songs), `weekly_market_post`
+  (1 ad), `weekly_event` (1 event) — 150 XP / 50 coins each, `type='weekly'`.
+  Reset Monday-anchored via `reset_weekly_missions_for_user`. Shown in a dedicated
+  **Weekly** section on `/gamification`; the floating daily tray stays daily-only.
 - Completing a mission fires a `bara_mission_completed` event (UI celebration);
   the user then **claims** to actually receive the reward (`claimMissionReward`).
 

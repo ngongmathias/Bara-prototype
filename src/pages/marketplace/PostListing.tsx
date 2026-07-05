@@ -813,6 +813,8 @@ export const PostListing = () => {
 
         await GamificationService.awardAchievement(userId, 'market_entry');
 
+        await GamificationService.trackMissionProgress(userId, 'weekly_market_post');
+
 
 
         // If premium, spend coins (boost cost is admin-tunable)

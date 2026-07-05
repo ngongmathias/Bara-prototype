@@ -147,6 +147,7 @@ export function GlobalPlayer() {
                 // Track the seeded daily-listen mission (the other keys were never
                 // seeded as missions, so they were silent no-ops — removed).
                 GamificationService.trackMissionProgress(user.id, 'daily_listen');
+                GamificationService.trackMissionProgress(user.id, 'weekly_listen');
                 // Dispatch event so DailyMissions UI refreshes
                 window.dispatchEvent(new CustomEvent('bara_song_played', {
                     detail: { songId: currentSong.id, userId: user.id }

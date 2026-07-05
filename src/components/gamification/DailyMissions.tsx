@@ -35,7 +35,8 @@ export const DailyMissions = () => {
     const fetchMissions = async () => {
         if (!user) return;
         const data = await GamificationService.getMissions(user.id);
-        setMissions(data);
+        // This floating widget is the daily tray — weekly missions live on /gamification.
+        setMissions(data.filter((m) => m.type === 'daily'));
     };
 
     const handleClaim = async (mission: UserMission) => {
