@@ -1230,8 +1230,13 @@ economy settings live + Trust Rank columns dropped).
   (season resets Monday), with "All-time" kept as a tab. `leaderboard_last_week_top`
   RPC drives a cosmetic **Champ crown** for last completed week's top 10
   (computed on read; monochrome).
-- [ ] **27.3.3 Streak Shield** — 1 missed day forgiven per 30 days, extra shields
-  purchasable (~50 coins): reduces streak-loss churn + a natural coin sink.
+- [x] **27.3.3 Streak Shield** — DONE Jul 6, 2026 (`20260706_streak_shield.sql`).
+  `streak_shields` on gamification_profiles (default 1, +1/calendar-month capped
+  at 3 via `economy_grant_monthly_shield`). `checkDailyStreak` consumes a shield
+  (`economy_consume_shield`, logs "Streak Shield used") when exactly one day is
+  missed, preserving the streak. Extra shields buyable for `cost.streak_shield`
+  (50, admin-tunable) via `economy_buy_shield` — surfaced in the Header coins
+  dropdown and on `/gamification`.
 - [ ] **27.3.4 Prestige perks** — Bronze: exclusive theme · Silver: 2× daily spin ·
   Gold: +5% coin earnings · Diamond: free monthly ad-free week + profile flair.
 - [ ] **27.3.5 Flatten the early curve** — micro-levels below L10 (or halve early

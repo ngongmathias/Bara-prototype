@@ -12,7 +12,7 @@ import { AchievementHall } from '@/components/gamification/AchievementHall';
 import { useGamification } from '@/hooks/useGamification';
 import { GamificationService, UserMission, getPrestigeTier } from '@/lib/gamificationService';
 import { useToast } from '@/hooks/use-toast';
-import { Coins, Zap, Flame, Trophy, Gift, CheckCircle2, Circle, Loader2, Target } from 'lucide-react';
+import { Coins, Zap, Flame, Trophy, Gift, CheckCircle2, Circle, Loader2, Target, Shield } from 'lucide-react';
 
 const GamificationPage = () => {
   const { user, isLoaded, isSignedIn } = useUser();
@@ -25,7 +25,28 @@ const GamificationPage = () => {
   const [missions, setMissions] = useState<UserMission[]>([]);
   const [loadingMissions, setLoadingMissions] = useState(true);
   const [claiming, setClaiming] = useState<string | null>(null);
+  const [buyingShield, setBuyingShield] = useState(false);
   const [recap, setRecap] = useState<{ xp: number; coins: number; listens: number; topArtist: string | null; topGenre: string | null } | null>(null);
+
+  const handleBuyShield = async () => {
+    if (!user?.id || buyingShield) return;
+    setBuyingShield(true);
+    try {
+      const res = await GamificationService.buyStreakShield(user.id);
+      if (res.success) {
+        toast({ title: 'Streak Shield purchased', description: 'It forgives one missed day and keeps your streak alive.' });
+        refresh();
+      } else {
+        toast({
+          title: 'Could not buy a shield',
+          description: res.reason === 'insufficient' ? `You need ${res.cost ?? 50} Bara Coins.` : 'Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } finally {
+      setBuyingShield(false);
+    }
+  };
 
   const fetchMissions = async () => {
     if (!user) return;
@@ -146,6 +167,20 @@ const GamificationPage = () => {
                 <span>{Math.round(progress.percentage)}% to next</span>
               </div>
               <Progress value={progress.percentage} className="h-2 bg-gray-700" />
+            </div>
+
+            {/* Streak Shields */}
+            <div className="mt-5 flex items-center justify-between gap-3 border-t border-gray-700 pt-4">
+              <div className="flex items-center gap-2">
+                <Shield className="w-5 h-5" />
+                <div>
+                  <div className="text-sm font-black">{profile?.streak_shields ?? 0} Streak {(profile?.streak_shields ?? 0) === 1 ? 'Shield' : 'Shields'}</div>
+                  <div className="text-[10px] text-gray-400 font-bold">Each forgives one missed day. You get one free monthly.</div>
+                </div>
+              </div>
+              <Button onClick={handleBuyShield} disabled={buyingShield} className="bg-white text-black hover:bg-gray-200 font-bold h-8 shrink-0">
+                {buyingShield ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Coins className="w-3.5 h-3.5 mr-1" /> Buy (50)</>}
+              </Button>
             </div>
           </CardContent>
         </Card>

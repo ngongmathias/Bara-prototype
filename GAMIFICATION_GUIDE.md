@@ -114,6 +114,13 @@ casual users.
 > theme) via the hardened coin RPCs. Guards: no self-referral, one referral per
 > user, milestones pay once.
 
+### Streak Shields (Phase 27.3.3)
+- `streak_shields` on the profile (start with 1, +1 each calendar month capped at 3).
+- When exactly one day is missed, `checkDailyStreak` spends a shield
+  (`economy_consume_shield`, logged as "Streak Shield used") to preserve the streak.
+- Buy extra shields for `cost.streak_shield` coins (default 50, admin-tunable) from
+  the Header coins dropdown or `/gamification` (`economy_buy_shield`). A coin sink.
+
 ### Streaks & the multiplier (`checkDailyStreak`)
 - Runs on app load when signed in. Compares today's date to `last_activity_at`.
 - Same day → no change. Next calendar day → streak **+1**. Gap → resets to **1**.

@@ -25,6 +25,7 @@ import {
   Users,
   Newspaper,
   LayoutGrid,
+  Shield,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -39,7 +40,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { XPProgressBar } from './gamification/XPProgressBar';
 import { useGamification } from '@/hooks/useGamification';
-import { getPrestigeTier } from '@/lib/gamificationService';
+import { getPrestigeTier, GamificationService } from '@/lib/gamificationService';
 import { scrollToTop } from '@/lib/scrollToTop';
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 
@@ -83,7 +84,28 @@ export const Header = () => {
   const { isSignedIn, user } = useUser();
   const { signOut } = useClerk();
   const { selectedCountry, setSelectedCountry } = useCountrySelection();
-  const { profile } = useGamification();
+  const { profile, refresh } = useGamification();
+  const [buyingShield, setBuyingShield] = useState(false);
+
+  const handleBuyShield = async () => {
+    if (!user?.id || buyingShield) return;
+    setBuyingShield(true);
+    try {
+      const res = await GamificationService.buyStreakShield(user.id);
+      if (res.success) {
+        toast({ title: 'Streak Shield purchased', description: 'It will forgive one missed day and keep your streak alive.' });
+        refresh();
+      } else {
+        toast({
+          title: 'Could not buy a shield',
+          description: res.reason === 'insufficient' ? `You need ${res.cost ?? 50} Bara Coins.` : 'Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } finally {
+      setBuyingShield(false);
+    }
+  };
 
   const [countries, setCountries] = useState<Country[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -286,6 +308,24 @@ export const Header = () => {
                       <p className="text-gray-500">Multiplier</p>
                       <p className="font-semibold text-gray-900">×{profile.multiplier}</p>
                     </div>
+                    <div>
+                      <p className="text-gray-500">Streak Shields</p>
+                      <p className="font-semibold text-gray-900 flex items-center gap-1">
+                        <Shield className="w-3.5 h-3.5 text-gray-700" />{profile.streak_shields ?? 0}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Streak Shield buy */}
+                  <div className="px-4 py-2 border-b">
+                    <button
+                      onClick={handleBuyShield}
+                      disabled={buyingShield}
+                      className="w-full flex items-center justify-between gap-2 text-xs font-bold text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg px-3 py-2 transition-colors disabled:opacity-60"
+                    >
+                      <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> Buy a Streak Shield</span>
+                      <span className="flex items-center gap-1 text-gray-600"><Coins className="w-3 h-3" /> 50</span>
+                    </button>
+                    <p className="text-[10px] text-gray-400 mt-1">Forgives one missed day so your streak survives.</p>
                   </div>
                   {/* Actions */}
                   <DropdownMenuItem onClick={() => navigate('/gamification')}>

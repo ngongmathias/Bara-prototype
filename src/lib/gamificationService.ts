@@ -10,6 +10,7 @@ export interface GamificationProfile {
     last_activity_at: string;
     consecutive_days: number;
     multiplier: number;
+    streak_shields?: number;
 }
 
 
@@ -82,6 +83,7 @@ export const DEFAULT_ECONOMY_SETTINGS: Record<string, { value: number; label: st
     'cost.ad_free_24h': { value: 20, label: 'Ad-free browsing (24h)', group: 'Coin costs' },
     'cost.listing_boost': { value: 50, label: 'Marketplace ad boost', group: 'Coin costs' },
     'cost.track_boost': { value: 50, label: 'Track boost (creator)', group: 'Coin costs' },
+    'cost.streak_shield': { value: 50, label: 'Streak Shield', group: 'Coin costs' },
     'limit.daily_listen_xp_cap': { value: 50, label: 'Songs per day that earn XP', group: 'Limits' },
     'economy.coins_per_usd': { value: 100, label: 'Coin worth: coins per 1 USD', group: 'Economy' },
 };
@@ -370,10 +372,25 @@ export class GamificationService {
             // Read the current streak from either column (defensive against drift).
             const currentStreak = Number(profile.consecutive_days ?? profile.daily_streak ?? 0) || 0;
 
+            // Monthly free Streak Shield top-up (idempotent per calendar month).
+            await supabase.rpc('economy_grant_monthly_shield', { p_user_id: userId }).then(() => {}, () => {});
+
+            // Exactly one day missed (gap of 2 calendar days) → try to spend a
+            // Streak Shield to preserve the streak instead of resetting it.
+            let shieldUsed = false;
+            if (lastValid && currentStreak >= 1 && diffDays === 2) {
+                const { data: sh } = await supabase.rpc('economy_consume_shield', { p_user_id: userId });
+                if ((sh as any)?.consumed) shieldUsed = true;
+            }
+
             let newStreak = currentStreak;
             let streakChanged = false;
 
-            if (!lastValid || currentStreak < 1 || diffDays >= 2) {
+            if (shieldUsed) {
+                // Shield absorbed the missed day — carry the streak forward.
+                newStreak = currentStreak + 1;
+                streakChanged = true;
+            } else if (!lastValid || currentStreak < 1 || diffDays >= 2) {
                 // Brand-new / broken streak → start (or restart) at day 1
                 newStreak = 1;
                 streakChanged = true;
@@ -595,6 +612,22 @@ export class GamificationService {
             await supabase.rpc('reset_daily_missions_for_user', { p_user_id: userId });
         } catch (error) {
             console.error('Error resetting daily missions:', error);
+        }
+    }
+
+    /**
+     * Buy an extra Streak Shield for coins (cost.streak_shield). Server checks
+     * the balance and increments the shield count atomically.
+     */
+    static async buyStreakShield(userId: string): Promise<{ success: boolean; shields?: number; cost?: number; reason?: string }> {
+        try {
+            const { data, error } = await supabase.rpc('economy_buy_shield', { p_user_id: userId });
+            if (error) throw error;
+            const r = (data as any) || {};
+            return { success: !!r.success, shields: r.shields, cost: r.cost, reason: r.reason };
+        } catch (error) {
+            console.error('Error buying streak shield:', error);
+            return { success: false };
         }
     }
 
