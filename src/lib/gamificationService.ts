@@ -86,6 +86,7 @@ export const DEFAULT_ECONOMY_SETTINGS: Record<string, { value: number; label: st
     'cost.streak_shield': { value: 50, label: 'Streak Shield', group: 'Coin costs' },
     'limit.daily_listen_xp_cap': { value: 50, label: 'Songs per day that earn XP', group: 'Limits' },
     'economy.coins_per_usd': { value: 100, label: 'Coin worth: coins per 1 USD', group: 'Economy' },
+    'perk.gold_coin_bonus_pct': { value: 5, label: 'Gold tier coin bonus (%)', group: 'Perks' },
 };
 
 let _settingsCache: Record<string, number> | null = null;
@@ -374,6 +375,8 @@ export class GamificationService {
 
             // Monthly free Streak Shield top-up (idempotent per calendar month).
             await supabase.rpc('economy_grant_monthly_shield', { p_user_id: userId }).then(() => {}, () => {});
+            // Diamond prestige perk: one free ad-free week per month (self-gated + idempotent).
+            supabase.rpc('economy_grant_diamond_adfree', { p_user_id: userId }).then(() => {}, () => {});
 
             // Exactly one day missed (gap of 2 calendar days) → try to spend a
             // Streak Shield to preserve the streak instead of resetting it.
@@ -438,9 +441,11 @@ export class GamificationService {
                 p_reason: reason,
             });
             if (error) throw error;
-            if (!(data as any)?.success) return false;
+            const r = data as any;
+            if (!r?.success) return false;
 
-            emitCoinEvent(amount, reason);
+            // Emit the actually-credited amount (may include the Gold tier bonus).
+            emitCoinEvent(Number(r.credited) || amount, reason);
             return true;
         } catch (error) {
             console.error('Error adding coins:', error);

@@ -68,7 +68,14 @@ in daily) apply an XP **multiplier**. **Daily missions**, **achievements** and a
 | 71 | 585,662 | **Diamond** (71+) |
 
 Each level-up also pays a **coin bonus = newLevel × 10** (e.g. reaching L12 pays 120 coins).
-Prestige tier is purely cosmetic/status today (shown on the profile/leaderboard).
+
+**Prestige perks (Phase 27.3.4)** — tiers now do something:
+- **Bronze (L11+):** claim a free exclusive `prestige_bronze` profile theme.
+- **Silver (L21+):** 2 daily spins instead of 1 (`economy_spin_wheel`).
+- **Gold (L41+):** +`perk.gold_coin_bonus_pct`% (default 5%) on coin earnings
+  (applied in `economy_add_coins`).
+- **Diamond (L71+):** a free ad-free week each calendar month
+  (`economy_grant_diamond_adfree`, idempotent).
 
 **Intuition:** at +10 XP per song, Level 2 ≈ 100 songs; the curve steepens fast, so
 levels are mostly driven by the *daily* sources (login bonus, missions, spin) for

@@ -1237,8 +1237,13 @@ economy settings live + Trust Rank columns dropped).
   missed, preserving the streak. Extra shields buyable for `cost.streak_shield`
   (50, admin-tunable) via `economy_buy_shield` — surfaced in the Header coins
   dropdown and on `/gamification`.
-- [ ] **27.3.4 Prestige perks** — Bronze: exclusive theme · Silver: 2× daily spin ·
-  Gold: +5% coin earnings · Diamond: free monthly ad-free week + profile flair.
+- [x] **27.3.4 Prestige perks** — DONE Jul 6, 2026 (`20260706_prestige_perks.sql`).
+  Bronze (L11+): free level-gated `prestige_bronze` theme in `useProfileTheme`.
+  Silver (L21+): 2 spins/day (`economy_spin_wheel` + client eligibility read
+  prestige). Gold (L41+): +5% coin earnings applied in `economy_add_coins`
+  (`perk.gold_coin_bonus_pct`, admin-tunable). Diamond (L71+): a free ad-free week
+  per calendar month via `economy_grant_diamond_adfree` (idempotent, granted in
+  `checkDailyStreak`). Perk list shown on `/rewards`.
 - [ ] **27.3.5 Flatten the early curve** — micro-levels below L10 (or halve early
   thresholds) so new users level up in week 1.
 - [ ] **27.3.6 Weekly recap email** — "Your week on BARA" via the existing

@@ -53,15 +53,24 @@ export function DailySpinWheel() {
     setLoading(true);
     try {
       const today = new Date().toLocaleDateString('en-CA');
-      const { data } = await supabase
-        .from('gamification_history')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('reason', 'Daily Spin Wheel')
-        .gte('created_at', `${today}T00:00:00`)
-        .limit(1);
+      const [{ data: spins }, { data: prof }] = await Promise.all([
+        supabase
+          .from('gamification_history')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('reason', 'Daily Spin Wheel')
+          .gte('created_at', `${today}T00:00:00`),
+        supabase
+          .from('gamification_profiles')
+          .select('current_level')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+      ]);
 
-      setCanSpin(!data || data.length === 0);
+      // Silver+ prestige (Level 21+) get 2 spins/day; everyone else 1.
+      const level = (prof as any)?.current_level ?? 1;
+      const allowed = level >= 21 ? 2 : 1;
+      setCanSpin((spins?.length ?? 0) < allowed);
     } catch {
       setCanSpin(true);
     } finally {

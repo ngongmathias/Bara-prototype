@@ -14,6 +14,9 @@ export interface ProfileTheme {
   // Locked themes can't be bought with coins — they're granted by an
   // achievement/milestone (e.g. the referral_champion 25-referral reward).
   locked?: boolean;
+  // Level-gated prestige themes: claimable for free once the user reaches this
+  // level (e.g. the Bronze tier exclusive at Level 11).
+  minLevel?: number;
 }
 
 export const PROFILE_THEMES: ProfileTheme[] = [
@@ -90,6 +93,18 @@ export const PROFILE_THEMES: ProfileTheme[] = [
     accentColor: 'bg-red-600',
   },
   {
+    // Phase 27.3.4 — Bronze prestige perk. Free to claim once you reach Level 11.
+    id: 'prestige_bronze',
+    name: 'Bronze Prestige',
+    description: 'Exclusive — unlocked at the Bronze tier (Level 11)',
+    cost: 0,
+    locked: true,
+    minLevel: 11,
+    preview: 'bg-gradient-to-br from-gray-200 via-gray-400 to-gray-600',
+    textColor: 'text-white',
+    accentColor: 'bg-gray-700',
+  },
+  {
     // Phase 27.2.2 — exclusive reward for referring 25 friends. Not purchasable;
     // granted by the referral_activate RPC at the 25-referral milestone.
     id: 'referral_champion',
@@ -139,9 +154,16 @@ export function useProfileTheme() {
       return { success: false, message: 'You already own this theme.' };
     }
 
-    // Locked themes are earned (achievement/referral milestone), never bought.
+    // Locked themes are earned, not bought — except level-gated prestige themes,
+    // which you can claim for free once you reach the required level.
     if (theme.locked) {
-      return { success: false, message: 'This theme is earned, not bought.' };
+      if (!theme.minLevel) {
+        return { success: false, message: 'This theme is earned, not bought.' };
+      }
+      const gp = await GamificationService.getProfile(user.id);
+      if (!gp || gp.current_level < theme.minLevel) {
+        return { success: false, message: `Reach Level ${theme.minLevel} to unlock this theme.` };
+      }
     }
 
     setLoading(true);

@@ -475,7 +475,7 @@ const AdminGamification = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {['XP rewards', 'Coin rewards', 'Coin costs', 'Limits', 'Economy'].map((group) => (
+                    {['XP rewards', 'Coin rewards', 'Coin costs', 'Limits', 'Economy', 'Perks'].map((group) => (
                         <div key={group}>
                             <div className="text-[11px] uppercase font-black text-gray-400 tracking-wider mb-2">{group}</div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">

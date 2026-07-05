@@ -2,7 +2,15 @@ import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
 import { Link } from 'react-router-dom';
-import { Zap, Coins, Flame, Target, Gift, Trophy, ArrowRight } from 'lucide-react';
+import { Zap, Coins, Flame, Target, Gift, Trophy, ArrowRight, Crown } from 'lucide-react';
+
+const PRESTIGE_PERKS = [
+  { tier: 'Explorer', level: 'Level 1–10', perk: 'Where everyone starts — earn XP and climb.' },
+  { tier: 'Bronze', level: 'Level 11+', perk: 'Claim an exclusive Bronze profile theme, free.' },
+  { tier: 'Silver', level: 'Level 21+', perk: 'Spin the daily wheel twice a day instead of once.' },
+  { tier: 'Gold', level: 'Level 41+', perk: '+5% Bara Coins on everything you earn.' },
+  { tier: 'Diamond', level: 'Level 71+', perk: 'A free ad-free week, automatically, every month.' },
+];
 
 const SECTIONS = [
   {
@@ -81,6 +89,28 @@ export default function RewardsHowItWorksPage() {
               </div>
             );
           })}
+        </div>
+
+        {/* Prestige perks */}
+        <div className="mt-12">
+          <div className="flex items-center gap-2 mb-4">
+            <Crown className="w-5 h-5 text-gray-900" />
+            <h2 className="text-2xl font-black text-gray-900 font-comfortaa">Prestige perks</h2>
+          </div>
+          <p className="text-sm text-gray-600 mb-5 font-roboto">
+            Your Level unlocks Prestige tiers — and each tier is more than a badge. The higher you climb, the more you get.
+          </p>
+          <div className="border border-gray-200 rounded-2xl divide-y divide-gray-100 overflow-hidden">
+            {PRESTIGE_PERKS.map((p) => (
+              <div key={p.tier} className="flex items-center gap-4 p-4">
+                <div className="w-24 flex-shrink-0">
+                  <div className="text-sm font-black text-gray-900">{p.tier}</div>
+                  <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">{p.level}</div>
+                </div>
+                <p className="text-sm text-gray-600 font-roboto">{p.perk}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="text-center mt-12">
