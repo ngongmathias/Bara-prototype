@@ -456,13 +456,13 @@ const adminMenuItems = [
 
   {
 
-    title: "Economy & Points",
+    title: "Gamification",
 
-    icon: BarChart3,
+    icon: Trophy,
 
     path: "/admin/gamification",
 
-    description: "Manage points, rewards, and economy"
+    description: "Economy settings, missions, coins & rewards"
 
   },
 
@@ -642,7 +642,7 @@ export const AdminSidebar = ({ isOpen, onToggle }: AdminSidebarProps) => {
 
           <div className="h-16 flex items-center justify-between px-6 border-b border-gray-800 bg-black">
 
-            <span className="text-xl font-comfortaa font-bold text-white tracking-tight">Admin<span className="text-yp-yellow">Panel</span></span>
+            <span className="text-xl font-comfortaa font-bold text-white tracking-tight">Admin<span className="text-gray-400">Panel</span></span>
 
             <button
 
@@ -684,7 +684,7 @@ export const AdminSidebar = ({ isOpen, onToggle }: AdminSidebarProps) => {
 
                     isActive
 
-                      ? "bg-yp-yellow text-black font-semibold shadow-md"
+                      ? "bg-white text-black font-semibold shadow-md"
 
                       : "text-gray-400 hover:bg-gray-800 hover:text-white"
 
@@ -704,7 +704,7 @@ export const AdminSidebar = ({ isOpen, onToggle }: AdminSidebarProps) => {
 
                   {item.path === '/admin/blog' && pendingBlogCount > 0 && (
 
-                    <span className="ml-auto bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                    <span className="ml-auto bg-white text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
 
                       {pendingBlogCount}
 
