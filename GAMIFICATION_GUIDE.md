@@ -265,9 +265,11 @@ and **~15–30 coins** per day before one-off actions.
    at 50 songs/day.
 4. ~~**Unearnable achievements**~~ ✅ **Fully fixed Jul 5, 2026** — all 13 badges are
    now wired, including `top_seller`, `prolific_writer` and `event_explorer`.
-5. ~~**No weekly layer**~~ 🟡 improved — a **"Your last 7 days" recap** now shows on the
-   Rewards hub (`getWeeklyRecap`). Still missing: weekly *missions*, seasons,
-   leaderboard resets, and a push/notification recap.
+5. ~~**No weekly layer**~~ ✅ **Done (Phase 27.3.1–27.3.6)** — weekly missions,
+   Monday-anchored leaderboard seasons with champion crowns, and a **weekly recap
+   email** (`enqueue_weekly_recaps()` → `email_queue`, scheduled via pg_cron,
+   respects the `weekly_recap_emails` opt-out) now complement the on-hub
+   "Your last 7 days" card (`getWeeklyRecap`).
 6. ~~**Trust Rank is dead weight**~~ ✅ **Removed Jul 5, 2026** (team decision) —
    code stripped, columns dropped by migration `20260705`.
 7. **Mission/achievement key drift** — keep the code's award keys and the seed in

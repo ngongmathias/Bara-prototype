@@ -1250,8 +1250,14 @@ economy settings live + Trust Rank columns dropped).
   so nobody at L10+ ever drops. SQL `economy_level_from_xp` mirrors it
   (`20260706_flatten_early_curve.sql`). `scripts/verify-level-curve.mjs` (run with
   node) proves no XP total maps to a lower level than before + L10+ unchanged.
-- [ ] **27.3.6 Weekly recap email** — "Your week on BARA" via the existing
-  `email_queue` (recap data already computed by `getWeeklyRecap`).
+- [x] **27.3.6 Weekly recap email** — DONE Jul 6, 2026
+  (`20260706_weekly_recap_email.sql`). `enqueue_weekly_recaps()` builds the
+  getWeeklyRecap data server-side (XP/coins/songs, last 7 days) for each active
+  user and INSERTs a monochrome email (RULES 15–16: black button, no emoji
+  heading, preferences link) into `email_queue`. Respects the new
+  `clerk_users.weekly_recap_emails` opt-out; idempotent per ISO week. Scheduled
+  Mondays 08:00 UTC via pg_cron when available (guarded no-op otherwise — enable
+  pg_cron and re-run the block, or call the function from a scheduled Edge Function).
 
 ### 27.4 Tier 3 — economy maturity (pre-monetisation)
 - [ ] **27.4.1 Coin anchor decision** — the reference worth is now an admin setting
