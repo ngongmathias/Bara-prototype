@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useRef, useEffect } from 'r
 
 import { supabase } from '@/lib/supabase';
 
-import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
+import { GamificationService } from '@/lib/gamificationService';
 import { trackRecent } from '@/lib/recentActivity';
 import { PAID_MUSIC_ENABLED } from '@/lib/features';
 

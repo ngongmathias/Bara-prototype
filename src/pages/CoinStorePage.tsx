@@ -298,19 +298,19 @@ export default function CoinStorePage() {
           </div>
         </div>
 
-        {/* CTA to Pricing */}
+        {/* CTA to Rewards — memberships don't exist yet, so no membership promises here */}
         <div className="text-center bg-black rounded-2xl p-8 md:p-12">
           <h2 className="text-2xl md:text-3xl font-black text-white font-comfortaa mb-3">
             Want even more coins?
           </h2>
           <p className="text-gray-400 max-w-lg mx-auto mb-6 font-roboto">
-            Bara Pro members get 100 bonus coins every month. Elite members get 500.
+            Keep your daily streak alive, complete missions and unlock achievements — every one pays coins.
           </p>
           <Button
-            onClick={() => navigate('/pricing')}
-            className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-8 py-6 text-base"
+            onClick={() => navigate('/rewards')}
+            className="bg-white hover:bg-gray-200 text-black font-bold px-8 py-6 text-base"
           >
-            View Plans
+            See how rewards work
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>

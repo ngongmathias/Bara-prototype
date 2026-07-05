@@ -16,7 +16,7 @@ import { EventsService, EventRegistration } from '@/lib/eventsService';
 
 import { supabase } from '@/lib/supabase';
 
-import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
+import { GamificationService } from '@/lib/gamificationService';
 
 import {
 
@@ -182,9 +182,18 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
 
             try {
 
-                await GamificationService.addXP(user.id, XP_REWARDS.TICKET_PURCHASE, `Registered for event: ${event.title}`);
+                await GamificationService.addXP(user.id, await GamificationService.getSetting('xp.ticket_purchase'), `Registered for event: ${event.title}`);
 
                 await GamificationService.awardAchievement(user.id, 'event_goer');
+
+                // Event Explorer: awarded at 10 lifetime event registrations (idempotent)
+                const { count: regCount } = await supabase
+                    .from('event_registrations')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('user_id', user.id);
+                if ((regCount || 0) >= 10) {
+                    await GamificationService.awardAchievement(user.id, 'event_explorer');
+                }
 
             } catch (gamifyErr) {
 
@@ -276,9 +285,18 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
 
             try {
 
-                await GamificationService.addXP(user.id, XP_REWARDS.TICKET_PURCHASE, `Registered for event: ${event.title}`);
+                await GamificationService.addXP(user.id, await GamificationService.getSetting('xp.ticket_purchase'), `Registered for event: ${event.title}`);
 
                 await GamificationService.awardAchievement(user.id, 'event_goer');
+
+                // Event Explorer: awarded at 10 lifetime event registrations (idempotent)
+                const { count: regCount } = await supabase
+                    .from('event_registrations')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('user_id', user.id);
+                if ((regCount || 0) >= 10) {
+                    await GamificationService.awardAchievement(user.id, 'event_explorer');
+                }
 
             } catch (gamifyErr) {
 

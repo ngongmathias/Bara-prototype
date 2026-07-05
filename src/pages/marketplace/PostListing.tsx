@@ -38,7 +38,7 @@ import { supabase } from '@/lib/supabase';
 
 import { useToast } from '@/components/ui/use-toast';
 
-import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
+import { GamificationService } from '@/lib/gamificationService';
 
 import {
 
@@ -809,17 +809,19 @@ export const PostListing = () => {
 
       try {
 
-        await GamificationService.addXP(userId, XP_REWARDS.LISTING_CREATE, `Posted listing: ${formData.title}`);
+        await GamificationService.addXP(userId, await GamificationService.getSetting('xp.listing_create'), `Posted listing: ${formData.title}`);
 
         await GamificationService.awardAchievement(userId, 'market_entry');
 
 
 
-        // If premium, spend coins
+        // If premium, spend coins (boost cost is admin-tunable)
 
         if (formData.is_premium) {
 
-          await GamificationService.spendCoins(userId, 50, `Premium boost for: ${formData.title}`);
+          const boostCost = await GamificationService.getSetting('cost.listing_boost');
+
+          await GamificationService.spendCoins(userId, boostCost, `Premium boost for: ${formData.title}`);
 
         }
 

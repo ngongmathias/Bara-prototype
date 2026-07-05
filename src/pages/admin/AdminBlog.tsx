@@ -151,12 +151,35 @@ export const AdminBlog = () => {
       } as any);
 
       const authorUserId = post?.author?.user_id;
+      let xpEarned = 150;
+      let coinsEarned = 25;
       if (authorUserId) {
-        // Award XP + coins
-        await Promise.allSettled([
-          GamificationService.addXP(authorUserId, 150, 'Blog article published'),
-          GamificationService.addCoins(authorUserId, 25, 'Blog article published'),
+        // Award XP + coins (amounts are admin-tunable in Admin → Gamification)
+        [xpEarned, coinsEarned] = await Promise.all([
+          GamificationService.getSetting('xp.blog_published'),
+          GamificationService.getSetting('coins.blog_published'),
         ]);
+        await Promise.allSettled([
+          GamificationService.addXP(authorUserId, xpEarned, 'Blog article published'),
+          GamificationService.addCoins(authorUserId, coinsEarned, 'Blog article published'),
+        ]);
+
+        // Prolific Writer: awarded at 10 published articles (idempotent)
+        try {
+          const authorId = (post as any)?.author?.id ?? (post as any)?.author_id;
+          if (authorId) {
+            const { count } = await supabase
+              .from('blog_posts')
+              .select('id', { count: 'exact', head: true })
+              .eq('author_id', authorId)
+              .eq('status', 'published');
+            if ((count || 0) >= 10) {
+              await GamificationService.awardAchievement(authorUserId, 'prolific_writer');
+            }
+          }
+        } catch (err) {
+          console.warn('prolific_writer check failed (non-critical):', err);
+        }
 
         // Enqueue approval email (fire-and-forget — don't block the UI)
         const authorEmail = await getAuthorEmail(authorUserId);
@@ -170,8 +193,8 @@ export const AdminBlog = () => {
                 authorName: post?.author?.display_name ?? 'Contributor',
                 articleTitle: post?.title ?? 'Your Article',
                 articleSlug: post?.slug ?? '',
-                xpEarned: 150,
-                coinsEarned: 25,
+                xpEarned,
+                coinsEarned,
               },
             },
           }).then(({ error }) => { if (error) console.error(error); });

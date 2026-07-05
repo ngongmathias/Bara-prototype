@@ -8,6 +8,7 @@ import { useUser } from '@clerk/clerk-react';
 import { Plus, Edit, Trash2, Eye, CheckCircle, Store, ShoppingBag, Clock, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSoldLabel, getMarkAsSoldLabel } from '@/config/categoryFieldConfigs';
+import { GamificationService } from '@/lib/gamificationService';
 
 export const MyAds = () => {
   const navigate = useNavigate();
@@ -131,6 +132,22 @@ export const MyAds = () => {
     } else {
       toast({ title: 'Transaction updated' });
       fetchSellerTransactions();
+
+      // Top Seller: awarded at 10 completed sales (idempotent)
+      if (status === 'completed' && user?.id) {
+        try {
+          const { count } = await supabase
+            .from('marketplace_transactions')
+            .select('id', { count: 'exact', head: true })
+            .eq('seller_user_id', user.id)
+            .eq('status', 'completed');
+          if ((count || 0) >= 10) {
+            await GamificationService.awardAchievement(user.id, 'top_seller');
+          }
+        } catch (err) {
+          console.warn('top_seller check failed (non-critical):', err);
+        }
+      }
     }
   };
 

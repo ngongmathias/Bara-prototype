@@ -819,14 +819,15 @@ export default function ArtistDashboard() {
                                                 setIsBoosting(true);
                                                 try {
                                                     const trackId = songs[0].id;
-                                                    const success = await GamificationService.spendCoins(user.id, 50, "Track Boost: " + trackId);
+                                                    const boostCost = await GamificationService.getSetting('cost.track_boost');
+                                                    const success = await GamificationService.spendCoins(user.id, boostCost, "Track Boost: " + trackId);
                                                     if (success) {
                                                         await supabase.from('songs').update({
                                                             is_premium: true,
                                                             boosted_until: new Date(Date.now() + 86400000).toISOString()
                                                         }).eq('id', trackId);
                                                         await MonetizationService.trackInteraction(trackId, 'song', 'click', 0.50);
-                                                        toast({ title: "Success", description: `"${songs[0].title}" promoted! -50 Coins.` });
+                                                        toast({ title: "Success", description: `"${songs[0].title}" promoted! -${boostCost} Coins.` });
                                                     } else {
                                                         toast({ title: "Error", description: "Insufficient Bara Coins!", variant: 'destructive' });
                                                     }

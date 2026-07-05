@@ -3,7 +3,7 @@ import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/lib/supabase';
 import { GamificationService } from '@/lib/gamificationService';
 
-const AD_FREE_COST = 20;
+const AD_FREE_COST_DEFAULT = 20; // fallback; live value is admin-tunable (cost.ad_free_24h)
 const AD_FREE_DURATION_HOURS = 24;
 
 let isActivating = false;
@@ -13,10 +13,17 @@ export function useAdFree() {
   const [isAdFree, setIsAdFree] = useState(false);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [cost, setCost] = useState(AD_FREE_COST_DEFAULT);
 
   useEffect(() => {
     if (user) checkAdFreeStatus();
   }, [user]);
+
+  useEffect(() => {
+    GamificationService.getSetting('cost.ad_free_24h')
+      .then((v) => { if (v > 0) setCost(v); })
+      .catch(() => { /* keep default */ });
+  }, []);
 
   const checkAdFreeStatus = async () => {
     if (!user) return;
@@ -59,15 +66,16 @@ export function useAdFree() {
         return { success: false, message: 'You already have ad-free browsing active!' };
       }
 
-      // Spend coins
+      // Spend coins (cost is admin-tunable; re-read at purchase time)
+      const liveCost = await GamificationService.getSetting('cost.ad_free_24h');
       const spent = await GamificationService.spendCoins(
         user.id,
-        AD_FREE_COST,
+        liveCost,
         `Ad-free browsing (${AD_FREE_DURATION_HOURS}h)`
       );
 
       if (!spent) {
-        return { success: false, message: `Not enough coins. You need ${AD_FREE_COST} Bara Coins.` };
+        return { success: false, message: `Not enough coins. You need ${liveCost} Bara Coins.` };
       }
 
       // Set expiry
@@ -77,12 +85,12 @@ export function useAdFree() {
       const { error } = await supabase.from('user_ad_free').insert({
         user_id: user.id,
         expires_at: expires.toISOString(),
-        coins_spent: AD_FREE_COST,
+        coins_spent: liveCost,
       });
 
       if (error) {
         // Refund
-        await GamificationService.addCoins(user.id, AD_FREE_COST, 'Ad-free refund (save failed)');
+        await GamificationService.addCoins(user.id, liveCost, 'Ad-free refund (save failed)');
         return { success: false, message: 'Failed to activate. Coins refunded.' };
       }
 
@@ -110,7 +118,7 @@ export function useAdFree() {
     loading,
     activateAdFree,
     timeRemaining,
-    cost: AD_FREE_COST,
+    cost,
     duration: AD_FREE_DURATION_HOURS,
   };
 }

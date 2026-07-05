@@ -149,7 +149,9 @@ export const EventGalleryUpload: React.FC<EventGalleryUploadProps> = ({
       // Gamification: reward for uploading event photos
       if (user?.id) {
         GamificationService.trackMissionProgress(user.id, 'event_photo_upload', uploadedUrls.length);
-        GamificationService.addXP(user.id, 25 * uploadedUrls.length, `Uploaded ${uploadedUrls.length} event photo(s)`);
+        GamificationService.getSetting('xp.event_photo').then((xpPerPhoto) =>
+          GamificationService.addXP(user.id, xpPerPhoto * uploadedUrls.length, `Uploaded ${uploadedUrls.length} event photo(s)`)
+        );
       }
 
     } catch (error) {

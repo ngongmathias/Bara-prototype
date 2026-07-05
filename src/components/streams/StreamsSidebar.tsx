@@ -1,7 +1,7 @@
 import { Home, Search, Library, Plus, Heart, Globe, Mic2, Film, BookOpen, Headphones, Gamepad2, BarChart3 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { GamificationService, XP_REWARDS } from '@/lib/gamificationService';
+import { GamificationService } from '@/lib/gamificationService';
 import { useUser } from '@clerk/clerk-react';
 import { XPProgressBar } from '../gamification/XPProgressBar';
 import { CreatePlaylistModal } from './CreatePlaylistModal';
@@ -112,7 +112,7 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
                 onClose={() => setIsModalOpen(false)}
                 onSuccess={async () => {
                     if (clerkUser) {
-                        await GamificationService.addXP(clerkUser.id, XP_REWARDS.PLAYLIST_CREATE, 'Created a new playlist');
+                        await GamificationService.addXP(clerkUser.id, await GamificationService.getSetting('xp.playlist_create'), 'Created a new playlist');
                         await GamificationService.awardAchievement(clerkUser.id, 'playlist_creator');
                     }
                 }}
