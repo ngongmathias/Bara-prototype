@@ -85,6 +85,8 @@ export const DEFAULT_ECONOMY_SETTINGS: Record<string, { value: number; label: st
     'cost.track_boost': { value: 50, label: 'Track boost (creator)', group: 'Coin costs' },
     'cost.streak_shield': { value: 50, label: 'Streak Shield', group: 'Coin costs' },
     'limit.daily_listen_xp_cap': { value: 50, label: 'Songs per day that earn XP', group: 'Limits' },
+    'limit.daily_xp_cap': { value: 20000, label: 'Max XP earned per day', group: 'Limits' },
+    'limit.daily_coin_gain_cap': { value: 20000, label: 'Max coins earned per day', group: 'Limits' },
     'economy.coins_per_usd': { value: 100, label: 'Coin worth: coins per 1 USD', group: 'Economy' },
     'perk.gold_coin_bonus_pct': { value: 5, label: 'Gold tier coin bonus (%)', group: 'Perks' },
 };

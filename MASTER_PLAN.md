@@ -1266,8 +1266,12 @@ economy settings live + Trust Rank columns dropped).
 - [ ] **27.4.2 New sinks** — coins as partial payment on event tickets, per-day
   "featured" marketplace slots, super-boost bundles, artist tipping (tips = the
   future creator-payout story).
-- [ ] **27.4.3 Anti-abuse pass** — server-side rate limits per action, top-earner
-  anomaly flags in AdminGamification, capped + audited admin grants.
+- [x] **27.4.3 Anti-abuse pass** (partial — server-side caps + observability panel)
+  — DONE Jul 6, 2026 (`20260706_anti_abuse.sql`). Daily backstop caps inside the
+  value RPCs: `economy_add_xp` stops past `limit.daily_xp_cap` (20,000) and
+  `economy_add_coins` past `limit.daily_coin_gain_cap` (20,000), both admin-tunable
+  (song-listen XP already capped at 50/day). A **Top earners (24h)** anomaly panel
+  was added to AdminGamification. (Capped/audited admin grants remain a later item.)
 - [ ] **27.4.4 Seasons (quarterly)** — free cosmetic season track, season-exclusive
   themes/badges. No pay-to-win.
 - [ ] **27.4.5 (Optional, separate from gamification)** Marketplace **Seller
@@ -1285,8 +1289,10 @@ economy settings live + Trust Rank columns dropped).
   never enforced; moderators currently have super-admin power.
 - [ ] **27.6.3 Membership (Pro/Elite) reality check** — either build the membership
   MVP or align all Pricing-page claims with reality (Coin Store + Invite page done Jul 5).
-- [ ] **27.6.4 Gamification observability** — daily earned-vs-spent coins chart in
-  AdminGamification (economy health before monetisation).
+- [x] **27.6.4 Gamification observability** — DONE Jul 6, 2026. AdminGamification
+  now has a **Coins earned vs spent** bar chart (daily, last 14 days, from
+  `gamification_history`) plus the Top earners (24h) panel — economy health at a
+  glance before monetisation.
 - [ ] **27.6.5 PWA / offline for Streams** — elevate from STREAMS_STANDARD Tier 3
   (African mobile-data context makes offline a differentiator).
 - [ ] **27.6.6 Real i18n** — replace the Google Translate widget with i18next flows

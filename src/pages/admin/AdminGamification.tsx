@@ -27,6 +27,12 @@ import {
     PieChart,
     Pie,
     Cell,
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Legend,
 } from 'recharts';
 
 interface ProfileRow {
@@ -86,6 +92,8 @@ const AdminGamification = () => {
     const [leaderboard, setLeaderboard] = useState<ProfileRow[]>([]);
     const [activity, setActivity] = useState<HistoryRow[]>([]);
     const [missions, setMissions] = useState<MissionStat[]>([]);
+    const [dailyFlow, setDailyFlow] = useState<{ day: string; earned: number; spent: number }[]>([]);
+    const [topEarners, setTopEarners] = useState<{ user_id: string; name?: string; earned: number }[]>([]);
 
     // Economy settings panel (admin-tunable values)
     const [settings, setSettings] = useState<Record<string, string>>({});
@@ -163,6 +171,45 @@ const AdminGamification = () => {
                 missionStats.push({ ...(m as any), completedCount: count || 0 });
             }
             setMissions(missionStats);
+
+            // Observability: last 14 days coin flow + 24h top earners
+            const since14 = new Date();
+            since14.setDate(since14.getDate() - 14);
+            const { data: flowRows } = await supabase
+                .from('gamification_history')
+                .select('user_id, type, amount, created_at')
+                .gte('created_at', since14.toISOString())
+                .order('created_at', { ascending: false })
+                .limit(5000);
+            const rowsF = (flowRows || []) as any[];
+
+            const dayMap = new Map<string, { earned: number; spent: number }>();
+            for (let i = 13; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                dayMap.set(d.toLocaleDateString('en-CA'), { earned: 0, spent: 0 });
+            }
+            rowsF.forEach((h) => {
+                const day = new Date(h.created_at).toLocaleDateString('en-CA');
+                const bucket = dayMap.get(day);
+                if (!bucket) return;
+                const amt = Number(h.amount) || 0;
+                if (h.type === 'coin_gain' || h.type === 'coin_purchase') bucket.earned += amt;
+                else if (h.type === 'coin_spend') bucket.spent += amt;
+            });
+            setDailyFlow(Array.from(dayMap.entries()).map(([day, v]) => ({ day: day.slice(5), earned: v.earned, spent: v.spent })));
+
+            const since24 = Date.now() - 24 * 60 * 60 * 1000;
+            const earnMap = new Map<string, number>();
+            rowsF.forEach((h) => {
+                if (new Date(h.created_at).getTime() < since24) return;
+                if (h.type === 'coin_gain' || h.type === 'coin_purchase') {
+                    earnMap.set(h.user_id, (earnMap.get(h.user_id) || 0) + (Number(h.amount) || 0));
+                }
+            });
+            const topE = Array.from(earnMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8);
+            const topNames = await resolveNames(topE.map(([id]) => id));
+            setTopEarners(topE.map(([id, earned]) => ({ user_id: id, name: topNames[id]?.name, earned })));
         } catch (err) {
             console.error('Error loading gamification overview:', err);
             toast({ title: 'Load error', description: 'Could not load gamification data.', variant: 'destructive' });
@@ -577,6 +624,58 @@ const AdminGamification = () => {
                                             <span className="font-black">{Number(u.bara_coins).toLocaleString()}</span>
                                         </div>
                                     </div>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Economy health: daily earned vs spent + 24h top earners */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <Card className="lg:col-span-2">
+                    <CardHeader>
+                        <CardTitle className="text-lg font-black font-comfortaa">Coins earned vs spent</CardTitle>
+                        <CardDescription>Daily flow over the last 14 days (economy health).</CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[280px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={dailyFlow} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                <XAxis dataKey="day" tick={{ fontSize: 10 }} />
+                                <YAxis tick={{ fontSize: 10 }} />
+                                <Tooltip />
+                                <Legend wrapperStyle={{ fontSize: 12 }} />
+                                <Bar dataKey="earned" name="Earned" fill="#111827" radius={[2, 2, 0, 0]} />
+                                <Bar dataKey="spent" name="Spent" fill="#9ca3af" radius={[2, 2, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+
+                <Card className="lg:col-span-1">
+                    <CardHeader>
+                        <CardTitle className="text-lg font-black font-comfortaa flex items-center gap-2">
+                            <TrendingUp size={18} /> Top earners (24h)
+                        </CardTitle>
+                        <CardDescription>Most coins earned in the last day — watch for anomalies.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {topEarners.length === 0 && !loading && (
+                            <div className="text-center text-gray-400 py-8 italic text-sm">No coin activity in the last 24h.</div>
+                        )}
+                        <div className="space-y-2">
+                            {topEarners.map((e, i) => (
+                                <div key={e.user_id} className="flex items-center justify-between p-2.5 border-b border-gray-50 last:border-0">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center font-black text-[10px] shrink-0">
+                                            {i + 1}
+                                        </div>
+                                        <span className="text-sm font-bold truncate">{e.name || shortId(e.user_id)}</span>
+                                    </div>
+                                    <span className="font-black text-sm flex items-center gap-1 shrink-0">
+                                        <Coins size={12} className="text-gray-500" />{e.earned.toLocaleString()}
+                                    </span>
                                 </div>
                             ))}
                         </div>

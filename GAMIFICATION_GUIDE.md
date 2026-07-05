@@ -261,8 +261,11 @@ and **~15–30 coins** per day before one-off actions.
    fixed and audited. Cash-backed coins still require this before going live.
 2. ~~**Streak stuck at 1**~~ ✅ **Fixed** — used UTC days + no null guard; now uses the
    user's local calendar days and is defensive. (Streaks increment once per day.)
-3. ~~**No anti-abuse on listen-XP**~~ ✅ **Fixed** — `awardSongListenXP` caps listen-XP
-   at 50 songs/day.
+3. ~~**No anti-abuse on listen-XP**~~ ✅ **Fixed + hardened (Phase 27.4.3)** —
+   `awardSongListenXP` caps listen-XP at 50 songs/day, and the value RPCs now
+   enforce daily backstops (`limit.daily_xp_cap` / `limit.daily_coin_gain_cap`,
+   both 20,000, admin-tunable) so automated farming can't run away. Admin →
+   Gamification shows a **Coins earned vs spent** chart + **Top earners (24h)**.
 4. ~~**Unearnable achievements**~~ ✅ **Fully fixed Jul 5, 2026** — all 13 badges are
    now wired, including `top_seller`, `prolific_writer` and `event_explorer`.
 5. ~~**No weekly layer**~~ ✅ **Done (Phase 27.3.1–27.3.6)** — weekly missions,
