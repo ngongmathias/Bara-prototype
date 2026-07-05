@@ -32,6 +32,7 @@ interface Podcast {
     cover_url: string;
     subscriber_count: number;
     is_featured?: boolean;
+    created_at?: string;
 }
 
 interface Episode {

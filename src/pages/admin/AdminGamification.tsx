@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/lib/supabase';
-import { GamificationService, getPrestigeTier } from '@/lib/gamificationService';
+import { GamificationService, getPrestigeTier, DEFAULT_ECONOMY_SETTINGS } from '@/lib/gamificationService';
 import { useToast } from '@/hooks/use-toast';
 import {
     Trophy,
@@ -17,6 +18,8 @@ import {
     Loader2,
     Target,
     RotateCcw,
+    SlidersHorizontal,
+    Save,
 } from 'lucide-react';
 import {
     Tooltip,
@@ -77,11 +80,17 @@ const shortId = (id: string) => (id?.length > 12 ? `${id.slice(0, 8)}…${id.sli
 
 const AdminGamification = () => {
     const { toast } = useToast();
+    const { user } = useUser();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ totalUsers: 0, totalCoins: 0, totalXP: 0, totalSpent: 0, totalEarned: 0 });
     const [leaderboard, setLeaderboard] = useState<ProfileRow[]>([]);
     const [activity, setActivity] = useState<HistoryRow[]>([]);
     const [missions, setMissions] = useState<MissionStat[]>([]);
+
+    // Economy settings panel (admin-tunable values)
+    const [settings, setSettings] = useState<Record<string, string>>({});
+    const [savedSettings, setSavedSettings] = useState<Record<string, number>>({});
+    const [settingsSaving, setSettingsSaving] = useState(false);
 
     // God Mode user-adjust panel
     const [query, setQuery] = useState('');
@@ -162,9 +171,51 @@ const AdminGamification = () => {
         }
     }, [toast]);
 
+    const loadSettings = useCallback(async () => {
+        const live = await GamificationService.getEconomySettings(true);
+        const asStrings: Record<string, string> = {};
+        Object.keys(DEFAULT_ECONOMY_SETTINGS).forEach((k) => {
+            asStrings[k] = String(live[k] ?? DEFAULT_ECONOMY_SETTINGS[k].value);
+        });
+        setSettings(asStrings);
+        setSavedSettings(live);
+    }, []);
+
     useEffect(() => {
         loadOverview();
-    }, [loadOverview]);
+        loadSettings();
+    }, [loadOverview, loadSettings]);
+
+    const dirtySettingKeys = Object.keys(settings).filter((k) => {
+        const n = Number(settings[k]);
+        return !isNaN(n) && n !== (savedSettings[k] ?? DEFAULT_ECONOMY_SETTINGS[k]?.value);
+    });
+
+    const saveSettings = async () => {
+        if (dirtySettingKeys.length === 0) return;
+        setSettingsSaving(true);
+        try {
+            let failures = 0;
+            for (const key of dirtySettingKeys) {
+                const value = Number(settings[key]);
+                if (isNaN(value) || value < 0) { failures++; continue; }
+                const ok = await GamificationService.updateSetting(key, value, user?.id);
+                if (!ok) failures++;
+            }
+            if (failures > 0) {
+                toast({
+                    title: 'Some settings failed to save',
+                    description: 'Writes are admin-gated server-side. Ensure your account is in admin_users and that migrations 20260705_economy_settings_drop_trust_rank.sql and 20260705_gamification_server_hardening.sql are applied.',
+                    variant: 'destructive',
+                });
+            } else {
+                toast({ title: 'Economy settings saved', description: 'New values apply immediately across the app.' });
+            }
+            await loadSettings();
+        } finally {
+            setSettingsSaving(false);
+        }
+    };
 
     const handleSearch = async () => {
         const q = query.trim();
@@ -409,6 +460,61 @@ const AdminGamification = () => {
                             </p>
                         </div>
                     )}
+                </CardContent>
+            </Card>
+
+            {/* Economy Settings — every number in the economy, editable live */}
+            <Card className="border-2 border-black">
+                <CardHeader>
+                    <CardTitle className="text-lg font-black font-comfortaa flex items-center gap-2">
+                        <SlidersHorizontal size={18} /> Economy Settings
+                    </CardTitle>
+                    <CardDescription>
+                        Change how much every action earns, what perks cost, daily caps, and the coin's reference worth.
+                        Values apply across the app within minutes (no deploy needed).
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    {['XP rewards', 'Coin rewards', 'Coin costs', 'Limits', 'Economy'].map((group) => (
+                        <div key={group}>
+                            <div className="text-[11px] uppercase font-black text-gray-400 tracking-wider mb-2">{group}</div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                                {Object.entries(DEFAULT_ECONOMY_SETTINGS)
+                                    .filter(([, def]) => def.group === group)
+                                    .map(([key, def]) => (
+                                        <div key={key} className="flex items-center justify-between gap-3 border border-gray-100 rounded-xl p-3">
+                                            <div className="min-w-0">
+                                                <div className="font-bold text-sm truncate">{def.label}</div>
+                                                <div className="text-[10px] text-gray-400 font-mono truncate">{key}</div>
+                                            </div>
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                value={settings[key] ?? ''}
+                                                onChange={(e) => setSettings((prev) => ({ ...prev, [key]: e.target.value }))}
+                                                className="w-24 text-right font-bold"
+                                            />
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    ))}
+                    <div className="flex items-center justify-between flex-wrap gap-3 pt-2 border-t">
+                        <p className="text-[11px] text-gray-400 max-w-xl">
+                            "Coin worth" is the reference anchor: {settings['economy.coins_per_usd'] || 100} coins ≈ $1
+                            (1 coin ≈ ${(1 / (Number(settings['economy.coins_per_usd']) || 100)).toFixed(3)}).
+                            It doesn't move money — it's the pricing yardstick for perks and future coin packs.
+                            One-off bonus grants for a specific user are in User Controls above.
+                        </p>
+                        <Button
+                            onClick={saveSettings}
+                            disabled={settingsSaving || dirtySettingKeys.length === 0}
+                            className="bg-black text-white font-bold"
+                        >
+                            {settingsSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                            Save {dirtySettingKeys.length > 0 ? `(${dirtySettingKeys.length})` : ''}
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
 

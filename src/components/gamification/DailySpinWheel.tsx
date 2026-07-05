@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X, Coins, Zap, Star, Gift, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GamificationService } from '@/lib/gamificationService';
+import { emitCoinEvent, emitXPEvent } from '@/lib/gamificationService';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -26,16 +26,6 @@ const SEGMENTS: WheelSegment[] = [
   { label: '50 Coins', value: 50, type: 'coins', color: '#B45309', probability: 1.5 },
   { label: '100 XP', value: 100, type: 'xp', color: '#1D4ED8', probability: 0.5 },
 ];
-
-function pickSegment(): number {
-  const total = SEGMENTS.reduce((sum, s) => sum + s.probability, 0);
-  let rand = Math.random() * total;
-  for (let i = 0; i < SEGMENTS.length; i++) {
-    rand -= SEGMENTS[i].probability;
-    if (rand <= 0) return i;
-  }
-  return 0;
-}
 
 export function DailySpinWheel() {
   const { user } = useUser();
@@ -135,7 +125,29 @@ export function DailySpinWheel() {
     setSpinning(true);
     setResult(null);
 
-    const winIndex = pickSegment();
+    // The server owns the weighted prize table and enforces once/day. It picks
+    // and awards the prize; we just animate the wheel to the returned segment.
+    let res: any;
+    try {
+      const { data, error } = await supabase.rpc('economy_spin_wheel', { p_user_id: user.id });
+      if (error) throw error;
+      res = data;
+    } catch (error) {
+      console.error('Error spinning wheel:', error);
+      setSpinning(false);
+      toast({ title: 'Spin failed', description: 'Please try again in a moment.', variant: 'destructive' });
+      return;
+    }
+
+    if (!res?.success) {
+      // Already spun today (server-enforced) — refuse.
+      setSpinning(false);
+      setCanSpin(false);
+      toast({ title: 'Already spun today', description: 'Come back tomorrow for another spin!' });
+      return;
+    }
+
+    const winIndex = Number(res.index) || 0;
     const segAngle = 360 / SEGMENTS.length;
     const targetAngle = 360 - (winIndex * segAngle + segAngle / 2);
     const totalRotation = 360 * 5 + targetAngle; // 5 full spins + landing
@@ -157,47 +169,34 @@ export function DailySpinWheel() {
         requestAnimationFrame(animate);
       } else {
         setRotation(currentRotation % 360);
-        onSpinComplete(SEGMENTS[winIndex]);
+        onSpinComplete(SEGMENTS[winIndex], res);
       }
     };
 
     requestAnimationFrame(animate);
   };
 
-  const onSpinComplete = async (segment: WheelSegment) => {
+  const onSpinComplete = (segment: WheelSegment, res: any) => {
     setResult(segment);
     setCanSpin(false);
     setSpinning(false);
 
-    if (!user) return;
-
-    try {
-      if (segment.type === 'coins') {
-        const profile = await GamificationService.getProfile(user.id);
-        if (profile) {
-          await supabase
-            .from('gamification_profiles')
-            .update({ bara_coins: Number(profile.bara_coins) + segment.value })
-            .eq('user_id', user.id);
-
-          await supabase.from('gamification_history').insert({
-            user_id: user.id,
-            type: 'coin_gain',
-            amount: segment.value,
-            reason: 'Daily Spin Wheel',
-          });
-        }
-      } else {
-        await GamificationService.addXP(user.id, segment.value, 'Daily Spin Wheel');
+    // The prize was already granted server-side — just fire the UI feedback
+    // events so the header / floating widgets update.
+    if (segment.type === 'coins') {
+      emitCoinEvent(segment.value, 'Daily Spin Wheel');
+    } else {
+      const mult = Number(res?.xp_result?.multiplied_amount) || segment.value;
+      emitXPEvent(mult, 'Daily Spin Wheel');
+      if (Number(res?.xp_result?.levelup_bonus) > 0) {
+        emitCoinEvent(Number(res.xp_result.levelup_bonus), `Level Up to ${res.xp_result.new_level}`);
       }
-
-      toast({
-        title: `You won ${segment.label}!`,
-        description: segment.type === 'coins' ? 'Coins added to your balance.' : 'XP added to your profile.',
-      });
-    } catch (error) {
-      console.error('Error awarding spin reward:', error);
     }
+
+    toast({
+      title: `You won ${segment.label}!`,
+      description: segment.type === 'coins' ? 'Coins added to your balance.' : 'XP added to your profile.',
+    });
   };
 
   if (!user) return null;

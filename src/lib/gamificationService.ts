@@ -1,299 +1,247 @@
 import { supabase } from './supabase';
 
 
-
 export interface GamificationProfile {
-
     user_id: string;
-
     total_xp: number;
-
     current_level: number;
-
     bara_coins: number;
-
     daily_streak: number;
-
     last_activity_at: string;
-
     consecutive_days: number;
-
     multiplier: number;
-
-    trust_rank: number;
-
 }
-
 
 
 export interface Mission {
-
     id: string;
-
     key: string;
-
     title: string;
-
     description: string;
-
     goal: number;
-
     xp_reward: number;
-
     coin_reward: number;
-
-    reputation_reward: number;
-
     type: 'daily' | 'weekly' | 'achievement';
-
     category: string;
-
 }
-
 
 
 export interface UserMission extends Mission {
-
     current_progress: number;
-
     is_completed: boolean;
-
     claimed_at: string | null;
-
 }
-
 
 
 export interface Achievement {
-
     id: string;
-
     key: string;
-
     title: string;
-
     description: string;
-
     icon_url: string;
-
     xp_reward: number;
-
     coin_reward: number;
-
     category: string;
-
 }
 
 
-
 export const XP_REWARDS = {
-
     SONG_LISTEN: 10,
-
     PLAYLIST_CREATE: 100,
-
     LISTING_CREATE: 200,
-
     TICKET_PURCHASE: 500,
-
     DAILY_STREAK_BONUS: 20,
-
     SIGN_IN_BONUS: 50,
-
 };
 
 
-
 export const LEVEL_BASE_XP = 1000;
-
 export const LEVEL_MULTIPLIER = 1.5;
 
+
+// ---------------------------------------------------------------------------
+// Admin-tunable economy settings
+// Every number in the economy (XP per action, coin rewards, perk costs, caps,
+// the coin's reference worth) lives in the `gamification_settings` table and is
+// editable from Admin → Gamification. The values below are the fallback
+// defaults used when a key is missing (or the table hasn't been migrated yet),
+// so the app keeps working with the historical values either way.
+// ---------------------------------------------------------------------------
+
+export const DEFAULT_ECONOMY_SETTINGS: Record<string, { value: number; label: string; group: string }> = {
+    'xp.song_listen': { value: 10, label: 'Song listen', group: 'XP rewards' },
+    'xp.daily_login': { value: 50, label: 'Daily login / streak bonus', group: 'XP rewards' },
+    'xp.playlist_create': { value: 100, label: 'Create a playlist', group: 'XP rewards' },
+    'xp.listing_create': { value: 200, label: 'Post a marketplace ad', group: 'XP rewards' },
+    'xp.ticket_purchase': { value: 500, label: 'Register for an event', group: 'XP rewards' },
+    'xp.event_photo': { value: 25, label: 'Upload an event photo (each)', group: 'XP rewards' },
+    'xp.blog_published': { value: 150, label: 'Blog article published', group: 'XP rewards' },
+    'coins.blog_published': { value: 25, label: 'Blog article published', group: 'Coin rewards' },
+    'coins.starting_balance': { value: 100, label: 'New user starting balance', group: 'Coin rewards' },
+    'coins.levelup_per_level': { value: 10, label: 'Level-up bonus (× new level)', group: 'Coin rewards' },
+    'cost.ad_free_24h': { value: 20, label: 'Ad-free browsing (24h)', group: 'Coin costs' },
+    'cost.listing_boost': { value: 50, label: 'Marketplace ad boost', group: 'Coin costs' },
+    'cost.track_boost': { value: 50, label: 'Track boost (creator)', group: 'Coin costs' },
+    'limit.daily_listen_xp_cap': { value: 50, label: 'Songs per day that earn XP', group: 'Limits' },
+    'economy.coins_per_usd': { value: 100, label: 'Coin worth: coins per 1 USD', group: 'Economy' },
+};
+
+let _settingsCache: Record<string, number> | null = null;
+let _settingsCacheAt = 0;
+const SETTINGS_TTL_MS = 5 * 60 * 1000;
 
 
 export type PrestigeTier = 'Explorer' | 'Bronze' | 'Silver' | 'Gold' | 'Diamond';
 
 
-
 export const getPrestigeTier = (level: number): PrestigeTier => {
-
     if (level >= 71) return 'Diamond';
-
     if (level >= 41) return 'Gold';
-
     if (level >= 21) return 'Silver';
-
     if (level >= 11) return 'Bronze';
-
     return 'Explorer';
-
 };
-
 
 
 export const calculateLevel = (xp: number): number => {
-
     if (xp < LEVEL_BASE_XP) return 1;
-
     return Math.floor(Math.pow(xp / LEVEL_BASE_XP, 1 / LEVEL_MULTIPLIER)) + 1;
-
 };
-
 
 
 export const getXPForLevel = (level: number): number => {
-
     if (level <= 1) return 0;
-
     return Math.floor(LEVEL_BASE_XP * Math.pow(level - 1, LEVEL_MULTIPLIER));
-
 };
-
 
 
 // Custom Event for Floating XP UI
-
 export const emitXPEvent = (amount: number, reason: string) => {
-
     const event = new CustomEvent('bara_xp_gain', { detail: { amount, reason } });
-
     window.dispatchEvent(event);
-
 };
 
 export const emitCoinEvent = (amount: number, reason: string) => {
-
     const event = new CustomEvent('bara_coin_gain', { detail: { amount, reason } });
-
     window.dispatchEvent(event);
-
 };
 
 
+// ---------------------------------------------------------------------------
+// Phase 27.2.1 — Server-side economy.
+// Every WRITE goes through a SECURITY DEFINER RPC (see
+// 20260705_gamification_server_hardening.sql). The gamification tables are
+// SELECT-only for the client, so reads stay direct but nothing can mint coins
+// or XP by writing a table. If an RPC fails we surface the error (no fallback
+// to direct table writes). Method signatures + bara_xp_gain / bara_coin_gain
+// UI events are unchanged so no consumer breaks.
+// ---------------------------------------------------------------------------
 
 export class GamificationService {
+    // ------------------------------------------------------------------
+    // Economy settings (admin-tunable, cached 5 min, safe fallbacks)
+    // ------------------------------------------------------------------
+
+    static async getEconomySettings(force = false): Promise<Record<string, number>> {
+        const now = Date.now();
+        if (!force && _settingsCache && now - _settingsCacheAt < SETTINGS_TTL_MS) return _settingsCache;
+
+        const merged: Record<string, number> = {};
+        Object.entries(DEFAULT_ECONOMY_SETTINGS).forEach(([k, v]) => { merged[k] = v.value; });
+        try {
+            const { data, error } = await supabase.from('gamification_settings').select('key, value');
+            if (!error && data) {
+                data.forEach((row: any) => {
+                    const n = Number(row.value);
+                    if (!isNaN(n)) merged[row.key] = n;
+                });
+            }
+        } catch {
+            // Table not migrated yet — defaults keep everything working.
+        }
+        _settingsCache = merged;
+        _settingsCacheAt = now;
+        return merged;
+    }
+
+    static async getSetting(key: string): Promise<number> {
+        const settings = await this.getEconomySettings();
+        return settings[key] ?? DEFAULT_ECONOMY_SETTINGS[key]?.value ?? 0;
+    }
+
+    /**
+     * Update an economy setting. Server-side gated on admin_users — the acting
+     * admin's Clerk id must be passed (the tokenless anon client has no JWT).
+     */
+    static async updateSetting(key: string, value: number, adminUserId?: string): Promise<boolean> {
+        try {
+            const { data, error } = await supabase.rpc('economy_update_setting', {
+                p_key: key,
+                p_value: value,
+                p_admin_id: adminUserId ?? null,
+            });
+            if (error) throw error;
+            const ok = !!(data as any)?.success;
+            if (ok) _settingsCache = null; // bust cache so the new value applies immediately
+            return ok;
+        } catch (error) {
+            console.error('Error updating economy setting:', error);
+            return false;
+        }
+    }
 
     static async getProfile(userId: string): Promise<GamificationProfile | null> {
-
         try {
-
             const { data, error } = await supabase
-
                 .from('gamification_profiles')
-
                 .select('*')
-
                 .eq('user_id', userId)
-
                 .single();
 
-
-
             if (error) {
-
-                // If profile doesn't exist (PGRST116), create it
-
+                // If profile doesn't exist (PGRST116), create it server-side.
                 if (error.code === 'PGRST116') {
+                    const { data: created, error: rpcError } = await supabase
+                        .rpc('economy_ensure_profile', { p_user_id: userId });
 
-                    console.log('Creating new gamification profile for user:', userId);
-
-                    const { data: newProfile, error: insertError } = await supabase
-
-                        .from('gamification_profiles')
-
-                        .insert({
-
-                            user_id: userId,
-
-                            total_xp: 0,
-
-                            current_level: 1,
-
-                            bara_coins: 100, // Starting coins
-
-                            daily_streak: 0,
-
-                            consecutive_days: 0,
-
-                            multiplier: 1.0,
-
-                            trust_rank: 0,
-
-                            last_activity_at: new Date().toISOString(),
-
-                        })
-
-                        .select()
-
-                        .single();
-
-
-
-                    if (insertError) {
-
-                        console.error('Error creating gamification profile:', insertError);
-
+                    if (rpcError) {
+                        console.error('Error creating gamification profile:', rpcError);
                         return null;
-
                     }
+
+                    const newProfile = Array.isArray(created) ? created[0] : created;
 
                     // Launch-period welcome badge (idempotent, non-blocking)
                     this.awardAchievement(userId, 'early_adopter').catch(() => {});
 
-                    return newProfile;
-
+                    return (newProfile as GamificationProfile) ?? null;
                 }
 
                 console.error('Error fetching gamification profile:', error);
-
                 return null;
-
             }
 
-
-
             return data;
-
         } catch (err) {
-
             console.error('Error in getProfile:', err);
-
             return null;
-
         }
-
     }
-
-
 
     static async getUserEconomyHistory(userId: string, limit = 20): Promise<any[]> {
-
         const { data, error } = await supabase
-
             .from('gamification_history')
-
             .select('*')
-
             .eq('user_id', userId)
-
             .order('created_at', { ascending: false })
-
             .limit(limit);
 
-
-
         if (error) {
-
             console.error('Error fetching economy history:', error);
-
             return [];
-
         }
-
         return data || [];
-
     }
-
-
 
     /**
      * "Your week on BARA" — activity over the last 7 days for the recap card.
@@ -344,120 +292,30 @@ export class GamificationService {
     }
 
     static async addXP(userId: string, amount: number, reason: string): Promise<{ levelUp: boolean; newLevel: number } | null> {
-
         try {
-
-            const profile = await this.getProfile(userId);
-
-            if (!profile) return null;
-
-
-
-            // Apply multiplier (MIT-level incentive)
-
-            const multipliedAmount = Math.round(amount * (profile.multiplier || 1));
-
-            const newXP = Number(profile.total_xp) + multipliedAmount;
-
-            const newLevel = calculateLevel(newXP);
-
-            const levelUp = newLevel > profile.current_level;
-
-
-
-            // Level up coin bonus (increased for higher tiers)
-
-            const levelUpBonus = levelUp ? (newLevel * 10) : 0;
-
-
-
-            const { error } = await supabase
-
-                .from('gamification_profiles')
-
-                .update({
-
-                    total_xp: newXP,
-
-                    current_level: newLevel,
-
-                    bara_coins: Number(profile.bara_coins) + levelUpBonus,
-
-                    updated_at: new Date().toISOString()
-
-                })
-
-                .eq('user_id', userId);
-
-
-
-            if (error) throw error;
-
-
-
-            // Trigger visual feedback event
-
-            emitXPEvent(multipliedAmount, reason);
-
-
-
-            // Log history
-
-            await supabase.from('gamification_history').insert({
-
-                user_id: userId,
-
-                type: 'xp_gain',
-
-                amount: multipliedAmount,
-
-                reason
-
+            const { data, error } = await supabase.rpc('economy_add_xp', {
+                p_user_id: userId,
+                p_amount: amount,
+                p_reason: reason,
             });
+            if (error || !data) throw error || new Error('economy_add_xp returned no data');
 
-
-
-            if (levelUpBonus > 0) {
-
-                emitCoinEvent(levelUpBonus, `Level Up to ${newLevel}`);
-
-                await supabase.from('gamification_history').insert({
-
-                    user_id: userId,
-
-                    type: 'coin_gain',
-
-                    amount: levelUpBonus,
-
-                    reason: `Level Up to ${newLevel}`
-
-                });
-
+            const r = data as any;
+            emitXPEvent(Number(r.multiplied_amount) || 0, reason);
+            if (Number(r.levelup_bonus) > 0) {
+                emitCoinEvent(Number(r.levelup_bonus), `Level Up to ${r.new_level}`);
             }
-
-
-
-            return { levelUp, newLevel };
-
+            return { levelUp: !!r.level_up, newLevel: Number(r.new_level) };
         } catch (error) {
-
             console.error('Error adding XP:', error);
-
             return null;
-
         }
-
     }
 
-
-
-    // Max songs per day that earn listen-XP (anti-farming: caps passive XP at
-    // DAILY_LISTEN_XP_CAP × SONG_LISTEN per day).
-    static DAILY_LISTEN_XP_CAP = 50;
-
     /**
-     * Award XP for a song listen, but only up to a daily cap, and grant the
-     * first-listen achievement. Replaces a raw addXP so listening can't be farmed.
+     * Award XP for a song listen, but only up to a daily cap (admin-tunable
+     * `limit.daily_listen_xp_cap`), and grant the first-listen achievement.
+     * Replaces a raw addXP so listening can't be farmed.
      */
     static async awardSongListenXP(userId: string, songTitle: string): Promise<void> {
         try {
@@ -470,9 +328,10 @@ export class GamificationService {
                 .ilike('reason', 'Listened to%')
                 .gte('created_at', startOfToday.toISOString());
 
-            if ((count || 0) >= this.DAILY_LISTEN_XP_CAP) return; // daily cap reached
+            const dailyCap = await this.getSetting('limit.daily_listen_xp_cap');
+            if ((count || 0) >= dailyCap) return; // daily cap reached
 
-            await this.addXP(userId, XP_REWARDS.SONG_LISTEN, `Listened to ${songTitle}`);
+            await this.addXP(userId, await this.getSetting('xp.song_listen'), `Listened to ${songTitle}`);
             await this.awardAchievement(userId, 'first_listen'); // idempotent
 
             // On the first listen of the day (cheap, once/day), check the
@@ -490,14 +349,9 @@ export class GamificationService {
     }
 
     static async checkDailyStreak(userId: string): Promise<void> {
-
         try {
-
             const profile = await this.getProfile(userId);
-
             if (!profile) return;
-
-
 
             // Reset daily missions for this user if they haven't been reset today
             await this.resetDailyMissions(userId);
@@ -533,688 +387,199 @@ export class GamificationService {
             // MIT-level psychological scaling
             const multiplier = newStreak >= 30 ? 2.0 : newStreak >= 7 ? 1.5 : newStreak >= 3 ? 1.2 : 1.0;
 
+            // Persist the computed streak server-side (client keeps the
+            // timezone-correct day maths; the RPC just writes + audits).
+            const { error } = await supabase.rpc('economy_apply_streak', {
+                p_user_id: userId,
+                p_streak: newStreak,
+                p_multiplier: multiplier,
+                p_changed: streakChanged,
+            });
+            if (error) throw error;
+
             if (streakChanged) {
-                const { error } = await supabase
-
-                    .from('gamification_profiles')
-
-                    .update({
-
-                        // Keep both columns in sync: the service tracks the streak in
-                        // consecutive_days, but Header + LeaderboardPage read daily_streak.
-
-                        daily_streak: newStreak,
-
-                        consecutive_days: newStreak,
-
-                        multiplier: multiplier,
-
-                        last_activity_at: new Date().toISOString()
-
-                    })
-
-                    .eq('user_id', userId);
-
-
-
-                if (error) throw error;
-
-                // Give a small daily bonus for returning
-                await this.addXP(userId, XP_REWARDS.SIGN_IN_BONUS, `Daily Streak: Day ${newStreak}`);
+                // Give a small daily bonus for returning (admin-tunable)
+                await this.addXP(userId, await this.getSetting('xp.daily_login'), `Daily Streak: Day ${newStreak}`);
 
                 // Award streak achievements once the user reaches the milestones
                 if (newStreak >= 7) await this.awardAchievement(userId, 'streak_7');
                 if (newStreak >= 30) await this.awardAchievement(userId, 'streak_30');
-            } else {
-                // Same day — just refresh last_activity_at
-                await supabase
-                    .from('gamification_profiles')
-                    .update({ last_activity_at: new Date().toISOString() })
-                    .eq('user_id', userId);
             }
 
             // Always track the daily_login mission (trackMissionProgress is idempotent once completed)
             await this.trackMissionProgress(userId, 'daily_login', 1);
-
         } catch (error) {
             console.error('Error checking streak:', error);
         }
-
     }
-
-
 
     static async addCoins(userId: string, amount: number, reason: string): Promise<boolean> {
-
         try {
-
-            const profile = await this.getProfile(userId);
-
-            if (!profile) return false;
-
-
-
-            const { error } = await supabase
-
-                .from('gamification_profiles')
-
-                .update({
-
-                    bara_coins: Number(profile.bara_coins) + amount,
-
-                    updated_at: new Date().toISOString()
-
-                })
-
-                .eq('user_id', userId);
-
-
-
+            const { data, error } = await supabase.rpc('economy_add_coins', {
+                p_user_id: userId,
+                p_amount: amount,
+                p_reason: reason,
+            });
             if (error) throw error;
+            if (!(data as any)?.success) return false;
 
             emitCoinEvent(amount, reason);
-
-            await supabase.from('gamification_history').insert({
-
-                user_id: userId,
-
-                type: 'coin_purchase',
-
-                amount,
-
-                reason
-
-            });
-
-
-
             return true;
-
         } catch (error) {
-
             console.error('Error adding coins:', error);
-
             return false;
-
         }
-
     }
-
-
 
     static async spendCoins(userId: string, amount: number, reason: string): Promise<boolean> {
-
         try {
-
-            const profile = await this.getProfile(userId);
-
-            if (!profile || profile.bara_coins < amount) return false;
-
-
-
-            const { error } = await supabase
-
-                .from('gamification_profiles')
-
-                .update({
-
-                    bara_coins: Number(profile.bara_coins) - amount,
-
-                    updated_at: new Date().toISOString()
-
-                })
-
-                .eq('user_id', userId);
-
-
-
-            if (error) throw error;
-
-
-
-            await supabase.from('gamification_history').insert({
-
-                user_id: userId,
-
-                type: 'coin_spend',
-
-                amount,
-
-                reason
-
+            const { data, error } = await supabase.rpc('economy_spend_coins', {
+                p_user_id: userId,
+                p_amount: amount,
+                p_reason: reason,
             });
-
-
-
-            return true;
-
+            if (error) throw error;
+            // Server returns { success:false } when the balance is insufficient.
+            return !!(data as any)?.success;
         } catch (error) {
-
             console.error('Error spending coins:', error);
-
             return false;
-
         }
-
     }
-
-
 
     static async getAchievements(): Promise<Achievement[]> {
-
         const { data, error } = await supabase
-
             .from('achievements')
-
             .select('*')
-
             .order('xp_reward', { ascending: false });
 
-
-
         if (error) {
-
             console.error('Error fetching achievements:', error);
-
             return [];
-
         }
-
         return data;
-
     }
-
-
 
     static async getUserAchievements(userId: string): Promise<string[]> {
-
         const { data, error } = await supabase
-
             .from('user_achievements')
-
             .select('achievement_id')
-
             .eq('user_id', userId);
 
-
-
         if (error) {
-
             console.error('Error fetching user achievements:', error);
-
             return [];
-
         }
-
         return data.map(ua => ua.achievement_id);
-
     }
-
-
 
     static async awardAchievement(userId: string, achievementKey: string): Promise<boolean> {
-
         try {
+            const { data, error } = await supabase.rpc('economy_award_achievement', {
+                p_user_id: userId,
+                p_key: achievementKey,
+            });
+            if (error) throw error;
 
-            // Get achievement details
-
-            const { data: achievement, error: achError } = await supabase
-
-                .from('achievements')
-
-                .select('*')
-
-                .eq('key', achievementKey)
-
-                .single();
-
-
-
-            if (achError || !achievement) return false;
-
-
-
-            // Check if already awarded
-
-            const { data: existing } = await supabase
-
-                .from('user_achievements')
-
-                .select('*')
-
-                .eq('user_id', userId)
-
-                .eq('achievement_id', achievement.id)
-
-                .maybeSingle();
-
-
-
-            if (existing) return false;
-
-
-
-            // Award it
-
-            const { error: insError } = await supabase
-
-                .from('user_achievements')
-
-                .insert({
-
-                    user_id: userId,
-
-                    achievement_id: achievement.id
-
-                });
-
-
-
-            if (insError) throw insError;
-
-
+            const r = data as any;
+            if (!r || !r.awarded) return false;
 
             // Trigger visual celebration event
+            window.dispatchEvent(new CustomEvent('bara_achievement_earned', {
+                detail: { title: r.title, subtitle: r.description, xp: r.xp, coins: r.coins },
+            }));
 
-            const event = new CustomEvent('bara_achievement_earned', {
-
-                detail: { title: achievement.title, subtitle: achievement.description, xp: achievement.xp_reward, coins: achievement.coin_reward }
-
-            });
-
-            window.dispatchEvent(event);
-
-
-
-            // Give rewards
-
-            if (achievement.xp_reward > 0) {
-
-                await this.addXP(userId, achievement.xp_reward, `Achievement: ${achievement.title}`);
-
-            }
-
-
-
-            if (achievement.coin_reward > 0) {
-
-                // Since addXP doesn't directly add coins unless levelUp, we add them here
-
-                const profile = await this.getProfile(userId);
-
-                if (profile) {
-
-                    await supabase
-
-                        .from('gamification_profiles')
-
-                        .update({
-
-                            bara_coins: Number(profile.bara_coins) + achievement.coin_reward
-
-                        })
-
-                        .eq('user_id', userId);
-
-
-
-                    await supabase.from('gamification_history').insert({
-
-                        user_id: userId,
-
-                        type: 'coin_gain',
-
-                        amount: achievement.coin_reward,
-
-                        reason: `Achievement: ${achievement.title}`
-
-                    });
-
+            // Mirror the floating XP feedback addXP used to emit for the badge XP.
+            if (r.xp_result && Number(r.xp_result.multiplied_amount) > 0) {
+                emitXPEvent(Number(r.xp_result.multiplied_amount), `Achievement: ${r.title}`);
+                if (Number(r.xp_result.levelup_bonus) > 0) {
+                    emitCoinEvent(Number(r.xp_result.levelup_bonus), `Level Up to ${r.xp_result.new_level}`);
                 }
-
             }
-
-
-
             return true;
-
         } catch (error) {
-
             console.error('Error awarding achievement:', error);
-
             return false;
-
         }
-
     }
 
-
-
     static async getMissions(userId: string): Promise<UserMission[]> {
-
         try {
-
             // Reset daily missions if they haven't been reset today
             await this.resetDailyMissions(userId);
 
-            // First, ensure user has records in user_missions for all active missions
-
-            const { data: allMissions } = await supabase.from('missions').select('*');
-
-            if (!allMissions) return [];
-
-
-
-            const missionIds = allMissions.map(m => m.id);
-
-
-
-            // Check existing progress
-
-            const { data: userProgress } = await supabase
-
-                .from('user_missions')
-
-                .select('*')
-
-                .eq('user_id', userId);
-
-
-
-            const existingMissionIds = new Set(userProgress?.map(p => p.mission_id) || []);
-
-            const missingMissionIds = missionIds.filter(id => !existingMissionIds.has(id));
-
-
-
-            if (missingMissionIds.length > 0) {
-
-                const newRecords = missingMissionIds.map(id => ({
-
-                    user_id: userId,
-
-                    mission_id: id
-
-                }));
-
-                await supabase.from('user_missions').insert(newRecords);
-
-            }
-
-
+            // Ensure the user has a row for every active mission (server-side).
+            await supabase.rpc('economy_ensure_missions', { p_user_id: userId });
 
             // Fetch final combined data
-
             const { data: finalData, error } = await supabase
-
                 .from('user_missions')
-
                 .select(`
-
                     current_progress,
-
                     is_completed,
-
                     claimed_at,
-
                     missions (*)
-
                 `)
-
                 .eq('user_id', userId);
-
-
 
             if (error) throw error;
 
-
-
             return finalData.map(item => ({
-
                 ...item.missions,
-
                 current_progress: item.current_progress,
-
                 is_completed: item.is_completed,
-
                 claimed_at: item.claimed_at
-
-            }));
-
+            })) as unknown as UserMission[];
         } catch (error) {
-
             console.error('Error fetching missions:', error);
-
             return [];
-
         }
-
     }
-
-
 
     static async trackMissionProgress(userId: string, missionKey: string, increment: number = 1): Promise<void> {
-
         try {
+            const { data, error } = await supabase.rpc('economy_track_mission', {
+                p_user_id: userId,
+                p_key: missionKey,
+                p_increment: increment,
+            });
+            if (error) throw error;
 
-            const { data: mission } = await supabase
-
-                .from('missions')
-
-                .select('id, goal')
-
-                .eq('key', missionKey)
-
-                .single();
-
-
-
-            if (!mission) return;
-
-            const { data: userMission } = await supabase
-                .from('user_missions')
-                .select('id, current_progress, is_completed')
-                .eq('user_id', userId)
-                .eq('mission_id', mission.id)
-                .maybeSingle();
-
-            if (userMission?.is_completed) return;
-
-            if (!userMission) {
-                const isNowCompleted = increment >= mission.goal;
-                await supabase.from('user_missions').insert({
-                    user_id: userId,
-                    mission_id: mission.id,
-                    current_progress: increment,
-                    is_completed: isNowCompleted,
-                    completed_at: isNowCompleted ? new Date().toISOString() : null
-                });
-
-                if (isNowCompleted) {
-                    window.dispatchEvent(new CustomEvent('bara_mission_completed', {
-                        detail: { missionKey, userId }
-                    }));
-                }
-                return;
-            }
-
-            const newProgress = userMission.current_progress + increment;
-            const isNowCompleted = newProgress >= mission.goal;
-
-            await supabase
-                .from('user_missions')
-
-                .update({
-
-                    current_progress: newProgress,
-
-                    is_completed: isNowCompleted,
-
-                    completed_at: isNowCompleted ? new Date().toISOString() : null
-
-                })
-
-                .eq('user_id', userId)
-
-                .eq('mission_id', mission.id);
-
-
-
-            if (isNowCompleted) {
-
-                // Trigger visual feedback for completion
-
-                const event = new CustomEvent('bara_mission_completed', {
-
+            if ((data as any)?.completed) {
+                window.dispatchEvent(new CustomEvent('bara_mission_completed', {
                     detail: { missionKey, userId }
-
-                });
-
-                window.dispatchEvent(event);
-
+                }));
             }
-
         } catch (error) {
-
             console.error('Error tracking mission progress:', error);
-
         }
-
     }
-
-
 
     static async claimMissionReward(userId: string, missionId: string): Promise<boolean> {
-
         try {
+            const { data, error } = await supabase.rpc('economy_claim_mission', {
+                p_user_id: userId,
+                p_mission_id: missionId,
+            });
+            if (error) throw error;
 
-            const { data: userMission, error: fetchError } = await supabase
+            const r = data as any;
+            if (!r || !r.success) return false;
 
-                .from('user_missions')
-
-                .select('*, missions(*)')
-
-                .eq('user_id', userId)
-
-                .eq('mission_id', missionId)
-
-                .single();
-
-
-
-            if (fetchError || !userMission || !userMission.is_completed || userMission.claimed_at) {
-
-                return false;
-
-            }
-
-
-
-            const mission = userMission.missions;
-
-
-
-            // Mark as claimed
-
-            await supabase
-
-                .from('user_missions')
-
-                .update({ claimed_at: new Date().toISOString() })
-
-                .eq('id', userMission.id);
-
-
-
-            // Award XP
-
-            if (mission.xp_reward > 0) {
-
-                await this.addXP(userId, mission.xp_reward, `Mission: ${mission.title}`);
-
-            }
-
-
-
-            // Award Coins
-
-            if (mission.coin_reward > 0) {
-
-                const profile = await this.getProfile(userId);
-
-                if (profile) {
-
-                    await supabase
-
-                        .from('gamification_profiles')
-
-                        .update({
-
-                            bara_coins: Number(profile.bara_coins) + mission.coin_reward
-
-                        })
-
-                        .eq('user_id', userId);
-
-
-
-                    await supabase.from('gamification_history').insert({
-
-                        user_id: userId,
-
-                        type: 'coin_gain',
-
-                        amount: mission.coin_reward,
-
-                        reason: `Mission: ${mission.title}`
-
-                    });
-
+            // Mirror the floating XP feedback addXP used to emit for the reward.
+            if (r.xp_result && Number(r.xp_result.multiplied_amount) > 0) {
+                emitXPEvent(Number(r.xp_result.multiplied_amount), `Mission: ${r.title}`);
+                if (Number(r.xp_result.levelup_bonus) > 0) {
+                    emitCoinEvent(Number(r.xp_result.levelup_bonus), `Level Up to ${r.xp_result.new_level}`);
                 }
-
             }
-
-
-
-            // Award Reputation (Trust Rank)
-
-            if (mission.reputation_reward > 0) {
-
-                const profile = await this.getProfile(userId);
-
-                if (profile) {
-
-                    await this.updateUserEconomy(userId, {
-
-                        trust_rank: Number(profile.trust_rank || 1.0) + Number(mission.reputation_reward)
-
-                    });
-
-                }
-
-            }
-
-
 
             return true;
-
         } catch (error) {
-
             console.error('Error claiming mission reward:', error);
-
             return false;
-
         }
-
     }
-
-
-
-    /**
-
-     * Admin God-Mode: Directly override user economy stats
-
-     */
 
     static async resetDailyMissions(userId: string): Promise<void> {
         try {
@@ -1224,53 +589,20 @@ export class GamificationService {
         }
     }
 
-    static async updateUserEconomy(userId: string, updates: { bara_coins?: number; trust_rank?: number }): Promise<boolean> {
-
+    /**
+     * Admin God-Mode: Directly override user economy stats (absolute set).
+     */
+    static async updateUserEconomy(userId: string, updates: { bara_coins?: number }): Promise<boolean> {
         try {
-
-            const { error } = await supabase
-
-                .from('gamification_profiles')
-
-                .update({
-
-                    ...updates,
-
-                    updated_at: new Date().toISOString()
-
-                })
-
-                .eq('user_id', userId);
-
-
-
-            if (error) throw error;
-
-
-
-            await supabase.from('gamification_history').insert({
-
-                user_id: userId,
-
-                type: 'admin_override',
-
-                reason: `Admin override: ${JSON.stringify(updates)}`
-
+            const { data, error } = await supabase.rpc('economy_admin_override', {
+                p_user_id: userId,
+                p_bara_coins: updates.bara_coins ?? null,
             });
-
-
-
-            return true;
-
+            if (error) throw error;
+            return !!(data as any)?.success;
         } catch (error) {
-
             console.error('Error updating user economy:', error);
-
             return false;
-
         }
-
     }
-
 }
-

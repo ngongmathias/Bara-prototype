@@ -1153,7 +1153,118 @@ committed under `compliance/`.
 `20260621_playlist_songs_anon_write.sql` ✅ applied (playlist song-adds work) ·
 `20260622_user_profile_fields.sql` ✅ applied (registration profile fields live) ·
 `20260622_streams_content_fields.sql` ⬜ **run me** (adds songs/albums.description
-so descriptions stop being dropped).
+so descriptions stop being dropped) ·
+`20260705_economy_settings_drop_trust_rank.sql` ✅ applied Jul 5 (admin-tunable
+economy settings live + Trust Rank columns dropped).
+
+---
+
+## PHASE 27 — GAMIFICATION OVERHAUL & ECONOMY CONTROL (July 5, 2026 →)
+
+> Follow-up to the Jul 5 full audit (`PROJECT_AUDIT_2026-07-05.md`) and team decisions:
+> **Trust Rank is removed** (not repurposed), **admins get full economy control**,
+> broken reward systems get fixed, server-side hardening is scheduled (not blocking).
+
+### 27.1 Immediate fixes ✅ (done Jul 5, Cowork session)
+- [x] **Trust Rank removed** — stripped from `GamificationService` (interface, profile
+  insert, mission claim, admin override types); `reputation_reward` removed from the
+  Mission interface. DB columns dropped in `20260705_economy_settings_drop_trust_rank.sql`.
+- [x] **Admin economy control** — new `gamification_settings` table (key/value) + an
+  **Economy Settings** panel in `AdminGamification`: every XP reward, coin reward,
+  perk cost, the daily listen cap, and the coin's reference worth (coins-per-USD)
+  are editable live (5-min client cache, hardcoded fallbacks if the table is absent).
+  Wired consumers: song listen XP + cap, daily login bonus, playlist create,
+  listing create + boost cost, ticket purchase, event photo XP, blog publish XP/coins,
+  level-up coin rate, starting balance, ad-free cost (`useAdFree`), track boost cost
+  (`ArtistDashboard`). Per-user bonus grants remain in the User Controls panel.
+- [x] **Wired the 3 dead achievements** — `top_seller` (10 completed sales, on
+  seller marking a transaction completed in `MyAds`), `prolific_writer` (10 published
+  posts, on approval in `AdminBlog`), `event_explorer` (10 event registrations, in
+  `TicketPurchaseModal`). All idempotent via `awardAchievement`.
+- [x] **Removed unbacked promises** — Coin Store no longer advertises "Pro/Elite
+  monthly coin bonuses" (CTA now points to `/rewards`); Invite page milestones no
+  longer promise "Pro Badge / 1 Month Pro Free / Lifetime Pro" (coin + cosmetic only).
+- [x] **Apply migration** `20260705_economy_settings_drop_trust_rank.sql` ✅ applied
+  Jul 5 ("Success. No rows returned") — settings table live, Trust Rank columns gone.
+
+### 27.2 Tier 1 — trust & honesty (next build)
+- [x] **27.2.1 Server-side economy hardening (SECURITY)** — DONE Jul 5, 2026.
+  Every economy write now goes through SECURITY DEFINER RPCs in
+  `20260705_gamification_server_hardening.sql`: `economy_add_xp`,
+  `economy_add_coins`, `economy_spend_coins` (rejects negative balances),
+  `economy_award_achievement`, `economy_track_mission`, `economy_claim_mission`
+  (server-validates completed+unclaimed), `economy_apply_streak`,
+  `economy_spin_wheel` (once/day + server-owned weighted prize table),
+  `economy_admin_override`, `economy_update_setting` (gated on `admin_users`),
+  plus `economy_ensure_profile` / `economy_ensure_missions`.
+  `gamification_profiles` / `gamification_history` / `user_missions` /
+  `user_achievements` / `gamification_settings` are now SELECT-only for
+  anon/authenticated (writes revoked). `GamificationService`, `DailySpinWheel`
+  and `AdminGamification` call the RPCs (no client-side fallback — RPC errors
+  surface). Coin store / betting / paid-music stay disabled (team decision).
+- [ ] **27.2.2 Referral program end-to-end** (UI already ships at `/invite`):
+  `referral_code` on `clerk_users` (+ backfill), capture `?ref=` at sign-up
+  (custom form + OAuth complete-profile path), `referrals` table, pay 50 coins to
+  referrer + 25 to friend on activation (first mission claim), milestone bonuses
+  (5 → 300 + Ambassador badge, 10 → 1,000, 25 → 3,000 + exclusive theme),
+  anti-self-referral guards, "referrals so far" counter on `/invite`.
+
+### 27.3 Tier 2 — depth & retention ("make it a habit")
+- [ ] **27.3.1 Weekly missions** (e.g. listen 25 songs / post 1 ad / attend 1 event)
+  with chunky coin rewards; `type='weekly'` already exists in the missions schema.
+- [ ] **27.3.2 Weekly leaderboard seasons** — Monday reset, cosmetic crowns for last
+  week's top 10 (keep lifetime XP leaderboard as a second tab).
+- [ ] **27.3.3 Streak Shield** — 1 missed day forgiven per 30 days, extra shields
+  purchasable (~50 coins): reduces streak-loss churn + a natural coin sink.
+- [ ] **27.3.4 Prestige perks** — Bronze: exclusive theme · Silver: 2× daily spin ·
+  Gold: +5% coin earnings · Diamond: free monthly ad-free week + profile flair.
+- [ ] **27.3.5 Flatten the early curve** — micro-levels below L10 (or halve early
+  thresholds) so new users level up in week 1.
+- [ ] **27.3.6 Weekly recap email** — "Your week on BARA" via the existing
+  `email_queue` (recap data already computed by `getWeeklyRecap`).
+
+### 27.4 Tier 3 — economy maturity (pre-monetisation)
+- [ ] **27.4.1 Coin anchor decision** — the reference worth is now an admin setting
+  (`economy.coins_per_usd`, default 100 ≈ $1). Team to ratify + publish an internal
+  price sheet for all sinks/packs.
+- [ ] **27.4.2 New sinks** — coins as partial payment on event tickets, per-day
+  "featured" marketplace slots, super-boost bundles, artist tipping (tips = the
+  future creator-payout story).
+- [ ] **27.4.3 Anti-abuse pass** — server-side rate limits per action, top-earner
+  anomaly flags in AdminGamification, capped + audited admin grants.
+- [ ] **27.4.4 Seasons (quarterly)** — free cosmetic season track, season-exclusive
+  themes/badges. No pay-to-win.
+- [ ] **27.4.5 (Optional, separate from gamification)** Marketplace **Seller
+  Reputation** score from completed sales + reviews — a marketplace trust feature,
+  NOT a currency. (Trust Rank itself is gone per team decision.)
+
+### 27.5 Guardrails (do NOT)
+- Do **not** reopen the coin top-up store before 27.2.1.
+- Do **not** re-enable sports betting before the compliance review.
+- Do **not** add new currencies — XP + Coins only.
+
+### 27.6 Platform ameliorations (from the Jul 5 audit)
+- [ ] **27.6.1 In-browser ebook reader** (PDF.js / EPUB.js) — currently download-only.
+- [ ] **27.6.2 Admin role separation enforcement** — `admin_users.role` is read but
+  never enforced; moderators currently have super-admin power.
+- [ ] **27.6.3 Membership (Pro/Elite) reality check** — either build the membership
+  MVP or align all Pricing-page claims with reality (Coin Store + Invite page done Jul 5).
+- [ ] **27.6.4 Gamification observability** — daily earned-vs-spent coins chart in
+  AdminGamification (economy health before monetisation).
+- [ ] **27.6.5 PWA / offline for Streams** — elevate from STREAMS_STANDARD Tier 3
+  (African mobile-data context makes offline a differentiator).
+- [ ] **27.6.6 Real i18n** — replace the Google Translate widget with i18next flows
+  (French / Swahili / Arabic first). (= 9.10, reprioritised.)
+- [ ] **27.6.7 Low-end Android performance budget** — bundle + image-lazy-load audit
+  across marketplace/global (26.5 covered Streams only).
+- [ ] **27.6.8 Marketplace listing remap (25.4.6)** — data-integrity risk while old
+  ads sit in stale categories.
+
+### 27.7 Re-prioritised existing items
+- ⬆️ Apply `20260622_streams_content_fields.sql` (ongoing data loss) + `20260705` (above).
+- ⬆️ Clerk **production keys** + **@baraafrika.com email domain** (launch risk every week).
+- ⬆️ Human cross-device pass (23.1) — several fixes are "best-guess, needs retest"
+  (e.g. Chrome sign-up popup).
 
 ---
 

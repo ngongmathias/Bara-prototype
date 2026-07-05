@@ -38,7 +38,13 @@ in daily) apply an XP **multiplier**. **Daily missions**, **achievements** and a
 |---|---|---|---|---|
 | **XP** | Status/progression only. Drives Level & Prestige. | Almost every action (see §4) | Nothing — pure rank | ✅ working |
 | **Bara Coins** | The spendable token. | Level-ups, blog, missions, achievements, spin wheel, admin grants | Ad-free, boosts, themes (song purchases **deferred**) | ✅ working as a closed reward loop |
-| **Trust Rank** | A reputation number. | Mission `reputation_reward` (rare) | **Nothing** — never used | ⚠️ removed from the UI (vestigial) |
+| ~~**Trust Rank**~~ | ~~A reputation number~~ | — | — | ❌ **REMOVED Jul 5, 2026** (code + DB columns dropped in `20260705_economy_settings_drop_trust_rank.sql`) |
+
+> **Jul 5, 2026 — every economy number is now admin-tunable.** XP per action, coin
+> rewards, perk costs, the daily listen cap and the coin's reference worth
+> (`economy.coins_per_usd`) live in the `gamification_settings` table, editable from
+> **Admin → Gamification → Economy Settings** (5-min client cache, hardcoded
+> fallbacks if the table is missing). The values quoted in this guide are the defaults.
 
 ---
 
@@ -161,12 +167,11 @@ and **~15–30 coins** per day before one-off actions.
 - **Defined (≈13):** early_adopter, first_listen/music_lover, playlist_creator,
   market_entry/first_purchase, event_goer/event_host/event_explorer, top_seller,
   prolific_writer, streak_7, streak_30.
-- **Actually awarded in code (only 3):** `playlist_creator` (create playlist),
-  `market_entry` (post listing), `event_goer` (buy ticket). On award: celebration
-  event + XP + coins.
-- ⚠️ **The rest are defined but never granted** (music_lover, streak_7/30,
-  top_seller, prolific_writer, first_purchase, event_host, etc.). They show as
-  "locked" forever today. (See Improvements.)
+- ✅ **All achievements are now earnable (Jul 5, 2026).** The last three were wired:
+  `top_seller` (10 completed sales — checked when a seller marks a transaction
+  completed in `MyAds`), `prolific_writer` (10 published posts — checked on approval
+  in `AdminBlog`), `event_explorer` (10 event registrations — checked in
+  `TicketPurchaseModal`). All idempotent via `awardAchievement`.
 
 ---
 
@@ -207,24 +212,31 @@ and **~15–30 coins** per day before one-off actions.
 ---
 
 ## 11. Known issues & inconsistencies (the "fix" list)
-1. **🔴 Security — coins/XP are client-mutated with open RLS.** The browser writes
-   balances directly via the anon client, so a user can grant themselves coins by
-   calling the API. Low-stakes while coins buy only farmable perks, but it **must**
-   move to a server-side Edge Function / RPC before coins carry real cash value.
-   *(Still open — needs a coordinated deployment; see §12 Phase B.)*
+1. ~~**🔴 Security — coins/XP are client-mutated with open RLS.**~~ ✅ **Fixed
+   Jul 5, 2026** (`20260705_gamification_server_hardening.sql`). Every economy
+   write is now a SECURITY DEFINER RPC (`economy_add_xp` / `economy_add_coins` /
+   `economy_spend_coins` / `economy_award_achievement` / `economy_track_mission` /
+   `economy_claim_mission` / `economy_apply_streak` / `economy_spin_wheel` /
+   `economy_admin_override` / `economy_update_setting` + `economy_ensure_profile`
+   / `economy_ensure_missions`). The five gamification tables are **SELECT-only**
+   for the anon/authenticated clients — the browser can no longer write balances
+   directly. Rules enforced server-side: non-negative spends, once/day spin with a
+   server-owned weighted prize table, server-validated mission claims, and
+   `admin_users`-gated settings writes. Residual note: the tokenless anon client
+   passes the acting user id as a parameter (no JWT), so the RPCs trust the caller
+   for *whose* row to touch — the win is that the *shape* of every mutation is now
+   fixed and audited. Cash-backed coins still require this before going live.
 2. ~~**Streak stuck at 1**~~ ✅ **Fixed** — used UTC days + no null guard; now uses the
    user's local calendar days and is defensive. (Streaks increment once per day.)
 3. ~~**No anti-abuse on listen-XP**~~ ✅ **Fixed** — `awardSongListenXP` caps listen-XP
    at 50 songs/day.
-4. **Unearnable achievements** — ✅ mostly fixed: `first_listen`, `streak_7`,
-   `streak_30`, `music_lover` (1,000 listens), `first_purchase`, `event_host` and
-   `early_adopter` (granted on first profile creation) are now wired. Still unwired:
-   `top_seller` (10 sales), `prolific_writer` (10 blogs), `event_explorer` (10 events)
-   — count-based, need the sale-complete / blog-count / event-save flows.
+4. ~~**Unearnable achievements**~~ ✅ **Fully fixed Jul 5, 2026** — all 13 badges are
+   now wired, including `top_seller`, `prolific_writer` and `event_explorer`.
 5. ~~**No weekly layer**~~ 🟡 improved — a **"Your last 7 days" recap** now shows on the
    Rewards hub (`getWeeklyRecap`). Still missing: weekly *missions*, seasons,
    leaderboard resets, and a push/notification recap.
-6. **Trust Rank is dead weight** — pick a purpose or remove the column.
+6. ~~**Trust Rank is dead weight**~~ ✅ **Removed Jul 5, 2026** (team decision) —
+   code stripped, columns dropped by migration `20260705`.
 7. **Mission/achievement key drift** — keep the code's award keys and the seed in
    lockstep (e.g. `market_entry` vs `first_purchase`).
 8. **Coin economy has no anchor** — with the store disabled, coins only inflate;
