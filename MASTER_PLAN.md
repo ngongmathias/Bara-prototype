@@ -1323,6 +1323,15 @@ economy settings live + Trust Rank columns dropped).
 
 ### 27.8 Team decisions — Mathias × Marlon meeting (Jul 6, 2026)
 
+> **Migrations note (Jul 6):** the six 20260708 files referenced in the DONE notes
+> below were combined into ONE file on user request — apply just
+> **`20260708_phase27_8.sql`** (after `20260706_phase27_gamification.sql` and
+> `20260707_anti_abuse.sql`). Its Section 7 also makes EVERY earn/spend amount
+> admin-tunable: referral bonuses + milestones (`referral.*`), daily-spin slice
+> values & odds (`spin.slice1–8_*`), and per-mission / per-achievement rewards
+> (admin-gated `economy_update_mission` / `economy_update_achievement` RPCs,
+> editable in the AdminGamification Missions + Achievement rewards cards).
+
 - [x] **27.8.1 Auto-proposed usernames** — sign-up no longer asks the user to invent
   a username; the system proposes one derived from first + last name (numeric suffix
   on collision), which is **retained unless the user changes it** in profile settings.
@@ -1381,7 +1390,12 @@ economy settings live + Trust Rank columns dropped).
   — DONE Jul 6, 2026 (`/coins-and-xp` renders every earn/spend amount live from
   gamification_settings — nothing hardcoded — incl. "no cash value" disclaimer; linked
   from coins dropdown, /gamification and /rewards; "How the economy works" section
-  added to AdminGamification covering faucets/sinks/caps/streaks w/ setting keys)
+  added to AdminGamification covering faucets/sinks/caps/streaks w/ setting keys.
+  EXTENDED same day: admin now controls EVERY earn/spend possibility — referral
+  bonuses/milestones + spin slice values/odds moved into gamification_settings
+  (Economy Settings groups "Referrals" + "Daily spin"), and mission/achievement
+  rewards are editable inline via admin-gated RPCs; /coins-and-xp shows referral +
+  spin amounts live too — `20260708_phase27_8.sql` Section 7)
 - [x] **27.8.7 Coins for leaderboard ranks** — weekly leaderboard top ranks earn
   coins (amounts per rank admin-tunable via `gamification_settings`). Extends
   27.3.2, where last week's top 10 currently get only the cosmetic Champ crown.

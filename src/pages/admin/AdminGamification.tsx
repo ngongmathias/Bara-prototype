@@ -68,6 +68,19 @@ interface MissionStat {
     completedCount: number;
 }
 
+interface AchievementRow {
+    id: string;
+    key: string;
+    title: string;
+    description: string | null;
+    xp_reward: number;
+    coin_reward: number;
+    earnedCount: number;
+}
+
+// Per-row reward edit buffers for the missions/achievements editors.
+type RewardEdit = { xp: string; coins: string; goal?: string };
+
 // Resolve Clerk display names for a set of user ids via the clerk_users sync table.
 const resolveNames = async (userIds: string[]): Promise<Record<string, { name: string; email: string }>> => {
     const map: Record<string, { name: string; email: string }> = {};
@@ -93,6 +106,10 @@ const AdminGamification = () => {
     const [leaderboard, setLeaderboard] = useState<ProfileRow[]>([]);
     const [activity, setActivity] = useState<HistoryRow[]>([]);
     const [missions, setMissions] = useState<MissionStat[]>([]);
+    const [achievements, setAchievements] = useState<AchievementRow[]>([]);
+    const [missionEdits, setMissionEdits] = useState<Record<string, RewardEdit>>({});
+    const [achievementEdits, setAchievementEdits] = useState<Record<string, RewardEdit>>({});
+    const [savingReward, setSavingReward] = useState<string | null>(null);
     const [dailyFlow, setDailyFlow] = useState<{ day: string; earned: number; spent: number }[]>([]);
     const [topEarners, setTopEarners] = useState<{ user_id: string; name?: string; earned: number }[]>([]);
 
@@ -172,6 +189,27 @@ const AdminGamification = () => {
                 missionStats.push({ ...(m as any), completedCount: count || 0 });
             }
             setMissions(missionStats);
+            setMissionEdits(Object.fromEntries(missionStats.map((m) => [
+                m.id, { xp: String(m.xp_reward), coins: String(m.coin_reward), goal: String(m.goal) },
+            ])));
+
+            // Achievement rewards (editable — every earn amount is admin-tunable)
+            const { data: achRows } = await supabase
+                .from('achievements')
+                .select('id, key, title, description, xp_reward, coin_reward')
+                .order('title', { ascending: true });
+            const achStats: AchievementRow[] = [];
+            for (const a of achRows || []) {
+                const { count } = await supabase
+                    .from('user_achievements')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('achievement_id', a.id);
+                achStats.push({ ...(a as any), earnedCount: count || 0 });
+            }
+            setAchievements(achStats);
+            setAchievementEdits(Object.fromEntries(achStats.map((a) => [
+                a.id, { xp: String(a.xp_reward), coins: String(a.coin_reward) },
+            ])));
 
             // Observability: last 14 days coin flow + 24h top earners
             const since14 = new Date();
@@ -357,6 +395,66 @@ const AdminGamification = () => {
         toast({ title: 'Daily missions reset', description: target.name || shortId(target.user_id) });
     };
 
+    // Save an edited mission's rewards/goal (admin-gated RPC; live immediately).
+    const saveMissionReward = async (m: MissionStat) => {
+        if (!user?.id) return;
+        const edit = missionEdits[m.id];
+        if (!edit) return;
+        setSavingReward(m.id);
+        try {
+            const ok = await GamificationService.updateMission(
+                user.id, m.id,
+                Math.max(parseInt(edit.xp) || 0, 0),
+                Math.max(parseInt(edit.coins) || 0, 0),
+                Math.max(parseInt(edit.goal || '1') || 1, 1),
+            );
+            if (ok) {
+                toast({ title: 'Mission updated', description: `"${m.title}" rewards saved — applies to the next claim.` });
+                setMissions((prev) => prev.map((x) => x.id === m.id
+                    ? { ...x, xp_reward: parseInt(edit.xp) || 0, coin_reward: parseInt(edit.coins) || 0, goal: Math.max(parseInt(edit.goal || '1') || 1, 1) }
+                    : x));
+            } else {
+                toast({ title: 'Update failed', description: 'Are you signed in as an active admin?', variant: 'destructive' });
+            }
+        } finally {
+            setSavingReward(null);
+        }
+    };
+
+    const saveAchievementReward = async (a: AchievementRow) => {
+        if (!user?.id) return;
+        const edit = achievementEdits[a.id];
+        if (!edit) return;
+        setSavingReward(a.id);
+        try {
+            const ok = await GamificationService.updateAchievement(
+                user.id, a.id,
+                Math.max(parseInt(edit.xp) || 0, 0),
+                Math.max(parseInt(edit.coins) || 0, 0),
+            );
+            if (ok) {
+                toast({ title: 'Achievement updated', description: `"${a.title}" rewards saved — applies to the next unlock.` });
+                setAchievements((prev) => prev.map((x) => x.id === a.id
+                    ? { ...x, xp_reward: parseInt(edit.xp) || 0, coin_reward: parseInt(edit.coins) || 0 }
+                    : x));
+            } else {
+                toast({ title: 'Update failed', description: 'Are you signed in as an active admin?', variant: 'destructive' });
+            }
+        } finally {
+            setSavingReward(null);
+        }
+    };
+
+    const missionDirty = (m: MissionStat) => {
+        const e = missionEdits[m.id];
+        return !!e && (parseInt(e.xp) !== m.xp_reward || parseInt(e.coins) !== m.coin_reward || parseInt(e.goal || '') !== m.goal);
+    };
+
+    const achievementDirty = (a: AchievementRow) => {
+        const e = achievementEdits[a.id];
+        return !!e && (parseInt(e.xp) !== a.xp_reward || parseInt(e.coins) !== a.coin_reward);
+    };
+
     const coinData = [
         { name: 'In Wallets', value: stats.totalCoins },
         { name: 'Spent (Burned)', value: stats.totalSpent },
@@ -523,7 +621,7 @@ const AdminGamification = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {['XP rewards', 'Coin rewards', 'Coin costs', 'Leaderboard prizes', 'Limits', 'Economy', 'Perks'].map((group) => (
+                    {['XP rewards', 'Coin rewards', 'Coin costs', 'Leaderboard prizes', 'Referrals', 'Daily spin', 'Limits', 'Economy', 'Perks'].map((group) => (
                         <div key={group}>
                             <div className="text-[11px] uppercase font-black text-gray-400 tracking-wider mb-2">{group}</div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -538,6 +636,7 @@ const AdminGamification = () => {
                                             <Input
                                                 type="number"
                                                 min={0}
+                                                step="any"
                                                 value={settings[key] ?? ''}
                                                 onChange={(e) => setSettings((prev) => ({ ...prev, [key]: e.target.value }))}
                                                 className="w-24 text-right font-bold"
@@ -691,7 +790,7 @@ const AdminGamification = () => {
                         <CardTitle className="text-lg font-black font-comfortaa flex items-center gap-2">
                             <Target size={18} /> Missions
                         </CardTitle>
-                        <CardDescription>Reward config and completion counts.</CardDescription>
+                        <CardDescription>Every mission's XP, coins and goal is editable — changes apply to the next claim.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {missions.length === 0 && !loading && (
@@ -699,16 +798,55 @@ const AdminGamification = () => {
                         )}
                         <div className="space-y-3">
                             {missions.map((m) => (
-                                <div key={m.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-xl">
-                                    <div>
-                                        <div className="font-bold text-sm">{m.title}</div>
-                                        <div className="text-[10px] text-gray-400 font-bold uppercase">
-                                            {m.type} · goal {m.goal} · +{m.xp_reward} XP / +{m.coin_reward} coins
+                                <div key={m.id} className="p-3 border border-gray-100 rounded-xl space-y-2">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div className="min-w-0">
+                                            <div className="font-bold text-sm truncate">{m.title}</div>
+                                            <div className="text-[10px] text-gray-400 font-bold uppercase">{m.type}</div>
+                                        </div>
+                                        <div className="text-right shrink-0">
+                                            <div className="font-black">{m.completedCount.toLocaleString()}</div>
+                                            <div className="text-[9px] text-gray-400 uppercase font-bold">completed</div>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <div className="font-black">{m.completedCount.toLocaleString()}</div>
-                                        <div className="text-[9px] text-gray-400 uppercase font-bold">completed</div>
+                                    <div className="flex items-end gap-2 flex-wrap">
+                                        <div>
+                                            <label className="text-[9px] uppercase font-bold text-gray-400 block mb-0.5">XP</label>
+                                            <Input
+                                                type="number" min={0}
+                                                className="w-20 h-8 text-right font-bold text-sm"
+                                                value={missionEdits[m.id]?.xp ?? ''}
+                                                onChange={(e) => setMissionEdits((prev) => ({ ...prev, [m.id]: { ...prev[m.id], xp: e.target.value } }))}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[9px] uppercase font-bold text-gray-400 block mb-0.5">Coins</label>
+                                            <Input
+                                                type="number" min={0}
+                                                className="w-20 h-8 text-right font-bold text-sm"
+                                                value={missionEdits[m.id]?.coins ?? ''}
+                                                onChange={(e) => setMissionEdits((prev) => ({ ...prev, [m.id]: { ...prev[m.id], coins: e.target.value } }))}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[9px] uppercase font-bold text-gray-400 block mb-0.5">Goal</label>
+                                            <Input
+                                                type="number" min={1}
+                                                className="w-16 h-8 text-right font-bold text-sm"
+                                                value={missionEdits[m.id]?.goal ?? ''}
+                                                onChange={(e) => setMissionEdits((prev) => ({ ...prev, [m.id]: { ...prev[m.id], goal: e.target.value } }))}
+                                            />
+                                        </div>
+                                        {missionDirty(m) && (
+                                            <Button
+                                                size="sm"
+                                                onClick={() => saveMissionReward(m)}
+                                                disabled={savingReward === m.id}
+                                                className="bg-black text-white font-bold h-8"
+                                            >
+                                                {savingReward === m.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -750,6 +888,65 @@ const AdminGamification = () => {
                 </Card>
             </div>
 
+            {/* Achievement rewards — editable (every earn amount is admin-tunable) */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-lg font-black font-comfortaa flex items-center gap-2">
+                        <Award size={18} /> Achievement rewards
+                    </CardTitle>
+                    <CardDescription>
+                        One-off badge bonuses. Every achievement's XP and coin payout is editable — changes apply to the next unlock (already-earned badges are not re-paid).
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {achievements.length === 0 && !loading && (
+                        <div className="text-center text-gray-400 py-8 italic text-sm">No achievements configured.</div>
+                    )}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                        {achievements.map((a) => (
+                            <div key={a.id} className="p-3 border border-gray-100 rounded-xl flex items-center justify-between gap-3 flex-wrap">
+                                <div className="min-w-0 flex-1">
+                                    <div className="font-bold text-sm truncate">{a.title}</div>
+                                    <div className="text-[10px] text-gray-400 truncate">
+                                        <span className="font-mono">{a.key}</span> · earned {a.earnedCount.toLocaleString()}×
+                                    </div>
+                                </div>
+                                <div className="flex items-end gap-2">
+                                    <div>
+                                        <label className="text-[9px] uppercase font-bold text-gray-400 block mb-0.5">XP</label>
+                                        <Input
+                                            type="number" min={0}
+                                            className="w-20 h-8 text-right font-bold text-sm"
+                                            value={achievementEdits[a.id]?.xp ?? ''}
+                                            onChange={(e) => setAchievementEdits((prev) => ({ ...prev, [a.id]: { ...prev[a.id], xp: e.target.value } }))}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[9px] uppercase font-bold text-gray-400 block mb-0.5">Coins</label>
+                                        <Input
+                                            type="number" min={0}
+                                            className="w-20 h-8 text-right font-bold text-sm"
+                                            value={achievementEdits[a.id]?.coins ?? ''}
+                                            onChange={(e) => setAchievementEdits((prev) => ({ ...prev, [a.id]: { ...prev[a.id], coins: e.target.value } }))}
+                                        />
+                                    </div>
+                                    {achievementDirty(a) && (
+                                        <Button
+                                            size="sm"
+                                            onClick={() => saveAchievementReward(a)}
+                                            disabled={savingReward === a.id}
+                                            className="bg-black text-white font-bold h-8"
+                                        >
+                                            {savingReward === a.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+
             {/* 27.8.6 — How the economy works (admin explainer) */}
             <Card>
                 <CardHeader>
@@ -774,15 +971,19 @@ const AdminGamification = () => {
                         </p>
                     </div>
                     <div>
-                        <div className="font-black text-gray-900 mb-1">Faucets (where coins come from)</div>
+                        <div className="font-black text-gray-900 mb-1">Faucets (where coins come from) — all tunable on this page</div>
                         <p>
                             New users start with <span className="font-mono text-xs">coins.starting_balance</span>. After that: level-ups
                             (<span className="font-mono text-xs">coins.levelup_per_level</span> × new level), daily &amp; weekly mission
-                            rewards (per-mission config in the Missions table), achievements, the daily spin, blog publishing
-                            (<span className="font-mono text-xs">coins.blog_published</span>), referrals (both sides paid on activation,
-                            inside the <span className="font-mono text-xs">referral_activate</span> RPC, plus milestone bonuses), and weekly
+                            rewards (edit each mission's XP/coins/goal in the Missions card), achievement bonuses (edit each badge in the
+                            Achievement rewards card), the daily spin (slice amounts &amp; odds under{' '}
+                            <span className="font-mono text-xs">spin.slice1–8</span>), blog publishing
+                            (<span className="font-mono text-xs">coins.blog_published</span>), referrals
+                            (<span className="font-mono text-xs">referral.friend_coins</span> / <span className="font-mono text-xs">referral.referrer_coins</span>{' '}
+                            plus the three <span className="font-mono text-xs">referral.milestone*_coins</span> bonuses), and weekly
                             leaderboard prizes (<span className="font-mono text-xs">leaderboard.rank1_coins</span> …{' '}
                             <span className="font-mono text-xs">leaderboard.rank4to10_coins</span>, paid once per completed week).
+                            There is no coin faucet that isn't controlled from this page.
                         </p>
                     </div>
                     <div>
@@ -792,8 +993,9 @@ const AdminGamification = () => {
                             (<span className="font-mono text-xs">cost.listing_boost</span>), track boosts
                             (<span className="font-mono text-xs">cost.track_boost</span>), and Streak Shields
                             (<span className="font-mono text-xs">cost.streak_shield</span> — forgives one missed day so the streak
-                            survives). Coin-barter marketplace purchases are a <span className="font-bold">transfer</span>, not a sink:
-                            the buyer's coins move to the seller, so total circulation is unchanged.
+                            survives) — every sink price is a <span className="font-mono text-xs">cost.*</span> key above.
+                            Coin-barter marketplace purchases are a <span className="font-bold">transfer</span>, not a sink:
+                            the buyer's coins move to the seller (the seller sets that price per ad), so total circulation is unchanged.
                         </p>
                     </div>
                     <div>

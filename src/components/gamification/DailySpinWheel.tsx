@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X, Coins, Zap, Star, Gift, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { emitCoinEvent, emitXPEvent } from '@/lib/gamificationService';
+import { emitCoinEvent, emitXPEvent, GamificationService } from '@/lib/gamificationService';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -16,7 +16,10 @@ interface WheelSegment {
   probability: number;
 }
 
-const SEGMENTS: WheelSegment[] = [
+// Slice layout is fixed (odd = coins, even = XP, these colors); the VALUES and
+// odds are admin-tunable via gamification_settings (spin.slice1–8_value/_prob)
+// and loaded live so the wheel always matches what the server pays out.
+const DEFAULT_SEGMENTS: WheelSegment[] = [
   { label: '5 Coins', value: 5, type: 'coins', color: '#FBBF24', probability: 30 },
   { label: '10 XP', value: 10, type: 'xp', color: '#60A5FA', probability: 25 },
   { label: '10 Coins', value: 10, type: 'coins', color: '#F59E0B', probability: 20 },
@@ -27,6 +30,18 @@ const SEGMENTS: WheelSegment[] = [
   { label: '100 XP', value: 100, type: 'xp', color: '#1D4ED8', probability: 0.5 },
 ];
 
+const segmentsFromSettings = (settings: Record<string, number>): WheelSegment[] =>
+  DEFAULT_SEGMENTS.map((seg, i) => {
+    const value = Number(settings[`spin.slice${i + 1}_value`]) || seg.value;
+    const probability = Number(settings[`spin.slice${i + 1}_prob`]);
+    return {
+      ...seg,
+      value,
+      probability: Number.isFinite(probability) ? probability : seg.probability,
+      label: `${value} ${seg.type === 'coins' ? 'Coins' : 'XP'}`,
+    };
+  });
+
 export function DailySpinWheel() {
   const { user } = useUser();
   const { toast } = useToast();
@@ -36,17 +51,22 @@ export function DailySpinWheel() {
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<WheelSegment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [segments, setSegments] = useState<WheelSegment[]>(DEFAULT_SEGMENTS);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (user && isOpen) {
       checkSpinEligibility();
+      // Admin-tunable slice values/odds — keep the wheel in sync with the server.
+      GamificationService.getEconomySettings()
+        .then((s) => setSegments(segmentsFromSettings(s)))
+        .catch(() => {});
     }
   }, [user, isOpen]);
 
   useEffect(() => {
     drawWheel();
-  }, [rotation]);
+  }, [rotation, segments]);
 
   const checkSpinEligibility = async () => {
     if (!user) return;
@@ -87,7 +107,7 @@ export function DailySpinWheel() {
     const size = canvas.width;
     const center = size / 2;
     const radius = center - 4;
-    const segCount = SEGMENTS.length;
+    const segCount = segments.length;
     const arc = (2 * Math.PI) / segCount;
 
     ctx.clearRect(0, 0, size, size);
@@ -99,7 +119,7 @@ export function DailySpinWheel() {
       ctx.moveTo(center, center);
       ctx.arc(center, center, radius, angle, angle + arc);
       ctx.closePath();
-      ctx.fillStyle = SEGMENTS[i].color;
+      ctx.fillStyle = segments[i].color;
       ctx.fill();
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 2;
@@ -114,7 +134,7 @@ export function DailySpinWheel() {
       ctx.font = 'bold 11px sans-serif';
       ctx.shadowColor = 'rgba(0,0,0,0.5)';
       ctx.shadowBlur = 2;
-      ctx.fillText(SEGMENTS[i].label, radius - 12, 4);
+      ctx.fillText(segments[i].label, radius - 12, 4);
       ctx.restore();
     }
 
@@ -157,7 +177,7 @@ export function DailySpinWheel() {
     }
 
     const winIndex = Number(res.index) || 0;
-    const segAngle = 360 / SEGMENTS.length;
+    const segAngle = 360 / segments.length;
     const targetAngle = 360 - (winIndex * segAngle + segAngle / 2);
     const totalRotation = 360 * 5 + targetAngle; // 5 full spins + landing
 
@@ -178,7 +198,15 @@ export function DailySpinWheel() {
         requestAnimationFrame(animate);
       } else {
         setRotation(currentRotation % 360);
-        onSpinComplete(SEGMENTS[winIndex], res);
+        // Trust the server's prize (label/type/value) — the local segment only
+        // supplies the color in case settings changed mid-session.
+        const seg = segments[winIndex] || segments[0];
+        onSpinComplete({
+          ...seg,
+          label: typeof res.label === 'string' ? res.label : seg.label,
+          type: res.type === 'coins' || res.type === 'xp' ? res.type : seg.type,
+          value: Number(res.value) || seg.value,
+        }, res);
       }
     };
 

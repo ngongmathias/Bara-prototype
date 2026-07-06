@@ -41,6 +41,11 @@ export default function CoinsAndXpPage() {
     const limits = byGroup('Limits');
     const leaderboardPrizes = byGroup('Leaderboard prizes');
 
+    const setting = (key: string) => settings[key] ?? DEFAULT_ECONOMY_SETTINGS[key]?.value ?? 0;
+    const spinValues = [1, 2, 3, 4, 5, 6, 7, 8].map((i) => setting(`spin.slice${i}_value`)).filter((v) => v > 0);
+    const spinMin = spinValues.length ? Math.min(...spinValues) : 0;
+    const spinMax = spinValues.length ? Math.max(...spinValues) : 0;
+
     return (
         <div className="min-h-screen bg-white">
             <SEO
@@ -119,15 +124,25 @@ export default function CoinsAndXpPage() {
                         </div>
                         <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
                             <span className="text-sm text-gray-700 flex items-center gap-1.5"><Gift size={13} /> Daily spin</span>
-                            <span className="text-sm font-black text-gray-900">surprise prize</span>
+                            <span className="text-sm font-black text-gray-900">
+                                {spinMin > 0 ? `${spinMin}–${spinMax} coins or XP` : 'surprise prize'}
+                            </span>
                         </div>
                         <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
                             <span className="text-sm text-gray-700 flex items-center gap-1.5"><Trophy size={13} /> Achievements</span>
                             <span className="text-sm font-black text-gray-900">per badge</span>
                         </div>
                         <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
-                            <span className="text-sm text-gray-700 flex items-center gap-1.5"><UserPlus size={13} /> Inviting friends</span>
-                            <span className="text-sm font-black text-gray-900">you both earn</span>
+                            <span className="text-sm text-gray-700 flex items-center gap-1.5"><UserPlus size={13} /> Inviting a friend (when they get active)</span>
+                            <span className="text-sm font-black text-gray-900">
+                                you +{setting('referral.referrer_coins').toLocaleString()} · friend +{setting('referral.friend_coins').toLocaleString()}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
+                            <span className="text-sm text-gray-700 flex items-center gap-1.5"><UserPlus size={13} /> Referral milestones (5 / 10 / 25 friends)</span>
+                            <span className="text-sm font-black text-gray-900">
+                                +{setting('referral.milestone5_coins').toLocaleString()} / +{setting('referral.milestone10_coins').toLocaleString()} / +{setting('referral.milestone25_coins').toLocaleString()}
+                            </span>
                         </div>
                         {leaderboardPrizes.length > 0 && (
                             <div className="px-4 py-2.5">

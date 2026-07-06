@@ -93,6 +93,27 @@ export const DEFAULT_ECONOMY_SETTINGS: Record<string, { value: number; label: st
     'leaderboard.rank2_coins': { value: 100, label: 'Weekly rank 2 prize', group: 'Leaderboard prizes' },
     'leaderboard.rank3_coins': { value: 50, label: 'Weekly rank 3 prize', group: 'Leaderboard prizes' },
     'leaderboard.rank4to10_coins': { value: 20, label: 'Weekly ranks 4–10 prize', group: 'Leaderboard prizes' },
+    'referral.friend_coins': { value: 25, label: 'New friend bonus (referred user)', group: 'Referrals' },
+    'referral.referrer_coins': { value: 50, label: 'Referrer bonus (per activation)', group: 'Referrals' },
+    'referral.milestone5_coins': { value: 300, label: 'Milestone: 5 activated referrals', group: 'Referrals' },
+    'referral.milestone10_coins': { value: 1000, label: 'Milestone: 10 activated referrals', group: 'Referrals' },
+    'referral.milestone25_coins': { value: 3000, label: 'Milestone: 25 activated referrals', group: 'Referrals' },
+    'spin.slice1_value': { value: 5, label: 'Slice 1 (coins) — amount', group: 'Daily spin' },
+    'spin.slice1_prob': { value: 30, label: 'Slice 1 — odds weight', group: 'Daily spin' },
+    'spin.slice2_value': { value: 10, label: 'Slice 2 (XP) — amount', group: 'Daily spin' },
+    'spin.slice2_prob': { value: 25, label: 'Slice 2 — odds weight', group: 'Daily spin' },
+    'spin.slice3_value': { value: 10, label: 'Slice 3 (coins) — amount', group: 'Daily spin' },
+    'spin.slice3_prob': { value: 20, label: 'Slice 3 — odds weight', group: 'Daily spin' },
+    'spin.slice4_value': { value: 25, label: 'Slice 4 (XP) — amount', group: 'Daily spin' },
+    'spin.slice4_prob': { value: 12, label: 'Slice 4 — odds weight', group: 'Daily spin' },
+    'spin.slice5_value': { value: 25, label: 'Slice 5 (coins) — amount', group: 'Daily spin' },
+    'spin.slice5_prob': { value: 8, label: 'Slice 5 — odds weight', group: 'Daily spin' },
+    'spin.slice6_value': { value: 50, label: 'Slice 6 (XP) — amount', group: 'Daily spin' },
+    'spin.slice6_prob': { value: 3, label: 'Slice 6 — odds weight', group: 'Daily spin' },
+    'spin.slice7_value': { value: 50, label: 'Slice 7 (coins) — amount', group: 'Daily spin' },
+    'spin.slice7_prob': { value: 1.5, label: 'Slice 7 — odds weight', group: 'Daily spin' },
+    'spin.slice8_value': { value: 100, label: 'Slice 8 (XP) — amount', group: 'Daily spin' },
+    'spin.slice8_prob': { value: 0.5, label: 'Slice 8 — odds weight', group: 'Daily spin' },
 };
 
 let _settingsCache: Record<string, number> | null = null;
@@ -248,6 +269,55 @@ export class GamificationService {
         } catch (error) {
             console.error('Error transferring coins:', error);
             return { success: false, error: 'rpc_failed' };
+        }
+    }
+
+    /**
+     * Admin: change a mission's rewards/goal (gated on admin_users server-side).
+     * The claim RPC reads rewards from the missions table, so edits are live.
+     */
+    static async updateMission(
+        adminUserId: string,
+        missionId: string,
+        xp: number | null,
+        coins: number | null,
+        goal: number | null,
+    ): Promise<boolean> {
+        try {
+            const { data, error } = await supabase.rpc('economy_update_mission', {
+                p_admin_id: adminUserId,
+                p_mission_id: missionId,
+                p_xp: xp,
+                p_coins: coins,
+                p_goal: goal,
+            });
+            if (error) throw error;
+            return !!(data as any)?.success;
+        } catch (error) {
+            console.error('Error updating mission:', error);
+            return false;
+        }
+    }
+
+    /** Admin: change an achievement's rewards (gated on admin_users server-side). */
+    static async updateAchievement(
+        adminUserId: string,
+        achievementId: string,
+        xp: number | null,
+        coins: number | null,
+    ): Promise<boolean> {
+        try {
+            const { data, error } = await supabase.rpc('economy_update_achievement', {
+                p_admin_id: adminUserId,
+                p_achievement_id: achievementId,
+                p_xp: xp,
+                p_coins: coins,
+            });
+            if (error) throw error;
+            return !!(data as any)?.success;
+        } catch (error) {
+            console.error('Error updating achievement:', error);
+            return false;
         }
     }
 
