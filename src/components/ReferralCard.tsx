@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ReferralService } from '@/lib/referralService';
-import { UserPlus, Copy, Check, ArrowRight } from 'lucide-react';
+import { useShare } from '@/context/ShareContext';
+import { UserPlus, Copy, Check, ArrowRight, Share2 } from 'lucide-react';
 
 // 27.8.5 — dashboard referral card: personal code, invited/activated counts,
 // copy-link button. The full program lives at /invite.
@@ -13,6 +14,7 @@ export const ReferralCard = () => {
     const { user } = useUser();
     const navigate = useNavigate();
     const { toast } = useToast();
+    const { openShare } = useShare();
     const [stats, setStats] = useState<{ code: string | null; total: number; activated: number }>({ code: null, total: 0, activated: 0 });
     const [copied, setCopied] = useState(false);
 
@@ -31,6 +33,15 @@ export const ReferralCard = () => {
         } catch {
             toast({ title: 'Failed to copy', description: 'Please copy the link manually.', variant: 'destructive' });
         }
+    };
+
+    const handleShare = () => {
+        if (!stats.code) return;
+        openShare({
+            url: referralLink,
+            title: 'Join me on BARA Afrika',
+            description: 'Sign up with my invite link and we both earn Bara Coins!',
+        });
     };
 
     return (
@@ -63,6 +74,13 @@ export const ReferralCard = () => {
                         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     </Button>
                 </div>
+                <Button
+                    onClick={handleShare}
+                    disabled={!stats.code}
+                    className="w-full bg-black hover:bg-gray-800 text-white font-bold"
+                >
+                    <Share2 className="w-4 h-4 mr-2" /> Share my invite link
+                </Button>
                 <button
                     onClick={() => navigate('/invite')}
                     className="text-xs font-bold text-gray-900 hover:underline flex items-center gap-1"
