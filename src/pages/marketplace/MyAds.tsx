@@ -9,6 +9,7 @@ import { Plus, Edit, Trash2, Eye, CheckCircle, Store, ShoppingBag, Clock, XCircl
 import { useToast } from '@/hooks/use-toast';
 import { getSoldLabel, getMarkAsSoldLabel } from '@/config/categoryFieldConfigs';
 import { GamificationService } from '@/lib/gamificationService';
+import { VerifyNudge } from '@/components/VerifyNudge';
 
 export const MyAds = () => {
   const navigate = useNavigate();
@@ -192,6 +193,11 @@ export const MyAds = () => {
 
       <main className="flex-1 py-8">
         <div className="max-w-7xl mx-auto px-4">
+          {/* Verification nudge (27.8.2) — unverified sellers with ads */}
+          <div className="mb-6">
+            <VerifyNudge accountType="business" context="You're selling on the BARA marketplace." />
+          </div>
+
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>

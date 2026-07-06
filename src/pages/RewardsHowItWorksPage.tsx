@@ -2,7 +2,7 @@ import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
 import { Link } from 'react-router-dom';
-import { Zap, Coins, Flame, Target, Gift, Trophy, ArrowRight, Crown } from 'lucide-react';
+import { Zap, Coins, Flame, Target, Gift, Trophy, ArrowRight, Crown, UserPlus } from 'lucide-react';
 
 const PRESTIGE_PERKS = [
   { tier: 'Explorer', level: 'Level 1–10', perk: 'Where everyone starts — earn XP and climb.' },
@@ -113,13 +113,41 @@ export default function RewardsHowItWorksPage() {
           </div>
         </div>
 
-        <div className="text-center mt-12">
+        {/* Referrals (27.8.5) */}
+        <div className="mt-12 bg-gray-900 text-white rounded-2xl p-6 sm:p-8">
+          <div className="flex items-start gap-4">
+            <div className="w-11 h-11 rounded-lg bg-white text-gray-900 flex items-center justify-center flex-shrink-0">
+              <UserPlus size={20} />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-black font-comfortaa mb-1">Invite friends, earn coins</h2>
+              <p className="text-sm text-gray-300 font-roboto leading-relaxed mb-4">
+                Share your personal invite link. When a friend joins and gets active, you both earn
+                Bara Coins — and inviting more friends unlocks milestone bonuses.
+              </p>
+              <Link
+                to="/invite"
+                className="inline-flex items-center gap-2 bg-white hover:bg-gray-100 text-gray-900 font-bold px-5 py-2.5 rounded-full transition-colors text-sm"
+              >
+                Get your invite link <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center mt-12 space-y-3">
           <Link
             to="/gamification"
             className="inline-flex items-center gap-2 bg-gray-900 hover:bg-black text-white font-bold px-6 py-3 rounded-full transition-colors"
           >
             See your progress <ArrowRight size={18} />
           </Link>
+          <p className="text-sm text-gray-500">
+            Want exact amounts?{' '}
+            <Link to="/coins-and-xp" className="font-bold text-gray-900 underline">
+              Every earn &amp; spend option, with live numbers
+            </Link>
+          </p>
         </div>
       </main>
 

@@ -14,13 +14,226 @@ import { Label } from '@/components/ui/label';
 
 import { UserLogService, UserLog } from '@/lib/userLogService';
 
+import { UsernameService } from '@/lib/usernameService';
+
+import { supabase } from '@/lib/supabase';
+
+import { useToast } from '@/hooks/use-toast';
+
 import { useEffect, useRef, useState } from 'react';
 
-import { Calendar, User, Shield, Printer, Edit, X, Key, LogOut } from 'lucide-react';
+import { Calendar, User, Shield, Printer, Edit, X, Key, LogOut, AtSign, Loader2 } from 'lucide-react';
 
 import { Header } from '@/components/Header';
 
 import Footer from '@/components/Footer';
+
+
+
+// 27.8.1 — usernames are auto-proposed at sign-up; this card is where the
+// user changes theirs. Availability is checked case-insensitively against
+// clerk_users; the DB unique index on lower(username) is the real guard.
+const UsernameCard = ({ clerkUserId }: { clerkUserId: string }) => {
+
+  const { toast } = useToast();
+
+  const [current, setCurrent] = useState<string | null>(null);
+
+  const [value, setValue] = useState('');
+
+  const [status, setStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
+
+  const [statusMsg, setStatusMsg] = useState('');
+
+  const [saving, setSaving] = useState(false);
+
+
+
+  useEffect(() => {
+
+    (async () => {
+
+      const { data } = await supabase
+
+        .from('clerk_users')
+
+        .select('username')
+
+        .eq('clerk_user_id', clerkUserId)
+
+        .maybeSingle();
+
+      const name = (data as any)?.username || '';
+
+      setCurrent(name);
+
+      setValue(name);
+
+    })();
+
+  }, [clerkUserId]);
+
+
+
+  useEffect(() => {
+
+    const name = value.trim().toLowerCase();
+
+    if (!name || name === (current || '').toLowerCase()) {
+
+      setStatus('idle');
+
+      setStatusMsg('');
+
+      return;
+
+    }
+
+    const invalid = UsernameService.validate(name);
+
+    if (invalid) {
+
+      setStatus('invalid');
+
+      setStatusMsg(invalid);
+
+      return;
+
+    }
+
+    setStatus('checking');
+
+    setStatusMsg('Checking availability…');
+
+    const timer = setTimeout(async () => {
+
+      const free = await UsernameService.isAvailable(name, clerkUserId);
+
+      setStatus(free ? 'available' : 'taken');
+
+      setStatusMsg(free ? 'Available' : 'That username is already taken.');
+
+    }, 400);
+
+    return () => clearTimeout(timer);
+
+  }, [value, current, clerkUserId]);
+
+
+
+  const handleSave = async () => {
+
+    setSaving(true);
+
+    try {
+
+      const result = await UsernameService.updateUsername(clerkUserId, value);
+
+      if (result.ok) {
+
+        const name = value.trim().toLowerCase();
+
+        setCurrent(name);
+
+        setValue(name);
+
+        setStatus('idle');
+
+        setStatusMsg('');
+
+        toast({ title: 'Username updated', description: `You are now @${name}.` });
+
+      } else {
+
+        setStatus('taken');
+
+        setStatusMsg(result.error || 'Could not save username.');
+
+      }
+
+    } finally {
+
+      setSaving(false);
+
+    }
+
+  };
+
+
+
+  const dirty = value.trim().toLowerCase() !== (current || '').toLowerCase();
+
+
+
+  return (
+
+    <Card className="mt-6">
+
+      <CardHeader>
+
+        <CardTitle className="flex items-center space-x-2">
+
+          <AtSign className="w-5 h-5 text-gray-900" />
+
+          <span>Username</span>
+
+        </CardTitle>
+
+      </CardHeader>
+
+      <CardContent className="space-y-3">
+
+        <p className="text-sm text-gray-500">
+
+          We set this up from your name when you joined. It identifies you across BARA Afrika — change it anytime.
+
+        </p>
+
+        <div className="flex gap-2 max-w-md">
+
+          <Input
+
+            value={value}
+
+            onChange={(e) => setValue(e.target.value.toLowerCase())}
+
+            placeholder={current === null ? 'Loading…' : 'username'}
+
+            disabled={current === null}
+
+            autoComplete="username"
+
+          />
+
+          <Button
+
+            onClick={handleSave}
+
+            disabled={!dirty || saving || status === 'checking' || status === 'taken' || status === 'invalid'}
+
+            className="bg-black text-white hover:bg-gray-800 flex-shrink-0"
+
+          >
+
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+
+          </Button>
+
+        </div>
+
+        {statusMsg && (
+
+          <p className={`text-xs font-medium ${status === 'available' ? 'text-gray-900' : 'text-gray-500'}`}>{statusMsg}</p>
+
+        )}
+
+      </CardContent>
+
+    </Card>
+
+  );
+
+};
 
 
 
@@ -422,6 +635,12 @@ const UserSettingsPage = () => {
           </Card>
 
         </div>
+
+
+
+        {/* Username (27.8.1) */}
+
+        {user?.id && <UsernameCard clerkUserId={user.id} />}
 
 
 

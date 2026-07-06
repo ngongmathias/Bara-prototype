@@ -89,6 +89,10 @@ export const DEFAULT_ECONOMY_SETTINGS: Record<string, { value: number; label: st
     'limit.daily_coin_gain_cap': { value: 20000, label: 'Max coins earned per day', group: 'Limits' },
     'economy.coins_per_usd': { value: 100, label: 'Coin worth: coins per 1 USD', group: 'Economy' },
     'perk.gold_coin_bonus_pct': { value: 5, label: 'Gold tier coin bonus (%)', group: 'Perks' },
+    'leaderboard.rank1_coins': { value: 200, label: 'Weekly rank 1 prize', group: 'Leaderboard prizes' },
+    'leaderboard.rank2_coins': { value: 100, label: 'Weekly rank 2 prize', group: 'Leaderboard prizes' },
+    'leaderboard.rank3_coins': { value: 50, label: 'Weekly rank 3 prize', group: 'Leaderboard prizes' },
+    'leaderboard.rank4to10_coins': { value: 20, label: 'Weekly ranks 4–10 prize', group: 'Leaderboard prizes' },
 };
 
 let _settingsCache: Record<string, number> | null = null;
@@ -208,6 +212,42 @@ export class GamificationService {
         } catch (error) {
             console.error('Error updating economy setting:', error);
             return false;
+        }
+    }
+
+    /**
+     * 27.8.3 — coins-as-barter: atomic buyer→seller transfer through the
+     * economy_transfer_coins RPC. Server rejects self-transfer + insufficient
+     * balance, respects the seller's daily coin-gain cap, logs both sides to
+     * gamification_history, notifies both parties, and is idempotent per
+     * (buyer, refId) so double-clicks can't double-spend.
+     */
+    static async transferCoins(
+        fromUserId: string,
+        toUserId: string,
+        amount: number,
+        reason: string,
+        refId: string | null,
+    ): Promise<{ success: boolean; error?: string; alreadyPaid?: boolean; fromBalance?: number }> {
+        try {
+            const { data, error } = await supabase.rpc('economy_transfer_coins', {
+                p_from_user: fromUserId,
+                p_to_user: toUserId,
+                p_amount: amount,
+                p_reason: reason,
+                p_ref_id: refId,
+            });
+            if (error) throw error;
+            const r = data as any;
+            return {
+                success: !!r?.success,
+                error: r?.error,
+                alreadyPaid: !!r?.already_paid,
+                fromBalance: r?.from_balance != null ? Number(r.from_balance) : undefined,
+            };
+        } catch (error) {
+            console.error('Error transferring coins:', error);
+            return { success: false, error: 'rpc_failed' };
         }
     }
 
@@ -651,6 +691,20 @@ export class GamificationService {
         } catch (error) {
             console.error('Error buying streak shield:', error);
             return { success: false };
+        }
+    }
+
+    /**
+     * 27.8.7 — pay last completed week's leaderboard top ranks. Fully
+     * idempotent server-side (leaderboard_payouts ledger + advisory lock), so
+     * it's fire-and-forget: triggered lazily on the first leaderboard read of
+     * a new week, with a guarded pg_cron Monday 00:10 UTC as backstop.
+     */
+    static async runLeaderboardPayout(): Promise<void> {
+        try {
+            await supabase.rpc('economy_leaderboard_payout');
+        } catch (error) {
+            console.error('Error running leaderboard payout:', error);
         }
     }
 

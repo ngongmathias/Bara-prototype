@@ -31,10 +31,12 @@ import {
   MessageCircle,
   Star,
   ShieldCheck,
-  DollarSign
+  DollarSign,
+  Coins
 } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { MessagingService } from '@/lib/MessagingService';
+import { GamificationService } from '@/lib/gamificationService';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -67,6 +69,10 @@ export const ListingDetailPage = () => {
   const [offerAmount, setOfferAmount] = useState('');
   const [offerMessage, setOfferMessage] = useState('');
   const [submittingOffer, setSubmittingOffer] = useState(false);
+  // 27.8.3 — coins-as-barter checkout
+  const [showCoinBuy, setShowCoinBuy] = useState(false);
+  const [coinBalance, setCoinBalance] = useState<number | null>(null);
+  const [coinBuying, setCoinBuying] = useState(false);
 
   // Fire-and-forget lead capture
   const recordLead = (contactType: string) => {
@@ -341,6 +347,69 @@ export const ListingDetailPage = () => {
     }
   };
 
+  // 27.8.3 — open the coin-checkout confirm dialog (signed-in users only).
+  const openCoinBuy = async () => {
+    if (!user) {
+      toast({ title: 'Please sign in', description: 'You need to be signed in to pay with coins.' });
+      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    if (listing?.created_by === user.id) {
+      toast({ title: 'This is your own ad', description: "You can't buy your own ad with coins.", variant: 'destructive' });
+      return;
+    }
+    setCoinBalance(null);
+    setShowCoinBuy(true);
+    const profile = await GamificationService.getProfile(user.id);
+    setCoinBalance(profile ? Number(profile.bara_coins || 0) : 0);
+  };
+
+  const confirmCoinBuy = async () => {
+    if (!user || !listing?.created_by || !listing?.coin_price) return;
+    setCoinBuying(true);
+    try {
+      const result = await GamificationService.transferCoins(
+        user.id,
+        listing.created_by,
+        Number(listing.coin_price),
+        `Coin purchase: ${listing.title}`,
+        listing.id,
+      );
+      if (result.alreadyPaid) {
+        toast({ title: 'Already paid', description: 'You already paid for this ad with coins.' });
+        setShowCoinBuy(false);
+        return;
+      }
+      if (!result.success) {
+        const msg =
+          result.error === 'insufficient' ? "You don't have enough coins for this purchase."
+          : result.error === 'seller_daily_cap' ? 'The seller has hit their daily coin limit — try again tomorrow.'
+          : result.error === 'self_transfer' ? "You can't buy your own ad."
+          : 'The payment could not be completed. Please try again.';
+        toast({ title: 'Payment failed', description: msg, variant: 'destructive' });
+        return;
+      }
+      // Record it like an offer so the seller sees who paid (existing pattern).
+      supabase.from('marketplace_offers').insert({
+        ad_id: listing.id,
+        buyer_user_id: user.id,
+        seller_user_id: listing.created_by,
+        amount: Number(listing.coin_price),
+        currency: 'COINS',
+        message: 'Paid with BARA Coins',
+        status: 'accepted',
+      }).then(() => {}, () => {});
+      recordLead('offer');
+      toast({
+        title: 'Payment sent!',
+        description: `You paid ${Number(listing.coin_price).toLocaleString()} coins. The seller has been notified — arrange delivery in chat.`,
+      });
+      setShowCoinBuy(false);
+    } finally {
+      setCoinBuying(false);
+    }
+  };
+
   const handleShare = () => setShowShareDialog(true);
 
   const handleReport = async () => {
@@ -577,6 +646,16 @@ export const ListingDetailPage = () => {
                 </div>
               )}
 
+              {/* Coin option (27.8.3) */}
+              {listing.accepts_coins && listing.coin_price > 0 && (
+                <div className="flex items-center gap-2 mb-4 bg-gray-100 border border-gray-200 rounded-lg px-3 py-2">
+                  <Coins className="w-4 h-4 text-gray-700 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">
+                    or <span className="font-bold text-gray-900">{Number(listing.coin_price).toLocaleString()} BARA Coins</span>
+                  </span>
+                </div>
+              )}
+
               <div className="text-lg font-semibold text-gray-900 mb-4">
                 {listing.title}
               </div>
@@ -626,6 +705,17 @@ export const ListingDetailPage = () => {
                   >
                     <CheckCircle className="w-5 h-5 mr-2" />
                     Buy Now
+                  </Button>
+                )}
+
+                {/* Buy with Coins (27.8.3) */}
+                {listing.status === 'active' && listing.accepts_coins && listing.coin_price > 0 && listing.created_by !== user?.id && (
+                  <Button
+                    onClick={openCoinBuy}
+                    className="w-full bg-black hover:bg-gray-800 text-white font-semibold h-12"
+                  >
+                    <Coins className="w-5 h-5 mr-2" />
+                    Buy with {Number(listing.coin_price).toLocaleString()} Coins
                   </Button>
                 )}
 
@@ -859,6 +949,82 @@ export const ListingDetailPage = () => {
           onClose={() => setShowBuyNow(false)}
         />
       )}
+
+      {/* Buy with Coins Modal (27.8.3) */}
+      <AnimatePresence>
+        {showCoinBuy && listing && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={() => !coinBuying && setShowCoinBuy(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-lg p-6 max-w-md w-full"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                  <Coins className="w-5 h-5" /> Pay with BARA Coins
+                </h3>
+                <button
+                  onClick={() => !coinBuying && setShowCoinBuy(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                You're paying the seller directly with your coins for{' '}
+                <span className="font-semibold text-gray-900">{listing.title}</span>.
+              </p>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg divide-y divide-gray-100 mb-4">
+                <div className="flex items-center justify-between px-4 py-2.5 text-sm">
+                  <span className="text-gray-600">Your balance</span>
+                  <span className="font-bold text-gray-900">
+                    {coinBalance === null ? '…' : coinBalance.toLocaleString()} coins
+                  </span>
+                </div>
+                <div className="flex items-center justify-between px-4 py-2.5 text-sm">
+                  <span className="text-gray-600">Price</span>
+                  <span className="font-bold text-gray-900">-{Number(listing.coin_price).toLocaleString()} coins</span>
+                </div>
+                <div className="flex items-center justify-between px-4 py-2.5 text-sm">
+                  <span className="text-gray-600">Balance after</span>
+                  <span className="font-bold text-gray-900">
+                    {coinBalance === null ? '…' : (coinBalance - Number(listing.coin_price)).toLocaleString()} coins
+                  </span>
+                </div>
+              </div>
+              {coinBalance !== null && coinBalance < Number(listing.coin_price) && (
+                <p className="text-sm font-semibold text-gray-900 bg-gray-100 border border-gray-200 rounded-lg p-3 mb-4">
+                  You don't have enough coins for this purchase.
+                </p>
+              )}
+              <p className="text-xs text-gray-500 mb-4">
+                Coins go straight to the seller and this can't be undone. Coins have no cash value.
+                Arrange delivery with the seller in chat after paying.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setShowCoinBuy(false)} disabled={coinBuying} className="flex-1">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmCoinBuy}
+                  disabled={coinBuying || coinBalance === null || coinBalance < Number(listing.coin_price)}
+                  className="flex-1 bg-black hover:bg-gray-800 text-white"
+                >
+                  {coinBuying ? 'Paying…' : 'Confirm payment'}
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Make Offer Modal */}
       <AnimatePresence>

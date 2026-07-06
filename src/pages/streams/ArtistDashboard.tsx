@@ -13,6 +13,7 @@ import { getMonthlyListeners } from "@/lib/artistStats";
 import { EditSongModal } from "@/components/streams/EditSongModal";
 import { EditAlbumModal } from "@/components/streams/EditAlbumModal";
 import { EditArtistProfileModal } from "@/components/streams/EditArtistProfileModal";
+import { VerifyNudge } from "@/components/VerifyNudge";
 import { useToast } from "@/hooks/use-toast";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { supabase, createAuthenticatedSupabaseClient } from "@/lib/supabase";
@@ -302,6 +303,11 @@ export default function ArtistDashboard() {
     return (
         <StreamsLayout>
             <div className="p-6 md:p-8 pb-32">
+                {/* Verification nudge (27.8.2) — unverified artists with uploads */}
+                <div className="mb-6">
+                    <VerifyNudge accountType="artist" context="Your music is live on BARA Streams." />
+                </div>
+
                 {/* Header */}
                 <div className="mb-8 flex items-start justify-between gap-4">
                     <div>

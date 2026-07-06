@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase';
 import { COUNTRIES } from '@/data/countries';
 import { DateOfBirthPicker } from '@/components/DateOfBirthPicker';
 import { ReferralService } from '@/lib/referralService';
+import { UsernameService } from '@/lib/usernameService';
+import { REFERRAL_PROMPT_PENDING_KEY } from '@/components/InviteFriendsPrompt';
 
 const GENDERS = ['Male', 'Female', 'Rather Not Say'] as const;
 
@@ -35,7 +37,6 @@ export const CompleteProfilePage = () => {
   const [country, setCountry] = useState('Rwanda');
   const [dialCode, setDialCode] = useState('+250');
   const [phone, setPhone] = useState('');
-  const [username, setUsername] = useState('');
 
   const email = user?.primaryEmailAddress?.emailAddress || '';
 
@@ -78,19 +79,12 @@ export const CompleteProfilePage = () => {
     if (!gender) return setError('Please select your gender.');
     if (!country) return setError('Please select your country.');
     if (!phone.trim()) return setError('Please enter your phone number.');
-    if (!username.trim() || username.trim().length < 3) return setError('Please choose a username (3+ characters).');
 
     setSubmitting(true);
     try {
-      const { data: taken } = await supabase
-        .from('clerk_users')
-        .select('id')
-        .ilike('username', username.trim())
-        .maybeSingle();
-      if (taken?.id) {
-        setSubmitting(false);
-        return setError('That username is already taken. Please choose another.');
-      }
+      // 27.8.1 — propose a username from first + last name (numeric suffix on
+      // collision). The user keeps it unless they change it in profile settings.
+      const username = await UsernameService.proposeUsername(firstName, lastName);
 
       const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
       const row = {
@@ -99,7 +93,7 @@ export const CompleteProfilePage = () => {
         full_name: fullName || null,
         first_name: firstName.trim() || null,
         last_name: lastName.trim() || null,
-        username: username.trim() || null,
+        username: username || null,
         date_of_birth: dob || null,
         gender: gender || null,
         country: country || null,
@@ -117,6 +111,9 @@ export const CompleteProfilePage = () => {
 
       // Best-effort: reflect the name on the Clerk user too.
       try { await user.update({ firstName: firstName.trim(), lastName: lastName.trim() }); } catch { /* noop */ }
+
+      // 27.8.5 — queue the one-time "invite friends" prompt for after the redirect.
+      try { sessionStorage.setItem(REFERRAL_PROMPT_PENDING_KEY, '1'); } catch { /* ignore */ }
 
       navigate(redirectUrl);
     } catch (e: any) {
@@ -203,10 +200,7 @@ export const CompleteProfilePage = () => {
               </div>
             </div>
 
-            <div>
-              <label className={labelCls}>Username</label>
-              <input className={inputCls} value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" />
-            </div>
+            <p className="text-[11px] text-gray-400">We'll set up a username for you from your name — you can change it anytime in settings.</p>
 
             <button
               type="submit"

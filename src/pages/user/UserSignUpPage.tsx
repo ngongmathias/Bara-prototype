@@ -4,6 +4,8 @@ import { useSignUp, useSignIn } from '@clerk/clerk-react';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { ReferralService } from '@/lib/referralService';
+import { UsernameService } from '@/lib/usernameService';
+import { REFERRAL_PROMPT_PENDING_KEY } from '@/components/InviteFriendsPrompt';
 import { COUNTRIES } from '@/data/countries';
 import { DateOfBirthPicker } from '@/components/DateOfBirthPicker';
 
@@ -62,7 +64,6 @@ export const UserSignUpPage = () => {
   const [dialCode, setDialCode] = useState('+250');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const onCountryChange = (name: string) => {
@@ -86,29 +87,16 @@ export const UserSignUpPage = () => {
     if (!country) return setError('Please select your country.');
     if (!phone.trim()) return setError('Please enter your phone number.');
     if (!email.trim()) return setError('Please enter your email.');
-    if (!username.trim()) return setError('Please choose a username.');
-    if (username.trim().length < 3) return setError('Username must be at least 3 characters.');
     if (password.length < 8) return setError('Password must be at least 8 characters.');
 
     setSubmitting(true);
     try {
-      // Username availability (case-insensitive) against the Supabase profile.
-      const { data: taken } = await supabase
-        .from('clerk_users')
-        .select('id')
-        .ilike('username', username.trim())
-        .maybeSingle();
-      if (taken?.id) {
-        setSubmitting(false);
-        return setError('That username is already taken. Please choose another.');
-      }
-
       await signUp.create({ emailAddress: email.trim(), password });
-      // Best-effort: also set name + username on the Clerk user. Each is wrapped
-      // separately so a field that's disabled on the instance can't block sign-up
-      // (the profile is always saved to Supabase regardless).
+      // Best-effort: also set the name on the Clerk user — wrapped so a field
+      // that's disabled on the instance can't block sign-up (the profile is
+      // always saved to Supabase regardless). Username is auto-derived at
+      // profile-save time (27.8.1) — no username prompt at sign-up.
       try { await signUp.update({ firstName: firstName.trim(), lastName: lastName.trim() }); } catch { /* field may be disabled */ }
-      try { await signUp.update({ username: username.trim() }); } catch { /* field may be disabled */ }
 
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
       setStep('verify');
@@ -121,13 +109,16 @@ export const UserSignUpPage = () => {
 
   const saveProfile = async (clerkUserId: string) => {
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+    // 27.8.1 — propose a username from first + last name (numeric suffix on
+    // collision). The user keeps it unless they change it in profile settings.
+    const username = await UsernameService.proposeUsername(firstName, lastName);
     const row = {
       clerk_user_id: clerkUserId,
       email: email.trim().toLowerCase(),
       full_name: fullName || null,
       first_name: firstName.trim() || null,
       last_name: lastName.trim() || null,
-      username: username.trim() || null,
+      username: username || null,
       date_of_birth: dob || null,
       gender: gender || null,
       country: country || null,
@@ -139,6 +130,8 @@ export const UserSignUpPage = () => {
     if (insertErr) {
       await supabase.from('clerk_users').update(row).eq('clerk_user_id', clerkUserId);
     }
+    // 27.8.5 — queue the one-time "invite friends" prompt for after the redirect.
+    try { sessionStorage.setItem(REFERRAL_PROMPT_PENDING_KEY, '1'); } catch { /* ignore */ }
   };
 
   const handleVerify = async (e: React.FormEvent) => {
@@ -261,15 +254,10 @@ export const UserSignUpPage = () => {
                 <input type="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelCls}>Username</label>
-                  <input className={inputCls} value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" />
-                </div>
-                <div>
-                  <label className={labelCls}>Password</label>
-                  <input type="password" className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" placeholder="At least 8 characters" />
-                </div>
+              <div>
+                <label className={labelCls}>Password</label>
+                <input type="password" className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" placeholder="At least 8 characters" />
+                <p className="text-[11px] text-gray-400 mt-1">We'll set up a username for you from your name — you can change it anytime in settings.</p>
               </div>
 
               {/* Clerk bot-protection mount target (used by some instances) */}

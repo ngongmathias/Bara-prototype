@@ -104,6 +104,10 @@ import ContactMessagesPage from "./pages/admin/ContactMessagesPage";
 
 import AdminGamification from "./pages/admin/AdminGamification";
 
+import AdminVerifications from "./pages/admin/AdminVerifications";
+
+import AdminPackages from "./pages/admin/AdminPackages";
+
 import AdminRevenue from "./pages/admin/AdminRevenue";
 
 import { AdminBannerAds } from "./pages/admin/AdminBannerAds";
@@ -330,9 +334,19 @@ import { OrganizerAnalyticsPage } from "./pages/users/OrganizerAnalyticsPage";
 
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 
+import ContentTermsPage from "./pages/ContentTermsPage";
+
+import CoinsAndXpPage from "./pages/CoinsAndXpPage";
+
+import VerifyAccountPage from "./pages/VerifyAccountPage";
+
+import BusinessPackagesPage from "./pages/BusinessPackagesPage";
+
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 
 import { CookieConsent } from "./components/CookieConsent";
+
+import { InviteFriendsPrompt } from "./components/InviteFriendsPrompt";
 
 import { NotificationsProvider } from "./context/NotificationsContext";
 
@@ -413,6 +427,8 @@ const AppRoutes = () => {
       <ScrollToTop />
 
       <CookieConsent />
+
+      <InviteFriendsPrompt />
 
 
 
@@ -784,6 +800,7 @@ const AppRoutes = () => {
         <Route path="/claim-listing" element={<ClaimListingPage />} />
 
         <Route path="/terms" element={<TermsOfServicePage />} />
+        <Route path="/content-terms" element={<ContentTermsPage />} />
 
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
 
@@ -806,6 +823,9 @@ const AppRoutes = () => {
         <Route path="/gamification" element={<GamificationPage />} />
 
         <Route path="/rewards" element={<RewardsHowItWorksPage />} />
+        <Route path="/coins-and-xp" element={<CoinsAndXpPage />} />
+        <Route path="/verify-account" element={<VerifyAccountPage />} />
+        <Route path="/packages" element={<BusinessPackagesPage />} />
 
         <Route path="/business-premium" element={<BusinessPremiumPage />} />
 
@@ -880,6 +900,10 @@ const AppRoutes = () => {
           <Route path="settings" element={<AdminAuthGuard><AdminSettings /></AdminAuthGuard>} />
 
           <Route path="gamification" element={<AdminAuthGuard><AdminGamification /></AdminAuthGuard>} />
+
+          <Route path="verifications" element={<AdminAuthGuard><AdminVerifications /></AdminAuthGuard>} />
+
+          <Route path="packages" element={<AdminAuthGuard><AdminPackages /></AdminAuthGuard>} />
 
           <Route path="revenue" element={<AdminAuthGuard><AdminRevenue /></AdminAuthGuard>} />
 

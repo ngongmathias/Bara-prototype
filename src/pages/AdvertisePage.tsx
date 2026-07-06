@@ -196,6 +196,13 @@ const AdvertisePage = () => {
                 <p className="text-xs text-gray-500 mt-1">Compare Free, Pro & Elite tiers</p>
               </Card>
             </Link>
+            <Link to="/packages" className="group">
+              <Card className="border-none shadow-sm hover:shadow-md transition-shadow rounded-2xl p-6 text-center">
+                <Zap className="mx-auto mb-3 text-gray-900" size={28} />
+                <h4 className="font-bold text-sm">Business Packages</h4>
+                <p className="text-xs text-gray-500 mt-1">Ad quotas, featured placement & storefront promotion</p>
+              </Card>
+            </Link>
             <Link to="/partners" className="group">
               <Card className="border-none shadow-sm hover:shadow-md transition-shadow rounded-2xl p-6 text-center">
                 <Globe className="mx-auto mb-3 text-green-600" size={28} />

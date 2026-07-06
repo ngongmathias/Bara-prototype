@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
 import { Upload, Store, ArrowLeft, Eye } from 'lucide-react';
+import { VerifyNudge } from '@/components/VerifyNudge';
 import {
   Select,
   SelectContent,
@@ -199,6 +200,11 @@ export const StorefrontEditor = () => {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to My Ads
         </Button>
+
+        {/* Verification nudge (27.8.2) — storefront creation is a strategic stage */}
+        <div className="mb-6">
+          <VerifyNudge accountType="business" context="You're setting up a storefront." />
+        </div>
 
         <div className="flex items-center justify-between mb-6">
           <div>

@@ -20,6 +20,7 @@ import {
     RotateCcw,
     SlidersHorizontal,
     Save,
+    BookOpen,
 } from 'lucide-react';
 import {
     Tooltip,
@@ -522,7 +523,7 @@ const AdminGamification = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {['XP rewards', 'Coin rewards', 'Coin costs', 'Limits', 'Economy', 'Perks'].map((group) => (
+                    {['XP rewards', 'Coin rewards', 'Coin costs', 'Leaderboard prizes', 'Limits', 'Economy', 'Perks'].map((group) => (
                         <div key={group}>
                             <div className="text-[11px] uppercase font-black text-gray-400 tracking-wider mb-2">{group}</div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -748,6 +749,84 @@ const AdminGamification = () => {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* 27.8.6 — How the economy works (admin explainer) */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-lg font-black font-comfortaa flex items-center gap-2">
+                        <BookOpen size={18} /> How the economy works
+                    </CardTitle>
+                    <CardDescription>
+                        The whole system in plain language — what feeds coins in, what takes them out, and where each lever is tuned.
+                        Every amount below is a key in the Economy Settings panel above; change it there and the app follows within minutes.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-5 text-sm text-gray-700 leading-relaxed">
+                    <div>
+                        <div className="font-black text-gray-900 mb-1">The two currencies</div>
+                        <p>
+                            <span className="font-bold">XP</span> is status: it only goes up, it sets a user's Level, and Levels unlock
+                            Prestige tiers (Explorer → Bronze → Silver → Gold → Diamond) with perks like free themes, double daily spins,
+                            a coin bonus (<span className="font-mono text-xs">perk.gold_coin_bonus_pct</span>) and monthly ad-free weeks.
+                            <span className="font-bold"> Bara Coins</span> are spendable: earned and burned. Coins have no cash value and
+                            can't be withdrawn — <span className="font-mono text-xs">economy.coins_per_usd</span> is only a pricing
+                            yardstick for deciding what perks should cost.
+                        </p>
+                    </div>
+                    <div>
+                        <div className="font-black text-gray-900 mb-1">Faucets (where coins come from)</div>
+                        <p>
+                            New users start with <span className="font-mono text-xs">coins.starting_balance</span>. After that: level-ups
+                            (<span className="font-mono text-xs">coins.levelup_per_level</span> × new level), daily &amp; weekly mission
+                            rewards (per-mission config in the Missions table), achievements, the daily spin, blog publishing
+                            (<span className="font-mono text-xs">coins.blog_published</span>), referrals (both sides paid on activation,
+                            inside the <span className="font-mono text-xs">referral_activate</span> RPC, plus milestone bonuses), and weekly
+                            leaderboard prizes (<span className="font-mono text-xs">leaderboard.rank1_coins</span> …{' '}
+                            <span className="font-mono text-xs">leaderboard.rank4to10_coins</span>, paid once per completed week).
+                        </p>
+                    </div>
+                    <div>
+                        <div className="font-black text-gray-900 mb-1">Sinks (where coins go)</div>
+                        <p>
+                            Ad-free browsing (<span className="font-mono text-xs">cost.ad_free_24h</span>), marketplace ad boosts
+                            (<span className="font-mono text-xs">cost.listing_boost</span>), track boosts
+                            (<span className="font-mono text-xs">cost.track_boost</span>), and Streak Shields
+                            (<span className="font-mono text-xs">cost.streak_shield</span> — forgives one missed day so the streak
+                            survives). Coin-barter marketplace purchases are a <span className="font-bold">transfer</span>, not a sink:
+                            the buyer's coins move to the seller, so total circulation is unchanged.
+                        </p>
+                    </div>
+                    <div>
+                        <div className="font-black text-gray-900 mb-1">Streaks &amp; multipliers</div>
+                        <p>
+                            Opening the app on consecutive days builds a streak: 3 days = 1.2× XP, 7 days = 1.5×, 30 days = 2×.
+                            Streaks only multiply XP (status), never coins — so they can't inflate the coin supply.
+                        </p>
+                    </div>
+                    <div>
+                        <div className="font-black text-gray-900 mb-1">Caps &amp; anti-abuse</div>
+                        <p>
+                            Per-day ceilings stop grinding and bot loops: <span className="font-mono text-xs">limit.daily_listen_xp_cap</span>{' '}
+                            (songs per day that earn XP), <span className="font-mono text-xs">limit.daily_xp_cap</span> and{' '}
+                            <span className="font-mono text-xs">limit.daily_coin_gain_cap</span> (hard daily earn ceilings, enforced inside
+                            the server RPCs). Watch the "Top earners (24h)" panel above for anomalies.
+                        </p>
+                    </div>
+                    <div>
+                        <div className="font-black text-gray-900 mb-1">Why nothing here can be faked</div>
+                        <p>
+                            Every write goes through SECURITY DEFINER RPCs (<span className="font-mono text-xs">economy_add_coins</span>,{' '}
+                            <span className="font-mono text-xs">economy_spend_coins</span>, <span className="font-mono text-xs">economy_transfer_coins</span>, …)
+                            that enforce caps and log to <span className="font-mono text-xs">gamification_history</span>. The client can only
+                            read balances, never write them. One-off grants for a specific user are in User Controls above — they're logged too.
+                        </p>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                        Users see the same story in plain language at <span className="font-mono">/coins-and-xp</span> — that page reads the
+                        live setting values, so tuning here updates it automatically.
+                    </p>
+                </CardContent>
+            </Card>
         </div>
     );
 };

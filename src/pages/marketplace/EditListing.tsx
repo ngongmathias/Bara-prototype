@@ -44,6 +44,8 @@ export const EditListing = () => {
     seller_whatsapp: '',
     seller_type: 'individual',
     location_details: '',
+    accepts_coins: false,
+    coin_price: '',
   });
 
   useEffect(() => {
@@ -90,6 +92,8 @@ export const EditListing = () => {
         seller_whatsapp: listingData.seller_whatsapp || '',
         seller_type: listingData.seller_type,
         location_details: listingData.location_details || '',
+        accepts_coins: !!listingData.accepts_coins,
+        coin_price: listingData.coin_price?.toString() || '',
       });
 
       // Fetch categories
@@ -147,6 +151,8 @@ export const EditListing = () => {
           seller_whatsapp: formData.seller_whatsapp,
           seller_type: formData.seller_type,
           location_details: formData.location_details,
+          accepts_coins: formData.accepts_coins && parseInt(formData.coin_price) > 0,
+          coin_price: formData.accepts_coins && parseInt(formData.coin_price) > 0 ? parseInt(formData.coin_price) : null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', listingId);
@@ -311,6 +317,40 @@ export const EditListing = () => {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            {/* Accept BARA Coins (27.8.3 — coins-as-barter, merchant opt-in) */}
+            <div className="border border-gray-200 rounded-lg p-4">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.accepts_coins}
+                  onChange={(e) => setFormData({ ...formData, accepts_coins: e.target.checked })}
+                  className="mt-1 h-4 w-4 flex-shrink-0 rounded border-gray-400 accent-black"
+                />
+                <div>
+                  <span className="font-bold text-gray-900 text-sm">Accept BARA Coins</span>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    Let buyers pay with their BARA Coins instead of cash — you receive the coins.
+                    You set the coin amount; coins have no cash value and can't be withdrawn.
+                  </p>
+                </div>
+              </label>
+              {formData.accepts_coins && (
+                <div className="mt-4 max-w-xs">
+                  <label className="block text-sm font-medium text-gray-700 mb-2 font-roboto">
+                    Price in coins *
+                  </label>
+                  <Input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={formData.coin_price}
+                    onChange={(e) => setFormData({ ...formData, coin_price: e.target.value })}
+                    placeholder="e.g. 500"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Contact Info */}

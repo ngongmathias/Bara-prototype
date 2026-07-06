@@ -26,6 +26,8 @@ import {
   Newspaper,
   LayoutGrid,
   Shield,
+  UserPlus,
+  Zap,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -327,6 +329,17 @@ export const Header = () => {
                     </button>
                     <p className="text-[10px] text-gray-400 mt-1">Forgives one missed day so your streak survives.</p>
                   </div>
+                  {/* Invite friends (27.8.5) */}
+                  <div className="px-4 py-2 border-b">
+                    <button
+                      onClick={() => navigate('/invite')}
+                      className="w-full flex items-center justify-between gap-2 text-xs font-bold text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg px-3 py-2 transition-colors"
+                    >
+                      <span className="flex items-center gap-1.5"><UserPlus className="w-3.5 h-3.5" /> Invite friends</span>
+                      <span className="text-gray-600">Earn coins</span>
+                    </button>
+                    <p className="text-[10px] text-gray-400 mt-1">You both earn coins when a friend joins and gets active.</p>
+                  </div>
                   {/* Actions */}
                   <DropdownMenuItem onClick={() => navigate('/gamification')}>
                     <Trophy className="w-4 h-4 mr-2" /> Missions & Achievements
@@ -337,6 +350,9 @@ export const Header = () => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/store')}>
                     <Coins className="w-4 h-4 mr-2" /> Coin Store
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/coins-and-xp')}>
+                    <Zap className="w-4 h-4 mr-2" /> How coins &amp; XP work
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

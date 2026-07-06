@@ -46,6 +46,7 @@ export default function UploadSongPage() {
     const [allArtists, setAllArtists] = useState<{ id: string; name: string }[]>([]);
 
     const [price, setPrice] = useState<string>('');
+    const [rightsAccepted, setRightsAccepted] = useState(false);
     const [audioFile, setAudioFile] = useState<File | null>(null);
     const [coverFile, setCoverFile] = useState<File | null>(null);
     const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -114,6 +115,11 @@ export default function UploadSongPage() {
         e.preventDefault();
         if (!user?.id || !audioFile || !title.trim()) {
             toast({ title: 'Missing fields', description: 'Please fill in the title and select an audio file.', variant: 'destructive' });
+            return;
+        }
+        // 27.8.8 — rights declaration is mandatory before anything uploads.
+        if (!rightsAccepted) {
+            toast({ title: 'Rights confirmation required', description: 'Please confirm you own the rights to this content before uploading.', variant: 'destructive' });
             return;
         }
 
@@ -195,6 +201,7 @@ export default function UploadSongPage() {
                     description: description.trim() || null,
                     producer: producer.trim() || null,
                     songwriter: songwriter.trim() || null,
+                    rights_accepted_at: new Date().toISOString(),
                 })
                 .select('id')
                 .single();
@@ -435,6 +442,30 @@ export default function UploadSongPage() {
                         </div>
                     )}
 
+                    {/* Rights declaration (27.8.8) */}
+                    <div className="space-y-3 border border-gray-200 rounded-xl p-4 bg-gray-50">
+                        <label className="flex items-start gap-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={rightsAccepted}
+                                onChange={(e) => setRightsAccepted(e.target.checked)}
+                                className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-gray-400 accent-black"
+                            />
+                            <span className="text-sm text-gray-700 leading-relaxed">
+                                I confirm I own all rights to this content or am licensed to distribute it,
+                                and I accept the{' '}
+                                <a href="/content-terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-gray-900 underline">
+                                    BARA Afrika Content Terms
+                                </a>. *
+                            </span>
+                        </label>
+                        <p className="text-[11px] text-gray-500 leading-relaxed">
+                            By uploading you warrant the content is yours or licensed to you, grant BARA Afrika a
+                            license to host and stream it, and accept liability for infringement. Rights holders can
+                            request takedowns via hello@baraafrika.com.
+                        </p>
+                    </div>
+
                     {/* Upload Progress */}
                     {uploading && (
                         <div className="space-y-2">
@@ -454,7 +485,7 @@ export default function UploadSongPage() {
                     {/* Submit */}
                     <Button
                         type="submit"
-                        disabled={uploading || !audioFile || !title.trim()}
+                        disabled={uploading || !audioFile || !title.trim() || !rightsAccepted}
                         className="w-full h-14 bg-gray-900 text-white hover:bg-black font-black text-lg rounded-xl disabled:opacity-50"
                     >
                         {uploading ? (

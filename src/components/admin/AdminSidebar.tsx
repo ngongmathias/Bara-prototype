@@ -468,6 +468,30 @@ const adminMenuItems = [
 
   {
 
+    title: "Verifications",
+
+    icon: Shield,
+
+    path: "/admin/verifications",
+
+    description: "Business & artist verification queue"
+
+  },
+
+  {
+
+    title: "Business Packages",
+
+    icon: BarChart3,
+
+    path: "/admin/packages",
+
+    description: "Paid packages & subscription requests"
+
+  },
+
+  {
+
     title: "Revenue Dashboard",
 
     icon: BarChart3,

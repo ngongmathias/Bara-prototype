@@ -1216,6 +1216,19 @@ economy settings live + Trust Rank columns dropped).
   once (idempotent history check). `/invite` shows the real code, live
   invited/activated counts + milestone progress (converted to monochrome).
 
+- [ ] **27.2.3 TODO: Fix admin economy settings write rejection** (test 4, Jul 6
+  gamification testing session) — in the AdminGamification Economy Settings panel,
+  changing `xp.song_listen` 10 → 99 + Save failed with: *"Writes are admin-gated
+  server-side. Ensure your account is in admin_users and that migrations
+  …drop_trust_rank and …server_hardening are applied."* Value stayed 10. All other
+  economy reads/writes in the session worked (missions, spin, shield purchase), so
+  the hardening gate itself is live — but it's blocking a legitimate admin. Verify
+  Mathias's account row exists in `admin_users` (correct Clerk user ID mapping),
+  and that `economy_update_setting`'s admin check matches how the client
+  authenticates; confirm both `20260705_…drop_trust_rank.sql` and
+  `20260705_gamification_server_hardening.sql` are applied to prod. Retest the
+  save + confirm listen-XP reflects the new value.
+
 ### 27.3 Tier 2 — depth & retention ("make it a habit")
 - [x] **27.3.1 Weekly missions** — DONE Jul 6, 2026 (`20260706_weekly_missions.sql`).
   Seeded 3 `type='weekly'` missions (`weekly_listen` 25 songs, `weekly_market_post`
@@ -1307,6 +1320,83 @@ economy settings live + Trust Rank columns dropped).
 - ⬆️ Clerk **production keys** + **@baraafrika.com email domain** (launch risk every week).
 - ⬆️ Human cross-device pass (23.1) — several fixes are "best-guess, needs retest"
   (e.g. Chrome sign-up popup).
+
+### 27.8 Team decisions — Mathias × Marlon meeting (Jul 6, 2026)
+
+- [x] **27.8.1 Auto-proposed usernames** — sign-up no longer asks the user to invent
+  a username; the system proposes one derived from first + last name (numeric suffix
+  on collision), which is **retained unless the user changes it** in profile settings.
+  Usernames are **globally unique** (case-insensitive — Clerk already treats them so;
+  enforce on the edit path too). **Supersedes/reconciles 25.1.1.a** ("drop username
+  entirely"): no username field at sign-up, auto-derive, editable later.
+  — DONE Jul 6, 2026 (`usernameService.ts` derive+suffix, username field removed from
+  UserSignUpPage + CompleteProfilePage, editable Username card w/ availability check in
+  UserSettingsPage, `20260708_username_unique_index.sql` dedupe + unique lower(username)
+  index; ⚠️ Marlon must still turn the Username field OFF in the Clerk Dashboard)
+- [x] **27.8.2 Account verification for businesses & artists** — verification =
+  **a form + required documents** (exact doc list per account type TBD with team).
+  Build: submission form, secure doc storage bucket, admin review queue (extends the
+  Phase 11 "admin verification console" backlog item), badge granted on approval.
+  **Prompt users to verify at strategic stages** — e.g. first marketplace listing,
+  first song upload, storefront creation.
+  — DONE Jul 6, 2026 (`20260708_verification_requests.sql`: table + RPC-only access +
+  private `verification-docs` bucket; `/verify-account` form, `/admin/verifications`
+  review queue w/ signed-URL doc viewing, approval flips artists.is_verified /
+  marketplace_partners.verification_level; VerifyNudge banner on MyAds, ArtistDashboard,
+  StorefrontEditor with 7-day dismiss; doc list in `verificationService.ts` REQUIRED_DOCS)
+- [x] **27.8.3 Coins-as-barter option on listings (merchant opt-in)** — a seller may
+  offer a product **for coins instead of, or alongside, cash** ("pay X cash OR Y
+  coins"), per product, seller sets the coin amount — e.g. as a promotion.
+  **Explicitly NOT a currency**: no cash-out, no implied exchange rate, no crypto —
+  same mental model as spending in-game coins on an in-game house. Needs: listing
+  fields (`accepts_coins`, `coin_price`), a coin-checkout path through
+  `economy_spend_coins`. **Decided Jul 6 (Mathias): the seller RECEIVES the buyer's
+  coins** — buyer→seller transfer, coins stay in circulation, zero real-money surface.
+  — DONE Jul 6, 2026 (`20260708_coins_barter.sql`: accepts_coins/coin_price columns,
+  coin_transfers idempotency ledger, `economy_transfer_coins` RPC — atomic, rejects
+  self-transfer/insufficient, seller daily-cap guarded, both sides logged + notified;
+  "Accept BARA Coins" toggle in PostListing + EditListing, coin price + "Buy with Coins"
+  confirm dialog on ListingDetailPage, paid purchases recorded as accepted offers)
+- [x] **27.8.4 Paid ad/service packages for businesses (real money)** — tiered
+  packages businesses pay for: ad-posting quotas, product advertising, placement in
+  the visible/featured areas of the site, storefront promotion — composition can
+  vary by business type. Ties into 25.7 (monetization) + 27.4.2 (featured slots);
+  **depends on Phase 15 payments**.
+  — DONE (scaffold) Jul 6, 2026 (`20260708_business_packages.sql`: packages +
+  subscriptions tables, gated upsert/subscribe/status RPCs, 3 seed packages; public
+  `/packages` pricing page → pending_payment CTA + admin notification; `/admin/packages`
+  CRUD + manual-fulfillment queue. Charging itself waits for Phase 15; feature hooks
+  live in `features` jsonb only — no enforcement yet)
+- [x] **27.8.5 Surface referrals in strategic places** — the program is live (27.2.2)
+  but only reachable at `/invite`. Add entry points: **post-registration prompt**
+  (after `/auth/finish`), **user dashboard card**, **Header coins dropdown link**,
+  and a link from `/rewards`.
+  — DONE Jul 6, 2026 (InviteFriendsPrompt one-time post-registration modal, ReferralCard
+  on the dashboard home w/ code + counts + copy link, "Invite friends → Earn coins" row
+  in the Header coins dropdown, referral section on /rewards)
+- [x] **27.8.6 Coins & XP explainer pages** — (a) user-facing "How coins & XP work"
+  summary with **all earn/spend options** listed; (b) admin info page documenting
+  the whole economy system so any admin can understand it (the Economy Settings
+  panel already exposes every tunable — this adds the explanation layer).
+  — DONE Jul 6, 2026 (`/coins-and-xp` renders every earn/spend amount live from
+  gamification_settings — nothing hardcoded — incl. "no cash value" disclaimer; linked
+  from coins dropdown, /gamification and /rewards; "How the economy works" section
+  added to AdminGamification covering faucets/sinks/caps/streaks w/ setting keys)
+- [x] **27.8.7 Coins for leaderboard ranks** — weekly leaderboard top ranks earn
+  coins (amounts per rank admin-tunable via `gamification_settings`). Extends
+  27.3.2, where last week's top 10 currently get only the cosmetic Champ crown.
+  — DONE Jul 6, 2026 (`20260708_leaderboard_payouts.sql`: leaderboard_payouts ledger +
+  idempotent `economy_leaderboard_payout()` paying via economy_add_coins, lazy-triggered
+  on leaderboard page load + guarded pg_cron Mon 00:10 UTC; tunables
+  leaderboard.rank1/2/3/4to10_coins (200/100/50/20) in Economy Settings; "Weekly prizes"
+  panel on /leaderboard shows live amounts)
+- [x] **27.8.8 Legal language for music uploads** — rights/copyright declaration
+  (checkbox + terms text: "I own or am licensed to distribute this content") on the
+  song upload flow. Ties into 25.8 (CSA/compliance).
+  — DONE Jul 6, 2026 (required rights checkbox blocking submit on UploadSongPage +
+  CreateAlbumPage, new `/content-terms` static page — ownership warranty, hosting
+  license, takedown contact, infringement liability; acceptance stored via
+  `20260708_content_rights_acceptance.sql` rights_accepted_at on songs + albums)
 
 ---
 

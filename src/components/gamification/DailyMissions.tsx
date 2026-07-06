@@ -85,7 +85,7 @@ export const DailyMissions = () => {
                                     <X size={16} />
                                 </button>
                                 <h3 className="text-xl font-black font-comfortaa">Daily Missions</h3>
-                                <div className="flex items-center gap-2 mt-2 text-xs font-bold text-yp-yellow">
+                                <div className="flex items-center gap-2 mt-2 text-xs font-bold text-gray-300">
                                     <Trophy size={14} />
                                     {completedCount}/{missions.length} Completed
                                 </div>
@@ -99,7 +99,7 @@ export const DailyMissions = () => {
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                                 {mission.is_completed ? (
-                                                    <CheckCircle2 className="text-green-500" size={16} />
+                                                    <CheckCircle2 className="text-black" size={16} />
                                                 ) : (
                                                     <Circle className="text-gray-200" size={16} />
                                                 )}
@@ -109,12 +109,12 @@ export const DailyMissions = () => {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 {mission.xp_reward > 0 && (
-                                                    <div className="flex items-center gap-1 text-[8px] font-black text-blue-600 bg-blue-50 px-1 py-0.5 rounded uppercase">
+                                                    <div className="flex items-center gap-1 text-[8px] font-black text-gray-700 bg-gray-100 px-1 py-0.5 rounded uppercase">
                                                         +{mission.xp_reward} XP
                                                     </div>
                                                 )}
                                                 {mission.coin_reward > 0 && (
-                                                    <div className="flex items-center gap-1 text-[8px] font-black text-yellow-600 bg-yellow-50 px-1 py-0.5 rounded uppercase">
+                                                    <div className="flex items-center gap-1 text-[8px] font-black text-black bg-gray-200 px-1 py-0.5 rounded uppercase">
                                                         +{mission.coin_reward} Coins
                                                     </div>
                                                 )}
@@ -132,7 +132,7 @@ export const DailyMissions = () => {
                                         {mission.is_completed && !mission.claimed_at && (
                                             <Button
                                                 size="sm"
-                                                className="w-full bg-yp-yellow hover:bg-yellow-500 text-black font-black text-[10px] h-7 rounded-lg mt-2"
+                                                className="w-full bg-black hover:bg-gray-800 text-white font-black text-[10px] h-7 rounded-lg mt-2"
                                                 onClick={() => handleClaim(mission)}
                                                 disabled={loading}
                                             >
@@ -141,7 +141,7 @@ export const DailyMissions = () => {
                                             </Button>
                                         )}
                                         {mission.claimed_at && (
-                                            <div className="text-center text-[10px] text-green-600 font-bold py-1 bg-green-50 rounded-lg">
+                                            <div className="text-center text-[10px] text-gray-600 font-bold py-1 bg-gray-100 rounded-lg">
                                                 REWARD CLAIMED
                                             </div>
                                         )}
@@ -155,10 +155,10 @@ export const DailyMissions = () => {
 
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-14 h-14 bg-yp-yellow text-black rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform relative group"
+                className="w-14 h-14 bg-black text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform relative group"
             >
                 {claimableCount > 0 && !isOpen && (
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-black text-white text-[10px] font-black rounded-full border-2 border-white flex items-center justify-center animate-bounce">
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-white text-black text-[10px] font-black rounded-full border-2 border-black flex items-center justify-center animate-bounce">
                         {claimableCount}
                     </div>
                 )}

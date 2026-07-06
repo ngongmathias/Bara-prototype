@@ -135,6 +135,10 @@ export const PostListing = () => {
 
     is_premium: false,
 
+    accepts_coins: false,
+
+    coin_price: '',
+
   });
 
 
@@ -655,6 +659,10 @@ export const PostListing = () => {
           attributes: attributes,
 
           is_premium: formData.is_premium,
+
+          accepts_coins: formData.accepts_coins && parseInt(formData.coin_price) > 0,
+
+          coin_price: formData.accepts_coins && parseInt(formData.coin_price) > 0 ? parseInt(formData.coin_price) : null,
 
         })
 
@@ -2561,6 +2569,39 @@ export const PostListing = () => {
               </div>
             );
           })()}
+
+          {/* Accept BARA Coins (27.8.3 — coins-as-barter, merchant opt-in) */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.accepts_coins}
+                onChange={(e) => setFormData({ ...formData, accepts_coins: e.target.checked })}
+                className="mt-1 h-4 w-4 flex-shrink-0 rounded border-gray-400 accent-black"
+              />
+              <div>
+                <span className="font-bold text-gray-900">Accept BARA Coins</span>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  Let buyers pay with their BARA Coins instead of cash — you receive the coins.
+                  You set the coin amount; coins have no cash value and can't be withdrawn.
+                </p>
+              </div>
+            </label>
+            {formData.accepts_coins && (
+              <div className="mt-4 max-w-xs">
+                <Label htmlFor="coin_price">Price in coins *</Label>
+                <Input
+                  id="coin_price"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={formData.coin_price}
+                  onChange={(e) => setFormData({ ...formData, coin_price: e.target.value })}
+                  placeholder="e.g. 500"
+                />
+              </div>
+            )}
+          </div>
 
           {/* Variants — available for all categories */}
           {(() => {

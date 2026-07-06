@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Trophy, Medal, Crown, Flame, Star, Coins, TrendingUp, Users } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { getPrestigeTier } from '@/lib/gamificationService';
+import { getPrestigeTier, GamificationService, DEFAULT_ECONOMY_SETTINGS } from '@/lib/gamificationService';
 import { SEO } from '@/components/SEO';
 
 interface LeaderboardEntry {
@@ -61,13 +61,30 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [userRank, setUserRank] = useState<number | null>(null);
   const [lastWeekTop, setLastWeekTop] = useState<Set<string>>(new Set());
+  const [prizes, setPrizes] = useState<{ rank1: number; rank2: number; rank3: number; rank4to10: number }>({
+    rank1: DEFAULT_ECONOMY_SETTINGS['leaderboard.rank1_coins'].value,
+    rank2: DEFAULT_ECONOMY_SETTINGS['leaderboard.rank2_coins'].value,
+    rank3: DEFAULT_ECONOMY_SETTINGS['leaderboard.rank3_coins'].value,
+    rank4to10: DEFAULT_ECONOMY_SETTINGS['leaderboard.rank4to10_coins'].value,
+  });
 
-  // Last completed week's top 10 — get a cosmetic crown across all views.
+  // Last completed week's top 10 — get a cosmetic crown across all views AND
+  // their coin prizes (27.8.7). The payout RPC is idempotent server-side, so
+  // this lazy fire-and-forget call is the weekly trigger (pg_cron is backup).
   useEffect(() => {
+    GamificationService.runLeaderboardPayout();
     supabase
       .rpc('leaderboard_last_week_top', { p_limit: 10 })
       .then(({ data }) => setLastWeekTop(new Set((data || []).map((r: any) => r.user_id))))
       .catch(() => {});
+    GamificationService.getEconomySettings().then((s) =>
+      setPrizes({
+        rank1: s['leaderboard.rank1_coins'],
+        rank2: s['leaderboard.rank2_coins'],
+        rank3: s['leaderboard.rank3_coins'],
+        rank4to10: s['leaderboard.rank4to10_coins'],
+      })
+    );
   }, []);
 
   useEffect(() => {
@@ -162,6 +179,34 @@ export default function LeaderboardPage() {
             Compete, earn, and climb the ranks. Updated weekly.
           </p>
         </div>
+
+        {/* Weekly prizes (27.8.7) */}
+        <Card className="mb-8 bg-gray-900 text-white border-none">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Crown className="w-5 h-5" />
+              <h2 className="font-black font-comfortaa text-lg">Weekly prizes</h2>
+            </div>
+            <p className="text-sm text-gray-300 mb-4">
+              Every Monday, last week's top 10 XP earners are paid Bara Coins automatically — on top of the Champ crown.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { label: 'Rank 1', coins: prizes.rank1 },
+                { label: 'Rank 2', coins: prizes.rank2 },
+                { label: 'Rank 3', coins: prizes.rank3 },
+                { label: 'Ranks 4–10', coins: prizes.rank4to10 },
+              ].map((p) => (
+                <div key={p.label} className="bg-white/10 rounded-xl p-3 text-center">
+                  <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">{p.label}</div>
+                  <div className="text-xl font-black flex items-center justify-center gap-1">
+                    <Coins className="w-4 h-4" /> {Number(p.coins || 0).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Your Rank */}
         {user && userRank && (

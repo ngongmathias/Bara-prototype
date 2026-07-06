@@ -84,6 +84,8 @@ import { Progress } from '@/components/ui/progress';
 
 import { GamificationService, UserMission } from '@/lib/gamificationService';
 
+import { ReferralCard } from '@/components/ReferralCard';
+
 
 
 export const UserDashboard = () => {
@@ -901,6 +903,12 @@ export const UserDashboardHome = () => {
         </Card>
 
       </div>
+
+
+
+      {/* Referral program (27.8.5) */}
+
+      <ReferralCard />
 
 
 

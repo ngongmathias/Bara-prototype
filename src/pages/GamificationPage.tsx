@@ -135,9 +135,14 @@ const GamificationPage = () => {
             <h1 className="text-3xl font-black font-comfortaa">Rewards</h1>
             <p className="text-gray-500">Earn BARA Coins and XP as you explore. Complete daily missions, unlock achievements.</p>
           </div>
-          <Link to="/rewards" className="flex-shrink-0 text-sm font-bold text-gray-700 hover:text-gray-900 underline whitespace-nowrap mt-1">
-            How rewards work
-          </Link>
+          <div className="flex-shrink-0 flex flex-col items-end gap-1 mt-1">
+            <Link to="/rewards" className="text-sm font-bold text-gray-700 hover:text-gray-900 underline whitespace-nowrap">
+              How rewards work
+            </Link>
+            <Link to="/coins-and-xp" className="text-sm font-bold text-gray-700 hover:text-gray-900 underline whitespace-nowrap">
+              Coins &amp; XP explained
+            </Link>
+          </div>
         </div>
 
         {/* Profile summary */}
