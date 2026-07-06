@@ -1326,11 +1326,15 @@ economy settings live + Trust Rank columns dropped).
 > **Migrations note (Jul 6):** the six 20260708 files referenced in the DONE notes
 > below were combined into ONE file on user request — apply just
 > **`20260708_phase27_8.sql`** (after `20260706_phase27_gamification.sql` and
-> `20260707_anti_abuse.sql`). Its Section 7 also makes EVERY earn/spend amount
-> admin-tunable: referral bonuses + milestones (`referral.*`), daily-spin slice
-> values & odds (`spin.slice1–8_*`), and per-mission / per-achievement rewards
-> (admin-gated `economy_update_mission` / `economy_update_achievement` RPCs,
-> editable in the AdminGamification Missions + Achievement rewards cards).
+> `20260707_anti_abuse.sql`, both already applied ✅). Its Section 7 also makes
+> EVERY earn/spend amount admin-tunable: referral bonuses + milestones
+> (`referral.*`), account-creation bonuses (`coins.starting_balance` +
+> `xp.signup`), streak XP multipliers (`streak.multiplier_3/7/30day`),
+> profile-theme prices (`cost.theme_*`), and per-mission / per-achievement
+> rewards (admin-gated `economy_update_mission` / `economy_update_achievement`
+> RPCs, editable inline in the AdminGamification Missions + Achievement rewards
+> cards). The daily-spin prize table intentionally stays fixed for now (Mathias,
+> Jul 6: "skip the daily spin").
 
 - [x] **27.8.1 Auto-proposed usernames** — sign-up no longer asks the user to invent
   a username; the system proposes one derived from first + last name (numeric suffix

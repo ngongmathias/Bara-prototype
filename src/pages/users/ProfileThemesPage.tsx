@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import { useProfileTheme, PROFILE_THEMES } from '@/hooks/useProfileTheme';
+import { useProfileTheme } from '@/hooks/useProfileTheme';
 import { useGamification } from '@/hooks/useGamification';
 import { useAdFree } from '@/hooks/useAdFree';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ export default function ProfileThemesPage() {
     loading: themeLoading,
     purchaseTheme,
     activateTheme,
+    themes,
   } = useProfileTheme();
   const {
     isAdFree,
@@ -60,7 +61,7 @@ export default function ProfileThemesPage() {
   const handleActivate = async (themeId: string) => {
     const success = await activateTheme(themeId);
     if (success) {
-      const theme = PROFILE_THEMES.find((t) => t.id === themeId);
+      const theme = themes.find((t) => t.id === themeId);
       toast({
         title: 'Theme Applied!',
         description: `${theme?.name || 'Theme'} is now your active profile theme.`,
@@ -152,7 +153,7 @@ export default function ProfileThemesPage() {
           Profile Themes
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {PROFILE_THEMES.map((theme) => {
+          {themes.map((theme) => {
             const owned = ownedThemes.includes(theme.id);
             const active = activeThemeId === theme.id;
 

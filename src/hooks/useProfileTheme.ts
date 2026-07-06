@@ -118,15 +118,31 @@ export const PROFILE_THEMES: ProfileTheme[] = [
   },
 ];
 
+// Theme prices are admin-tunable (Economy Settings → Theme prices, keys
+// cost.theme_<id>); the hardcoded cost is only the fallback default.
+const themesWithLiveCosts = (settings: Record<string, number>): ProfileTheme[] =>
+  PROFILE_THEMES.map((t) => {
+    if (t.locked || t.cost === 0) return t;
+    const live = Number(settings[`cost.theme_${t.id}`]);
+    return Number.isFinite(live) && live >= 0 ? { ...t, cost: live } : t;
+  });
+
 export function useProfileTheme() {
   const { user } = useUser();
   const [activeThemeId, setActiveThemeId] = useState('default');
   const [ownedThemes, setOwnedThemes] = useState<string[]>(['default']);
   const [loading, setLoading] = useState(false);
+  const [themes, setThemes] = useState<ProfileTheme[]>(PROFILE_THEMES);
 
   useEffect(() => {
     if (user) fetchUserThemes();
   }, [user]);
+
+  useEffect(() => {
+    GamificationService.getEconomySettings()
+      .then((s) => setThemes(themesWithLiveCosts(s)))
+      .catch(() => {});
+  }, []);
 
   const fetchUserThemes = async () => {
     if (!user) return;
@@ -147,7 +163,7 @@ export function useProfileTheme() {
   const purchaseTheme = async (themeId: string): Promise<{ success: boolean; message: string }> => {
     if (!user) return { success: false, message: 'Please sign in.' };
 
-    const theme = PROFILE_THEMES.find((t) => t.id === themeId);
+    const theme = themes.find((t) => t.id === themeId);
     if (!theme) return { success: false, message: 'Theme not found.' };
 
     if (ownedThemes.includes(themeId)) {
@@ -168,15 +184,24 @@ export function useProfileTheme() {
 
     setLoading(true);
 
-    if (theme.cost > 0) {
+    // Re-read the live price at purchase time (admin may have just tuned it).
+    let liveCost = theme.cost;
+    if (!theme.locked && theme.cost > 0) {
+      try {
+        const fresh = await GamificationService.getSetting(`cost.theme_${theme.id}`);
+        if (Number.isFinite(fresh) && fresh >= 0) liveCost = fresh;
+      } catch { /* fall back to the listed price */ }
+    }
+
+    if (liveCost > 0) {
       const spent = await GamificationService.spendCoins(
         user.id,
-        theme.cost,
+        liveCost,
         `Profile theme: ${theme.name}`
       );
       if (!spent) {
         setLoading(false);
-        return { success: false, message: `Not enough coins. You need ${theme.cost} Bara Coins.` };
+        return { success: false, message: `Not enough coins. You need ${liveCost} Bara Coins.` };
       }
     }
 
@@ -187,8 +212,8 @@ export function useProfileTheme() {
     });
 
     if (error) {
-      if (theme.cost > 0) {
-        await GamificationService.addCoins(user.id, theme.cost, 'Theme refund (save failed)');
+      if (liveCost > 0) {
+        await GamificationService.addCoins(user.id, liveCost, 'Theme refund (save failed)');
       }
       setLoading(false);
       return { success: false, message: 'Failed to purchase. Coins refunded.' };
@@ -221,7 +246,7 @@ export function useProfileTheme() {
     return true;
   };
 
-  const activeTheme = PROFILE_THEMES.find((t) => t.id === activeThemeId) || PROFILE_THEMES[0];
+  const activeTheme = themes.find((t) => t.id === activeThemeId) || themes[0];
 
   return {
     activeTheme,
@@ -230,6 +255,6 @@ export function useProfileTheme() {
     loading,
     purchaseTheme,
     activateTheme,
-    themes: PROFILE_THEMES,
+    themes,
   };
 }

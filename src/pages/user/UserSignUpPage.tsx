@@ -132,6 +132,13 @@ export const UserSignUpPage = () => {
     }
     // 27.8.5 — queue the one-time "invite friends" prompt for after the redirect.
     try { sessionStorage.setItem(REFERRAL_PROMPT_PENDING_KEY, '1'); } catch { /* ignore */ }
+
+    // Account sign-up XP bonus (admin-tunable, xp.signup — 0 disables it).
+    try {
+      const { GamificationService } = await import('@/lib/gamificationService');
+      const signupXp = await GamificationService.getSetting('xp.signup');
+      if (signupXp > 0) await GamificationService.addXP(clerkUserId, signupXp, 'Account created');
+    } catch { /* non-critical */ }
   };
 
   const handleVerify = async (e: React.FormEvent) => {

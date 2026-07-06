@@ -621,7 +621,7 @@ const AdminGamification = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {['XP rewards', 'Coin rewards', 'Coin costs', 'Leaderboard prizes', 'Referrals', 'Daily spin', 'Limits', 'Economy', 'Perks'].map((group) => (
+                    {['XP rewards', 'Coin rewards', 'Coin costs', 'Theme prices', 'Leaderboard prizes', 'Referrals', 'Streaks', 'Limits', 'Economy', 'Perks'].map((group) => (
                         <div key={group}>
                             <div className="text-[11px] uppercase font-black text-gray-400 tracking-wider mb-2">{group}</div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -971,19 +971,20 @@ const AdminGamification = () => {
                         </p>
                     </div>
                     <div>
-                        <div className="font-black text-gray-900 mb-1">Faucets (where coins come from) — all tunable on this page</div>
+                        <div className="font-black text-gray-900 mb-1">Faucets (where coins &amp; XP come from) — all tunable on this page</div>
                         <p>
-                            New users start with <span className="font-mono text-xs">coins.starting_balance</span>. After that: level-ups
+                            Creating an account grants <span className="font-mono text-xs">coins.starting_balance</span> coins and{' '}
+                            <span className="font-mono text-xs">xp.signup</span> XP. After that: every XP action is an{' '}
+                            <span className="font-mono text-xs">xp.*</span> key above, level-ups pay
                             (<span className="font-mono text-xs">coins.levelup_per_level</span> × new level), daily &amp; weekly mission
-                            rewards (edit each mission's XP/coins/goal in the Missions card), achievement bonuses (edit each badge in the
-                            Achievement rewards card), the daily spin (slice amounts &amp; odds under{' '}
-                            <span className="font-mono text-xs">spin.slice1–8</span>), blog publishing
-                            (<span className="font-mono text-xs">coins.blog_published</span>), referrals
+                            rewards are edited per mission in the Missions card, achievement bonuses (incl. Ambassador) per badge in the
+                            Achievement rewards card, blog publishing pays
+                            (<span className="font-mono text-xs">coins.blog_published</span>), referrals pay
                             (<span className="font-mono text-xs">referral.friend_coins</span> / <span className="font-mono text-xs">referral.referrer_coins</span>{' '}
                             plus the three <span className="font-mono text-xs">referral.milestone*_coins</span> bonuses), and weekly
                             leaderboard prizes (<span className="font-mono text-xs">leaderboard.rank1_coins</span> …{' '}
                             <span className="font-mono text-xs">leaderboard.rank4to10_coins</span>, paid once per completed week).
-                            There is no coin faucet that isn't controlled from this page.
+                            The daily spin's prize table (5–100 coins/XP) is the one faucet that stays fixed for now — by team decision.
                         </p>
                     </div>
                     <div>
@@ -991,9 +992,10 @@ const AdminGamification = () => {
                         <p>
                             Ad-free browsing (<span className="font-mono text-xs">cost.ad_free_24h</span>), marketplace ad boosts
                             (<span className="font-mono text-xs">cost.listing_boost</span>), track boosts
-                            (<span className="font-mono text-xs">cost.track_boost</span>), and Streak Shields
+                            (<span className="font-mono text-xs">cost.track_boost</span>), Streak Shields
                             (<span className="font-mono text-xs">cost.streak_shield</span> — forgives one missed day so the streak
-                            survives) — every sink price is a <span className="font-mono text-xs">cost.*</span> key above.
+                            survives), and profile themes (<span className="font-mono text-xs">cost.theme_*</span>, one per theme) —
+                            every sink price is a <span className="font-mono text-xs">cost.*</span> key above.
                             Coin-barter marketplace purchases are a <span className="font-bold">transfer</span>, not a sink:
                             the buyer's coins move to the seller (the seller sets that price per ad), so total circulation is unchanged.
                         </p>
@@ -1001,7 +1003,8 @@ const AdminGamification = () => {
                     <div>
                         <div className="font-black text-gray-900 mb-1">Streaks &amp; multipliers</div>
                         <p>
-                            Opening the app on consecutive days builds a streak: 3 days = 1.2× XP, 7 days = 1.5×, 30 days = 2×.
+                            Opening the app on consecutive days builds a streak that multiplies XP at the 3 / 7 / 30-day marks
+                            (<span className="font-mono text-xs">streak.multiplier_3day/7day/30day</span> above).
                             Streaks only multiply XP (status), never coins — so they can't inflate the coin supply.
                         </p>
                     </div>

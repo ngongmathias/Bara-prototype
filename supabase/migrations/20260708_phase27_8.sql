@@ -809,9 +809,11 @@ WHERE NOT EXISTS (SELECT 1 FROM public.business_packages);
 -- Closes the last hardcoded amounts in the economy so the AdminGamification
 -- Economy Settings panel controls EVERY faucet and sink:
 --   7a. referral bonuses + milestone bonuses  -> gamification_settings keys
---   7b. daily spin slice values + odds        -> gamification_settings keys
+--   7b. sign-up XP bonus, streak XP multipliers, profile-theme prices
+--       -> gamification_settings keys (read client-side)
 --   7c. mission & achievement rewards         -> admin-gated update RPCs
 --       (claim RPCs already read rewards from the tables, so edits are live)
+-- The daily spin's prize table intentionally stays fixed for now (team call).
 -- ============================================================
 
 -- ------------------------------------------------------------
@@ -909,100 +911,26 @@ $$;
 GRANT EXECUTE ON FUNCTION public.referral_activate(TEXT) TO anon, authenticated;
 
 -- ------------------------------------------------------------
--- 7b. Daily spin - the 8 slice values and their odds (weights) become
---     settings. Slice types stay fixed (odd slices = coins, even = XP) so
---     the client wheel and the server always agree on the layout.
+-- 7b. Sign-up XP bonus, streak XP multipliers, and profile-theme prices.
+--     These are read client-side (gamificationService / useProfileTheme):
+--     - xp.signup: XP granted right after the profile row is created
+--       (0 = disabled, the historical behavior)
+--     - streak.multiplier_*: the XP multiplier reached at 3/7/30-day streaks
+--     - cost.theme_*: coin price of each purchasable profile theme
 -- ------------------------------------------------------------
 INSERT INTO public.gamification_settings (key, value) VALUES
-    ('spin.slice1_value',   5), ('spin.slice1_prob', 30),
-    ('spin.slice2_value',  10), ('spin.slice2_prob', 25),
-    ('spin.slice3_value',  10), ('spin.slice3_prob', 20),
-    ('spin.slice4_value',  25), ('spin.slice4_prob', 12),
-    ('spin.slice5_value',  25), ('spin.slice5_prob',  8),
-    ('spin.slice6_value',  50), ('spin.slice6_prob',  3),
-    ('spin.slice7_value',  50), ('spin.slice7_prob',  1.5),
-    ('spin.slice8_value', 100), ('spin.slice8_prob',  0.5)
+    ('xp.signup',                 0),
+    ('streak.multiplier_3day',  1.2),
+    ('streak.multiplier_7day',  1.5),
+    ('streak.multiplier_30day',   2),
+    ('cost.theme_sunset',        30),
+    ('cost.theme_ocean',         30),
+    ('cost.theme_forest',        30),
+    ('cost.theme_midnight',      50),
+    ('cost.theme_gold',          75),
+    ('cost.theme_neon',          75),
+    ('cost.theme_african',      100)
 ON CONFLICT (key) DO NOTHING;
-
-CREATE OR REPLACE FUNCTION public.economy_spin_wheel(p_user_id TEXT)
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-    v_defaults_val  INTEGER[] := ARRAY[5, 10, 10, 25, 25, 50, 50, 100];
-    v_defaults_prob NUMERIC[] := ARRAY[30, 25, 20, 12, 8, 3, 1.5, 0.5];
-    v_types  TEXT[] := ARRAY['coins','xp','coins','xp','coins','xp','coins','xp'];
-    v_values INTEGER[] := ARRAY[0,0,0,0,0,0,0,0];
-    v_probs  NUMERIC[] := ARRAY[0,0,0,0,0,0,0,0];
-    v_total  NUMERIC := 0;
-    v_cum    NUMERIC := 0;
-    v_rand   NUMERIC;
-    v_idx    INTEGER;
-    i        INTEGER;
-    v_xp     JSONB := NULL;
-    v_level  INTEGER;
-    v_allowed INTEGER;
-    v_today  INTEGER;
-    v_label  TEXT;
-BEGIN
-    PERFORM economy_ensure_profile(p_user_id);
-    SELECT COALESCE(current_level, 1) INTO v_level FROM gamification_profiles WHERE user_id = p_user_id;
-    -- Silver+ (L21+) get 2 spins/day.
-    v_allowed := CASE WHEN v_level >= 21 THEN 2 ELSE 1 END;
-
-    SELECT count(*) INTO v_today
-      FROM gamification_history
-     WHERE user_id = p_user_id
-       AND reason = 'Daily Spin Wheel'
-       AND created_at >= date_trunc('day', now());
-
-    IF v_today >= v_allowed THEN
-        RETURN jsonb_build_object('success', false, 'reason', 'already_spun');
-    END IF;
-
-    -- Slice values + odds are admin-tunable (Economy Settings -> Daily spin).
-    FOR i IN 1 .. 8 LOOP
-        v_values[i] := COALESCE((SELECT value::integer FROM gamification_settings
-                                  WHERE key = 'spin.slice' || i || '_value'), v_defaults_val[i]);
-        v_probs[i]  := GREATEST(COALESCE((SELECT value FROM gamification_settings
-                                  WHERE key = 'spin.slice' || i || '_prob'), v_defaults_prob[i]), 0);
-        v_total := v_total + v_probs[i];
-    END LOOP;
-
-    IF v_total <= 0 THEN
-        v_probs := v_defaults_prob;
-        v_total := 100;
-    END IF;
-
-    v_rand := random() * v_total;
-    v_idx := 8;
-    FOR i IN 1 .. 8 LOOP
-        v_cum := v_cum + v_probs[i];
-        IF v_rand <= v_cum THEN v_idx := i; EXIT; END IF;
-    END LOOP;
-
-    v_label := v_values[v_idx] || CASE WHEN v_types[v_idx] = 'coins' THEN ' Coins' ELSE ' XP' END;
-
-    IF v_types[v_idx] = 'coins' THEN
-        UPDATE gamification_profiles
-           SET bara_coins = COALESCE(bara_coins, 0) + v_values[v_idx], updated_at = now()
-         WHERE user_id = p_user_id;
-        INSERT INTO gamification_history (user_id, type, amount, reason)
-        VALUES (p_user_id, 'coin_gain', v_values[v_idx], 'Daily Spin Wheel');
-    ELSE
-        v_xp := economy_add_xp(p_user_id, v_values[v_idx], 'Daily Spin Wheel');
-    END IF;
-
-    RETURN jsonb_build_object(
-        'success', true, 'index', v_idx - 1, 'label', v_label,
-        'type', v_types[v_idx], 'value', v_values[v_idx], 'xp_result', v_xp
-    );
-END;
-$$;
-
-GRANT EXECUTE ON FUNCTION public.economy_spin_wheel(TEXT) TO anon, authenticated;
 
 -- ------------------------------------------------------------
 -- 7c. Mission & achievement rewards - admin-gated update RPCs. The claim

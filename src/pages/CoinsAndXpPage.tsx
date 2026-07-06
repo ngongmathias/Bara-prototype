@@ -41,10 +41,8 @@ export default function CoinsAndXpPage() {
     const limits = byGroup('Limits');
     const leaderboardPrizes = byGroup('Leaderboard prizes');
 
+    const themePrices = byGroup('Theme prices');
     const setting = (key: string) => settings[key] ?? DEFAULT_ECONOMY_SETTINGS[key]?.value ?? 0;
-    const spinValues = [1, 2, 3, 4, 5, 6, 7, 8].map((i) => setting(`spin.slice${i}_value`)).filter((v) => v > 0);
-    const spinMin = spinValues.length ? Math.min(...spinValues) : 0;
-    const spinMax = spinValues.length ? Math.max(...spinValues) : 0;
 
     return (
         <div className="min-h-screen bg-white">
@@ -72,7 +70,8 @@ export default function CoinsAndXpPage() {
                     <p className="text-sm text-gray-600 leading-relaxed font-roboto mb-4">
                         <span className="font-bold text-gray-900">XP is your status.</span> Almost everything you do earns XP.
                         XP raises your Level, and your Level unlocks Prestige tiers — each with a real perk. Daily streaks
-                        multiply your XP (3 days = 1.2×, 7 days = 1.5×, 30 days = 2×), so showing up daily is the fastest way to climb.
+                        multiply your XP (3 days = {setting('streak.multiplier_3day')}×, 7 days = {setting('streak.multiplier_7day')}×,
+                        30 days = {setting('streak.multiplier_30day')}×), so showing up daily is the fastest way to climb.
                     </p>
                     <div className="border border-gray-200 rounded-2xl divide-y divide-gray-100 overflow-hidden mb-4">
                         {PRESTIGE_TIERS.map((p) => (
@@ -124,9 +123,7 @@ export default function CoinsAndXpPage() {
                         </div>
                         <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
                             <span className="text-sm text-gray-700 flex items-center gap-1.5"><Gift size={13} /> Daily spin</span>
-                            <span className="text-sm font-black text-gray-900">
-                                {spinMin > 0 ? `${spinMin}–${spinMax} coins or XP` : 'surprise prize'}
-                            </span>
+                            <span className="text-sm font-black text-gray-900">surprise prize</span>
                         </div>
                         <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
                             <span className="text-sm text-gray-700 flex items-center gap-1.5"><Trophy size={13} /> Achievements</span>
@@ -178,6 +175,18 @@ export default function CoinsAndXpPage() {
                                 <span className="text-sm font-black text-gray-900">{row.value.toLocaleString()} coins</span>
                             </div>
                         ))}
+                        {themePrices.length > 0 && (
+                            <div className="px-4 py-2.5 border-t border-gray-100">
+                                <div className="text-sm text-gray-700 mb-1.5">Profile themes</div>
+                                <div className="flex flex-wrap gap-2">
+                                    {themePrices.map((row) => (
+                                        <span key={row.key} className="text-[11px] font-bold bg-white border border-gray-200 rounded-full px-2.5 py-1 text-gray-700">
+                                            {row.label.replace('Theme: ', '')}: {row.value.toLocaleString()} coins
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                         <div className="flex items-center justify-between px-4 py-2.5 border-t border-gray-100">
                             <span className="text-sm text-gray-700">Marketplace ads that accept coins</span>
                             <span className="text-sm font-black text-gray-900">seller sets the price</span>

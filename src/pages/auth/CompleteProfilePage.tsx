@@ -115,6 +115,13 @@ export const CompleteProfilePage = () => {
       // 27.8.5 — queue the one-time "invite friends" prompt for after the redirect.
       try { sessionStorage.setItem(REFERRAL_PROMPT_PENDING_KEY, '1'); } catch { /* ignore */ }
 
+      // Account sign-up XP bonus (admin-tunable, xp.signup — 0 disables it).
+      try {
+        const { GamificationService } = await import('@/lib/gamificationService');
+        const signupXp = await GamificationService.getSetting('xp.signup');
+        if (signupXp > 0) await GamificationService.addXP(user.id, signupXp, 'Account created');
+      } catch { /* non-critical */ }
+
       navigate(redirectUrl);
     } catch (e: any) {
       setError(e?.message || 'Could not save your profile. Please try again.');

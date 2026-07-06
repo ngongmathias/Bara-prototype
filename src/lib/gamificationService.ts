@@ -77,8 +77,9 @@ export const DEFAULT_ECONOMY_SETTINGS: Record<string, { value: number; label: st
     'xp.ticket_purchase': { value: 500, label: 'Register for an event', group: 'XP rewards' },
     'xp.event_photo': { value: 25, label: 'Upload an event photo (each)', group: 'XP rewards' },
     'xp.blog_published': { value: 150, label: 'Blog article published', group: 'XP rewards' },
+    'xp.signup': { value: 0, label: 'Account sign-up bonus', group: 'XP rewards' },
     'coins.blog_published': { value: 25, label: 'Blog article published', group: 'Coin rewards' },
-    'coins.starting_balance': { value: 100, label: 'New user starting balance', group: 'Coin rewards' },
+    'coins.starting_balance': { value: 100, label: 'Account creation (new user starting coins)', group: 'Coin rewards' },
     'coins.levelup_per_level': { value: 10, label: 'Level-up bonus (× new level)', group: 'Coin rewards' },
     'cost.ad_free_24h': { value: 20, label: 'Ad-free browsing (24h)', group: 'Coin costs' },
     'cost.listing_boost': { value: 50, label: 'Marketplace ad boost', group: 'Coin costs' },
@@ -98,22 +99,16 @@ export const DEFAULT_ECONOMY_SETTINGS: Record<string, { value: number; label: st
     'referral.milestone5_coins': { value: 300, label: 'Milestone: 5 activated referrals', group: 'Referrals' },
     'referral.milestone10_coins': { value: 1000, label: 'Milestone: 10 activated referrals', group: 'Referrals' },
     'referral.milestone25_coins': { value: 3000, label: 'Milestone: 25 activated referrals', group: 'Referrals' },
-    'spin.slice1_value': { value: 5, label: 'Slice 1 (coins) — amount', group: 'Daily spin' },
-    'spin.slice1_prob': { value: 30, label: 'Slice 1 — odds weight', group: 'Daily spin' },
-    'spin.slice2_value': { value: 10, label: 'Slice 2 (XP) — amount', group: 'Daily spin' },
-    'spin.slice2_prob': { value: 25, label: 'Slice 2 — odds weight', group: 'Daily spin' },
-    'spin.slice3_value': { value: 10, label: 'Slice 3 (coins) — amount', group: 'Daily spin' },
-    'spin.slice3_prob': { value: 20, label: 'Slice 3 — odds weight', group: 'Daily spin' },
-    'spin.slice4_value': { value: 25, label: 'Slice 4 (XP) — amount', group: 'Daily spin' },
-    'spin.slice4_prob': { value: 12, label: 'Slice 4 — odds weight', group: 'Daily spin' },
-    'spin.slice5_value': { value: 25, label: 'Slice 5 (coins) — amount', group: 'Daily spin' },
-    'spin.slice5_prob': { value: 8, label: 'Slice 5 — odds weight', group: 'Daily spin' },
-    'spin.slice6_value': { value: 50, label: 'Slice 6 (XP) — amount', group: 'Daily spin' },
-    'spin.slice6_prob': { value: 3, label: 'Slice 6 — odds weight', group: 'Daily spin' },
-    'spin.slice7_value': { value: 50, label: 'Slice 7 (coins) — amount', group: 'Daily spin' },
-    'spin.slice7_prob': { value: 1.5, label: 'Slice 7 — odds weight', group: 'Daily spin' },
-    'spin.slice8_value': { value: 100, label: 'Slice 8 (XP) — amount', group: 'Daily spin' },
-    'spin.slice8_prob': { value: 0.5, label: 'Slice 8 — odds weight', group: 'Daily spin' },
+    'streak.multiplier_3day': { value: 1.2, label: 'XP multiplier at 3-day streak', group: 'Streaks' },
+    'streak.multiplier_7day': { value: 1.5, label: 'XP multiplier at 7-day streak', group: 'Streaks' },
+    'streak.multiplier_30day': { value: 2, label: 'XP multiplier at 30-day streak', group: 'Streaks' },
+    'cost.theme_sunset': { value: 30, label: 'Theme: Sunset', group: 'Theme prices' },
+    'cost.theme_ocean': { value: 30, label: 'Theme: Ocean', group: 'Theme prices' },
+    'cost.theme_forest': { value: 30, label: 'Theme: Forest', group: 'Theme prices' },
+    'cost.theme_midnight': { value: 50, label: 'Theme: Midnight', group: 'Theme prices' },
+    'cost.theme_gold': { value: 75, label: 'Theme: Gold Rush', group: 'Theme prices' },
+    'cost.theme_neon': { value: 75, label: 'Theme: Neon Nights', group: 'Theme prices' },
+    'cost.theme_african': { value: 100, label: 'Theme: African Pride', group: 'Theme prices' },
 };
 
 let _settingsCache: Record<string, number> | null = null;
@@ -532,8 +527,12 @@ export class GamificationService {
             }
             // diffDays <= 0 → already counted today (or clock skew): no change
 
-            // MIT-level psychological scaling
-            const multiplier = newStreak >= 30 ? 2.0 : newStreak >= 7 ? 1.5 : newStreak >= 3 ? 1.2 : 1.0;
+            // Streak → XP multiplier thresholds (admin-tunable: streak.multiplier_*)
+            const s = await this.getEconomySettings();
+            const m3 = s['streak.multiplier_3day'] ?? 1.2;
+            const m7 = s['streak.multiplier_7day'] ?? 1.5;
+            const m30 = s['streak.multiplier_30day'] ?? 2.0;
+            const multiplier = newStreak >= 30 ? m30 : newStreak >= 7 ? m7 : newStreak >= 3 ? m3 : 1.0;
 
             // Persist the computed streak server-side (client keeps the
             // timezone-correct day maths; the RPC just writes + audits).
