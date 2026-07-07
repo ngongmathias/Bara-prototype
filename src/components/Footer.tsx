@@ -219,10 +219,16 @@ const Footer = () => {
         {/* Bottom Bar — Social, Legal Links & Copyright */}
         <div className="border-t border-gray-200 pt-4 md:pt-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-4 text-xs text-gray-500">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-gray-500">
               <Link to="/terms" onClick={scrollToTop} className="hover:text-gray-900 transition-colors">Terms of Service</Link>
               <span className="text-gray-300">|</span>
               <Link to="/privacy" onClick={scrollToTop} className="hover:text-gray-900 transition-colors">Privacy Policy</Link>
+              <span className="text-gray-300">|</span>
+              <Link to="/registration-disclaimer" onClick={scrollToTop} className="hover:text-gray-900 transition-colors">Registration Disclaimer</Link>
+              <span className="text-gray-300">|</span>
+              <Link to="/definitions" onClick={scrollToTop} className="hover:text-gray-900 transition-colors">Definitions</Link>
+              <span className="text-gray-300">|</span>
+              <Link to="/content-terms" onClick={scrollToTop} className="hover:text-gray-900 transition-colors">Content Terms</Link>
               <span className="text-gray-300">|</span>
               <Link to="/advertise" onClick={scrollToTop} className="hover:text-gray-900 transition-colors">{t('footer.advertisingChoices')}</Link>
             </div>

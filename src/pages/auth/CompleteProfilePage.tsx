@@ -268,6 +268,14 @@ export const CompleteProfilePage = () => {
             >
               {submitting ? <Loader2 className="animate-spin" size={18} /> : 'Finish'}
             </button>
+
+            {/* 28.6 — registration disclaimer acceptance */}
+            <p className="text-center text-[11px] text-gray-400 leading-relaxed">
+              By completing your profile you confirm your details are accurate and accept our{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline text-gray-600">Terms of Service</a>,{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline text-gray-600">Privacy Policy</a> and{' '}
+              <a href="/registration-disclaimer" target="_blank" rel="noopener noreferrer" className="underline text-gray-600">Registration Disclaimer</a>.
+            </p>
           </form>
         </div>
       </div>

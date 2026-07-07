@@ -342,6 +342,10 @@ import VerifyAccountPage from "./pages/VerifyAccountPage";
 
 import BusinessPackagesPage from "./pages/BusinessPackagesPage";
 
+import RegistrationDisclaimerPage from "./pages/RegistrationDisclaimerPage";
+
+import DefinitionsPage from "./pages/DefinitionsPage";
+
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 
 import { CookieConsent } from "./components/CookieConsent";
@@ -801,6 +805,8 @@ const AppRoutes = () => {
 
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/content-terms" element={<ContentTermsPage />} />
+        <Route path="/registration-disclaimer" element={<RegistrationDisclaimerPage />} />
+        <Route path="/definitions" element={<DefinitionsPage />} />
 
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
 

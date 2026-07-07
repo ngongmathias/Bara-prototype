@@ -202,9 +202,12 @@ Open — needs decisions/clarification (see email to Marlon, Jul 7):
   (Explainer/promo videos = team content task.)
 - [ ] **28.5 Optional Referral Code field at sign-up** — codes currently only
   work via `?ref=` links; add a manual input.
-- [ ] **28.6 Legal pages set** — Registration Disclaimer + Important Definitions
-  (new), grouped with existing `/terms`, `/privacy-policy`, `/content-terms`
-  in a footer "Business area". Needs copy or approval to draft.
+- [x] **28.6 Legal pages set** — DONE Jul 7: `/registration-disclaimer` (age,
+  accuracy, data use, comms, rewards-not-money, termination; acceptance line
+  added under both sign-up forms) and `/definitions` (17 platform terms in
+  plain language) drafted by Mathias/Claude for team review; footer legal row
+  now links Terms · Privacy · Registration Disclaimer · Definitions · Content
+  Terms. Marlon reviews wording; only "what is BARA" homepage copy still owed.
 - [ ] **28.7 "Feature restorations" (Discover more / Daily Spin / Daily Missions
   / Map Game)** — Spin + Missions exist as floating widgets; DiscoverMore
   component exists; **Map Game does not exist in the codebase**. Awaiting
@@ -216,11 +219,12 @@ Open — needs decisions/clarification (see email to Marlon, Jul 7):
 - [ ] **28.9 Monetization pricing** — premium advertising $100/country, featured
   listings $50 can be created TODAY as packages in Admin → Business Packages
   (manual fulfilment). Ticketing 6% + store 10–15% commission need Phase 15.
-- [ ] **28.10 Payments next step** — open the Flutterwave business account + KYC
-  (covers Visa/Mastercard, MTN MoMo, M-Pesa across ~34 countries; Stripe not
-  recommended for African mobile money). **Paystack** stays the planned secondary
-  (15.9 — Nigeria/Ghana/SA/Kenya). Account approval is the long pole and is
-  non-code — start immediately. Integration plan = Phase 15 in ARCHIVE_2.
+- [ ] **28.10 Payments next step** — priority is **MoMo** (currently delayed on
+  Marlon's side). Route: Flutterwave primary (covers MTN MoMo + Visa/Mastercard +
+  M-Pesa, ~34 countries), **Paystack** secondary (15.9 — Nigeria/Ghana/SA/Kenya).
+  Gating step: business account + KYC. Mathias × Claude working session booked
+  **Fri Jul 10, 10:00 CAT** (calendar) to scope MoMo-first options + what can be
+  pre-built in sandbox. Integration plan = Phase 15 in ARCHIVE_2.
 - [ ] **28.11 Affiliate marketing strategy** — Marlon's side (identify, contact,
   activate partners).
 

@@ -335,6 +335,14 @@ export const UserSignUpPage = () => {
                 {submitting ? <Loader2 className="animate-spin" size={18} /> : 'Create account'}
               </button>
 
+              {/* 28.6 — registration disclaimer acceptance */}
+              <p className="text-center text-[11px] text-gray-400 leading-relaxed">
+                By creating an account you confirm your details are accurate and accept our{' '}
+                <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline text-gray-600">Terms of Service</a>,{' '}
+                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline text-gray-600">Privacy Policy</a> and{' '}
+                <a href="/registration-disclaimer" target="_blank" rel="noopener noreferrer" className="underline text-gray-600">Registration Disclaimer</a>.
+              </p>
+
               <p className="text-center text-sm text-gray-600">
                 Already have an account?{' '}
                 <Link to={signInUrl} className="font-semibold text-gray-900 hover:underline">Sign in</Link>
