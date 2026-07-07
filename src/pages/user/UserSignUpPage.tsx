@@ -65,6 +65,8 @@ export const UserSignUpPage = () => {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  // 28.5 — optional manual referral code (prefilled when arriving via ?ref= link)
+  const [referralCode, setReferralCode] = useState(refCode || '');
   // 27.8.1 (revised Jul 7, Marlon meeting): the username is AUTO-SUGGESTED from
   // first + last name, shown in the form, and the user may edit it. The field
   // always has a value (suggested or user-entered).
@@ -202,7 +204,7 @@ export const UserSignUpPage = () => {
       if (result.createdUserId) {
         await saveProfile(result.createdUserId);
         // Create the referral row now that the profile exists.
-        await ReferralService.createReferralOnSignup(result.createdUserId, refCode);
+        await ReferralService.createReferralOnSignup(result.createdUserId, referralCode.trim() || refCode);
       }
       await setActive({ session: result.createdSessionId });
       navigate(finishUrl);
@@ -322,6 +324,16 @@ export const UserSignUpPage = () => {
               <div>
                 <label className={labelCls}>Password</label>
                 <input type="password" className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" placeholder="At least 8 characters" />
+              </div>
+
+              <div>
+                <label className={labelCls}>Referral code (optional)</label>
+                <input
+                  className={inputCls}
+                  value={referralCode}
+                  onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                  placeholder="Got a code from a friend? Enter it here"
+                />
               </div>
 
               {/* Clerk bot-protection mount target (used by some instances) */}

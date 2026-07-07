@@ -292,14 +292,14 @@ export const Header = () => {
                       <Coins className="w-5 h-5 text-gray-700" />
                       <span className="text-2xl font-bold text-gray-900">{profile.bara_coins.toLocaleString()}</span>
                     </div>
-                    {/* Explainer entry point — clearly visible, same weight as the
-                        action rows below ("what are Coins & XP?") */}
+                    {/* Explainer entry point — simple plain-language definitions
+                        (the detailed amounts page stays linked from /rewards) */}
                     <button
-                      onClick={() => navigate('/coins-and-xp')}
+                      onClick={() => navigate('/definitions')}
                       className="w-full flex items-center justify-between gap-2 text-xs font-bold text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg px-3 py-2 transition-colors"
                     >
                       <span className="flex items-center gap-1.5"><Info className="w-3.5 h-3.5" /> What are Coins &amp; XP?</span>
-                      <span className="text-gray-600">See how they work</span>
+                      <span className="text-gray-600">Quick explanation</span>
                     </button>
                   </div>
                   {/* Stats */}
@@ -361,8 +361,8 @@ export const Header = () => {
                   <DropdownMenuItem onClick={() => navigate('/store')}>
                     <Coins className="w-4 h-4 mr-2" /> Coin Store
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/coins-and-xp')}>
-                    <Zap className="w-4 h-4 mr-2" /> How coins &amp; XP work
+                  <DropdownMenuItem onClick={() => navigate('/definitions')}>
+                    <Zap className="w-4 h-4 mr-2" /> What Coins &amp; XP mean
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

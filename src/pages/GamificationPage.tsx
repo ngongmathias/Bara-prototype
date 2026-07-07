@@ -139,8 +139,8 @@ const GamificationPage = () => {
             <Link to="/rewards" className="text-sm font-bold text-gray-700 hover:text-gray-900 underline whitespace-nowrap">
               How rewards work
             </Link>
-            <Link to="/coins-and-xp" className="text-sm font-bold text-gray-700 hover:text-gray-900 underline whitespace-nowrap">
-              Coins &amp; XP explained
+            <Link to="/definitions" className="text-sm font-bold text-gray-700 hover:text-gray-900 underline whitespace-nowrap">
+              What Coins &amp; XP mean
             </Link>
           </div>
         </div>

@@ -37,6 +37,8 @@ export const CompleteProfilePage = () => {
   const [country, setCountry] = useState('Rwanda');
   const [dialCode, setDialCode] = useState('+250');
   const [phone, setPhone] = useState('');
+  // 28.5 — optional manual referral code (prefilled from the stashed ?ref=)
+  const [referralCode, setReferralCode] = useState(() => ReferralService.getRefFromUrl() || ReferralService.peekStashedRef() || '');
   // 27.8.1 (revised Jul 7): username is auto-suggested from the name, shown,
   // and editable — the field always carries a value.
   const [username, setUsername] = useState('');
@@ -145,9 +147,10 @@ export const CompleteProfilePage = () => {
         await supabase.from('clerk_users').update(row).eq('clerk_user_id', user.id);
       }
 
-      // Turn a captured ?ref= (stashed at sign-up before the OAuth redirect)
-      // into a pending referral now that the profile row exists.
-      await ReferralService.createReferralOnSignup(user.id, ReferralService.getRefFromUrl());
+      // Turn the referral code (manual input, ?ref=, or the code stashed at
+      // sign-up before the OAuth redirect) into a pending referral now that
+      // the profile row exists.
+      await ReferralService.createReferralOnSignup(user.id, referralCode.trim() || ReferralService.getRefFromUrl());
 
       // Best-effort: reflect the name on the Clerk user too.
       try { await user.update({ firstName: firstName.trim(), lastName: lastName.trim() }); } catch { /* noop */ }
@@ -259,6 +262,16 @@ export const CompleteProfilePage = () => {
               {usernameMsg && (
                 <p className={`text-[11px] mt-1 ${usernameStatus === 'available' ? 'text-gray-700 font-semibold' : 'text-gray-400'}`}>{usernameMsg}</p>
               )}
+            </div>
+
+            <div>
+              <label className={labelCls}>Referral code (optional)</label>
+              <input
+                className={inputCls}
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                placeholder="Got a code from a friend? Enter it here"
+              />
             </div>
 
             <button

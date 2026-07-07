@@ -192,16 +192,21 @@ Done immediately (Jul 7):
 - [x] **28.2 Admin user rankings** — Top Players card in AdminGamification now
   ranks by **XP / Coins / Streak** (toggle). "User ranks" as a metric doesn't
   exist (Trust Rank was removed by team decision — see guardrails).
-- [x] **28.3 Coins/XP clarity** — prominent "What are Coins & XP? — See how they
-  work" row under the balance in the coins dropdown → `/coins-and-xp` (upgraded
-  from a tiny link per Mathias's feedback); the explainer pages shipped in 27.8.6.
+- [x] **28.3 Coins/XP clarity** — prominent "What are Coins & XP?" row under the
+  balance in the coins dropdown. REVISED Jul 7 per Mathias: user-facing links
+  (dropdown row, dropdown menu item, /gamification) now point to the SIMPLE
+  glossary `/definitions` (Marlon's actual ask — plain meanings, no numbers);
+  the detailed live-amounts page `/coins-and-xp` stays reachable only from
+  /rewards ("want exact amounts?") for users who want the full breakdown.
 
 Open — needs decisions/clarification (see email to Marlon, Jul 7):
-- [ ] **28.4 Homepage clarity** — bolder/larger tile typography (Mathias) + a
-  "what is BARA" explanation block — **copy to be supplied by Marlon**.
+- [ ] **28.4 Homepage clarity** — "text too small" feedback needs SPECIFICS from
+  Marlon (which pages/tiles — screenshots requested Jul 7) before changing
+  typography; "what is BARA" block waits on **copy from Marlon**.
   (Explainer/promo videos = team content task.)
-- [ ] **28.5 Optional Referral Code field at sign-up** — codes currently only
-  work via `?ref=` links; add a manual input.
+- [x] **28.5 Optional Referral Code field at sign-up** — DONE Jul 7: manual
+  "Referral code (optional)" input on both sign-up paths, prefilled from
+  `?ref=` / the stashed OAuth code; manual entry takes precedence.
 - [x] **28.6 Legal pages set** — DONE Jul 7: `/registration-disclaimer` (age,
   accuracy, data use, comms, rewards-not-money, termination; acceptance line
   added under both sign-up forms) and `/definitions` (17 platform terms in
@@ -219,12 +224,12 @@ Open — needs decisions/clarification (see email to Marlon, Jul 7):
 - [ ] **28.9 Monetization pricing** — premium advertising $100/country, featured
   listings $50 can be created TODAY as packages in Admin → Business Packages
   (manual fulfilment). Ticketing 6% + store 10–15% commission need Phase 15.
-- [ ] **28.10 Payments next step** — priority is **MoMo** (currently delayed on
-  Marlon's side). Route: Flutterwave primary (covers MTN MoMo + Visa/Mastercard +
-  M-Pesa, ~34 countries), **Paystack** secondary (15.9 — Nigeria/Ghana/SA/Kenya).
-  Gating step: business account + KYC. Mathias × Claude working session booked
-  **Fri Jul 10, 10:00 CAT** (calendar) to scope MoMo-first options + what can be
-  pre-built in sandbox. Integration plan = Phase 15 in ARCHIVE_2.
+- [ ] **28.10 Payments next step** — priority is **MoMo**, currently blocked on
+  the DPO approval document (Marlon's part: company info). Route: Flutterwave
+  primary (MTN MoMo + Visa/Mastercard + M-Pesa, ~34 countries), **Paystack**
+  secondary (15.9). Mathias learns the Flutterwave process FIRST (working
+  session booked **Fri Jul 10, 10:00 CAT**), and only then hands Marlon a
+  precise account/KYC ask. Integration plan = Phase 15 in ARCHIVE_2.
 - [ ] **28.11 Affiliate marketing strategy** — Marlon's side (identify, contact,
   activate partners).
 
