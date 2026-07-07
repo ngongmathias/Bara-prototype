@@ -65,6 +65,41 @@ export const UserSignUpPage = () => {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  // 27.8.1 (revised Jul 7, Marlon meeting): the username is AUTO-SUGGESTED from
+  // first + last name, shown in the form, and the user may edit it. The field
+  // always has a value (suggested or user-entered).
+  const [username, setUsername] = useState('');
+  const [usernameEdited, setUsernameEdited] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
+  const [usernameMsg, setUsernameMsg] = useState('');
+
+  // Keep suggesting from the name until the user types their own.
+  useEffect(() => {
+    if (usernameEdited) return;
+    if (!firstName.trim() && !lastName.trim()) { setUsername(''); return; }
+    const timer = setTimeout(() => {
+      UsernameService.proposeUsername(firstName, lastName).then((u) => {
+        setUsername((prev) => prev === u ? prev : u);
+      });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [firstName, lastName, usernameEdited]);
+
+  // Live availability feedback.
+  useEffect(() => {
+    const name = username.trim().toLowerCase();
+    if (!name) { setUsernameStatus('idle'); setUsernameMsg(''); return; }
+    const invalid = UsernameService.validate(name);
+    if (invalid) { setUsernameStatus('invalid'); setUsernameMsg(invalid); return; }
+    setUsernameStatus('checking');
+    setUsernameMsg('Checking availability…');
+    const timer = setTimeout(async () => {
+      const free = await UsernameService.isAvailable(name);
+      setUsernameStatus(free ? 'available' : 'taken');
+      setUsernameMsg(free ? 'Available' : 'That username is taken — try another.');
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [username]);
 
   const onCountryChange = (name: string) => {
     setCountry(name);
@@ -87,6 +122,11 @@ export const UserSignUpPage = () => {
     if (!country) return setError('Please select your country.');
     if (!phone.trim()) return setError('Please enter your phone number.');
     if (!email.trim()) return setError('Please enter your email.');
+    const uname = username.trim().toLowerCase();
+    if (!uname) return setError('Please choose a username (we suggest one from your name).');
+    const unameInvalid = UsernameService.validate(uname);
+    if (unameInvalid) return setError(unameInvalid);
+    if (usernameStatus === 'taken') return setError('That username is already taken. Please choose another.');
     if (password.length < 8) return setError('Password must be at least 8 characters.');
 
     setSubmitting(true);
@@ -109,16 +149,20 @@ export const UserSignUpPage = () => {
 
   const saveProfile = async (clerkUserId: string) => {
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-    // 27.8.1 — propose a username from first + last name (numeric suffix on
-    // collision). The user keeps it unless they change it in profile settings.
-    const username = await UsernameService.proposeUsername(firstName, lastName);
+    // 27.8.1 — use the form's username (auto-suggested, user-editable). If it
+    // became invalid/taken between typing and verifying, fall back to a fresh
+    // proposal so the profile always saves with a valid, free username.
+    let finalUsername = username.trim().toLowerCase();
+    if (!finalUsername || UsernameService.validate(finalUsername) || !(await UsernameService.isAvailable(finalUsername))) {
+      finalUsername = await UsernameService.proposeUsername(firstName, lastName);
+    }
     const row = {
       clerk_user_id: clerkUserId,
       email: email.trim().toLowerCase(),
       full_name: fullName || null,
       first_name: firstName.trim() || null,
       last_name: lastName.trim() || null,
-      username: username || null,
+      username: finalUsername || null,
       date_of_birth: dob || null,
       gender: gender || null,
       country: country || null,
@@ -262,9 +306,22 @@ export const UserSignUpPage = () => {
               </div>
 
               <div>
+                <label className={labelCls}>Username</label>
+                <input
+                  className={inputCls}
+                  value={username}
+                  onChange={(e) => { setUsernameEdited(true); setUsername(e.target.value.toLowerCase()); }}
+                  autoComplete="username"
+                  placeholder="Suggested from your name — edit if you like"
+                />
+                {usernameMsg && (
+                  <p className={`text-[11px] mt-1 ${usernameStatus === 'available' ? 'text-gray-700 font-semibold' : 'text-gray-400'}`}>{usernameMsg}</p>
+                )}
+              </div>
+
+              <div>
                 <label className={labelCls}>Password</label>
                 <input type="password" className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" placeholder="At least 8 characters" />
-                <p className="text-[11px] text-gray-400 mt-1">We'll set up a username for you from your name — you can change it anytime in settings.</p>
               </div>
 
               {/* Clerk bot-protection mount target (used by some instances) */}

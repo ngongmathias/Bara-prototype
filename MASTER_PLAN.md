@@ -36,7 +36,7 @@
 ### Tech Stack
 
 - **Frontend:** React 18 + TypeScript, Vite, TailwindCSS, shadcn/ui, Framer Motion
-- **Auth:** Clerk v5 (SSO, email/password; `forceRedirectUrl`/`fallbackRedirectUrl` only — no v4 props). User sign-in is `/user/sign-in` (NOT `/sign-in`, that's admin). Usernames are auto-derived from first+last name at sign-up (27.8.1) — never prompt for one.
+- **Auth:** Clerk v5 (SSO, email/password; `forceRedirectUrl`/`fallbackRedirectUrl` only — no v4 props). User sign-in is `/user/sign-in` (NOT `/sign-in`, that's admin). Usernames: **auto-suggested** from first+last name in the sign-up form, user-editable there and later in Settings (27.8.1 revised Jul 7); global case-insensitive uniqueness via index on `lower(username)`.
 - **Backend:** Supabase (Postgres, Edge Functions, Storage, Realtime). The app uses the **tokenless anon client** — server-side gating is done inside SECURITY DEFINER RPCs, not via auth.uid() RLS.
 - **Email:** Resend API via Supabase Edge Function (`send-email`) + React Email templates; all sends go through `email_queue`
 - **Deployment:** Vercel (Edge Middleware for OG tags); pushes to `main` auto-deploy
@@ -153,12 +153,12 @@
 
 | # | Item | Source |
 |---|------|--------|
-| 1 | DPO compliance gaps — privacy policy (api-sports, retention, DFD) | 7.33 |
+| 1 | DPO compliance — **documents are DONE by Mathias and shared with Marlon**; waiting on Marlon to fill in company information + set the Rwanda Cyber Security regulator meeting. No open drafting work. | 7.33 / 25.8 |
 | 2 | Streams: volume control in player | 7A-1.3 |
 | 3 | User profile visibility — needs team call | 7D |
 | 4 | Event saves (`event_bookmarks`) + business listing saves (`listing_bookmarks`) | 10.4 |
 | 5 | Favorites count badge + "My Favorites" dashboard link | 13.7 |
-| 6 | CSA (Cyber Security Authority) compliance meeting follow-ups | 25.8 |
+| 6 | CSA (Cyber Security Authority) regulator meeting — Marlon to schedule (TBC) | 25.8 |
 | 7 | Marketplace categories restructure remainder — esp. **old-ad remap** (data-integrity risk) | 25.4.6 / 27.6.8 |
 | 8 | BARA Global gallery & key listings | 25.5 |
 
@@ -181,6 +181,45 @@
 - [ ] **27.6.2 Admin role separation** — `admin_users.role` read but never enforced.
 - [ ] **27.6.3 Membership (Pro/Elite) reality check** — build MVP or align Pricing-page claims; partially addressed by 27.8.4 packages scaffold.
 - [ ] **27.6.7 Low-end Android perf budget** — bundle + lazy-load audit beyond Streams (main chunk is ~5.4 MB).
+
+### Phase 28 — Jul 6 meeting follow-ups (from Marlon's summary; triaged Jul 7)
+
+Done immediately (Jul 7):
+- [x] **28.1 Username auto-suggested + editable at sign-up** — the sign-up and
+  OAuth complete-profile forms now show a Username field pre-filled from
+  first+last name (live availability check); user can edit it; also editable in
+  Settings. Supersedes the "invisible auto-derive" from 27.8.1.
+- [x] **28.2 Admin user rankings** — Top Players card in AdminGamification now
+  ranks by **XP / Coins / Streak** (toggle). "User ranks" as a metric doesn't
+  exist (Trust Rank was removed by team decision — see guardrails).
+- [x] **28.3 Coins/XP clarity** — "What's this?" info affordance on the coins
+  dropdown → `/coins-and-xp`; the explainer pages themselves shipped in 27.8.6.
+
+Open — needs decisions/clarification (see email to Marlon, Jul 7):
+- [ ] **28.4 Homepage clarity** — bolder/larger tile typography + a "what is
+  BARA" explanation block. (Explainer/promo videos = team content task.)
+- [ ] **28.5 Optional Referral Code field at sign-up** — codes currently only
+  work via `?ref=` links; add a manual input.
+- [ ] **28.6 Legal pages set** — Registration Disclaimer + Important Definitions
+  (new), grouped with existing `/terms`, `/privacy-policy`, `/content-terms`
+  in a footer "Business area". Needs copy or approval to draft.
+- [ ] **28.7 "Feature restorations" (Discover more / Daily Spin / Daily Missions
+  / Map Game)** — Spin + Missions exist as floating widgets; DiscoverMore
+  component exists; **Map Game does not exist in the codebase**. Awaiting
+  Marlon's elaboration on what exactly is missing.
+- [ ] **28.8 Hybrid check-in system** (GPS + proximity + staff verification +
+  community reporting) — never discussed with Mathias; needs a real spec.
+  If built: must go through the hardened economy RPCs + anti-abuse caps, and
+  location data must be reflected in the DPO/privacy documents first.
+- [ ] **28.9 Monetization pricing** — premium advertising $100/country, featured
+  listings $50 can be created TODAY as packages in Admin → Business Packages
+  (manual fulfilment). Ticketing 6% + store 10–15% commission need Phase 15.
+- [ ] **28.10 Payments next step** — open the Flutterwave business account + KYC
+  (covers Visa/Mastercard, MTN MoMo, M-Pesa across ~34 countries; Stripe not
+  recommended for African mobile money). Account approval is the long pole and
+  is non-code — start immediately. Integration plan = Phase 15 in ARCHIVE_2.
+- [ ] **28.11 Affiliate marketing strategy** — Marlon's side (identify, contact,
+  activate partners).
 
 ### Guardrails (do NOT)
 

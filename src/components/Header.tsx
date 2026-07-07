@@ -28,6 +28,7 @@ import {
   Shield,
   UserPlus,
   Zap,
+  Info,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -286,7 +287,17 @@ export const Header = () => {
                 <DropdownMenuContent className="w-64" align="end">
                   {/* Balance */}
                   <div className="px-4 py-3 border-b">
-                    <p className="text-xs text-gray-500 mb-1">Bara Coins Balance</p>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-gray-500">Bara Coins Balance</p>
+                      {/* Tiny explainer entry point — "what are Coins & XP?" */}
+                      <button
+                        onClick={() => navigate('/coins-and-xp')}
+                        className="flex items-center gap-1 text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors"
+                        title="What are Coins & XP?"
+                      >
+                        <Info className="w-3 h-3" /> What's this?
+                      </button>
+                    </div>
                     <div className="flex items-center gap-2">
                       <Coins className="w-5 h-5 text-gray-700" />
                       <span className="text-2xl font-bold text-gray-900">{profile.bara_coins.toLocaleString()}</span>

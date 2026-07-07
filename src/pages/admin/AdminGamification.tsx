@@ -104,6 +104,9 @@ const AdminGamification = () => {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ totalUsers: 0, totalCoins: 0, totalXP: 0, totalSpent: 0, totalEarned: 0 });
     const [leaderboard, setLeaderboard] = useState<ProfileRow[]>([]);
+    // Top Players ranking metric (Jul 7 request: rank by XP / Coins / Streak)
+    const [allProfiles, setAllProfiles] = useState<ProfileRow[]>([]);
+    const [rankBy, setRankBy] = useState<'total_xp' | 'bara_coins' | 'streak'>('total_xp');
     const [activity, setActivity] = useState<HistoryRow[]>([]);
     const [missions, setMissions] = useState<MissionStat[]>([]);
     const [achievements, setAchievements] = useState<AchievementRow[]>([]);
@@ -154,21 +157,12 @@ const AdminGamification = () => {
                 .filter((h) => h.type === 'coin_gain' || h.type === 'coin_purchase')
                 .reduce((a, h) => a + (Number(h.amount) || 0), 0);
 
-            // Names for leaderboard + recent activity
-            const topRows = rows.slice(0, 10);
-            const nameMap = await resolveNames([
-                ...topRows.map((r) => r.user_id),
-                ...hist.slice(0, 15).map((h) => h.user_id),
-            ]);
+            // Names for recent activity (the Top Players list resolves its own
+            // names in the rankBy effect below, since the metric is switchable)
+            const nameMap = await resolveNames(hist.slice(0, 15).map((h) => h.user_id));
 
             setStats({ totalUsers: rows.length, totalCoins, totalXP, totalSpent, totalEarned });
-            setLeaderboard(
-                topRows.map((r) => ({
-                    ...r,
-                    name: nameMap[r.user_id]?.name,
-                    email: nameMap[r.user_id]?.email,
-                }))
-            );
+            setAllProfiles(rows);
             setActivity(
                 hist.slice(0, 15).map((h) => ({ ...h, name: nameMap[h.user_id]?.name }))
             );
@@ -271,6 +265,23 @@ const AdminGamification = () => {
         loadOverview();
         loadSettings();
     }, [loadOverview, loadSettings]);
+
+    // Top Players — re-rank by the selected metric (XP / Coins / Streak) and
+    // resolve display names for whoever lands in the top 10.
+    useEffect(() => {
+        if (allProfiles.length === 0) { setLeaderboard([]); return; }
+        const metric = (r: ProfileRow) =>
+            rankBy === 'streak'
+                ? Number(r.daily_streak ?? r.consecutive_days ?? 0) || 0
+                : Number(r[rankBy]) || 0;
+        const top = [...allProfiles].sort((a, b) => metric(b) - metric(a)).slice(0, 10);
+        let cancelled = false;
+        resolveNames(top.map((r) => r.user_id)).then((map) => {
+            if (cancelled) return;
+            setLeaderboard(top.map((r) => ({ ...r, name: map[r.user_id]?.name, email: map[r.user_id]?.email } as ProfileRow)));
+        });
+        return () => { cancelled = true; };
+    }, [allProfiles, rankBy]);
 
     const dirtySettingKeys = Object.keys(settings).filter((k) => {
         const n = Number(settings[k]);
@@ -693,8 +704,31 @@ const AdminGamification = () => {
                 {/* Real Leaderboard */}
                 <Card className="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle className="text-lg font-black font-comfortaa">Top Players</CardTitle>
-                        <CardDescription>Ranked by lifetime XP.</CardDescription>
+                        <div className="flex items-start justify-between flex-wrap gap-2">
+                            <div>
+                                <CardTitle className="text-lg font-black font-comfortaa">Top Players</CardTitle>
+                                <CardDescription>
+                                    Ranked by {rankBy === 'total_xp' ? 'lifetime XP' : rankBy === 'bara_coins' ? 'coin balance' : 'daily streak'}.
+                                </CardDescription>
+                            </div>
+                            <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+                                {([
+                                    { key: 'total_xp', label: 'XP' },
+                                    { key: 'bara_coins', label: 'Coins' },
+                                    { key: 'streak', label: 'Streak' },
+                                ] as const).map((opt) => (
+                                    <button
+                                        key={opt.key}
+                                        onClick={() => setRankBy(opt.key)}
+                                        className={`px-3 py-1 rounded-md text-xs font-bold transition-colors ${
+                                            rankBy === opt.key ? 'bg-black text-white' : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         {leaderboard.length === 0 && !loading && (

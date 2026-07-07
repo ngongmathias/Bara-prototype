@@ -37,6 +37,38 @@ export const CompleteProfilePage = () => {
   const [country, setCountry] = useState('Rwanda');
   const [dialCode, setDialCode] = useState('+250');
   const [phone, setPhone] = useState('');
+  // 27.8.1 (revised Jul 7): username is auto-suggested from the name, shown,
+  // and editable — the field always carries a value.
+  const [username, setUsername] = useState('');
+  const [usernameEdited, setUsernameEdited] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
+  const [usernameMsg, setUsernameMsg] = useState('');
+
+  useEffect(() => {
+    if (usernameEdited) return;
+    if (!firstName.trim() && !lastName.trim()) { setUsername(''); return; }
+    const timer = setTimeout(() => {
+      UsernameService.proposeUsername(firstName, lastName).then((u) => {
+        setUsername((prev) => (prev === u ? prev : u));
+      });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [firstName, lastName, usernameEdited]);
+
+  useEffect(() => {
+    const name = username.trim().toLowerCase();
+    if (!name) { setUsernameStatus('idle'); setUsernameMsg(''); return; }
+    const invalid = UsernameService.validate(name);
+    if (invalid) { setUsernameStatus('invalid'); setUsernameMsg(invalid); return; }
+    setUsernameStatus('checking');
+    setUsernameMsg('Checking availability…');
+    const timer = setTimeout(async () => {
+      const free = await UsernameService.isAvailable(name);
+      setUsernameStatus(free ? 'available' : 'taken');
+      setUsernameMsg(free ? 'Available' : 'That username is taken — try another.');
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [username]);
 
   const email = user?.primaryEmailAddress?.emailAddress || '';
 
@@ -79,12 +111,20 @@ export const CompleteProfilePage = () => {
     if (!gender) return setError('Please select your gender.');
     if (!country) return setError('Please select your country.');
     if (!phone.trim()) return setError('Please enter your phone number.');
+    const uname = username.trim().toLowerCase();
+    if (!uname) return setError('Please choose a username (we suggest one from your name).');
+    const unameInvalid = UsernameService.validate(uname);
+    if (unameInvalid) return setError(unameInvalid);
+    if (usernameStatus === 'taken') return setError('That username is already taken. Please choose another.');
 
     setSubmitting(true);
     try {
-      // 27.8.1 — propose a username from first + last name (numeric suffix on
-      // collision). The user keeps it unless they change it in profile settings.
-      const username = await UsernameService.proposeUsername(firstName, lastName);
+      // 27.8.1 — use the form's username (auto-suggested, user-editable);
+      // fall back to a fresh proposal if it was taken in a race.
+      let finalUsername = uname;
+      if (!(await UsernameService.isAvailable(finalUsername))) {
+        finalUsername = await UsernameService.proposeUsername(firstName, lastName);
+      }
 
       const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
       const row = {
@@ -93,7 +133,7 @@ export const CompleteProfilePage = () => {
         full_name: fullName || null,
         first_name: firstName.trim() || null,
         last_name: lastName.trim() || null,
-        username: username || null,
+        username: finalUsername || null,
         date_of_birth: dob || null,
         gender: gender || null,
         country: country || null,
@@ -207,7 +247,19 @@ export const CompleteProfilePage = () => {
               </div>
             </div>
 
-            <p className="text-[11px] text-gray-400">We'll set up a username for you from your name — you can change it anytime in settings.</p>
+            <div>
+              <label className={labelCls}>Username</label>
+              <input
+                className={inputCls}
+                value={username}
+                onChange={(e) => { setUsernameEdited(true); setUsername(e.target.value.toLowerCase()); }}
+                autoComplete="username"
+                placeholder="Suggested from your name — edit if you like"
+              />
+              {usernameMsg && (
+                <p className={`text-[11px] mt-1 ${usernameStatus === 'available' ? 'text-gray-700 font-semibold' : 'text-gray-400'}`}>{usernameMsg}</p>
+              )}
+            </div>
 
             <button
               type="submit"
