@@ -146,8 +146,8 @@
 | 3 | **Cross-device human pass** — mobile 375px / tablet / desktop, all pages; several fixes are "best-guess, needs retest" | 23.1 |
 | 4 | **Clerk flow audit** — retest Chrome sign-up popup (never closes) now that sign-up changed to auto-usernames; full walk of all auth entry points | 25.1.1 / 25.1.2 |
 | 5 | **SSL not showing Secure** — confirm Vercel SSL for baraafrika.com + subdomains, fix mixed content | 25.1.4 |
-| 6 | **`20260622_streams_content_fields.sql`** — confirm applied (song/album descriptions dropped otherwise) | 26 |
-| 7 | **27.2.3 Admin economy-settings save rejection** — Jul 6 test: saving a setting failed "not admin" for Mathias. Verify his row in `admin_users` (active, correct Clerk ID) and retest. May already be fixed — re-verify after next tuning session. | 27.2.3 |
+| 6 | ~~**`20260622_streams_content_fields.sql`**~~ ✅ applied Jul 7 (probe had confirmed songs/albums.description missing — song uploads were failing on the missing column) | 26 |
+| 7 | **27.2.3 Admin economy-settings save rejection** — CAUSE FOUND Jul 7 (live probe): Mathias has NO row in `admin_users`. Fix SQL provided (INSERT with his Clerk ID, role super_admin) — awaiting run + retest of a settings save. | 27.2.3 |
 
 ### Important (P1)
 
@@ -192,12 +192,14 @@ Done immediately (Jul 7):
 - [x] **28.2 Admin user rankings** — Top Players card in AdminGamification now
   ranks by **XP / Coins / Streak** (toggle). "User ranks" as a metric doesn't
   exist (Trust Rank was removed by team decision — see guardrails).
-- [x] **28.3 Coins/XP clarity** — "What's this?" info affordance on the coins
-  dropdown → `/coins-and-xp`; the explainer pages themselves shipped in 27.8.6.
+- [x] **28.3 Coins/XP clarity** — prominent "What are Coins & XP? — See how they
+  work" row under the balance in the coins dropdown → `/coins-and-xp` (upgraded
+  from a tiny link per Mathias's feedback); the explainer pages shipped in 27.8.6.
 
 Open — needs decisions/clarification (see email to Marlon, Jul 7):
-- [ ] **28.4 Homepage clarity** — bolder/larger tile typography + a "what is
-  BARA" explanation block. (Explainer/promo videos = team content task.)
+- [ ] **28.4 Homepage clarity** — bolder/larger tile typography (Mathias) + a
+  "what is BARA" explanation block — **copy to be supplied by Marlon**.
+  (Explainer/promo videos = team content task.)
 - [ ] **28.5 Optional Referral Code field at sign-up** — codes currently only
   work via `?ref=` links; add a manual input.
 - [ ] **28.6 Legal pages set** — Registration Disclaimer + Important Definitions
@@ -216,8 +218,9 @@ Open — needs decisions/clarification (see email to Marlon, Jul 7):
   (manual fulfilment). Ticketing 6% + store 10–15% commission need Phase 15.
 - [ ] **28.10 Payments next step** — open the Flutterwave business account + KYC
   (covers Visa/Mastercard, MTN MoMo, M-Pesa across ~34 countries; Stripe not
-  recommended for African mobile money). Account approval is the long pole and
-  is non-code — start immediately. Integration plan = Phase 15 in ARCHIVE_2.
+  recommended for African mobile money). **Paystack** stays the planned secondary
+  (15.9 — Nigeria/Ghana/SA/Kenya). Account approval is the long pole and is
+  non-code — start immediately. Integration plan = Phase 15 in ARCHIVE_2.
 - [ ] **28.11 Affiliate marketing strategy** — Marlon's side (identify, contact,
   activate partners).
 

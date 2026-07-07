@@ -287,21 +287,20 @@ export const Header = () => {
                 <DropdownMenuContent className="w-64" align="end">
                   {/* Balance */}
                   <div className="px-4 py-3 border-b">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-xs text-gray-500">Bara Coins Balance</p>
-                      {/* Tiny explainer entry point — "what are Coins & XP?" */}
-                      <button
-                        onClick={() => navigate('/coins-and-xp')}
-                        className="flex items-center gap-1 text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors"
-                        title="What are Coins & XP?"
-                      >
-                        <Info className="w-3 h-3" /> What's this?
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-2">
+                    <p className="text-xs text-gray-500 mb-1">Bara Coins Balance</p>
+                    <div className="flex items-center gap-2 mb-2">
                       <Coins className="w-5 h-5 text-gray-700" />
                       <span className="text-2xl font-bold text-gray-900">{profile.bara_coins.toLocaleString()}</span>
                     </div>
+                    {/* Explainer entry point — clearly visible, same weight as the
+                        action rows below ("what are Coins & XP?") */}
+                    <button
+                      onClick={() => navigate('/coins-and-xp')}
+                      className="w-full flex items-center justify-between gap-2 text-xs font-bold text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg px-3 py-2 transition-colors"
+                    >
+                      <span className="flex items-center gap-1.5"><Info className="w-3.5 h-3.5" /> What are Coins &amp; XP?</span>
+                      <span className="text-gray-600">See how they work</span>
+                    </button>
                   </div>
                   {/* Stats */}
                   <div className="px-4 py-2 border-b grid grid-cols-2 gap-2 text-xs">
