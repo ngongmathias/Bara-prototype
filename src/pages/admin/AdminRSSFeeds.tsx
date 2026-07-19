@@ -303,6 +303,14 @@ export const AdminRSSFeeds = () => {
                       {source.last_fetched_at && (
                         <p className="text-xs text-gray-400 font-roboto mt-1">
                           Last fetched: {formatDate(source.last_fetched_at)}
+                          {source.last_fetch_status === 'ok' && source.last_fetch_items != null && (
+                            <span className="text-green-600"> · {source.last_fetch_items} items</span>
+                          )}
+                        </p>
+                      )}
+                      {source.last_fetch_status === 'error' && (
+                        <p className="text-xs text-red-600 font-roboto mt-1">
+                          Last fetch failed: {source.last_fetch_error || 'unknown error'}
                         </p>
                       )}
                     </div>

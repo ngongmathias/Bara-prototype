@@ -200,11 +200,21 @@ Deno.serve(async (req) => {
           }
           await supabase
             .from('rss_feed_sources')
-            .update({ last_fetched_at: new Date().toISOString() })
+            .update({
+              last_fetched_at: new Date().toISOString(),
+              last_fetch_status: 'ok',
+              last_fetch_error: null,
+              last_fetch_items: items.length,
+            })
             .eq('id', source.id)
           sourcesProcessed++
         } catch (e) {
-          errors.push(`${source.name}: ${e instanceof Error ? e.message : e}`)
+          const message = e instanceof Error ? e.message : String(e)
+          errors.push(`${source.name}: ${message}`)
+          await supabase
+            .from('rss_feed_sources')
+            .update({ last_fetch_status: 'error', last_fetch_error: message.substring(0, 500) })
+            .eq('id', source.id)
         }
       }
     }))
