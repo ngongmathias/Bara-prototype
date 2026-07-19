@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { COUNTRIES } from '@/data/countries';
+import { COUNTRIES, countryByIso2, formatPhone } from '@/data/countries';
 import { DateOfBirthPicker } from '@/components/DateOfBirthPicker';
 import { ReferralService } from '@/lib/referralService';
 import { UsernameService } from '@/lib/usernameService';
@@ -35,7 +35,10 @@ export const CompleteProfilePage = () => {
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('');
   const [country, setCountry] = useState('Rwanda');
-  const [dialCode, setDialCode] = useState('+250');
+  // Keyed by ISO code, not dial string — countries can share a dial code
+  // (US/CA are both +1) and a dial-keyed select displays the wrong country.
+  const [dialIso, setDialIso] = useState('RW');
+  const dialCode = countryByIso2(dialIso)?.dial || '';
   const [phone, setPhone] = useState('');
   // 28.5 — optional manual referral code (prefilled from the stashed ?ref=)
   const [referralCode, setReferralCode] = useState(() => ReferralService.getRefFromUrl() || ReferralService.peekStashedRef() || '');
@@ -100,7 +103,7 @@ export const CompleteProfilePage = () => {
   const onCountryChange = (name: string) => {
     setCountry(name);
     const match = COUNTRIES.find((c) => c.name === name);
-    if (match && match.dial !== '+') setDialCode(match.dial);
+    if (match && match.dial !== '+') setDialIso(match.iso2);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -139,7 +142,7 @@ export const CompleteProfilePage = () => {
         date_of_birth: dob || null,
         gender: gender || null,
         country: country || null,
-        phone: `${dialCode} ${phone.trim()}`.trim(),
+        phone: formatPhone(dialCode, phone),
         updated_at: new Date().toISOString(),
       };
       const { error: insertErr } = await supabase.from('clerk_users').insert(row);
@@ -241,9 +244,9 @@ export const CompleteProfilePage = () => {
             <div>
               <label className={labelCls}>Phone number</label>
               <div className="flex gap-2">
-                <select className={`${inputCls} w-24 sm:w-28 flex-shrink-0`} value={dialCode} onChange={(e) => setDialCode(e.target.value)} aria-label="Country code">
+                <select className={`${inputCls} w-24 sm:w-28 flex-shrink-0`} value={dialIso} onChange={(e) => setDialIso(e.target.value)} aria-label="Country code">
                   {sortedCountries.filter((c) => c.dial !== '+').map((c) => (
-                    <option key={c.iso2} value={c.dial}>{c.iso2} {c.dial}</option>
+                    <option key={c.iso2} value={c.iso2}>{c.iso2} {c.dial}</option>
                   ))}
                 </select>
                 <input className={`${inputCls} flex-1 min-w-0`} value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" inputMode="numeric" placeholder="712 345 678" autoComplete="tel-national" />

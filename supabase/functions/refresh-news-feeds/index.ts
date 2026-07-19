@@ -1,247 +1,234 @@
-// Supabase Edge Function: Auto-refresh RSS feeds
-// Runs automatically via cron job every 6 hours
+// Supabase Edge Function: refresh RSS news feeds into the rss_feeds cache table.
+//
+// Called two ways, both authenticated by the platform JWT check (anon key works):
+//   - pg_cron (hourly) — respects each source's fetch_interval_minutes
+//   - the admin "Refresh Now" button — passes { force: true } to ignore intervals
+//
+// Feeds are fetched directly (no CORS proxy — that constraint only exists in
+// browsers) and parsed with fast-xml-parser, since the Deno edge runtime has
+// no DOMParser.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { XMLParser } from 'https://esm.sh/fast-xml-parser@4.3.6'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface RSSFeedSource {
-  id: string;
-  name: string;
-  url: string;
-  country_code: string | null;
-  country_name: string | null;
-  category: string | null;
-  fetch_interval_minutes: number;
-  last_fetched_at: string | null;
+interface FeedSource {
+  id: string
+  name: string
+  url: string
+  country_code: string | null
+  country_name: string | null
+  category: string | null
+  fetch_interval_minutes: number
+  last_fetched_at: string | null
 }
 
-interface RSSFeedItem {
-  title: string;
-  link: string;
-  description: string;
-  pubDate: string;
-  source: string;
-  imageUrl?: string;
-  author?: string;
-  guid: string;
+interface FeedItem {
+  title: string
+  link: string
+  description: string
+  pub_date: string
+  source: string
+  image_url?: string
+  author?: string
+  guid: string
 }
 
-// Parse RSS feed XML
-async function fetchAndParseRSSFeed(feedUrl: string, sourceName: string): Promise<RSSFeedItem[]> {
-  try {
-    // Use CORS proxy to fetch RSS feeds
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`;
-    
-    const response = await fetch(proxyUrl);
-    const xmlText = await response.text();
-    
-    // Parse XML using DOMParser
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-    
-    // Check for parsing errors
-    const parseError = xmlDoc.querySelector('parsererror');
-    if (parseError) {
-      console.error('XML parsing error:', parseError.textContent);
-      return [];
-    }
-    
-    // Try RSS 2.0 format first
-    let items = xmlDoc.querySelectorAll('item');
-    
-    // If no items, try Atom format
-    if (items.length === 0) {
-      items = xmlDoc.querySelectorAll('entry');
-    }
-    
-    const feedItems: RSSFeedItem[] = [];
-    
-    items.forEach((item, index) => {
-      if (index >= 10) return; // Limit to 10 items per feed
-      
-      const title = item.querySelector('title')?.textContent || '';
-      const link = item.querySelector('link')?.textContent || item.querySelector('link')?.getAttribute('href') || '';
-      const description = item.querySelector('description')?.textContent || 
-                         item.querySelector('summary')?.textContent || 
-                         item.querySelector('content')?.textContent || '';
-      const pubDate = item.querySelector('pubDate')?.textContent || 
-                     item.querySelector('published')?.textContent || 
-                     item.querySelector('updated')?.textContent || 
-                     new Date().toISOString();
-      const guid = item.querySelector('guid')?.textContent || 
-                  item.querySelector('id')?.textContent || 
-                  link;
-      const author = item.querySelector('author')?.textContent || 
-                    item.querySelector('dc\\:creator')?.textContent || '';
-      
-      // Try to extract image
-      let imageUrl = item.querySelector('media\\:thumbnail')?.getAttribute('url') || 
-                    item.querySelector('media\\:content')?.getAttribute('url') || 
-                    item.querySelector('enclosure[type^="image"]')?.getAttribute('url') || '';
-      
-      // If no image in item, try to extract from description
-      if (!imageUrl && description) {
-        const imgMatch = description.match(/<img[^>]+src="([^">]+)"/);
-        if (imgMatch) {
-          imageUrl = imgMatch[1];
-        }
-      }
-      
-      // Strip HTML from description
-      const tmp = new DOMParser().parseFromString(description, 'text/html');
-      const cleanDescription = (tmp.body.textContent || '').trim().substring(0, 300);
-      
-      feedItems.push({
-        title: title.trim(),
-        link: link.trim(),
-        description: cleanDescription,
-        pubDate: new Date(pubDate).toISOString(),
-        source: sourceName,
-        imageUrl: imageUrl || undefined,
-        author: author.trim() || undefined,
-        guid: guid.trim(),
-      });
-    });
-    
-    return feedItems;
-  } catch (error) {
-    console.error(`Error fetching RSS feed from ${feedUrl}:`, error);
-    return [];
+const MAX_ITEMS_PER_FEED = 10
+const FETCH_TIMEOUT_MS = 12_000
+const CONCURRENCY = 8
+// A forced refresh (admin button) still no-ops if one ran in the last 2 minutes,
+// so the public endpoint can't be used to hammer the source sites.
+const FORCE_COOLDOWN_MS = 2 * 60_000
+
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: '@_',
+  textNodeName: '#text',
+})
+
+const asArray = <T>(v: T | T[] | undefined): T[] => (v === undefined ? [] : Array.isArray(v) ? v : [v])
+
+const text = (v: unknown): string => {
+  if (v == null) return ''
+  if (typeof v === 'string' || typeof v === 'number') return String(v)
+  if (typeof v === 'object' && '#text' in (v as Record<string, unknown>)) return text((v as Record<string, unknown>)['#text'])
+  return ''
+}
+
+const stripHtml = (html: string): string =>
+  html.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#?\w+;/g, ' ')
+    .replace(/\s+/g, ' ').trim()
+
+const toIso = (v: string): string => {
+  const d = new Date(v)
+  return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString()
+}
+
+function atomLink(link: unknown): string {
+  // Atom <link> can be an object or array of objects with href attributes.
+  const links = asArray(link as Record<string, unknown>)
+  const alt = links.find((l) => l?.['@_rel'] === 'alternate' || !l?.['@_rel'])
+  return text(alt?.['@_href']) || text(links[0]?.['@_href']) || text(link)
+}
+
+function itemImage(item: Record<string, unknown>, description: string): string | undefined {
+  const media = asArray(item['media:thumbnail'] as Record<string, unknown>)[0] ||
+    asArray(item['media:content'] as Record<string, unknown>)[0]
+  if (media?.['@_url']) return text(media['@_url'])
+  const enclosure = asArray(item.enclosure as Record<string, unknown>)[0]
+  if (enclosure?.['@_url'] && String(enclosure?.['@_type'] || '').startsWith('image')) return text(enclosure['@_url'])
+  const m = description.match(/<img[^>]+src="([^">]+)"/)
+  return m ? m[1] : undefined
+}
+
+function parseFeed(xml: string, sourceName: string): FeedItem[] {
+  const doc = parser.parse(xml)
+  // RSS 2.0: rss.channel.item — RDF 1.0: rdf:RDF.item — Atom: feed.entry
+  const rssItems = asArray(doc?.rss?.channel?.item ?? doc?.['rdf:RDF']?.item)
+  const atomEntries = asArray(doc?.feed?.entry)
+
+  const items: FeedItem[] = []
+  for (const item of rssItems.slice(0, MAX_ITEMS_PER_FEED)) {
+    const rawDesc = text(item.description) || text(item['content:encoded'])
+    const link = text(item.link)
+    items.push({
+      title: stripHtml(text(item.title)),
+      link,
+      description: stripHtml(rawDesc).substring(0, 300),
+      pub_date: toIso(text(item.pubDate) || text(item['dc:date'])),
+      source: sourceName,
+      image_url: itemImage(item, rawDesc),
+      author: stripHtml(text(item.author) || text(item['dc:creator'])) || undefined,
+      guid: text(item.guid) || link,
+    })
   }
+  for (const entry of atomEntries.slice(0, MAX_ITEMS_PER_FEED)) {
+    const rawDesc = text(entry.summary) || text(entry.content)
+    const link = atomLink(entry.link)
+    items.push({
+      title: stripHtml(text(entry.title)),
+      link,
+      description: stripHtml(rawDesc).substring(0, 300),
+      pub_date: toIso(text(entry.published) || text(entry.updated)),
+      source: sourceName,
+      image_url: itemImage(entry, rawDesc),
+      author: stripHtml(text(asArray(entry.author)[0]?.name)) || undefined,
+      guid: text(entry.id) || link,
+    })
+  }
+  return items.filter((i) => i.title && i.link && i.guid)
+}
+
+async function fetchFeed(url: string, sourceName: string): Promise<FeedItem[]> {
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    headers: {
+      'User-Agent': 'BaraAfrika-NewsBot/1.0 (+https://baraafrika.com)',
+      Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*',
+    },
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return parseFeed(await res.text(), sourceName)
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // Verify authorization (cron secret or service role)
-    const authHeader = req.headers.get('Authorization')
-    const cronSecret = Deno.env.get('CRON_SECRET')
-    
-    // Allow cron secret or service role key
-    if (authHeader !== `Bearer ${cronSecret}` && !authHeader?.includes('service_role')) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    )
+    const force = req.method === 'POST'
+      ? Boolean((await req.json().catch(() => ({})))?.force)
+      : false
 
-    // Create Supabase client with service role
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-    console.log('🔄 Starting RSS feed refresh...')
-
-    // Get all active RSS feed sources
     const { data: sources, error: sourcesError } = await supabase
       .from('rss_feed_sources')
       .select('*')
       .eq('is_active', true)
       .order('name')
+    if (sourcesError) throw sourcesError
 
-    if (sourcesError) {
-      throw sourcesError
-    }
-
-    console.log(`📰 Found ${sources?.length || 0} active sources`)
-
-    let totalItemsAdded = 0
-    const errors: string[] = []
-
-    // Fetch from each source
-    for (const source of sources || []) {
-      try {
-        // Check if we should fetch (based on interval)
-        if (source.last_fetched_at) {
-          const lastFetch = new Date(source.last_fetched_at)
-          const now = new Date()
-          const minutesSinceLastFetch = (now.getTime() - lastFetch.getTime()) / (1000 * 60)
-
-          if (minutesSinceLastFetch < source.fetch_interval_minutes) {
-            console.log(`⏭️ Skipping ${source.name} - fetched ${minutesSinceLastFetch.toFixed(0)} minutes ago`)
-            continue
-          }
-        }
-
-        console.log(`📡 Fetching from ${source.name}...`)
-        const items = await fetchAndParseRSSFeed(source.url, source.name)
-
-        // Insert items into database
-        for (const item of items) {
-          const { error } = await supabase
-            .from('rss_feeds')
-            .upsert({
-              title: item.title,
-              link: item.link,
-              description: item.description,
-              pub_date: item.pubDate,
-              source: item.source,
-              country_code: source.country_code,
-              country_name: source.country_name,
-              image_url: item.imageUrl,
-              author: item.author,
-              category: source.category,
-              guid: item.guid,
-            }, {
-              onConflict: 'guid',
-              ignoreDuplicates: true,
-            })
-
-          if (!error) {
-            totalItemsAdded++
-          }
-        }
-
-        // Update last_fetched_at
-        await supabase
-          .from('rss_feed_sources')
-          .update({ last_fetched_at: new Date().toISOString() })
-          .eq('id', source.id)
-
-        console.log(`✅ ${source.name}: Added ${items.length} items`)
-      } catch (error) {
-        const errorMsg = `${source.name}: ${error}`
-        console.error(`❌ ${errorMsg}`)
-        errors.push(errorMsg)
+    const now = Date.now()
+    if (force) {
+      const newest = Math.max(...(sources ?? []).map((s: FeedSource) =>
+        s.last_fetched_at ? new Date(s.last_fetched_at).getTime() : 0))
+      if (now - newest < FORCE_COOLDOWN_MS) {
+        return new Response(
+          JSON.stringify({ success: true, skipped: 'cooldown', itemsAdded: 0, sourcesProcessed: 0 }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        )
       }
     }
 
-    console.log(`✅ RSS refresh complete. Added ${totalItemsAdded} new items.`)
+    const due = (sources ?? []).filter((s: FeedSource) => {
+      if (force || !s.last_fetched_at) return true
+      const minutes = (now - new Date(s.last_fetched_at).getTime()) / 60_000
+      return minutes >= s.fetch_interval_minutes
+    })
+
+    let itemsAdded = 0
+    let sourcesProcessed = 0
+    const errors: string[] = []
+
+    const queue = [...due]
+    await Promise.all(Array.from({ length: CONCURRENCY }, async () => {
+      for (let source = queue.shift(); source; source = queue.shift()) {
+        try {
+          const items = await fetchFeed(source.url, source.name)
+          if (items.length > 0) {
+            const rows = items.map((i) => ({
+              ...i,
+              country_code: source.country_code,
+              country_name: source.country_name,
+              category: source.category,
+            }))
+            const { error, count } = await supabase
+              .from('rss_feeds')
+              .upsert(rows, { onConflict: 'guid', ignoreDuplicates: true, count: 'exact' })
+            if (error) throw error
+            itemsAdded += count ?? rows.length
+          }
+          await supabase
+            .from('rss_feed_sources')
+            .update({ last_fetched_at: new Date().toISOString() })
+            .eq('id', source.id)
+          sourcesProcessed++
+        } catch (e) {
+          errors.push(`${source.name}: ${e instanceof Error ? e.message : e}`)
+        }
+      }
+    }))
+
+    // Trim the cache so it doesn't grow without bound.
+    await supabase.from('rss_feeds').delete()
+      .lt('pub_date', new Date(now - 30 * 24 * 3600_000).toISOString())
 
     return new Response(
       JSON.stringify({
         success: true,
-        itemsAdded: totalItemsAdded,
-        sourcesProcessed: sources?.length || 0,
+        itemsAdded,
+        sourcesProcessed,
+        sourcesSkipped: (sources?.length ?? 0) - due.length,
         errors: errors.length > 0 ? errors : undefined,
         timestamp: new Date().toISOString(),
       }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
   } catch (error) {
-    console.error('❌ Error in refresh-news-feeds function:', error)
-    
+    console.error('refresh-news-feeds failed:', error)
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message,
-        timestamp: new Date().toISOString(),
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      }
+      JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 },
     )
   }
 })

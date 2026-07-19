@@ -83,21 +83,41 @@ export const AdminRSSFeeds = () => {
         description: 'Fetching latest news from all sources...',
       });
 
-      const result = await refreshRSSFeeds(true);
+      // Server-side refresh via the refresh-news-feeds edge function — fast,
+      // and it keeps running even if the admin leaves this page.
+      const { data, error } = await supabase.functions.invoke('refresh-news-feeds', {
+        body: { force: true },
+      });
 
-      if (result.success) {
-        toast({
-          title: 'Success',
-          description: `Added ${result.itemsAdded} new articles`,
-        });
-        fetchData(); // Refresh the data
+      let itemsAdded: number;
+      let errors: string[] | undefined;
+      if (!error && data?.success) {
+        itemsAdded = data.itemsAdded ?? 0;
+        errors = data.errors;
+        if (data.skipped === 'cooldown') {
+          toast({
+            title: 'Already refreshed',
+            description: 'Feeds were refreshed less than 2 minutes ago.',
+          });
+          fetchData();
+          return;
+        }
       } else {
-        toast({
-          title: 'Refresh Complete',
-          description: 'Some feeds may have failed to update',
-          variant: 'destructive'
-        });
+        // Fallback: refresh from this browser tab (slow, but works without
+        // the edge function — e.g. local development).
+        console.warn('Edge function refresh failed, falling back to client-side refresh', error, data);
+        const result = await refreshRSSFeeds(true);
+        if (!result.success) throw new Error('Client-side refresh failed');
+        itemsAdded = result.itemsAdded;
       }
+
+      toast({
+        title: 'Success',
+        description: `Added ${itemsAdded} new articles` +
+          (errors?.length ? ` (${errors.length} sources failed)` : ''),
+      });
+      if (errors?.length) console.warn('Sources that failed to refresh:', errors);
+      fetchData(); // Refresh the data
     } catch (error) {
       console.error('Error refreshing feeds:', error);
       toast({

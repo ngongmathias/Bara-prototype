@@ -63,6 +63,23 @@ export const COUNTRIES: CountryInfo[] = [
   { name: 'Uganda', iso2: 'UG', dial: '+256' },
   { name: 'Zambia', iso2: 'ZM', dial: '+260' },
   { name: 'Zimbabwe', iso2: 'ZW', dial: '+263' },
+  // Caribbean / Latin America (African diaspora)
+  { name: 'Antigua and Barbuda', iso2: 'AG', dial: '+1268' },
+  { name: 'Bahamas', iso2: 'BS', dial: '+1242' },
+  { name: 'Barbados', iso2: 'BB', dial: '+1246' },
+  { name: 'Belize', iso2: 'BZ', dial: '+501' },
+  { name: 'Cuba', iso2: 'CU', dial: '+53' },
+  { name: 'Dominica', iso2: 'DM', dial: '+1767' },
+  { name: 'Dominican Republic', iso2: 'DO', dial: '+1809' },
+  { name: 'Grenada', iso2: 'GD', dial: '+1473' },
+  { name: 'Guyana', iso2: 'GY', dial: '+592' },
+  { name: 'Haiti', iso2: 'HT', dial: '+509' },
+  { name: 'Jamaica', iso2: 'JM', dial: '+1876' },
+  { name: 'Saint Kitts and Nevis', iso2: 'KN', dial: '+1869' },
+  { name: 'Saint Lucia', iso2: 'LC', dial: '+1758' },
+  { name: 'Saint Vincent and the Grenadines', iso2: 'VC', dial: '+1784' },
+  { name: 'Suriname', iso2: 'SR', dial: '+597' },
+  { name: 'Trinidad and Tobago', iso2: 'TT', dial: '+1868' },
   // Major diaspora / global
   { name: 'Australia', iso2: 'AU', dial: '+61' },
   { name: 'Belgium', iso2: 'BE', dial: '+32' },
@@ -90,3 +107,22 @@ export const COUNTRIES: CountryInfo[] = [
   { name: 'United States', iso2: 'US', dial: '+1' },
   { name: 'Other', iso2: 'ZZ', dial: '+' },
 ];
+
+/** Look up a country by its ISO-3166 alpha-2 code. */
+export const countryByIso2 = (iso2: string): CountryInfo | undefined =>
+  COUNTRIES.find((c) => c.iso2 === iso2);
+
+/**
+ * Combine a dial code and a locally-typed number into the stored phone string.
+ * Strips formatting, drops the leading trunk zero, and de-duplicates the dial
+ * code if the user typed the full international number into the phone box.
+ */
+export const formatPhone = (dial: string, raw: string): string => {
+  let digits = raw.replace(/\D/g, '');
+  const dialDigits = dial.replace(/\D/g, '');
+  if (dialDigits && digits.startsWith(dialDigits) && digits.length > dialDigits.length + 4) {
+    digits = digits.slice(dialDigits.length);
+  }
+  digits = digits.replace(/^0+/, '');
+  return digits ? `${dial} ${digits}`.trim() : '';
+};

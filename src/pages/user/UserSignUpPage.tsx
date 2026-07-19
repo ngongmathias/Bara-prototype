@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { ReferralService } from '@/lib/referralService';
 import { UsernameService } from '@/lib/usernameService';
 import { REFERRAL_PROMPT_PENDING_KEY } from '@/components/InviteFriendsPrompt';
-import { COUNTRIES } from '@/data/countries';
+import { COUNTRIES, countryByIso2, formatPhone } from '@/data/countries';
 import { DateOfBirthPicker } from '@/components/DateOfBirthPicker';
 
 const GENDERS = ['Male', 'Female', 'Rather Not Say'] as const;
@@ -61,7 +61,11 @@ export const UserSignUpPage = () => {
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState<string>('');
   const [country, setCountry] = useState('Rwanda');
-  const [dialCode, setDialCode] = useState('+250');
+  // The dial-code select is keyed by ISO country code, not by the dial string:
+  // several countries share a dial code (US/CA are both +1), so a dial-keyed
+  // select displays the wrong country after selection.
+  const [dialIso, setDialIso] = useState('RW');
+  const dialCode = countryByIso2(dialIso)?.dial || '';
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -106,7 +110,7 @@ export const UserSignUpPage = () => {
   const onCountryChange = (name: string) => {
     setCountry(name);
     const match = COUNTRIES.find((c) => c.name === name);
-    if (match && match.dial !== '+') setDialCode(match.dial);
+    if (match && match.dial !== '+') setDialIso(match.iso2);
   };
 
   const clerkError = (e: any): string =>
@@ -168,7 +172,7 @@ export const UserSignUpPage = () => {
       date_of_birth: dob || null,
       gender: gender || null,
       country: country || null,
-      phone: `${dialCode} ${phone.trim()}`.trim(),
+      phone: formatPhone(dialCode, phone),
       updated_at: new Date().toISOString(),
     };
     // Insert the full profile; if a row already exists (retry), update it.
@@ -289,12 +293,12 @@ export const UserSignUpPage = () => {
                 <div className="flex gap-2">
                   <select
                     className={`${inputCls} w-24 sm:w-28 flex-shrink-0`}
-                    value={dialCode}
-                    onChange={(e) => setDialCode(e.target.value)}
+                    value={dialIso}
+                    onChange={(e) => setDialIso(e.target.value)}
                     aria-label="Country code"
                   >
                     {sortedCountries.filter((c) => c.dial !== '+').map((c) => (
-                      <option key={c.iso2} value={c.dial}>{c.iso2} {c.dial}</option>
+                      <option key={c.iso2} value={c.iso2}>{c.iso2} {c.dial}</option>
                     ))}
                   </select>
                   <input className={`${inputCls} flex-1 min-w-0`} value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" inputMode="numeric" placeholder="712 345 678" autoComplete="tel-national" />
