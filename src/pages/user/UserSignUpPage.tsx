@@ -340,9 +340,6 @@ export const UserSignUpPage = () => {
                 />
               </div>
 
-              {/* Clerk bot-protection mount target (used by some instances) */}
-              <div id="clerk-captcha" />
-
               <button
                 type="submit"
                 disabled={submitting || !isLoaded}
