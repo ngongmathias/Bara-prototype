@@ -27,9 +27,28 @@ const EXCLUDE_EMAILS = (process.env.EXCLUDE_EMAILS || '')
   .split(',')
   .map((s) => s.trim().toLowerCase())
   .filter(Boolean);
+// Clerk rate-limits the Backend API; firing requests with no gap triggers
+// HTTP 429. Space calls out and retry 429s with backoff.
+const REQUEST_DELAY_MS = Number(process.env.REQUEST_DELAY_MS || 400);
+const MAX_RETRIES = Number(process.env.CLERK_MAX_RETRIES || 6);
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// fetch wrapper that retries on 429, honoring the Retry-After header when
+// present and otherwise backing off exponentially (capped at 30s).
+async function fetchWithRetry(url, init) {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, init);
+    if (res.status !== 429 || attempt >= MAX_RETRIES) return res;
+    const retryAfter = Number(res.headers.get('retry-after')) || 0;
+    const waitMs = retryAfter > 0 ? retryAfter * 1000 : Math.min(2000 * 2 ** attempt, 30000);
+    console.warn(`Rate limited (429) — waiting ${Math.round(waitMs / 1000)}s (retry ${attempt + 1}/${MAX_RETRIES})`);
+    await sleep(waitMs);
+  }
+}
 
 async function clerkFetch(secretKey, url) {
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: {
       Authorization: `Bearer ${secretKey}`,
     },
@@ -52,7 +71,7 @@ async function clerkFetch(secretKey, url) {
 }
 
 async function clerkPost(secretKey, url, body) {
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${secretKey}`,
@@ -201,6 +220,7 @@ async function main() {
         console.error(`Revoke failed: ${invEmail}`);
         console.error(e);
       }
+      await sleep(REQUEST_DELAY_MS);
     }
   }
 
@@ -225,6 +245,7 @@ async function main() {
       console.error(`Failed: ${email}`);
       console.error(e);
     }
+    await sleep(REQUEST_DELAY_MS);
   }
 
   const reportsDir = path.join(process.cwd(), 'scripts', 'reports');
