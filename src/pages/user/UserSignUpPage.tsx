@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useSignUp, useSignIn } from '@clerk/clerk-react';
-import { Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { RegTelemetry } from '@/lib/registrationTelemetry';
 import { ReferralService } from '@/lib/referralService';
 import { UsernameService } from '@/lib/usernameService';
 import { REFERRAL_PROMPT_PENDING_KEY } from '@/components/InviteFriendsPrompt';
@@ -28,20 +29,26 @@ export const UserSignUpPage = () => {
   // redirect and can be turned into a referral once the profile row exists.
   useEffect(() => { ReferralService.stashRef(refCode); }, [refCode]);
 
+  // Top of the funnel — lets us see how many arrivals ever reach code_sent.
+  useEffect(() => { RegTelemetry.log('page_view', { detail: { ref: !!refCode } }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Google sign-up: new Google users are routed to /auth/complete-profile (by
   // AuthFinishPage) to collect the same fields — so no password is needed.
   const handleGoogle = async () => {
     if (!signInLoaded || !signIn) return;
     setOauthLoading(true);
     sessionStorage.setItem('bara_oauth_redirect', redirectUrl);
+    RegTelemetry.log('oauth_started');
     try {
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
         redirectUrl: '/sso-callback',
         redirectUrlComplete: finishUrl,
       });
-    } catch {
+    } catch (e: any) {
       setOauthLoading(false);
+      setError('Could not start Google sign-up. Please check your connection and try again, or register with email below.');
+      RegTelemetry.log('oauth_error', { errorMessage: e?.message });
     }
   };
 
@@ -54,6 +61,23 @@ export const UserSignUpPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  // Resend-code cooldown (seconds). Users whose verification email lands in
+  // spam or arrives late were previously hard-stuck on the verify step.
+  const [resendIn, setResendIn] = useState(0);
+  useEffect(() => {
+    if (step !== 'verify' || resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn, step]);
+
+  // On mobile the error banner (top of a long form) can be off-screen when a
+  // submit fails at the bottom — the page then looks like the button "did
+  // nothing". Scroll the banner into view whenever an error is set.
+  const errorRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (error) errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [error]);
 
   // Form fields
   const [firstName, setFirstName] = useState('');
@@ -115,6 +139,35 @@ export const UserSignUpPage = () => {
 
   const clerkError = (e: any): string =>
     e?.errors?.[0]?.longMessage || e?.errors?.[0]?.message || e?.message || 'Something went wrong. Please try again.';
+  const clerkCode = (e: any): string => e?.errors?.[0]?.code || '';
+
+  // Map the Clerk error codes real users actually hit to actionable copy
+  // (raw Clerk messages are technical and offer no next step).
+  const friendlyError = (e: any): string => {
+    switch (clerkCode(e)) {
+      case 'form_identifier_exists':
+        return 'An account with this email already exists — use "Sign in" below instead, or reset your password from the sign-in page.';
+      case 'form_password_pwned':
+        return 'That password has appeared in a known data breach, so it can’t be used. Please pick a different password.';
+      case 'form_password_length_too_short':
+      case 'form_password_validation_failed':
+        return 'Please choose a stronger password — at least 8 characters.';
+      case 'too_many_requests':
+        return 'Too many attempts right now. Please wait a minute, then try again.';
+      case 'verification_expired':
+        return 'That code has expired — tap "Resend code" to get a fresh one.';
+      case 'form_code_incorrect':
+        return 'That code doesn’t match. Double-check the 6 digits from the email and try again.';
+      default:
+        return clerkError(e);
+    }
+  };
+
+  // Validation failures are also logged so drop-off points become visible.
+  const failValidation = (msg: string, field: string) => {
+    RegTelemetry.log('validation_error', { email, detail: { field } });
+    setError(msg);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,18 +175,18 @@ export const UserSignUpPage = () => {
     setError(null);
 
     // Validation
-    if (!firstName.trim() || !lastName.trim()) return setError('Please enter your first and last name.');
-    if (!dob) return setError('Please enter your date of birth.');
-    if (!gender) return setError('Please select your gender.');
-    if (!country) return setError('Please select your country.');
-    if (!phone.trim()) return setError('Please enter your phone number.');
-    if (!email.trim()) return setError('Please enter your email.');
+    if (!firstName.trim() || !lastName.trim()) return failValidation('Please enter your first and last name.', 'name');
+    if (!dob) return failValidation('Please enter your date of birth.', 'dob');
+    if (!gender) return failValidation('Please select your gender.', 'gender');
+    if (!country) return failValidation('Please select your country.', 'country');
+    if (!phone.trim()) return failValidation('Please enter your phone number.', 'phone');
+    if (!email.trim()) return failValidation('Please enter your email.', 'email');
     const uname = username.trim().toLowerCase();
-    if (!uname) return setError('Please choose a username (we suggest one from your name).');
+    if (!uname) return failValidation('Please choose a username (we suggest one from your name).', 'username');
     const unameInvalid = UsernameService.validate(uname);
-    if (unameInvalid) return setError(unameInvalid);
-    if (usernameStatus === 'taken') return setError('That username is already taken. Please choose another.');
-    if (password.length < 8) return setError('Password must be at least 8 characters.');
+    if (unameInvalid) return failValidation(unameInvalid, 'username');
+    if (usernameStatus === 'taken') return failValidation('That username is already taken. Please choose another.', 'username');
+    if (password.length < 8) return failValidation('Password must be at least 8 characters.', 'password');
 
     setSubmitting(true);
     try {
@@ -145,11 +198,27 @@ export const UserSignUpPage = () => {
       try { await signUp.update({ firstName: firstName.trim(), lastName: lastName.trim() }); } catch { /* field may be disabled */ }
 
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      RegTelemetry.log('code_sent', { email });
       setStep('verify');
+      setResendIn(30);
     } catch (e: any) {
-      setError(clerkError(e));
+      setError(friendlyError(e));
+      RegTelemetry.log('create_error', { email, errorCode: clerkCode(e), errorMessage: clerkError(e) });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!isLoaded || resendIn > 0 || submitting) return;
+    setError(null);
+    try {
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      setResendIn(30);
+      RegTelemetry.log('code_resent', { email });
+    } catch (e: any) {
+      setError(friendlyError(e));
+      RegTelemetry.log('resend_error', { email, errorCode: clerkCode(e), errorMessage: clerkError(e) });
     }
   };
 
@@ -178,7 +247,15 @@ export const UserSignUpPage = () => {
     // Insert the full profile; if a row already exists (retry), update it.
     const { error: insertErr } = await supabase.from('clerk_users').insert(row);
     if (insertErr) {
-      await supabase.from('clerk_users').update(row).eq('clerk_user_id', clerkUserId);
+      const { error: updateErr } = await supabase.from('clerk_users').update(row).eq('clerk_user_id', clerkUserId);
+      if (updateErr) {
+        // Don't block the (already verified) account — AuthFinishPage creates a
+        // minimal profile row as a fallback; record it so support can follow up.
+        RegTelemetry.log('profile_save_error', {
+          email,
+          errorMessage: `${insertErr.message} / ${updateErr.message}`,
+        });
+      }
     }
     // 27.8.5 — queue the one-time "invite friends" prompt for after the redirect.
     try { sessionStorage.setItem(REFERRAL_PROMPT_PENDING_KEY, '1'); } catch { /* ignore */ }
@@ -191,9 +268,9 @@ export const UserSignUpPage = () => {
     } catch { /* non-critical */ }
   };
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isLoaded) return;
+  const handleVerify = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!isLoaded || submitting) return;
     setError(null);
     if (!code.trim()) return setError('Enter the 6-digit code we emailed you.');
 
@@ -202,21 +279,41 @@ export const UserSignUpPage = () => {
       const result = await signUp.attemptEmailAddressVerification({ code: code.trim() });
       if (result.status !== 'complete') {
         setSubmitting(false);
+        RegTelemetry.log('verify_incomplete', { email, detail: { status: result.status } });
         return setError('That code was not accepted. Please check and try again.');
       }
-      // Persist the registration profile to Supabase (the anon client is fine).
-      if (result.createdUserId) {
-        await saveProfile(result.createdUserId);
-        // Create the referral row now that the profile exists.
-        await ReferralService.createReferralOnSignup(result.createdUserId, referralCode.trim() || refCode);
-      }
+      RegTelemetry.log('verified', { email });
+      // Activate the session FIRST: from this moment the account exists in
+      // Clerk, so a profile-save/referral hiccup must never strand the user on
+      // an error screen (retrying the code then fails with "already verified"
+      // and re-registering says "email taken" — the exact "registration is
+      // broken" reports we've had). Profile persistence below is best-effort;
+      // AuthFinishPage backfills a minimal row if it failed.
       await setActive({ session: result.createdSessionId });
+      if (result.createdUserId) {
+        try {
+          await saveProfile(result.createdUserId);
+        } catch (pe: any) {
+          RegTelemetry.log('profile_save_error', { email, errorMessage: pe?.message });
+        }
+        try {
+          await ReferralService.createReferralOnSignup(result.createdUserId, referralCode.trim() || refCode);
+        } catch { /* non-critical */ }
+      }
       navigate(finishUrl);
     } catch (e: any) {
-      setError(clerkError(e));
+      setError(friendlyError(e));
+      RegTelemetry.log('verify_error', { email, errorCode: clerkCode(e), errorMessage: clerkError(e) });
       setSubmitting(false);
     }
   };
+
+  // Auto-submit as soon as all 6 digits are in — one less tap, and it makes
+  // the pasted-code path feel instant.
+  useEffect(() => {
+    if (step === 'verify' && code.length === 6 && !submitting) void handleVerify();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, step]);
 
   const inputCls =
     'w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900';
@@ -234,7 +331,7 @@ export const UserSignUpPage = () => {
 
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
           {error && (
-            <div className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md p-3">{error}</div>
+            <div ref={errorRef} className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md p-3">{error}</div>
           )}
 
           {step === 'form' ? (
@@ -327,7 +424,25 @@ export const UserSignUpPage = () => {
 
               <div>
                 <label className={labelCls}>Password</label>
-                <input type="password" className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" placeholder="At least 8 characters" />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    className={`${inputCls} pr-10`}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
+                    placeholder="At least 8 characters"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-700"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -374,6 +489,7 @@ export const UserSignUpPage = () => {
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   inputMode="numeric"
+                  autoComplete="one-time-code"
                   placeholder="••••••"
                   autoFocus
                 />
@@ -385,13 +501,26 @@ export const UserSignUpPage = () => {
               >
                 {submitting ? <Loader2 className="animate-spin" size={18} /> : 'Verify & finish'}
               </button>
-              <button
-                type="button"
-                onClick={() => { setStep('form'); setCode(''); setError(null); }}
-                className="w-full text-sm text-gray-500 hover:text-gray-900 transition-colors"
-              >
-                ← Back to the form
-              </button>
+              <div className="flex items-center justify-between text-sm">
+                <button
+                  type="button"
+                  onClick={() => { setStep('form'); setCode(''); setError(null); }}
+                  className="text-gray-500 hover:text-gray-900 transition-colors"
+                >
+                  ← Back to the form
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendIn > 0 || submitting}
+                  className="text-gray-500 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:hover:text-gray-500"
+                >
+                  {resendIn > 0 ? `Resend code in ${resendIn}s` : 'Resend code'}
+                </button>
+              </div>
+              <p className="text-center text-[11px] text-gray-400">
+                Didn’t get it? Check your spam folder, or use “Resend code”.
+              </p>
             </form>
           )}
         </div>
