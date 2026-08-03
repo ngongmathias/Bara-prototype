@@ -469,6 +469,12 @@ export const UserSignUpPage = () => {
                 />
               </div>
 
+              {/* Clerk Bot sign-up protection (Smart CAPTCHA) renders into this
+                  element. Required for custom sign-up flows — without it,
+                  signUp.create()/verification calls fail with 400 when bot
+                  protection is enabled on the instance. */}
+              <div id="clerk-captcha" />
+
               <button
                 type="submit"
                 disabled={submitting || !isLoaded}
