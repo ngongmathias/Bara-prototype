@@ -190,12 +190,24 @@ export const UserSignUpPage = () => {
 
     setSubmitting(true);
     try {
-      await signUp.create({ emailAddress: email.trim(), password });
+      const res = await signUp.create({ emailAddress: email.trim(), password });
       // Best-effort: also set the name on the Clerk user — wrapped so a field
       // that's disabled on the instance can't block sign-up (the profile is
       // always saved to Supabase regardless). Username is auto-derived at
       // profile-save time (27.8.1) — no username prompt at sign-up.
       try { await signUp.update({ firstName: firstName.trim(), lastName: lastName.trim() }); } catch { /* field may be disabled */ }
+
+      // Email verification is intentionally NOT required (team decision, Aug
+      // 2026 — reduce sign-up friction). When the Clerk instance has "Verify at
+      // sign-up" turned OFF, create() returns status 'complete' with a session,
+      // so we finish immediately with no code step. The email-code branch below
+      // is kept only as a safe fallback: if the instance still requires
+      // verification, registration keeps working instead of dead-ending.
+      if (res.status === 'complete' && res.createdSessionId) {
+        RegTelemetry.log('completed_no_verification', { email });
+        await finishSignUp(res.createdUserId, res.createdSessionId);
+        return;
+      }
 
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
       RegTelemetry.log('code_sent', { email });
@@ -268,6 +280,25 @@ export const UserSignUpPage = () => {
     } catch { /* non-critical */ }
   };
 
+  // Shared completion for both paths (immediate no-verification, and the
+  // email-code fallback). Activate the Clerk session FIRST, then persist the
+  // profile + referral as best-effort so nothing after account creation can
+  // strand the user; AuthFinishPage backfills a minimal profile if needed.
+  const finishSignUp = async (createdUserId?: string | null, createdSessionId?: string | null) => {
+    await setActive({ session: createdSessionId ?? undefined });
+    if (createdUserId) {
+      try {
+        await saveProfile(createdUserId);
+      } catch (pe: any) {
+        RegTelemetry.log('profile_save_error', { email, errorMessage: pe?.message });
+      }
+      try {
+        await ReferralService.createReferralOnSignup(createdUserId, referralCode.trim() || refCode);
+      } catch { /* non-critical */ }
+    }
+    navigate(finishUrl);
+  };
+
   const handleVerify = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!isLoaded || submitting) return;
@@ -283,24 +314,7 @@ export const UserSignUpPage = () => {
         return setError('That code was not accepted. Please check and try again.');
       }
       RegTelemetry.log('verified', { email });
-      // Activate the session FIRST: from this moment the account exists in
-      // Clerk, so a profile-save/referral hiccup must never strand the user on
-      // an error screen (retrying the code then fails with "already verified"
-      // and re-registering says "email taken" — the exact "registration is
-      // broken" reports we've had). Profile persistence below is best-effort;
-      // AuthFinishPage backfills a minimal row if it failed.
-      await setActive({ session: result.createdSessionId });
-      if (result.createdUserId) {
-        try {
-          await saveProfile(result.createdUserId);
-        } catch (pe: any) {
-          RegTelemetry.log('profile_save_error', { email, errorMessage: pe?.message });
-        }
-        try {
-          await ReferralService.createReferralOnSignup(result.createdUserId, referralCode.trim() || refCode);
-        } catch { /* non-critical */ }
-      }
-      navigate(finishUrl);
+      await finishSignUp(result.createdUserId, result.createdSessionId);
     } catch (e: any) {
       setError(friendlyError(e));
       RegTelemetry.log('verify_error', { email, errorCode: clerkCode(e), errorMessage: clerkError(e) });
