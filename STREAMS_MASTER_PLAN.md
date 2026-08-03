@@ -1,8 +1,12 @@
 # BARA Streams — Master Completion Plan
 
-**Created:** 2026-08-03 (planning session)
-**Goal:** Take Streams from "wide skeleton" to a fully functional product where every user scenario is accounted for — Spotify-quality mechanics, adapted to Bara's context: free-first, self-managed by users and artists, deep shareable links into every corner of the platform, and payments deferred until DPO/MoMo approval.
-**Companion docs:** `GAMIFICATION_GUIDE.md` (rewards system), this file (streams).
+**Created:** 2026-08-03 (planning session) · **Revised:** 2026-08-03 (admin + signature-features + doc reconciliation)
+**Goal:** Take Streams from "wide skeleton" to a fully functional product where every user scenario is accounted for — Spotify-quality mechanics, adapted to Bara's context: free-first, self-managed by users and artists, deep shareable links into every corner of the platform, and payments deferred until DPO/MoMo approval (Phase 15 Flutterwave in `MASTER_PLAN.md`).
+
+**How this doc relates to the others:**
+- `MASTER_PLAN.md` — platform-wide single source of truth. This file is the **streams execution plan** it points to; platform rules there (black/white/grey only, mobile-first 375px, migrations are *listed for Mathias, never auto-applied*, use existing patterns `useToast`/`useShare`/shadcn) all apply to every phase below.
+- `STREAMS_STANDARD.md` — the Spotify-grade **quality bar** for music (F1–F10, D1–D6) with its Tier 1–3 roadmap. This plan executes toward that bar and extends it to the other three verticals. Where this plan's audit contradicts a ✅ in the standard, this plan wins (discrepancies listed in §2b) — update the standard's statuses as phases land.
+- `GAMIFICATION_GUIDE.md` — rewards reference (listening XP, missions touch the player).
 
 ---
 
@@ -13,7 +17,7 @@ These were decided explicitly and should not be re-litigated without a new decis
 | # | Decision | Call |
 |---|----------|------|
 | D1 | Scope | All four verticals: Music, Podcasts, Movies, Ebooks |
-| D2 | Security hardening (RLS lockdown) | **Later phase, before public launch** — users are few and trusted now; visible completeness first. See Phase K. |
+| D2 | Security hardening (RLS lockdown) | **Later phase, before public launch** — users are few and trusted now; visible completeness first. See §K / Phase 13. |
 | D3 | What counts as a stream | **30 seconds of playback + dedupe** (max 1 count per user/device per song per short window). Anonymous plays count (free-first) but are rate-limited server-side. |
 | D4 | Moderation model | **Post-publish + reports.** Instant publishing stays (self-managed spirit). Add: Report button on songs/albums/artists → admin queue, DMCA/copyright claim form, admin takedown with artist notification, **plus clearly published content guidelines** shown at upload time and linkable. |
 | D5 | Movies playback | **Self-hosted video now** — real video player + Supabase storage for full films. |
@@ -39,11 +43,18 @@ Three deep code audits + live click-through on the dev build. Full details in se
 | **Ebooks** | ~50% — browse/detail solid, real storage bucket, **no reader** | ~30% — admin upload works end-to-end; no self-publish | "Read" is a dead button |
 
 Cross-cutting themes found everywhere:
-1. **Security/integrity:** catalog world-writable via anon key; plays gameable (Phase K, D2).
+1. **Security/integrity:** catalog world-writable via anon key; plays gameable (§K / Phase 13, D2).
 2. **Dead-end core actions:** watch/read/episode pages missing; several broken/inert buttons in music.
-3. **Sharing half-built** despite being a Bara priority: no OG previews anywhere (SPA), missing share buttons, shared songs open without queue.
+3. **Sharing half-built** despite being a Bara priority: OG previews exist ONLY for song/playlist/artist (via `middleware.ts` on Vercel — see §2b) — nothing for album/genre/podcast/movie/ebook; missing share buttons; shared songs open without queue.
 4. **No persistence/resume:** player state dies on refresh; no listen/watch/read progress anywhere.
 5. **Consistency debt:** 3 table-name mismatches, two migration folders, duplicate columns, mock sections, inconsistent login-gating UX.
+
+### 2b. Corrections & discrepancies vs. earlier docs (verified 2026-08-03)
+
+- **OG previews:** `STREAMS_STANDARD.md` F8 says "OG previews ✅" and the original audit said "none". Truth: **Vercel Edge Middleware (`middleware.ts`) already serves OG tags for `/streams/song/:id`, `/streams/playlist/:id`, `/streams/artist/:id` in production** (invisible on dev, which is why both got it wrong). Missing: album, genre, podcast show/episode, movie, ebook. §C1 = *extend* the existing middleware, not build new.
+- **Radio:** `startRadio` genuinely exists and works (standard Tier 2 ✅), but the home page's "Popular radio" cards are hardcoded mocks that don't call it (`StreamsHome.tsx:663-687`) — wiring them is a quick win, not a build.
+- **QueueDrawer contrast:** standard Part C claims fixed; the drawer is still light-on-dark inconsistent with the player surface (§B5).
+- **`STREAMS_STANDARD.md` still-open items this plan absorbs:** gapless/crossfade/normalization (F1), offline/PWA (F5), weekly recap (F10), activity feed (F8 stretch), device-matrix + full keyboard sweep (D3/D5), claim/verify 🟡 (F9).
 
 ---
 
@@ -126,10 +137,11 @@ Ranked within each area. File references are as of audit date.
 6. Mobile mini-player hides volume/shuffle/repeat entirely (fine) but nav omits Stats/Trending — review nav contents.
 
 ### C. Sharing & deep links (Bara priority)
-1. **No OG/link previews for anything** — helmet-only SPA meta is invisible to WhatsApp/FB scrapers, and `SongPage` doesn't even render `SEO`. Needs a server-side answer: Supabase Edge Function (or Vercel middleware) that serves crawler-targeted OG HTML for `/streams/song/:id`, `/album/:id`, `/artist/:id`, `/playlist/:id`, podcast/movie/ebook pages. This is the single highest-leverage share feature.
+1. **Extend the existing Vercel Edge Middleware OG system** (`middleware.ts` — already covers song/playlist/artist, see §2b) to: `/streams/album/:id`, `/streams/genre/:g`, podcast show + episode pages, `/streams/movies` detail, ebook detail. Also add client-side `SEO` component on `SongPage` (in-app tab titles, and dev parity).
 2. No share button on Album (`AlbumPage.tsx:199-228` action bar) or Genre pages; podcasts have no share at all.
-3. Unify a `useShare()` helper: canonical URL builder per entity + native share sheet + copy fallback (exists partially in `ShareContext` used by movies/ebooks).
-4. Future (nice-to-have): `?t=90` timestamp deep links into songs/episodes.
+3. Unify on the platform `useShare()` pattern (per MASTER_PLAN rule 5): canonical URL builder per entity + native share sheet + copy fallback (`ShareContext` already used by movies/ebooks — bring music pages onto it).
+4. **Share cards for WhatsApp** (see §6 Signature): OG images per entity — cover art + title composited, since WhatsApp status/share is the dominant African share channel.
+5. Future (nice-to-have): `?t=90` timestamp deep links into songs/episodes.
 
 ### D. Stream-count integrity (D3)
 1. Count at 30s: move `trackPlay` from play-start to a 30s-elapsed trigger (player already has a 30s XP timer to piggyback on — `AudioPlayerContext.tsx:225`).
@@ -200,9 +212,70 @@ Ranked within each area. File references are as of audit date.
 6. Podcast/movie RLS: replace `USING (true)` management policies with admin/owner checks.
 7. Pen-test pass: attempt anon writes against every table/bucket via REST; document results.
 
+### L. Admin & management completeness
+
+Admin items scattered above, consolidated + extended into a real "streams command center":
+
+**Broken today (also listed in their vertical sections):**
+1. AdminMovies create/edit fails (schema mismatch, §H1); `movies`/`podcasts`/`music-covers` buckets missing (§H2, §G6, E-album note).
+2. No podcast **episode** management UI at all (§G6) — delete dialog even promises episode cleanup it can't do.
+3. Admin song deletion cleans the wrong storage prefix (§E2).
+4. `is_verified` writable two ways with no audit trail (§E7).
+
+**Missing management capability (new):**
+5. **Moderation queue** page: content reports + DMCA claims (from §F) with review/dismiss/takedown+notify actions and per-admin action log.
+6. **AdminStreamsDashboard with real numbers:** plays today/week (post-D3 they're credible), top songs/artists, uploads per day, storage used per bucket, listener counts per vertical, seed-vs-real content split. Recharts, consistent with other admin dashboards.
+7. **Content-health panel** (pattern proven by the RSS fetch-health work): dead audio URLs (external SoundHelix seeds!), songs with missing covers/durations, orphaned storage objects, albums with zero tracks, artists with no user_id (unclaimed) — each with a fix/queue action.
+8. **Seed-data controls:** flag `is_seed` on seeded artists/songs/podcasts/movies; one-click hide-all-seed-content for launch (today seed and real content are indistinguishable — user test uploads appeared inside a "curated" playlist live).
+9. **Bulk actions** on AdminSongs/AdminAlbums: multi-select → genre fix, takedown, badge, delete-with-storage.
+10. **Artist-claim review queue** (from §E1) alongside the existing verification queue.
+11. **Admin role separation** — `admin_users.role` is read but never enforced (MASTER_PLAN 27.6.2); enforce at least super_admin vs content-moderator on takedown/delete.
+12. Admin audit trail for destructive actions (who deleted/took down what, when) — pairs with soft-delete/unpublish (§F3).
+
 ---
 
-## 5. Execution Phases
+## 5. Signature Features — "splendid UX/UI" layer
+
+The gap register makes Streams *work*; this section makes it *delightful*. Bar = `STREAMS_STANDARD.md` D1–D6 (strict black/white/grey, Comfortaa/Roboto, Apple+Stripe calm, skeletons everywhere, 44px touch targets, reduced-motion respected). Items marked ⭐ are the highest leverage for Bara's context.
+
+**Cross-vertical**
+- ⭐ **"Jump back in" universal resume rail** on the Streams hub + music home: your interrupted song queue, half-played episode, paused movie, open book — one row, four verticals. (Depends on the progress tables from §B/§G/§H/§I.)
+- ⭐ **Data Saver mode** (African context: data is expensive): audio-quality selector (low/normal/high), disable autoplay images option, "wifi-only artwork" — a Streams settings sheet, persisted per device.
+- ⭐ **Offline/PWA** for free content (STREAMS_STANDARD F5 leftover; MASTER_PLAN 27.6.5): installable app, cached shell, downloadable free songs/episodes for offline playback.
+- ⭐ **Country charts — real, not mock:** replace the hardcoded "Featured Charts" with actual charts computed from `play_history` (Top 50 Africa, Top Songs {country} using Bara's country dimension). This is Bara's identity advantage over Spotify — lean in.
+- **Cross-vertical search** with grouped sections (§J1) + trending searches.
+- **Share cards:** OG image generation (cover art + entity name + Bara mark) for every shareable entity (§C4) — WhatsApp-first.
+- Consistent **sign-in nudge sheet** for gated actions (one component, warm copy, not a dead button) — fixes §A silent no-ops with good UX.
+
+**Music**
+- ⭐ **Wire "Popular radio" cards to the real `startRadio`** (§2b — engine exists, cards are mock). Radio from any song/artist/genre.
+- **Synced lyrics** already ship (LRC `[mm:ss]`) — add a lyrics button on the mini-player and a share-a-lyric-line card (ties into share cards).
+- **Gapless + crossfade + loudness normalization** (STREAMS_STANDARD Tier 3, F1) — Web Audio API crossfade setting (0–12s).
+- **Weekly recap + "Bara Wrapped"** (F10 leftover): weekly listening email/notification via the existing email queue; end-of-year shareable Wrapped cards (stats page already computes most inputs).
+- **Smart queue end:** when a queue runs out, auto-continue with radio from the last song (setting, default on — engine exists).
+- **Artist tipping with coins** (MASTER_PLAN 27.4.2 sink) — *after* coin security; UI stub "Support this artist" can land earlier gated off.
+- **New-release notifications** already exist (trigger) — surface a "New from artists you follow" rail (Release Radar exists; make it prominent).
+
+**Podcasts**
+- Playback speed + skip-silence flags on episodes (player already supports rate 0.25–4x — expose it in podcast UI).
+- Episode chapters (simple `[{t, title}]` JSON) with chapter list in full-screen player.
+- "New episodes" rail from subscriptions + subscription notifications (reuse new-release trigger pattern).
+
+**Movies**
+- "Continue watching" rail with progress bars on cards (§H3 progress table).
+- Trailer-on-hover / trailer button using existing `trailer_url` data even before full films upload.
+- Subtitle track support (`<track>` WebVTT) — schema + player slot from day one, content later.
+
+**Ebooks**
+- Reader comfort: font size/line-height controls, sepia/night reading surface (still within the grey system), remembered per user.
+- ⭐ **Quote cards:** select text → share as a designed quote card (author + cover + Bara mark) — the ebook version of share cards.
+- Reading streaks/goals tie-in with existing gamification (missions already exist).
+
+**Explicitly out (per MASTER_PLAN rules/guardrails):** emoji reaction pickers (likes only), any colored accent UI, coin cash-out, betting-adjacent features. Activity feed / friend listening (F8 stretch) and Blend-style two-person playlists stay in "later" — logged, not scheduled.
+
+---
+
+## 6. Execution Phases
 
 Ordered for: visible product completeness first (D2), foundations that other phases need early, security as the launch gate. Each phase is a shippable PR-sized chunk (some split into multiple PRs).
 
@@ -218,10 +291,12 @@ Ordered for: visible product completeness first (D2), foundations that other pha
 | **8** | Movies to parity (D5) | §H — schema fix, buckets, video player + progress, watchlist, wired browse | L |
 | **9** | Ebooks to parity (D7) | §I — reader, progress, self-publish, seed catalog | L |
 | **10** | Search, discovery & perf | §J — cross-vertical search, pagination, React Query | M |
-| **11** | Security & schema hardening | §K — the pre-launch gate | L |
-| **12** | Launch QA | Re-run this scenario matrix end-to-end, all ✅ or consciously deferred; mobile pass; empty/error-state pass | M |
+| **11** | Admin command center | §L — moderation queue, real dashboard, content health, seed controls, bulk actions, claim queue, role enforcement, audit trail | L |
+| **12** | Signature experiences | §5 — resume rail, data saver, country charts, radio wiring, share/quote cards, recap/Wrapped, offline/PWA, per-vertical delight | L (split into several PRs) |
+| **13** | Security & schema hardening | §K — the pre-launch gate | L |
+| **14** | Launch QA | Re-run scenario matrix end-to-end, all ✅ or consciously deferred; STREAMS_STANDARD Part B acceptance checks; device-matrix pass (375/768/1440); empty/error-state pass; Lighthouse ≥90 a11y | M |
 
-Suggested pairing per session: Phases 1–2 together (music feels dramatically more finished), then 3–4 (share + counting = credible public numbers), then 5–6 (creators + safety), then one vertical per session (7, 8, 9), then 10, then 11–12 as the launch gate.
+Suggested pairing per session: Phases 1–2 together (music feels dramatically more finished), then 3–4 (share + counting = credible public numbers), then 5–6 (creators + safety), then one vertical per session (7, 8, 9), then 10–11 (search + admin), 12 in slices whenever a phase lands early, then 13–14 as the launch gate. Some §5 quick wins (radio wiring, sign-in nudge sheet, SongPage SEO) can ride along inside Phases 1–3.
 
 ### Acceptance criteria (definition of "fully complete")
 - Every row in the Scenario Matrix (§3) is ✅ or explicitly deferred with a reason logged here.
@@ -229,11 +304,13 @@ Suggested pairing per session: Phases 1–2 together (music feels dramatically m
 - Nothing user-visible is mock/hardcoded/inert.
 - A signed-out user always gets a clear sign-in prompt (never a silent no-op) on gated actions.
 - Play/watch/read progress survives refresh and returns.
-- Anon REST writes fail against every streams table and bucket (Phase 11).
+- Anon REST writes fail against every streams table and bucket (Phase 13).
+- Admin can manage every content type end-to-end (create, edit, takedown, moderate reports) without touching SQL (Phase 11).
+- The ⭐ signature features in §5 are shipped or explicitly deferred with reasons logged.
 
 ---
 
-## 6. Known environment notes
+## 7. Known environment notes
 - Dev: `npm run dev` wants port 8080 but that collides with other local projects — use `npx vite --port 8090 --strictPort`.
 - Seed catalog audio = external SoundHelix MP3s (can time out); replace or accept for dev only.
 - Two migration folders exist (`supabase/migrations/`, `database/migrations/`) — the latter is hand-run; Phase 5/11 consolidates.

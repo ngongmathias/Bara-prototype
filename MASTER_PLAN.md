@@ -79,7 +79,7 @@
 | Migrations | `supabase/migrations/` |
 | Config | `src/config/categoryFieldConfigs.ts` |
 | Compliance | `compliance/` (10 files) |
-| Streams spec | `STREAMS_STANDARD.md` · Rewards reference: `GAMIFICATION_GUIDE.md` |
+| Streams spec | `STREAMS_STANDARD.md` (quality bar) · **`STREAMS_MASTER_PLAN.md` (execution plan — audits, scenario matrix, 14 phases; start here for ANY streams work)** · Rewards reference: `GAMIFICATION_GUIDE.md` |
 
 ### Key Identifiers
 
@@ -169,7 +169,7 @@
 - **Phase 11/11.7 marketplace backlog**: partner dashboard, lead inbox UI, bulk CSV upload, saved-search alerts, video ads, slug URLs, fraud rules, posting-form unification (delete PostListing.tsx in favor of CategoryPostForm).
 - **Phase 22 email**: create remaining new templates/triggers, preferences page completeness.
 - **Phases 23/24 checklists**: cross-browser, error states, perf, SEO, competitor benchmark — run before/after launch.
-- **Streams Tier 2/3** (`STREAMS_STANDARD.md`): radio, daily mixes, synced lyrics enhancements, gapless/crossfade, offline/PWA (27.6.5), perf/a11y.
+- **Streams — full completion plan now lives in `STREAMS_MASTER_PLAN.md`** (Aug 3, 2026): audits of all four verticals (music/podcasts/movies/ebooks), scenario matrix, ranked gap register, 7 locked product decisions, 14 execution phases (incl. admin command center, signature UX features, and the security-hardening pre-launch gate). Supersedes the "Streams Tier 2/3" line — remaining STREAMS_STANDARD items are absorbed into it.
 
 ### Phase 27 — remaining items
 
@@ -276,5 +276,7 @@ User profile visibility ──→ team decision
 ## CHANGELOG
 
 *Feb 22 – Jul 6, 2026 — full changelog preserved in `MASTER_PLAN_ARCHIVE_2.md`.*
+
+***August 3, 2026 — STREAMS PLANNING SESSION: created `STREAMS_MASTER_PLAN.md` (three deep code audits + live click-through of all four Streams verticals → scenario matrix, ranked gap register with file refs, 7 locked decisions, 14 execution phases). Key facts for other sessions: catalog RLS is world-writable (deliberately deferred to the Phase 13 pre-launch gate); Movies "Watch Now"/Ebooks "Read" are dead buttons; AdminMovies inserts fail on nonexistent columns; `movies`/`podcasts`/`music-covers` buckets don't exist; OG middleware covers song/playlist/artist only.***
 
 ***July 6, 2026 — v3 RESTRUCTURE: archived the full plan (Phases 15–27 detail, all DONE notes) to `MASTER_PLAN_ARCHIVE_2.md` and restarted MASTER_PLAN.md lean: START HERE + RULES kept, history compressed to a summary table, ACTIVE WORK reduced to genuinely open items. Same day: Phase 27 + 27.8 shipped end-to-end and ALL migrations verified applied to prod (15/15); every earn/spend amount made admin-tunable; Marlon confirmed the Clerk username-field question is settled.***
