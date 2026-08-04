@@ -9,12 +9,24 @@ import { ShareDialog } from '@/components/ShareDialog';
 
 export default function SongPage() {
     const { id } = useParams<{ id: string }>();
-    const { play, currentSong, isPlaying, togglePlay, toggleLike, likedSongs } = useAudioPlayer();
+    const { playAlbum, currentSong, isPlaying, togglePlay, toggleLike, likedSongs } = useAudioPlayer();
     const [song, setSong] = useState<Song | null>(null);
     const [credits, setCredits] = useState<{ role: string; name: string; artist_id: string }[]>([]);
     const [loading, setLoading] = useState(true);
     const [showShare, setShowShare] = useState(false);
     const { toast } = useToast();
+
+    const mapSong = (s: any): Song => ({
+        id: s.id,
+        title: s.title,
+        artist: s.artists?.name || 'Unknown Artist',
+        file_url: s.file_url,
+        cover_url: s.cover_url || '/placeholder-music.png',
+        duration: s.duration || 0,
+        artist_id: s.artist_id,
+        album_id: s.album_id,
+        album_title: s.albums?.title,
+    });
 
     useEffect(() => {
         if (!id) return;
@@ -31,17 +43,7 @@ export default function SongPage() {
                 return;
             }
 
-            setSong({
-                id: data.id,
-                title: data.title,
-                artist: data.artists?.name || 'Unknown Artist',
-                file_url: data.file_url,
-                cover_url: data.cover_url || '/placeholder-music.png',
-                duration: data.duration || 0,
-                artist_id: data.artist_id,
-                album_id: data.album_id,
-                album_title: data.albums?.title,
-            });
+            setSong(mapSong(data));
 
             // Fetch credits from song_artists
             try {
@@ -60,10 +62,41 @@ export default function SongPage() {
         fetchSong();
     }, [id]);
 
+    // Builds real queue context (the album, or the artist's top tracks) so
+    // next/prev work instead of dying after one song — matters most for
+    // shared links, which are the main way people land directly on this page.
+    const playWithContext = async (target: Song) => {
+        let context: Song[] = [target];
+        try {
+            if (target.album_id) {
+                const { data } = await supabase
+                    .from('songs')
+                    .select('*, artists(name), albums(title)')
+                    .eq('album_id', target.album_id)
+                    .order('track_number', { ascending: true, nullsFirst: false })
+                    .order('created_at', { ascending: true });
+                if (data && data.length > 0) context = data.map(mapSong);
+            } else if (target.artist_id) {
+                const { data } = await supabase
+                    .from('songs')
+                    .select('*, artists(name), albums(title)')
+                    .eq('artist_id', target.artist_id)
+                    .order('plays', { ascending: false })
+                    .limit(10);
+                if (data && data.length > 0) {
+                    context = data.map(mapSong);
+                    if (!context.some(s => s.id === target.id)) context = [target, ...context];
+                }
+            }
+        } catch { /* fall back to playing just this song */ }
+        const startIndex = Math.max(0, context.findIndex(s => s.id === target.id));
+        playAlbum(context, startIndex);
+    };
+
     // Auto-play when song loads from a shared link
     useEffect(() => {
         if (song && !currentSong) {
-            play(song);
+            playWithContext(song);
         }
     }, [song]);
 
@@ -72,7 +105,7 @@ export default function SongPage() {
         if (currentSong?.id === song.id) {
             togglePlay();
         } else {
-            play(song);
+            playWithContext(song);
         }
     };
 
