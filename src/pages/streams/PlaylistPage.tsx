@@ -7,6 +7,7 @@ import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useSongContextMenu } from '@/components/streams/SongContextMenu';
 import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music, Share2, Users, Link2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useShare } from '@/context/ShareContext';
 import { useUser, useAuth } from '@clerk/clerk-react';
 
 interface PlaylistData {
@@ -26,6 +27,7 @@ export default function PlaylistPage() {
     const { play, playAlbum, currentSong, isPlaying, togglePlay } = useAudioPlayer();
     const { handlers: contextMenuHandlers } = useSongContextMenu();
     const { toast } = useToast();
+    const { openShare } = useShare();
     const { user } = useUser();
     const { getToken } = useAuth();
     const [playlist, setPlaylist] = useState<PlaylistData | null>(null);
@@ -171,30 +173,14 @@ export default function PlaylistPage() {
         }
     };
 
-    const handleShare = async () => {
-        const shareUrl = window.location.href;
-        const shareData = {
-            title: playlist?.title || 'Playlist',
-            text: `Check out "${playlist?.title || 'this playlist'}" on Bara Streams!`,
-            url: shareUrl,
-        };
-
-        try {
-            if (navigator.share) {
-                await navigator.share(shareData);
-            } else {
-                await navigator.clipboard.writeText(shareUrl);
-                toast({ title: 'Link copied!', description: 'Playlist link copied to clipboard.' });
-            }
-        } catch (err) {
-            // User cancelled share or clipboard failed
-            try {
-                await navigator.clipboard.writeText(shareUrl);
-                toast({ title: 'Link copied!', description: 'Playlist link copied to clipboard.' });
-            } catch {
-                toast({ title: 'Share', description: shareUrl });
-            }
-        }
+    const handleShare = () => {
+        if (!playlist) return;
+        openShare({
+            url: `${window.location.origin}/streams/playlist/${playlist.id}`,
+            title: playlist.title,
+            description: playlist.description || `Check out "${playlist.title}" on Bara Streams`,
+            imageUrl: playlist.cover_url,
+        });
     };
 
     const formatDuration = (seconds: number | null) => {
