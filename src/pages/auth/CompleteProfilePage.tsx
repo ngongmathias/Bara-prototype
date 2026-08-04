@@ -8,6 +8,7 @@ import { DateOfBirthPicker } from '@/components/DateOfBirthPicker';
 import { ReferralService } from '@/lib/referralService';
 import { UsernameService } from '@/lib/usernameService';
 import { isProfileComplete } from '@/lib/profileCompletion';
+import { SignupProfileStash } from '@/lib/signupProfileStash';
 import { REFERRAL_PROMPT_PENDING_KEY } from '@/components/InviteFriendsPrompt';
 
 const GENDERS = ['Male', 'Female', 'Rather Not Say'] as const;
@@ -97,21 +98,33 @@ export const CompleteProfilePage = () => {
         .eq('clerk_user_id', user.id)
         .maybeSingle();
       if (isProfileComplete(data)) {
+        SignupProfileStash.clear();
         navigate(redirectUrl); // already complete — nothing to do
         return;
       }
-      if (data) {
-        if (data.first_name) setFirstName(data.first_name);
-        if (data.last_name) setLastName(data.last_name);
-        if (data.date_of_birth) setDob(data.date_of_birth);
-        if (data.gender) setGender(data.gender);
-        if (data.country) {
-          setCountry(data.country);
-          const match = COUNTRIES.find((c) => c.name === data.country);
-          if (match && match.dial !== '+') setDialIso(match.iso2);
-        }
-        if (data.username) { setUsername(data.username); setUsernameEdited(true); }
+      // Prefill from whatever we already have. Returning users: their existing
+      // DB row. Fresh Google sign-ups: the details they typed on the sign-up
+      // form, stashed across the OAuth redirect — those take precedence.
+      const stash = SignupProfileStash.read();
+      const firstNameV = stash?.firstName || data?.first_name || user.firstName || '';
+      const lastNameV = stash?.lastName || data?.last_name || user.lastName || '';
+      const dobV = stash?.dob || data?.date_of_birth || '';
+      const genderV = stash?.gender || data?.gender || '';
+      const countryV = stash?.country || data?.country || '';
+      const usernameV = stash?.username || data?.username || '';
+      if (firstNameV) setFirstName(firstNameV);
+      if (lastNameV) setLastName(lastNameV);
+      if (dobV) setDob(dobV as string);
+      if (genderV) setGender(genderV as string);
+      if (countryV) {
+        setCountry(countryV as string);
+        const match = COUNTRIES.find((c) => c.name === countryV);
+        if (match && match.dial !== '+') setDialIso(match.iso2);
       }
+      if (stash?.dialIso) setDialIso(stash.dialIso);
+      if (stash?.phone) setPhone(stash.phone);
+      if (usernameV) { setUsername(usernameV as string); setUsernameEdited(true); }
+      if (stash?.referralCode) setReferralCode(stash.referralCode);
       setChecking(false);
     })();
   }, [isLoaded, isSignedIn, user, navigate, redirectUrl]);
@@ -184,6 +197,7 @@ export const CompleteProfilePage = () => {
         if (signupXp > 0) await GamificationService.addXP(user.id, signupXp, 'Account created');
       } catch { /* non-critical */ }
 
+      SignupProfileStash.clear();
       navigate(redirectUrl);
     } catch (e: any) {
       setError(e?.message || 'Could not save your profile. Please try again.');
