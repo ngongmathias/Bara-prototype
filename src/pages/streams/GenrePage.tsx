@@ -6,6 +6,7 @@ import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { SEO } from '@/components/SEO';
 import { Play, Pause, ArrowLeft, Music2 } from 'lucide-react';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
+import { filterPublished } from '@/lib/publishFilter';
 
 interface Genre { name: string; slug: string; blurb: string; }
 
@@ -99,7 +100,7 @@ function GenreDetail({ genre, slug }: { genre?: Genre; slug: string }) {
           supabase.from('artists').select('id, name, image_url, is_verified').ilike('genre', `%${name}%`).limit(12),
         ]);
         if (!active) return;
-        setSongs((songData || []).map(mapSong));
+        setSongs(filterPublished(songData).map(mapSong));
         setArtists(artistData || []);
       } finally {
         if (active) setLoading(false);

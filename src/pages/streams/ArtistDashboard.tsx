@@ -17,6 +17,7 @@ import { VerifyNudge } from "@/components/VerifyNudge";
 import { useToast } from "@/hooks/use-toast";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { supabase, createAuthenticatedSupabaseClient } from "@/lib/supabase";
+import { deleteSongStorageFiles } from "@/lib/songStorage";
 import { Link } from "react-router-dom";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
 import {
@@ -38,6 +39,10 @@ interface MySong {
     created_at: string;
     album_id: string | null;
     albums?: { title: string } | null;
+    is_premium?: boolean;
+    boosted_until?: string | null;
+    status?: string | null;
+    release_date?: string | null;
 }
 
 interface MyAlbum {
@@ -66,6 +71,7 @@ export default function ArtistDashboard() {
     const [loading, setLoading] = useState(true);
     const [isBoosting, setIsBoosting] = useState(false);
     const [dailyStreams, setDailyStreams] = useState<Array<{ date: string; count: number }>>([]);
+    const [streamsRangeDays, setStreamsRangeDays] = useState<7 | 30 | 90>(30);
     const [followerCount, setFollowerCount] = useState(0);
     const [monthlyListeners, setMonthlyListeners] = useState(0);
     const [editingSong, setEditingSong] = useState<MySong | null>(null);
@@ -85,6 +91,45 @@ export default function ArtistDashboard() {
     useEffect(() => {
         if (user?.id) fetchMyData();
     }, [user?.id]);
+
+    // Separate from fetchMyData so switching the time range doesn't flash the
+    // whole dashboard's loading state — only the chart itself refetches.
+    useEffect(() => {
+        const songIds = songs.map((s) => s.id);
+        if (songIds.length === 0) { setDailyStreams([]); return; }
+        let active = true;
+        (async () => {
+            try {
+                const since = new Date();
+                since.setDate(since.getDate() - streamsRangeDays);
+                const { data: plays } = await supabase
+                    .from('play_history')
+                    .select('played_at')
+                    .in('song_id', songIds)
+                    .gte('played_at', since.toISOString());
+                if (!active) return;
+
+                const byDay = new Map<string, number>();
+                (plays || []).forEach((row: any) => {
+                    const d = new Date(row.played_at);
+                    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    byDay.set(key, (byDay.get(key) || 0) + 1);
+                });
+                const buckets: Array<{ date: string; count: number }> = [];
+                for (let i = streamsRangeDays - 1; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    buckets.push({ date: key, count: byDay.get(key) || 0 });
+                }
+                setDailyStreams(buckets);
+            } catch (err) {
+                console.warn('Could not fetch daily streams', err);
+            }
+        })();
+        return () => { active = false; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [artistId, streamsRangeDays, songs.length]);
 
     const fetchMyData = async () => {
         if (!user?.id) return;
@@ -109,7 +154,7 @@ export default function ArtistDashboard() {
             const [songsRes, albumsRes] = await Promise.all([
                 supabase
                     .from('songs')
-                    .select('id, title, file_url, cover_url, genre, plays, duration, created_at, album_id, albums(title)')
+                    .select('id, title, file_url, cover_url, genre, plays, duration, created_at, album_id, albums(title), is_premium, boosted_until, status, release_date')
                     .eq('artist_id', artist.id)
                     .order('created_at', { ascending: false }),
                 supabase
@@ -122,39 +167,9 @@ export default function ArtistDashboard() {
             setSongs(songsRes.data || []);
             setAlbums(albumsRes.data || []);
 
-            // Fetch streams-over-time (last 30 days) from play_history for this artist's songs
-            const songIds = (songsRes.data || []).map((s: any) => s.id);
-            if (songIds.length > 0) {
-                try {
-                    const since = new Date();
-                    since.setDate(since.getDate() - 30);
-                    const { data: plays } = await supabase
-                        .from('play_history')
-                        .select('played_at')
-                        .in('song_id', songIds)
-                        .gte('played_at', since.toISOString());
-
-                    const byDay = new Map<string, number>();
-                    (plays || []).forEach((row: any) => {
-                        const d = new Date(row.played_at);
-                        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                        byDay.set(key, (byDay.get(key) || 0) + 1);
-                    });
-                    const buckets: Array<{ date: string; count: number }> = [];
-                    for (let i = 29; i >= 0; i--) {
-                        const d = new Date();
-                        d.setDate(d.getDate() - i);
-                        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                        buckets.push({ date: key, count: byDay.get(key) || 0 });
-                    }
-                    setDailyStreams(buckets);
-                } catch (err) {
-                    console.warn('Could not fetch daily streams', err);
-                }
-            }
-
             // Real monthly listeners = distinct users who played this artist's
             // songs in the last 30 days (no fabricated numbers).
+            const songIds = (songsRes.data || []).map((s: any) => s.id);
             setMonthlyListeners(await getMonthlyListeners(songIds));
 
             // Follower count (best-effort)
@@ -192,7 +207,7 @@ export default function ArtistDashboard() {
                             }))
                     );
                 }
-            } catch { /* song_artists table may not exist */ }
+            } catch (err) { console.error('Failed to load featured-on songs:', err); }
 
             // Fetch artist picks
             try {
@@ -252,12 +267,14 @@ export default function ArtistDashboard() {
 
     const handleDeleteSong = async (songId: string) => {
         if (!confirm('Delete this song? This cannot be undone.')) return;
+        const song = songs.find(s => s.id === songId);
         const { error } = await supabase.from('songs').delete().eq('id', songId);
         if (error) {
             toast({ title: 'Error', description: error.message, variant: 'destructive' });
         } else {
             toast({ title: 'Deleted', description: 'Song removed.' });
             setSongs(prev => prev.filter(s => s.id !== songId));
+            if (song) deleteSongStorageFiles(song);
         }
     };
 
@@ -552,6 +569,12 @@ export default function ArtistDashboard() {
                                                                     {picks.some(p => p.song_id === song.id) && (
                                                                         <Star size={12} className="inline ml-1 fill-gray-900 text-gray-900" />
                                                                     )}
+                                                                    {song.status === 'draft' && (
+                                                                        <Badge variant="secondary" className="ml-2 text-[10px]">Draft</Badge>
+                                                                    )}
+                                                                    {song.status !== 'draft' && song.release_date && new Date(song.release_date) > new Date() && (
+                                                                        <Badge variant="secondary" className="ml-2 text-[10px]">Scheduled</Badge>
+                                                                    )}
                                                                 </span>
                                                             </div>
                                                         </TableCell>
@@ -666,14 +689,27 @@ export default function ArtistDashboard() {
                             <div className="space-y-6">
                                 <h2 className="text-xl font-bold text-gray-900">Performance Analytics</h2>
 
-                                {/* Streams over time (30 days) */}
+                                {/* Streams over time */}
                                 <Card className="border-none shadow-sm">
-                                    <CardHeader>
-                                        <CardTitle className="text-lg">Streams (Last 30 Days)</CardTitle>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                                        <CardTitle className="text-lg">Streams (Last {streamsRangeDays} Days)</CardTitle>
+                                        <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+                                            {([7, 30, 90] as const).map((range) => (
+                                                <button
+                                                    key={range}
+                                                    onClick={() => setStreamsRangeDays(range)}
+                                                    className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
+                                                        streamsRangeDays === range ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900'
+                                                    }`}
+                                                >
+                                                    {range}d
+                                                </button>
+                                            ))}
+                                        </div>
                                     </CardHeader>
                                     <CardContent>
                                         {dailyStreams.length === 0 || dailyStreams.every((d) => d.count === 0) ? (
-                                            <p className="text-gray-500 text-center py-8 text-sm">No streams recorded in the last 30 days yet.</p>
+                                            <p className="text-gray-500 text-center py-8 text-sm">No streams recorded in the last {streamsRangeDays} days yet.</p>
                                         ) : (
                                             <>
                                                 <div className="flex items-end gap-1 h-40">
@@ -702,7 +738,7 @@ export default function ArtistDashboard() {
                                                     <span>Today</span>
                                                 </div>
                                                 <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-sm">
-                                                    <span className="text-gray-500">Total last 30 days</span>
+                                                    <span className="text-gray-500">Total last {streamsRangeDays} days</span>
                                                     <span className="font-bold text-gray-900">
                                                         {dailyStreams.reduce((acc, d) => acc + d.count, 0).toLocaleString()} streams
                                                     </span>
@@ -787,11 +823,16 @@ export default function ArtistDashboard() {
                                             <div className="text-sm text-gray-500 font-medium mb-1">Total Listening Time</div>
                                             <div className="text-3xl font-black text-gray-900">
                                                 {(() => {
-                                                    const totalSec = songs.reduce((acc, s) => acc + ((s.plays || 0) * (s.duration || 0)), 0);
+                                                    // A counted play means 30s+ of listening (the Phase 4 stream
+                                                    // rule) — that's the only duration we actually know per play.
+                                                    // plays x full track duration assumes everyone listens to the
+                                                    // whole song, which inflates this number; 30s is a real floor.
+                                                    const totalSec = songs.reduce((acc, s) => acc + (s.plays || 0) * 30, 0);
                                                     const hours = Math.floor(totalSec / 3600);
                                                     return hours > 0 ? `${hours.toLocaleString()}h` : `${Math.floor(totalSec / 60)}m`;
                                                 })()}
                                             </div>
+                                            <div className="text-[11px] text-gray-400 mt-0.5">Minimum — based on 30s+ per play</div>
                                         </CardContent>
                                     </Card>
                                     <Card className="border-none shadow-sm">
@@ -817,37 +858,56 @@ export default function ArtistDashboard() {
                                     </CardHeader>
                                     <CardContent>
                                         <p className="text-sm text-gray-500 mb-4">Boost your latest release to the top of the "Trending" feed for 24 hours.</p>
-                                        <Button
-                                            className="bg-gray-900 text-white hover:bg-black font-bold flex items-center gap-2"
-                                            disabled={isBoosting || songs.length === 0}
-                                            onClick={async () => {
-                                                if (!user || songs.length === 0) return;
-                                                setIsBoosting(true);
-                                                try {
-                                                    const trackId = songs[0].id;
-                                                    const boostCost = await GamificationService.getSetting('cost.track_boost');
-                                                    const success = await GamificationService.spendCoins(user.id, boostCost, "Track Boost: " + trackId);
-                                                    if (success) {
-                                                        await supabase.from('songs').update({
-                                                            is_premium: true,
-                                                            boosted_until: new Date(Date.now() + 86400000).toISOString()
-                                                        }).eq('id', trackId);
-                                                        await MonetizationService.trackInteraction(trackId, 'song', 'click', 0.50);
-                                                        toast({ title: "Success", description: `"${songs[0].title}" promoted! -${boostCost} Coins.` });
-                                                    } else {
-                                                        toast({ title: "Error", description: "Insufficient Bara Coins!", variant: 'destructive' });
-                                                    }
-                                                } catch (err) {
-                                                    console.error(err);
-                                                    toast({ title: "Error", description: "Not enough coins to promote.", variant: 'destructive' });
-                                                } finally {
-                                                    setIsBoosting(false);
-                                                }
-                                            }}
-                                        >
-                                            <Star size={18} className={isBoosting ? "animate-spin" : ""} />
-                                            {isBoosting ? "Boosting..." : "Boost Now (50 Coins)"}
-                                        </Button>
+                                        {(() => {
+                                            // is_premium alone is stale once a boost expires — nothing ever
+                                            // clears it back to false, so the real signal is whether
+                                            // boosted_until is still in the future.
+                                            const latest = songs[0];
+                                            const activeBoost = !!(latest?.is_premium && latest.boosted_until && new Date(latest.boosted_until) > new Date());
+                                            if (activeBoost && latest.boosted_until) {
+                                                return (
+                                                    <p className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                                        <Star size={18} className="fill-current" />
+                                                        Boosted until {new Date(latest.boosted_until).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                                                    </p>
+                                                );
+                                            }
+                                            return (
+                                                <Button
+                                                    className="bg-gray-900 text-white hover:bg-black font-bold flex items-center gap-2"
+                                                    disabled={isBoosting || songs.length === 0}
+                                                    onClick={async () => {
+                                                        if (!user || songs.length === 0) return;
+                                                        setIsBoosting(true);
+                                                        try {
+                                                            const trackId = songs[0].id;
+                                                            const boostCost = await GamificationService.getSetting('cost.track_boost');
+                                                            const success = await GamificationService.spendCoins(user.id, boostCost, "Track Boost: " + trackId);
+                                                            if (success) {
+                                                                const boostedUntil = new Date(Date.now() + 86400000).toISOString();
+                                                                await supabase.from('songs').update({
+                                                                    is_premium: true,
+                                                                    boosted_until: boostedUntil
+                                                                }).eq('id', trackId);
+                                                                setSongs(prev => prev.map(s => s.id === trackId ? { ...s, is_premium: true, boosted_until: boostedUntil } : s));
+                                                                await MonetizationService.trackInteraction(trackId, 'song', 'click', 0.50);
+                                                                toast({ title: "Success", description: `"${songs[0].title}" promoted! -${boostCost} Coins.` });
+                                                            } else {
+                                                                toast({ title: "Error", description: "Insufficient Bara Coins!", variant: 'destructive' });
+                                                            }
+                                                        } catch (err) {
+                                                            console.error(err);
+                                                            toast({ title: "Error", description: "Not enough coins to promote.", variant: 'destructive' });
+                                                        } finally {
+                                                            setIsBoosting(false);
+                                                        }
+                                                    }}
+                                                >
+                                                    <Star size={18} className={isBoosting ? "animate-spin" : ""} />
+                                                    {isBoosting ? "Boosting..." : "Boost Now (50 Coins)"}
+                                                </Button>
+                                            );
+                                        })()}
                                     </CardContent>
                                 </Card>
                             </div>

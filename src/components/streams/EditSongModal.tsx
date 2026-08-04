@@ -47,6 +47,8 @@ export const EditSongModal = ({ song, artistId, albums, onClose, onSaved }: Prop
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [allArtists, setAllArtists] = useState<{ id: string; name: string }[]>([]);
   const [featuredIds, setFeaturedIds] = useState<string[]>([]);
+  const [releaseOption, setReleaseOption] = useState<'now' | 'draft' | 'scheduled'>('now');
+  const [scheduledDate, setScheduledDate] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -54,7 +56,7 @@ export const EditSongModal = ({ song, artistId, albums, onClose, onSaved }: Prop
   useEffect(() => {
     (async () => {
       const [{ data: full }, { data: artists }, { data: feats }] = await Promise.all([
-        supabase.from('songs').select('price, description, lyrics, producer, songwriter').eq('id', song.id).maybeSingle(),
+        supabase.from('songs').select('price, description, lyrics, producer, songwriter, status, release_date').eq('id', song.id).maybeSingle(),
         supabase.from('artists').select('id, name').order('name'),
         supabase.from('song_artists').select('artist_id').eq('song_id', song.id).eq('role', 'featured'),
       ]);
@@ -64,6 +66,15 @@ export const EditSongModal = ({ song, artistId, albums, onClose, onSaved }: Prop
         setLyrics(full.lyrics || '');
         setProducer((full as any).producer || '');
         setSongwriter((full as any).songwriter || '');
+        const status = (full as any).status;
+        const releaseDate = (full as any).release_date;
+        if (status === 'draft') setReleaseOption('draft');
+        else if (releaseDate && new Date(releaseDate) > new Date()) {
+          setReleaseOption('scheduled');
+          setScheduledDate(new Date(releaseDate).toISOString().slice(0, 16));
+        } else {
+          setReleaseOption('now');
+        }
       }
       setAllArtists(artists || []);
       setFeaturedIds((feats || []).map((f: any) => f.artist_id));
@@ -80,6 +91,10 @@ export const EditSongModal = ({ song, artistId, albums, onClose, onSaved }: Prop
 
   const handleSave = async () => {
     if (!title.trim()) { toast({ title: 'Title required', variant: 'destructive' }); return; }
+    if (releaseOption === 'scheduled' && !scheduledDate) {
+      toast({ title: 'Pick a release date', description: 'Choose when this should go live, or switch to "Publish now".', variant: 'destructive' });
+      return;
+    }
     setSaving(true);
     try {
       let coverUrl = song.cover_url;
@@ -101,6 +116,8 @@ export const EditSongModal = ({ song, artistId, albums, onClose, onSaved }: Prop
         producer: producer.trim() || null,
         songwriter: songwriter.trim() || null,
         cover_url: coverUrl || null,
+        status: releaseOption === 'draft' ? 'draft' : 'published',
+        release_date: releaseOption === 'scheduled' && scheduledDate ? new Date(scheduledDate).toISOString() : null,
       }).eq('id', song.id);
       if (error) throw error;
 
@@ -204,6 +221,39 @@ export const EditSongModal = ({ song, artistId, albums, onClose, onSaved }: Prop
                 <input className={input} type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00 (free)" />
               </div>
             )}
+
+            <div>
+              <label className={label}>Release</label>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  { value: 'now', label: 'Published' },
+                  { value: 'draft', label: 'Draft' },
+                  { value: 'scheduled', label: 'Scheduled' },
+                ] as const).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setReleaseOption(opt.value)}
+                    className={`py-2 rounded-md text-sm font-bold border-2 transition ${
+                      releaseOption === opt.value
+                        ? 'border-gray-900 bg-gray-900 text-white'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-400'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {releaseOption === 'scheduled' && (
+                <input
+                  type="datetime-local"
+                  className={`${input} mt-2`}
+                  value={scheduledDate}
+                  min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+                  onChange={(e) => setScheduledDate(e.target.value)}
+                />
+              )}
+            </div>
 
             <div>
               <label className={label}>Description</label>

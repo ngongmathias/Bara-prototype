@@ -1,20 +1,29 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { SEO } from '@/components/SEO';
-import { Loader2, Play, Pause, BadgeCheck, Share2, Radio } from 'lucide-react';
+import { Loader2, Play, Pause, BadgeCheck, Share2, Radio, ShieldQuestion } from 'lucide-react';
 import { useShare } from '@/context/ShareContext';
+import { useToast } from '@/hooks/use-toast';
 import { FollowUserButton } from '@/components/FollowUserButton';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
 import { getArtistSongIds, getMonthlyListeners } from '@/lib/artistStats';
+import { filterPublished, isPublished } from '@/lib/publishFilter';
 
 export default function ArtistPage() {
     const { id } = useParams();
     const { play, currentSong, isPlaying, togglePlay, startRadio } = useAudioPlayer();
     const { openShare } = useShare();
+    const { user } = useUser();
+    const { toast } = useToast();
     const [artist, setArtist] = useState<any>(null);
+    const [myClaim, setMyClaim] = useState<{ id: string; status: string; reviewer_notes: string | null } | null>(null);
+    const [claimFormOpen, setClaimFormOpen] = useState(false);
+    const [claimEvidence, setClaimEvidence] = useState('');
+    const [claimSubmitting, setClaimSubmitting] = useState(false);
     const [topTracks, setTopTracks] = useState<Song[]>([]);
     const [featuredOnTracks, setFeaturedOnTracks] = useState<(Song & { primary_artist: string; plays: number })[]>([]);
     const [albums, setAlbums] = useState<any[]>([]);
@@ -54,7 +63,7 @@ export default function ArtistPage() {
                     .limit(5);
 
                 if (songsData) {
-                    const formattedSongs = songsData.map(song => ({
+                    const formattedSongs = filterPublished(songsData).map(song => ({
                         id: song.id,
                         title: song.title,
                         artist: artistData?.name || 'Unknown Artist',
@@ -73,13 +82,13 @@ export default function ArtistPage() {
                 try {
                     const { data: featuredData } = await supabase
                         .from('song_artists')
-                        .select('song_id, songs(id, title, file_url, cover_url, duration, plays, artist_id, album_id, artists(name))')
+                        .select('song_id, songs(id, title, file_url, cover_url, duration, plays, artist_id, album_id, status, release_date, artists(name))')
                         .eq('artist_id', id)
                         .eq('role', 'featured')
                         .order('display_order');
                     if (featuredData) {
                         const formatted = featuredData
-                            .filter((f: any) => f.songs)
+                            .filter((f: any) => f.songs && isPublished(f.songs))
                             .map((f: any) => ({
                                 id: f.songs.id,
                                 title: f.songs.title,
@@ -94,18 +103,18 @@ export default function ArtistPage() {
                             }));
                         setFeaturedOnTracks(formatted);
                     }
-                } catch { /* song_artists table may not exist yet */ }
+                } catch (err) { console.error('Failed to load featured-on songs:', err); }
 
                 // Fetch Artist Picks
                 try {
                     const { data: picksData } = await supabase
                         .from('artist_picks')
-                        .select('display_order, note, songs(id, title, file_url, cover_url, duration, artist_id, album_id, albums(title))')
+                        .select('display_order, note, songs(id, title, file_url, cover_url, duration, artist_id, album_id, status, release_date, albums(title))')
                         .eq('artist_id', id)
                         .order('display_order')
                         .limit(5);
                     if (picksData) {
-                        setArtistPicks(picksData.filter((p: any) => p.songs).map((p: any) => ({
+                        setArtistPicks(picksData.filter((p: any) => p.songs && isPublished(p.songs)).map((p: any) => ({
                             id: p.songs.id,
                             title: p.songs.title,
                             artist: artistData?.name || 'Unknown Artist',
@@ -179,6 +188,43 @@ export default function ArtistPage() {
 
         fetchData();
     }, [id]);
+
+    // §E1 — is this an unclaimed (admin-seeded) artist, and has the current
+    // user already filed a claim for it?
+    useEffect(() => {
+        if (!id || !user?.id || artist?.user_id) { setMyClaim(null); return; }
+        let active = true;
+        supabase
+            .from('artist_claims')
+            .select('id, status, reviewer_notes')
+            .eq('artist_id', id)
+            .eq('requester_user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+            .then(({ data }) => { if (active) setMyClaim(data); });
+        return () => { active = false; };
+    }, [id, user?.id, artist?.user_id]);
+
+    const submitClaim = async () => {
+        if (!id || !user?.id) return;
+        setClaimSubmitting(true);
+        try {
+            const { data, error } = await supabase
+                .from('artist_claims')
+                .insert({ artist_id: id, requester_user_id: user.id, evidence: claimEvidence.trim() || null })
+                .select('id, status, reviewer_notes')
+                .single();
+            if (error) throw error;
+            setMyClaim(data);
+            setClaimFormOpen(false);
+            toast({ title: 'Claim submitted', description: "We'll review it and let you know." });
+        } catch (e: any) {
+            toast({ title: "Couldn't submit claim", description: e.message, variant: 'destructive' });
+        } finally {
+            setClaimSubmitting(false);
+        }
+    };
 
     const handlePlaySong = (song: Song) => {
         play(song);
@@ -289,6 +335,22 @@ export default function ArtistPage() {
                         {/* Follow Button — persists via user_follows */}
                         {artist.user_id ? (
                             <FollowUserButton targetUserId={artist.user_id} variant="pill" />
+                        ) : user?.id ? (
+                            myClaim ? (
+                                <span className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 border-2 border-gray-200 px-4 py-2 rounded-full">
+                                    <ShieldQuestion size={16} />
+                                    {myClaim.status === 'pending' && 'Claim pending review'}
+                                    {myClaim.status === 'approved' && 'Claim approved'}
+                                    {myClaim.status === 'rejected' && 'Claim not approved'}
+                                </span>
+                            ) : (
+                                <button
+                                    onClick={() => setClaimFormOpen((v) => !v)}
+                                    className="inline-flex items-center gap-2 border-2 border-gray-300 text-gray-700 font-bold px-5 py-2.5 rounded-full hover:border-gray-900 hover:text-gray-900 transition"
+                                >
+                                    <ShieldQuestion size={18} /> Is this you? Claim this profile
+                                </button>
+                            )
                         ) : null}
 
                         {/* Share Button */}
@@ -305,6 +367,32 @@ export default function ArtistPage() {
                             <Share2 className="w-5 h-5" />
                         </button>
                     </div>
+
+                    {claimFormOpen && (
+                        <div className="max-w-7xl mx-auto mt-4 p-4 border-2 border-gray-200 rounded-xl bg-white">
+                            <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">
+                                Why is this your profile?
+                            </label>
+                            <textarea
+                                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 min-h-[80px] resize-none"
+                                value={claimEvidence}
+                                onChange={(e) => setClaimEvidence(e.target.value)}
+                                placeholder="Link your official socials, distributor account, or anything else that shows this is your music."
+                            />
+                            <div className="flex justify-end gap-2 mt-3">
+                                <button onClick={() => setClaimFormOpen(false)} className="px-4 py-2 rounded-md text-gray-700 font-bold hover:bg-gray-100">
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={submitClaim}
+                                    disabled={claimSubmitting || !claimEvidence.trim()}
+                                    className="px-5 py-2 rounded-md bg-gray-900 text-white font-black hover:bg-black disabled:opacity-50"
+                                >
+                                    {claimSubmitting ? 'Submitting…' : 'Submit claim'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Content Sections */}

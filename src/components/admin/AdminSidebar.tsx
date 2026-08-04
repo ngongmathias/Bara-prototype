@@ -480,6 +480,18 @@ const adminMenuItems = [
 
   {
 
+    title: "Artist Claims",
+
+    icon: Mic2,
+
+    path: "/admin/artist-claims",
+
+    description: "Requests to claim admin-seeded artist profiles"
+
+  },
+
+  {
+
     title: "Business Packages",
 
     icon: BarChart3,

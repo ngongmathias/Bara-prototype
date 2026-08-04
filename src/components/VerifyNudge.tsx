@@ -55,7 +55,7 @@ export const VerifyNudge = ({ accountType, context }: { accountType: Verificatio
                     it takes a few minutes.
                 </p>
                 <button
-                    onClick={() => navigate('/verify-account')}
+                    onClick={() => navigate(`/verify-account?type=${accountType}`)}
                     className="mt-2 bg-white text-gray-900 hover:bg-gray-100 text-xs font-black px-4 py-1.5 rounded-full transition-colors"
                 >
                     Verify my {accountType} account

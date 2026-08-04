@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
 import { Play, Pause, Shuffle, Clock, Heart, ArrowLeft, Music2, Disc3, Check, Plus } from 'lucide-react';
 import { PAID_MUSIC_ENABLED } from '@/lib/features';
+import { filterPublished } from '@/lib/publishFilter';
 
 interface AlbumInfo {
   id: string;
@@ -60,7 +61,7 @@ export default function AlbumPage() {
         if (!active) return;
         setAlbum(albumData as AlbumInfo);
         setTracks(
-          (songData || []).map((s: any) => ({
+          filterPublished(songData).map((s: any) => ({
             id: s.id,
             title: s.title,
             artist: s.artists?.name || albumData?.artists?.name || 'Unknown Artist',

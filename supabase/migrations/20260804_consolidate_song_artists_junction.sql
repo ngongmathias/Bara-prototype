@@ -1,8 +1,15 @@
 -- ============================================================
--- BARA AFRIKA — Movie Crew + Song Credits
--- Adds producer/writer/actors to movies
--- Adds multi-artist support (featuring) + producer/songwriter to songs
--- Run in Supabase SQL Editor
+-- Consolidate song_artists into the tracked migration history
+-- (STREAMS_MASTER_PLAN.md §E6)
+--
+-- This table has been live and in active use for a while (song credits,
+-- featured-artist rails, ArtistPage "Featured On", playlist ft. tags, etc.)
+-- but only ever existed as a hand-run script at
+-- database/migrations/add_movie_crew_song_credits.sql, run manually via the
+-- Supabase SQL Editor rather than through supabase/migrations/. This file
+-- is that same script, unchanged and still fully idempotent, so applying it
+-- here is a safe no-op wherever it was already run by hand and brings every
+-- environment onto the same tracked history going forward.
 -- ============================================================
 
 -- === MOVIES: Add crew fields ===

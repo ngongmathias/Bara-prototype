@@ -8,6 +8,7 @@ import { useSongContextMenu } from '@/components/streams/SongContextMenu';
 import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music, Share2, Users, Link2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useAuth } from '@clerk/clerk-react';
+import { filterPublished, isPublished } from '@/lib/publishFilter';
 
 interface PlaylistData {
     id: string;
@@ -71,6 +72,7 @@ export default function PlaylistPage() {
                     position,
                     songs (
                         id, title, file_url, cover_url, duration, artist_id, album_id,
+                        status, release_date,
                         artists(name),
                         albums(title)
                     )
@@ -80,7 +82,7 @@ export default function PlaylistPage() {
 
             if (playlistSongs) {
                 const mappedTracks: Song[] = playlistSongs
-                    .filter((ps: any) => ps.songs)
+                    .filter((ps: any) => ps.songs && isPublished(ps.songs))
                     .map((ps: any) => ({
                         id: ps.songs.id,
                         title: ps.songs.title,
@@ -104,7 +106,7 @@ export default function PlaylistPage() {
                     .limit(20);
 
                 if (allSongs) {
-                    setTracks(allSongs.map((s: any) => ({
+                    setTracks(filterPublished(allSongs).map((s: any) => ({
                         id: s.id,
                         title: s.title,
                         artist: s.artists?.name || 'Unknown Artist',
