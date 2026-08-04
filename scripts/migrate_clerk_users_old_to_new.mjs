@@ -16,14 +16,39 @@ if (!NEW_CLERK_SECRET_KEY) {
 
 const MODE = (process.env.CLERK_MIGRATION_MODE || 'invite').toLowerCase();
 const DRY_RUN = (process.env.DRY_RUN || 'true').toLowerCase() !== 'false';
+// When true, revoke every pending invitation in the NEW instance before
+// inviting. Use this to re-send a batch whose emails never delivered (e.g.
+// invites created before the production domain's email DNS was verified):
+// revoking clears the "invitation already exists" duplicate error so the
+// invite loop can create fresh ones that actually send.
+const REVOKE_PENDING = (process.env.REVOKE_PENDING || 'false').toLowerCase() === 'true';
 const PAGE_SIZE = Number(process.env.CLERK_PAGE_SIZE || 100);
 const EXCLUDE_EMAILS = (process.env.EXCLUDE_EMAILS || '')
   .split(',')
   .map((s) => s.trim().toLowerCase())
   .filter(Boolean);
+// Clerk rate-limits the Backend API; firing requests with no gap triggers
+// HTTP 429. Space calls out and retry 429s with backoff.
+const REQUEST_DELAY_MS = Number(process.env.REQUEST_DELAY_MS || 400);
+const MAX_RETRIES = Number(process.env.CLERK_MAX_RETRIES || 6);
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// fetch wrapper that retries on 429, honoring the Retry-After header when
+// present and otherwise backing off exponentially (capped at 30s).
+async function fetchWithRetry(url, init) {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, init);
+    if (res.status !== 429 || attempt >= MAX_RETRIES) return res;
+    const retryAfter = Number(res.headers.get('retry-after')) || 0;
+    const waitMs = retryAfter > 0 ? retryAfter * 1000 : Math.min(2000 * 2 ** attempt, 30000);
+    console.warn(`Rate limited (429) — waiting ${Math.round(waitMs / 1000)}s (retry ${attempt + 1}/${MAX_RETRIES})`);
+    await sleep(waitMs);
+  }
+}
 
 async function clerkFetch(secretKey, url) {
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: {
       Authorization: `Bearer ${secretKey}`,
     },
@@ -46,7 +71,7 @@ async function clerkFetch(secretKey, url) {
 }
 
 async function clerkPost(secretKey, url, body) {
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${secretKey}`,
@@ -110,6 +135,35 @@ async function inviteIntoNewProject(emailAddress) {
   });
 }
 
+async function listNewPendingInvitations() {
+  const invitations = [];
+  let offset = 0;
+
+  while (true) {
+    const url = new URL('https://api.clerk.com/v1/invitations');
+    url.searchParams.set('limit', String(PAGE_SIZE));
+    url.searchParams.set('offset', String(offset));
+    url.searchParams.set('status', 'pending');
+
+    const page = await clerkFetch(NEW_CLERK_SECRET_KEY, url.toString());
+    if (!Array.isArray(page) || page.length === 0) break;
+
+    invitations.push(...page);
+    offset += PAGE_SIZE;
+  }
+
+  return invitations;
+}
+
+async function revokeInvitation(invitationId) {
+  // Revoke takes no body; only pending invitations can be revoked.
+  return clerkPost(
+    NEW_CLERK_SECRET_KEY,
+    `https://api.clerk.com/v1/invitations/${invitationId}/revoke`,
+    {}
+  );
+}
+
 async function main() {
   if (MODE !== 'invite') {
     console.error(`Unsupported CLERK_MIGRATION_MODE=${MODE}. Only 'invite' is supported.`);
@@ -127,9 +181,12 @@ async function main() {
   const report = {
     mode: MODE,
     dry_run: DRY_RUN,
+    revoke_pending: REVOKE_PENDING,
     old_user_count: oldUsers.length,
     unique_email_count: uniqueEmails.length,
     excluded_email_count: EXCLUDE_EMAILS.length,
+    revoked: [],
+    revoke_failed: [],
     invited: [],
     skipped: [],
     failed: [],
@@ -140,8 +197,34 @@ async function main() {
   if (EXCLUDE_EMAILS.length) {
     console.log(`Excluded emails: ${EXCLUDE_EMAILS.length}`);
   }
-  console.log(`Mode: ${MODE}, DRY_RUN: ${DRY_RUN}`);
+  console.log(`Mode: ${MODE}, DRY_RUN: ${DRY_RUN}, REVOKE_PENDING: ${REVOKE_PENDING}`);
 
+  // Phase 1 (optional): clear existing pending invitations in the NEW instance
+  // so the invite loop below can re-create them (Clerk rejects a duplicate
+  // invitation for an email that already has a pending one).
+  if (REVOKE_PENDING) {
+    const pending = await listNewPendingInvitations();
+    console.log(`Pending invitations found in new instance: ${pending.length}`);
+    for (const inv of pending) {
+      const invEmail = (inv.email_address || '').toLowerCase();
+      if (DRY_RUN) {
+        report.revoked.push({ email: invEmail, id: inv.id, reason: 'dry_run' });
+        continue;
+      }
+      try {
+        await revokeInvitation(inv.id);
+        report.revoked.push({ email: invEmail, id: inv.id });
+        console.log(`Revoked: ${invEmail}`);
+      } catch (e) {
+        report.revoke_failed.push({ email: invEmail, id: inv.id, error: String(e.message || e) });
+        console.error(`Revoke failed: ${invEmail}`);
+        console.error(e);
+      }
+      await sleep(REQUEST_DELAY_MS);
+    }
+  }
+
+  // Phase 2: (re-)invite.
   for (const email of uniqueEmails) {
     if (excludeSet.has(email)) {
       report.skipped.push({ email, reason: 'excluded' });
@@ -162,6 +245,7 @@ async function main() {
       console.error(`Failed: ${email}`);
       console.error(e);
     }
+    await sleep(REQUEST_DELAY_MS);
   }
 
   const reportsDir = path.join(process.cwd(), 'scripts', 'reports');
@@ -170,7 +254,10 @@ async function main() {
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
   console.log(`Report: ${reportPath}`);
-  console.log(`Done. Invited: ${report.invited.length}, Failed: ${report.failed.length}, Skipped: ${report.skipped.length}`);
+  console.log(
+    `Done. Revoked: ${report.revoked.length}, Revoke-failed: ${report.revoke_failed.length}, ` +
+    `Invited: ${report.invited.length}, Failed: ${report.failed.length}, Skipped: ${report.skipped.length}`
+  );
 }
 
 main().catch((err) => {

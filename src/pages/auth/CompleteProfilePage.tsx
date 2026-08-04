@@ -7,6 +7,8 @@ import { COUNTRIES, countryByIso2, formatPhone } from '@/data/countries';
 import { DateOfBirthPicker } from '@/components/DateOfBirthPicker';
 import { ReferralService } from '@/lib/referralService';
 import { UsernameService } from '@/lib/usernameService';
+import { isProfileComplete } from '@/lib/profileCompletion';
+import { SignupProfileStash } from '@/lib/signupProfileStash';
 import { REFERRAL_PROMPT_PENDING_KEY } from '@/components/InviteFriendsPrompt';
 
 const GENDERS = ['Male', 'Female', 'Rather Not Say'] as const;
@@ -77,7 +79,10 @@ export const CompleteProfilePage = () => {
 
   const email = user?.primaryEmailAddress?.emailAddress || '';
 
-  // Guard: must be signed in; if a profile already exists, skip straight through.
+  // Guard: must be signed in. Skip only if the profile is already COMPLETE.
+  // Returning users who predate the DOB/gender/country/phone fields have a row
+  // that's missing them — prefill what exists and let them fill the rest,
+  // rather than bouncing them through.
   useEffect(() => {
     if (!isLoaded) return;
     if (!isSignedIn || !user) {
@@ -89,13 +94,37 @@ export const CompleteProfilePage = () => {
     (async () => {
       const { data } = await supabase
         .from('clerk_users')
-        .select('id')
+        .select('first_name, last_name, date_of_birth, gender, country, phone, username')
         .eq('clerk_user_id', user.id)
         .maybeSingle();
-      if (data?.id) {
-        navigate(redirectUrl); // already has a profile — nothing to complete
+      if (isProfileComplete(data)) {
+        SignupProfileStash.clear();
+        navigate(redirectUrl); // already complete — nothing to do
         return;
       }
+      // Prefill from whatever we already have. Returning users: their existing
+      // DB row. Fresh Google sign-ups: the details they typed on the sign-up
+      // form, stashed across the OAuth redirect — those take precedence.
+      const stash = SignupProfileStash.read();
+      const firstNameV = stash?.firstName || data?.first_name || user.firstName || '';
+      const lastNameV = stash?.lastName || data?.last_name || user.lastName || '';
+      const dobV = stash?.dob || data?.date_of_birth || '';
+      const genderV = stash?.gender || data?.gender || '';
+      const countryV = stash?.country || data?.country || '';
+      const usernameV = stash?.username || data?.username || '';
+      if (firstNameV) setFirstName(firstNameV);
+      if (lastNameV) setLastName(lastNameV);
+      if (dobV) setDob(dobV as string);
+      if (genderV) setGender(genderV as string);
+      if (countryV) {
+        setCountry(countryV as string);
+        const match = COUNTRIES.find((c) => c.name === countryV);
+        if (match && match.dial !== '+') setDialIso(match.iso2);
+      }
+      if (stash?.dialIso) setDialIso(stash.dialIso);
+      if (stash?.phone) setPhone(stash.phone);
+      if (usernameV) { setUsername(usernameV as string); setUsernameEdited(true); }
+      if (stash?.referralCode) setReferralCode(stash.referralCode);
       setChecking(false);
     })();
   }, [isLoaded, isSignedIn, user, navigate, redirectUrl]);
@@ -168,6 +197,7 @@ export const CompleteProfilePage = () => {
         if (signupXp > 0) await GamificationService.addXP(user.id, signupXp, 'Account created');
       } catch { /* non-critical */ }
 
+      SignupProfileStash.clear();
       navigate(redirectUrl);
     } catch (e: any) {
       setError(e?.message || 'Could not save your profile. Please try again.');
