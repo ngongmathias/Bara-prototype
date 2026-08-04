@@ -7,6 +7,7 @@ import { COUNTRIES, countryByIso2, formatPhone } from '@/data/countries';
 import { DateOfBirthPicker } from '@/components/DateOfBirthPicker';
 import { ReferralService } from '@/lib/referralService';
 import { UsernameService } from '@/lib/usernameService';
+import { isProfileComplete } from '@/lib/profileCompletion';
 import { REFERRAL_PROMPT_PENDING_KEY } from '@/components/InviteFriendsPrompt';
 
 const GENDERS = ['Male', 'Female', 'Rather Not Say'] as const;
@@ -77,7 +78,10 @@ export const CompleteProfilePage = () => {
 
   const email = user?.primaryEmailAddress?.emailAddress || '';
 
-  // Guard: must be signed in; if a profile already exists, skip straight through.
+  // Guard: must be signed in. Skip only if the profile is already COMPLETE.
+  // Returning users who predate the DOB/gender/country/phone fields have a row
+  // that's missing them — prefill what exists and let them fill the rest,
+  // rather than bouncing them through.
   useEffect(() => {
     if (!isLoaded) return;
     if (!isSignedIn || !user) {
@@ -89,12 +93,24 @@ export const CompleteProfilePage = () => {
     (async () => {
       const { data } = await supabase
         .from('clerk_users')
-        .select('id')
+        .select('first_name, last_name, date_of_birth, gender, country, phone, username')
         .eq('clerk_user_id', user.id)
         .maybeSingle();
-      if (data?.id) {
-        navigate(redirectUrl); // already has a profile — nothing to complete
+      if (isProfileComplete(data)) {
+        navigate(redirectUrl); // already complete — nothing to do
         return;
+      }
+      if (data) {
+        if (data.first_name) setFirstName(data.first_name);
+        if (data.last_name) setLastName(data.last_name);
+        if (data.date_of_birth) setDob(data.date_of_birth);
+        if (data.gender) setGender(data.gender);
+        if (data.country) {
+          setCountry(data.country);
+          const match = COUNTRIES.find((c) => c.name === data.country);
+          if (match && match.dial !== '+') setDialIso(match.iso2);
+        }
+        if (data.username) { setUsername(data.username); setUsernameEdited(true); }
       }
       setChecking(false);
     })();

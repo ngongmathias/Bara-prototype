@@ -16,6 +16,8 @@ import { CountrySelectionProvider } from "@/context/CountrySelectionContext";
 
 import { useAuthLogging } from "@/hooks/useAuthLogging";
 
+import { useProfileCompletionGuard } from "@/hooks/useProfileCompletionGuard";
+
 import { ScrollToTop } from "@/components/ScrollToTop";
 
 import { useEffect, lazy, Suspense } from "react";
@@ -397,6 +399,11 @@ const AppRoutes = () => {
   // Use the auth logging hook to track all authentication events
 
   useAuthLogging();
+
+  // Force signed-in users with an incomplete registration profile (missing
+  // DOB/gender/country/phone) to /auth/complete-profile before using the app.
+
+  useProfileCompletionGuard();
 
   // Check and send welcome email if needed
 
