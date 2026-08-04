@@ -50,15 +50,28 @@ export const AuthFinishPage = () => {
           if (userEmail) {
             const { data: byEmail } = await supabase
               .from('clerk_users')
-              .select('id')
+              .select('id, clerk_user_id')
               .eq('email', userEmail)
               .maybeSingle();
             if (byEmail?.id) {
+              const previousClerkUserId = byEmail.clerk_user_id;
               await supabase
                 .from('clerk_users')
                 .update({ clerk_user_id: user.id, updated_at: new Date().toISOString() })
                 .eq('id', byEmail.id);
               linked = true;
+
+              // clerk_users is only one of ~60 tables keyed directly by the raw
+              // Clerk id (coins/XP, listings, likes, playlists, missions, ...).
+              // Bring all of it along too — e.g. after the Clerk dev->production
+              // switch, everyone's id changed and this is what actually carries
+              // their coins/listings/etc. over instead of leaving them stranded
+              // under the old id. Best-effort: must never block sign-in.
+              if (previousClerkUserId && previousClerkUserId !== user.id) {
+                try {
+                  await supabase.rpc('reconcile_user_data', { p_old_id: previousClerkUserId, p_new_id: user.id });
+                } catch { /* non-critical */ }
+              }
             }
           }
 
