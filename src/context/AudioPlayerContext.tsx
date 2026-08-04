@@ -1,12 +1,28 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 
-import { supabase } from '@/lib/supabase';
+import { supabase, createAuthenticatedSupabaseClient } from '@/lib/supabase';
 
 import { GamificationService } from '@/lib/gamificationService';
 import { trackRecent } from '@/lib/recentActivity';
 import { PAID_MUSIC_ENABLED } from '@/lib/features';
 
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
+
+const DEVICE_ID_KEY = 'bara.streams.deviceId';
+// Anonymous plays still count (D3), just deduped server-side by this
+// per-browser id instead of a verified user id.
+function getDeviceId(): string {
+    try {
+        let id = localStorage.getItem(DEVICE_ID_KEY);
+        if (!id) {
+            id = crypto.randomUUID();
+            localStorage.setItem(DEVICE_ID_KEY, id);
+        }
+        return id;
+    } catch {
+        return 'unknown-device';
+    }
+}
 
 
 
@@ -168,6 +184,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const hasAwardedXP = useRef<string | null>(null);
 
     const { user: clerkUser } = useUser();
+    const { getToken } = useAuth();
 
     // Refs for stable access in audio event handlers (avoids stale closures)
     const queueRef = useRef(queue);
@@ -221,24 +238,20 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 if (isPreviewing) setIsPreviewing(false);
             }
 
-            // Award XP after 30 seconds of playback
+            // A "stream" is 30s+ of listening (D3) — this is the single
+            // trigger for play count, XP, and mission progress, so all
+            // three "meaningful play" definitions agree. Guard fires once
+            // per song regardless of sign-in state, so anon listeners
+            // don't re-trigger it every tick for the rest of the track.
             if (audio.currentTime >= 30 && song && hasAwardedXP.current !== song.id) {
+                hasAwardedXP.current = song.id;
 
-                const awardXP = async () => {
+                trackPlay(song.id);
 
-                    if (clerkUser) {
-
-                        // Capped daily listen-XP + first-listen achievement
-                        await GamificationService.awardSongListenXP(clerkUser.id, song.title);
-
-                        hasAwardedXP.current = song.id;
-
-                    }
-
-                };
-
-                awardXP();
-
+                if (clerkUser) {
+                    // Capped daily listen-XP + first-listen achievement
+                    GamificationService.awardSongListenXP(clerkUser.id, song.title).catch(() => {});
+                }
             }
 
         };
@@ -503,11 +516,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
         if (index !== -1) setQueueIndex(index);
 
-
-
-        // Track play count & history (fire-and-forget)
-
-        trackPlay(song.id);
+        // Play counting happens at the 30s mark (see handleTimeUpdate),
+        // not here — a "stream" is 30s+ of listening, not a tap on Play.
 
     };
 
@@ -515,38 +525,24 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     // Record play count and play history
 
+    // Records a meaningful play (D3: 30s+ of listening — see the
+    // handleTimeUpdate call site). Counting and "Recently Played" history
+    // both go through the record_play RPC, which determines the caller's
+    // identity itself from the verified JWT rather than trusting a
+    // client-supplied user id, and dedupes rapid replays server-side.
     const trackPlay = async (songId: string) => {
-
         try {
-
-            // Increment the play count via RPC
-
-            await supabase.rpc('increment_play_count', { p_song_id: songId });
-
-
-
-            // Record in play history for "Recently Played"
-
             if (clerkUser) {
-
-                await supabase.from('play_history').insert({
-
-                    user_id: clerkUser.id,
-
-                    song_id: songId,
-
-                });
-
+                const token = await getToken({ template: 'supabase' });
+                const client = token ? await createAuthenticatedSupabaseClient(token) : supabase;
+                await client.rpc('record_play', { p_song_id: songId, p_device_id: getDeviceId() });
+            } else {
+                await supabase.rpc('record_play', { p_song_id: songId, p_device_id: getDeviceId() });
             }
-
         } catch (error) {
-
             // Non-blocking: don't interrupt playback if tracking fails
-
             console.warn('Play tracking failed:', error);
-
         }
-
     };
 
 
