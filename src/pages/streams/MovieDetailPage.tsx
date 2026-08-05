@@ -5,6 +5,7 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { SEO } from '@/components/SEO';
 import { supabase } from '@/lib/supabase';
 import { useShare } from '@/context/ShareContext';
+import { useSignInNudge } from '@/context/SignInNudgeContext';
 import { ArrowLeft, Play, Star, Clock, Eye, Share2, Loader2, User, Plus, Check } from 'lucide-react';
 
 interface Movie {
@@ -40,6 +41,7 @@ export default function MovieDetailPage() {
   const navigate = useNavigate();
   const { openShare } = useShare();
   const { user: clerkUser } = useUser();
+  const { requireSignIn } = useSignInNudge();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [related, setRelated] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +63,8 @@ export default function MovieDetailPage() {
   }, [id, clerkUser?.id]);
 
   const toggleWatchlist = async () => {
-    if (!clerkUser?.id || !id) return;
+    if (!id) return;
+    if (!clerkUser?.id) { requireSignIn("Sign in to save movies to My List."); return; }
     if (inWatchlist) {
       setInWatchlist(false);
       await supabase.from('movie_watchlist').delete().eq('user_id', clerkUser.id).eq('movie_id', id);
@@ -184,15 +187,13 @@ export default function MovieDetailPage() {
             >
               <Play className="w-5 h-5" fill="white" /> Watch Now
             </button>
-            {clerkUser && (
-              <button
-                onClick={toggleWatchlist}
-                className={`flex items-center gap-2 font-semibold px-5 py-3 rounded-xl transition-colors backdrop-blur-sm border ${inWatchlist ? 'bg-white text-gray-900 border-white' : 'bg-white/10 hover:bg-white/20 text-white border-white/20'}`}
-              >
-                {inWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                {inWatchlist ? 'In My List' : 'My List'}
-              </button>
-            )}
+            <button
+              onClick={toggleWatchlist}
+              className={`flex items-center gap-2 font-semibold px-5 py-3 rounded-xl transition-colors backdrop-blur-sm border ${inWatchlist ? 'bg-white text-gray-900 border-white' : 'bg-white/10 hover:bg-white/20 text-white border-white/20'}`}
+            >
+              {inWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+              {inWatchlist ? 'In My List' : 'My List'}
+            </button>
             <button
               onClick={handleShare}
               className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-3 rounded-xl transition-colors backdrop-blur-sm border border-white/20"

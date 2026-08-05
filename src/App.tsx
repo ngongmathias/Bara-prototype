@@ -296,6 +296,7 @@ const PlaylistPage = lazy(() => import("./pages/streams/PlaylistPage"));
 const ArtistPage = lazy(() => import("./pages/streams/ArtistPage"));
 const ArtistsPage = lazy(() => import("./pages/streams/ArtistsPage"));
 const TrendingSongsPage = lazy(() => import("./pages/streams/TrendingSongsPage"));
+const ChartsPage = lazy(() => import("./pages/streams/ChartsPage"));
 const NewReleasesPage = lazy(() => import("./pages/streams/NewReleasesPage"));
 const AlbumPage = lazy(() => import("./pages/streams/AlbumPage"));
 const GenrePage = lazy(() => import("./pages/streams/GenrePage"));
@@ -373,8 +374,10 @@ import { ChatWindow } from "./pages/messages/ChatWindow";
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
 
 import { ShareProvider } from "@/context/ShareContext";
+import { SignInNudgeProvider } from "@/context/SignInNudgeContext";
 import { CartProvider } from "@/context/CartContext";
 import { GlobalPlayer } from "@/components/streams/GlobalPlayer";
+import { SignInNudgeSheet } from "@/components/SignInNudgeSheet";
 
 
 
@@ -481,6 +484,8 @@ const AppRoutes = () => {
           <Route path="artists" element={<ArtistsPage />} />
 
           <Route path="trending" element={<TrendingSongsPage />} />
+
+          <Route path="charts" element={<ChartsPage />} />
 
           <Route path="new-releases" element={<NewReleasesPage />} />
 
@@ -1046,6 +1051,7 @@ const App = () => (
 
         <CountrySelectionProvider>
 
+          <SignInNudgeProvider>
           <AudioPlayerProvider>
           <ShareProvider>
           <CartProvider>
@@ -1060,6 +1066,8 @@ const App = () => (
 
                 <GlobalPlayer />
 
+                <SignInNudgeSheet />
+
               </ErrorBoundary>
 
             </BrowserRouter>
@@ -1067,6 +1075,7 @@ const App = () => (
           </CartProvider>
           </ShareProvider>
           </AudioPlayerProvider>
+          </SignInNudgeProvider>
 
         </CountrySelectionProvider>
 

@@ -7,6 +7,7 @@ import { trackRecent } from '@/lib/recentActivity';
 import { PAID_MUSIC_ENABLED } from '@/lib/features';
 
 import { useUser, useAuth } from '@clerk/clerk-react';
+import { useSignInNudge } from '@/context/SignInNudgeContext';
 
 const DEVICE_ID_KEY = 'bara.streams.deviceId';
 // Anonymous plays still count (D3), just deduped server-side by this
@@ -189,6 +190,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     const { user: clerkUser } = useUser();
     const { getToken } = useAuth();
+    const { requireSignIn } = useSignInNudge();
 
     // Refs for stable access in audio event handlers (avoids stale closures)
     const queueRef = useRef(queue);
@@ -1165,7 +1167,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     const toggleLike = async (songId: string) => {
 
-        if (!clerkUser) return;
+        if (!clerkUser) { requireSignIn("Sign in to like songs and build your library."); return; }
 
 
 

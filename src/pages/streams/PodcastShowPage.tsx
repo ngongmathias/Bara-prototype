@@ -6,6 +6,7 @@ import { Mic2, Play, Pause, Clock, Headphones, Users, Share2, Bell, BellOff, Arr
 import { supabase } from '@/lib/supabase';
 import { SEO } from '@/components/SEO';
 import { useShare } from '@/context/ShareContext';
+import { useSignInNudge } from '@/context/SignInNudgeContext';
 import { useAudioPlayer, type Song } from '@/context/AudioPlayerContext';
 
 interface Podcast {
@@ -36,6 +37,7 @@ export default function PodcastShowPage() {
     const { id, episodeId } = useParams<{ id: string; episodeId?: string }>();
     const { user: clerkUser } = useUser();
     const { openShare } = useShare();
+    const { requireSignIn } = useSignInNudge();
     const { currentSong, isPlaying, playAlbum } = useAudioPlayer();
 
     const [podcast, setPodcast] = useState<Podcast | null>(null);
@@ -78,7 +80,8 @@ export default function PodcastShowPage() {
     }, [episodeId, episodes]);
 
     const toggleSubscribe = async () => {
-        if (!clerkUser?.id || !id) return;
+        if (!id) return;
+        if (!clerkUser?.id) { requireSignIn("Sign in to subscribe to podcasts."); return; }
         if (isSubscribed) {
             setIsSubscribed(false);
             setSubscriberCount(c => Math.max(0, c - 1));
@@ -175,15 +178,13 @@ export default function PodcastShowPage() {
                             <p className="text-gray-600 text-sm mt-3 max-w-xl">{podcast.description}</p>
                             <div className="flex items-center gap-3 mt-4 flex-wrap">
                                 <span className="flex items-center gap-1 text-xs text-gray-500"><Users size={14} />{subscriberCount.toLocaleString()} subscribers</span>
-                                {clerkUser && (
-                                    <button
-                                        onClick={toggleSubscribe}
-                                        className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border transition ${isSubscribed ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-900 border-gray-300 hover:bg-gray-100'}`}
-                                    >
-                                        {isSubscribed ? <BellOff size={12} /> : <Bell size={12} />}
-                                        {isSubscribed ? 'Subscribed' : 'Subscribe'}
-                                    </button>
-                                )}
+                                <button
+                                    onClick={toggleSubscribe}
+                                    className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border transition ${isSubscribed ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-900 border-gray-300 hover:bg-gray-100'}`}
+                                >
+                                    {isSubscribed ? <BellOff size={12} /> : <Bell size={12} />}
+                                    {isSubscribed ? 'Subscribed' : 'Subscribe'}
+                                </button>
                                 <button onClick={handleShare} className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border border-gray-300 bg-white text-gray-900 hover:bg-gray-100 transition">
                                     <Share2 size={12} /> Share
                                 </button>
