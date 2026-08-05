@@ -20,7 +20,7 @@ import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-    Plus, Search, Edit, Trash2, BookOpen, Star, Download, TrendingUp, Upload, Loader2, X
+    Plus, Search, Edit, Trash2, BookOpen, Star, BookOpenCheck, TrendingUp, Upload, Loader2, X
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -42,7 +42,7 @@ interface Ebook {
     is_featured: boolean;
     is_free: boolean;
     price: number;
-    download_count: number;
+    read_count: number;
     created_at: string;
 }
 
@@ -130,7 +130,7 @@ export const AdminEbooks = () => {
                 if (error) throw error;
                 toast({ title: "Updated", description: `"${finalData.title}" updated.` });
             } else {
-                const { error } = await supabase.from("ebooks").insert([{ ...finalData, download_count: 0 }]);
+                const { error } = await supabase.from("ebooks").insert([{ ...finalData, read_count: 0 }]);
                 if (error) throw error;
                 toast({ title: "Created", description: `"${finalData.title}" created.` });
             }
@@ -237,10 +237,10 @@ export const AdminEbooks = () => {
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Downloads</CardTitle>
-                            <Download className="h-4 w-4 text-muted-foreground" />
+                            <CardTitle className="text-sm font-medium">Total Reads</CardTitle>
+                            <BookOpenCheck className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
-                        <CardContent><div className="text-2xl font-bold">{ebooks.reduce((a, e) => a + (e.download_count || 0), 0).toLocaleString()}</div></CardContent>
+                        <CardContent><div className="text-2xl font-bold">{ebooks.reduce((a, e) => a + (e.read_count || 0), 0).toLocaleString()}</div></CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -272,7 +272,7 @@ export const AdminEbooks = () => {
                                     <TableHead>Author</TableHead>
                                     <TableHead>Genre</TableHead>
                                     <TableHead>Pages</TableHead>
-                                    <TableHead>Downloads</TableHead>
+                                    <TableHead>Reads</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
@@ -297,7 +297,7 @@ export const AdminEbooks = () => {
                                         <TableCell>{e.author}</TableCell>
                                         <TableCell><span className="bg-gray-100 text-gray-700 text-xs font-medium px-2 py-1 rounded-full">{e.genre}</span></TableCell>
                                         <TableCell>{e.pages || "—"}</TableCell>
-                                        <TableCell>{e.download_count?.toLocaleString()}</TableCell>
+                                        <TableCell>{e.read_count?.toLocaleString()}</TableCell>
                                         <TableCell>
                                             <div className="flex flex-col gap-1">
                                                 {e.is_featured && <span className="text-green-600 font-bold text-[10px]">FEATURED</span>}

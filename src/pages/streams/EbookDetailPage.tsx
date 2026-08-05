@@ -4,19 +4,7 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { SEO } from '@/components/SEO';
 import { supabase } from '@/lib/supabase';
 import { useShare } from '@/context/ShareContext';
-import { ArrowLeft, BookOpen, Star, Download, Share2, Loader2, User, Calendar, Hash } from 'lucide-react';
-
-// Static fallback books (same as EbooksPage) — used when DB table doesn't exist yet
-const STATIC_BOOKS: Record<string, any> = {
-  '1': { id: '1', title: 'Half of a Yellow Sun', author: 'Chimamanda Ngozi Adichie', description: 'A masterful novel set during the Nigerian Civil War, exploring love, loyalty, and the horrors of conflict.', genre: 'Historical Fiction', year: 2006, pages: 448, cover_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop', is_free: true },
-  '2': { id: '2', title: 'Born a Crime', author: 'Trevor Noah', description: 'Stories from a South African childhood — a memoir of growing up as a mixed-race child under apartheid.', genre: 'Memoir', year: 2016, pages: 304, cover_url: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop', is_free: true },
-  '3': { id: '3', title: 'Things Fall Apart', author: 'Chinua Achebe', description: 'The classic story of Okonkwo and the clash between traditional Igbo society and colonial forces.', genre: 'Literary Fiction', year: 1958, pages: 209, cover_url: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&h=600&fit=crop', is_free: true },
-  '4': { id: '4', title: 'Americanah', author: 'Chimamanda Ngozi Adichie', description: "A powerful story of love, race, and identity following a young Nigerian woman's journey between Africa and America.", genre: 'Contemporary Fiction', year: 2013, pages: 477, cover_url: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=400&h=600&fit=crop', is_free: true },
-  '5': { id: '5', title: 'The Promise', author: 'Damon Galgut', genre: 'Literary Fiction', cover_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=450&fit=crop', is_free: true },
-  '6': { id: '6', title: 'Remote Control', author: 'Nnedi Okofor', genre: 'Sci-Fi', cover_url: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=450&fit=crop', is_free: true },
-  '7': { id: '7', title: 'My Sister, the Serial Killer', author: 'Oyinkan Braithwaite', genre: 'Thriller', cover_url: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&h=450&fit=crop', is_free: true },
-  '8': { id: '8', title: 'The Old Drift', author: 'Namwali Serpell', genre: 'Epic Fiction', cover_url: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=450&fit=crop', is_free: true },
-};
+import { ArrowLeft, BookOpen, Star, BookOpenCheck, Share2, Loader2, User, Calendar, Hash } from 'lucide-react';
 
 interface Ebook {
   id: string;
@@ -27,9 +15,10 @@ interface Ebook {
   year?: number;
   pages?: number;
   cover_url?: string;
+  file_url?: string;
   is_free: boolean;
   price?: number;
-  download_count?: number;
+  read_count?: number;
 }
 
 export default function EbookDetailPage() {
@@ -47,14 +36,9 @@ export default function EbookDetailPage() {
     setLoading(true);
     try {
       const { data, error } = await supabase.from('ebooks').select('*').eq('id', ebookId).single();
-      if (data && !error) {
-        setEbook(data);
-      } else {
-        // Fall back to static data
-        setEbook(STATIC_BOOKS[ebookId] || null);
-      }
+      setEbook(!error && data ? data : null);
     } catch {
-      setEbook(STATIC_BOOKS[ebookId] || null);
+      setEbook(null);
     } finally {
       setLoading(false);
     }
@@ -146,8 +130,8 @@ export default function EbookDetailPage() {
                 <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-5">
                   {ebook.year && <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {ebook.year}</span>}
                   {ebook.pages && <span className="flex items-center gap-1"><Hash className="w-3.5 h-3.5" /> {ebook.pages} pages</span>}
-                  {ebook.download_count != null && ebook.download_count > 0 && (
-                    <span className="flex items-center gap-1"><Download className="w-3.5 h-3.5" /> {ebook.download_count.toLocaleString()} downloads</span>
+                  {ebook.read_count != null && ebook.read_count > 0 && (
+                    <span className="flex items-center gap-1"><BookOpenCheck className="w-3.5 h-3.5" /> {ebook.read_count.toLocaleString()} reads</span>
                   )}
                 </div>
 
@@ -156,7 +140,10 @@ export default function EbookDetailPage() {
                 )}
 
                 <div className="flex flex-wrap gap-3">
-                  <button className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold px-5 py-2.5 rounded-xl transition-colors">
+                  <button
+                    onClick={() => navigate(`/streams/ebook/${ebook.id}/read`)}
+                    className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold px-5 py-2.5 rounded-xl transition-colors"
+                  >
                     <BookOpen className="w-4 h-4" />
                     {ebook.is_free ? 'Read Free' : `Buy · ${ebook.price} coins`}
                   </button>

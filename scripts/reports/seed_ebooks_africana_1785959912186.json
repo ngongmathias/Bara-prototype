@@ -1,0 +1,27 @@
+{
+  "seededAt": "2026-08-05T19:58:14.476Z",
+  "created": [
+    {
+      "title": "The Interesting Narrative of the Life of Olaudah Equiano",
+      "file_url": "https://sqxybqvrctegnejbkpwg.supabase.co/storage/v1/object/public/ebooks/seed/equiano-interesting-narrative.epub",
+      "cover_url": "https://sqxybqvrctegnejbkpwg.supabase.co/storage/v1/object/public/ebooks/seed/equiano-interesting-narrative-cover.jpg"
+    },
+    {
+      "title": "Native Life in South Africa",
+      "file_url": "https://sqxybqvrctegnejbkpwg.supabase.co/storage/v1/object/public/ebooks/seed/plaatje-native-life-in-south-africa.epub",
+      "cover_url": "https://sqxybqvrctegnejbkpwg.supabase.co/storage/v1/object/public/ebooks/seed/plaatje-native-life-in-south-africa-cover.jpg"
+    },
+    {
+      "title": "The Story of an African Farm",
+      "file_url": "https://sqxybqvrctegnejbkpwg.supabase.co/storage/v1/object/public/ebooks/seed/schreiner-story-of-an-african-farm.epub",
+      "cover_url": "https://sqxybqvrctegnejbkpwg.supabase.co/storage/v1/object/public/ebooks/seed/schreiner-story-of-an-african-farm-cover.jpg"
+    },
+    {
+      "title": "The Suppression of the African Slave Trade to the United States of America",
+      "file_url": "https://sqxybqvrctegnejbkpwg.supabase.co/storage/v1/object/public/ebooks/seed/du-bois-suppression-african-slave-trade.epub",
+      "cover_url": "https://sqxybqvrctegnejbkpwg.supabase.co/storage/v1/object/public/ebooks/seed/du-bois-suppression-african-slave-trade-cover.jpg"
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}
