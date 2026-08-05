@@ -1,9 +1,10 @@
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { Mic2, Bell, Play, Clock, Headphones, Pause, Loader2, Users, Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { SEO } from '@/components/SEO';
 import { DiscoverMore } from '@/components/DiscoverMore';
+import { useAudioPlayer, type Song } from '@/context/AudioPlayerContext';
 
 const FALLBACK_PODCASTS = [
     { id: '1', title: 'The African Dream', host: 'Amara Kone', category: 'Entrepreneurship', cover_url: '', subscriber_count: 12400, description: 'Stories of founders building across the continent' },
@@ -54,10 +55,9 @@ export default function PodcastsPage() {
     const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null);
     const [loading, setLoading] = useState(true);
     const [usingFallback, setUsingFallback] = useState(false);
-    const [playingEpisodeId, setPlayingEpisodeId] = useState<string | null>(null);
     const [notifyEmail, setNotifyEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const { currentSong, isPlaying, playAlbum } = useAudioPlayer();
 
     // Search, filter & sort
     const [searchQuery, setSearchQuery] = useState('');
@@ -110,17 +110,23 @@ export default function PodcastsPage() {
         }
     };
 
-    const handlePlayEpisode = (episode: Episode) => {
-        if (playingEpisodeId === episode.id) {
-            audioRef.current?.pause();
-            setPlayingEpisodeId(null);
-            return;
-        }
-        if (!audioRef.current) audioRef.current = new Audio();
-        audioRef.current.src = episode.audio_url;
-        audioRef.current.play().catch(console.error);
-        setPlayingEpisodeId(episode.id);
-        audioRef.current.onended = () => setPlayingEpisodeId(null);
+    const mapEpisodeToSong = (episode: Episode, podcast: Podcast): Song => ({
+        id: episode.id,
+        title: episode.title,
+        artist: podcast.host,
+        file_url: episode.audio_url,
+        cover_url: podcast.cover_url,
+        duration: episode.duration,
+        kind: 'episode',
+        podcast_id: episode.podcast_id,
+    });
+
+    // Queues every episode of the currently-open show so next/prev move
+    // between episodes, same as an album — playAlbum toggles play/pause
+    // itself when the same episode is clicked again.
+    const handlePlayEpisode = (episode: Episode, podcast: Podcast) => {
+        const startIndex = episodes.findIndex(e => e.id === episode.id);
+        playAlbum(episodes.map(e => mapEpisodeToSong(e, podcast)), startIndex === -1 ? 0 : startIndex);
     };
 
     const formatDuration = (seconds: number) => {
@@ -368,10 +374,10 @@ export default function PodcastsPage() {
                                                 {episodes.map((ep) => (
                                                     <div key={ep.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition group/ep">
                                                         <button
-                                                            onClick={() => handlePlayEpisode(ep)}
+                                                            onClick={() => handlePlayEpisode(ep, pod)}
                                                             className="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center flex-shrink-0 hover:bg-gray-800 transition"
                                                         >
-                                                            {playingEpisodeId === ep.id ? <Pause size={16} fill="white" /> : <Play size={16} fill="white" className="ml-0.5" />}
+                                                            {currentSong?.id === ep.id && isPlaying ? <Pause size={16} fill="white" /> : <Play size={16} fill="white" className="ml-0.5" />}
                                                         </button>
                                                         <div className="flex-1 min-w-0">
                                                             <p className="text-sm font-semibold text-gray-900 truncate">{ep.title}</p>

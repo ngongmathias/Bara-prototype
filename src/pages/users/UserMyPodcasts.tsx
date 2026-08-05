@@ -32,21 +32,13 @@ export const UserMyPodcasts = () => {
   const fetchMyPodcasts = async () => {
     try {
       setLoading(true);
-      // Podcasts created by this user (matched by host name or uploaded_by)
       const { data, error } = await supabase
         .from("podcasts")
         .select("*")
-        .or(`uploaded_by.eq.${user!.id},host.eq.${user!.fullName || ""}`)
+        .eq("uploaded_by", user!.id)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        // Table might not exist yet
-        if (error.code === "42P01" || error.message?.includes("does not exist")) {
-          setLoading(false);
-          return;
-        }
-        throw error;
-      }
+      if (error) throw error;
       setPodcasts(data || []);
     } catch (e) {
       console.error(e);

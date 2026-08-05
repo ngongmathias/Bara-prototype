@@ -50,6 +50,10 @@ export interface Song {
 
     price?: number | null; // null or 0 = free, >0 = paid (requires purchase)
 
+    kind?: 'song' | 'episode'; // Discriminator — absent/'song' = music (default), 'episode' = podcast episode
+
+    podcast_id?: string; // Set when kind === 'episode' — the parent show, for resume/progress lookups and links
+
 }
 
 
@@ -252,6 +256,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     // position, volume, shuffle/repeat and rate restored (paused; never
     // autoplays on load).
     const lastPersistTimeRef = useRef(0);
+    const lastEpisodeProgressSaveRef = useRef(0);
     const savePlayerState = () => {
         try {
             localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify({
@@ -334,12 +339,24 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
             if (audio.currentTime >= 30 && song && hasAwardedXP.current !== song.id) {
                 hasAwardedXP.current = song.id;
 
-                trackPlay(song.id);
+                if (song.kind === 'episode') {
+                    trackEpisodePlay(song.id);
+                } else {
+                    trackPlay(song.id);
 
-                if (clerkUser) {
-                    // Capped daily listen-XP + first-listen achievement
-                    GamificationService.awardSongListenXP(clerkUser.id, song.title).catch(() => {});
+                    if (clerkUser) {
+                        // Capped daily listen-XP + first-listen achievement
+                        GamificationService.awardSongListenXP(clerkUser.id, song.title).catch(() => {});
+                    }
                 }
+            }
+
+            // Podcast resume — save progress periodically (same 5s cadence as
+            // the localStorage persist above) so "continue listening" works
+            // even if the tab is killed instead of closed cleanly.
+            if (song?.kind === 'episode' && clerkUser && audio.currentTime - lastEpisodeProgressSaveRef.current > 5) {
+                lastEpisodeProgressSaveRef.current = audio.currentTime;
+                saveEpisodeProgress(song.id, audio.currentTime, audio.duration);
             }
 
         };
@@ -347,6 +364,10 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const handleDurationChange = () => setDuration(audio.duration || 0);
 
         const handleEnded = () => {
+            const endedSong = currentSongRef.current;
+            if (endedSong?.kind === 'episode') {
+                saveEpisodeProgress(endedSong.id, audio.duration || endedSong.duration, audio.duration || endedSong.duration);
+            }
             if (sleepTimerEndOfTrackRef.current) {
                 sleepTimerEndOfTrackRef.current = false;
                 setSleepTimerEndOfTrack(false);
@@ -633,16 +654,17 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
 
         setCurrentSong(song);
+        lastEpisodeProgressSaveRef.current = 0;
 
         // Track for "Continue where you left off"
         try {
           trackRecent({
             id: song.id,
-            kind: 'song',
+            kind: song.kind === 'episode' ? 'episode' : 'song',
             title: song.title,
             subtitle: song.artist,
             imageUrl: song.cover_url,
-            href: `/streams/song/${song.id}`,
+            href: song.kind === 'episode' ? `/streams/podcast/${song.podcast_id}/episode/${song.id}` : `/streams/song/${song.id}`,
           });
         } catch { /* ignore */ }
 
@@ -667,6 +689,29 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         // Play counting happens at the 30s mark (see handleTimeUpdate),
         // not here — a "stream" is 30s+ of listening, not a tap on Play.
 
+        // Resume a podcast episode where the signed-in user left off.
+        if (song.kind === 'episode' && clerkUser && audioRef.current) {
+            const audio = audioRef.current;
+            supabase
+                .from('podcast_listen_history')
+                .select('progress_seconds, completed')
+                .eq('user_id', clerkUser.id)
+                .eq('episode_id', song.id)
+                .maybeSingle()
+                .then(({ data }) => {
+                    if (data && !data.completed && data.progress_seconds > 5 && audioRef.current === audio) {
+                        const resumeTo = data.progress_seconds;
+                        const seekOnceReady = () => {
+                            audio.currentTime = resumeTo;
+                            setProgress(resumeTo);
+                            audio.removeEventListener('loadedmetadata', seekOnceReady);
+                        };
+                        audio.addEventListener('loadedmetadata', seekOnceReady);
+                    }
+                })
+                .catch(() => {});
+        }
+
     };
 
 
@@ -690,6 +735,34 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         } catch (error) {
             // Non-blocking: don't interrupt playback if tracking fails
             console.warn('Play tracking failed:', error);
+        }
+    };
+
+    // Podcast equivalent of trackPlay — increments the episode's play_count
+    // via an atomic RPC (see 20260805_podcasts_creator_and_storage.sql).
+    const trackEpisodePlay = async (episodeId: string) => {
+        try {
+            await supabase.rpc('record_episode_play', { p_episode_id: episodeId });
+        } catch (error) {
+            console.warn('Episode play tracking failed:', error);
+        }
+    };
+
+    // Upserts listening progress so playback can resume next time (§G3).
+    // Only called for signed-in users — anon listeners don't get resume.
+    const saveEpisodeProgress = async (episodeId: string, progressSeconds: number, durationSeconds: number) => {
+        if (!clerkUser) return;
+        try {
+            const completed = durationSeconds > 0 && progressSeconds >= durationSeconds - 15;
+            await supabase.from('podcast_listen_history').upsert({
+                user_id: clerkUser.id,
+                episode_id: episodeId,
+                progress_seconds: Math.floor(progressSeconds),
+                completed,
+                listened_at: new Date().toISOString(),
+            }, { onConflict: 'user_id,episode_id' });
+        } catch (error) {
+            console.warn('Episode progress save failed:', error);
         }
     };
 
