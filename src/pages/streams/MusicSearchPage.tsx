@@ -5,7 +5,8 @@ import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
 import { SEO } from '@/components/SEO';
-import { Search, Play, Pause, X, Clock, Disc3, Music2 } from 'lucide-react';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { Search, Play, Pause, X, Clock, Disc3, Music2, Mic2, Film, BookOpen } from 'lucide-react';
 
 const RECENT_KEY = 'bara_music_recent';
 const loadRecent = (): string[] => {
@@ -34,8 +35,11 @@ interface Results {
   artists: any[];
   albums: any[];
   playlists: any[];
+  podcasts: any[];
+  movies: any[];
+  ebooks: any[];
 }
-const EMPTY: Results = { songs: [], artists: [], albums: [], playlists: [] };
+const EMPTY: Results = { songs: [], artists: [], albums: [], playlists: [], podcasts: [], movies: [], ebooks: [] };
 
 // Songs search: try the trigram RPC (typo-tolerant) first, fall back to ILIKE.
 async function searchSongs(q: string): Promise<Song[]> {
@@ -70,28 +74,34 @@ export default function MusicSearchPage() {
     setRecent(next);
   }, []);
 
-  // Debounced instant search
+  // Debounced instant search across all four Streams verticals (STREAMS_MASTER_PLAN.md §J1)
+  const debouncedQuery = useDebouncedValue(query, 250);
   useEffect(() => {
-    const q = query.trim();
+    const q = debouncedQuery.trim();
     if (!q) { setResults(EMPTY); setLoading(false); return; }
     setLoading(true);
-    const t = setTimeout(async () => {
-      const [songs, artistsRes, albumsRes, playlistsRes] = await Promise.all([
+    (async () => {
+      const [songs, artistsRes, albumsRes, playlistsRes, podcastsRes, moviesRes, ebooksRes] = await Promise.all([
         searchSongs(q),
         supabase.from('artists').select('id, name, image_url, is_verified').ilike('name', `%${q}%`).limit(8),
         supabase.from('albums').select('id, title, cover_url, artists(name)').ilike('title', `%${q}%`).limit(10),
         supabase.from('playlists').select('id, title, cover_url').eq('is_public', true).ilike('title', `%${q}%`).limit(10),
+        supabase.from('podcasts').select('id, title, host, cover_url').or(`title.ilike.%${q}%,host.ilike.%${q}%`).limit(8),
+        supabase.from('movies').select('id, title, poster_url, year, is_free').ilike('title', `%${q}%`).limit(10),
+        supabase.from('ebooks').select('id, title, author, cover_url, is_free').or(`title.ilike.%${q}%,author.ilike.%${q}%`).limit(10),
       ]);
       setResults({
         songs,
         artists: artistsRes.data || [],
         albums: albumsRes.data || [],
         playlists: playlistsRes.data || [],
+        podcasts: podcastsRes.data || [],
+        movies: moviesRes.data || [],
+        ebooks: ebooksRes.data || [],
       });
       setLoading(false);
-    }, 250);
-    return () => clearTimeout(t);
-  }, [query]);
+    })();
+  }, [debouncedQuery]);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
 
@@ -101,7 +111,8 @@ export default function MusicSearchPage() {
   };
 
   const hasQuery = query.trim().length > 0;
-  const total = results.songs.length + results.artists.length + results.albums.length + results.playlists.length;
+  const total = results.songs.length + results.artists.length + results.albums.length + results.playlists.length
+    + results.podcasts.length + results.movies.length + results.ebooks.length;
   const playSongs = (i: number) => {
     const s = results.songs[i];
     if (currentSong?.id === s.id) { togglePlay(); return; }
@@ -111,7 +122,7 @@ export default function MusicSearchPage() {
 
   return (
     <StreamsLayout>
-      <SEO title="Search — BARA Streams" description="Search songs, artists, albums and playlists on BARA Streams." />
+      <SEO title="Search — BARA Streams" description="Search songs, artists, albums, podcasts, movies and ebooks on BARA Streams." />
       <div className="min-h-screen pb-32">
         <main className="p-4 sm:p-8 max-w-[1100px] mx-auto">
           {/* Search bar */}
@@ -122,7 +133,7 @@ export default function MusicSearchPage() {
               value={query}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') saveRecent(query); }}
-              placeholder="Songs, artists, albums, playlists…"
+              placeholder="Songs, artists, albums, podcasts, movies, ebooks…"
               className="w-full pl-12 pr-12 py-3.5 bg-gray-100 focus:bg-white focus:ring-2 focus:ring-gray-900 rounded-full text-gray-900 placeholder-gray-500 outline-none transition-all text-sm font-medium"
             />
             {hasQuery && (
@@ -151,7 +162,7 @@ export default function MusicSearchPage() {
             ) : (
               <div className="text-center py-20 text-gray-400">
                 <Search size={40} className="mx-auto mb-3 opacity-30" />
-                <p className="font-medium text-gray-500">Search for your favourite songs, artists and albums.</p>
+                <p className="font-medium text-gray-500">Search songs, artists, albums, podcasts, movies and ebooks.</p>
               </div>
             )
           )}
@@ -256,6 +267,74 @@ export default function MusicSearchPage() {
                           </div>
                           <h3 className="font-bold truncate text-gray-900 text-sm">{pl.title}</h3>
                           <p className="text-xs text-gray-500 truncate">Playlist</p>
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Podcasts */}
+                {results.podcasts.length > 0 && (
+                  <section>
+                    <h2 className="text-xl font-bold text-gray-900 tracking-tight mb-4">Podcasts</h2>
+                    <div className="flex overflow-x-auto scrollbar-hide gap-6 pb-2 -mx-2 px-2">
+                      {results.podcasts.map((p) => (
+                        <Link key={p.id} to={`/streams/podcast/${p.id}`} onClick={() => saveRecent(query)} className="group flex flex-col min-w-[140px] snap-start">
+                          <div className="aspect-square mb-3 rounded-xl overflow-hidden bg-gray-100 shadow-md">
+                            {p.cover_url ? (
+                              <img src={p.cover_url} alt={p.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center"><Mic2 size={32} className="text-gray-300" /></div>
+                            )}
+                          </div>
+                          <h3 className="font-bold truncate text-gray-900 text-sm">{p.title}</h3>
+                          <p className="text-xs text-gray-500 truncate">{p.host}</p>
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Movies */}
+                {results.movies.length > 0 && (
+                  <section>
+                    <h2 className="text-xl font-bold text-gray-900 tracking-tight mb-4">Movies</h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                      {results.movies.map((m) => (
+                        <Link key={m.id} to={`/streams/movie/${m.id}`} onClick={() => saveRecent(query)} className="group flex flex-col">
+                          <div className="aspect-[2/3] mb-3 rounded-md overflow-hidden bg-gray-100 shadow-md relative">
+                            {m.poster_url ? (
+                              <img src={m.poster_url} alt={m.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center"><Film size={32} className="text-gray-300" /></div>
+                            )}
+                            {m.is_free && <div className="absolute top-2 left-2 bg-gray-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">FREE</div>}
+                          </div>
+                          <h3 className="font-bold truncate text-gray-900 text-sm">{m.title}</h3>
+                          <p className="text-xs text-gray-500 truncate">{m.year}</p>
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Ebooks */}
+                {results.ebooks.length > 0 && (
+                  <section>
+                    <h2 className="text-xl font-bold text-gray-900 tracking-tight mb-4">Ebooks</h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                      {results.ebooks.map((b) => (
+                        <Link key={b.id} to={`/streams/ebook/${b.id}`} onClick={() => saveRecent(query)} className="group flex flex-col">
+                          <div className="aspect-[2/3] mb-3 rounded-md overflow-hidden bg-gray-100 shadow-md relative">
+                            {b.cover_url ? (
+                              <img src={b.cover_url} alt={b.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center"><BookOpen size={32} className="text-gray-300" /></div>
+                            )}
+                            {b.is_free && <div className="absolute top-2 left-2 bg-gray-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">FREE</div>}
+                          </div>
+                          <h3 className="font-bold truncate text-gray-900 text-sm">{b.title}</h3>
+                          <p className="text-xs text-gray-500 truncate">{b.author}</p>
                         </Link>
                       ))}
                     </div>

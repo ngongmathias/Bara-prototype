@@ -204,7 +204,7 @@ export default function MoviesPage() {
                   loading="lazy" src={featured.backdrop_url}
                   alt={featured.title}
                   className="w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&h=600&fit=crop'; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-movie.svg'; }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
@@ -303,7 +303,7 @@ export default function MoviesPage() {
                         onClick={() => setSelectedGenre(isActive ? null : cat.name)}
                         className={`group relative rounded-xl overflow-hidden cursor-pointer aspect-[16/10] ${isActive ? 'ring-2 ring-gray-900' : ''}`}
                       >
-                        <img loading="lazy" src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=250&fit=crop'; }} />
+                        <img loading="lazy" src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-movie.svg'; }} />
                         <div className={`absolute inset-0 bg-gradient-to-t ${isActive ? 'from-gray-900/90' : 'from-black/80'} to-transparent`} />
                         <div className="absolute bottom-0 left-0 right-0 p-3">
                           <h3 className="text-white font-bold text-sm">{cat.name}</h3>
@@ -327,7 +327,7 @@ export default function MoviesPage() {
                             loading="lazy" src={movie.poster_url}
                             alt={movie.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop'; }}
+                            onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-movie.svg'; }}
                           />
                         </div>
                         <p className="font-semibold text-gray-900 text-sm truncate">{movie.title}</p>
@@ -356,7 +356,7 @@ export default function MoviesPage() {
                           loading="lazy" src={movie.poster_url}
                           alt={movie.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop'; }}
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-movie.svg'; }}
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                           <button onClick={(e) => { e.stopPropagation(); navigate(`/streams/movie/${movie.id}/watch`); }} className="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-xl" aria-label="Play"><Play className="w-5 h-5 ml-0.5" fill="white" /></button>
@@ -403,7 +403,7 @@ export default function MoviesPage() {
                           loading="lazy" src={movie.backdrop_url || movie.poster_url}
                           alt={movie.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&h=600&fit=crop'; }}
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-movie.svg'; }}
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                           <button onClick={(e) => { e.stopPropagation(); navigate(`/streams/movie/${movie.id}/watch`); }} className="w-14 h-14 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-xl" aria-label="Play"><Play className="w-6 h-6 ml-0.5" fill="white" /></button>

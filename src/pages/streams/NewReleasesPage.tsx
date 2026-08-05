@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
-import { Play, Radar } from 'lucide-react';
+import { Play, Radar, Loader2 } from 'lucide-react';
 import { SkeletonCard } from '@/components/animations/SkeletonCard';
 import { ScrollReveal } from '@/components/animations/ScrollReveal';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useUser } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
 
+const PAGE_SIZE = 24;
+
 export default function NewReleasesPage() {
     const [albums, setAlbums] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
     const [radarSongs, setRadarSongs] = useState<any[]>([]);
     const [radarLoading, setRadarLoading] = useState(false);
     const { play, playAlbum, currentSong, isPlaying } = useAudioPlayer();
@@ -40,26 +44,44 @@ export default function NewReleasesPage() {
         }
     };
 
+    // Pagination (STREAMS_MASTER_PLAN.md §J2) — used to fetch every album in
+    // one unbounded query; now fetches PAGE_SIZE at a time via range().
+    const fetchAlbumsPage = async (offset: number) => {
+        const { data, error } = await supabase
+            .from('albums')
+            .select('*, artists(name)')
+            .order('release_date', { ascending: false })
+            .range(offset, offset + PAGE_SIZE - 1);
+        if (error) throw error;
+        if ((data || []).length < PAGE_SIZE) setHasMore(false);
+        return data || [];
+    };
+
     useEffect(() => {
-        const fetchAlbums = async () => {
+        (async () => {
             try {
                 setLoading(true);
-                const { data, error } = await supabase
-                    .from('albums')
-                    .select('*, artists(name)')
-                    .order('release_date', { ascending: false });
-
-                if (error) throw error;
-                setAlbums(data || []);
+                setHasMore(true);
+                setAlbums(await fetchAlbumsPage(0));
             } catch (error) {
                 console.error('Error fetching new releases:', error);
             } finally {
                 setLoading(false);
             }
-        };
-
-        fetchAlbums();
+        })();
     }, []);
+
+    const handleLoadMoreAlbums = async () => {
+        setLoadingMore(true);
+        try {
+            const next = await fetchAlbumsPage(albums.length);
+            setAlbums(prev => [...prev, ...next]);
+        } catch (error) {
+            console.error('Error fetching more new releases:', error);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
 
     useEffect(() => {
         if (!isSignedIn || !user?.id) {
@@ -211,6 +233,19 @@ export default function NewReleasesPage() {
                             </div>
                         ))}
                     </ScrollReveal>
+                )}
+
+                {!loading && hasMore && (
+                    <div className="flex justify-center mt-8">
+                        <button
+                            onClick={handleLoadMoreAlbums}
+                            disabled={loadingMore}
+                            className="flex items-center gap-2 bg-white border border-gray-200 text-gray-900 font-bold px-6 py-2.5 rounded-full hover:bg-gray-100 transition disabled:opacity-50"
+                        >
+                            {loadingMore && <Loader2 className="w-4 h-4 animate-spin" />}
+                            {loadingMore ? 'Loading...' : 'Load More'}
+                        </button>
+                    </div>
                 )}
             </div>
         </StreamsLayout>

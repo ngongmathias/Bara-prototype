@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { Play, Pause, Search as SearchIcon, Loader2, Heart, Calendar, ShoppingBag, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 interface SearchResults {
     songs: Song[];
@@ -29,9 +30,11 @@ export default function SearchPage() {
         blogPosts: [],
     });
     const [loading, setLoading] = useState(false);
+    const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
     useEffect(() => {
         const fetchResults = async () => {
+            const searchQuery = debouncedQuery;
             if (!searchQuery.trim()) {
                 setResults({ songs: [], artists: [], albums: [], teams: [], events: [], ads: [], blogPosts: [] });
                 setIsSearching(false);
@@ -120,9 +123,8 @@ export default function SearchPage() {
             }
         };
 
-        const debounce = setTimeout(fetchResults, 300);
-        return () => clearTimeout(debounce);
-    }, [searchQuery]);
+        fetchResults();
+    }, [debouncedQuery]);
 
     const handleGenreClick = (genre: string) => {
         setSearchQuery(genre);

@@ -8,6 +8,9 @@ import { PAID_MUSIC_ENABLED } from '@/lib/features';
 import { filterPublished } from '@/lib/publishFilter';
 import { SkeletonCard } from '@/components/animations/SkeletonCard';
 import { ScrollReveal } from '@/components/animations/ScrollReveal';
+import { Loader2 } from 'lucide-react';
+
+const PAGE_SIZE = 24;
 
 export default function TrendingSongsPage() {
     const { play, playAlbum, currentSong, isPlaying } = useAudioPlayer();
@@ -15,61 +18,85 @@ export default function TrendingSongsPage() {
     const [songs, setSongs] = useState<Song[]>([]);
     const [ftMap, setFtMap] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+
+    const fetchFeaturedArtists = async (ids: string[]) => {
+        if (ids.length === 0) return;
+        const { data: ftData } = await supabase
+            .from('song_artists')
+            .select('song_id, artists(name)')
+            .in('song_id', ids)
+            .eq('role', 'featured');
+        const map: Record<string, string[]> = {};
+        if (ftData) {
+            for (const e of ftData as any[]) {
+                const name = e.artists?.name;
+                if (name) { if (!map[e.song_id]) map[e.song_id] = []; map[e.song_id].push(name); }
+            }
+        }
+        setFtMap(prev => {
+            const next = { ...prev };
+            for (const [sid, names] of Object.entries(map)) next[sid] = ` ft. ${names.join(', ')}`;
+            return next;
+        });
+    };
+
+    // Pagination (STREAMS_MASTER_PLAN.md §J2) — this page used to fetch every
+    // song in one unbounded query; now fetches PAGE_SIZE at a time via range().
+    const fetchPage = async (offset: number) => {
+        const { data, error } = await supabase
+            .from('songs')
+            .select('*, artists(name)')
+            .order('plays', { ascending: false })
+            .range(offset, offset + PAGE_SIZE - 1);
+
+        if (error) throw error;
+        if (!data) return [];
+
+        const formattedSongs: Song[] = filterPublished(data).map(song => ({
+            id: song.id,
+            title: song.title,
+            artist: song.artists?.name || 'Unknown Artist',
+            file_url: song.file_url,
+            cover_url: song.cover_url || '/placeholder-music.png',
+            duration: song.duration,
+            artist_id: song.artist_id,
+            album_id: song.album_id,
+            price: song.price ?? null,
+        }));
+        if (data.length < PAGE_SIZE) setHasMore(false);
+        return formattedSongs;
+    };
 
     useEffect(() => {
-        const fetchSongs = async () => {
+        (async () => {
             try {
                 setLoading(true);
-                const { data, error } = await supabase
-                    .from('songs')
-                    .select('*, artists(name)')
-                    .order('plays', { ascending: false });
-
-                if (error) throw error;
-
-                if (data) {
-                    const formattedSongs: Song[] = filterPublished(data).map(song => ({
-                        id: song.id,
-                        title: song.title,
-                        artist: song.artists?.name || 'Unknown Artist',
-                        file_url: song.file_url,
-                        cover_url: song.cover_url || '/placeholder-music.png',
-                        duration: song.duration,
-                        artist_id: song.artist_id,
-                        album_id: song.album_id,
-                        price: song.price ?? null,
-                    }));
-                    setSongs(formattedSongs);
-
-                    // Fetch featured artists
-                    const ids = formattedSongs.map(s => s.id);
-                    if (ids.length > 0) {
-                        const { data: ftData } = await supabase
-                            .from('song_artists')
-                            .select('song_id, artists(name)')
-                            .in('song_id', ids)
-                            .eq('role', 'featured');
-                        const map: Record<string, string[]> = {};
-                        if (ftData) {
-                            for (const e of ftData as any[]) {
-                                const name = e.artists?.name;
-                                if (name) { if (!map[e.song_id]) map[e.song_id] = []; map[e.song_id].push(name); }
-                            }
-                        }
-                        const result: Record<string, string> = {};
-                        for (const [sid, names] of Object.entries(map)) result[sid] = ` ft. ${names.join(', ')}`;
-                        setFtMap(result);
-                    }
-                }
+                setHasMore(true);
+                const formattedSongs = await fetchPage(0);
+                setSongs(formattedSongs);
+                fetchFeaturedArtists(formattedSongs.map(s => s.id));
             } catch (error) {
                 console.error('Error fetching trending songs:', error);
             } finally {
                 setLoading(false);
             }
-        };
-
-        fetchSongs();
+        })();
     }, []);
+
+    const handleLoadMore = async () => {
+        setLoadingMore(true);
+        try {
+            const nextSongs = await fetchPage(songs.length);
+            setSongs(prev => [...prev, ...nextSongs]);
+            fetchFeaturedArtists(nextSongs.map(s => s.id));
+        } catch (error) {
+            console.error('Error fetching more trending songs:', error);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
 
     const handlePlaySong = (song: Song) => {
         // Set all trending songs as queue so next/prev work
@@ -118,6 +145,19 @@ export default function TrendingSongsPage() {
                             </div>
                         ))}
                     </ScrollReveal>
+                )}
+
+                {!loading && hasMore && (
+                    <div className="flex justify-center mt-8">
+                        <button
+                            onClick={handleLoadMore}
+                            disabled={loadingMore}
+                            className="flex items-center gap-2 bg-white border border-gray-200 text-gray-900 font-bold px-6 py-2.5 rounded-full hover:bg-gray-100 transition disabled:opacity-50"
+                        >
+                            {loadingMore && <Loader2 className="w-4 h-4 animate-spin" />}
+                            {loadingMore ? 'Loading...' : 'Load More'}
+                        </button>
+                    </div>
                 )}
             </div>
         </StreamsLayout>
