@@ -8,7 +8,7 @@ import { PAID_MUSIC_ENABLED } from '@/lib/features';
 
 import { useUser } from '@clerk/clerk-react';
 
-
+const PLAYER_STORAGE_KEY = 'bara.streams.playerState';
 
 // Types
 
@@ -183,6 +183,87 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     useEffect(() => { currentSongRef.current = currentSong; }, [currentSong]);
     const purchasedSongsRef = useRef(purchasedSongs);
     useEffect(() => { purchasedSongsRef.current = purchasedSongs; }, [purchasedSongs]);
+    const volumeRef = useRef(volume);
+    useEffect(() => { volumeRef.current = volume; }, [volume]);
+    const playbackRateRef = useRef(playbackRate);
+    useEffect(() => { playbackRateRef.current = playbackRate; }, [playbackRate]);
+
+    // ===== Shuffle order — a real permutation + a pointer into it, so next()
+    // never repeats a song until the whole queue has played once, and prev()
+    // retraces the exact same path instead of picking a new random song.
+    const shuffleOrderRef = useRef<number[]>([]);
+    const shufflePosRef = useRef(0);
+
+    const buildFreshShuffleOrder = (length: number): number[] => {
+        const arr = Array.from({ length }, (_, i) => i);
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    };
+
+    // Lazily (re)builds the shuffle order whenever it's out of sync with the
+    // current queue (fresh queue, resized queue, or shuffle just turned on),
+    // pinning the currently-playing song to the current position so toggling
+    // shuffle mid-song doesn't jump to something else.
+    const ensureShuffleOrder = (): { order: number[]; pos: number } => {
+        const q = queueRef.current;
+        if (shuffleOrderRef.current.length === q.length && shuffleOrderRef.current.length > 0) {
+            return { order: shuffleOrderRef.current, pos: shufflePosRef.current };
+        }
+        const cur = queueIndexRef.current;
+        const order = buildFreshShuffleOrder(q.length);
+        if (cur >= 0 && cur < q.length) {
+            const curPos = order.indexOf(cur);
+            if (curPos > 0) { [order[0], order[curPos]] = [order[curPos], order[0]]; }
+        }
+        shuffleOrderRef.current = order;
+        shufflePosRef.current = 0;
+        return { order, pos: 0 };
+    };
+
+    // Any time the queue's contents change shape (new album, reorder, remove,
+    // radio extend, ...) the previous shuffle order's indices no longer mean
+    // anything — force a lazy rebuild on the next next()/prev() call.
+    const resetShuffleOrder = () => {
+        shuffleOrderRef.current = [];
+        shufflePosRef.current = 0;
+    };
+
+    // ===== Persistence — survive a refresh with the queue, current song,
+    // position, volume, shuffle/repeat and rate restored (paused; never
+    // autoplays on load).
+    const lastPersistTimeRef = useRef(0);
+    const savePlayerState = () => {
+        try {
+            localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify({
+                currentSong: currentSongRef.current,
+                queue: queueRef.current,
+                queueIndex: queueIndexRef.current,
+                progress: audioRef.current?.currentTime ?? 0,
+                volume: volumeRef.current,
+                isShuffle: isShuffleRef.current,
+                repeatMode: repeatModeRef.current,
+                playbackRate: playbackRateRef.current,
+            }));
+        } catch { /* storage unavailable or full — not fatal */ }
+    };
+    const savePlayerStateRef = useRef(savePlayerState);
+    useEffect(() => { savePlayerStateRef.current = savePlayerState; });
+
+    // Flush on tab close/hide — beforeunload doesn't fire reliably on mobile,
+    // visibilitychange does.
+    useEffect(() => {
+        const flush = () => savePlayerStateRef.current();
+        const onVisibilityChange = () => { if (document.visibilityState === 'hidden') flush(); };
+        window.addEventListener('beforeunload', flush);
+        document.addEventListener('visibilitychange', onVisibilityChange);
+        return () => {
+            window.removeEventListener('beforeunload', flush);
+            document.removeEventListener('visibilitychange', onVisibilityChange);
+        };
+    }, []);
 
     // Reload likes + purchases whenever the signed-in user changes
     useEffect(() => { if (clerkUser) fetchLikes(); }, [clerkUser?.id]);
@@ -206,6 +287,13 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const handleTimeUpdate = () => {
 
             setProgress(audio.currentTime);
+
+            // Persist playback position periodically (not on every tick — that's
+            // ~4x/sec) so a refresh can resume roughly where you left off.
+            if (audio.currentTime - lastPersistTimeRef.current > 5) {
+                lastPersistTimeRef.current = audio.currentTime;
+                savePlayerStateRef.current();
+            }
 
             // Preview cutoff: paid songs stop at 25 seconds if not purchased.
             // Disabled while paid music is deferred (all songs play in full).
@@ -258,22 +346,34 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
             } else {
                 // Inline next logic using refs to avoid stale closures
                 const q = queueRef.current;
-                const idx = queueIndexRef.current;
                 if (q.length === 0) { setIsPlaying(false); return; }
 
-                let nextIdx;
+                let nextIdx: number | null = null;
                 if (isShuffleRef.current) {
-                    nextIdx = Math.floor(Math.random() * q.length);
+                    const { order, pos } = ensureShuffleOrder();
+                    if (pos + 1 < order.length) {
+                        shufflePosRef.current = pos + 1;
+                        nextIdx = order[pos + 1];
+                    }
                 } else {
-                    nextIdx = idx + 1;
+                    const idx = queueIndexRef.current + 1;
+                    if (idx < q.length) nextIdx = idx;
                 }
 
-                if (nextIdx < q.length) {
+                if (nextIdx !== null) {
                     setQueueIndex(nextIdx);
                     play(q[nextIdx]);
                 } else if (repeatModeRef.current === 'all') {
-                    setQueueIndex(0);
-                    play(q[0]);
+                    if (isShuffleRef.current) {
+                        const order = buildFreshShuffleOrder(q.length);
+                        shuffleOrderRef.current = order;
+                        shufflePosRef.current = 0;
+                        setQueueIndex(order[0]);
+                        play(q[order[0]]);
+                    } else {
+                        setQueueIndex(0);
+                        play(q[0]);
+                    }
                 } else if (radioSeedRef.current) {
                     extendRadioRef.current();
                 } else {
@@ -343,7 +443,55 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     }, []); // Runs once — event handlers use refs for current state
 
+    // Restore persisted player state on mount. Always restores paused —
+    // browsers block autoplay without a user gesture anyway, and jumping
+    // straight into audio on load would be a bad surprise.
+    useEffect(() => {
+        try {
+            const raw = localStorage.getItem(PLAYER_STORAGE_KEY);
+            if (!raw) return;
+            const saved = JSON.parse(raw);
 
+            if (typeof saved.volume === 'number') {
+                setVolumeState(saved.volume);
+                if (audioRef.current) audioRef.current.volume = saved.volume;
+            }
+            if (typeof saved.playbackRate === 'number') setPlaybackRateState(saved.playbackRate);
+            if (typeof saved.isShuffle === 'boolean') setIsShuffle(saved.isShuffle);
+            if (saved.repeatMode === 'none' || saved.repeatMode === 'one' || saved.repeatMode === 'all') {
+                setRepeatMode(saved.repeatMode);
+            }
+            if (Array.isArray(saved.queue) && saved.queue.length > 0) {
+                setQueue(saved.queue);
+                queueRef.current = saved.queue;
+                setQueueIndex(saved.queueIndex ?? 0);
+                queueIndexRef.current = saved.queueIndex ?? 0;
+            }
+            if (saved.currentSong?.id && audioRef.current) {
+                setCurrentSong(saved.currentSong);
+                currentSongRef.current = saved.currentSong;
+                if (saved.currentSong.file_url) {
+                    const audio = audioRef.current;
+                    audio.src = saved.currentSong.file_url;
+                    audio.load();
+                    const restorePosition = () => {
+                        if (typeof saved.progress === 'number' && saved.progress > 0) {
+                            audio.currentTime = saved.progress;
+                            setProgress(saved.progress);
+                        }
+                        audio.removeEventListener('loadedmetadata', restorePosition);
+                    };
+                    audio.addEventListener('loadedmetadata', restorePosition);
+                }
+            }
+        } catch { /* corrupt or unavailable storage — start fresh */ }
+    }, []);
+
+    // Save immediately on discrete state changes (song, queue shape, toggles).
+    // Progress itself is saved on a throttle inside handleTimeUpdate instead.
+    useEffect(() => {
+        savePlayerState();
+    }, [currentSong?.id, queue, isShuffle, repeatMode, volume, playbackRate]);
 
     const fetchLikes = async () => {
 
@@ -570,83 +718,70 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
 
     const next = () => {
+        const q = queueRef.current;
+        if (q.length === 0) return;
 
-        if (queue.length === 0) return;
-
-
-
-        let nextIndex;
-
-        if (isShuffle) {
-
-            nextIndex = Math.floor(Math.random() * queue.length);
-
+        let nextIndex: number | null = null;
+        if (isShuffleRef.current) {
+            const { order, pos } = ensureShuffleOrder();
+            if (pos + 1 < order.length) {
+                shufflePosRef.current = pos + 1;
+                nextIndex = order[pos + 1];
+            }
         } else {
-
-            nextIndex = queueIndex + 1;
-
+            const idx = queueIndexRef.current + 1;
+            if (idx < q.length) nextIndex = idx;
         }
 
-
-
-        if (nextIndex < queue.length) {
-
+        if (nextIndex !== null) {
             setQueueIndex(nextIndex);
-
-            play(queue[nextIndex]);
-
+            play(q[nextIndex]);
         } else if (repeatMode === 'all') {
-
-            setQueueIndex(0);
-
-            play(queue[0]);
-
+            if (isShuffleRef.current) {
+                const order = buildFreshShuffleOrder(q.length);
+                shuffleOrderRef.current = order;
+                shufflePosRef.current = 0;
+                setQueueIndex(order[0]);
+                play(q[order[0]]);
+            } else {
+                setQueueIndex(0);
+                play(q[0]);
+            }
         } else if (radioSeedRef.current) {
-
             extendRadioRef.current();
-
         } else {
-
             setIsPlaying(false);
-
             if (audioRef.current) audioRef.current.currentTime = 0;
-
         }
-
     };
 
-
-
     const prev = () => {
-
-        if (queue.length === 0) return;
-
-
+        const q = queueRef.current;
+        if (q.length === 0) return;
 
         if (audioRef.current && audioRef.current.currentTime > 3) {
-
             audioRef.current.currentTime = 0;
-
             return;
-
         }
 
-
-
-        const prevIndex = queueIndex - 1;
-
-        if (prevIndex >= 0) {
-
-            setQueueIndex(prevIndex);
-
-            play(queue[prevIndex]);
-
+        let prevIndex: number | null = null;
+        if (isShuffleRef.current) {
+            const { order, pos } = ensureShuffleOrder();
+            if (pos > 0) {
+                shufflePosRef.current = pos - 1;
+                prevIndex = order[pos - 1];
+            }
         } else {
-
-            if (audioRef.current) audioRef.current.currentTime = 0;
-
+            const idx = queueIndexRef.current - 1;
+            if (idx >= 0) prevIndex = idx;
         }
 
+        if (prevIndex !== null) {
+            setQueueIndex(prevIndex);
+            play(q[prevIndex]);
+        } else {
+            if (audioRef.current) audioRef.current.currentTime = 0;
+        }
     };
 
 
@@ -806,12 +941,13 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
 
     const addToQueue = (song: Song) => {
-
+        resetShuffleOrder();
         setQueue(prev => [...prev, song]);
 
     };
 
     const playNext = (song: Song) => {
+        resetShuffleOrder();
         setQueue(prev => {
             const idx = queueIndexRef.current;
             const filtered = prev.filter(s => s.id !== song.id);
@@ -827,6 +963,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const qi = queueIndexRef.current;
         const prev = queueRef.current;
         if (index < 0 || index >= prev.length || index === qi) return; // never drop the now-playing track
+        resetShuffleOrder();
         setQueue(prev.filter((_, i) => i !== index));
         if (index < qi) setQueueIndex(qi - 1); // keep the index pointing at the current song
     };
@@ -834,6 +971,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const reorderQueue = (from: number, to: number) => {
         const prev = queueRef.current;
         if (from < 0 || from >= prev.length || to < 0 || to >= prev.length || from === to) return;
+        resetShuffleOrder();
         const currentId = currentSongRef.current?.id;
         const arr = [...prev];
         const [moved] = arr.splice(from, 1);
@@ -846,6 +984,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     const clearQueue = () => {
+        resetShuffleOrder();
         const current = currentSongRef.current;
         if (current) {
             setQueue([current]);
@@ -911,6 +1050,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setRadioSeed(seed);
         radioSeedRef.current = seed;
         const more = await fetchRadioSongs(seed, [song.id], 20);
+        resetShuffleOrder();
         setQueue([song, ...more]);
         setQueueIndex(0);
         play(song);
@@ -924,6 +1064,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const more = await fetchRadioSongs(seed, q.map(s => s.id), 20);
         if (more.length === 0) { setIsPlaying(false); return; }
         const startAt = q.length;
+        resetShuffleOrder();
         setQueue([...q, ...more]);
         setQueueIndex(startAt);
         play(more[0]);
@@ -933,6 +1074,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const playAlbum = (songs: Song[], startIndex = 0) => {
 
         setRadioSeed(null); // explicit album/playlist play ends radio mode
+
+        resetShuffleOrder();
 
         setQueue(songs);
 
@@ -944,7 +1087,10 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
 
 
-    const toggleShuffle = () => setIsShuffle(!isShuffle);
+    const toggleShuffle = () => {
+        if (!isShuffle) resetShuffleOrder();
+        setIsShuffle(!isShuffle);
+    };
 
 
 
