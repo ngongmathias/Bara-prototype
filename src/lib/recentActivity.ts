@@ -1,4 +1,4 @@
-export type RecentKind = 'event' | 'ad' | 'song';
+export type RecentKind = 'event' | 'ad' | 'song' | 'episode';
 
 export interface RecentItem {
   id: string;

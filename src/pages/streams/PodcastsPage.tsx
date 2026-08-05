@@ -1,9 +1,12 @@
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { Mic2, Bell, Play, Clock, Headphones, Pause, Loader2, Users, Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/lib/supabase';
 import { SEO } from '@/components/SEO';
 import { DiscoverMore } from '@/components/DiscoverMore';
+import { useAudioPlayer, type Song } from '@/context/AudioPlayerContext';
 
 const FALLBACK_PODCASTS = [
     { id: '1', title: 'The African Dream', host: 'Amara Kone', category: 'Entrepreneurship', cover_url: '', subscriber_count: 12400, description: 'Stories of founders building across the continent' },
@@ -32,6 +35,7 @@ interface Podcast {
     cover_url: string;
     subscriber_count: number;
     is_featured?: boolean;
+    is_seed?: boolean;
     created_at?: string;
 }
 
@@ -48,16 +52,23 @@ interface Episode {
     play_count: number;
 }
 
+interface ContinueListeningItem {
+    progress_seconds: number;
+    episode: Episode & { podcast: Podcast | null };
+}
+
 export default function PodcastsPage() {
+    const { user: clerkUser } = useUser();
     const [podcasts, setPodcasts] = useState<Podcast[]>([]);
     const [episodes, setEpisodes] = useState<Episode[]>([]);
     const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null);
     const [loading, setLoading] = useState(true);
     const [usingFallback, setUsingFallback] = useState(false);
-    const [playingEpisodeId, setPlayingEpisodeId] = useState<string | null>(null);
     const [notifyEmail, setNotifyEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [continueListening, setContinueListening] = useState<ContinueListeningItem[]>([]);
+    const [subscribedPodcasts, setSubscribedPodcasts] = useState<Podcast[]>([]);
+    const { currentSong, isPlaying, playAlbum } = useAudioPlayer();
 
     // Search, filter & sort
     const [searchQuery, setSearchQuery] = useState('');
@@ -67,6 +78,37 @@ export default function PodcastsPage() {
     useEffect(() => {
         fetchPodcasts();
     }, []);
+
+    useEffect(() => {
+        if (clerkUser?.id) {
+            fetchContinueListening();
+            fetchSubscribedPodcasts();
+        } else {
+            setContinueListening([]);
+            setSubscribedPodcasts([]);
+        }
+    }, [clerkUser?.id]);
+
+    const fetchSubscribedPodcasts = async () => {
+        const { data } = await supabase
+            .from('podcast_subscriptions')
+            .select('subscribed_at, podcasts(*)')
+            .eq('user_id', clerkUser!.id)
+            .order('subscribed_at', { ascending: false });
+        setSubscribedPodcasts(((data as any) || []).map((row: any) => row.podcasts).filter(Boolean));
+    };
+
+    const fetchContinueListening = async () => {
+        const { data } = await supabase
+            .from('podcast_listen_history')
+            .select('progress_seconds, episode:podcast_episodes(id, podcast_id, title, description, audio_url, duration, episode_number, season_number, published_at, play_count, podcast:podcasts(id, title, host, description, category, cover_url, subscriber_count))')
+            .eq('user_id', clerkUser!.id)
+            .eq('completed', false)
+            .gt('progress_seconds', 5)
+            .order('listened_at', { ascending: false })
+            .limit(10);
+        setContinueListening(((data as any) || []).filter((row: any) => row.episode));
+    };
 
     const fetchPodcasts = async () => {
         try {
@@ -110,17 +152,30 @@ export default function PodcastsPage() {
         }
     };
 
-    const handlePlayEpisode = (episode: Episode) => {
-        if (playingEpisodeId === episode.id) {
-            audioRef.current?.pause();
-            setPlayingEpisodeId(null);
-            return;
-        }
-        if (!audioRef.current) audioRef.current = new Audio();
-        audioRef.current.src = episode.audio_url;
-        audioRef.current.play().catch(console.error);
-        setPlayingEpisodeId(episode.id);
-        audioRef.current.onended = () => setPlayingEpisodeId(null);
+    const mapEpisodeToSong = (episode: Episode, podcast: Podcast): Song => ({
+        id: episode.id,
+        title: episode.title,
+        artist: podcast.host,
+        file_url: episode.audio_url,
+        cover_url: podcast.cover_url,
+        duration: episode.duration,
+        kind: 'episode',
+        podcast_id: episode.podcast_id,
+    });
+
+    // Queues every episode of the currently-open show so next/prev move
+    // between episodes, same as an album — playAlbum toggles play/pause
+    // itself when the same episode is clicked again.
+    const handlePlayEpisode = (episode: Episode, podcast: Podcast) => {
+        const startIndex = episodes.findIndex(e => e.id === episode.id);
+        playAlbum(episodes.map(e => mapEpisodeToSong(e, podcast)), startIndex === -1 ? 0 : startIndex);
+    };
+
+    // Continue-listening items carry their own embedded podcast, so they're
+    // queued standalone rather than against the (possibly unloaded) episodes list.
+    const handleContinueListening = (item: ContinueListeningItem) => {
+        if (!item.episode.podcast) return;
+        playAlbum([mapEpisodeToSong(item.episode, item.episode.podcast)], 0);
     };
 
     const formatDuration = (seconds: number) => {
@@ -266,6 +321,71 @@ export default function PodcastsPage() {
                     </div>
                 ) : (
                     <>
+                        {/* Continue Listening */}
+                        {continueListening.length > 0 && (
+                            <div className="max-w-6xl mx-auto px-6 mt-8">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">Continue Listening</h2>
+                                <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 snap-x -mx-2 px-2">
+                                    {continueListening.map((item) => {
+                                        const ep = item.episode;
+                                        const pct = ep.duration > 0 ? Math.min(100, (item.progress_seconds / ep.duration) * 100) : 0;
+                                        const isCurrent = currentSong?.id === ep.id;
+                                        return (
+                                            <button
+                                                key={ep.id}
+                                                onClick={() => handleContinueListening(item)}
+                                                className="flex-shrink-0 w-[220px] snap-start text-left bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow group"
+                                            >
+                                                <div className="h-28 bg-gradient-to-br from-gray-600 to-gray-800 relative flex items-center justify-center">
+                                                    {ep.podcast?.cover_url ? (
+                                                        <img loading="lazy" src={ep.podcast.cover_url} alt={ep.title} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <Mic2 size={32} className="text-white/30" />
+                                                    )}
+                                                    <div className="absolute bottom-2 right-2 w-9 h-9 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                                        {isCurrent && isPlaying ? <Pause size={14} className="text-white" fill="white" /> : <Play size={14} className="text-white ml-0.5" fill="white" />}
+                                                    </div>
+                                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
+                                                        <div className="h-full bg-white" style={{ width: `${pct}%` }} />
+                                                    </div>
+                                                </div>
+                                                <div className="p-3">
+                                                    <p className="text-sm font-semibold text-gray-900 truncate">{ep.title}</p>
+                                                    <p className="text-xs text-gray-500 truncate">{ep.podcast?.title}</p>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Your Subscriptions */}
+                        {subscribedPodcasts.length > 0 && (
+                            <div className="max-w-6xl mx-auto px-6 mt-8">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">Your Subscriptions</h2>
+                                <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 snap-x -mx-2 px-2">
+                                    {subscribedPodcasts.map((pod) => (
+                                        <Link
+                                            key={pod.id}
+                                            to={`/streams/podcast/${pod.id}`}
+                                            className="flex-shrink-0 w-[160px] snap-start group"
+                                        >
+                                            <div className="h-[160px] w-[160px] rounded-xl overflow-hidden bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center">
+                                                {pod.cover_url ? (
+                                                    <img loading="lazy" src={pod.cover_url} alt={pod.title} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <Mic2 size={32} className="text-white/30" />
+                                                )}
+                                            </div>
+                                            <p className="text-sm font-semibold text-gray-900 mt-2 truncate">{pod.title}</p>
+                                            <p className="text-xs text-gray-500 truncate">{pod.host}</p>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Featured Podcasts */}
                         {featuredPodcasts.length > 0 && (
                             <div className="max-w-6xl mx-auto px-6 mt-8">
@@ -349,6 +469,9 @@ export default function PodcastsPage() {
                                                 <div className="absolute bottom-2 right-2 w-10 h-10 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                                                     <Play size={16} className="text-white ml-0.5" fill="white" />
                                                 </div>
+                                                {pod.is_seed && (
+                                                    <span className="absolute top-2 left-2 text-[9px] font-bold uppercase tracking-wider text-white bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded-full">Demo</span>
+                                                )}
                                             </div>
                                             <div className="p-4">
                                                 <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">{pod.category}</span>
@@ -364,14 +487,19 @@ export default function PodcastsPage() {
                                         {/* Episodes panel (expanded) */}
                                         {selectedPodcast?.id === pod.id && episodes.length > 0 && (
                                             <div className="mt-2 bg-white border border-gray-200 rounded-xl p-4 space-y-3">
-                                                <h4 className="font-bold text-gray-900 text-sm">Episodes</h4>
+                                                <div className="flex items-center justify-between">
+                                                    <h4 className="font-bold text-gray-900 text-sm">Episodes</h4>
+                                                    <Link to={`/streams/podcast/${pod.id}`} className="text-xs font-bold text-gray-500 hover:text-gray-900 underline" onClick={(e) => e.stopPropagation()}>
+                                                        View Show
+                                                    </Link>
+                                                </div>
                                                 {episodes.map((ep) => (
                                                     <div key={ep.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition group/ep">
                                                         <button
-                                                            onClick={() => handlePlayEpisode(ep)}
+                                                            onClick={() => handlePlayEpisode(ep, pod)}
                                                             className="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center flex-shrink-0 hover:bg-gray-800 transition"
                                                         >
-                                                            {playingEpisodeId === ep.id ? <Pause size={16} fill="white" /> : <Play size={16} fill="white" className="ml-0.5" />}
+                                                            {currentSong?.id === ep.id && isPlaying ? <Pause size={16} fill="white" /> : <Play size={16} fill="white" className="ml-0.5" />}
                                                         </button>
                                                         <div className="flex-1 min-w-0">
                                                             <p className="text-sm font-semibold text-gray-900 truncate">{ep.title}</p>

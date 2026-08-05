@@ -20,7 +20,7 @@ import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-    Plus, Search, Edit, Trash2, Mic2, Headphones, Users, Eye, Upload, Loader2, X
+    Plus, Search, Edit, Trash2, Mic2, Headphones, Users, Eye, Upload, Loader2, X, ListMusic
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +38,19 @@ interface Podcast {
     is_featured: boolean;
     subscriber_count: number;
     created_at: string;
+}
+
+interface Episode {
+    id: string;
+    podcast_id: string;
+    title: string;
+    description: string;
+    audio_url: string;
+    duration: number;
+    episode_number: number;
+    season_number: number;
+    published_at: string;
+    play_count: number;
 }
 
 const CATEGORIES = [
@@ -73,6 +86,17 @@ export const AdminPodcasts = () => {
     // File states
     const [coverFile, setCoverFile] = useState<File | null>(null);
     const [coverPreview, setCoverPreview] = useState<string | null>(null);
+
+    // Episode management
+    const [managingPodcast, setManagingPodcast] = useState<Podcast | null>(null);
+    const [episodes, setEpisodes] = useState<Episode[]>([]);
+    const [episodesLoading, setEpisodesLoading] = useState(false);
+    const [episodeToDelete, setEpisodeToDelete] = useState<string | null>(null);
+    const [savingEpisode, setSavingEpisode] = useState(false);
+    const [audioFile, setAudioFile] = useState<File | null>(null);
+    const [episodeForm, setEpisodeForm] = useState({
+        title: "", description: "", episode_number: 1, season_number: 1, duration: 0,
+    });
 
     const [formData, setFormData] = useState({
         title: "", host: "", description: "", category: "Entrepreneurship",
@@ -139,6 +163,63 @@ export const AdminPodcasts = () => {
             fetchPodcasts();
         } catch (e: any) {
             toast({ title: "Error", description: e.message, variant: "destructive" });
+        }
+    };
+
+    const openManageEpisodes = async (p: Podcast) => {
+        setManagingPodcast(p);
+        setEpisodesLoading(true);
+        const { data } = await supabase.from("podcast_episodes").select("*").eq("podcast_id", p.id).order("episode_number", { ascending: false });
+        setEpisodes(data || []);
+        setEpisodesLoading(false);
+    };
+
+    const resetEpisodeForm = () => {
+        setEpisodeForm({ title: "", description: "", episode_number: episodes.length + 1, season_number: 1, duration: 0 });
+        setAudioFile(null);
+    };
+
+    const handleAddEpisode = async () => {
+        if (!managingPodcast || !episodeForm.title || !audioFile) {
+            toast({ title: "Error", description: "Title and audio file are required.", variant: "destructive" });
+            return;
+        }
+        try {
+            setSavingEpisode(true);
+            const audio_url = await uploadFile(audioFile, `episodes/${managingPodcast.id}`);
+            const { error } = await supabase.from("podcast_episodes").insert([{
+                podcast_id: managingPodcast.id,
+                title: episodeForm.title,
+                description: episodeForm.description,
+                audio_url,
+                duration: episodeForm.duration,
+                episode_number: episodeForm.episode_number,
+                season_number: episodeForm.season_number,
+                uploaded_by: null,
+            }]);
+            if (error) throw error;
+            toast({ title: "Episode added", description: `"${episodeForm.title}" uploaded.` });
+            resetEpisodeForm();
+            const { data } = await supabase.from("podcast_episodes").select("*").eq("podcast_id", managingPodcast.id).order("episode_number", { ascending: false });
+            setEpisodes(data || []);
+        } catch (e: any) {
+            toast({ title: "Error", description: e.message, variant: "destructive" });
+        } finally {
+            setSavingEpisode(false);
+        }
+    };
+
+    const handleDeleteEpisode = async () => {
+        if (!episodeToDelete) return;
+        try {
+            const { error } = await supabase.from("podcast_episodes").delete().eq("id", episodeToDelete);
+            if (error) throw error;
+            setEpisodes(prev => prev.filter(e => e.id !== episodeToDelete));
+            toast({ title: "Deleted", description: "Episode removed." });
+        } catch (e: any) {
+            toast({ title: "Error", description: e.message, variant: "destructive" });
+        } finally {
+            setEpisodeToDelete(null);
         }
     };
 
@@ -275,6 +356,7 @@ export const AdminPodcasts = () => {
                                         <TableCell>{p.is_featured ? <span className="text-green-600 font-bold text-xs">YES</span> : <span className="text-gray-400 text-xs">No</span>}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
+                                                <Button variant="outline" size="sm" onClick={() => openManageEpisodes(p)}><ListMusic className="h-4 w-4 mr-1" />Episodes</Button>
                                                 <Button variant="outline" size="sm" onClick={() => openEdit(p)}><Edit className="h-4 w-4" /></Button>
                                                 <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => setPodcastToDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
                                             </div>
@@ -367,6 +449,71 @@ export const AdminPodcasts = () => {
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Manage Episodes */}
+            <Dialog open={!!managingPodcast} onOpenChange={(open) => { if (!open) { setManagingPodcast(null); resetEpisodeForm(); } }}>
+                <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Episodes — {managingPodcast?.title}</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-3">
+                        {episodesLoading ? (
+                            <div className="text-center py-8 text-gray-500">Loading episodes...</div>
+                        ) : episodes.length === 0 ? (
+                            <div className="text-center py-6 text-gray-500 text-sm">No episodes yet.</div>
+                        ) : (
+                            episodes.map(ep => (
+                                <div key={ep.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                                    <Headphones className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-sm truncate">S{ep.season_number}E{ep.episode_number} — {ep.title}</p>
+                                        <p className="text-xs text-gray-500">{ep.play_count?.toLocaleString() || 0} plays</p>
+                                    </div>
+                                    <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => setEpisodeToDelete(ep.id)}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    <div className="border-t pt-4 mt-2 space-y-3">
+                        <h4 className="font-semibold text-sm">Add Episode</h4>
+                        <div><Label>Title *</Label><Input value={episodeForm.title} onChange={e => setEpisodeForm({ ...episodeForm, title: e.target.value })} /></div>
+                        <div><Label>Description</Label><Textarea value={episodeForm.description} onChange={e => setEpisodeForm({ ...episodeForm, description: e.target.value })} rows={2} /></div>
+                        <div className="grid grid-cols-3 gap-3">
+                            <div><Label>Season</Label><Input type="number" min={1} value={episodeForm.season_number} onChange={e => setEpisodeForm({ ...episodeForm, season_number: Number(e.target.value) })} /></div>
+                            <div><Label>Episode #</Label><Input type="number" min={1} value={episodeForm.episode_number} onChange={e => setEpisodeForm({ ...episodeForm, episode_number: Number(e.target.value) })} /></div>
+                            <div><Label>Duration (sec)</Label><Input type="number" min={0} value={episodeForm.duration} onChange={e => setEpisodeForm({ ...episodeForm, duration: Number(e.target.value) })} /></div>
+                        </div>
+                        <div>
+                            <Label>Audio File *</Label>
+                            <label className="flex items-center gap-2 border-2 border-dashed rounded-lg p-4 cursor-pointer hover:border-gray-400 transition mt-1">
+                                <Upload className="h-5 w-5 text-gray-400" />
+                                <span className="text-sm text-gray-500">{audioFile ? audioFile.name : "Click to upload episode audio"}</span>
+                                <input type="file" accept="audio/*" className="hidden" onChange={e => setAudioFile(e.target.files?.[0] || null)} />
+                            </label>
+                        </div>
+                        <Button onClick={handleAddEpisode} disabled={savingEpisode} className="w-full">
+                            {savingEpisode ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Uploading...</> : "Add Episode"}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <AlertDialog open={!!episodeToDelete} onOpenChange={() => setEpisodeToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Episode?</AlertDialogTitle>
+                        <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteEpisode} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
