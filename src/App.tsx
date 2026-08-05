@@ -107,6 +107,7 @@ import ContactMessagesPage from "./pages/admin/ContactMessagesPage";
 import AdminGamification from "./pages/admin/AdminGamification";
 
 import AdminVerifications from "./pages/admin/AdminVerifications";
+import AdminContentReports from "./pages/admin/AdminContentReports";
 
 import AdminPackages from "./pages/admin/AdminPackages";
 
@@ -301,6 +302,7 @@ const LibraryPage = lazy(() => import("./pages/streams/LibraryPage"));
 const ListeningStatsPage = lazy(() => import("./pages/streams/ListeningStatsPage"));
 const ArtistDashboard = lazy(() => import("@/pages/streams/ArtistDashboard"));
 const ArtistVerificationPage = lazy(() => import("./pages/streams/ArtistVerificationPage"));
+const StreamsGuidelinesPage = lazy(() => import("./pages/streams/StreamsGuidelinesPage"));
 const UploadSongPage = lazy(() => import("./pages/streams/UploadSongPage"));
 const CreateAlbumPage = lazy(() => import("./pages/streams/CreateAlbumPage"));
 const PodcastsPage = lazy(() => import("./pages/streams/PodcastsPage"));
@@ -341,6 +343,7 @@ import ContentTermsPage from "./pages/ContentTermsPage";
 import CoinsAndXpPage from "./pages/CoinsAndXpPage";
 
 import VerifyAccountPage from "./pages/VerifyAccountPage";
+import DMCAPage from "./pages/DMCAPage";
 
 import BusinessPackagesPage from "./pages/BusinessPackagesPage";
 
@@ -501,6 +504,8 @@ const AppRoutes = () => {
           <Route path="creator/albums" element={<UserAuthGuard><CreateAlbumPage /></UserAuthGuard>} />
 
           <Route path="verification" element={<ArtistVerificationPage />} />
+
+          <Route path="guidelines" element={<StreamsGuidelinesPage />} />
 
           <Route path="song/:id" element={<SongPage />} />
           <Route path="producer/:id" element={<CreditPage />} />
@@ -838,6 +843,7 @@ const AppRoutes = () => {
         <Route path="/rewards" element={<RewardsHowItWorksPage />} />
         <Route path="/coins-and-xp" element={<CoinsAndXpPage />} />
         <Route path="/verify-account" element={<VerifyAccountPage />} />
+        <Route path="/dmca" element={<DMCAPage />} />
         <Route path="/packages" element={<BusinessPackagesPage />} />
 
         <Route path="/business-premium" element={<BusinessPremiumPage />} />
@@ -915,6 +921,8 @@ const AppRoutes = () => {
           <Route path="gamification" element={<AdminAuthGuard><AdminGamification /></AdminAuthGuard>} />
 
           <Route path="verifications" element={<AdminAuthGuard><AdminVerifications /></AdminAuthGuard>} />
+
+          <Route path="content-reports" element={<AdminAuthGuard><AdminContentReports /></AdminAuthGuard>} />
 
           <Route path="packages" element={<AdminAuthGuard><AdminPackages /></AdminAuthGuard>} />
 

@@ -93,12 +93,12 @@ export function StreamsSidebar({ className = "" }: { className?: string }) {
                 {/* Footer Links */}
                 <div className="p-4 mt-auto space-y-6">
                     <div className="flex flex-wrap gap-x-4 gap-y-2 text-[10px] text-gray-400 font-medium">
-                        <a href="#" className="hover:underline">Legal</a>
-                        <a href="#" className="hover:underline">Safety & Privacy Center</a>
-                        <a href="#" className="hover:underline">Privacy Policy</a>
-                        <a href="#" className="hover:underline">Cookies</a>
-                        <a href="#" className="hover:underline">About Ads</a>
-                        <a href="#" className="hover:underline">Accessibility</a>
+                        <Link to="/terms" className="hover:underline">Legal</Link>
+                        <Link to="/streams/guidelines" className="hover:underline">Safety & Privacy Center</Link>
+                        <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+                        <Link to="/privacy" className="hover:underline">Cookies</Link>
+                        <Link to="/advertise" className="hover:underline">About Ads</Link>
+                        <Link to="/contact-us" className="hover:underline">Accessibility</Link>
                     </div>
 
                     <button className="flex items-center gap-1 text-gray-700 border border-gray-300 rounded-full px-3 py-1 text-xs font-bold hover:border-gray-500 hover:scale-105 transition">

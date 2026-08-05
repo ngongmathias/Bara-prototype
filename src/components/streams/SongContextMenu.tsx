@@ -3,11 +3,12 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import {
-    Play, ListPlus, Plus, User, Disc, Share2, Heart, HeartOff, Loader2, Music, Check, Radio,
+    Play, ListPlus, Plus, User, Disc, Share2, Heart, HeartOff, Loader2, Music, Check, Radio, Flag,
 } from 'lucide-react';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { ReportContentDialog } from './ReportContentDialog';
 
 interface MenuState {
     song: Song;
@@ -39,6 +40,7 @@ const MENU_HEIGHT = 340;
 export const SongContextMenuProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [menu, setMenu] = useState<MenuState | null>(null);
     const [playlistPickerOpen, setPlaylistPickerOpen] = useState(false);
+    const [reportSong, setReportSong] = useState<Song | null>(null);
     const longPressTimerRef = useRef<number | null>(null);
     const touchMovedRef = useRef(false);
 
@@ -88,8 +90,18 @@ export const SongContextMenuProvider: React.FC<{ children: React.ReactNode }> = 
                     onClose={close}
                     playlistPickerOpen={playlistPickerOpen}
                     setPlaylistPickerOpen={setPlaylistPickerOpen}
+                    onReport={setReportSong}
                 />,
                 document.body
+            )}
+            {reportSong && (
+                <ReportContentDialog
+                    open
+                    onClose={() => setReportSong(null)}
+                    entityType="song"
+                    entityId={reportSong.id}
+                    entityName={reportSong.title}
+                />
             )}
         </Ctx.Provider>
     );
@@ -100,9 +112,10 @@ interface MenuProps {
     onClose: () => void;
     playlistPickerOpen: boolean;
     setPlaylistPickerOpen: (v: boolean) => void;
+    onReport: (song: Song) => void;
 }
 
-const Menu: React.FC<MenuProps> = ({ state, onClose, playlistPickerOpen, setPlaylistPickerOpen }) => {
+const Menu: React.FC<MenuProps> = ({ state, onClose, playlistPickerOpen, setPlaylistPickerOpen, onReport }) => {
     const { song, x, y } = state;
     const { play, playNext, addToQueue, toggleLike, likedSongs, startRadio } = useAudioPlayer();
     const navigate = useNavigate();
@@ -220,6 +233,8 @@ const Menu: React.FC<MenuProps> = ({ state, onClose, playlistPickerOpen, setPlay
             {song.artist_id && <MenuItem icon={<User size={16} />} label="Go to artist" onClick={handleGoToArtist} />}
             {song.album_id && <MenuItem icon={<Disc size={16} />} label="Go to album" onClick={handleGoToAlbum} />}
             <MenuItem icon={<Share2 size={16} />} label="Share" onClick={handleShare} />
+            <div className="my-1 border-t border-gray-100" />
+            <MenuItem icon={<Flag size={16} />} label="Report" onClick={() => { onClose(); onReport(song); }} />
         </div>
     );
 };

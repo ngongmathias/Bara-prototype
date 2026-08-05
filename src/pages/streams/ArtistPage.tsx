@@ -4,16 +4,18 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { SEO } from '@/components/SEO';
-import { Loader2, Play, Pause, BadgeCheck, Share2, Radio } from 'lucide-react';
+import { Loader2, Play, Pause, BadgeCheck, Share2, Radio, Flag } from 'lucide-react';
 import { useShare } from '@/context/ShareContext';
 import { FollowUserButton } from '@/components/FollowUserButton';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
 import { getArtistSongIds, getMonthlyListeners } from '@/lib/artistStats';
+import { ReportContentDialog } from '@/components/streams/ReportContentDialog';
 
 export default function ArtistPage() {
     const { id } = useParams();
     const { play, currentSong, isPlaying, togglePlay, startRadio } = useAudioPlayer();
     const { openShare } = useShare();
+    const [reportOpen, setReportOpen] = useState(false);
     const [artist, setArtist] = useState<any>(null);
     const [topTracks, setTopTracks] = useState<Song[]>([]);
     const [featuredOnTracks, setFeaturedOnTracks] = useState<(Song & { primary_artist: string; plays: number })[]>([]);
@@ -304,8 +306,25 @@ export default function ArtistPage() {
                         >
                             <Share2 className="w-5 h-5" />
                         </button>
+
+                        {/* Report Button */}
+                        <button
+                            onClick={() => setReportOpen(true)}
+                            className="p-2 rounded-full hover:bg-gray-200 transition text-gray-600 hover:text-gray-900"
+                            title="Report artist"
+                        >
+                            <Flag className="w-5 h-5" />
+                        </button>
                     </div>
                 </div>
+
+                <ReportContentDialog
+                    open={reportOpen}
+                    onClose={() => setReportOpen(false)}
+                    entityType="artist"
+                    entityId={artist.id}
+                    entityName={artist.name}
+                />
 
                 {/* Content Sections */}
                 <div className="px-8 pt-8">

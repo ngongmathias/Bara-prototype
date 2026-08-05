@@ -461,8 +461,14 @@ export default function UploadSongPage() {
                         </label>
                         <p className="text-[11px] text-gray-500 leading-relaxed">
                             By uploading you warrant the content is yours or licensed to you, grant BARA Afrika a
-                            license to host and stream it, and accept liability for infringement. Rights holders can
-                            request takedowns via hello@baraafrika.com.
+                            license to host and stream it, and accept liability for infringement. See our{' '}
+                            <a href="/streams/guidelines" target="_blank" rel="noopener noreferrer" className="underline text-gray-700">
+                                content guidelines
+                            </a>{' '}
+                            for what's allowed — rights holders can request takedowns via our{' '}
+                            <a href="/dmca" target="_blank" rel="noopener noreferrer" className="underline text-gray-700">
+                                DMCA form
+                            </a>.
                         </p>
                     </div>
 
