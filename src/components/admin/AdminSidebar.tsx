@@ -34,6 +34,8 @@ import {
 
   Shield,
 
+  Flag,
+
   LogOut,
 
   Megaphone,
@@ -475,6 +477,18 @@ const adminMenuItems = [
     path: "/admin/verifications",
 
     description: "Business & artist verification queue"
+
+  },
+
+  {
+
+    title: "Content Reports",
+
+    icon: Flag,
+
+    path: "/admin/content-reports",
+
+    description: "Reports & DMCA claims — review, dismiss, or take down"
 
   },
 

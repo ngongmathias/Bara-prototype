@@ -7,8 +7,9 @@ import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useToast } from '@/hooks/use-toast';
 import { useShare } from '@/context/ShareContext';
 import { SEO } from '@/components/SEO';
-import { Play, Pause, Shuffle, Clock, Heart, ArrowLeft, Music2, Disc3, Check, Plus, Share2 } from 'lucide-react';
+import { Play, Pause, Shuffle, Clock, Heart, ArrowLeft, Music2, Disc3, Check, Plus, Flag, Share2 } from 'lucide-react';
 import { PAID_MUSIC_ENABLED } from '@/lib/features';
+import { ReportContentDialog } from '@/components/streams/ReportContentDialog';
 import { filterPublished } from '@/lib/publishFilter';
 
 interface AlbumInfo {
@@ -41,6 +42,7 @@ export default function AlbumPage() {
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [savePending, setSavePending] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -247,7 +249,25 @@ export default function AlbumPage() {
           >
             <Share2 size={20} />
           </button>
+          <button
+            onClick={() => setReportOpen(true)}
+            disabled={!album}
+            className="w-11 h-11 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition disabled:opacity-40"
+            aria-label="Report album"
+            title="Report album"
+          >
+            <Flag size={18} />
+          </button>
         </div>
+        {album && (
+          <ReportContentDialog
+            open={reportOpen}
+            onClose={() => setReportOpen(false)}
+            entityType="album"
+            entityId={album.id}
+            entityName={album.title}
+          />
+        )}
 
         {/* Track list */}
         <div className="max-w-[1200px] mx-auto px-4 sm:px-8">

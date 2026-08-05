@@ -5,10 +5,11 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase, createAuthenticatedSupabaseClient } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useSongContextMenu } from '@/components/streams/SongContextMenu';
-import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music, Share2, Users, Link2, Copy } from 'lucide-react';
+import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music, Share2, Users, Link2, Flag, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useShare } from '@/context/ShareContext';
 import { useUser, useAuth } from '@clerk/clerk-react';
+import { ReportContentDialog } from '@/components/streams/ReportContentDialog';
 import { isPublished } from '@/lib/publishFilter';
 import {
     DropdownMenu,
@@ -43,6 +44,7 @@ export default function PlaylistPage() {
     const [collaborators, setCollaborators] = useState<string[]>([]);
     const [isCollaborator, setIsCollaborator] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [reportOpen, setReportOpen] = useState(false);
     const [notFound, setNotFound] = useState(false);
     const [isPlaylistLiked, setIsPlaylistLiked] = useState(false);
 
@@ -362,6 +364,7 @@ export default function PlaylistPage() {
                             <Heart className="w-7 h-7" fill={isPlaylistLiked ? 'currentColor' : 'none'} />
                         </button>
                         <button onClick={handleShare} className="text-gray-500 hover:text-gray-900 transition" title="Share playlist" aria-label="Share"><Share2 className="w-7 h-7" /></button>
+                        <button onClick={() => setReportOpen(true)} className="text-gray-500 hover:text-gray-900 transition" title="Report playlist" aria-label="Report"><Flag className="w-7 h-7" /></button>
                         {playlist?.created_by === user?.id && (
                             <button
                                 onClick={copyInviteLink}
@@ -398,6 +401,16 @@ export default function PlaylistPage() {
                         </DropdownMenu>
                     </div>
                 </div>
+
+                {playlist && (
+                    <ReportContentDialog
+                        open={reportOpen}
+                        onClose={() => setReportOpen(false)}
+                        entityType="playlist"
+                        entityId={playlist.id}
+                        entityName={playlist.title}
+                    />
+                )}
 
                 {/* Track List */}
                 <div className="px-8 pt-4">

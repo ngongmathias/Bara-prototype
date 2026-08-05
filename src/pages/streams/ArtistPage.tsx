@@ -5,18 +5,20 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { SEO } from '@/components/SEO';
-import { Loader2, Play, Pause, BadgeCheck, Share2, Radio, ShieldQuestion } from 'lucide-react';
+import { Loader2, Play, Pause, BadgeCheck, Share2, Radio, Flag, ShieldQuestion } from 'lucide-react';
 import { useShare } from '@/context/ShareContext';
 import { useToast } from '@/hooks/use-toast';
 import { FollowUserButton } from '@/components/FollowUserButton';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
 import { getArtistSongIds, getMonthlyListeners } from '@/lib/artistStats';
+import { ReportContentDialog } from '@/components/streams/ReportContentDialog';
 import { filterPublished, isPublished } from '@/lib/publishFilter';
 
 export default function ArtistPage() {
     const { id } = useParams();
     const { playAlbum, currentSong, isPlaying, togglePlay, startRadio } = useAudioPlayer();
     const { openShare } = useShare();
+    const [reportOpen, setReportOpen] = useState(false);
     const { user } = useUser();
     const { toast } = useToast();
     const [artist, setArtist] = useState<any>(null);
@@ -391,6 +393,15 @@ export default function ArtistPage() {
                         >
                             <Share2 className="w-5 h-5" />
                         </button>
+
+                        {/* Report Button */}
+                        <button
+                            onClick={() => setReportOpen(true)}
+                            className="p-2 rounded-full hover:bg-gray-200 transition text-gray-600 hover:text-gray-900"
+                            title="Report artist"
+                        >
+                            <Flag className="w-5 h-5" />
+                        </button>
                     </div>
 
                     {claimFormOpen && (
@@ -419,6 +430,14 @@ export default function ArtistPage() {
                         </div>
                     )}
                 </div>
+
+                <ReportContentDialog
+                    open={reportOpen}
+                    onClose={() => setReportOpen(false)}
+                    entityType="artist"
+                    entityId={artist.id}
+                    entityName={artist.name}
+                />
 
                 {/* Content Sections */}
                 <div className="px-8 pt-8">
