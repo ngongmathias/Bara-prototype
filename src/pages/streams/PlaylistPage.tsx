@@ -5,10 +5,16 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase, createAuthenticatedSupabaseClient } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useSongContextMenu } from '@/components/streams/SongContextMenu';
-import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music, Share2, Users, Link2 } from 'lucide-react';
+import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music, Share2, Users, Link2, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useShare } from '@/context/ShareContext';
 import { useUser, useAuth } from '@clerk/clerk-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface PlaylistData {
     id: string;
@@ -24,7 +30,7 @@ interface PlaylistData {
 export default function PlaylistPage() {
     const { id } = useParams();
     const [searchParams] = useSearchParams();
-    const { play, playAlbum, currentSong, isPlaying, togglePlay } = useAudioPlayer();
+    const { play, playAlbum, currentSong, isPlaying, togglePlay, likedSongs, toggleLike, isShuffle, toggleShuffle } = useAudioPlayer();
     const { handlers: contextMenuHandlers } = useSongContextMenu();
     const { toast } = useToast();
     const { openShare } = useShare();
@@ -32,15 +38,17 @@ export default function PlaylistPage() {
     const { getToken } = useAuth();
     const [playlist, setPlaylist] = useState<PlaylistData | null>(null);
     const [tracks, setTracks] = useState<Song[]>([]);
-    const [likedTracks, setLikedTracks] = useState<string[]>([]);
     const [ftMap, setFtMap] = useState<Record<string, string>>({});
     const [collaborators, setCollaborators] = useState<string[]>([]);
     const [isCollaborator, setIsCollaborator] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
+    const [isPlaylistLiked, setIsPlaylistLiked] = useState(false);
 
     useEffect(() => {
         const fetchPlaylist = async () => {
             setLoading(true);
+            setNotFound(false);
 
             // Fetch playlist details
             const { data: playlistData } = await supabase
@@ -49,22 +57,28 @@ export default function PlaylistPage() {
                 .eq('id', id)
                 .single();
 
-            if (playlistData) {
-                setPlaylist(playlistData);
-
-                // Fetch collaborators
-                try {
-                    const { data: collabs } = await supabase
-                        .from('playlist_collaborators')
-                        .select('user_id')
-                        .eq('playlist_id', playlistData.id);
-                    const ids = (collabs || []).map((c: any) => c.user_id);
-                    setCollaborators(ids);
-                    setIsCollaborator(
-                        playlistData.created_by === user?.id || ids.includes(user?.id || '')
-                    );
-                } catch { /* table may not exist */ }
+            if (!playlistData) {
+                setPlaylist(null);
+                setTracks([]);
+                setNotFound(true);
+                setLoading(false);
+                return;
             }
+
+            setPlaylist(playlistData);
+
+            // Fetch collaborators
+            try {
+                const { data: collabs } = await supabase
+                    .from('playlist_collaborators')
+                    .select('user_id')
+                    .eq('playlist_id', playlistData.id);
+                const ids = (collabs || []).map((c: any) => c.user_id);
+                setCollaborators(ids);
+                setIsCollaborator(
+                    playlistData.created_by === user?.id || ids.includes(user?.id || '')
+                );
+            } catch { /* table may not exist */ }
 
             // Fetch songs in this playlist (via playlist_songs junction table)
             const { data: playlistSongs } = await supabase
@@ -80,51 +94,39 @@ export default function PlaylistPage() {
                 .eq('playlist_id', id)
                 .order('position', { ascending: true });
 
-            if (playlistSongs) {
-                const mappedTracks: Song[] = playlistSongs
-                    .filter((ps: any) => ps.songs)
-                    .map((ps: any) => ({
-                        id: ps.songs.id,
-                        title: ps.songs.title,
-                        artist: ps.songs.artists?.name || 'Unknown Artist',
-                        album_title: ps.songs.albums?.title || 'Single',
-                        duration: ps.songs.duration,
-                        file_url: ps.songs.file_url,
-                        cover_url: ps.songs.cover_url || '/placeholder-music.png',
-                        artist_id: ps.songs.artist_id,
-                        album_id: ps.songs.album_id,
-                    }));
-                setTracks(mappedTracks);
-            }
+            const mappedTracks: Song[] = (playlistSongs || [])
+                .filter((ps: any) => ps.songs)
+                .map((ps: any) => ({
+                    id: ps.songs.id,
+                    title: ps.songs.title,
+                    artist: ps.songs.artists?.name || 'Unknown Artist',
+                    album_title: ps.songs.albums?.title || 'Single',
+                    duration: ps.songs.duration,
+                    file_url: ps.songs.file_url,
+                    cover_url: ps.songs.cover_url || '/placeholder-music.png',
+                    artist_id: ps.songs.artist_id,
+                    album_id: ps.songs.album_id,
+                }));
+            setTracks(mappedTracks);
 
-            // If no junction table data, fall back to fetching all songs
-            if (!playlistSongs || playlistSongs.length === 0) {
-                const { data: allSongs } = await supabase
-                    .from('songs')
-                    .select('*, artists(name), albums(title)')
-                    .order('created_at', { ascending: false })
-                    .limit(20);
-
-                if (allSongs) {
-                    setTracks(allSongs.map((s: any) => ({
-                        id: s.id,
-                        title: s.title,
-                        artist: s.artists?.name || 'Unknown Artist',
-                        album_title: s.albums?.title || 'Single',
-                        duration: s.duration,
-                        file_url: s.file_url,
-                        cover_url: s.cover_url || '/placeholder-music.png',
-                        artist_id: s.artist_id,
-                        album_id: s.album_id,
-                    })));
-                }
+            // Whether the signed-in user has saved this playlist
+            if (user?.id) {
+                const { data: likeRow } = await supabase
+                    .from('user_playlist_likes')
+                    .select('user_id')
+                    .eq('user_id', user.id)
+                    .eq('playlist_id', playlistData.id)
+                    .maybeSingle();
+                setIsPlaylistLiked(!!likeRow);
+            } else {
+                setIsPlaylistLiked(false);
             }
 
             setLoading(false);
         };
 
         if (id) fetchPlaylist();
-    }, [id]);
+    }, [id, user?.id]);
 
     // Fetch featured artists for playlist tracks
     useEffect(() => {
@@ -149,12 +151,29 @@ export default function PlaylistPage() {
             });
     }, [tracks]);
 
-    const toggleLike = (trackId: string) => {
-        setLikedTracks(prev =>
-            prev.includes(trackId)
-                ? prev.filter(i => i !== trackId)
-                : [...prev, trackId]
-        );
+    const togglePlaylistLike = async () => {
+        if (!user?.id || !playlist) {
+            toast({ title: 'Sign in required', description: 'Sign in to save playlists to your library.' });
+            return;
+        }
+        try {
+            if (isPlaylistLiked) {
+                await supabase
+                    .from('user_playlist_likes')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('playlist_id', playlist.id);
+                setIsPlaylistLiked(false);
+            } else {
+                await supabase
+                    .from('user_playlist_likes')
+                    .insert({ user_id: user.id, playlist_id: playlist.id });
+                setIsPlaylistLiked(true);
+                toast({ title: 'Saved to Your Library' });
+            }
+        } catch (e: any) {
+            toast({ title: 'Error', description: e.message, variant: 'destructive' });
+        }
     };
 
     const handlePlayTrack = (track: Song) => {
@@ -261,9 +280,21 @@ export default function PlaylistPage() {
         );
     }
 
-    const playlistTitle = playlist?.title || 'Afrobeats Essentials';
-    const playlistDesc = playlist?.description || 'The biggest Afrobeats hits from across the continent. Updated weekly with the freshest tracks.';
-    const coverUrl = playlist?.cover_url;
+    if (notFound || !playlist) {
+        return (
+            <StreamsLayout>
+                <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center gap-3 px-8 text-center">
+                    <Music size={48} className="text-gray-500" />
+                    <h1 className="text-2xl font-bold">Playlist not found</h1>
+                    <p className="text-gray-400 max-w-md">This playlist doesn't exist or may have been removed.</p>
+                </div>
+            </StreamsLayout>
+        );
+    }
+
+    const playlistTitle = playlist.title;
+    const playlistDesc = playlist.description || '';
+    const coverUrl = playlist.cover_url;
 
     return (
         <StreamsLayout>
@@ -312,10 +343,22 @@ export default function PlaylistPage() {
                             onClick={handlePlayAll}
                             className="w-14 h-14 rounded-full bg-white hover:scale-105 transition flex items-center justify-center shadow-xl active:scale-95"
                          aria-label="Play"><Play className="w-6 h-6 text-black ml-1" fill="black" /></button>
-                        <button className="text-gray-500 hover:text-gray-900 transition">
+                        <button
+                            onClick={toggleShuffle}
+                            className={`transition ${isShuffle ? 'text-white' : 'text-gray-500 hover:text-gray-900'}`}
+                            aria-label="Shuffle"
+                            title={isShuffle ? 'Shuffle on' : 'Shuffle off'}
+                        >
                             <Shuffle className="w-7 h-7" />
                         </button>
-                        <button className="text-gray-500 hover:text-gray-900 transition" aria-label="Like"><Heart className="w-7 h-7" /></button>
+                        <button
+                            onClick={togglePlaylistLike}
+                            className={`transition ${isPlaylistLiked ? 'text-white' : 'text-gray-500 hover:text-gray-900'}`}
+                            aria-label={isPlaylistLiked ? 'Remove from Your Library' : 'Save to Your Library'}
+                            title={isPlaylistLiked ? 'Remove from Your Library' : 'Save to Your Library'}
+                        >
+                            <Heart className="w-7 h-7" fill={isPlaylistLiked ? 'currentColor' : 'none'} />
+                        </button>
                         <button onClick={handleShare} className="text-gray-500 hover:text-gray-900 transition" title="Share playlist" aria-label="Share"><Share2 className="w-7 h-7" /></button>
                         {playlist?.created_by === user?.id && (
                             <button
@@ -331,7 +374,26 @@ export default function PlaylistPage() {
                                 <Users size={14} /> {collaborators.length + 1} contributors
                             </span>
                         )}
-                        <button className="text-gray-500 hover:text-gray-900 transition" aria-label="More options"><MoreHorizontal className="w-7 h-7" /></button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="text-gray-500 hover:text-gray-900 transition" aria-label="More options">
+                                    <MoreHorizontal className="w-7 h-7" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                                <DropdownMenuItem onClick={handleShare}>
+                                    <Share2 className="w-4 h-4 mr-2" /> Share
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(window.location.href).then(() => toast({ title: 'Link copied!' }))}>
+                                    <Copy className="w-4 h-4 mr-2" /> Copy link
+                                </DropdownMenuItem>
+                                {playlist?.created_by === user?.id && (
+                                    <DropdownMenuItem onClick={copyInviteLink}>
+                                        <Link2 className="w-4 h-4 mr-2" /> Copy invite link
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
 
@@ -413,9 +475,9 @@ export default function PlaylistPage() {
                                             <div className="flex items-center justify-end gap-6 pr-4">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); toggleLike(track.id); }}
-                                                    className={`opacity-0 group-hover:opacity-100 transition ${likedTracks.includes(track.id) ? 'text-white !opacity-100' : 'text-gray-500 hover:text-gray-900'}`}
+                                                    className={`opacity-0 group-hover:opacity-100 transition ${likedSongs.includes(track.id) ? 'text-white !opacity-100' : 'text-gray-500 hover:text-gray-900'}`}
                                                 >
-                                                    <Heart size={18} fill={likedTracks.includes(track.id) ? "currentColor" : "none"} />
+                                                    <Heart size={18} fill={likedSongs.includes(track.id) ? "currentColor" : "none"} />
                                                 </button>
                                                 <span className="text-sm text-gray-500 font-mono w-10 text-right">{formatDuration(track.duration)}</span>
                                             </div>

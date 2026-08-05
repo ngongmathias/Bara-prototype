@@ -41,11 +41,20 @@ export default function LibraryPage() {
                 .select('*, playlists(*, artists(name))')
                 .eq('user_id', user.id);
 
-            // Fetch Followed Artists
-            const { data: artistsData } = await supabase
-                .from('user_artist_follows')
-                .select('*, artists(*)')
-                .eq('user_id', user.id);
+            // Fetch Followed Artists — via user_follows (the active follow graph;
+            // artists are followed through their user_id, same table FollowUserButton writes to)
+            const { data: followData } = await supabase
+                .from('user_follows')
+                .select('followee_user_id')
+                .eq('follower_user_id', user.id);
+
+            const followeeIds = (followData || []).map(f => f.followee_user_id);
+            const { data: artistsData } = followeeIds.length
+                ? await supabase
+                    .from('artists')
+                    .select('*')
+                    .in('user_id', followeeIds)
+                : { data: [] as any[] };
 
             // Fetch Saved Albums
             const { data: albumsData } = await supabase
@@ -63,11 +72,11 @@ export default function LibraryPage() {
             }));
 
             const formattedArtists: LibraryItem[] = (artistsData || []).map(a => ({
-                id: a.artists.id,
+                id: a.id,
                 type: 'artist',
-                title: a.artists.name,
+                title: a.name,
                 subtitle: 'Artist',
-                image_url: a.artists.image_url || '/placeholder-artist.png'
+                image_url: a.image_url || '/placeholder-artist.png'
             }));
 
             const formattedAlbums: LibraryItem[] = (albumsData || [])
@@ -90,7 +99,7 @@ export default function LibraryPage() {
 
     useEffect(() => {
         fetchLibrary();
-    }, []);
+    }, [isLoaded, user?.id]);
 
     const handleCreateSuccess = () => {
         fetchLibrary();
