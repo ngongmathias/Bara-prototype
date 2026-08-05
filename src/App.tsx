@@ -312,6 +312,7 @@ const MovieDetailPage = lazy(() => import("./pages/streams/MovieDetailPage"));
 const MovieWatchPage = lazy(() => import("./pages/streams/MovieWatchPage"));
 const EbooksPage = lazy(() => import("./pages/streams/EbooksPage"));
 const EbookDetailPage = lazy(() => import("./pages/streams/EbookDetailPage"));
+const EbookReaderPage = lazy(() => import("./pages/streams/EbookReaderPage"));
 
 import SportsNewsList from "./pages/sports/SportsNewsList";
 
@@ -501,6 +502,7 @@ const AppRoutes = () => {
 
           <Route path="ebooks" element={<EbooksPage />} />
           <Route path="ebook/:id" element={<EbookDetailPage />} />
+          <Route path="ebook/:id/read" element={<EbookReaderPage />} />
 
           <Route path="creator" element={<UserAuthGuard><ArtistDashboard /></UserAuthGuard>} />
 

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
-  TrendingUp, Music, Mic2, BookOpen, Play, Download, Users,
+  TrendingUp, Music, Mic2, BookOpen, Play, BookOpenCheck, Users,
   Lock, BarChart3, Eye, Heart, ArrowUpRight, Crown
 } from "lucide-react";
 
@@ -15,14 +15,14 @@ interface ContentStats {
   podcasts: number;
   totalSubscribers: number;
   ebooks: number;
-  totalDownloads: number;
+  totalReads: number;
 }
 
 export const UserCreatorAnalytics = () => {
   const { user } = useUser();
   const [stats, setStats] = useState<ContentStats>({
     songs: 0, totalPlays: 0, podcasts: 0,
-    totalSubscribers: 0, ebooks: 0, totalDownloads: 0,
+    totalSubscribers: 0, ebooks: 0, totalReads: 0,
   });
   const [loading, setLoading] = useState(true);
   // TODO: Check user's subscription tier for gating
@@ -52,7 +52,7 @@ export const UserCreatorAnalytics = () => {
       // Fetch ebooks
       const { data: ebooks } = await supabase
         .from("ebooks")
-        .select("download_count")
+        .select("read_count")
         .eq("uploaded_by", userId);
 
       setStats({
@@ -61,7 +61,7 @@ export const UserCreatorAnalytics = () => {
         podcasts: podcasts?.length || 0,
         totalSubscribers: podcasts?.reduce((a, p) => a + (p.subscriber_count || 0), 0) || 0,
         ebooks: ebooks?.length || 0,
-        totalDownloads: ebooks?.reduce((a, e) => a + (e.download_count || 0), 0) || 0,
+        totalReads: ebooks?.reduce((a, e) => a + (e.read_count || 0), 0) || 0,
       });
     } catch (e) {
       console.error(e);
@@ -127,9 +127,9 @@ export const UserCreatorAnalytics = () => {
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <Download className="h-5 w-5 text-gray-400 mx-auto mb-1" />
-            <div className="text-xl font-bold">{stats.totalDownloads.toLocaleString()}</div>
-            <p className="text-xs text-gray-500">Downloads</p>
+            <BookOpenCheck className="h-5 w-5 text-gray-400 mx-auto mb-1" />
+            <div className="text-xl font-bold">{stats.totalReads.toLocaleString()}</div>
+            <p className="text-xs text-gray-500">Reads</p>
           </CardContent>
         </Card>
       </div>
@@ -141,7 +141,7 @@ export const UserCreatorAnalytics = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <BarChart3 className="h-5 w-5" /> Plays & Downloads Over Time
+                <BarChart3 className="h-5 w-5" /> Plays & Reads Over Time
               </CardTitle>
             </CardHeader>
             <CardContent>
