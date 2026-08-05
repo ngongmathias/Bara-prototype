@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { HelmetProvider } from 'react-helmet-async';
 
-import { BrowserRouter, Routes, Route, useLocation, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, Outlet } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SongContextMenuProvider } from "@/components/streams/SongContextMenu";
 
@@ -108,6 +108,7 @@ import AdminGamification from "./pages/admin/AdminGamification";
 
 import AdminVerifications from "./pages/admin/AdminVerifications";
 import AdminContentReports from "./pages/admin/AdminContentReports";
+import AdminArtistClaims from "./pages/admin/AdminArtistClaims";
 
 import AdminPackages from "./pages/admin/AdminPackages";
 
@@ -301,7 +302,6 @@ const CreditPage = lazy(() => import("./pages/streams/CreditPage"));
 const LibraryPage = lazy(() => import("./pages/streams/LibraryPage"));
 const ListeningStatsPage = lazy(() => import("./pages/streams/ListeningStatsPage"));
 const ArtistDashboard = lazy(() => import("@/pages/streams/ArtistDashboard"));
-const ArtistVerificationPage = lazy(() => import("./pages/streams/ArtistVerificationPage"));
 const StreamsGuidelinesPage = lazy(() => import("./pages/streams/StreamsGuidelinesPage"));
 const UploadSongPage = lazy(() => import("./pages/streams/UploadSongPage"));
 const CreateAlbumPage = lazy(() => import("./pages/streams/CreateAlbumPage"));
@@ -503,7 +503,9 @@ const AppRoutes = () => {
 
           <Route path="creator/albums" element={<UserAuthGuard><CreateAlbumPage /></UserAuthGuard>} />
 
-          <Route path="verification" element={<ArtistVerificationPage />} />
+          {/* The real, free doc-review verification flow lives at /verify-account
+              (VerifyAccountPage) — this used to point at a mock $10/mo page. */}
+          <Route path="verification" element={<Navigate to="/verify-account?type=artist" replace />} />
 
           <Route path="guidelines" element={<StreamsGuidelinesPage />} />
 
@@ -923,6 +925,8 @@ const AppRoutes = () => {
           <Route path="verifications" element={<AdminAuthGuard><AdminVerifications /></AdminAuthGuard>} />
 
           <Route path="content-reports" element={<AdminAuthGuard><AdminContentReports /></AdminAuthGuard>} />
+
+          <Route path="artist-claims" element={<AdminAuthGuard><AdminArtistClaims /></AdminAuthGuard>} />
 
           <Route path="packages" element={<AdminAuthGuard><AdminPackages /></AdminAuthGuard>} />
 

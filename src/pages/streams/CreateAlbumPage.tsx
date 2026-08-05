@@ -81,7 +81,10 @@ export default function CreateAlbumPage() {
         try {
             let currentArtistId = artistId;
 
-            // Auto-create artist profile if none exists
+            // Auto-create artist profile if none exists. artists.user_id is
+            // UNIQUE, so a race surfaces as a 23505 conflict here instead of
+            // silently creating a second artist row for the same person —
+            // recover by fetching the row the other request just created.
             if (!currentArtistId) {
                 const { data: newArtist, error: artistError } = await supabase
                     .from('artists')
@@ -94,8 +97,21 @@ export default function CreateAlbumPage() {
                     .select('id')
                     .single();
 
-                if (artistError) throw artistError;
-                currentArtistId = newArtist.id;
+                if (artistError) {
+                    if (artistError.code === '23505') {
+                        const { data: existing, error: fetchError } = await supabase
+                            .from('artists')
+                            .select('id')
+                            .eq('user_id', user.id)
+                            .single();
+                        if (fetchError || !existing) throw artistError;
+                        currentArtistId = existing.id;
+                    } else {
+                        throw artistError;
+                    }
+                } else {
+                    currentArtistId = newArtist.id;
+                }
                 setArtistId(currentArtistId);
             }
 

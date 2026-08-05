@@ -1,22 +1,31 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { SEO } from '@/components/SEO';
-import { Loader2, Play, Pause, BadgeCheck, Share2, Radio, Flag } from 'lucide-react';
+import { Loader2, Play, Pause, BadgeCheck, Share2, Radio, Flag, ShieldQuestion } from 'lucide-react';
 import { useShare } from '@/context/ShareContext';
+import { useToast } from '@/hooks/use-toast';
 import { FollowUserButton } from '@/components/FollowUserButton';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
 import { getArtistSongIds, getMonthlyListeners } from '@/lib/artistStats';
 import { ReportContentDialog } from '@/components/streams/ReportContentDialog';
+import { filterPublished, isPublished } from '@/lib/publishFilter';
 
 export default function ArtistPage() {
     const { id } = useParams();
-    const { play, currentSong, isPlaying, togglePlay, startRadio } = useAudioPlayer();
+    const { playAlbum, currentSong, isPlaying, togglePlay, startRadio } = useAudioPlayer();
     const { openShare } = useShare();
     const [reportOpen, setReportOpen] = useState(false);
+    const { user } = useUser();
+    const { toast } = useToast();
     const [artist, setArtist] = useState<any>(null);
+    const [myClaim, setMyClaim] = useState<{ id: string; status: string; reviewer_notes: string | null } | null>(null);
+    const [claimFormOpen, setClaimFormOpen] = useState(false);
+    const [claimEvidence, setClaimEvidence] = useState('');
+    const [claimSubmitting, setClaimSubmitting] = useState(false);
     const [topTracks, setTopTracks] = useState<Song[]>([]);
     const [featuredOnTracks, setFeaturedOnTracks] = useState<(Song & { primary_artist: string; plays: number })[]>([]);
     const [albums, setAlbums] = useState<any[]>([]);
@@ -56,7 +65,7 @@ export default function ArtistPage() {
                     .limit(5);
 
                 if (songsData) {
-                    const formattedSongs = songsData.map(song => ({
+                    const formattedSongs = filterPublished(songsData).map(song => ({
                         id: song.id,
                         title: song.title,
                         artist: artistData?.name || 'Unknown Artist',
@@ -75,13 +84,13 @@ export default function ArtistPage() {
                 try {
                     const { data: featuredData } = await supabase
                         .from('song_artists')
-                        .select('song_id, songs(id, title, file_url, cover_url, duration, plays, artist_id, album_id, artists(name))')
+                        .select('song_id, songs(id, title, file_url, cover_url, duration, plays, artist_id, album_id, status, release_date, artists(name))')
                         .eq('artist_id', id)
                         .eq('role', 'featured')
                         .order('display_order');
                     if (featuredData) {
                         const formatted = featuredData
-                            .filter((f: any) => f.songs)
+                            .filter((f: any) => f.songs && isPublished(f.songs))
                             .map((f: any) => ({
                                 id: f.songs.id,
                                 title: f.songs.title,
@@ -96,18 +105,18 @@ export default function ArtistPage() {
                             }));
                         setFeaturedOnTracks(formatted);
                     }
-                } catch { /* song_artists table may not exist yet */ }
+                } catch (err) { console.error('Failed to load featured-on songs:', err); }
 
                 // Fetch Artist Picks
                 try {
                     const { data: picksData } = await supabase
                         .from('artist_picks')
-                        .select('display_order, note, songs(id, title, file_url, cover_url, duration, artist_id, album_id, albums(title))')
+                        .select('display_order, note, songs(id, title, file_url, cover_url, duration, artist_id, album_id, status, release_date, albums(title))')
                         .eq('artist_id', id)
                         .order('display_order')
                         .limit(5);
                     if (picksData) {
-                        setArtistPicks(picksData.filter((p: any) => p.songs).map((p: any) => ({
+                        setArtistPicks(picksData.filter((p: any) => p.songs && isPublished(p.songs)).map((p: any) => ({
                             id: p.songs.id,
                             title: p.songs.title,
                             artist: artistData?.name || 'Unknown Artist',
@@ -182,8 +191,70 @@ export default function ArtistPage() {
         fetchData();
     }, [id]);
 
-    const handlePlaySong = (song: Song) => {
-        play(song);
+    // §E1 — is this an unclaimed (admin-seeded) artist, and has the current
+    // user already filed a claim for it?
+    useEffect(() => {
+        if (!id || !user?.id || artist?.user_id) { setMyClaim(null); return; }
+        let active = true;
+        supabase
+            .from('artist_claims')
+            .select('id, status, reviewer_notes')
+            .eq('artist_id', id)
+            .eq('requester_user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+            .then(({ data }) => { if (active) setMyClaim(data); });
+        return () => { active = false; };
+    }, [id, user?.id, artist?.user_id]);
+
+    const submitClaim = async () => {
+        if (!id || !user?.id) return;
+        setClaimSubmitting(true);
+        try {
+            const { data, error } = await supabase
+                .from('artist_claims')
+                .insert({ artist_id: id, requester_user_id: user.id, evidence: claimEvidence.trim() || null })
+                .select('id, status, reviewer_notes')
+                .single();
+            if (error) throw error;
+            setMyClaim(data);
+            setClaimFormOpen(false);
+            toast({ title: 'Claim submitted', description: "We'll review it and let you know." });
+        } catch (e: any) {
+            toast({ title: "Couldn't submit claim", description: e.message, variant: 'destructive' });
+        } finally {
+            setClaimSubmitting(false);
+        }
+    };
+
+    // Builds a real queue from the list the track was played from, so
+    // next/prev keep working instead of dying after one song.
+    const handlePlaySong = (list: Song[], index: number) => {
+        playAlbum(list, index);
+    };
+
+    const handlePlayAlbum = async (e: React.MouseEvent, albumId: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const { data } = await supabase
+            .from('songs')
+            .select('*, albums(title, cover_url)')
+            .eq('album_id', albumId)
+            .order('track_number', { ascending: true, nullsFirst: false })
+            .order('created_at', { ascending: true });
+        const albumSongs: Song[] = (data || []).map((song: any) => ({
+            id: song.id,
+            title: song.title,
+            artist: artist?.name || 'Unknown Artist',
+            file_url: song.file_url,
+            cover_url: song.cover_url || song.albums?.cover_url || '/placeholder-music.png',
+            duration: song.duration,
+            artist_id: song.artist_id,
+            album_id: song.album_id,
+            album_title: song.albums?.title,
+        }));
+        if (albumSongs.length > 0) playAlbum(albumSongs, 0);
     };
 
     if (loading) {
@@ -270,7 +341,7 @@ export default function ArtistPage() {
                         {/* Play Button */}
                         {topTracks.length > 0 && (
                             <button
-                                onClick={() => handlePlaySong(topTracks[0])}
+                                onClick={() => handlePlaySong(topTracks, 0)}
                                 className="w-14 h-14 rounded-full bg-gray-900 hover:scale-105 transition flex items-center justify-center shadow-xl active:scale-95"
                             >
                                 <Play fill="white" className="w-6 h-6 ml-1 text-white" />
@@ -291,6 +362,22 @@ export default function ArtistPage() {
                         {/* Follow Button — persists via user_follows */}
                         {artist.user_id ? (
                             <FollowUserButton targetUserId={artist.user_id} variant="pill" />
+                        ) : user?.id ? (
+                            myClaim ? (
+                                <span className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 border-2 border-gray-200 px-4 py-2 rounded-full">
+                                    <ShieldQuestion size={16} />
+                                    {myClaim.status === 'pending' && 'Claim pending review'}
+                                    {myClaim.status === 'approved' && 'Claim approved'}
+                                    {myClaim.status === 'rejected' && 'Claim not approved'}
+                                </span>
+                            ) : (
+                                <button
+                                    onClick={() => setClaimFormOpen((v) => !v)}
+                                    className="inline-flex items-center gap-2 border-2 border-gray-300 text-gray-700 font-bold px-5 py-2.5 rounded-full hover:border-gray-900 hover:text-gray-900 transition"
+                                >
+                                    <ShieldQuestion size={18} /> Is this you? Claim this profile
+                                </button>
+                            )
                         ) : null}
 
                         {/* Share Button */}
@@ -316,6 +403,32 @@ export default function ArtistPage() {
                             <Flag className="w-5 h-5" />
                         </button>
                     </div>
+
+                    {claimFormOpen && (
+                        <div className="max-w-7xl mx-auto mt-4 p-4 border-2 border-gray-200 rounded-xl bg-white">
+                            <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">
+                                Why is this your profile?
+                            </label>
+                            <textarea
+                                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 min-h-[80px] resize-none"
+                                value={claimEvidence}
+                                onChange={(e) => setClaimEvidence(e.target.value)}
+                                placeholder="Link your official socials, distributor account, or anything else that shows this is your music."
+                            />
+                            <div className="flex justify-end gap-2 mt-3">
+                                <button onClick={() => setClaimFormOpen(false)} className="px-4 py-2 rounded-md text-gray-700 font-bold hover:bg-gray-100">
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={submitClaim}
+                                    disabled={claimSubmitting || !claimEvidence.trim()}
+                                    className="px-5 py-2 rounded-md bg-gray-900 text-white font-black hover:bg-black disabled:opacity-50"
+                                >
+                                    {claimSubmitting ? 'Submitting…' : 'Submit claim'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <ReportContentDialog
@@ -337,7 +450,7 @@ export default function ArtistPage() {
                                     <div
                                         key={track.id}
                                         className="grid grid-cols-[16px_4fr_2fr_minmax(80px,1fr)] gap-4 px-4 py-2 rounded group hover:bg-gray-100 cursor-pointer items-center"
-                                        onClick={() => handlePlaySong(track)}
+                                        onClick={() => handlePlaySong(topTracks, index)}
                                     >
                                         {/* Track Number / Play Button */}
                                         <div className="text-gray-500 flex justify-center w-8">
@@ -389,7 +502,7 @@ export default function ArtistPage() {
                             <section className="mb-12">
                                 <h2 className="text-2xl font-comfortaa font-semibold mb-6">Artist's Pick{artistPicks.length > 1 ? 's' : ''}</h2>
                                 <div className="flex flex-wrap gap-4">
-                                    {(artistPicks.length > 0 ? artistPicks : [topTracks[0]]).map((track) => (
+                                    {(artistPicks.length > 0 ? artistPicks : [topTracks[0]]).map((track, index, picksList) => (
                                         <div key={track.id} className="flex items-start gap-4 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl p-5 max-w-sm w-full sm:w-auto">
                                             <img
                                                 loading="lazy" src={track.cover_url}
@@ -403,7 +516,7 @@ export default function ArtistPage() {
                                                 <h3 className="font-bold text-gray-900 truncate">{track.title}</h3>
                                                 <p className="text-sm text-gray-500 mt-0.5">{track.album_title || 'Single'}</p>
                                                 <button
-                                                    onClick={() => handlePlaySong(track)}
+                                                    onClick={() => handlePlaySong(picksList, index)}
                                                     className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-gray-900 hover:underline"
                                                 >
                                                     <Play fill="currentColor" className="w-4 h-4" />
@@ -423,18 +536,28 @@ export default function ArtistPage() {
                             </div>
                             <div className="flex overflow-x-auto scrollbar-hide gap-6 pb-4">
                                 {albums.map((album) => (
-                                    <div key={album.id} className="bg-white border border-gray-100 p-4 rounded-lg hover:bg-gray-50 transition cursor-pointer group min-w-[180px] flex flex-col">
+                                    <Link
+                                        to={`/streams/album/${album.id}`}
+                                        key={album.id}
+                                        className="bg-white border border-gray-100 p-4 rounded-lg hover:bg-gray-50 transition cursor-pointer group min-w-[180px] flex flex-col"
+                                    >
                                         <div className="relative mb-4 aspect-square">
                                             <img
                                                 loading="lazy" src={album.cover_url || '/placeholder-music.png'}
                                                 alt={album.title}
                                                 className="w-full h-full object-cover rounded shadow-lg"
                                             />
-                                            <button className="absolute right-2 bottom-2 w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl transform translate-y-2 group-hover:translate-y-0 active:scale-95" aria-label="Play"><Play fill="white" className="w-5 h-5 ml-1 text-white" /></button>
+                                            <button
+                                                onClick={(e) => handlePlayAlbum(e, album.id)}
+                                                className="absolute right-2 bottom-2 w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl transform translate-y-2 group-hover:translate-y-0 active:scale-95"
+                                                aria-label="Play album"
+                                            >
+                                                <Play fill="white" className="w-5 h-5 ml-1 text-white" />
+                                            </button>
                                         </div>
                                         <h3 className="font-bold text-sm mb-1 truncate">{album.title}</h3>
                                         <p className="text-xs text-gray-500">{new Date(album.release_date).getFullYear()} • Album</p>
-                                    </div>
+                                    </Link>
                                 ))}
                             </div>
                         </section>
@@ -448,7 +571,7 @@ export default function ArtistPage() {
                                         <div
                                             key={track.id}
                                             className="grid grid-cols-[16px_4fr_2fr_minmax(80px,1fr)] gap-4 px-4 py-2 rounded group hover:bg-gray-100 cursor-pointer items-center"
-                                            onClick={() => handlePlaySong(track)}
+                                            onClick={() => handlePlaySong(featuredOnTracks, index)}
                                         >
                                             <div className="text-gray-500 flex justify-center w-8">
                                                 {currentSong?.id === track.id && isPlaying ? (

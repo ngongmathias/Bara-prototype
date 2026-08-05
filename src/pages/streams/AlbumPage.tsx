@@ -5,10 +5,12 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useToast } from '@/hooks/use-toast';
+import { useShare } from '@/context/ShareContext';
 import { SEO } from '@/components/SEO';
-import { Play, Pause, Shuffle, Clock, Heart, ArrowLeft, Music2, Disc3, Check, Plus, Flag } from 'lucide-react';
+import { Play, Pause, Shuffle, Clock, Heart, ArrowLeft, Music2, Disc3, Check, Plus, Flag, Share2 } from 'lucide-react';
 import { PAID_MUSIC_ENABLED } from '@/lib/features';
 import { ReportContentDialog } from '@/components/streams/ReportContentDialog';
+import { filterPublished } from '@/lib/publishFilter';
 
 interface AlbumInfo {
   id: string;
@@ -33,6 +35,7 @@ export default function AlbumPage() {
   const { playAlbum, togglePlay, currentSong, isPlaying, toggleLike, likedSongs } = useAudioPlayer();
   const { user } = useUser();
   const { toast } = useToast();
+  const { openShare } = useShare();
 
   const [album, setAlbum] = useState<AlbumInfo | null>(null);
   const [tracks, setTracks] = useState<Song[]>([]);
@@ -62,7 +65,7 @@ export default function AlbumPage() {
         if (!active) return;
         setAlbum(albumData as AlbumInfo);
         setTracks(
-          (songData || []).map((s: any) => ({
+          filterPublished(songData).map((s: any) => ({
             id: s.id,
             title: s.title,
             artist: s.artists?.name || albumData?.artists?.name || 'Unknown Artist',
@@ -156,6 +159,16 @@ export default function AlbumPage() {
     playAlbum(tracks, index);
   };
 
+  const handleShare = () => {
+    if (!album) return;
+    openShare({
+      url: `${window.location.origin}/streams/album/${album.id}`,
+      title: album.title,
+      description: `${album.title}${album.artists?.name ? ` by ${album.artists.name}` : ''} — listen on Bara Streams`,
+      imageUrl: album.cover_url || undefined,
+    });
+  };
+
   return (
     <StreamsLayout>
       <SEO title={album ? `${album.title} — BARA Streams` : 'Album — BARA Streams'} description={album ? `Listen to ${album.title}${album.artists?.name ? ' by ' + album.artists.name : ''} on BARA Streams.` : 'Album on BARA Streams.'} />
@@ -226,6 +239,15 @@ export default function AlbumPage() {
             }`}
           >
             {saved ? <><Check size={18} /> Saved</> : <><Plus size={18} /> Save</>}
+          </button>
+          <button
+            onClick={handleShare}
+            disabled={!album}
+            className="w-11 h-11 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition disabled:opacity-40"
+            aria-label="Share album"
+            title="Share album"
+          >
+            <Share2 size={20} />
           </button>
           <button
             onClick={() => setReportOpen(true)}

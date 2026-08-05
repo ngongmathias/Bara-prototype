@@ -47,13 +47,13 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-gray-200 z-[120] flex flex-col shadow-2xl"
+                        className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#121212] border-l border-white/10 z-[120] flex flex-col shadow-2xl text-white"
                     >
                         {/* Header */}
-                        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+                        <div className="p-5 border-b border-white/10 flex items-center justify-between">
                             <div>
-                                <h2 className="text-xl font-black text-gray-900 tracking-tight">Queue</h2>
-                                <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">
+                                <h2 className="text-xl font-black text-white tracking-tight">Queue</h2>
+                                <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">
                                     {upNext.length} up next
                                 </p>
                             </div>
@@ -61,14 +61,14 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                                 {upNext.length > 0 && (
                                     <button
                                         onClick={clearQueue}
-                                        className="text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors px-3 py-1.5 rounded-full hover:bg-gray-100"
+                                        className="text-xs font-bold text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded-full hover:bg-white/10"
                                     >
                                         Clear
                                     </button>
                                 )}
                                 <button
                                     onClick={onClose}
-                                    className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors text-gray-700"
+                                    className="w-9 h-9 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors text-gray-300"
                                     aria-label="Close"
                                 >
                                     <X size={18} />
@@ -82,7 +82,7 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                             {currentSong && (
                                 <div className="mb-6">
                                     <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">Now Playing</h3>
-                                    <div className="bg-gray-100 rounded-xl p-3 flex items-center gap-3">
+                                    <div className="bg-white/5 rounded-xl p-3 flex items-center gap-3">
                                         <div className="relative flex-shrink-0">
                                             <img loading="lazy" src={currentSong.cover_url} className="w-12 h-12 rounded-lg object-cover" alt="" />
                                             {isPlaying && (
@@ -94,8 +94,8 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                                             )}
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <div className="font-bold text-gray-900 truncate">{currentSong.title}</div>
-                                            <div className="text-sm text-gray-500 truncate">{currentSong.artist}</div>
+                                            <div className="font-bold text-white truncate">{currentSong.title}</div>
+                                            <div className="text-sm text-gray-400 truncate">{currentSong.artist}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -114,13 +114,27 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                                                 onDragOver={(e) => { e.preventDefault(); setOverIndex(index); }}
                                                 onDrop={() => handleDrop(index)}
                                                 onDragEnd={() => { setDragIndex(null); setOverIndex(null); }}
-                                                className={`group flex items-center gap-3 p-2 rounded-xl transition-all cursor-pointer ${
-                                                    overIndex === index && dragIndex !== null ? 'bg-gray-100 ring-1 ring-gray-300' : 'hover:bg-gray-50'
+                                                onTouchStart={() => setDragIndex(index)}
+                                                onTouchMove={(e) => {
+                                                    if (dragIndex === null) return;
+                                                    const touch = e.touches[0];
+                                                    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+                                                    const row = el?.closest('[data-queue-index]');
+                                                    const overIdx = row ? Number(row.getAttribute('data-queue-index')) : null;
+                                                    if (overIdx !== null && !Number.isNaN(overIdx)) setOverIndex(overIdx);
+                                                }}
+                                                onTouchEnd={() => {
+                                                    if (overIndex !== null) handleDrop(overIndex);
+                                                    else { setDragIndex(null); setOverIndex(null); }
+                                                }}
+                                                data-queue-index={index}
+                                                className={`group flex items-center gap-3 p-2 rounded-xl transition-all cursor-pointer touch-none ${
+                                                    overIndex === index && dragIndex !== null ? 'bg-white/10 ring-1 ring-white/20' : 'hover:bg-white/5'
                                                 } ${dragIndex === index ? 'opacity-40' : ''}`}
                                                 onClick={() => play(song)}
                                             >
                                                 <button
-                                                    className="text-gray-300 group-hover:text-gray-500 cursor-grab active:cursor-grabbing flex-shrink-0"
+                                                    className="text-gray-500 group-hover:text-gray-300 cursor-grab active:cursor-grabbing flex-shrink-0"
                                                     onClick={(e) => e.stopPropagation()}
                                                     aria-label="Drag to reorder"
                                                 >
@@ -133,13 +147,13 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                                                     </div>
                                                 </div>
                                                 <div className="min-w-0 flex-1">
-                                                    <div className="font-bold text-gray-900 truncate text-sm">{song.title}</div>
-                                                    <div className="text-xs text-gray-500 truncate">{song.artist}</div>
+                                                    <div className="font-bold text-white truncate text-sm">{song.title}</div>
+                                                    <div className="text-xs text-gray-400 truncate">{song.artist}</div>
                                                 </div>
-                                                <span className="text-[11px] text-gray-400 tabular-nums flex-shrink-0">{fmt(song.duration)}</span>
+                                                <span className="text-[11px] text-gray-500 tabular-nums flex-shrink-0">{fmt(song.duration)}</span>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); removeFromQueue(index); }}
-                                                    className="text-gray-300 hover:text-gray-900 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
+                                                    className="text-gray-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
                                                     aria-label="Remove from queue"
                                                 >
                                                     <Trash2 size={15} />
@@ -148,9 +162,9 @@ export function QueueDrawer({ isOpen, onClose }: QueueDrawerProps) {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="py-14 text-center text-gray-400">
+                                    <div className="py-14 text-center text-gray-500">
                                         <Music size={36} className="mx-auto mb-3 opacity-30" />
-                                        <p className="font-bold text-gray-500">Nothing queued up</p>
+                                        <p className="font-bold text-gray-400">Nothing queued up</p>
                                         <p className="text-xs mt-1">Play an album or add songs to build a queue.</p>
                                     </div>
                                 )}

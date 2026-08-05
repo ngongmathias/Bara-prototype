@@ -4,8 +4,10 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { SEO } from '@/components/SEO';
-import { Play, Pause, ArrowLeft, Music2 } from 'lucide-react';
+import { Play, Pause, ArrowLeft, Music2, Share2 } from 'lucide-react';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
+import { filterPublished } from '@/lib/publishFilter';
+import { useShare } from '@/context/ShareContext';
 
 interface Genre { name: string; slug: string; blurb: string; }
 
@@ -84,10 +86,21 @@ function GenreBrowse() {
 
 function GenreDetail({ genre, slug }: { genre?: Genre; slug: string }) {
   const { playAlbum, togglePlay, currentSong, isPlaying } = useAudioPlayer();
+  const { openShare } = useShare();
   const [songs, setSongs] = useState<Song[]>([]);
   const [artists, setArtists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const name = genre?.name || slug.replace(/-/g, ' ');
+  const displayName = name.replace(/\b\w/g, (c) => c.toUpperCase());
+
+  const handleShare = () => {
+    openShare({
+      url: `${window.location.origin}/streams/genre/${slug}`,
+      title: `${displayName} — BARA Streams`,
+      description: `Listen to the best ${displayName} tracks on Bara Streams`,
+      imageUrl: songs[0]?.cover_url,
+    });
+  };
 
   useEffect(() => {
     let active = true;
@@ -99,7 +112,7 @@ function GenreDetail({ genre, slug }: { genre?: Genre; slug: string }) {
           supabase.from('artists').select('id, name, image_url, is_verified').ilike('genre', `%${name}%`).limit(12),
         ]);
         if (!active) return;
-        setSongs((songData || []).map(mapSong));
+        setSongs(filterPublished(songData).map(mapSong));
         setArtists(artistData || []);
       } finally {
         if (active) setLoading(false);
@@ -121,14 +134,24 @@ function GenreDetail({ genre, slug }: { genre?: Genre; slug: string }) {
             </Link>
             <p className="text-[11px] uppercase tracking-[0.2em] text-gray-300 font-bold mb-2">Genre</p>
             <h1 className="text-4xl sm:text-6xl font-black tracking-tight capitalize" style={{ fontFamily: 'Comfortaa, sans-serif' }}>{name}</h1>
-            <button
-              onClick={() => { if (songs.length === 0) return; if (genreActive) { togglePlay(); } else { playAlbum(songs, 0); } }}
-              disabled={songs.length === 0}
-              className="mt-6 inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-7 py-3 rounded-full hover:bg-gray-200 transition disabled:opacity-40 active:scale-[0.98]"
-            >
-              {genreActive && isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
-              {genreActive && isPlaying ? 'Pause' : 'Play all'}
-            </button>
+            <div className="mt-6 flex items-center gap-3">
+              <button
+                onClick={() => { if (songs.length === 0) return; if (genreActive) { togglePlay(); } else { playAlbum(songs, 0); } }}
+                disabled={songs.length === 0}
+                className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-7 py-3 rounded-full hover:bg-gray-200 transition disabled:opacity-40 active:scale-[0.98]"
+              >
+                {genreActive && isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
+                {genreActive && isPlaying ? 'Pause' : 'Play all'}
+              </button>
+              <button
+                onClick={handleShare}
+                className="w-11 h-11 flex items-center justify-center rounded-full text-gray-300 hover:text-white hover:bg-white/10 transition"
+                aria-label="Share genre"
+                title="Share genre"
+              >
+                <Share2 size={20} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -172,7 +195,7 @@ function GenreDetail({ genre, slug }: { genre?: Genre; slug: string }) {
                     <div key={song.id} className="group flex flex-col">
                       <div className="relative mb-3 aspect-square">
                         <img src={song.cover_url} alt={song.title} loading="lazy" className="w-full h-full object-cover rounded-md shadow-md"
-                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }} />
                         <button
                           onClick={() => { if (active) { togglePlay(); } else { playAlbum(songs, i); } }}
                           className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all hover:scale-105 active:scale-95"

@@ -45,6 +45,7 @@ import { db, supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
 import { PAID_MUSIC_ENABLED } from '@/lib/features';
+import { deleteSongStorageFiles } from '@/lib/songStorage';
 
 
 interface Song {
@@ -274,20 +275,17 @@ export const AdminSongs = () => {
         }
     };
 
-    const handleDelete = async (id: string, fileUrl: string) => {
+    const handleDelete = async (id: string, fileUrl: string, coverUrl?: string | null) => {
         if (!confirm("Are you sure you want to delete this track?")) return;
         try {
             // Delete from DB
             const { error: dbError } = await db.songs().delete().eq('id', id);
             if (dbError) throw dbError;
 
-            // Optional: Delete from storage if it's a supabase URL
-            if (fileUrl.includes('music')) {
-                const fileName = fileUrl.split('/').pop();
-                if (fileName) {
-                    await supabase.storage.from('music').remove([`tracks/${fileName}`]);
-                }
-            }
+            // Storage cleanup by real path from the stored URL, not a
+            // guessed prefix — creator uploads live at songs/{userId}/...,
+            // not tracks/..., so the old guess silently missed them.
+            await deleteSongStorageFiles({ file_url: fileUrl, cover_url: coverUrl });
 
             toast({ title: "Success", description: "Song deleted" });
             fetchSongs();
@@ -672,7 +670,7 @@ export const AdminSongs = () => {
                                                     variant="ghost"
                                                     size="icon"
                                                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    onClick={() => handleDelete(song.id, song.file_url)}
+                                                    onClick={() => handleDelete(song.id, song.file_url, song.cover_url)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>

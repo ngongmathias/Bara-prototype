@@ -159,12 +159,12 @@ const Menu: React.FC<MenuProps> = ({ state, onClose, playlistPickerOpen, setPlay
     };
 
     const handleGoToArtist = () => {
-        if (song.artist_id) navigate(`/streams/artists/${song.artist_id}`);
+        if (song.artist_id) navigate(`/streams/artist/${song.artist_id}`);
         onClose();
     };
 
     const handleGoToAlbum = () => {
-        if (song.album_id) navigate(`/streams/albums/${song.album_id}`);
+        if (song.album_id) navigate(`/streams/album/${song.album_id}`);
         else toast({ title: 'No album', description: 'This song is not part of an album', variant: 'destructive' });
         onClose();
     };

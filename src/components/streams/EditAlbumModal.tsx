@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, X, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Loader2, X, Image as ImageIcon, Trash2, GripVertical, Plus } from 'lucide-react';
 
 const TYPES = ['Album', 'EP', 'Single', 'Mixtape', 'Compilation'];
 
@@ -25,17 +25,22 @@ export const EditAlbumModal = ({ album, artistId, onClose, onSaved }: Props) => 
   const [description, setDescription] = useState('');
   const [coverPreview, setCoverPreview] = useState<string | null>(album.cover_url);
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [songs, setSongs] = useState<{ id: string; title: string; album_id: string | null }[]>([]);
-  const [inAlbum, setInAlbum] = useState<Set<string>>(new Set());
+  interface TrackRow { id: string; title: string; album_id: string | null; track_number: number | null }
+  const [songs, setSongs] = useState<TrackRow[]>([]);
+  // Ordered ids of tracks currently in this album — order here IS the
+  // track_number that gets saved, so drag-reordering is just array reordering.
+  const [included, setIncluded] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
       const [{ data: full }, { data: artistSongs }] = await Promise.all([
         supabase.from('albums').select('type, release_date, description').eq('id', album.id).maybeSingle(),
-        supabase.from('songs').select('id, title, album_id').eq('artist_id', artistId).order('created_at', { ascending: false }),
+        supabase.from('songs').select('id, title, album_id, track_number').eq('artist_id', artistId).order('created_at', { ascending: false }),
       ]);
       if (full) {
         const t = (full as any).type;
@@ -43,8 +48,14 @@ export const EditAlbumModal = ({ album, artistId, onClose, onSaved }: Props) => 
         setReleaseDate((full as any).release_date || '');
         setDescription((full as any).description || '');
       }
-      setSongs(artistSongs || []);
-      setInAlbum(new Set((artistSongs || []).filter((s: any) => s.album_id === album.id).map((s: any) => s.id)));
+      const list = artistSongs || [];
+      setSongs(list);
+      setIncluded(
+        list
+          .filter((s: any) => s.album_id === album.id)
+          .sort((a: any, b: any) => (a.track_number ?? 999) - (b.track_number ?? 999))
+          .map((s: any) => s.id)
+      );
       setLoading(false);
     })();
   }, [album.id, artistId]);
@@ -56,12 +67,23 @@ export const EditAlbumModal = ({ album, artistId, onClose, onSaved }: Props) => 
     setCoverPreview(URL.createObjectURL(file));
   };
 
-  const toggleTrack = (id: string) => {
-    setInAlbum((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
+  const addTrack = (id: string) => setIncluded((prev) => [...prev, id]);
+  const removeTrack = (id: string) => setIncluded((prev) => prev.filter((x) => x !== id));
+
+  const reorder = (from: number, to: number) => {
+    setIncluded((prev) => {
+      if (from < 0 || from >= prev.length || to < 0 || to >= prev.length || from === to) return prev;
+      const arr = [...prev];
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      return arr;
     });
+  };
+
+  const handleDrop = (targetIndex: number) => {
+    if (dragIndex !== null && dragIndex !== targetIndex) reorder(dragIndex, targetIndex);
+    setDragIndex(null);
+    setOverIndex(null);
   };
 
   const handleSave = async () => {
@@ -86,14 +108,22 @@ export const EditAlbumModal = ({ album, artistId, onClose, onSaved }: Props) => 
       }).eq('id', album.id);
       if (error) throw error;
 
-      // Apply track assignment changes (only the ones that actually changed).
+      // Apply track assignment + order changes. included's array order IS
+      // the track_number, so every included track gets (re)written each
+      // save — simplest way to keep numbers gapless and correct after
+      // adds/removes/drags.
+      const includedSet = new Set(included);
       const updates: Promise<any>[] = [];
       for (const s of songs) {
         const wasIn = s.album_id === album.id;
-        const nowIn = inAlbum.has(s.id);
-        if (wasIn && !nowIn) updates.push(supabase.from('songs').update({ album_id: null }).eq('id', s.id));
-        else if (!wasIn && nowIn) updates.push(supabase.from('songs').update({ album_id: album.id }).eq('id', s.id));
+        const nowIn = includedSet.has(s.id);
+        if (wasIn && !nowIn) {
+          updates.push(supabase.from('songs').update({ album_id: null, track_number: null }).eq('id', s.id));
+        }
       }
+      included.forEach((songId, idx) => {
+        updates.push(supabase.from('songs').update({ album_id: album.id, track_number: idx + 1 }).eq('id', songId));
+      });
       await Promise.all(updates);
 
       toast({ title: 'Saved', description: 'Album updated.' });
@@ -172,15 +202,69 @@ export const EditAlbumModal = ({ album, artistId, onClose, onSaved }: Props) => 
               {songs.length === 0 ? (
                 <p className="text-xs text-gray-400">You have no tracks yet. Upload some, then add them here.</p>
               ) : (
-                <div className="border border-gray-200 rounded-md divide-y max-h-48 overflow-y-auto">
-                  {songs.map((s) => (
-                    <label key={s.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-50">
-                      <input type="checkbox" checked={inAlbum.has(s.id)} onChange={() => toggleTrack(s.id)} className="accent-gray-900" />
-                      <span className="text-sm text-gray-800 truncate">{s.title}</span>
-                      {s.album_id && s.album_id !== album.id && <span className="ml-auto text-[10px] text-gray-400">in another album</span>}
-                    </label>
-                  ))}
-                </div>
+                <>
+                  {included.length > 0 ? (
+                    <div className="border border-gray-200 rounded-md divide-y mb-3">
+                      {included.map((id, index) => {
+                        const s = songs.find((x) => x.id === id);
+                        if (!s) return null;
+                        return (
+                          <div
+                            key={id}
+                            draggable
+                            onDragStart={() => setDragIndex(index)}
+                            onDragOver={(e) => { e.preventDefault(); setOverIndex(index); }}
+                            onDrop={() => handleDrop(index)}
+                            onDragEnd={() => { setDragIndex(null); setOverIndex(null); }}
+                            onTouchStart={() => setDragIndex(index)}
+                            onTouchMove={(e) => {
+                              if (dragIndex === null) return;
+                              const touch = e.touches[0];
+                              const el = document.elementFromPoint(touch.clientX, touch.clientY);
+                              const row = el?.closest('[data-track-index]');
+                              const overIdx = row ? Number(row.getAttribute('data-track-index')) : null;
+                              if (overIdx !== null && !Number.isNaN(overIdx)) setOverIndex(overIdx);
+                            }}
+                            onTouchEnd={() => {
+                              if (overIndex !== null) handleDrop(overIndex);
+                              else { setDragIndex(null); setOverIndex(null); }
+                            }}
+                            data-track-index={index}
+                            className={`flex items-center gap-2 px-3 py-2 touch-none ${overIndex === index && dragIndex !== null ? 'bg-gray-100' : ''} ${dragIndex === index ? 'opacity-40' : ''}`}
+                          >
+                            <GripVertical size={14} className="text-gray-300 cursor-grab active:cursor-grabbing flex-shrink-0" />
+                            <span className="text-[11px] text-gray-400 w-4 flex-shrink-0">{index + 1}</span>
+                            <span className="text-sm text-gray-800 truncate flex-1">{s.title}</span>
+                            <button onClick={() => removeTrack(id)} className="text-gray-300 hover:text-gray-900 flex-shrink-0" aria-label="Remove from album">
+                              <X size={14} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 mb-3">No tracks added yet.</p>
+                  )}
+
+                  {songs.some((s) => !included.includes(s.id)) && (
+                    <>
+                      <label className={label}>Add tracks</label>
+                      <div className="border border-gray-200 rounded-md divide-y max-h-32 overflow-y-auto">
+                        {songs.filter((s) => !included.includes(s.id)).map((s) => (
+                          <button
+                            key={s.id}
+                            onClick={() => addTrack(s.id)}
+                            className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-50"
+                          >
+                            <Plus size={14} className="text-gray-400 flex-shrink-0" />
+                            <span className="text-sm text-gray-800 truncate">{s.title}</span>
+                            {s.album_id && s.album_id !== album.id && <span className="ml-auto text-[10px] text-gray-400">in another album</span>}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </>
               )}
             </div>
           </div>

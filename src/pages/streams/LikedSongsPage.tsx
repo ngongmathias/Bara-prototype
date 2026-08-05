@@ -99,7 +99,7 @@ export default function LikedSongsPage() {
         <StreamsLayout>
             <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white p-8">
                 {/* Header */}
-                <div className="flex flex-col md:row items-end gap-6 mb-8 mt-12">
+                <div className="flex flex-col md:flex-row items-end gap-6 mb-8 mt-12">
                     <div className="w-52 h-52 bg-gradient-to-br from-gray-700 to-gray-900 shadow-2xl flex items-center justify-center rounded-lg relative group overflow-hidden">
                         <Heart size={100} fill="white" className="text-white drop-shadow-lg" />
                     </div>
