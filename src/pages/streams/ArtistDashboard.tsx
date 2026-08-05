@@ -172,14 +172,15 @@ export default function ArtistDashboard() {
             const songIds = (songsRes.data || []).map((s: any) => s.id);
             setMonthlyListeners(await getMonthlyListeners(songIds));
 
-            // Follower count (best-effort)
+            // Follower count — via user_follows (the active follow graph; this
+            // artist's own profile is scoped to user.id, so followee_user_id = user.id)
             try {
                 const { count } = await supabase
-                    .from('artist_followers')
+                    .from('user_follows')
                     .select('*', { count: 'exact', head: true })
-                    .eq('artist_id', artist.id);
+                    .eq('followee_user_id', user.id);
                 setFollowerCount(count || 0);
-            } catch { /* table may not exist */ }
+            } catch { /* best-effort */ }
 
             // Fetch songs this artist is featured on
             try {

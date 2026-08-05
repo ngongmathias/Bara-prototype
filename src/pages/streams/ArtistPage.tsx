@@ -15,7 +15,7 @@ import { filterPublished, isPublished } from '@/lib/publishFilter';
 
 export default function ArtistPage() {
     const { id } = useParams();
-    const { play, currentSong, isPlaying, togglePlay, startRadio } = useAudioPlayer();
+    const { playAlbum, currentSong, isPlaying, togglePlay, startRadio } = useAudioPlayer();
     const { openShare } = useShare();
     const { user } = useUser();
     const { toast } = useToast();
@@ -226,8 +226,33 @@ export default function ArtistPage() {
         }
     };
 
-    const handlePlaySong = (song: Song) => {
-        play(song);
+    // Builds a real queue from the list the track was played from, so
+    // next/prev keep working instead of dying after one song.
+    const handlePlaySong = (list: Song[], index: number) => {
+        playAlbum(list, index);
+    };
+
+    const handlePlayAlbum = async (e: React.MouseEvent, albumId: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const { data } = await supabase
+            .from('songs')
+            .select('*, albums(title, cover_url)')
+            .eq('album_id', albumId)
+            .order('track_number', { ascending: true, nullsFirst: false })
+            .order('created_at', { ascending: true });
+        const albumSongs: Song[] = (data || []).map((song: any) => ({
+            id: song.id,
+            title: song.title,
+            artist: artist?.name || 'Unknown Artist',
+            file_url: song.file_url,
+            cover_url: song.cover_url || song.albums?.cover_url || '/placeholder-music.png',
+            duration: song.duration,
+            artist_id: song.artist_id,
+            album_id: song.album_id,
+            album_title: song.albums?.title,
+        }));
+        if (albumSongs.length > 0) playAlbum(albumSongs, 0);
     };
 
     if (loading) {
@@ -314,7 +339,7 @@ export default function ArtistPage() {
                         {/* Play Button */}
                         {topTracks.length > 0 && (
                             <button
-                                onClick={() => handlePlaySong(topTracks[0])}
+                                onClick={() => handlePlaySong(topTracks, 0)}
                                 className="w-14 h-14 rounded-full bg-gray-900 hover:scale-105 transition flex items-center justify-center shadow-xl active:scale-95"
                             >
                                 <Play fill="white" className="w-6 h-6 ml-1 text-white" />
@@ -406,7 +431,7 @@ export default function ArtistPage() {
                                     <div
                                         key={track.id}
                                         className="grid grid-cols-[16px_4fr_2fr_minmax(80px,1fr)] gap-4 px-4 py-2 rounded group hover:bg-gray-100 cursor-pointer items-center"
-                                        onClick={() => handlePlaySong(track)}
+                                        onClick={() => handlePlaySong(topTracks, index)}
                                     >
                                         {/* Track Number / Play Button */}
                                         <div className="text-gray-500 flex justify-center w-8">
@@ -458,7 +483,7 @@ export default function ArtistPage() {
                             <section className="mb-12">
                                 <h2 className="text-2xl font-comfortaa font-semibold mb-6">Artist's Pick{artistPicks.length > 1 ? 's' : ''}</h2>
                                 <div className="flex flex-wrap gap-4">
-                                    {(artistPicks.length > 0 ? artistPicks : [topTracks[0]]).map((track) => (
+                                    {(artistPicks.length > 0 ? artistPicks : [topTracks[0]]).map((track, index, picksList) => (
                                         <div key={track.id} className="flex items-start gap-4 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl p-5 max-w-sm w-full sm:w-auto">
                                             <img
                                                 loading="lazy" src={track.cover_url}
@@ -472,7 +497,7 @@ export default function ArtistPage() {
                                                 <h3 className="font-bold text-gray-900 truncate">{track.title}</h3>
                                                 <p className="text-sm text-gray-500 mt-0.5">{track.album_title || 'Single'}</p>
                                                 <button
-                                                    onClick={() => handlePlaySong(track)}
+                                                    onClick={() => handlePlaySong(picksList, index)}
                                                     className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-gray-900 hover:underline"
                                                 >
                                                     <Play fill="currentColor" className="w-4 h-4" />
@@ -492,18 +517,28 @@ export default function ArtistPage() {
                             </div>
                             <div className="flex overflow-x-auto scrollbar-hide gap-6 pb-4">
                                 {albums.map((album) => (
-                                    <div key={album.id} className="bg-white border border-gray-100 p-4 rounded-lg hover:bg-gray-50 transition cursor-pointer group min-w-[180px] flex flex-col">
+                                    <Link
+                                        to={`/streams/album/${album.id}`}
+                                        key={album.id}
+                                        className="bg-white border border-gray-100 p-4 rounded-lg hover:bg-gray-50 transition cursor-pointer group min-w-[180px] flex flex-col"
+                                    >
                                         <div className="relative mb-4 aspect-square">
                                             <img
                                                 loading="lazy" src={album.cover_url || '/placeholder-music.png'}
                                                 alt={album.title}
                                                 className="w-full h-full object-cover rounded shadow-lg"
                                             />
-                                            <button className="absolute right-2 bottom-2 w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl transform translate-y-2 group-hover:translate-y-0 active:scale-95" aria-label="Play"><Play fill="white" className="w-5 h-5 ml-1 text-white" /></button>
+                                            <button
+                                                onClick={(e) => handlePlayAlbum(e, album.id)}
+                                                className="absolute right-2 bottom-2 w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl transform translate-y-2 group-hover:translate-y-0 active:scale-95"
+                                                aria-label="Play album"
+                                            >
+                                                <Play fill="white" className="w-5 h-5 ml-1 text-white" />
+                                            </button>
                                         </div>
                                         <h3 className="font-bold text-sm mb-1 truncate">{album.title}</h3>
                                         <p className="text-xs text-gray-500">{new Date(album.release_date).getFullYear()} • Album</p>
-                                    </div>
+                                    </Link>
                                 ))}
                             </div>
                         </section>
@@ -517,7 +552,7 @@ export default function ArtistPage() {
                                         <div
                                             key={track.id}
                                             className="grid grid-cols-[16px_4fr_2fr_minmax(80px,1fr)] gap-4 px-4 py-2 rounded group hover:bg-gray-100 cursor-pointer items-center"
-                                            onClick={() => handlePlaySong(track)}
+                                            onClick={() => handlePlaySong(featuredOnTracks, index)}
                                         >
                                             <div className="text-gray-500 flex justify-center w-8">
                                                 {currentSong?.id === track.id && isPlaying ? (

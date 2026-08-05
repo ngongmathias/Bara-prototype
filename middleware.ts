@@ -30,6 +30,8 @@ export const config = {
     '/streams/song/:id*',
     '/streams/playlist/:id*',
     '/streams/artist/:id*',
+    '/streams/album/:id*',
+    '/streams/genre/:slug*',
     '/streams/movie/:id*',
     '/events/:id*',
     '/blog/:slug*',
@@ -178,6 +180,47 @@ async function buildPreview(pathname: string): Promise<PreviewData | null> {
       description: row.bio?.slice(0, 160) || `${row.name} on Bara Streams`,
       image: row.avatar_url || DEFAULT_IMAGE,
       type: 'profile',
+    };
+  }
+
+  // /streams/album/:id
+  const albumMatch = pathname.match(/^\/streams\/album\/([^/?#]+)/);
+  if (albumMatch) {
+    const id = albumMatch[1];
+    const row = await fetchFromSupabase(
+      'albums',
+      `id=eq.${id}&select=title,cover_url,artist_id`
+    );
+    if (!row) return null;
+    let artistName = 'Unknown Artist';
+    if (row.artist_id) {
+      const artist = await fetchFromSupabase('artists', `id=eq.${row.artist_id}&select=name`);
+      if (artist?.name) artistName = artist.name;
+    }
+    return {
+      title: row.title,
+      description: `${row.title} by ${artistName} — listen on Bara Streams`,
+      image: row.cover_url || DEFAULT_IMAGE,
+      type: 'music.album',
+    };
+  }
+
+  // /streams/genre/:slug
+  const genreMatch = pathname.match(/^\/streams\/genre\/([^/?#]+)/);
+  if (genreMatch) {
+    const slug = genreMatch[1];
+    const name = slug.replace(/-/g, ' ');
+    const title = name.replace(/\b\w/g, (c) => c.toUpperCase());
+    // Best-effort cover: the top-played song's artwork in this genre
+    const row = await fetchFromSupabase(
+      'songs',
+      `genre=ilike.*${encodeURIComponent(name)}*&select=cover_url&order=plays.desc&limit=1`
+    );
+    return {
+      title,
+      description: `Listen to the best ${title} tracks on Bara Streams`,
+      image: row?.cover_url || DEFAULT_IMAGE,
+      type: 'music.playlist',
     };
   }
 

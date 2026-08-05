@@ -1,9 +1,10 @@
-import { Home, Search, Library, Mic2 } from 'lucide-react';
+import { Home, Search, Library, Mic2, BarChart3 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const ITEMS = [
   { to: '/streams', icon: Home, label: 'Home', match: (p: string) => p === '/streams' || p.startsWith('/streams/music') },
   { to: '/streams/search', icon: Search, label: 'Search', match: (p: string) => p.startsWith('/streams/search') },
+  { to: '/streams/stats', icon: BarChart3, label: 'Stats', match: (p: string) => p.startsWith('/streams/stats') },
   { to: '/streams/library', icon: Library, label: 'Library', match: (p: string) => p.startsWith('/streams/library') || p.startsWith('/streams/liked') },
   { to: '/streams/creator', icon: Mic2, label: 'Creator', match: (p: string) => p.startsWith('/streams/creator') },
 ];
