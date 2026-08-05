@@ -141,7 +141,7 @@ export default function MovieDetailPage() {
             loading="lazy" src={movie.backdrop_url || movie.poster_url}
             alt={movie.title}
             className="w-full h-full object-cover"
-            onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&h=600&fit=crop'; }}
+            onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-movie.svg'; }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
           <button
@@ -159,7 +159,7 @@ export default function MovieDetailPage() {
               loading="lazy" src={movie.poster_url}
               alt={movie.title}
               className="w-28 sm:w-40 flex-shrink-0 rounded-xl shadow-2xl border-2 border-white/20"
-              onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop'; }}
+              onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-movie.svg'; }}
             />
             <div className="pb-2">
               <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -273,7 +273,7 @@ export default function MovieDetailPage() {
                         loading="lazy" src={(m as any).poster_url}
                         alt={m.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop'; }}
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-movie.svg'; }}
                       />
                       {(m as any).is_free && <div className="absolute top-2 left-2 bg-gray-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">FREE</div>}
                     </div>

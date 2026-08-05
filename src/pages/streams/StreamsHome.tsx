@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { supabase } from '@/lib/supabase';
@@ -41,208 +42,180 @@ async function fetchFeaturedArtistsMap(songIds: string[]): Promise<Record<string
     return result;
 }
 
+// The following fetchers each backed a step of an 8-query sequential
+// waterfall (STREAMS_MASTER_PLAN.md §J3) — one `await` after another in a
+// single effect, so the page waited for the sum of every round-trip before
+// rendering. Each is now its own useQuery below, so React Query fires them
+// concurrently (recentlyPlayed → personalized still chains, since the second
+// genuinely depends on the first's result).
+
+async function fetchTrendingSongs(): Promise<Song[]> {
+    const { data } = await supabase.from('songs').select('*, artists(name)').order('plays', { ascending: false }).limit(20);
+    if (!data) return [];
+    return filterPublished(data).map((song: any) => ({
+        id: song.id, title: song.title, artist: song.artists?.name || 'Unknown Artist',
+        file_url: song.file_url, cover_url: song.cover_url || '/placeholder-music.png',
+        duration: song.duration, artist_id: song.artist_id, album_id: song.album_id, price: song.price ?? null,
+    }));
+}
+
+async function fetchPopularArtists(): Promise<any[]> {
+    const { data } = await supabase.from('artists').select('*').eq('is_verified', true).limit(20);
+    return data || [];
+}
+
+async function fetchNewReleases(): Promise<any[]> {
+    const { data } = await supabase.from('albums').select('*, artists(name)').order('release_date', { ascending: false }).limit(10);
+    return data || [];
+}
+
+async function fetchPlatformPlaylists(): Promise<any[]> {
+    const { data } = await supabase.from('playlists').select('*').eq('created_by', 'platform').eq('is_public', true).limit(6);
+    return data || [];
+}
+
+async function fetchSpotlight(): Promise<any | null> {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const { data } = await supabase
+            .from('featured_artists')
+            .select('*, artists(id, name, image_url, bio, genre)')
+            .lte('start_date', today)
+            .gte('end_date', today)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        return data;
+    } catch { return null; } // featured_artists table may not exist yet
+}
+
+async function fetchPromotedSongs(): Promise<(Song & { featured_badge?: string })[]> {
+    try {
+        const { data } = await supabase
+            .from('songs')
+            .select('*, artists(name)')
+            .not('featured_badge', 'is', null)
+            .order('plays', { ascending: false })
+            .limit(10);
+        if (!data || data.length === 0) return [];
+        return filterPublished(data).map((song: any) => ({
+            id: song.id, title: song.title, artist: song.artists?.name || 'Unknown Artist',
+            file_url: song.file_url, cover_url: song.cover_url || '/placeholder-music.png',
+            duration: song.duration, artist_id: song.artist_id, album_id: song.album_id,
+            featured_badge: song.featured_badge, price: song.price ?? null,
+        }));
+    } catch { return []; } // featured_badge column may not exist yet
+}
+
+interface RecentlyPlayedResult { songs: Song[]; topArtistIds: string[]; }
+
+async function fetchRecentlyPlayed(userId: string): Promise<RecentlyPlayedResult> {
+    try {
+        const { data: historyData } = await supabase
+            .from('play_history')
+            .select('song_id, played_at, songs(*, artists(name))')
+            .eq('user_id', userId)
+            .order('played_at', { ascending: false })
+            .limit(50);
+        if (!historyData) return { songs: [], topArtistIds: [] };
+
+        const seen = new Set<string>();
+        const unique: Song[] = [];
+        const artistPlayCount: Record<string, number> = {};
+        for (const entry of historyData) {
+            const song = (entry as any).songs;
+            if (song) {
+                if (!seen.has(song.id)) {
+                    seen.add(song.id);
+                    unique.push({
+                        id: song.id, title: song.title, artist: song.artists?.name || 'Unknown Artist',
+                        file_url: song.file_url, cover_url: song.cover_url || '/placeholder-music.png',
+                        duration: song.duration, artist_id: song.artist_id, album_id: song.album_id,
+                    });
+                }
+                if (song.artist_id) artistPlayCount[song.artist_id] = (artistPlayCount[song.artist_id] || 0) + 1;
+            }
+        }
+        const topArtistIds = Object.entries(artistPlayCount).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id]) => id);
+        return { songs: unique.slice(0, 10), topArtistIds };
+    } catch {
+        return { songs: [], topArtistIds: [] }; // history not critical
+    }
+}
+
+async function fetchPersonalizedSongs(topArtistIds: string[], excludeIds: string[]): Promise<Song[]> {
+    if (topArtistIds.length === 0) return [];
+    try {
+        const { data } = await supabase
+            .from('songs')
+            .select('*, artists(name)')
+            .in('artist_id', topArtistIds)
+            .not('id', 'in', `(${excludeIds.map(id => `'${id}'`).join(',') || "''"})`)
+            .order('plays', { ascending: false })
+            .limit(12);
+        if (!data || data.length === 0) return [];
+        return filterPublished(data).map((song: any) => ({
+            id: song.id, title: song.title, artist: song.artists?.name || 'Unknown Artist',
+            file_url: song.file_url, cover_url: song.cover_url || '/placeholder-music.png',
+            duration: song.duration, artist_id: song.artist_id, album_id: song.album_id,
+        }));
+    } catch { return []; }
+}
+
 export default function StreamsHome() {
     const { toast } = useToast();
     const navigate = useNavigate();
     const { play, currentSong, isPlaying, playAlbum, startRadio } = useAudioPlayer();
     const { user: clerkUser } = useUser();
-    const [trendingSongs, setTrendingSongs] = useState<Song[]>([]);
-    const [popularArtists, setPopularArtists] = useState<any[]>([]);
-    const [newReleases, setNewReleases] = useState<any[]>([]);
-    const [recentlyPlayed, setRecentlyPlayed] = useState<Song[]>([]);
-    const [platformPlaylists, setPlatformPlaylists] = useState<any[]>([]);
-    const [promotedSongs, setPromotedSongs] = useState<(Song & { featured_badge?: string })[]>([]);
-    const [personalizedSongs, setPersonalizedSongs] = useState<Song[]>([]);
+    const queryClient = useQueryClient();
     const [dailyMixes, setDailyMixes] = useState<DailyMix[]>([]);
     const [featuredArtistsMap, setFeaturedArtistsMap] = useState<Record<string, string>>({});
-    const [spotlight, setSpotlight] = useState<any | null>(null);
-    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [refreshKey, setRefreshKey] = useState(0);
+    const [refreshTick, setRefreshTick] = useState(0);
     const searchRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
+    // Each of these used to be one more `await` in a single sequential
+    // effect — React Query fires them all concurrently instead.
+    const trendingQuery = useQuery({ queryKey: ['streamsHome', 'trending'], queryFn: fetchTrendingSongs, staleTime: 60_000 });
+    const artistsQuery = useQuery({ queryKey: ['streamsHome', 'artists'], queryFn: fetchPopularArtists, staleTime: 60_000 });
+    const releasesQuery = useQuery({ queryKey: ['streamsHome', 'newReleases'], queryFn: fetchNewReleases, staleTime: 60_000 });
+    const playlistsQuery = useQuery({ queryKey: ['streamsHome', 'playlists'], queryFn: fetchPlatformPlaylists, staleTime: 60_000 });
+    const spotlightQuery = useQuery({ queryKey: ['streamsHome', 'spotlight'], queryFn: fetchSpotlight, staleTime: 60_000 });
+    const promotedQuery = useQuery({ queryKey: ['streamsHome', 'promoted'], queryFn: fetchPromotedSongs, staleTime: 60_000 });
+    const recentQuery = useQuery({
+        queryKey: ['streamsHome', 'recentlyPlayed', clerkUser?.id],
+        queryFn: () => fetchRecentlyPlayed(clerkUser!.id),
+        enabled: !!clerkUser,
+    });
+    const recentlyPlayed = recentQuery.data?.songs ?? [];
+    const topArtistIds = recentQuery.data?.topArtistIds ?? [];
+    // Genuinely dependent on recentQuery's result (needs the top artists it
+    // derived), so this one still chains — everything else above doesn't.
+    const personalizedQuery = useQuery({
+        queryKey: ['streamsHome', 'personalized', topArtistIds],
+        queryFn: () => fetchPersonalizedSongs(topArtistIds, recentlyPlayed.map(s => s.id)),
+        enabled: topArtistIds.length > 0,
+    });
 
-                // Trending Songs
-                const { data: songsData } = await supabase
-                    .from('songs')
-                    .select('*, artists(name)')
-                    .order('plays', { ascending: false })
-                    .limit(20);
+    const trendingSongs = trendingQuery.data ?? [];
+    const popularArtists = artistsQuery.data ?? [];
+    const newReleases = releasesQuery.data ?? [];
+    const platformPlaylists = playlistsQuery.data ?? [];
+    const spotlight = spotlightQuery.data ?? null;
+    const promotedSongs = promotedQuery.data ?? [];
+    const personalizedSongs = personalizedQuery.data ?? [];
+    const loading = trendingQuery.isLoading || artistsQuery.isLoading || releasesQuery.isLoading || playlistsQuery.isLoading;
 
-                if (songsData) {
-                    const formattedSongs: Song[] = filterPublished(songsData).map(song => ({
-                        id: song.id,
-                        title: song.title,
-                        artist: song.artists?.name || 'Unknown Artist',
-                        file_url: song.file_url,
-                        cover_url: song.cover_url || '/placeholder-music.png',
-                        duration: song.duration,
-                        artist_id: song.artist_id,
-                        album_id: song.album_id,
-                        price: song.price ?? null,
-                    }));
-                    setTrendingSongs(formattedSongs);
-                }
-
-                // Popular Artists
-                const { data: artistsData } = await supabase
-                    .from('artists')
-                    .select('*')
-                    .eq('is_verified', true)
-                    .limit(20);
-                setPopularArtists(artistsData || []);
-
-                // New Releases (Albums)
-                const { data: albumsData } = await supabase
-                    .from('albums')
-                    .select('*, artists(name)')
-                    .order('release_date', { ascending: false })
-                    .limit(10);
-                setNewReleases(albumsData || []);
-
-                // Platform Playlists (Made For You)
-                const { data: playlistData } = await supabase
-                    .from('playlists')
-                    .select('*')
-                    .eq('created_by', 'platform')
-                    .eq('is_public', true)
-                    .limit(6);
-                setPlatformPlaylists(playlistData || []);
-
-                // Artist Spotlight
-                try {
-                    const today = new Date().toISOString().split('T')[0];
-                    const { data: spotlightData } = await supabase
-                        .from('featured_artists')
-                        .select('*, artists(id, name, image_url, bio, genre)')
-                        .lte('start_date', today)
-                        .gte('end_date', today)
-                        .order('created_at', { ascending: false })
-                        .limit(1)
-                        .maybeSingle();
-                    setSpotlight(spotlightData);
-                } catch { /* featured_artists table may not exist yet */ }
-
-                // Promoted Songs (Platform Picks / Editor's Choice)
-                try {
-                    const { data: promotedData } = await supabase
-                        .from('songs')
-                        .select('*, artists(name)')
-                        .not('featured_badge', 'is', null)
-                        .order('plays', { ascending: false })
-                        .limit(10);
-                    if (promotedData && promotedData.length > 0) {
-                        setPromotedSongs(filterPublished(promotedData).map(song => ({
-                            id: song.id,
-                            title: song.title,
-                            artist: song.artists?.name || 'Unknown Artist',
-                            file_url: song.file_url,
-                            cover_url: song.cover_url || '/placeholder-music.png',
-                            duration: song.duration,
-                            artist_id: song.artist_id,
-                            album_id: song.album_id,
-                            featured_badge: song.featured_badge,
-                            price: song.price ?? null,
-                        })));
-                    }
-                } catch { /* featured_badge column may not exist yet */ }
-
-                // Recently Played + Personalized recommendations
-                if (clerkUser) {
-                    try {
-                        const { data: historyData } = await supabase
-                            .from('play_history')
-                            .select('song_id, played_at, songs(*, artists(name))')
-                            .eq('user_id', clerkUser.id)
-                            .order('played_at', { ascending: false })
-                            .limit(50);
-
-                        if (historyData) {
-                            // Deduplicate recently played
-                            const seen = new Set<string>();
-                            const unique: Song[] = [];
-                            const artistPlayCount: Record<string, number> = {};
-
-                            for (const entry of historyData) {
-                                const song = (entry as any).songs;
-                                if (song) {
-                                    if (!seen.has(song.id)) {
-                                        seen.add(song.id);
-                                        unique.push({
-                                            id: song.id,
-                                            title: song.title,
-                                            artist: song.artists?.name || 'Unknown Artist',
-                                            file_url: song.file_url,
-                                            cover_url: song.cover_url || '/placeholder-music.png',
-                                            duration: song.duration,
-                                            artist_id: song.artist_id,
-                                            album_id: song.album_id,
-                                        });
-                                    }
-                                    if (song.artist_id) {
-                                        artistPlayCount[song.artist_id] = (artistPlayCount[song.artist_id] || 0) + 1;
-                                    }
-                                }
-                            }
-                            setRecentlyPlayed(unique.slice(0, 10));
-
-                            // Build personalized mix from top 3 artists
-                            const topArtistIds = Object.entries(artistPlayCount)
-                                .sort((a, b) => b[1] - a[1])
-                                .slice(0, 3)
-                                .map(([id]) => id);
-
-                            if (topArtistIds.length > 0) {
-                                const { data: personalData } = await supabase
-                                    .from('songs')
-                                    .select('*, artists(name)')
-                                    .in('artist_id', topArtistIds)
-                                    .not('id', 'in', `(${unique.slice(0, 10).map(s => `'${s.id}'`).join(',')})`)
-                                    .order('plays', { ascending: false })
-                                    .limit(12);
-
-                                if (personalData && personalData.length > 0) {
-                                    setPersonalizedSongs(filterPublished(personalData).map(song => ({
-                                        id: song.id,
-                                        title: song.title,
-                                        artist: song.artists?.name || 'Unknown Artist',
-                                        file_url: song.file_url,
-                                        cover_url: song.cover_url || '/placeholder-music.png',
-                                        duration: song.duration,
-                                        artist_id: song.artist_id,
-                                        album_id: song.album_id,
-                                    })));
-                                }
-                            }
-                        }
-                    } catch {
-                        // Silently fail - history not critical
-                    }
-                }
-
-            } catch (error) {
-                console.error('Error fetching streams data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [clerkUser?.id, refreshKey]);
-
-    // Named daily mixes from listening history
+    // Named daily mixes from listening history (not part of the React Query
+    // rollout — this is its own independent, already-async call).
     useEffect(() => {
         if (!clerkUser) { setDailyMixes([]); return; }
         buildDailyMixes(clerkUser.id).then(setDailyMixes).catch(() => {});
-    }, [clerkUser?.id, refreshKey]);
+    }, [clerkUser?.id, refreshTick]);
 
     const handleRefresh = async () => {
-        setRefreshKey(k => k + 1);
-        await new Promise(r => setTimeout(r, 600));
+        setRefreshTick(t => t + 1);
+        await queryClient.invalidateQueries({ queryKey: ['streamsHome'] });
     };
 
     // Fetch featured artists for all displayed songs

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
@@ -14,6 +15,89 @@ import { getArtistSongIds, getMonthlyListeners } from '@/lib/artistStats';
 import { ReportContentDialog } from '@/components/streams/ReportContentDialog';
 import { filterPublished, isPublished } from '@/lib/publishFilter';
 
+// Six independent fetchers that used to run as one `await`-after-another
+// waterfall keyed only on the route :id (STREAMS_MASTER_PLAN.md §J3) — only
+// "related artists" genuinely needs the artist's data first (genre/country),
+// everything else here only ever needed the id.
+
+async function fetchArtistDetails(id: string) {
+    const { data } = await supabase.from('artists').select('*').eq('id', id).single();
+    return data;
+}
+
+async function fetchTopTracksRaw(id: string) {
+    const { data } = await supabase.from('songs').select('*, albums(title, cover_url)').eq('artist_id', id).order('plays', { ascending: false }).limit(5);
+    return data ? filterPublished(data) : [];
+}
+
+async function fetchFeaturedOnTracks(id: string): Promise<(Song & { primary_artist: string; plays: number })[]> {
+    try {
+        const { data } = await supabase
+            .from('song_artists')
+            .select('song_id, songs(id, title, file_url, cover_url, duration, plays, artist_id, album_id, status, release_date, artists(name))')
+            .eq('artist_id', id)
+            .eq('role', 'featured')
+            .order('display_order');
+        if (!data) return [];
+        return data
+            .filter((f: any) => f.songs && isPublished(f.songs))
+            .map((f: any) => ({
+                id: f.songs.id, title: f.songs.title, artist: f.songs.artists?.name || 'Unknown Artist',
+                file_url: f.songs.file_url, cover_url: f.songs.cover_url || '/placeholder-music.png',
+                duration: f.songs.duration, artist_id: f.songs.artist_id, album_id: f.songs.album_id,
+                primary_artist: f.songs.artists?.name || 'Unknown Artist', plays: f.songs.plays || 0,
+            }));
+    } catch { return []; } // §E1 junction table
+}
+
+async function fetchArtistPicksRaw(id: string): Promise<any[]> {
+    try {
+        const { data } = await supabase
+            .from('artist_picks')
+            .select('display_order, note, songs(id, title, file_url, cover_url, duration, artist_id, album_id, status, release_date, albums(title))')
+            .eq('artist_id', id)
+            .order('display_order')
+            .limit(5);
+        return (data || []).filter((p: any) => p.songs && isPublished(p.songs));
+    } catch { return []; } // artist_picks table may not exist yet
+}
+
+async function fetchArtistAlbums(id: string) {
+    const { data } = await supabase.from('albums').select('*').eq('artist_id', id).order('release_date', { ascending: false });
+    return data || [];
+}
+
+async function fetchRelatedArtists(id: string, genre?: string, country?: string) {
+    try {
+        const collected = new Map<string, any>();
+        // Tier 1: same genre + same country
+        if (genre && country) {
+            const { data } = await supabase
+                .from('artists').select('id, name, image_url, genre, country, is_verified, monthly_listeners')
+                .eq('genre', genre).eq('country', country).neq('id', id)
+                .order('monthly_listeners', { ascending: false, nullsFirst: false }).limit(6);
+            (data || []).forEach((a: any) => collected.set(a.id, a));
+        }
+        // Tier 2: same genre
+        if (collected.size < 6 && genre) {
+            const { data } = await supabase
+                .from('artists').select('id, name, image_url, genre, country, is_verified, monthly_listeners')
+                .eq('genre', genre).neq('id', id)
+                .order('monthly_listeners', { ascending: false, nullsFirst: false }).limit(6);
+            (data || []).forEach((a: any) => { if (!collected.has(a.id)) collected.set(a.id, a); });
+        }
+        // Tier 3: same country
+        if (collected.size < 6 && country) {
+            const { data } = await supabase
+                .from('artists').select('id, name, image_url, genre, country, is_verified, monthly_listeners')
+                .eq('country', country).neq('id', id)
+                .order('monthly_listeners', { ascending: false, nullsFirst: false }).limit(6);
+            (data || []).forEach((a: any) => { if (!collected.has(a.id)) collected.set(a.id, a); });
+        }
+        return Array.from(collected.values()).slice(0, 6);
+    } catch { return []; }
+}
+
 export default function ArtistPage() {
     const { id } = useParams();
     const { playAlbum, currentSong, isPlaying, togglePlay, startRadio } = useAudioPlayer();
@@ -21,174 +105,62 @@ export default function ArtistPage() {
     const [reportOpen, setReportOpen] = useState(false);
     const { user } = useUser();
     const { toast } = useToast();
-    const [artist, setArtist] = useState<any>(null);
     const [myClaim, setMyClaim] = useState<{ id: string; status: string; reviewer_notes: string | null } | null>(null);
     const [claimFormOpen, setClaimFormOpen] = useState(false);
     const [claimEvidence, setClaimEvidence] = useState('');
     const [claimSubmitting, setClaimSubmitting] = useState(false);
-    const [topTracks, setTopTracks] = useState<Song[]>([]);
-    const [featuredOnTracks, setFeaturedOnTracks] = useState<(Song & { primary_artist: string; plays: number })[]>([]);
-    const [albums, setAlbums] = useState<any[]>([]);
-    const [artistPicks, setArtistPicks] = useState<(Song & { note?: string })[]>([]);
-    const [relatedArtists, setRelatedArtists] = useState<any[]>([]);
     const [monthlyListeners, setMonthlyListeners] = useState(0);
-    const [loading, setLoading] = useState(true);
 
+    // All five of these only ever needed :id — they now fire concurrently
+    // instead of one after another. Only relatedArtists genuinely needs the
+    // artist's genre/country first, so it alone stays gated on artistQuery.
+    const artistQuery = useQuery({ queryKey: ['artistPage', 'artist', id], queryFn: () => fetchArtistDetails(id!), enabled: !!id });
+    const artist = artistQuery.data ?? null;
+    const topTracksRawQuery = useQuery({ queryKey: ['artistPage', 'topTracks', id], queryFn: () => fetchTopTracksRaw(id!), enabled: !!id });
+    const featuredOnQuery = useQuery({ queryKey: ['artistPage', 'featuredOn', id], queryFn: () => fetchFeaturedOnTracks(id!), enabled: !!id });
+    const artistPicksRawQuery = useQuery({ queryKey: ['artistPage', 'picks', id], queryFn: () => fetchArtistPicksRaw(id!), enabled: !!id });
+    const albumsQuery = useQuery({ queryKey: ['artistPage', 'albums', id], queryFn: () => fetchArtistAlbums(id!), enabled: !!id });
+    const relatedArtistsQuery = useQuery({
+        queryKey: ['artistPage', 'related', id, artist?.genre, artist?.country],
+        queryFn: () => fetchRelatedArtists(id!, artist?.genre, artist?.country),
+        enabled: !!id && !!artist,
+    });
+
+    const topTracks: Song[] = (topTracksRawQuery.data ?? []).map((song: any) => ({
+        id: song.id,
+        title: song.title,
+        artist: artist?.name || 'Unknown Artist',
+        file_url: song.file_url,
+        cover_url: song.cover_url || song.albums?.cover_url || '/placeholder-music.png',
+        duration: song.duration,
+        artist_id: song.artist_id,
+        album_id: song.album_id,
+        album_title: song.albums?.title,
+        plays: song.plays || 0,
+    }));
+    const featuredOnTracks = featuredOnQuery.data ?? [];
+    const albums = albumsQuery.data ?? [];
+    const relatedArtists = relatedArtistsQuery.data ?? [];
+    const artistPicks: (Song & { note?: string })[] = (artistPicksRawQuery.data ?? []).map((p: any) => ({
+        id: p.songs.id,
+        title: p.songs.title,
+        artist: artist?.name || 'Unknown Artist',
+        file_url: p.songs.file_url,
+        cover_url: p.songs.cover_url || '/placeholder-music.png',
+        duration: p.songs.duration,
+        artist_id: p.songs.artist_id,
+        album_id: p.songs.album_id,
+        album_title: p.songs.albums?.title,
+        note: p.note,
+    }));
+    const loading = artistQuery.isLoading;
+
+    // Real monthly listeners: distinct users who played any of this artist's
+    // songs in the last 30 days (no estimated/fake number) — independent of
+    // the queries above, so left as its own effect.
     useEffect(() => {
         if (!id) return;
-
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-
-                // Fetch Artist Details
-                const { data: artistData } = await supabase
-                    .from('artists')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
-                setArtist(artistData);
-
-                // Real monthly listeners: distinct users who played any of this
-                // artist's songs in the last 30 days (no estimated/fake number).
-                getArtistSongIds(id)
-                    .then(getMonthlyListeners)
-                    .then(setMonthlyListeners)
-                    .catch(() => {});
-
-                // Fetch Top Tracks (by plays)
-                const { data: songsData } = await supabase
-                    .from('songs')
-                    .select('*, albums(title, cover_url)')
-                    .eq('artist_id', id)
-                    .order('plays', { ascending: false })
-                    .limit(5);
-
-                if (songsData) {
-                    const formattedSongs = filterPublished(songsData).map(song => ({
-                        id: song.id,
-                        title: song.title,
-                        artist: artistData?.name || 'Unknown Artist',
-                        file_url: song.file_url,
-                        cover_url: song.cover_url || song.albums?.cover_url || '/placeholder-music.png',
-                        duration: song.duration,
-                        artist_id: song.artist_id,
-                        album_id: song.album_id,
-                        album_title: song.albums?.title,
-                        plays: song.plays || 0,
-                    }));
-                    setTopTracks(formattedSongs);
-                }
-
-                // Fetch songs this artist is featured on
-                try {
-                    const { data: featuredData } = await supabase
-                        .from('song_artists')
-                        .select('song_id, songs(id, title, file_url, cover_url, duration, plays, artist_id, album_id, status, release_date, artists(name))')
-                        .eq('artist_id', id)
-                        .eq('role', 'featured')
-                        .order('display_order');
-                    if (featuredData) {
-                        const formatted = featuredData
-                            .filter((f: any) => f.songs && isPublished(f.songs))
-                            .map((f: any) => ({
-                                id: f.songs.id,
-                                title: f.songs.title,
-                                artist: f.songs.artists?.name || 'Unknown Artist',
-                                file_url: f.songs.file_url,
-                                cover_url: f.songs.cover_url || '/placeholder-music.png',
-                                duration: f.songs.duration,
-                                artist_id: f.songs.artist_id,
-                                album_id: f.songs.album_id,
-                                primary_artist: f.songs.artists?.name || 'Unknown Artist',
-                                plays: f.songs.plays || 0,
-                            }));
-                        setFeaturedOnTracks(formatted);
-                    }
-                } catch (err) { console.error('Failed to load featured-on songs:', err); }
-
-                // Fetch Artist Picks
-                try {
-                    const { data: picksData } = await supabase
-                        .from('artist_picks')
-                        .select('display_order, note, songs(id, title, file_url, cover_url, duration, artist_id, album_id, status, release_date, albums(title))')
-                        .eq('artist_id', id)
-                        .order('display_order')
-                        .limit(5);
-                    if (picksData) {
-                        setArtistPicks(picksData.filter((p: any) => p.songs && isPublished(p.songs)).map((p: any) => ({
-                            id: p.songs.id,
-                            title: p.songs.title,
-                            artist: artistData?.name || 'Unknown Artist',
-                            file_url: p.songs.file_url,
-                            cover_url: p.songs.cover_url || '/placeholder-music.png',
-                            duration: p.songs.duration,
-                            artist_id: p.songs.artist_id,
-                            album_id: p.songs.album_id,
-                            album_title: p.songs.albums?.title,
-                            note: p.note,
-                        })));
-                    }
-                } catch { /* artist_picks table may not exist yet */ }
-
-                // Fetch Albums
-                const { data: albumsData } = await supabase
-                    .from('albums')
-                    .select('*')
-                    .eq('artist_id', id)
-                    .order('release_date', { ascending: false });
-                setAlbums(albumsData || []);
-
-                // Fetch related artists ("Fans also like")
-                try {
-                    const collected = new Map<string, any>();
-                    // Tier 1: same genre + same country
-                    if (artistData?.genre && artistData?.country) {
-                        const { data } = await supabase
-                            .from('artists')
-                            .select('id, name, image_url, genre, country, is_verified, monthly_listeners')
-                            .eq('genre', artistData.genre)
-                            .eq('country', artistData.country)
-                            .neq('id', id)
-                            .order('monthly_listeners', { ascending: false, nullsFirst: false })
-                            .limit(6);
-                        (data || []).forEach((a: any) => collected.set(a.id, a));
-                    }
-                    // Tier 2: same genre
-                    if (collected.size < 6 && artistData?.genre) {
-                        const { data } = await supabase
-                            .from('artists')
-                            .select('id, name, image_url, genre, country, is_verified, monthly_listeners')
-                            .eq('genre', artistData.genre)
-                            .neq('id', id)
-                            .order('monthly_listeners', { ascending: false, nullsFirst: false })
-                            .limit(6);
-                        (data || []).forEach((a: any) => { if (!collected.has(a.id)) collected.set(a.id, a); });
-                    }
-                    // Tier 3: same country
-                    if (collected.size < 6 && artistData?.country) {
-                        const { data } = await supabase
-                            .from('artists')
-                            .select('id, name, image_url, genre, country, is_verified, monthly_listeners')
-                            .eq('country', artistData.country)
-                            .neq('id', id)
-                            .order('monthly_listeners', { ascending: false, nullsFirst: false })
-                            .limit(6);
-                        (data || []).forEach((a: any) => { if (!collected.has(a.id)) collected.set(a.id, a); });
-                    }
-                    setRelatedArtists(Array.from(collected.values()).slice(0, 6));
-                } catch (err) {
-                    console.error('Error fetching related artists:', err);
-                }
-
-            } catch (error) {
-                console.error('Error fetching artist data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+        getArtistSongIds(id).then(getMonthlyListeners).then(setMonthlyListeners).catch(() => {});
     }, [id]);
 
     // §E1 — is this an unclaimed (admin-seeded) artist, and has the current
