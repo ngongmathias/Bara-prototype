@@ -43,7 +43,7 @@ async function fetchFeaturedArtistsMap(songIds: string[]): Promise<Record<string
 export default function StreamsHome() {
     const { toast } = useToast();
     const navigate = useNavigate();
-    const { play, currentSong, isPlaying, playAlbum } = useAudioPlayer();
+    const { play, currentSong, isPlaying, playAlbum, startRadio } = useAudioPlayer();
     const { user: clerkUser } = useUser();
     const [trendingSongs, setTrendingSongs] = useState<Song[]>([]);
     const [popularArtists, setPopularArtists] = useState<any[]>([]);
@@ -279,6 +279,27 @@ export default function StreamsHome() {
         } catch (error) { console.error('Error playing artist top song:', error); }
     };
 
+    const handlePlayArtistRadio = async (artistId: string) => {
+        try {
+            const { data: songsData } = await supabase
+                .from('songs')
+                .select('*, artists(name)')
+                .eq('artist_id', artistId)
+                .order('plays', { ascending: false })
+                .limit(1);
+            if (songsData && songsData.length > 0) {
+                const song = songsData[0];
+                startRadio({
+                    id: song.id, title: song.title,
+                    artist: song.artists?.name || 'Unknown Artist',
+                    file_url: song.file_url, cover_url: song.cover_url || '/placeholder-music.png',
+                    duration: song.duration,
+                    artist_id: song.artist_id,
+                });
+            }
+        } catch (error) { console.error('Error starting artist radio:', error); }
+    };
+
     const handlePlayPlaylist = async (playlistId: string) => {
         try {
             const { data: playlistSongsData } = await supabase
@@ -449,7 +470,7 @@ export default function StreamsHome() {
                                                     loading="lazy" src={song.cover_url}
                                                     alt={song.title}
                                                     className="w-full h-full object-cover rounded-md shadow-lg"
-                                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }}
+                                                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }}
                                                 />
                                                 {song.featured_badge && (
                                                     <div className={`absolute top-2 left-2 text-[9px] font-black px-2 py-0.5 rounded-full ${getBadgeStyle(song.featured_badge)}`}>
@@ -479,7 +500,7 @@ export default function StreamsHome() {
                                     dailyMixes.map(mix => (
                                         <div key={mix.id} onClick={() => playAlbum(mix.songs, 0)} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-sm">
                                             <div className="relative mb-4 aspect-square rounded-md overflow-hidden shadow-lg">
-                                                <img loading="lazy" src={mix.cover_url} alt={mix.subtitle} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
+                                                <img loading="lazy" src={mix.cover_url} alt={mix.subtitle} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }} />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                                                 <div className="absolute bottom-2 left-3 right-3">
                                                     <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">Daily Mix</p>
@@ -496,7 +517,7 @@ export default function StreamsHome() {
                                         <div key={pl.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
                                                 <img loading="lazy" src={pl.cover_url} alt={pl.title} className="w-full h-full object-cover rounded-md shadow-xl"
-                                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
+                                                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-playlist.png'; }} />
                                                 <button onClick={() => handlePlayPlaylist(pl.id)}
                                                     className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
                                                     <Play size={24} fill="white" className="ml-1" />
@@ -536,7 +557,7 @@ export default function StreamsHome() {
                                         <div key={song.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
                                                 <img loading="lazy" src={song.cover_url} alt={song.title} className="w-full h-full object-cover rounded-md shadow-lg"
-                                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
+                                                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }} />
                                                 <div className="absolute top-2 left-2 bg-gray-900 text-white text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
                                                     <Sparkles size={8} /> For You
                                                 </div>
@@ -562,7 +583,7 @@ export default function StreamsHome() {
                                         <div key={song.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
                                                 <img loading="lazy" src={song.cover_url} alt={song.title} className="w-full h-full object-cover rounded-md shadow-lg"
-                                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
+                                                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }} />
                                                 <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                                                     <Clock size={10} /> Played
                                                 </div>
@@ -594,7 +615,7 @@ export default function StreamsHome() {
                                         <div key={song.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
                                                 <img loading="lazy" src={song.cover_url} alt={song.title} className="w-full h-full object-cover rounded-md shadow-lg"
-                                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
+                                                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }} />
                                                 <button onClick={(e) => { e.stopPropagation(); handlePlaySong(song); }}
                                                     className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
                                                     {currentSong?.id === song.id && isPlaying ? <Pause size={24} fill="white" /> : <Play size={24} fill="white" className="ml-1" />}
@@ -622,7 +643,7 @@ export default function StreamsHome() {
                                             <div className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 w-full text-center">
                                                 <div className="relative mb-4 aspect-square shadow-2xl">
                                                     <img loading="lazy" src={artist.image_url} alt={artist.name} className="w-full h-full object-cover rounded-full shadow-lg"
-                                                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop'; }} />
+                                                        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-artist.png'; }} />
                                                     <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePlayArtist(artist.id); }}
                                                         className="absolute bottom-6 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
                                                         <Play size={24} fill="white" className="ml-1" />
@@ -645,7 +666,7 @@ export default function StreamsHome() {
                                         <Link to={`/streams/album/${album.id}`} key={album.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
                                             <div className="relative mb-4 aspect-square shadow-2xl">
                                                 <img loading="lazy" src={album.cover_url} alt={album.title} className="w-full h-full object-cover rounded-md shadow-lg"
-                                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&h=300&fit=crop'; }} />
+                                                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-album.png'; }} />
                                                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePlayAlbum(album.id); }}
                                                     className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
                                                     <Play size={24} fill="white" className="ml-1" />
@@ -660,31 +681,21 @@ export default function StreamsHome() {
                                 )}
                             </Section>
 
-                            {/* Popular Radio */}
-                            <Section title="Popular radio" showAllLink="/streams/search?q=radio">
-                                {[
-                                    { id: 'r1', title: 'Mike Kayihura', images: ['https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=200&h=200&fit=crop'], color: 'bg-gray-800', footer: 'With Andy Bumuntu, Yvan Buravan, Igor...' },
-                                    { id: 'r2', title: 'Kivumbi King', images: ['https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-gray-700', footer: 'With Amalon, Nel Ngabo, Ish Kevin and more' },
-                                    { id: 'r3', title: 'The Ben', images: ['https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-gray-900', footer: 'With Meddy, Bruce Melodie, Christopher...' },
-                                    { id: 'r4', title: 'Bruce Melodie', images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1514525253361-bee8a19740c1?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1459749411177-042180ce673c?w=200&h=200&fit=crop'], color: 'bg-gray-600', footer: 'With Davis D, Chriss Eazy, Juno Kizigenza and more' },
-                                    { id: 'r5', title: 'Rema', images: ['https://plus.unsplash.com/premium_photo-1661601614051-9e7978280628?w=300&h=300&fit=crop', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&h=200&fit=crop', 'https://images.unsplash.com/photo-1520127873598-d22ecf253289?w=200&h=200&fit=crop'], color: 'bg-gray-700', footer: 'With Shallipopi, ODUMODUBLVCK, Kizz...' }
-                                ].map(radio => (
-                                    <RadioCard key={radio.id} {...radio} />
-                                ))}
-                            </Section>
-
-                            {/* Featured Charts */}
-                            <Section title="Featured Charts" showAllLink="/streams/trending">
-                                {[
-                                    { id: 'c1', title: 'Top Songs Africa', type: 'Weekly Music Charts', gradient: 'from-gray-900 to-gray-700', footer: 'Your weekly update of the most played tracks...' },
-                                    { id: 'c2', title: 'Top Songs Nigeria', type: 'Weekly Music Charts', gradient: 'from-gray-800 to-gray-600', footer: 'Your weekly update of the most played tracks...' },
-                                    { id: 'c3', title: 'Top 50 Africa', type: 'Daily Update', gradient: 'from-gray-700 to-gray-500', footer: 'Your daily update of the most played tracks right...' },
-                                    { id: 'c4', title: 'Top 50 South Africa', type: 'Daily Update', gradient: 'from-gray-800 to-gray-600', footer: 'Your daily update of the most played tracks right...' },
-                                    { id: 'c5', title: 'Viral 50 Africa', type: 'Daily Update', gradient: 'from-gray-600 to-gray-400', footer: 'Your daily update of the most viral tracks right...' }
-                                ].map(chart => (
-                                    <ChartCard key={chart.id} {...chart} />
-                                ))}
-                            </Section>
+                            {/* Popular Radio — seeded from real popular artists, wired to startRadio */}
+                            {popularArtists.length > 0 && (
+                                <Section title="Popular radio" showAllLink="/streams/artists">
+                                    {popularArtists.slice(0, 5).map(artist => (
+                                        <RadioCard
+                                            key={artist.id}
+                                            title={artist.name}
+                                            images={[artist.image_url || '/placeholder-artist.png', artist.image_url || '/placeholder-artist.png', artist.image_url || '/placeholder-artist.png']}
+                                            color="bg-gray-800"
+                                            footer={artist.genre ? `${artist.genre} radio, based on ${artist.name}` : `Radio based on ${artist.name}`}
+                                            onPlay={() => handlePlayArtistRadio(artist.id)}
+                                        />
+                                    ))}
+                                </Section>
+                            )}
                         </div>
                     )}
                 </main>
@@ -707,7 +718,7 @@ function QuickAccessTile({ title, gradient, icon, to }: { title: string; gradien
     );
 }
 
-function RadioCard({ title, images, color, footer }: { title: string; images: string[]; color: string; footer: string }) {
+function RadioCard({ title, images, color, footer, onPlay }: { title: string; images: string[]; color: string; footer: string; onPlay: () => void }) {
     return (
         <div className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
             <div className={`relative mb-4 aspect-square shadow-2xl rounded-md overflow-hidden ${color}`}>
@@ -720,33 +731,15 @@ function RadioCard({ title, images, color, footer }: { title: string; images: st
                 <div className="absolute bottom-4 left-4 right-4">
                     <h3 className="text-xl font-black text-white leading-tight tracking-tighter truncate">{title}</h3>
                 </div>
-                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20" aria-label="Play"><Play size={24} fill="white" className="ml-1" /></button>
+                <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onPlay(); }}
+                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20"
+                    aria-label="Play radio"
+                >
+                    <Play size={24} fill="white" className="ml-1" />
+                </button>
             </div>
             <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{title} Radio</h3>
-            <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">{footer}</p>
-        </div>
-    );
-}
-
-function ChartCard({ title, type, gradient, footer }: { title: string; type: string; gradient: string; footer: string }) {
-    return (
-        <div className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start">
-            <div className={`relative mb-4 aspect-square shadow-2xl rounded-md overflow-hidden bg-gradient-to-br ${gradient}`}>
-                <div className="absolute top-4 left-4">
-                    <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center">
-                        <div className="w-3 h-3 bg-white rounded-full rotate-45" />
-                    </div>
-                </div>
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                    <h4 className="text-3xl font-black text-white leading-none tracking-tighter mb-2 overflow-hidden break-words">{title.split(' ').join('\n')}</h4>
-                </div>
-                <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2">
-                    <div className="h-4 w-[2px] bg-white/40" />
-                    <span className="text-[10px] font-bold text-white uppercase tracking-widest opacity-80">{type}</span>
-                </div>
-                <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-20" aria-label="Play"><Play size={24} fill="white" className="ml-1" /></button>
-            </div>
-            <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{title}</h3>
             <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">{footer}</p>
         </div>
     );

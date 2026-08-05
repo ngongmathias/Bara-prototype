@@ -172,7 +172,7 @@ function GenreDetail({ genre, slug }: { genre?: Genre; slug: string }) {
                     <div key={song.id} className="group flex flex-col">
                       <div className="relative mb-3 aspect-square">
                         <img src={song.cover_url} alt={song.title} loading="lazy" className="w-full h-full object-cover rounded-md shadow-md"
-                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop'; }} />
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-music.png'; }} />
                         <button
                           onClick={() => { if (active) { togglePlay(); } else { playAlbum(songs, i); } }}
                           className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all hover:scale-105 active:scale-95"
