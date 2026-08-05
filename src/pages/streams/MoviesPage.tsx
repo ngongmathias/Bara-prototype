@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { SEO } from '@/components/SEO';
-import { Play, Star, Clock, Filter, Search, ChevronRight, TrendingUp, Eye, Share2 } from 'lucide-react';
+import { Play, Star, Clock, Filter, Search, ChevronRight, ChevronDown, TrendingUp, Eye, Share2, Plus, Check } from 'lucide-react';
 import { SkeletonCard } from '@/components/animations/SkeletonCard';
 import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import { DiscoverMore } from '@/components/DiscoverMore';
 import { supabase } from '@/lib/supabase';
 import { useShare } from '@/context/ShareContext';
@@ -60,18 +61,62 @@ const formatDuration = (minutes: number) => {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 };
 
+type SortMode = 'popular' | 'newest' | 'rating';
+
 export default function MoviesPage() {
   const navigate = useNavigate();
   const { openShare } = useShare();
+  const { user: clerkUser } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [movies, setMovies] = useState<Movie[]>([]);
   const [categories, setCategories] = useState<MovieCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [usingFallback, setUsingFallback] = useState(false);
+  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>('popular');
+  const [freeOnly, setFreeOnly] = useState(false);
+  const [showAllTrending, setShowAllTrending] = useState(false);
+  const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
+  const [watchlistMovies, setWatchlistMovies] = useState<Movie[]>([]);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (clerkUser?.id) fetchWatchlist();
+    else { setWatchlistIds(new Set()); setWatchlistMovies([]); }
+  }, [clerkUser?.id]);
+
+  const fetchWatchlist = async () => {
+    const { data } = await supabase
+      .from('movie_watchlist')
+      .select('added_at, movies(*)')
+      .eq('user_id', clerkUser!.id)
+      .order('added_at', { ascending: false });
+    const rows = ((data as any) || []).filter((r: any) => r.movies);
+    setWatchlistIds(new Set(rows.map((r: any) => r.movies.id)));
+    setWatchlistMovies(rows.map((r: any) => r.movies));
+  };
+
+  const toggleWatchlist = async (movieId: string) => {
+    if (!clerkUser?.id) return;
+    const isIn = watchlistIds.has(movieId);
+    setWatchlistIds(prev => {
+      const next = new Set(prev);
+      if (isIn) next.delete(movieId); else next.add(movieId);
+      return next;
+    });
+    if (isIn) {
+      await supabase.from('movie_watchlist').delete().eq('user_id', clerkUser.id).eq('movie_id', movieId);
+      setWatchlistMovies(prev => prev.filter(m => m.id !== movieId));
+    } else {
+      await supabase.from('movie_watchlist').insert({ user_id: clerkUser.id, movie_id: movieId });
+      const added = movies.find(m => m.id === movieId);
+      if (added) setWatchlistMovies(prev => [added, ...prev]);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -109,10 +154,26 @@ export default function MoviesPage() {
 
   const featuredMovies = movies.filter(m => m.is_featured);
   const featured = featuredMovies[0] || movies[0];
-  const trendingMovies = [...movies].sort((a, b) => b.view_count - a.view_count).slice(0, 10);
-  const filteredMovies = searchQuery
-    ? movies.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()) || m.genre?.toLowerCase().includes(searchQuery.toLowerCase()))
-    : movies;
+  const allTrending = [...movies].sort((a, b) => b.view_count - a.view_count);
+  const trendingMovies = showAllTrending ? allTrending : allTrending.slice(0, 10);
+
+  const isFiltering = !!searchQuery || !!selectedGenre || freeOnly;
+  const displayedMovies = useMemo(() => {
+    let result = searchQuery
+      ? movies.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()) || m.genre?.toLowerCase().includes(searchQuery.toLowerCase()))
+      : isFiltering ? movies : (featuredMovies.length > 0 ? featuredMovies : movies.slice(0, 6));
+
+    if (selectedGenre) result = result.filter(m => m.genre?.toLowerCase() === selectedGenre.toLowerCase());
+    if (freeOnly) result = result.filter(m => m.is_free);
+
+    result = [...result];
+    switch (sortMode) {
+      case 'popular': result.sort((a, b) => (b.view_count || 0) - (a.view_count || 0)); break;
+      case 'newest': result.sort((a, b) => (b.year || 0) - (a.year || 0)); break;
+      case 'rating': result.sort((a, b) => (b.rating || 0) - (a.rating || 0)); break;
+    }
+    return result;
+  }, [movies, searchQuery, selectedGenre, freeOnly, sortMode, isFiltering, featuredMovies]);
 
   return (
     <StreamsLayout>
@@ -168,11 +229,20 @@ export default function MoviesPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold px-6 py-3 rounded-lg transition-colors" aria-label="Play"><Play className="w-5 h-5" fill="white" /> Watch Now
+                    <button onClick={() => navigate(`/streams/movie/${featured.id}/watch`)} className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold px-6 py-3 rounded-lg transition-colors" aria-label="Play"><Play className="w-5 h-5" fill="white" /> Watch Now
                     </button>
-                    <button className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-bold px-6 py-3 rounded-lg transition-colors backdrop-blur-sm">
+                    <button onClick={() => navigate(`/streams/movie/${featured.id}`)} className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-bold px-6 py-3 rounded-lg transition-colors backdrop-blur-sm">
                       More Info
                     </button>
+                    {clerkUser && (
+                      <button
+                        onClick={() => toggleWatchlist(featured.id)}
+                        className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-bold px-4 py-3 rounded-lg transition-colors backdrop-blur-sm"
+                        aria-label="Add to My List"
+                      >
+                        {watchlistIds.has(featured.id) ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -180,7 +250,7 @@ export default function MoviesPage() {
 
             <main className="p-4 sm:p-8 max-w-[1400px] mx-auto space-y-12">
               {/* Search */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 relative">
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
@@ -191,27 +261,82 @@ export default function MoviesPage() {
                     className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                   />
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
-                  <Filter className="w-4 h-4" /> Filters
+                <button
+                  onClick={() => setShowFilters(v => !v)}
+                  className={`flex items-center gap-2 px-4 py-2.5 border rounded-lg text-sm font-medium transition ${showFilters || sortMode !== 'popular' || freeOnly ? 'bg-gray-900 text-white border-gray-900' : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'}`}
+                >
+                  <Filter className="w-4 h-4" /> Filters <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
                 </button>
+                {showFilters && (
+                  <div className="absolute right-0 top-full mt-2 z-10 bg-white border border-gray-200 rounded-xl shadow-lg p-4 w-64 space-y-4">
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Sort By</p>
+                      <div className="flex flex-col gap-1">
+                        {(['popular', 'newest', 'rating'] as SortMode[]).map((mode) => (
+                          <button
+                            key={mode}
+                            onClick={() => setSortMode(mode)}
+                            className={`text-left text-sm px-3 py-1.5 rounded-lg transition ${sortMode === mode ? 'bg-gray-900 text-white font-bold' : 'text-gray-600 hover:bg-gray-100'}`}
+                          >
+                            {mode === 'popular' ? 'Most Popular' : mode === 'newest' ? 'Newest' : 'Top Rated'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                      <input type="checkbox" checked={freeOnly} onChange={(e) => setFreeOnly(e.target.checked)} />
+                      Free titles only
+                    </label>
+                  </div>
+                )}
               </div>
 
               {/* Categories */}
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">Browse by Genre</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {categories.map((cat) => (
-                    <div key={cat.id} className="group relative rounded-xl overflow-hidden cursor-pointer aspect-[16/10]">
-                      <img loading="lazy" src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=250&fit=crop'; }} />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-3">
-                        <h3 className="text-white font-bold text-sm">{cat.name}</h3>
-                        <p className="text-gray-300 text-xs">{cat.description}</p>
+                  {categories.map((cat) => {
+                    const isActive = selectedGenre?.toLowerCase() === cat.name.toLowerCase();
+                    return (
+                      <div
+                        key={cat.id}
+                        onClick={() => setSelectedGenre(isActive ? null : cat.name)}
+                        className={`group relative rounded-xl overflow-hidden cursor-pointer aspect-[16/10] ${isActive ? 'ring-2 ring-gray-900' : ''}`}
+                      >
+                        <img loading="lazy" src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=250&fit=crop'; }} />
+                        <div className={`absolute inset-0 bg-gradient-to-t ${isActive ? 'from-gray-900/90' : 'from-black/80'} to-transparent`} />
+                        <div className="absolute bottom-0 left-0 right-0 p-3">
+                          <h3 className="text-white font-bold text-sm">{cat.name}</h3>
+                          <p className="text-gray-300 text-xs">{cat.description}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
+
+              {/* My List */}
+              {watchlistMovies.length > 0 && (
+                <section>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">My List</h2>
+                  <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 snap-x -mx-2 px-2">
+                    {watchlistMovies.map((movie) => (
+                      <div key={movie.id} onClick={() => navigate(`/streams/movie/${movie.id}`)} className="group flex-shrink-0 w-[140px] snap-start cursor-pointer">
+                        <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-2 shadow-md">
+                          <img
+                            loading="lazy" src={movie.poster_url}
+                            alt={movie.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop'; }}
+                          />
+                        </div>
+                        <p className="font-semibold text-gray-900 text-sm truncate">{movie.title}</p>
+                        <p className="text-xs text-gray-500">{movie.year} · {movie.genre}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {/* Trending */}
               <section>
@@ -220,12 +345,12 @@ export default function MoviesPage() {
                     <TrendingUp className="w-5 h-5 text-gray-900" />
                     <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Trending Now</h2>
                   </div>
-                  <button className="text-sm font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1">
-                    See all <ChevronRight className="w-4 h-4" /></button>
+                  <button onClick={() => setShowAllTrending(v => !v)} className="text-sm font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1">
+                    {showAllTrending ? 'Show less' : 'See all'} <ChevronRight className={`w-4 h-4 transition-transform ${showAllTrending ? '-rotate-90' : ''}`} /></button>
                 </div>
-                <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 snap-x -mx-2 px-2">
+                <div className={showAllTrending ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" : "flex overflow-x-auto scrollbar-hide gap-4 pb-4 snap-x -mx-2 px-2"}>
                   {trendingMovies.map((movie) => (
-                    <div key={movie.id} onClick={() => navigate(`/streams/movie/${movie.id}`)} className="group flex-shrink-0 w-[160px] sm:w-[180px] snap-start cursor-pointer">
+                    <div key={movie.id} onClick={() => navigate(`/streams/movie/${movie.id}`)} className={`group snap-start cursor-pointer ${showAllTrending ? '' : 'flex-shrink-0 w-[160px] sm:w-[180px]'}`}>
                       <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 shadow-lg">
                         <img
                           loading="lazy" src={movie.poster_url}
@@ -234,13 +359,22 @@ export default function MoviesPage() {
                           onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop'; }}
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                          <button className="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-xl" aria-label="Play"><Play className="w-5 h-5 ml-0.5" fill="white" /></button>
+                          <button onClick={(e) => { e.stopPropagation(); navigate(`/streams/movie/${movie.id}/watch`); }} className="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-xl" aria-label="Play"><Play className="w-5 h-5 ml-0.5" fill="white" /></button>
                         </div>
                         <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                           <Star className="w-3 h-3 text-white" fill="currentColor" /> {movie.rating}
                         </div>
                         {movie.is_free && (
                           <div className="absolute top-2 left-2 bg-gray-900 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">FREE</div>
+                        )}
+                        {clerkUser && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleWatchlist(movie.id); }}
+                            className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                            aria-label="Toggle My List"
+                          >
+                            {watchlistIds.has(movie.id) ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                          </button>
                         )}
                       </div>
                       <h3 className="font-bold text-gray-900 text-sm truncate">{movie.title}</h3>
@@ -253,11 +387,16 @@ export default function MoviesPage() {
 
               {/* All Movies / Search Results */}
               <section>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">
-                  {searchQuery ? `Results for "${searchQuery}"` : "Editor's Picks"}
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                    {searchQuery ? `Results for "${searchQuery}"` : selectedGenre ? `${selectedGenre} Movies` : "Editor's Picks"}
+                  </h2>
+                  {selectedGenre && !searchQuery && (
+                    <button onClick={() => setSelectedGenre(null)} className="text-sm font-bold text-gray-500 hover:text-gray-900">Clear genre</button>
+                  )}
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {(searchQuery ? filteredMovies : featuredMovies.length > 0 ? featuredMovies : movies.slice(0, 6)).map((movie) => (
+                  {displayedMovies.map((movie) => (
                     <div key={movie.id} onClick={() => navigate(`/streams/movie/${movie.id}`)} className="group bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
                       <div className="relative aspect-video overflow-hidden">
                         <img
@@ -267,10 +406,19 @@ export default function MoviesPage() {
                           onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&h=600&fit=crop'; }}
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                          <button className="w-14 h-14 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-xl" aria-label="Play"><Play className="w-6 h-6 ml-0.5" fill="white" /></button>
+                          <button onClick={(e) => { e.stopPropagation(); navigate(`/streams/movie/${movie.id}/watch`); }} className="w-14 h-14 rounded-full bg-gray-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-xl" aria-label="Play"><Play className="w-6 h-6 ml-0.5" fill="white" /></button>
                         </div>
                         {movie.is_free && (
                           <div className="absolute top-2 left-2 bg-gray-900 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">FREE</div>
+                        )}
+                        {clerkUser && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleWatchlist(movie.id); }}
+                            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                            aria-label="Toggle My List"
+                          >
+                            {watchlistIds.has(movie.id) ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                          </button>
                         )}
                       </div>
                       <div className="p-4">
@@ -309,10 +457,10 @@ export default function MoviesPage() {
                     </div>
                   ))}
                 </div>
-                {searchQuery && filteredMovies.length === 0 && (
+                {displayedMovies.length === 0 && (
                   <div className="text-center py-12 text-gray-500">
-                    <p className="text-lg font-semibold">No movies found for "{searchQuery}"</p>
-                    <p className="text-sm mt-1">Try a different search term</p>
+                    <p className="text-lg font-semibold">{searchQuery ? `No movies found for "${searchQuery}"` : 'No movies match these filters'}</p>
+                    <p className="text-sm mt-1">Try a different search term or filter</p>
                   </div>
                 )}
               </section>
