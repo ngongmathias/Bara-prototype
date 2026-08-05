@@ -3,6 +3,7 @@ import { Music, Film, BookOpen, Headphones, Gamepad2, ArrowRight, Sparkles } fro
 import { MainLayout } from '@/components/layout/MainLayout';
 import { SEO } from '@/components/SEO';
 import { DiscoverMore } from '@/components/DiscoverMore';
+import { JumpBackInRail } from '@/components/streams/JumpBackInRail';
 
 const STREAM_CATEGORIES = [
   {
@@ -97,6 +98,7 @@ export default function StreamsHub() {
 
         {/* Category Cards */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-12 relative z-10 pb-16">
+          <JumpBackInRail />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {STREAM_CATEGORIES.map((cat) => {
               const Icon = cat.icon;

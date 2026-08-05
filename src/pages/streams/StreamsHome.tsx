@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { SEO } from '@/components/SEO';
 import { DiscoverMore } from '@/components/DiscoverMore';
+import { JumpBackInRail } from '@/components/streams/JumpBackInRail';
 import { useUser } from '@clerk/clerk-react';
 import { GENRES } from './GenrePage';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
@@ -376,6 +377,8 @@ export default function StreamsHome() {
                         </div>
                     ) : (
                         <div className="space-y-8 sm:space-y-12">
+                            <JumpBackInRail />
+
                             {/* Quick Access Tiles */}
                             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                                 <QuickAccessTile title="Liked Songs" gradient="from-gray-700 to-gray-800" icon="💜" to="/streams/liked" />
