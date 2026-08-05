@@ -5,15 +5,16 @@ import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { Play, Pause, Heart, Share2, ArrowLeft, Music, Clock, Disc } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { ShareDialog } from '@/components/ShareDialog';
+import { useShare } from '@/context/ShareContext';
+import { SEO } from '@/components/SEO';
 
 export default function SongPage() {
     const { id } = useParams<{ id: string }>();
     const { playAlbum, currentSong, isPlaying, togglePlay, toggleLike, likedSongs } = useAudioPlayer();
+    const { openShare } = useShare();
     const [song, setSong] = useState<Song | null>(null);
     const [credits, setCredits] = useState<{ role: string; name: string; artist_id: string }[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showShare, setShowShare] = useState(false);
     const { toast } = useToast();
 
     const mapSong = (s: any): Song => ({
@@ -109,7 +110,15 @@ export default function SongPage() {
         }
     };
 
-    const handleShare = () => setShowShare(true);
+    const handleShare = () => {
+        if (!song) return;
+        openShare({
+            url: `${window.location.origin}/streams/song/${song.id}`,
+            title: song.title,
+            description: `By ${song.artist} — listen on Bara Streams`,
+            imageUrl: song.cover_url,
+        });
+    };
 
     const isCurrentSong = currentSong?.id === id;
     const isLiked = song ? likedSongs.includes(song.id) : false;
@@ -140,6 +149,14 @@ export default function SongPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+            <SEO
+                title={song.title}
+                description={`Listen to ${song.title} by ${song.artist} on Bara Streams`}
+                image={song.cover_url}
+                url={`/streams/song/${song.id}`}
+                type="music.song"
+                keywords={[song.title, song.artist, 'Bara Streams']}
+            />
             <div className="max-w-2xl mx-auto px-4 py-8">
                 {/* Back */}
                 <Link to="/streams" className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition">
@@ -217,17 +234,6 @@ export default function SongPage() {
                     )}
                 </div>
             </div>
-
-            {song && (
-                <ShareDialog
-                    open={showShare}
-                    onClose={() => setShowShare(false)}
-                    url={`${window.location.origin}/streams/song/${song.id}`}
-                    title={song.title}
-                    description={`By ${song.artist} — listen on Bara Streams`}
-                    imageUrl={song.cover_url}
-                />
-            )}
         </div>
     );
 }
