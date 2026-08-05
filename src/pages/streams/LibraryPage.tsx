@@ -11,7 +11,7 @@ import { useUser } from '@clerk/clerk-react';
 
 interface LibraryItem {
     id: string;
-    type: 'playlist' | 'artist' | 'album' | 'podcast';
+    type: 'playlist' | 'artist' | 'album' | 'podcast' | 'movie';
     title: string;
     subtitle: string;
     image_url: string;
@@ -20,7 +20,7 @@ interface LibraryItem {
 export default function LibraryPage() {
     const { likedSongs } = useAudioPlayer();
     const [items, setItems] = useState<LibraryItem[]>([]);
-    const [filter, setFilter] = useState<'all' | 'playlists' | 'artists' | 'albums' | 'podcasts'>('all');
+    const [filter, setFilter] = useState<'all' | 'playlists' | 'artists' | 'albums' | 'podcasts' | 'movies'>('all');
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -70,6 +70,13 @@ export default function LibraryPage() {
                 .eq('user_id', user.id)
                 .order('subscribed_at', { ascending: false });
 
+            // Fetch Movie Watchlist
+            const { data: moviesData } = await supabase
+                .from('movie_watchlist')
+                .select('added_at, movies(id, title, genre, poster_url)')
+                .eq('user_id', user.id)
+                .order('added_at', { ascending: false });
+
             const formattedPlaylists: LibraryItem[] = (playlistsData || []).map(p => ({
                 id: p.playlists.id,
                 type: 'playlist',
@@ -106,7 +113,17 @@ export default function LibraryPage() {
                     image_url: p.podcasts.cover_url || '/placeholder-music.png'
                 }));
 
-            setItems([...formattedPlaylists, ...formattedAlbums, ...formattedArtists, ...formattedPodcasts]);
+            const formattedMovies: LibraryItem[] = (moviesData || [])
+                .filter((m: any) => m.movies)
+                .map((m: any) => ({
+                    id: m.movies.id,
+                    type: 'movie',
+                    title: m.movies.title,
+                    subtitle: `Movie • ${m.movies.genre || 'Film'}`,
+                    image_url: m.movies.poster_url || '/placeholder-music.png'
+                }));
+
+            setItems([...formattedPlaylists, ...formattedAlbums, ...formattedArtists, ...formattedPodcasts, ...formattedMovies]);
         } catch (err) {
             console.error('Error fetching library:', err);
         } finally {
@@ -128,12 +145,11 @@ export default function LibraryPage() {
         if (filter === 'artists') return item.type === 'artist';
         if (filter === 'albums') return item.type === 'album';
         if (filter === 'podcasts') return item.type === 'podcast';
+        if (filter === 'movies') return item.type === 'movie';
         return true;
     });
 
-    // podcast show pages live at /streams/podcast/:id (singular), unlike the
-    // other item types which all use their plural route name.
-    const libraryItemHref = (item: LibraryItem) => item.type === 'podcast' ? `/streams/podcast/${item.id}` : `/streams/${item.type}/${item.id}`;
+    const libraryItemHref = (item: LibraryItem) => `/streams/${item.type}/${item.id}`;
 
     return (
         <StreamsLayout>
@@ -146,6 +162,7 @@ export default function LibraryPage() {
                             <FilterPill label="Albums" active={filter === 'albums'} onClick={() => setFilter(filter === 'albums' ? 'all' : 'albums')} />
                             <FilterPill label="Artists" active={filter === 'artists'} onClick={() => setFilter(filter === 'artists' ? 'all' : 'artists')} />
                             <FilterPill label="Podcasts" active={filter === 'podcasts'} onClick={() => setFilter(filter === 'podcasts' ? 'all' : 'podcasts')} />
+                            <FilterPill label="Movies" active={filter === 'movies'} onClick={() => setFilter(filter === 'movies' ? 'all' : 'movies')} />
                         </div>
                         <Button
                             onClick={() => setIsCreateModalOpen(true)}

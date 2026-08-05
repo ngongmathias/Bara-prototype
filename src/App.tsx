@@ -309,6 +309,7 @@ const PodcastsPage = lazy(() => import("./pages/streams/PodcastsPage"));
 const PodcastShowPage = lazy(() => import("./pages/streams/PodcastShowPage"));
 const MoviesPage = lazy(() => import("./pages/streams/MoviesPage"));
 const MovieDetailPage = lazy(() => import("./pages/streams/MovieDetailPage"));
+const MovieWatchPage = lazy(() => import("./pages/streams/MovieWatchPage"));
 const EbooksPage = lazy(() => import("./pages/streams/EbooksPage"));
 const EbookDetailPage = lazy(() => import("./pages/streams/EbookDetailPage"));
 
@@ -496,6 +497,7 @@ const AppRoutes = () => {
 
           <Route path="movies" element={<MoviesPage />} />
           <Route path="movie/:id" element={<MovieDetailPage />} />
+          <Route path="movie/:id/watch" element={<MovieWatchPage />} />
 
           <Route path="ebooks" element={<EbooksPage />} />
           <Route path="ebook/:id" element={<EbookDetailPage />} />
