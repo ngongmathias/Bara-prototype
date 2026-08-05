@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminRole } from "@/hooks/useAdminRole";
+import { logAdminAction } from "@/lib/adminAuditLog";
 import { AdminPageGuide } from "@/components/admin/AdminPageGuide";
 import { COUNTRIES, LANGUAGES } from "@/lib/constants";
 
@@ -80,6 +82,7 @@ export const AdminMovies = () => {
     const [movieToDelete, setMovieToDelete] = useState<string | null>(null);
     const [tableExists, setTableExists] = useState(true);
     const { toast } = useToast();
+    const { canDelete } = useAdminRole();
 
     // File states
     const [posterFile, setPosterFile] = useState<File | null>(null);
@@ -159,9 +162,15 @@ export const AdminMovies = () => {
 
     const handleDelete = async () => {
         if (!movieToDelete) return;
+        if (!canDelete) {
+            toast({ title: "Not allowed", description: "Deleting requires an admin or super_admin role.", variant: "destructive" });
+            return;
+        }
         try {
+            const title = movies.find(m => m.id === movieToDelete)?.title;
             const { error } = await supabase.from("movies").delete().eq("id", movieToDelete);
             if (error) throw error;
+            await logAdminAction('delete_movie', { title });
             toast({ title: "Deleted", description: "Movie deleted." });
             setMovieToDelete(null);
             fetchMovies();
@@ -348,7 +357,7 @@ export const AdminMovies = () => {
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
                                                 <Button variant="outline" size="sm" onClick={() => openEdit(m)}><Edit className="h-4 w-4" /></Button>
-                                                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => setMovieToDelete(m.id)}><Trash2 className="h-4 w-4" /></Button>
+                                                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" disabled={!canDelete} title={!canDelete ? 'Requires admin or super_admin role' : undefined} onClick={() => setMovieToDelete(m.id)}><Trash2 className="h-4 w-4" /></Button>
                                             </div>
                                         </TableCell>
                                     </TableRow>

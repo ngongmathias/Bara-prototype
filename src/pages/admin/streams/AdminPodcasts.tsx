@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminRole } from "@/hooks/useAdminRole";
+import { logAdminAction } from "@/lib/adminAuditLog";
 import { AdminPageGuide } from "@/components/admin/AdminPageGuide";
 import { LANGUAGES } from "@/lib/constants";
 
@@ -82,6 +84,7 @@ export const AdminPodcasts = () => {
     const [podcastToDelete, setPodcastToDelete] = useState<string | null>(null);
     const [tableExists, setTableExists] = useState(true);
     const { toast } = useToast();
+    const { canDelete } = useAdminRole();
 
     // File states
     const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -155,9 +158,15 @@ export const AdminPodcasts = () => {
 
     const handleDelete = async () => {
         if (!podcastToDelete) return;
+        if (!canDelete) {
+            toast({ title: "Not allowed", description: "Deleting requires an admin or super_admin role.", variant: "destructive" });
+            return;
+        }
         try {
+            const title = podcasts.find(p => p.id === podcastToDelete)?.title;
             const { error } = await supabase.from("podcasts").delete().eq("id", podcastToDelete);
             if (error) throw error;
+            await logAdminAction('delete_podcast', { title });
             toast({ title: "Deleted", description: "Podcast deleted." });
             setPodcastToDelete(null);
             fetchPodcasts();
@@ -358,7 +367,7 @@ export const AdminPodcasts = () => {
                                             <div className="flex justify-end gap-2">
                                                 <Button variant="outline" size="sm" onClick={() => openManageEpisodes(p)}><ListMusic className="h-4 w-4 mr-1" />Episodes</Button>
                                                 <Button variant="outline" size="sm" onClick={() => openEdit(p)}><Edit className="h-4 w-4" /></Button>
-                                                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => setPodcastToDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
+                                                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" disabled={!canDelete} title={!canDelete ? 'Requires admin or super_admin role' : undefined} onClick={() => setPodcastToDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
                                             </div>
                                         </TableCell>
                                     </TableRow>

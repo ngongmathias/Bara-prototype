@@ -21,6 +21,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     Select,
     SelectContent,
@@ -40,6 +41,9 @@ import {
 import { db, supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+import { useAdminRole } from '@/hooks/useAdminRole';
+import { logAdminAction } from '@/lib/adminAuditLog';
+import { GENRES } from '@/pages/streams/GenrePage';
 
 
 interface Album {
@@ -67,6 +71,7 @@ export const AdminAlbums = () => {
     const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const { toast } = useToast();
+    const { canDelete } = useAdminRole();
 
     // Form State
     const [formData, setFormData] = useState<Partial<Album>>({
@@ -82,6 +87,64 @@ export const AdminAlbums = () => {
     const [total, setTotal] = useState(0);
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
+    // §L9 — bulk actions, scoped to the current page (same reasoning as AdminSongs).
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [bulkBusy, setBulkBusy] = useState(false);
+    const allOnPageSelected = albums.length > 0 && albums.every(a => selectedIds.has(a.id));
+
+    const toggleSelectAll = () => setSelectedIds(allOnPageSelected ? new Set() : new Set(albums.map(a => a.id)));
+    const toggleSelectOne = (id: string) => setSelectedIds(prev => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id); else next.add(id);
+        return next;
+    });
+    const clearSelection = () => setSelectedIds(new Set());
+
+    const handleBulkGenre = async (genre: string) => {
+        if (!canDelete || selectedIds.size === 0) return;
+        setBulkBusy(true);
+        try {
+            const ids = Array.from(selectedIds);
+            const { error } = await db.albums().update({ genre }).in('id', ids);
+            if (error) throw error;
+            await logAdminAction('bulk_set_album_genre', { genre, count: ids.length });
+            toast({ title: 'Updated', description: `Genre set to "${genre}" for ${ids.length} album(s).` });
+            clearSelection();
+            fetchAlbums();
+        } catch (e: any) {
+            toast({ title: 'Error', description: e.message, variant: 'destructive' });
+        } finally {
+            setBulkBusy(false);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (!canDelete || selectedIds.size === 0) return;
+        if (!confirm(`Delete ${selectedIds.size} album(s)? This will not delete the songs inside them.`)) return;
+        setBulkBusy(true);
+        try {
+            const targets = albums.filter(a => selectedIds.has(a.id));
+            const ids = targets.map(a => a.id);
+            const { error } = await db.albums().delete().in('id', ids);
+            if (error) throw error;
+            await Promise.all(targets.map(a => {
+                if (a.cover_url && a.cover_url.includes('music-covers')) {
+                    const fileName = a.cover_url.split('/').pop();
+                    return fileName ? supabase.storage.from('music-covers').remove([`covers/${fileName}`]) : Promise.resolve();
+                }
+                return Promise.resolve();
+            }));
+            await logAdminAction('bulk_delete_albums', { count: ids.length, titles: targets.map(a => a.title) });
+            toast({ title: 'Deleted', description: `${ids.length} album(s) removed.` });
+            clearSelection();
+            fetchAlbums();
+        } catch (e: any) {
+            toast({ title: 'Error', description: e.message, variant: 'destructive' });
+        } finally {
+            setBulkBusy(false);
+        }
+    };
+
     // Artists (for the dropdown) load once; albums are paginated.
     useEffect(() => {
         db.artists().select('id, name').order('name').then(({ data }) => setArtists(data || []));
@@ -89,6 +152,7 @@ export const AdminAlbums = () => {
 
     useEffect(() => {
         const t = setTimeout(() => fetchAlbums(page, searchTerm), 250);
+        setSelectedIds(new Set());
         return () => clearTimeout(t);
     }, [page, searchTerm]);
 
@@ -172,7 +236,11 @@ export const AdminAlbums = () => {
         }
     };
 
-    const handleDelete = async (id: string, coverUrl: string) => {
+    const handleDelete = async (id: string, coverUrl: string, title?: string) => {
+        if (!canDelete) {
+            toast({ title: "Not allowed", description: "Deleting requires an admin or super_admin role.", variant: "destructive" });
+            return;
+        }
         if (!confirm("Are you sure? This will not delete the songs inside.")) return;
         try {
             const { error: dbError } = await db.albums().delete().eq('id', id);
@@ -185,6 +253,7 @@ export const AdminAlbums = () => {
                     await supabase.storage.from('music-covers').remove([`covers/${fileName}`]);
                 }
             }
+            await logAdminAction('delete_album', { title });
 
             toast({ title: "Success", description: "Album deleted" });
             fetchAlbums();
@@ -320,10 +389,29 @@ export const AdminAlbums = () => {
                     </Dialog>
                 </div>
 
+                {selectedIds.size > 0 && (
+                    <div className="flex flex-wrap items-center gap-2 bg-gray-900 text-white rounded-lg px-4 py-2.5 mb-3">
+                        <span className="text-sm font-medium mr-2">{selectedIds.size} selected</span>
+                        <Select onValueChange={handleBulkGenre} disabled={!canDelete || bulkBusy}>
+                            <SelectTrigger className="w-[140px] h-8 bg-white text-gray-900 text-xs"><SelectValue placeholder="Set genre..." /></SelectTrigger>
+                            <SelectContent>
+                                {GENRES.map(g => <SelectItem key={g.slug} value={g.name}>{g.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <Button size="sm" variant="destructive" className="h-8 text-xs" disabled={!canDelete || bulkBusy} onClick={handleBulkDelete}>
+                            {bulkBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Delete'}
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-8 text-xs text-white hover:text-white hover:bg-white/10 ml-auto" onClick={clearSelection}>Clear</Button>
+                    </div>
+                )}
+
                 <div className="rounded-md border bg-white overflow-hidden">
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead className="w-10">
+                                    <Checkbox checked={allOnPageSelected} onCheckedChange={toggleSelectAll} aria-label="Select all on page" />
+                                </TableHead>
                                 <TableHead>Album</TableHead>
                                 <TableHead>Artist</TableHead>
                                 <TableHead>Release Date</TableHead>
@@ -334,17 +422,20 @@ export const AdminAlbums = () => {
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8">
+                                    <TableCell colSpan={6} className="text-center py-8">
                                         <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
                                     </TableCell>
                                 </TableRow>
                             ) : albums.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">No albums found.</TableCell>
+                                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">No albums found.</TableCell>
                                 </TableRow>
                             ) : (
                                 albums.map((album) => (
                                     <TableRow key={album.id}>
+                                        <TableCell>
+                                            <Checkbox checked={selectedIds.has(album.id)} onCheckedChange={() => toggleSelectOne(album.id)} aria-label={`Select ${album.title}`} />
+                                        </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <div className="h-12 w-12 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
@@ -378,7 +469,9 @@ export const AdminAlbums = () => {
                                                     variant="ghost"
                                                     size="icon"
                                                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    onClick={() => handleDelete(album.id, album.cover_url || '')}
+                                                    disabled={!canDelete}
+                                                    title={!canDelete ? 'Requires admin or super_admin role' : undefined}
+                                                    onClick={() => handleDelete(album.id, album.cover_url || '', album.title)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>

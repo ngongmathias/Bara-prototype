@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { logAdminAction } from '@/lib/adminAuditLog';
 import { Flag, Loader2, Ban, X } from 'lucide-react';
 
 type ReportStatus = 'pending' | 'dismissed' | 'actioned';
@@ -108,6 +109,9 @@ const AdminContentReports = () => {
             if (error || !result?.success) {
                 toast({ title: 'Review failed', description: result?.error || error?.message || 'Please try again.', variant: 'destructive' });
             } else {
+                await logAdminAction(action === 'takedown' ? 'content_takedown' : 'content_report_dismissed', {
+                    entity_type: row.entity_type, entity_id: row.entity_id, notes: notes[row.id] || null,
+                });
                 toast({
                     title: action === 'takedown' ? 'Taken down' : 'Dismissed',
                     description: action === 'takedown' ? 'The content was unpublished and the owner notified.' : 'The report was dismissed.',

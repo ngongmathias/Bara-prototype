@@ -60,7 +60,11 @@ import {
 
   Film,
 
-  Mic2
+  Mic2,
+
+  HeartPulse,
+
+  ScrollText
 
 } from "lucide-react";
 
@@ -350,6 +354,18 @@ const adminMenuItems = [
 
   {
 
+    title: "Content Health",
+
+    icon: HeartPulse,
+
+    path: "/admin/streams/content-health",
+
+    description: "Dead audio, missing covers, empty albums, unclaimed artists"
+
+  },
+
+  {
+
     title: "Sports",
 
     icon: Trophy,
@@ -429,6 +445,18 @@ const adminMenuItems = [
     path: "/admin/admin-management",
 
     description: "Manage admin users (Super Admin only)"
+
+  },
+
+  {
+
+    title: "Audit Log",
+
+    icon: ScrollText,
+
+    path: "/admin/audit-log",
+
+    description: "Who did what — destructive admin actions (Super Admin only)"
 
   },
 
