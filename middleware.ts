@@ -32,6 +32,7 @@ export const config = {
     '/streams/artist/:id*',
     '/streams/album/:id*',
     '/streams/genre/:slug*',
+    '/streams/podcast/:id*',
     '/streams/movie/:id*',
     '/events/:id*',
     '/blog/:slug*',
@@ -202,6 +203,41 @@ async function buildPreview(pathname: string): Promise<PreviewData | null> {
       description: `${row.title} by ${artistName} — listen on Bara Streams`,
       image: row.cover_url || DEFAULT_IMAGE,
       type: 'music.album',
+    };
+  }
+
+  // /streams/podcast/:id/episode/:epId — check before the show match below
+  const episodeMatch = pathname.match(/^\/streams\/podcast\/[^/?#]+\/episode\/([^/?#]+)/);
+  if (episodeMatch) {
+    const epId = episodeMatch[1];
+    const row = await fetchFromSupabase(
+      'podcast_episodes',
+      `id=eq.${epId}&select=title,description,audio_url,podcasts(title,host,cover_url)`
+    );
+    if (!row) return null;
+    const pod = row.podcasts;
+    return {
+      title: row.title,
+      description: `${pod ? `${pod.title} — ` : ''}${(row.description || '').slice(0, 140) || 'Listen on Bara Streams'}`,
+      image: pod?.cover_url || DEFAULT_IMAGE,
+      type: 'music.song',
+    };
+  }
+
+  // /streams/podcast/:id
+  const podcastMatch = pathname.match(/^\/streams\/podcast\/([^/?#]+)/);
+  if (podcastMatch) {
+    const id = podcastMatch[1];
+    const row = await fetchFromSupabase(
+      'podcasts',
+      `id=eq.${id}&select=title,host,description,cover_url`
+    );
+    if (!row) return null;
+    return {
+      title: row.title,
+      description: `${row.host ? `Hosted by ${row.host} — ` : ''}${(row.description || '').slice(0, 140) || 'Listen on Bara Streams'}`,
+      image: row.cover_url || DEFAULT_IMAGE,
+      type: 'music.playlist',
     };
   }
 

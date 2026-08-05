@@ -11,7 +11,7 @@ import { useUser } from '@clerk/clerk-react';
 
 interface LibraryItem {
     id: string;
-    type: 'playlist' | 'artist' | 'album';
+    type: 'playlist' | 'artist' | 'album' | 'podcast';
     title: string;
     subtitle: string;
     image_url: string;
@@ -20,7 +20,7 @@ interface LibraryItem {
 export default function LibraryPage() {
     const { likedSongs } = useAudioPlayer();
     const [items, setItems] = useState<LibraryItem[]>([]);
-    const [filter, setFilter] = useState<'all' | 'playlists' | 'artists' | 'albums'>('all');
+    const [filter, setFilter] = useState<'all' | 'playlists' | 'artists' | 'albums' | 'podcasts'>('all');
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -63,6 +63,13 @@ export default function LibraryPage() {
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
 
+            // Fetch Subscribed Podcasts
+            const { data: podcastsData } = await supabase
+                .from('podcast_subscriptions')
+                .select('subscribed_at, podcasts(id, title, host, cover_url)')
+                .eq('user_id', user.id)
+                .order('subscribed_at', { ascending: false });
+
             const formattedPlaylists: LibraryItem[] = (playlistsData || []).map(p => ({
                 id: p.playlists.id,
                 type: 'playlist',
@@ -89,7 +96,17 @@ export default function LibraryPage() {
                     image_url: a.albums.cover_url || '/placeholder-music.png'
                 }));
 
-            setItems([...formattedPlaylists, ...formattedAlbums, ...formattedArtists]);
+            const formattedPodcasts: LibraryItem[] = (podcastsData || [])
+                .filter((p: any) => p.podcasts)
+                .map((p: any) => ({
+                    id: p.podcasts.id,
+                    type: 'podcast',
+                    title: p.podcasts.title,
+                    subtitle: `Podcast • ${p.podcasts.host}`,
+                    image_url: p.podcasts.cover_url || '/placeholder-music.png'
+                }));
+
+            setItems([...formattedPlaylists, ...formattedAlbums, ...formattedArtists, ...formattedPodcasts]);
         } catch (err) {
             console.error('Error fetching library:', err);
         } finally {
@@ -110,8 +127,13 @@ export default function LibraryPage() {
         if (filter === 'playlists') return item.type === 'playlist';
         if (filter === 'artists') return item.type === 'artist';
         if (filter === 'albums') return item.type === 'album';
+        if (filter === 'podcasts') return item.type === 'podcast';
         return true;
     });
+
+    // podcast show pages live at /streams/podcast/:id (singular), unlike the
+    // other item types which all use their plural route name.
+    const libraryItemHref = (item: LibraryItem) => item.type === 'podcast' ? `/streams/podcast/${item.id}` : `/streams/${item.type}/${item.id}`;
 
     return (
         <StreamsLayout>
@@ -123,6 +145,7 @@ export default function LibraryPage() {
                             <FilterPill label="Playlists" active={filter === 'playlists'} onClick={() => setFilter(filter === 'playlists' ? 'all' : 'playlists')} />
                             <FilterPill label="Albums" active={filter === 'albums'} onClick={() => setFilter(filter === 'albums' ? 'all' : 'albums')} />
                             <FilterPill label="Artists" active={filter === 'artists'} onClick={() => setFilter(filter === 'artists' ? 'all' : 'artists')} />
+                            <FilterPill label="Podcasts" active={filter === 'podcasts'} onClick={() => setFilter(filter === 'podcasts' ? 'all' : 'podcasts')} />
                         </div>
                         <Button
                             onClick={() => setIsCreateModalOpen(true)}
@@ -176,7 +199,7 @@ export default function LibraryPage() {
                             {filteredItems.map((item) => (
                                 <Link
                                     key={`${item.type}-${item.id}`}
-                                    to={`/streams/${item.type}/${item.id}`}
+                                    to={libraryItemHref(item)}
                                     className="bg-white border border-gray-100 p-4 rounded-xl hover:bg-gray-50 transition-all group flex flex-col shadow-lg"
                                 >
                                     <div className="relative mb-4 aspect-square">

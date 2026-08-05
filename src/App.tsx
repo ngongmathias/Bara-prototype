@@ -306,6 +306,7 @@ const StreamsGuidelinesPage = lazy(() => import("./pages/streams/StreamsGuidelin
 const UploadSongPage = lazy(() => import("./pages/streams/UploadSongPage"));
 const CreateAlbumPage = lazy(() => import("./pages/streams/CreateAlbumPage"));
 const PodcastsPage = lazy(() => import("./pages/streams/PodcastsPage"));
+const PodcastShowPage = lazy(() => import("./pages/streams/PodcastShowPage"));
 const MoviesPage = lazy(() => import("./pages/streams/MoviesPage"));
 const MovieDetailPage = lazy(() => import("./pages/streams/MovieDetailPage"));
 const EbooksPage = lazy(() => import("./pages/streams/EbooksPage"));
@@ -490,6 +491,8 @@ const AppRoutes = () => {
           <Route path="stats" element={<UserAuthGuard><ListeningStatsPage /></UserAuthGuard>} />
 
           <Route path="podcasts" element={<PodcastsPage />} />
+          <Route path="podcast/:id" element={<PodcastShowPage />} />
+          <Route path="podcast/:id/episode/:episodeId" element={<PodcastShowPage />} />
 
           <Route path="movies" element={<MoviesPage />} />
           <Route path="movie/:id" element={<MovieDetailPage />} />
