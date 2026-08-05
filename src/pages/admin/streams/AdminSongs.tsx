@@ -22,6 +22,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     Select,
     SelectContent,
@@ -46,6 +47,9 @@ import { useToast } from "@/hooks/use-toast";
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
 import { PAID_MUSIC_ENABLED } from '@/lib/features';
 import { deleteSongStorageFiles } from '@/lib/songStorage';
+import { useAdminRole } from '@/hooks/useAdminRole';
+import { logAdminAction } from '@/lib/adminAuditLog';
+import { GENRES } from '@/pages/streams/GenrePage';
 
 
 interface Song {
@@ -75,6 +79,7 @@ interface Album {
 
 export const AdminSongs = () => {
     const { user } = useUser();
+    const { canDelete } = useAdminRole();
     const [songs, setSongs] = useState<Song[]>([]);
     const [artists, setArtists] = useState<Artist[]>([]);
     const [albums, setAlbums] = useState<Album[]>([]);
@@ -108,6 +113,101 @@ export const AdminSongs = () => {
     const [total, setTotal] = useState(0);
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
+    // §L9 — bulk actions. Scoped to the current page only (not "every song
+    // matching the search"): a much safer default for destructive actions,
+    // and simple enough to reason about at a glance.
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [bulkBusy, setBulkBusy] = useState(false);
+    const allOnPageSelected = songs.length > 0 && songs.every(s => selectedIds.has(s.id));
+
+    const toggleSelectAll = () => {
+        setSelectedIds(allOnPageSelected ? new Set() : new Set(songs.map(s => s.id)));
+    };
+    const toggleSelectOne = (id: string) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id); else next.add(id);
+            return next;
+        });
+    };
+    const clearSelection = () => setSelectedIds(new Set());
+
+    const handleBulkGenre = async (genre: string) => {
+        if (!canDelete || selectedIds.size === 0) return;
+        setBulkBusy(true);
+        try {
+            const ids = Array.from(selectedIds);
+            const { error } = await db.songs().update({ genre }).in('id', ids);
+            if (error) throw error;
+            await logAdminAction('bulk_set_genre', { genre, count: ids.length });
+            toast({ title: 'Updated', description: `Genre set to "${genre}" for ${ids.length} song(s).` });
+            clearSelection();
+            fetchSongs();
+        } catch (e: any) {
+            toast({ title: 'Error', description: e.message, variant: 'destructive' });
+        } finally {
+            setBulkBusy(false);
+        }
+    };
+
+    const handleBulkBadge = async (badge: string | null) => {
+        if (!canDelete || selectedIds.size === 0) return;
+        setBulkBusy(true);
+        try {
+            const ids = Array.from(selectedIds);
+            const { error } = await db.songs().update({ featured_badge: badge }).in('id', ids);
+            if (error) throw error;
+            await logAdminAction('bulk_set_badge', { badge, count: ids.length });
+            toast({ title: 'Updated', description: `Badge ${badge ? `set to "${badge}"` : 'cleared'} for ${ids.length} song(s).` });
+            clearSelection();
+            fetchSongs();
+        } catch (e: any) {
+            toast({ title: 'Error', description: e.message, variant: 'destructive' });
+        } finally {
+            setBulkBusy(false);
+        }
+    };
+
+    const handleBulkTakedown = async () => {
+        if (!canDelete || selectedIds.size === 0) return;
+        if (!confirm(`Unpublish ${selectedIds.size} song(s)? They'll be hidden from public listings until republished.`)) return;
+        setBulkBusy(true);
+        try {
+            const ids = Array.from(selectedIds);
+            const { error } = await db.songs().update({ status: 'draft' }).in('id', ids);
+            if (error) throw error;
+            await logAdminAction('bulk_takedown_songs', { count: ids.length });
+            toast({ title: 'Unpublished', description: `${ids.length} song(s) set to draft.` });
+            clearSelection();
+            fetchSongs();
+        } catch (e: any) {
+            toast({ title: 'Error', description: e.message, variant: 'destructive' });
+        } finally {
+            setBulkBusy(false);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (!canDelete || selectedIds.size === 0) return;
+        if (!confirm(`Permanently delete ${selectedIds.size} song(s) and their storage files? This cannot be undone.`)) return;
+        setBulkBusy(true);
+        try {
+            const targets = songs.filter(s => selectedIds.has(s.id));
+            const ids = targets.map(s => s.id);
+            const { error } = await db.songs().delete().in('id', ids);
+            if (error) throw error;
+            await Promise.all(targets.map(s => deleteSongStorageFiles({ file_url: s.file_url, cover_url: s.cover_url })));
+            await logAdminAction('bulk_delete_songs', { count: ids.length, titles: targets.map(s => s.title) });
+            toast({ title: 'Deleted', description: `${ids.length} song(s) removed.` });
+            clearSelection();
+            fetchSongs();
+        } catch (e: any) {
+            toast({ title: 'Error', description: e.message, variant: 'destructive' });
+        } finally {
+            setBulkBusy(false);
+        }
+    };
+
     // Artists + albums (for the dialog dropdowns) load once; songs are paginated.
     useEffect(() => {
         (async () => {
@@ -122,6 +222,7 @@ export const AdminSongs = () => {
 
     useEffect(() => {
         const t = setTimeout(() => fetchSongs(page, searchTerm), 250);
+        setSelectedIds(new Set());
         return () => clearTimeout(t);
     }, [page, searchTerm]);
 
@@ -275,7 +376,11 @@ export const AdminSongs = () => {
         }
     };
 
-    const handleDelete = async (id: string, fileUrl: string, coverUrl?: string | null) => {
+    const handleDelete = async (id: string, fileUrl: string, coverUrl?: string | null, title?: string) => {
+        if (!canDelete) {
+            toast({ title: "Not allowed", description: "Deleting requires an admin or super_admin role.", variant: "destructive" });
+            return;
+        }
         if (!confirm("Are you sure you want to delete this track?")) return;
         try {
             // Delete from DB
@@ -286,6 +391,7 @@ export const AdminSongs = () => {
             // guessed prefix — creator uploads live at songs/{userId}/...,
             // not tracks/..., so the old guess silently missed them.
             await deleteSongStorageFiles({ file_url: fileUrl, cover_url: coverUrl });
+            await logAdminAction('delete_song', { title });
 
             toast({ title: "Success", description: "Song deleted" });
             fetchSongs();
@@ -584,10 +690,38 @@ export const AdminSongs = () => {
                     </Dialog>
                 </div>
 
+                {selectedIds.size > 0 && (
+                    <div className="flex flex-wrap items-center gap-2 bg-gray-900 text-white rounded-lg px-4 py-2.5 mb-3">
+                        <span className="text-sm font-medium mr-2">{selectedIds.size} selected</span>
+                        <Select onValueChange={handleBulkGenre} disabled={!canDelete || bulkBusy}>
+                            <SelectTrigger className="w-[140px] h-8 bg-white text-gray-900 text-xs"><SelectValue placeholder="Set genre..." /></SelectTrigger>
+                            <SelectContent>
+                                {GENRES.map(g => <SelectItem key={g.slug} value={g.name}>{g.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <Select onValueChange={(v) => handleBulkBadge(v === 'none' ? null : v)} disabled={!canDelete || bulkBusy}>
+                            <SelectTrigger className="w-[140px] h-8 bg-white text-gray-900 text-xs"><SelectValue placeholder="Set badge..." /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="platform_pick">Platform Pick</SelectItem>
+                                <SelectItem value="editors_choice">Editor's Choice</SelectItem>
+                                <SelectItem value="none">Clear badge</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Button size="sm" variant="outline" className="h-8 text-xs bg-white text-gray-900" disabled={!canDelete || bulkBusy} onClick={handleBulkTakedown}>Takedown</Button>
+                        <Button size="sm" variant="destructive" className="h-8 text-xs" disabled={!canDelete || bulkBusy} onClick={handleBulkDelete}>
+                            {bulkBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Delete'}
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-8 text-xs text-white hover:text-white hover:bg-white/10 ml-auto" onClick={clearSelection}>Clear</Button>
+                    </div>
+                )}
+
                 <div className="rounded-md border bg-white overflow-hidden">
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead className="w-10">
+                                    <Checkbox checked={allOnPageSelected} onCheckedChange={toggleSelectAll} aria-label="Select all on page" />
+                                </TableHead>
                                 <TableHead className="w-12"></TableHead>
                                 <TableHead>Track</TableHead>
                                 <TableHead>Artist</TableHead>
@@ -600,17 +734,20 @@ export const AdminSongs = () => {
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="text-center py-8">
+                                    <TableCell colSpan={8} className="text-center py-8">
                                         <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
                                     </TableCell>
                                 </TableRow>
                             ) : songs.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">No songs found.</TableCell>
+                                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">No songs found.</TableCell>
                                 </TableRow>
                             ) : (
                                 songs.map((song) => (
                                     <TableRow key={song.id}>
+                                        <TableCell>
+                                            <Checkbox checked={selectedIds.has(song.id)} onCheckedChange={() => toggleSelectOne(song.id)} aria-label={`Select ${song.title}`} />
+                                        </TableCell>
                                         <TableCell>
                                             <Button
                                                 variant="ghost"
@@ -670,7 +807,9 @@ export const AdminSongs = () => {
                                                     variant="ghost"
                                                     size="icon"
                                                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    onClick={() => handleDelete(song.id, song.file_url, song.cover_url)}
+                                                    disabled={!canDelete}
+                                                    title={!canDelete ? 'Requires admin or super_admin role' : undefined}
+                                                    onClick={() => handleDelete(song.id, song.file_url, song.cover_url, song.title)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>

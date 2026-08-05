@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminRole } from "@/hooks/useAdminRole";
+import { logAdminAction } from "@/lib/adminAuditLog";
 import { AdminPageGuide } from "@/components/admin/AdminPageGuide";
 import { COUNTRIES, LANGUAGES } from "@/lib/constants";
 
@@ -76,6 +78,7 @@ export const AdminEbooks = () => {
     const [ebookToDelete, setEbookToDelete] = useState<string | null>(null);
     const [tableExists, setTableExists] = useState(true);
     const { toast } = useToast();
+    const { canDelete } = useAdminRole();
 
     // File states
     const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -146,9 +149,15 @@ export const AdminEbooks = () => {
 
     const handleDelete = async () => {
         if (!ebookToDelete) return;
+        if (!canDelete) {
+            toast({ title: "Not allowed", description: "Deleting requires an admin or super_admin role.", variant: "destructive" });
+            return;
+        }
         try {
+            const title = ebooks.find(b => b.id === ebookToDelete)?.title;
             const { error } = await supabase.from("ebooks").delete().eq("id", ebookToDelete);
             if (error) throw error;
+            await logAdminAction('delete_ebook', { title });
             toast({ title: "Deleted", description: "Ebook deleted." });
             setEbookToDelete(null);
             fetchEbooks();
@@ -307,7 +316,7 @@ export const AdminEbooks = () => {
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
                                                 <Button variant="outline" size="sm" onClick={() => openEdit(e)}><Edit className="h-4 w-4" /></Button>
-                                                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => setEbookToDelete(e.id)}><Trash2 className="h-4 w-4" /></Button>
+                                                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" disabled={!canDelete} title={!canDelete ? 'Requires admin or super_admin role' : undefined} onClick={() => setEbookToDelete(e.id)}><Trash2 className="h-4 w-4" /></Button>
                                             </div>
                                         </TableCell>
                                     </TableRow>
