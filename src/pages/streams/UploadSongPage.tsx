@@ -46,6 +46,8 @@ export default function UploadSongPage() {
     const [allArtists, setAllArtists] = useState<{ id: string; name: string }[]>([]);
 
     const [price, setPrice] = useState<string>('');
+    const [releaseOption, setReleaseOption] = useState<'now' | 'draft' | 'scheduled'>('now');
+    const [scheduledDate, setScheduledDate] = useState<string>('');
     const [rightsAccepted, setRightsAccepted] = useState(false);
     const [audioFile, setAudioFile] = useState<File | null>(null);
     const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -122,14 +124,29 @@ export default function UploadSongPage() {
             toast({ title: 'Rights confirmation required', description: 'Please confirm you own the rights to this content before uploading.', variant: 'destructive' });
             return;
         }
+        if (releaseOption === 'scheduled' && !scheduledDate) {
+            toast({ title: 'Pick a release date', description: 'Choose when this should go live, or switch to "Publish now".', variant: 'destructive' });
+            return;
+        }
 
         setUploading(true);
         setUploadProgress(10);
 
+        // Tracked outside the try so the catch block can clean up any file
+        // that made it to storage before a later step (e.g. the DB insert)
+        // failed — previously those were left orphaned forever.
+        let uploadedAudioPath: string | null = null;
+        let uploadedCoverPath: string | null = null;
+        let insertedSongId: string | null = null;
+
         try {
             let currentArtistId = artistId;
 
-            // Auto-create artist profile if none exists
+            // Auto-create artist profile if none exists. artists.user_id is
+            // UNIQUE, so a race (e.g. two tabs uploading before artistId
+            // state settles) surfaces as a 23505 conflict here instead of
+            // silently creating a second artist row for the same person —
+            // recover by fetching the row the other request just created.
             if (!currentArtistId) {
                 const { data: newArtist, error: artistError } = await supabase
                     .from('artists')
@@ -142,8 +159,21 @@ export default function UploadSongPage() {
                     .select('id')
                     .single();
 
-                if (artistError) throw artistError;
-                currentArtistId = newArtist.id;
+                if (artistError) {
+                    if (artistError.code === '23505') {
+                        const { data: existing, error: fetchError } = await supabase
+                            .from('artists')
+                            .select('id')
+                            .eq('user_id', user.id)
+                            .single();
+                        if (fetchError || !existing) throw artistError;
+                        currentArtistId = existing.id;
+                    } else {
+                        throw artistError;
+                    }
+                } else {
+                    currentArtistId = newArtist.id;
+                }
                 setArtistId(currentArtistId);
             }
 
@@ -155,6 +185,7 @@ export default function UploadSongPage() {
             const fileUrl = await uploadToMusicWithProgress(audioPath, audioFile, (f) => {
                 setUploadProgress(10 + Math.round(f * 70));
             });
+            uploadedAudioPath = audioPath;
 
             setUploadProgress(82);
 
@@ -164,9 +195,24 @@ export default function UploadSongPage() {
                 const coverExt = coverFile.name.split('.').pop() || 'jpg';
                 const coverPath = `covers/${user.id}/${Date.now()}.${coverExt}`;
                 coverUrl = await uploadToMusicWithProgress(coverPath, coverFile, () => {});
+                uploadedCoverPath = coverPath;
             }
 
             setUploadProgress(88);
+
+            // If this song is going straight into an album, give it the next
+            // track number so it doesn't land as an unordered NULL until
+            // someone visits Edit Album to fix it.
+            let nextTrackNumber: number | null = null;
+            if (albumId) {
+                const { data: existingTracks } = await supabase
+                    .from('songs')
+                    .select('track_number')
+                    .eq('album_id', albumId)
+                    .order('track_number', { ascending: false, nullsFirst: false })
+                    .limit(1);
+                nextTrackNumber = (existingTracks?.[0]?.track_number || 0) + 1;
+            }
 
             // Get audio duration
             let duration = 0;
@@ -191,6 +237,7 @@ export default function UploadSongPage() {
                     title: title.trim(),
                     artist_id: currentArtistId,
                     album_id: albumId || null,
+                    track_number: nextTrackNumber,
                     file_url: fileUrl,
                     cover_url: coverUrl || null,
                     genre: genre || null,
@@ -202,11 +249,14 @@ export default function UploadSongPage() {
                     producer: producer.trim() || null,
                     songwriter: songwriter.trim() || null,
                     rights_accepted_at: new Date().toISOString(),
+                    status: releaseOption === 'draft' ? 'draft' : 'published',
+                    release_date: releaseOption === 'scheduled' && scheduledDate ? new Date(scheduledDate).toISOString() : null,
                 })
                 .select('id')
                 .single();
 
             if (insertError) throw insertError;
+            insertedSongId = insertedSong.id;
 
             // Credits: primary + featured artists (best-effort, like the admin flow).
             try {
@@ -241,6 +291,14 @@ export default function UploadSongPage() {
 
         } catch (error: any) {
             console.error('Upload error:', error);
+            // Files reached storage but the song row never got created —
+            // don't leave them orphaned.
+            if (!insertedSongId) {
+                const orphaned = [uploadedAudioPath, uploadedCoverPath].filter((p): p is string => !!p);
+                if (orphaned.length > 0) {
+                    supabase.storage.from('music').remove(orphaned).catch(() => {});
+                }
+            }
             toast({ title: 'Upload failed', description: error.message || 'Something went wrong. Please try again.', variant: 'destructive' });
         } finally {
             setUploading(false);
@@ -441,6 +499,46 @@ export default function UploadSongPage() {
                             </p>
                         </div>
                     )}
+
+                    {/* Publish timing */}
+                    <div className="space-y-2">
+                        <Label className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Release</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {([
+                                { value: 'now', label: 'Publish now' },
+                                { value: 'draft', label: 'Save as draft' },
+                                { value: 'scheduled', label: 'Schedule' },
+                            ] as const).map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => setReleaseOption(opt.value)}
+                                    className={`py-2.5 rounded-lg text-sm font-bold border-2 transition ${
+                                        releaseOption === opt.value
+                                            ? 'border-gray-900 bg-gray-900 text-white'
+                                            : 'border-gray-200 text-gray-600 hover:border-gray-400'
+                                    }`}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                        {releaseOption === 'draft' && (
+                            <p className="text-xs text-gray-500">Only you can see this until you publish it.</p>
+                        )}
+                        {releaseOption === 'scheduled' && (
+                            <div className="pt-1">
+                                <Input
+                                    type="datetime-local"
+                                    value={scheduledDate}
+                                    min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+                                    onChange={(e) => setScheduledDate(e.target.value)}
+                                    className="bg-gray-50 border-gray-200 text-gray-900 focus:border-gray-900 focus:ring-gray-900 h-12"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Hidden from listeners until this date/time.</p>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Rights declaration (27.8.8) */}
                     <div className="space-y-3 border border-gray-200 rounded-xl p-4 bg-gray-50">

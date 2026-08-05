@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import {
     AlertDialog,
@@ -32,7 +33,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
     Plus,
     Search,
@@ -136,8 +136,13 @@ export const AdminArtists = () => {
             }
 
             if (editingArtist) {
+                // is_verified is intentionally excluded — it's only ever set
+                // via verification_admin_review, which keeps an audit trail
+                // (verification_requests.reviewed_by/reviewed_at); this form
+                // must not be a second, unaudited way to flip it.
+                const { is_verified: _ignored, ...updateData } = finalData;
                 const { error } = await db.artists()
-                    .update(finalData)
+                    .update(updateData)
                     .eq('id', editingArtist.id);
                 if (error) throw error;
                 toast({ title: "Success", description: "Artist updated" });
@@ -286,13 +291,23 @@ export const AdminArtists = () => {
                                         </label>
                                     )}
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id="verified"
-                                        checked={formData.is_verified}
-                                        onCheckedChange={(checked) => setFormData({ ...formData, is_verified: !!checked })}
-                                    />
-                                    <Label htmlFor="verified">Verified Artist</Label>
+                                <div className="flex items-center gap-2 text-sm">
+                                    {formData.is_verified ? (
+                                        <span className="inline-flex items-center gap-1.5 text-gray-900 font-medium">
+                                            <CheckCircle className="h-4 w-4" /> Verified artist
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-1.5 text-gray-500">
+                                            <XCircle className="h-4 w-4" /> Not verified
+                                        </span>
+                                    )}
+                                    <span className="text-gray-400">
+                                        — reviewed via the{' '}
+                                        <Link to="/admin/verifications" className="underline hover:text-gray-700">
+                                            verification queue
+                                        </Link>
+                                        , not editable here
+                                    </span>
                                 </div>
                             </div>
                             <DialogFooter>

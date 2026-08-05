@@ -14,6 +14,7 @@ import { GENRES } from './GenrePage';
 import { VerifiedBadge } from '@/components/streams/VerifiedBadge';
 import { buildDailyMixes, DailyMix } from '@/lib/dailyMixes';
 import { PAID_MUSIC_ENABLED } from '@/lib/features';
+import { filterPublished } from '@/lib/publishFilter';
 
 // Batch-fetch featured artists for a list of song IDs and return a map: songId -> "ft. A, B"
 async function fetchFeaturedArtistsMap(songIds: string[]): Promise<Record<string, string>> {
@@ -73,7 +74,7 @@ export default function StreamsHome() {
                     .limit(20);
 
                 if (songsData) {
-                    const formattedSongs: Song[] = songsData.map(song => ({
+                    const formattedSongs: Song[] = filterPublished(songsData).map(song => ({
                         id: song.id,
                         title: song.title,
                         artist: song.artists?.name || 'Unknown Artist',
@@ -135,7 +136,7 @@ export default function StreamsHome() {
                         .order('plays', { ascending: false })
                         .limit(10);
                     if (promotedData && promotedData.length > 0) {
-                        setPromotedSongs(promotedData.map(song => ({
+                        setPromotedSongs(filterPublished(promotedData).map(song => ({
                             id: song.id,
                             title: song.title,
                             artist: song.artists?.name || 'Unknown Artist',
@@ -205,7 +206,7 @@ export default function StreamsHome() {
                                     .limit(12);
 
                                 if (personalData && personalData.length > 0) {
-                                    setPersonalizedSongs(personalData.map(song => ({
+                                    setPersonalizedSongs(filterPublished(personalData).map(song => ({
                                         id: song.id,
                                         title: song.title,
                                         artist: song.artists?.name || 'Unknown Artist',

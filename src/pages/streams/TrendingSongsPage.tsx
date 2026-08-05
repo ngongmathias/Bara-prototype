@@ -5,6 +5,7 @@ import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useSongContextMenu } from '@/components/streams/SongContextMenu';
 import { Play, Pause } from 'lucide-react';
 import { PAID_MUSIC_ENABLED } from '@/lib/features';
+import { filterPublished } from '@/lib/publishFilter';
 import { SkeletonCard } from '@/components/animations/SkeletonCard';
 import { ScrollReveal } from '@/components/animations/ScrollReveal';
 
@@ -27,7 +28,7 @@ export default function TrendingSongsPage() {
                 if (error) throw error;
 
                 if (data) {
-                    const formattedSongs: Song[] = data.map(song => ({
+                    const formattedSongs: Song[] = filterPublished(data).map(song => ({
                         id: song.id,
                         title: song.title,
                         artist: song.artists?.name || 'Unknown Artist',

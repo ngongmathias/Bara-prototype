@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useShare } from '@/context/ShareContext';
 import { SEO } from '@/components/SEO';
+import { isPublished } from '@/lib/publishFilter';
 
 export default function SongPage() {
     const { id } = useParams<{ id: string }>();
@@ -39,7 +40,7 @@ export default function SongPage() {
                 .eq('id', id)
                 .single();
 
-            if (error || !data) {
+            if (error || !data || !isPublished(data)) {
                 setLoading(false);
                 return;
             }

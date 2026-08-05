@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -25,10 +25,13 @@ import { ShieldCheck, Upload, X, Loader2, CheckCircle, Clock, FileText } from 'l
 export default function VerifyAccountPage() {
     const { user, isLoaded, isSignedIn } = useUser();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { toast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const [accountType, setAccountType] = useState<VerificationAccountType>('business');
+    const [accountType, setAccountType] = useState<VerificationAccountType>(
+        searchParams.get('type') === 'artist' ? 'artist' : 'business'
+    );
     const [name, setName] = useState('');
     const [country, setCountry] = useState('');
     const [contactEmail, setContactEmail] = useState('');

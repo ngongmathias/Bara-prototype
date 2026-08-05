@@ -9,6 +9,7 @@ import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music, Sha
 import { useToast } from '@/hooks/use-toast';
 import { useShare } from '@/context/ShareContext';
 import { useUser, useAuth } from '@clerk/clerk-react';
+import { isPublished } from '@/lib/publishFilter';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -87,6 +88,7 @@ export default function PlaylistPage() {
                     position,
                     songs (
                         id, title, file_url, cover_url, duration, artist_id, album_id,
+                        status, release_date,
                         artists(name),
                         albums(title)
                     )
@@ -95,7 +97,7 @@ export default function PlaylistPage() {
                 .order('position', { ascending: true });
 
             const mappedTracks: Song[] = (playlistSongs || [])
-                .filter((ps: any) => ps.songs)
+                .filter((ps: any) => ps.songs && isPublished(ps.songs))
                 .map((ps: any) => ({
                     id: ps.songs.id,
                     title: ps.songs.title,
