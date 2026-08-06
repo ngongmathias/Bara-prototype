@@ -17,6 +17,7 @@ export function GlobalPlayer() {
     // On Streams routes the mobile bottom-nav occupies the bottom 56px, so the
     // mini-player sits above it on mobile (unchanged on desktop / other sections).
     const onStreams = pathname.startsWith('/streams');
+    const isAdminSurface = pathname.startsWith('/admin');
     const {
         currentSong,
         isPlaying,
@@ -163,6 +164,14 @@ export function GlobalPlayer() {
 
     // Early return AFTER all hooks to avoid React error #310
     if (!currentSong) return null;
+
+    // The player is mounted globally (App.tsx), which put a 90px music bar
+    // over every admin screen — covering table rows and action buttons on
+    // short laptop viewports. Admin is a work surface, not a listening one.
+    // Playback itself is unaffected: the <audio> element lives in
+    // AudioPlayerContext, so a song keeps playing while an admin works, the
+    // controls just aren't drawn here.
+    if (isAdminSurface) return null;
 
     const isLiked = likedSongs.includes(currentSong.id);
 

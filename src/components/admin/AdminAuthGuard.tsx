@@ -8,6 +8,29 @@ interface AdminAuthGuardProps {
   children: ReactNode;
 }
 
+/**
+ * Local-only escape hatch for reviewing admin UI.
+ *
+ * Clerk production keys are domain-locked to baraafrika.com and refuse to
+ * initialise on localhost, so the admin panel is otherwise unreachable in
+ * local development — which makes admin pages impossible to see, style or
+ * test without deploying.
+ *
+ * TWO independent conditions must hold, and neither can be true in
+ * production:
+ *   1. `import.meta.env.DEV` — Vite statically replaces this with `false`
+ *      in every production build, so the branch below is dead code that
+ *      gets stripped by the minifier. It cannot ship.
+ *   2. `VITE_ADMIN_PREVIEW=true` — set only in `.env.local`, which is
+ *      gitignored and never deployed.
+ *
+ * NOTE: the local app still talks to the PRODUCTION database, so anything
+ * done behind this flag affects real data. It is for looking at layout,
+ * not for testing destructive actions.
+ */
+const ADMIN_PREVIEW =
+  import.meta.env.DEV && import.meta.env.VITE_ADMIN_PREVIEW === 'true';
+
 export const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,6 +47,8 @@ export const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    if (ADMIN_PREVIEW) return;
+
     const checkAdminStatus = async () => {
       if (!isLoaded || hasCheckedRef.current) return;
       hasCheckedRef.current = true;
@@ -107,6 +132,17 @@ export const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
     // We use hasCheckedRef.current to prevent infinite loops, so we only need it to run when user/isLoaded changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, isSignedIn, user?.id]);
+
+  if (ADMIN_PREVIEW) {
+    return (
+      <>
+        <div className="bg-gray-900 text-white text-xs font-bold text-center py-1.5 tracking-wide">
+          LOCAL ADMIN PREVIEW — auth bypassed · connected to the production database
+        </div>
+        {children}
+      </>
+    );
+  }
 
   if (isChecking) {
     return (
