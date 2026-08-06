@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/lib/supabase';
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, X, Image as ImageIcon, Trash2, GripVertical, Plus } from 'lucide-react';
 
@@ -16,6 +17,7 @@ interface Props {
 
 export const EditAlbumModal = ({ album, artistId, onClose, onSaved }: Props) => {
   const { user } = useUser();
+  const { getClient } = useAuthedSupabase();
   const { toast } = useToast();
   const coverInputRef = useRef<HTMLInputElement>(null);
 
@@ -90,16 +92,17 @@ export const EditAlbumModal = ({ album, artistId, onClose, onSaved }: Props) => 
     if (!title.trim()) { toast({ title: 'Title required', variant: 'destructive' }); return; }
     setSaving(true);
     try {
+      const client = await getClient();
       let coverUrl = album.cover_url;
       if (coverFile && user?.id) {
         const ext = coverFile.name.split('.').pop() || 'jpg';
         const path = `covers/${user.id}/album_${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from('music').upload(path, coverFile, { contentType: coverFile.type });
+        const { error: upErr } = await client.storage.from('music').upload(path, coverFile, { contentType: coverFile.type });
         if (upErr) throw upErr;
-        coverUrl = supabase.storage.from('music').getPublicUrl(path).data.publicUrl;
+        coverUrl = client.storage.from('music').getPublicUrl(path).data.publicUrl;
       }
 
-      const { error } = await supabase.from('albums').update({
+      const { error } = await client.from('albums').update({
         title: title.trim(),
         type: type.toLowerCase(),
         release_date: releaseDate || null,
@@ -118,11 +121,11 @@ export const EditAlbumModal = ({ album, artistId, onClose, onSaved }: Props) => 
         const wasIn = s.album_id === album.id;
         const nowIn = includedSet.has(s.id);
         if (wasIn && !nowIn) {
-          updates.push(supabase.from('songs').update({ album_id: null, track_number: null }).eq('id', s.id));
+          updates.push(client.from('songs').update({ album_id: null, track_number: null }).eq('id', s.id));
         }
       }
       included.forEach((songId, idx) => {
-        updates.push(supabase.from('songs').update({ album_id: album.id, track_number: idx + 1 }).eq('id', songId));
+        updates.push(client.from('songs').update({ album_id: album.id, track_number: idx + 1 }).eq('id', songId));
       });
       await Promise.all(updates);
 
@@ -140,7 +143,8 @@ export const EditAlbumModal = ({ album, artistId, onClose, onSaved }: Props) => 
     setSaving(true);
     try {
       // Songs' album_id is set NULL by the FK on delete — tracks are not removed.
-      const { error } = await supabase.from('albums').delete().eq('id', album.id);
+      const client = await getClient();
+      const { error } = await client.from('albums').delete().eq('id', album.id);
       if (error) throw error;
       toast({ title: 'Album deleted', description: 'Its tracks were kept as singles.' });
       onSaved();

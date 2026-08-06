@@ -22,7 +22,9 @@ import {
 import {
     Plus, Search, Edit, Trash2, Film, Star, Eye, TrendingUp, Upload, Loader2, X
 } from "lucide-react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import { useAuthedSupabase } from "@/hooks/useAuthedSupabase";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { logAdminAction } from "@/lib/adminAuditLog";
@@ -60,15 +62,15 @@ const GENRES = [
 
 const BUCKET = "movies";
 
-async function uploadFile(file: File, folder: string): Promise<string> {
+async function uploadFile(file: File, folder: string, client: SupabaseClient): Promise<string> {
     const fileExt = file.name.split(".").pop();
     const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
     const filePath = `${folder}/${fileName}`;
 
-    const { error } = await supabase.storage.from(BUCKET).upload(filePath, file);
+    const { error } = await client.storage.from(BUCKET).upload(filePath, file);
     if (error) throw error;
 
-    const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
+    const { data: { publicUrl } } = client.storage.from(BUCKET).getPublicUrl(filePath);
     return publicUrl;
 }
 
@@ -82,6 +84,7 @@ export const AdminMovies = () => {
     const [movieToDelete, setMovieToDelete] = useState<string | null>(null);
     const [tableExists, setTableExists] = useState(true);
     const { toast } = useToast();
+    const { getClient } = useAuthedSupabase();
     const { canDelete } = useAdminRole();
 
     // File states
@@ -126,14 +129,15 @@ export const AdminMovies = () => {
         }
         try {
             setUploading(true);
+            const client = await getClient();
             const finalData = { ...formData };
 
             // Upload files in parallel
             const uploads = await Promise.all([
-                posterFile ? uploadFile(posterFile, "posters") : null,
-                backdropFile ? uploadFile(backdropFile, "backdrops") : null,
-                trailerFile ? uploadFile(trailerFile, "trailers") : null,
-                movieFile ? uploadFile(movieFile, "videos") : null,
+                posterFile ? uploadFile(posterFile, "posters", client) : null,
+                backdropFile ? uploadFile(backdropFile, "backdrops", client) : null,
+                trailerFile ? uploadFile(trailerFile, "trailers", client) : null,
+                movieFile ? uploadFile(movieFile, "videos", client) : null,
             ]);
 
             if (uploads[0]) finalData.poster_url = uploads[0];
@@ -142,11 +146,11 @@ export const AdminMovies = () => {
             if (uploads[3]) finalData.stream_url = uploads[3];
 
             if (editingMovie) {
-                const { error } = await supabase.from("movies").update(finalData).eq("id", editingMovie.id);
+                const { error } = await client.from("movies").update(finalData).eq("id", editingMovie.id);
                 if (error) throw error;
                 toast({ title: "Updated", description: `"${finalData.title}" updated.` });
             } else {
-                const { error } = await supabase.from("movies").insert([{ ...finalData, view_count: 0 }]);
+                const { error } = await client.from("movies").insert([{ ...finalData, view_count: 0 }]);
                 if (error) throw error;
                 toast({ title: "Created", description: `"${finalData.title}" created.` });
             }
@@ -167,8 +171,9 @@ export const AdminMovies = () => {
             return;
         }
         try {
+            const client = await getClient();
             const title = movies.find(m => m.id === movieToDelete)?.title;
-            const { error } = await supabase.from("movies").delete().eq("id", movieToDelete);
+            const { error } = await client.from("movies").delete().eq("id", movieToDelete);
             if (error) throw error;
             await logAdminAction('delete_movie', { title });
             toast({ title: "Deleted", description: "Movie deleted." });

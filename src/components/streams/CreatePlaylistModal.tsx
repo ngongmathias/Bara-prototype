@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/lib/supabase';
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
 import { useToast } from '@/hooks/use-toast';
 
 interface SongItem {
@@ -28,6 +29,7 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const { user, isLoaded } = useUser();
+    const { getClient } = useAuthedSupabase();
 
     // Step 2: Add songs
     const [step, setStep] = useState<'details' | 'songs'>('details');
@@ -80,7 +82,8 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
         // Optimistic: flip the button to "added" immediately so the tap registers.
         setAddingSongId(songId);
         setAddedSongIds(prev => new Set(prev).add(songId));
-        const { error } = await supabase.from('playlist_songs').insert({
+        const client = await getClient();
+        const { error } = await client.from('playlist_songs').insert({
             playlist_id: playlistId,
             song_id: songId,
             position,
@@ -105,7 +108,8 @@ export const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ isOpen
 
         setLoading(true);
         try {
-            const { data, error } = await supabase
+            const client = await getClient();
+            const { data, error } = await client
                 .from('playlists')
                 .insert({
                     title: title.trim(),

@@ -43,6 +43,7 @@ import {
     Plus
 } from "lucide-react";
 import { db, supabase } from "@/lib/supabase";
+import { useAuthedSupabase } from "@/hooks/useAuthedSupabase";
 import { useToast } from "@/hooks/use-toast";
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
 import { PAID_MUSIC_ENABLED } from '@/lib/features';
@@ -79,6 +80,7 @@ interface Album {
 
 export const AdminSongs = () => {
     const { user } = useUser();
+    const { getClient } = useAuthedSupabase();
     const { canDelete } = useAdminRole();
     const [songs, setSongs] = useState<Song[]>([]);
     const [artists, setArtists] = useState<Artist[]>([]);
@@ -136,8 +138,9 @@ export const AdminSongs = () => {
         if (!canDelete || selectedIds.size === 0) return;
         setBulkBusy(true);
         try {
+            const client = await getClient();
             const ids = Array.from(selectedIds);
-            const { error } = await db.songs().update({ genre }).in('id', ids);
+            const { error } = await client.from('songs').update({ genre }).in('id', ids);
             if (error) throw error;
             await logAdminAction('bulk_set_genre', { genre, count: ids.length });
             toast({ title: 'Updated', description: `Genre set to "${genre}" for ${ids.length} song(s).` });
@@ -154,8 +157,9 @@ export const AdminSongs = () => {
         if (!canDelete || selectedIds.size === 0) return;
         setBulkBusy(true);
         try {
+            const client = await getClient();
             const ids = Array.from(selectedIds);
-            const { error } = await db.songs().update({ featured_badge: badge }).in('id', ids);
+            const { error } = await client.from('songs').update({ featured_badge: badge }).in('id', ids);
             if (error) throw error;
             await logAdminAction('bulk_set_badge', { badge, count: ids.length });
             toast({ title: 'Updated', description: `Badge ${badge ? `set to "${badge}"` : 'cleared'} for ${ids.length} song(s).` });
@@ -173,8 +177,9 @@ export const AdminSongs = () => {
         if (!confirm(`Unpublish ${selectedIds.size} song(s)? They'll be hidden from public listings until republished.`)) return;
         setBulkBusy(true);
         try {
+            const client = await getClient();
             const ids = Array.from(selectedIds);
-            const { error } = await db.songs().update({ status: 'draft' }).in('id', ids);
+            const { error } = await client.from('songs').update({ status: 'draft' }).in('id', ids);
             if (error) throw error;
             await logAdminAction('bulk_takedown_songs', { count: ids.length });
             toast({ title: 'Unpublished', description: `${ids.length} song(s) set to draft.` });
@@ -192,11 +197,12 @@ export const AdminSongs = () => {
         if (!confirm(`Permanently delete ${selectedIds.size} song(s) and their storage files? This cannot be undone.`)) return;
         setBulkBusy(true);
         try {
+            const client = await getClient();
             const targets = songs.filter(s => selectedIds.has(s.id));
             const ids = targets.map(s => s.id);
-            const { error } = await db.songs().delete().in('id', ids);
+            const { error } = await client.from('songs').delete().in('id', ids);
             if (error) throw error;
-            await Promise.all(targets.map(s => deleteSongStorageFiles({ file_url: s.file_url, cover_url: s.cover_url })));
+            await Promise.all(targets.map(s => deleteSongStorageFiles({ file_url: s.file_url, cover_url: s.cover_url }, client)));
             await logAdminAction('bulk_delete_songs', { count: ids.length, titles: targets.map(s => s.title) });
             toast({ title: 'Deleted', description: `${ids.length} song(s) removed.` });
             clearSelection();
@@ -259,18 +265,18 @@ export const AdminSongs = () => {
         }
     };
 
-    const handleUpload = async (file: File) => {
+    const handleUpload = async (file: File, client: Awaited<ReturnType<typeof getClient>>) => {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
         const filePath = `tracks/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await client.storage
             .from('music')
             .upload(filePath, file);
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
+        const { data: { publicUrl } } = client.storage
             .from('music')
             .getPublicUrl(filePath);
 
@@ -285,10 +291,11 @@ export const AdminSongs = () => {
             }
 
             setUploading(true);
+            const client = await getClient();
             let finalFileUrl = formData.file_url;
 
             if (selectedFile) {
-                finalFileUrl = await handleUpload(selectedFile);
+                finalFileUrl = await handleUpload(selectedFile, client);
             }
 
             if (!finalFileUrl) {
@@ -310,14 +317,14 @@ export const AdminSongs = () => {
             let songId: string;
 
             if (editingSong) {
-                const { error } = await db.songs()
+                const { error } = await client.from('songs')
                     .update(songData)
                     .eq('id', editingSong.id);
                 if (error) throw error;
                 songId = editingSong.id;
                 toast({ title: "Success", description: "Song updated" });
             } else {
-                const { data: inserted, error } = await db.songs()
+                const { data: inserted, error } = await client.from('songs')
                     .insert(songData)
                     .select('id')
                     .single();
@@ -329,7 +336,7 @@ export const AdminSongs = () => {
             // Save song_artists (primary + featured)
             try {
                 // First, fetch existing entries to find ones to remove
-                const { data: existing } = await supabase
+                const { data: existing } = await client
                     .from('song_artists')
                     .select('id, artist_id, role')
                     .eq('song_id', songId);
@@ -346,13 +353,13 @@ export const AdminSongs = () => {
                     const keepSet = new Set(newEntries.map(e => `${e.artist_id}:${e.role}`));
                     const toDelete = existing.filter(e => !keepSet.has(`${e.artist_id}:${e.role}`));
                     for (const entry of toDelete) {
-                        await supabase.from('song_artists').delete().eq('id', entry.id);
+                        await client.from('song_artists').delete().eq('id', entry.id);
                     }
                 }
 
                 // Upsert new/updated entries
                 if (newEntries.length > 0) {
-                    const { error: upsertErr } = await supabase
+                    const { error: upsertErr } = await client
                         .from('song_artists')
                         .upsert(newEntries, { onConflict: 'song_id,artist_id,role' });
                     if (upsertErr) {
@@ -383,14 +390,15 @@ export const AdminSongs = () => {
         }
         if (!confirm("Are you sure you want to delete this track?")) return;
         try {
+            const client = await getClient();
             // Delete from DB
-            const { error: dbError } = await db.songs().delete().eq('id', id);
+            const { error: dbError } = await client.from('songs').delete().eq('id', id);
             if (dbError) throw dbError;
 
             // Storage cleanup by real path from the stored URL, not a
             // guessed prefix — creator uploads live at songs/{userId}/...,
             // not tracks/..., so the old guess silently missed them.
-            await deleteSongStorageFiles({ file_url: fileUrl, cover_url: coverUrl });
+            await deleteSongStorageFiles({ file_url: fileUrl, cover_url: coverUrl }, client);
             await logAdminAction('delete_song', { title });
 
             toast({ title: "Success", description: "Song deleted" });
@@ -466,7 +474,8 @@ export const AdminSongs = () => {
             : null;
 
         try {
-            const { error } = await supabase
+            const client = await getClient();
+            const { error } = await client
                 .from('songs')
                 .update({ featured_badge: nextBadge })
                 .eq('id', song.id);
@@ -650,16 +659,17 @@ export const AdminSongs = () => {
                                         <label className="flex items-center gap-2 border-2 border-dashed rounded-lg p-3 cursor-pointer hover:border-gray-400 transition">
                                             <Upload className="h-4 w-4 text-gray-400" />
                                             <span className="text-sm text-gray-500">Upload cover art</span>
-                                            <input type="file" accept="image/*" className="hidden" onChange={e => {
+                                            <input type="file" accept="image/*" className="hidden" onChange={async e => {
                                                 const file = e.target.files?.[0];
                                                 if (file) {
                                                     setPreviewUrl(URL.createObjectURL(file));
                                                     // Upload cover art to storage
                                                     const ext = file.name.split('.').pop();
                                                     const name = `covers/${Math.random().toString(36).substring(2)}-${Date.now()}.${ext}`;
-                                                    supabase.storage.from('music').upload(name, file).then(({ error }) => {
+                                                    const client = await getClient();
+                                                    client.storage.from('music').upload(name, file).then(({ error }) => {
                                                         if (!error) {
-                                                            const { data: { publicUrl } } = supabase.storage.from('music').getPublicUrl(name);
+                                                            const { data: { publicUrl } } = client.storage.from('music').getPublicUrl(name);
                                                             setFormData(prev => ({ ...prev, cover_url: publicUrl }));
                                                         }
                                                     });

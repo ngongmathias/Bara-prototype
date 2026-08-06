@@ -1169,7 +1169,11 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
         if (!clerkUser) { requireSignIn("Sign in to like songs and build your library."); return; }
 
-
+        // §K1/§K5 — user_song_likes RLS now checks the caller's own Clerk id
+        // via the JWT, not a client-supplied one, so this needs the
+        // authenticated client (plain anon-key client has no JWT to check).
+        const token = await getToken({ template: 'supabase' });
+        const client = token ? await createAuthenticatedSupabaseClient(token) : supabase;
 
         const isLiked = likedSongs.includes(songId);
 
@@ -1177,7 +1181,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
         if (isLiked) {
 
-            const { error } = await supabase
+            const { error } = await client
 
                 .from('user_song_likes')
 
@@ -1197,7 +1201,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
         } else {
 
-            const { error } = await supabase
+            const { error } = await client
 
                 .from('user_song_likes')
 

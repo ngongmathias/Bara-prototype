@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { supabase as defaultClient } from '@/lib/supabase';
 
 // Shared storage hygiene for songs (STREAMS_MASTER_PLAN.md §E2). Deleting a
 // song's DB row never cleaned up its audio/cover objects in the `music`
@@ -20,13 +21,20 @@ function storagePathFromPublicUrl(url: string | null | undefined): string | null
 
 // Best-effort: storage cleanup failing should never block the DB delete the
 // caller already committed to. Errors are logged, not thrown.
-export async function deleteSongStorageFiles(song: { file_url?: string | null; cover_url?: string | null }): Promise<void> {
+//
+// §K2 — the `music` bucket's delete policy is path-scoped to the caller's
+// JWT sub (or an active admin), so pass an authenticated client here or
+// cleanup will silently no-op once the bucket lockdown migration lands.
+export async function deleteSongStorageFiles(
+    song: { file_url?: string | null; cover_url?: string | null },
+    client: SupabaseClient = defaultClient
+): Promise<void> {
     const paths = [song.file_url, song.cover_url]
         .map(storagePathFromPublicUrl)
         .filter((p): p is string => !!p);
     if (paths.length === 0) return;
     try {
-        const { error } = await supabase.storage.from(BUCKET).remove(paths);
+        const { error } = await client.storage.from(BUCKET).remove(paths);
         if (error) console.warn('Song storage cleanup failed:', error.message, paths);
     } catch (err) {
         console.warn('Song storage cleanup failed:', err, paths);

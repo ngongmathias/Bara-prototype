@@ -5,6 +5,7 @@ import { useUser } from '@clerk/clerk-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
 import { useToast } from '@/hooks/use-toast';
 
 interface PlaylistRow {
@@ -28,6 +29,7 @@ interface AddToPlaylistModalProps {
 export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ isOpen, onClose, songId, songTitle }) => {
   const { toast } = useToast();
   const { user, isSignedIn } = useUser();
+  const { getClient } = useAuthedSupabase();
   const [playlists, setPlaylists] = useState<PlaylistRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
@@ -61,11 +63,12 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ isOpen, 
     if (!songId || added.has(playlistId)) return;
     setBusyId(playlistId);
     try {
-      const { count } = await supabase
+      const client = await getClient();
+      const { count } = await client
         .from('playlist_songs')
         .select('id', { count: 'exact', head: true })
         .eq('playlist_id', playlistId);
-      const { error } = await supabase
+      const { error } = await client
         .from('playlist_songs')
         .insert({ playlist_id: playlistId, song_id: songId, position: count || 0 });
       // Unique(playlist_id, song_id) -> duplicate is fine, treat as added
@@ -83,13 +86,14 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({ isOpen, 
     if (!newTitle.trim() || !user || !songId) return;
     setCreating(true);
     try {
-      const { data, error } = await supabase
+      const client = await getClient();
+      const { data, error } = await client
         .from('playlists')
         .insert({ title: newTitle.trim(), created_by: user.id, is_public: true })
         .select('id, title, cover_url')
         .single();
       if (error) throw error;
-      await supabase.from('playlist_songs').insert({ playlist_id: data.id, song_id: songId, position: 0 });
+      await client.from('playlist_songs').insert({ playlist_id: data.id, song_id: songId, position: 0 });
       setPlaylists((prev) => [data as PlaylistRow, ...prev]);
       setAdded((prev) => new Set(prev).add(data.id));
       setShowCreate(false);

@@ -269,13 +269,15 @@ export default function ArtistDashboard() {
     const handleDeleteSong = async (songId: string) => {
         if (!confirm('Delete this song? This cannot be undone.')) return;
         const song = songs.find(s => s.id === songId);
-        const { error } = await supabase.from('songs').delete().eq('id', songId);
+        const token = await getToken({ template: 'supabase' });
+        const client = token ? await createAuthenticatedSupabaseClient(token) : supabase;
+        const { error } = await client.from('songs').delete().eq('id', songId);
         if (error) {
             toast({ title: 'Error', description: error.message, variant: 'destructive' });
         } else {
             toast({ title: 'Deleted', description: 'Song removed.' });
             setSongs(prev => prev.filter(s => s.id !== songId));
-            if (song) deleteSongStorageFiles(song);
+            if (song) deleteSongStorageFiles(song, client);
         }
     };
 
@@ -886,7 +888,9 @@ export default function ArtistDashboard() {
                                                             const success = await GamificationService.spendCoins(user.id, boostCost, "Track Boost: " + trackId);
                                                             if (success) {
                                                                 const boostedUntil = new Date(Date.now() + 86400000).toISOString();
-                                                                await supabase.from('songs').update({
+                                                                const boostToken = await getToken({ template: 'supabase' });
+                                                                const boostClient = boostToken ? await createAuthenticatedSupabaseClient(boostToken) : supabase;
+                                                                await boostClient.from('songs').update({
                                                                     is_premium: true,
                                                                     boosted_until: boostedUntil
                                                                 }).eq('id', trackId);

@@ -39,6 +39,7 @@ import {
     Plus
 } from "lucide-react";
 import { db, supabase } from "@/lib/supabase";
+import { useAuthedSupabase } from "@/hooks/useAuthedSupabase";
 import { useToast } from "@/hooks/use-toast";
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
 import { useAdminRole } from '@/hooks/useAdminRole';
@@ -71,6 +72,7 @@ export const AdminAlbums = () => {
     const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const { toast } = useToast();
+    const { getClient } = useAuthedSupabase();
     const { canDelete } = useAdminRole();
 
     // Form State
@@ -104,8 +106,9 @@ export const AdminAlbums = () => {
         if (!canDelete || selectedIds.size === 0) return;
         setBulkBusy(true);
         try {
+            const client = await getClient();
             const ids = Array.from(selectedIds);
-            const { error } = await db.albums().update({ genre }).in('id', ids);
+            const { error } = await client.from('albums').update({ genre }).in('id', ids);
             if (error) throw error;
             await logAdminAction('bulk_set_album_genre', { genre, count: ids.length });
             toast({ title: 'Updated', description: `Genre set to "${genre}" for ${ids.length} album(s).` });
@@ -123,14 +126,15 @@ export const AdminAlbums = () => {
         if (!confirm(`Delete ${selectedIds.size} album(s)? This will not delete the songs inside them.`)) return;
         setBulkBusy(true);
         try {
+            const client = await getClient();
             const targets = albums.filter(a => selectedIds.has(a.id));
             const ids = targets.map(a => a.id);
-            const { error } = await db.albums().delete().in('id', ids);
+            const { error } = await client.from('albums').delete().in('id', ids);
             if (error) throw error;
             await Promise.all(targets.map(a => {
                 if (a.cover_url && a.cover_url.includes('music-covers')) {
                     const fileName = a.cover_url.split('/').pop();
-                    return fileName ? supabase.storage.from('music-covers').remove([`covers/${fileName}`]) : Promise.resolve();
+                    return fileName ? client.storage.from('music-covers').remove([`covers/${fileName}`]) : Promise.resolve();
                 }
                 return Promise.resolve();
             }));
@@ -180,18 +184,18 @@ export const AdminAlbums = () => {
         }
     };
 
-    const handleUpload = async (file: File) => {
+    const handleUpload = async (file: File, client: Awaited<ReturnType<typeof getClient>>) => {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
         const filePath = `covers/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await client.storage
             .from('music-covers')
             .upload(filePath, file);
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
+        const { data: { publicUrl } } = client.storage
             .from('music-covers')
             .getPublicUrl(filePath);
 
@@ -206,20 +210,21 @@ export const AdminAlbums = () => {
             }
 
             setUploading(true);
+            const client = await getClient();
             let finalCoverUrl = formData.cover_url;
 
             if (selectedFile) {
-                finalCoverUrl = await handleUpload(selectedFile);
+                finalCoverUrl = await handleUpload(selectedFile, client);
             }
 
             if (editingAlbum) {
-                const { error } = await db.albums()
+                const { error } = await client.from('albums')
                     .update({ ...formData, cover_url: finalCoverUrl })
                     .eq('id', editingAlbum.id);
                 if (error) throw error;
                 toast({ title: "Success", description: "Album updated" });
             } else {
-                const { error } = await db.albums()
+                const { error } = await client.from('albums')
                     .insert({ ...formData, cover_url: finalCoverUrl });
                 if (error) throw error;
                 toast({ title: "Success", description: "Album created" });
@@ -243,14 +248,15 @@ export const AdminAlbums = () => {
         }
         if (!confirm("Are you sure? This will not delete the songs inside.")) return;
         try {
-            const { error: dbError } = await db.albums().delete().eq('id', id);
+            const client = await getClient();
+            const { error: dbError } = await client.from('albums').delete().eq('id', id);
             if (dbError) throw dbError;
 
             // Optional: Delete from storage
             if (coverUrl && coverUrl.includes('music-covers')) {
                 const fileName = coverUrl.split('/').pop();
                 if (fileName) {
-                    await supabase.storage.from('music-covers').remove([`covers/${fileName}`]);
+                    await client.storage.from('music-covers').remove([`covers/${fileName}`]);
                 }
             }
             await logAdminAction('delete_album', { title });

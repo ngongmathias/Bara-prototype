@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/lib/supabase';
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,7 @@ const GENRES = [
 
 export default function UploadSongPage() {
     const { user } = useUser();
+    const { getClient } = useAuthedSupabase();
     const navigate = useNavigate();
     const { toast } = useToast();
     const audioInputRef = useRef<HTMLInputElement>(null);
@@ -138,6 +140,7 @@ export default function UploadSongPage() {
         let uploadedAudioPath: string | null = null;
         let uploadedCoverPath: string | null = null;
         let insertedSongId: string | null = null;
+        const client = await getClient();
 
         try {
             let currentArtistId = artistId;
@@ -148,7 +151,7 @@ export default function UploadSongPage() {
             // silently creating a second artist row for the same person —
             // recover by fetching the row the other request just created.
             if (!currentArtistId) {
-                const { data: newArtist, error: artistError } = await supabase
+                const { data: newArtist, error: artistError } = await client
                     .from('artists')
                     .insert({
                         name: user.fullName || user.firstName || 'Unknown Artist',
@@ -161,7 +164,7 @@ export default function UploadSongPage() {
 
                 if (artistError) {
                     if (artistError.code === '23505') {
-                        const { data: existing, error: fetchError } = await supabase
+                        const { data: existing, error: fetchError } = await client
                             .from('artists')
                             .select('id')
                             .eq('user_id', user.id)
@@ -184,7 +187,7 @@ export default function UploadSongPage() {
             const audioPath = `songs/${user.id}/${Date.now()}.${audioExt}`;
             const fileUrl = await uploadToMusicWithProgress(audioPath, audioFile, (f) => {
                 setUploadProgress(10 + Math.round(f * 70));
-            });
+            }, client);
             uploadedAudioPath = audioPath;
 
             setUploadProgress(82);
@@ -194,7 +197,7 @@ export default function UploadSongPage() {
             if (coverFile) {
                 const coverExt = coverFile.name.split('.').pop() || 'jpg';
                 const coverPath = `covers/${user.id}/${Date.now()}.${coverExt}`;
-                coverUrl = await uploadToMusicWithProgress(coverPath, coverFile, () => {});
+                coverUrl = await uploadToMusicWithProgress(coverPath, coverFile, () => {}, client);
                 uploadedCoverPath = coverPath;
             }
 
@@ -205,7 +208,7 @@ export default function UploadSongPage() {
             // someone visits Edit Album to fix it.
             let nextTrackNumber: number | null = null;
             if (albumId) {
-                const { data: existingTracks } = await supabase
+                const { data: existingTracks } = await client
                     .from('songs')
                     .select('track_number')
                     .eq('album_id', albumId)
@@ -231,7 +234,7 @@ export default function UploadSongPage() {
             }
 
             // Insert song record
-            const { data: insertedSong, error: insertError } = await supabase
+            const { data: insertedSong, error: insertError } = await client
                 .from('songs')
                 .insert({
                     title: title.trim(),
@@ -264,7 +267,7 @@ export default function UploadSongPage() {
                     { song_id: insertedSong.id, artist_id: currentArtistId, role: 'primary', display_order: 0 },
                     ...featuredIds.map((aid, i) => ({ song_id: insertedSong.id, artist_id: aid, role: 'featured', display_order: i + 1 })),
                 ];
-                await supabase.from('song_artists').upsert(entries, { onConflict: 'song_id,artist_id,role' });
+                await client.from('song_artists').upsert(entries, { onConflict: 'song_id,artist_id,role' });
             } catch { /* credits are non-critical */ }
 
             setUploadProgress(100);
@@ -296,7 +299,7 @@ export default function UploadSongPage() {
             if (!insertedSongId) {
                 const orphaned = [uploadedAudioPath, uploadedCoverPath].filter((p): p is string => !!p);
                 if (orphaned.length > 0) {
-                    supabase.storage.from('music').remove(orphaned).catch(() => {});
+                    client.storage.from('music').remove(orphaned).catch(() => {});
                 }
             }
             toast({ title: 'Upload failed', description: error.message || 'Something went wrong. Please try again.', variant: 'destructive' });

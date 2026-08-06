@@ -8,6 +8,7 @@ import {
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
 import { ReportContentDialog } from './ReportContentDialog';
 
 interface MenuState {
@@ -253,6 +254,7 @@ interface PlaylistRow { id: string; title: string }
 
 const PlaylistPicker: React.FC<{ song: Song; onDone: () => void; onBack: () => void }> = ({ song, onDone, onBack }) => {
     const { user } = useUser();
+    const { getClient } = useAuthedSupabase();
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
     const [playlists, setPlaylists] = useState<PlaylistRow[]>([]);
@@ -273,12 +275,13 @@ const PlaylistPicker: React.FC<{ song: Song; onDone: () => void; onBack: () => v
 
     const addTo = async (playlistId: string) => {
         if (addedTo.has(playlistId)) return;
-        const { count } = await supabase
+        const client = await getClient();
+        const { count } = await client
             .from('playlist_songs')
             .select('*', { count: 'exact', head: true })
             .eq('playlist_id', playlistId);
         const position = count || 0;
-        const { error } = await supabase.from('playlist_songs').insert({
+        const { error } = await client.from('playlist_songs').insert({
             playlist_id: playlistId,
             song_id: song.id,
             position,

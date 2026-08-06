@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { supabase } from "@/lib/supabase";
+import { useAuthedSupabase } from "@/hooks/useAuthedSupabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +24,7 @@ interface MySong {
 
 export const UserMyMusic = () => {
   const { user } = useUser();
+  const { getClient } = useAuthedSupabase();
   const [songs, setSongs] = useState<MySong[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalPlays: 0, totalLikes: 0, totalSongs: 0 });
@@ -59,7 +61,8 @@ export const UserMyMusic = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this song? This cannot be undone.")) return;
     try {
-      const { error } = await supabase.from("songs").delete().eq("id", id);
+      const client = await getClient();
+      const { error } = await client.from("songs").delete().eq("id", id);
       if (error) throw error;
       toast({ title: "Deleted", description: "Song removed." });
       fetchMySongs();
