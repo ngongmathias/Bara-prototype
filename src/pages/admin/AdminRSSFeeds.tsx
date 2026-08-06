@@ -106,23 +106,33 @@ export const AdminRSSFeeds = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [sourcesRes, feedsRes, countriesRes, codesRes] = await Promise.all([
+      const [sourcesRes, feedsRes, countriesRes] = await Promise.all([
         supabase.from('rss_feed_sources').select('*').order('country_name'),
         supabase.from('rss_feeds').select('*').order('pub_date', { ascending: false }).limit(50),
         supabase.from('countries').select('code, name').eq('is_active', true).order('name'),
-        // Only the code column — enough to count coverage without pulling
-        // every article body.
-        supabase.from('rss_feeds').select('country_code'),
       ]);
 
       if (sourcesRes.error) throw sourcesRes.error;
 
+      // Coverage counts must page explicitly: PostgREST caps an unbounded
+      // select() at 1000 rows and returns them silently, which made this
+      // panel under-report — it showed 0 Africa-wide articles when there
+      // were 823. Only the code column is fetched, so the pages are small.
       const counts: Record<string, number> = {};
       let panAfrica = 0;
-      (codesRes.data || []).forEach((r: any) => {
-        if (r.country_code) counts[r.country_code] = (counts[r.country_code] || 0) + 1;
-        else panAfrica += 1;
-      });
+      const PAGE = 1000;
+      for (let from = 0; ; from += PAGE) {
+        const { data, error } = await supabase
+          .from('rss_feeds')
+          .select('country_code')
+          .range(from, from + PAGE - 1);
+        if (error) throw error;
+        (data || []).forEach((r: any) => {
+          if (r.country_code) counts[r.country_code] = (counts[r.country_code] || 0) + 1;
+          else panAfrica += 1;
+        });
+        if (!data || data.length < PAGE) break;
+      }
 
       setSources((sourcesRes.data as Source[]) || []);
       setFeeds(feedsRes.data || []);
