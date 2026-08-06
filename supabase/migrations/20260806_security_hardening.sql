@@ -414,6 +414,11 @@ GRANT SELECT, INSERT, DELETE ON public.songs TO authenticated;
 -- like record_play), add it to this list — anything left out here will
 -- silently fail to update for authenticated clients, the same way `plays`
 -- now silently fails on purpose.
+-- (Practical example of "add it to this list": 20260806_songs_boost_columns.sql
+-- adds is_premium/boosted_until and grants UPDATE on just those two columns
+-- in its own file, rather than editing the list below — avoids a fragile
+-- same-day apply-order dependency, since that migration must run whether
+-- this file has already applied or not.)
 REVOKE UPDATE ON public.songs FROM anon, authenticated;
 GRANT UPDATE (
     album_id, artist_id, cover_url, description, duration, featured_badge,

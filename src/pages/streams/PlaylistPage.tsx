@@ -7,6 +7,7 @@ import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useSongContextMenu } from '@/components/streams/SongContextMenu';
 import { Loader2, Play, Pause, Heart, MoreHorizontal, Shuffle, Clock, Music, Share2, Users, Link2, Flag, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useSignInNudge } from '@/context/SignInNudgeContext';
 import { useShare } from '@/context/ShareContext';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { ReportContentDialog } from '@/components/streams/ReportContentDialog';
@@ -35,6 +36,7 @@ export default function PlaylistPage() {
     const { play, playAlbum, currentSong, isPlaying, togglePlay, likedSongs, toggleLike, isShuffle, toggleShuffle } = useAudioPlayer();
     const { handlers: contextMenuHandlers } = useSongContextMenu();
     const { toast } = useToast();
+    const { requireSignIn } = useSignInNudge();
     const { openShare } = useShare();
     const { user } = useUser();
     const { getToken } = useAuth();
@@ -157,7 +159,7 @@ export default function PlaylistPage() {
 
     const togglePlaylistLike = async () => {
         if (!user?.id || !playlist) {
-            toast({ title: 'Sign in required', description: 'Sign in to save playlists to your library.' });
+            requireSignIn('Sign in to save playlists to your library.');
             return;
         }
         try {

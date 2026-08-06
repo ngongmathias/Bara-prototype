@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useToast } from '@/hooks/use-toast';
+import { useSignInNudge } from '@/context/SignInNudgeContext';
 import { supabase } from '@/lib/supabase';
 import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
 import { ReportContentDialog } from './ReportContentDialog';
@@ -122,6 +123,7 @@ const Menu: React.FC<MenuProps> = ({ state, onClose, playlistPickerOpen, setPlay
     const navigate = useNavigate();
     const { user } = useUser();
     const { toast } = useToast();
+    const { requireSignIn } = useSignInNudge();
     const menuRef = useRef<HTMLDivElement>(null);
 
     const isLiked = likedSongs.includes(song.id);
@@ -185,9 +187,12 @@ const Menu: React.FC<MenuProps> = ({ state, onClose, playlistPickerOpen, setPlay
     };
 
     const handleToggleLike = async () => {
-        if (!user) { toast({ title: 'Sign in required', variant: 'destructive' }); onClose(); return; }
+        // toggleLike (AudioPlayerContext) already calls requireSignIn itself
+        // for guests — no need to duplicate the gate here, and doing so
+        // would show a toast instead of the nudge sheet before toggleLike
+        // ever runs.
         await toggleLike(song.id);
-        toast({ title: isLiked ? 'Removed from liked songs' : 'Added to liked songs' });
+        if (user) toast({ title: isLiked ? 'Removed from liked songs' : 'Added to liked songs' });
         onClose();
     };
 
@@ -225,7 +230,7 @@ const Menu: React.FC<MenuProps> = ({ state, onClose, playlistPickerOpen, setPlay
                 icon={<Music size={16} />}
                 label="Add to playlist"
                 onClick={() => {
-                    if (!user) { toast({ title: 'Sign in required', variant: 'destructive' }); onClose(); return; }
+                    if (!requireSignIn('Sign in to add songs to a playlist.')) { onClose(); return; }
                     setPlaylistPickerOpen(true);
                 }}
             />
