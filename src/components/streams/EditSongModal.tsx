@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/lib/supabase';
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, X, Image as ImageIcon } from 'lucide-react';
 import { PAID_MUSIC_ENABLED } from '@/lib/features';
@@ -32,6 +33,7 @@ interface Props {
 
 export const EditSongModal = ({ song, artistId, albums, onClose, onSaved }: Props) => {
   const { user } = useUser();
+  const { getClient } = useAuthedSupabase();
   const { toast } = useToast();
   const coverInputRef = useRef<HTMLInputElement>(null);
 
@@ -97,16 +99,17 @@ export const EditSongModal = ({ song, artistId, albums, onClose, onSaved }: Prop
     }
     setSaving(true);
     try {
+      const client = await getClient();
       let coverUrl = song.cover_url;
       if (coverFile && user?.id) {
         const ext = coverFile.name.split('.').pop() || 'jpg';
         const path = `covers/${user.id}/${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from('music').upload(path, coverFile, { contentType: coverFile.type });
+        const { error: upErr } = await client.storage.from('music').upload(path, coverFile, { contentType: coverFile.type });
         if (upErr) throw upErr;
-        coverUrl = supabase.storage.from('music').getPublicUrl(path).data.publicUrl;
+        coverUrl = client.storage.from('music').getPublicUrl(path).data.publicUrl;
       }
 
-      const { error } = await supabase.from('songs').update({
+      const { error } = await client.from('songs').update({
         title: title.trim(),
         genre: genre || null,
         album_id: albumId || null,
@@ -123,9 +126,9 @@ export const EditSongModal = ({ song, artistId, albums, onClose, onSaved }: Prop
 
       // Sync featured artists (primary stays; replace the 'featured' rows).
       try {
-        await supabase.from('song_artists').delete().eq('song_id', song.id).eq('role', 'featured');
+        await client.from('song_artists').delete().eq('song_id', song.id).eq('role', 'featured');
         if (featuredIds.length > 0) {
-          await supabase.from('song_artists').insert(
+          await client.from('song_artists').insert(
             featuredIds.map((aid, i) => ({ song_id: song.id, artist_id: aid, role: 'featured', display_order: i + 1 }))
           );
         }

@@ -161,15 +161,19 @@ export default function PlaylistPage() {
             return;
         }
         try {
+            // §K1/§K5 — user_playlist_likes RLS now checks the caller's own
+            // Clerk id via the JWT, so this needs the authenticated client.
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? await createAuthenticatedSupabaseClient(token) : supabase;
             if (isPlaylistLiked) {
-                await supabase
+                await client
                     .from('user_playlist_likes')
                     .delete()
                     .eq('user_id', user.id)
                     .eq('playlist_id', playlist.id);
                 setIsPlaylistLiked(false);
             } else {
-                await supabase
+                await client
                     .from('user_playlist_likes')
                     .insert({ user_id: user.id, playlist_id: playlist.id });
                 setIsPlaylistLiked(true);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { supabase } from "@/lib/supabase";
+import { useAuthedSupabase } from "@/hooks/useAuthedSupabase";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -18,6 +19,7 @@ interface Playlist {
 
 export const UserMyPlaylists = () => {
     const { user } = useUser();
+    const { getClient } = useAuthedSupabase();
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
@@ -66,8 +68,11 @@ export const UserMyPlaylists = () => {
     const handleDelete = async (id: string) => {
         if (!confirm("Delete this playlist?")) return;
         try {
-            await supabase.from("playlist_songs").delete().eq("playlist_id", id);
-            const { error } = await supabase.from("playlists").delete().eq("id", id);
+            // §K1/§K5 — playlists/playlist_songs RLS now checks ownership via
+            // the caller's JWT, so this needs the authenticated client.
+            const client = await getClient();
+            await client.from("playlist_songs").delete().eq("playlist_id", id);
+            const { error } = await client.from("playlists").delete().eq("id", id);
             if (error) throw error;
             toast({ title: "Deleted", description: "Playlist removed." });
             fetchPlaylists();

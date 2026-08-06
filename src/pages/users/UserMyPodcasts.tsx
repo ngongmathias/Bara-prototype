@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import { useAuthedSupabase } from "@/hooks/useAuthedSupabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,18 +53,19 @@ const CATEGORIES = [
 
 const BUCKET = "podcasts";
 
-async function uploadFile(file: File, folder: string): Promise<string> {
+async function uploadFile(file: File, folder: string, client: SupabaseClient): Promise<string> {
   const fileExt = file.name.split(".").pop();
   const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
   const filePath = `${folder}/${fileName}`;
-  const { error } = await supabase.storage.from(BUCKET).upload(filePath, file);
+  const { error } = await client.storage.from(BUCKET).upload(filePath, file);
   if (error) throw error;
-  const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
+  const { data: { publicUrl } } = client.storage.from(BUCKET).getPublicUrl(filePath);
   return publicUrl;
 }
 
 export const UserMyPodcasts = () => {
   const { user } = useUser();
+  const { getClient } = useAuthedSupabase();
   const [podcasts, setPodcasts] = useState<MyPodcast[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -118,8 +121,9 @@ export const UserMyPodcasts = () => {
     }
     try {
       setCreating(true);
-      const cover_url = coverFile ? await uploadFile(coverFile, "covers") : "";
-      const { error } = await supabase.from("podcasts").insert([{
+      const client = await getClient();
+      const cover_url = coverFile ? await uploadFile(coverFile, "covers", client) : "";
+      const { error } = await client.from("podcasts").insert([{
         title: form.title,
         host: user.fullName || user.username || "Unknown Host",
         description: form.description,
@@ -144,7 +148,8 @@ export const UserMyPodcasts = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this podcast? All episodes will also be deleted.")) return;
     try {
-      const { error } = await supabase.from("podcasts").delete().eq("id", id);
+      const client = await getClient();
+      const { error } = await client.from("podcasts").delete().eq("id", id);
       if (error) throw error;
       toast({ title: "Deleted", description: "Podcast removed." });
       fetchMyPodcasts();
@@ -173,8 +178,9 @@ export const UserMyPodcasts = () => {
     }
     try {
       setSavingEpisode(true);
-      const audio_url = await uploadFile(audioFile, `episodes/${managingPodcast.id}`);
-      const { error } = await supabase.from("podcast_episodes").insert([{
+      const client = await getClient();
+      const audio_url = await uploadFile(audioFile, `episodes/${managingPodcast.id}`, client);
+      const { error } = await client.from("podcast_episodes").insert([{
         podcast_id: managingPodcast.id,
         title: episodeForm.title,
         description: episodeForm.description,
@@ -187,7 +193,7 @@ export const UserMyPodcasts = () => {
       if (error) throw error;
       toast({ title: "Episode added", description: `"${episodeForm.title}" uploaded.` });
       resetEpisodeForm();
-      const { data } = await supabase.from("podcast_episodes").select("*").eq("podcast_id", managingPodcast.id).order("episode_number", { ascending: false });
+      const { data } = await client.from("podcast_episodes").select("*").eq("podcast_id", managingPodcast.id).order("episode_number", { ascending: false });
       setEpisodes(data || []);
     } catch (e: any) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
@@ -199,7 +205,8 @@ export const UserMyPodcasts = () => {
   const handleDeleteEpisode = async () => {
     if (!episodeToDelete) return;
     try {
-      const { error } = await supabase.from("podcast_episodes").delete().eq("id", episodeToDelete);
+      const client = await getClient();
+      const { error } = await client.from("podcast_episodes").delete().eq("id", episodeToDelete);
       if (error) throw error;
       setEpisodes(prev => prev.filter(e => e.id !== episodeToDelete));
       toast({ title: "Deleted", description: "Episode removed." });

@@ -46,16 +46,18 @@ import {
     Loader2,
     X
 } from "lucide-react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { db, supabase } from "@/lib/supabase";
+import { useAuthedSupabase } from "@/hooks/useAuthedSupabase";
 import { useToast } from "@/hooks/use-toast";
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
 
-async function uploadArtistImage(file: File): Promise<string> {
+async function uploadArtistImage(file: File, client: SupabaseClient): Promise<string> {
     const fileExt = file.name.split(".").pop();
     const fileName = `artists/${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-    const { error } = await supabase.storage.from("music").upload(fileName, file);
+    const { error } = await client.storage.from("music").upload(fileName, file);
     if (error) throw error;
-    const { data: { publicUrl } } = supabase.storage.from("music").getPublicUrl(fileName);
+    const { data: { publicUrl } } = client.storage.from("music").getPublicUrl(fileName);
     return publicUrl;
 }
 
@@ -81,6 +83,7 @@ export const AdminArtists = () => {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const { toast } = useToast();
+    const { getClient } = useAuthedSupabase();
 
     // Form State
     const [formData, setFormData] = useState<Partial<Artist>>({
@@ -129,10 +132,11 @@ export const AdminArtists = () => {
             }
 
             setUploading(true);
+            const client = await getClient();
             const finalData = { ...formData };
 
             if (imageFile) {
-                finalData.image_url = await uploadArtistImage(imageFile);
+                finalData.image_url = await uploadArtistImage(imageFile, client);
             }
 
             if (editingArtist) {
@@ -141,13 +145,13 @@ export const AdminArtists = () => {
                 // (verification_requests.reviewed_by/reviewed_at); this form
                 // must not be a second, unaudited way to flip it.
                 const { is_verified: _ignored, ...updateData } = finalData;
-                const { error } = await db.artists()
+                const { error } = await client.from('artists')
                     .update(updateData)
                     .eq('id', editingArtist.id);
                 if (error) throw error;
                 toast({ title: "Success", description: "Artist updated" });
             } else {
-                const { error } = await db.artists()
+                const { error } = await client.from('artists')
                     .insert(finalData);
                 if (error) throw error;
                 toast({ title: "Success", description: "Artist created" });
@@ -167,7 +171,8 @@ export const AdminArtists = () => {
     const confirmDelete = async () => {
         if (!artistToDelete) return;
         try {
-            const { error } = await db.artists().delete().eq('id', artistToDelete);
+            const client = await getClient();
+            const { error } = await client.from('artists').delete().eq('id', artistToDelete);
             if (error) throw error;
             toast({ title: "Success", description: "Artist deleted" });
             fetchArtists();

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/lib/supabase';
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,7 @@ const ALBUM_TYPES = ['Album', 'EP', 'Single', 'Mixtape', 'Compilation'];
 
 export default function CreateAlbumPage() {
     const { user } = useUser();
+    const { getClient } = useAuthedSupabase();
     const navigate = useNavigate();
     const { toast } = useToast();
     const coverInputRef = useRef<HTMLInputElement>(null);
@@ -79,6 +81,7 @@ export default function CreateAlbumPage() {
         setSaving(true);
 
         try {
+            const client = await getClient();
             let currentArtistId = artistId;
 
             // Auto-create artist profile if none exists. artists.user_id is
@@ -86,7 +89,7 @@ export default function CreateAlbumPage() {
             // silently creating a second artist row for the same person —
             // recover by fetching the row the other request just created.
             if (!currentArtistId) {
-                const { data: newArtist, error: artistError } = await supabase
+                const { data: newArtist, error: artistError } = await client
                     .from('artists')
                     .insert({
                         name: user.fullName || user.firstName || 'Unknown Artist',
@@ -99,7 +102,7 @@ export default function CreateAlbumPage() {
 
                 if (artistError) {
                     if (artistError.code === '23505') {
-                        const { data: existing, error: fetchError } = await supabase
+                        const { data: existing, error: fetchError } = await client
                             .from('artists')
                             .select('id')
                             .eq('user_id', user.id)
@@ -120,17 +123,17 @@ export default function CreateAlbumPage() {
             if (coverFile) {
                 const coverExt = coverFile.name.split('.').pop() || 'jpg';
                 const coverPath = `covers/${user.id}/album_${Date.now()}.${coverExt}`;
-                const { error: coverUploadError } = await supabase.storage
+                const { error: coverUploadError } = await client.storage
                     .from('music')
                     .upload(coverPath, coverFile, { contentType: coverFile.type });
 
                 if (coverUploadError) throw coverUploadError;
-                const { data: coverUrlData } = supabase.storage.from('music').getPublicUrl(coverPath);
+                const { data: coverUrlData } = client.storage.from('music').getPublicUrl(coverPath);
                 coverUrl = coverUrlData.publicUrl;
             }
 
             // Insert album
-            const { error: insertError } = await supabase
+            const { error: insertError } = await client
                 .from('albums')
                 .insert({
                     title: title.trim(),

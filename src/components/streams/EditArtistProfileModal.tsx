@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/lib/supabase';
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, X, Mic2 } from 'lucide-react';
 
@@ -19,6 +20,7 @@ interface Props {
 
 export const EditArtistProfileModal = ({ artistId, onClose, onSaved }: Props) => {
   const { user } = useUser();
+  const { getClient } = useAuthedSupabase();
   const { toast } = useToast();
   const imgRef = useRef<HTMLInputElement>(null);
 
@@ -64,13 +66,14 @@ export const EditArtistProfileModal = ({ artistId, onClose, onSaved }: Props) =>
     if (!name.trim()) { toast({ title: 'Artist name required', variant: 'destructive' }); return; }
     setSaving(true);
     try {
+      const client = await getClient();
       let imageUrl: string | undefined;
       if (imgFile && user?.id) {
         const ext = imgFile.name.split('.').pop() || 'jpg';
         const path = `artists/${user.id}/${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from('music').upload(path, imgFile, { contentType: imgFile.type });
+        const { error: upErr } = await client.storage.from('music').upload(path, imgFile, { contentType: imgFile.type });
         if (upErr) throw upErr;
-        imageUrl = supabase.storage.from('music').getPublicUrl(path).data.publicUrl;
+        imageUrl = client.storage.from('music').getPublicUrl(path).data.publicUrl;
       }
       const update: Record<string, any> = {
         name: name.trim(),
@@ -81,7 +84,7 @@ export const EditArtistProfileModal = ({ artistId, onClose, onSaved }: Props) =>
         instagram_handle: instagram.trim() || null,
       };
       if (imageUrl) update.image_url = imageUrl;
-      const { error } = await supabase.from('artists').update(update).eq('id', artistId);
+      const { error } = await client.from('artists').update(update).eq('id', artistId);
       if (error) throw error;
       toast({ title: 'Profile updated' });
       onSaved();
