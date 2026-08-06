@@ -43,8 +43,8 @@ const FETCH_TIMEOUT_MS = 12_000
 // Google News throttles bursts from a single datacenter IP. At CONCURRENCY=8
 // with no pacing, 44 of 49 sources came back HTTP 503 even though every URL
 // returns 100+ items when fetched on its own. Keep this low.
-const CONCURRENCY = 3
-const REQUEST_SPACING_MS = 400
+const CONCURRENCY = 4
+const REQUEST_SPACING_MS = 250
 const FETCH_RETRIES = 3
 const RETRY_BACKOFF_MS = 1_500
 // A forced refresh (admin button) still no-ops if one ran in the last 2 minutes,
@@ -134,38 +134,98 @@ function parseFeed(xml: string, sourceName: string): FeedItem[] {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 /**
- * Fetch one feed, retrying on the throttling responses Google News returns
- * when it sees a burst from one datacenter IP.
+ * Google News refuses this function's requests outright.
  *
- * Verified behaviour: these exact URLs return 100+ items every time when
- * fetched individually, but running the whole source list at CONCURRENCY=8
- * with no pacing produced HTTP 503 on 44 of 49 sources. The URLs were never
- * the problem — the request rate was. Retry with backoff plus the reduced
- * concurrency and inter-request delay below is what makes a full refresh
- * actually complete.
+ * Measured, not guessed: on a full refresh, all 44 Google News sources
+ * returned HTTP 503 while all 5 non-Google sources (BBC Africa, AllAfrica,
+ * African Business, Africa News, The Africa Report) returned 200 with items.
+ * A perfect split by domain rather than by rate — and the same URLs return
+ * 100+ items when fetched from a residential IP, with either a bot or a
+ * browser User-Agent. Google blocks the datacenter IP ranges that Supabase
+ * Edge Functions run on, so lowering concurrency cannot fix it.
+ *
+ * rss2json fetches the feed from their own infrastructure and hands back
+ * JSON, which gets through. It caps free responses at 10 items — the same as
+ * MAX_ITEMS_PER_FEED, so nothing is lost. The client-side refresh path
+ * (src/lib/rssService.ts) has relied on this service for a long time.
+ */
+async function fetchViaRss2Json(url: string, sourceName: string): Promise<FeedItem[]> {
+  const res = await fetch(
+    `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`,
+    { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
+  )
+  if (!res.ok) throw new Error(`rss2json HTTP ${res.status}`)
+
+  const data = await res.json()
+  if (data.status !== 'ok' || !Array.isArray(data.items)) {
+    throw new Error(`rss2json status ${data.status ?? 'unknown'}`)
+  }
+
+  return data.items
+    .slice(0, MAX_ITEMS_PER_FEED)
+    .map((i: Record<string, unknown>): FeedItem => ({
+      title: String(i.title ?? ''),
+      link: String(i.link ?? ''),
+      description: String(i.description ?? i.content ?? ''),
+      pub_date: new Date(String(i.pubDate ?? Date.now())).toISOString(),
+      source: sourceName,
+      image_url: (i.thumbnail as string) || ((i.enclosure as Record<string, string>)?.link ?? undefined) || undefined,
+      author: (i.author as string) || undefined,
+      guid: String(i.guid ?? i.link ?? ''),
+    }))
+    .filter((i: FeedItem) => i.title && i.link && i.guid)
+}
+
+/**
+ * Domains known to reject this function's datacenter IP outright. Trying them
+ * directly first is pure waste: three failed attempts plus backoff costs ~4.5s
+ * per source, and across ~44 sources that alone pushed a full refresh past the
+ * Edge Function execution limit — the run was cut off partway, leaving most
+ * sources unfetched. Going straight to the proxy for these takes a full
+ * refresh from minutes to well under the limit.
+ */
+const PROXY_ONLY_HOSTS = ['news.google.com']
+
+/**
+ * Fetch one feed: direct first, then via rss2json if the origin rejects us —
+ * except for hosts we already know block us, which go straight to the proxy.
  */
 async function fetchFeed(url: string, sourceName: string): Promise<FeedItem[]> {
   let lastStatus = 0
 
+  if (PROXY_ONLY_HOSTS.some((h) => url.includes(h))) {
+    return await fetchViaRss2Json(url, sourceName)
+  }
+
   for (let attempt = 0; attempt < FETCH_RETRIES; attempt++) {
     if (attempt > 0) await sleep(RETRY_BACKOFF_MS * attempt)
 
-    const res = await fetch(url, {
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      headers: {
-        'User-Agent': 'BaraAfrika-NewsBot/1.0 (+https://baraafrika.com)',
-        Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*',
-      },
-    })
+    try {
+      const res = await fetch(url, {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        headers: {
+          'User-Agent': 'BaraAfrika-NewsBot/1.0 (+https://baraafrika.com)',
+          Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*',
+        },
+      })
 
-    if (res.ok) return parseFeed(await res.text(), sourceName)
+      if (res.ok) return parseFeed(await res.text(), sourceName)
 
-    lastStatus = res.status
-    // Only 429/5xx are worth retrying; a 404 will never become a 200.
-    if (res.status !== 429 && res.status < 500) break
+      lastStatus = res.status
+      // Only 429/5xx are worth retrying directly; a 404 will never become 200.
+      if (res.status !== 429 && res.status < 500) break
+    } catch (_e) {
+      lastStatus = 0 // network/timeout — fall through to the proxy
+    }
   }
 
-  throw new Error(`HTTP ${lastStatus}`)
+  // Direct fetch is blocked or failing; try the proxy before giving up.
+  try {
+    return await fetchViaRss2Json(url, sourceName)
+  } catch (proxyErr) {
+    const detail = proxyErr instanceof Error ? proxyErr.message : String(proxyErr)
+    throw new Error(`HTTP ${lastStatus || 'ERR'} direct, then ${detail}`)
+  }
 }
 
 Deno.serve(async (req) => {
