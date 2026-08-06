@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { Header } from '@/components/Header';
@@ -6,83 +6,44 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Coins, Sparkles, Zap, ShoppingBag, Calendar, Music, TrendingUp, Gift, ArrowRight, Check, Loader2 } from 'lucide-react';
+import { Coins, Sparkles, Zap, ShoppingBag, Music, TrendingUp, Gift, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
 import { GamificationService } from '@/lib/gamificationService';
 import { useAdFree } from '@/hooks/useAdFree';
 import { ShieldOff } from 'lucide-react';
 
+// Packs are priced and ready, but not purchasable until the payment
+// integration lands — the UI below states that plainly rather than
+// advertising them as claimable (it previously rendered "FREE" over every
+// pack with a button that always failed).
 const coinPacks = [
-  {
-    id: 'starter',
-    name: 'Starter',
-    coins: 100,
-    bonus: 0,
-    price: 1.99,
-    popular: false,
-    icon: Coins,
-    color: 'from-gray-100 to-gray-50',
-    borderColor: 'border-gray-200',
-  },
-  {
-    id: 'popular',
-    name: 'Popular',
-    coins: 300,
-    bonus: 50,
-    price: 4.99,
-    popular: true,
-    icon: Sparkles,
-    color: 'from-yellow-50 to-orange-50',
-    borderColor: 'border-yellow-300',
-  },
-  {
-    id: 'power',
-    name: 'Power',
-    coins: 700,
-    bonus: 150,
-    price: 9.99,
-    popular: false,
-    icon: Zap,
-    color: 'from-blue-50 to-indigo-50',
-    borderColor: 'border-blue-200',
-  },
-  {
-    id: 'elite',
-    name: 'Elite',
-    coins: 2000,
-    bonus: 500,
-    price: 24.99,
-    popular: false,
-    icon: TrendingUp,
-    color: 'from-purple-50 to-pink-50',
-    borderColor: 'border-purple-200',
-  },
+  { id: 'starter', name: 'Starter', coins: 100, bonus: 0, price: 1.99, popular: false, icon: Coins },
+  { id: 'popular', name: 'Popular', coins: 300, bonus: 50, price: 4.99, popular: true, icon: Sparkles },
+  { id: 'power', name: 'Power', coins: 700, bonus: 150, price: 9.99, popular: false, icon: Zap },
+  { id: 'elite', name: 'Elite', coins: 2000, bonus: 500, price: 24.99, popular: false, icon: TrendingUp },
 ];
 
+// Only perks that actually exist and can be paid for. "Event Highlight" and
+// "Business Premium Badge" used to be listed here with hardcoded prices but
+// have no implementation anywhere — no settings key, no call site — so they
+// were advertising features nobody could buy. Costs are read live from
+// gamification_settings so this page can't go stale when an admin retunes.
 const spendOptions = [
   {
     icon: ShoppingBag,
     title: 'Marketplace Spotlight',
-    cost: '50 coins',
-    description: 'Boost your listing to the top of its category for 7 days',
-  },
-  {
-    icon: Calendar,
-    title: 'Event Highlight',
-    cost: '75 coins',
-    description: 'Feature your event with a banner on the events page',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Business Premium Badge',
-    cost: '100 coins',
-    description: 'Get a verified badge and priority in search for 30 days',
+    settingKey: 'cost.listing_boost',
+    to: '/marketplace/post',
+    where: 'Choose it while posting an ad',
+    description: 'Boost your listing to the top of its category',
   },
   {
     icon: Music,
     title: 'Track Boost',
-    cost: '50 coins',
+    settingKey: 'cost.track_boost',
+    to: '/streams/creator',
+    where: 'From your Creator dashboard',
     description: 'Push your track to the top of the trending feed for 24 hours',
   },
 ];
@@ -91,10 +52,22 @@ export default function CoinStorePage() {
   const { isSignedIn, user } = useUser();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [selectedPack, setSelectedPack] = useState<string | null>(null);
-  const [purchasing, setPurchasing] = useState(false);
   const { activateAdFree, isAdFree, timeRemaining, cost: adFreeCost, duration: adFreeHours } = useAdFree();
   const [activatingAdFree, setActivatingAdFree] = useState(false);
+  const [spendCosts, setSpendCosts] = useState<Record<string, number>>({});
+
+  // Read the real prices rather than trusting hardcoded copy — an admin can
+  // retune these live in Admin → Gamification.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const entries = await Promise.all(
+        spendOptions.map(async (o) => [o.settingKey, await GamificationService.getSetting(o.settingKey)] as const)
+      );
+      if (!cancelled) setSpendCosts(Object.fromEntries(entries));
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleAdFree = async () => {
     if (!isSignedIn || !user) {
@@ -114,19 +87,15 @@ export default function CoinStorePage() {
     }
   };
 
-  const handlePurchase = async (packId: string) => {
-    if (!isSignedIn || !user) {
-      navigate(`/user/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
-      return;
-    }
-
+  // Coin packs are not purchasable yet — the cards render as "coming soon"
+  // and their buttons are disabled, so this is only reachable via keyboard
+  // edge cases. Kept honest rather than removed.
+  // TODO: grant coins via a secure Edge Function once payments are integrated.
+  const handlePurchase = async (_packId: string) => {
     toast({
-      title: 'Store Under Maintenance',
-      description: 'Coin purchases are temporarily disabled while we upgrade our payment system. Please check back later.',
+      title: 'Coin packs are not on sale yet',
+      description: 'You can earn coins today through missions, the daily spin, and levelling up.',
     });
-    return;
-
-    // TODO: Move coin granting to a secure Edge Function with Stripe webhook
   };
 
   return (
@@ -140,8 +109,8 @@ export default function CoinStorePage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-bold mb-6">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-bold mb-6">
             <Coins className="w-4 h-4" />
             Bara Coin Store
           </div>
@@ -150,28 +119,42 @@ export default function CoinStorePage() {
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto font-roboto">
             Bara Coins let you boost listings, promote events, and stand out from the crowd.
-            Earn them through activity or buy packs below.
+            Right now every coin is earned — buying them is coming soon.
           </p>
         </div>
 
-        {/* Coin Packs */}
+        {/* Coin Packs — priced but not yet purchasable */}
+        <div className="max-w-3xl mx-auto mb-8 border border-gray-200 rounded-xl px-5 py-4 bg-gray-50 flex flex-col sm:flex-row sm:items-center gap-3">
+          <p className="text-sm text-gray-700 font-roboto flex-1">
+            <span className="font-bold text-gray-900">Coin packs aren&apos;t on sale yet.</span>{' '}
+            We&apos;re finishing card and mobile-money payments. Until then, everything below
+            is earnable for free.
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/rewards')}
+            className="border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white font-bold shrink-0"
+          >
+            Ways to earn <ArrowRight className="w-4 h-4 ml-1" />
+          </Button>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
           {coinPacks.map((pack) => {
             const Icon = pack.icon;
             const totalCoins = pack.coins + pack.bonus;
-            const rate = (pack.price / totalCoins).toFixed(3);
 
             return (
               <div key={pack.id} className="relative">
                 {pack.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                    <Badge className="bg-yellow-400 text-yellow-900 border-0 font-bold px-3 py-1 shadow-sm">
+                    <Badge className="bg-gray-900 text-white border-0 font-bold px-3 py-1 shadow-sm">
                       Best Value
                     </Badge>
                   </div>
                 )}
-                <Card className={`h-full flex flex-col border-2 ${pack.popular ? 'border-yellow-400 shadow-lg ring-1 ring-yellow-200' : pack.borderColor} hover:shadow-md transition-shadow`}>
-                  <CardHeader className={`bg-gradient-to-br ${pack.color} rounded-t-lg pb-4`}>
+                <Card className={`h-full flex flex-col border-2 ${pack.popular ? 'border-gray-900' : 'border-gray-200'}`}>
+                  <CardHeader className="bg-gray-50 rounded-t-lg pb-4">
                     <div className="flex items-center justify-between">
                       <Icon className="w-8 h-8 text-gray-700" />
                       <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{pack.name}</span>
@@ -179,37 +162,35 @@ export default function CoinStorePage() {
                     <div className="mt-4">
                       <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-black text-gray-900">{pack.coins.toLocaleString()}</span>
-                        <Coins className="w-5 h-5 text-yellow-600" />
+                        <Coins className="w-5 h-5 text-gray-500" />
                       </div>
                       {pack.bonus > 0 && (
                         <div className="flex items-center gap-1 mt-1">
-                          <Gift className="w-3.5 h-3.5 text-green-600" />
-                          <span className="text-sm font-bold text-green-700">+{pack.bonus} bonus coins!</span>
+                          <Gift className="w-3.5 h-3.5 text-gray-600" />
+                          <span className="text-sm font-bold text-gray-700">+{pack.bonus} bonus coins</span>
                         </div>
                       )}
                     </div>
                   </CardHeader>
 
                   <CardContent className="flex-1 pt-4">
-                    <div className="text-3xl font-black text-green-600 mb-1">
-                      FREE
+                    <div className="flex items-baseline gap-1.5 mb-1">
+                      <span className="text-3xl font-black text-gray-900">${pack.price}</span>
+                      <span className="text-sm text-gray-500 font-roboto">
+                        for {totalCoins.toLocaleString()}
+                      </span>
                     </div>
                     <p className="text-xs text-gray-500 font-roboto">
-                      Limited time — grab your coins now!
+                      Not on sale yet — coming with card &amp; mobile money payments.
                     </p>
                   </CardContent>
 
                   <div className="px-6 pb-6">
                     <Button
-                      onClick={() => handlePurchase(pack.id)}
-                      disabled={purchasing && selectedPack === pack.id}
-                      className={`w-full py-5 font-bold ${pack.popular ? 'bg-yellow-500 hover:bg-yellow-600 text-black' : 'bg-black hover:bg-gray-800 text-white'}`}
+                      disabled
+                      className="w-full py-5 font-bold bg-gray-100 text-gray-400 hover:bg-gray-100 cursor-not-allowed"
                     >
-                      {purchasing && selectedPack === pack.id ? (
-                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Adding...</>
-                      ) : (
-                        <>Claim {totalCoins.toLocaleString()} Coins</>
-                      )}
+                      Coming soon
                     </Button>
                   </div>
                 </Card>
@@ -232,10 +213,10 @@ export default function CoinStorePage() {
             ].map((item) => (
               <div key={item.action} className="bg-white rounded-xl p-5 border border-gray-100">
                 <div className="flex items-center gap-2 mb-2">
-                  <Check className="w-4 h-4 text-green-600" />
+                  <Check className="w-4 h-4 text-gray-900" />
                   <span className="font-bold text-gray-900 text-sm">{item.action}</span>
                 </div>
-                <div className="text-lg font-black text-yellow-600 mb-1">{item.reward}</div>
+                <div className="text-lg font-black text-gray-900 mb-1">{item.reward}</div>
                 <p className="text-xs text-gray-500">{item.desc}</p>
               </div>
             ))}
@@ -256,7 +237,7 @@ export default function CoinStorePage() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-bold">Ad-Free Browsing</h3>
-                <Badge variant="outline" className="text-xs font-bold text-yellow-300 border-yellow-400/40 bg-yellow-400/10">
+                <Badge variant="outline" className="text-xs font-bold text-white border-white/40 bg-white/10">
                   {adFreeCost} coins / {adFreeHours}h
                 </Badge>
               </div>
@@ -269,7 +250,7 @@ export default function CoinStorePage() {
             <Button
               onClick={handleAdFree}
               disabled={activatingAdFree || isAdFree}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold flex-shrink-0"
+              className="bg-white hover:bg-gray-100 text-gray-900 font-bold flex-shrink-0"
             >
               {isAdFree ? 'Active' : activatingAdFree ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Activating…</> : 'Activate'}
             </Button>
@@ -278,21 +259,29 @@ export default function CoinStorePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {spendOptions.map((option) => {
               const Icon = option.icon;
+              const cost = spendCosts[option.settingKey];
               return (
-                <div key={option.title} className="flex gap-4 p-6 bg-white border border-gray-100 rounded-xl hover:shadow-sm transition">
-                  <div className="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-6 h-6 text-yellow-700" />
+                <button
+                  key={option.title}
+                  onClick={() => navigate(option.to)}
+                  className="flex gap-4 p-6 bg-white border border-gray-200 rounded-xl hover:border-gray-900 hover:shadow-sm transition text-left w-full"
+                >
+                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-6 h-6 text-gray-700" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <h3 className="font-bold text-gray-900">{option.title}</h3>
-                      <Badge variant="outline" className="text-xs font-bold text-yellow-700 border-yellow-300 bg-yellow-50">
-                        {option.cost}
+                      <Badge variant="outline" className="text-xs font-bold text-gray-700 border-gray-300 bg-gray-100">
+                        {cost != null ? `${cost} coins` : '—'}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600 font-roboto">{option.description}</p>
+                    <p className="text-sm text-gray-600 font-roboto mb-2">{option.description}</p>
+                    <span className="text-xs font-bold text-gray-900 inline-flex items-center gap-1">
+                      {option.where} <ArrowRight className="w-3 h-3" />
+                    </span>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
