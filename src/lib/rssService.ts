@@ -27,55 +27,80 @@ export interface RSSFeedSource {
   lastFetchedAt?: string;
 }
 
+function mapFeedRow(feed: any): RSSFeedItem {
+  return {
+    id: feed.id,
+    title: feed.title,
+    link: feed.link,
+    description: feed.description || '',
+    pubDate: feed.pub_date,
+    source: feed.source,
+    countryCode: feed.country_code,
+    countryName: feed.country_name,
+    imageUrl: feed.image_url,
+    author: feed.author,
+    category: feed.category,
+    guid: feed.guid,
+  };
+}
+
 /**
- * Fetch RSS feeds from the database cache
+ * Fetch RSS feeds from the database cache.
+ *
+ * Falls back to Africa-wide articles (`country_code IS NULL` — BBC Africa,
+ * AllAfrica, The Africa Report and friends) when a specific country has thin
+ * coverage. Previously this filtered strictly on country_code, so 800+
+ * continental articles were cached but displayed on no page at all, while
+ * most country pages rendered "NO NEWS".
+ *
+ * Pass `fallback: false` to opt out (e.g. an admin view that must show exactly
+ * what is attributed to one country).
  */
 export async function getRSSFeeds(options?: {
   countryCode?: string;
   limit?: number;
   source?: string;
+  fallback?: boolean;
 }): Promise<RSSFeedItem[]> {
+  const limit = options?.limit ?? 20;
+
   try {
     let query = supabase
       .from('rss_feeds')
       .select('*')
       .order('pub_date', { ascending: false });
 
-    if (options?.countryCode) {
-      query = query.eq('country_code', options.countryCode);
-    }
+    if (options?.countryCode) query = query.eq('country_code', options.countryCode);
+    if (options?.source) query = query.eq('source', options.source);
 
-    if (options?.source) {
-      query = query.eq('source', options.source);
-    }
-
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    } else {
-      query = query.limit(20);
-    }
-
-    const { data, error } = await query;
+    const { data, error } = await query.limit(limit);
 
     if (error) {
       console.error('Error fetching RSS feeds:', error);
       return [];
     }
 
-    return (data || []).map(feed => ({
-      id: feed.id,
-      title: feed.title,
-      link: feed.link,
-      description: feed.description || '',
-      pubDate: feed.pub_date,
-      source: feed.source,
-      countryCode: feed.country_code,
-      countryName: feed.country_name,
-      imageUrl: feed.image_url,
-      author: feed.author,
-      category: feed.category,
-      guid: feed.guid,
-    }));
+    const items = (data || []).map(mapFeedRow);
+
+    // Top up thin country pages with continental news rather than showing an
+    // empty state. Only when filtering by country, and never for a source-
+    // specific query (which is asking for one publisher on purpose).
+    const wantsFallback = options?.fallback !== false && !!options?.countryCode && !options?.source;
+    if (wantsFallback && items.length < limit) {
+      const { data: panAfrica } = await supabase
+        .from('rss_feeds')
+        .select('*')
+        .is('country_code', null)
+        .order('pub_date', { ascending: false })
+        .limit(limit - items.length);
+
+      const seen = new Set(items.map((i) => i.link));
+      for (const row of panAfrica || []) {
+        if (!seen.has(row.link)) items.push(mapFeedRow(row));
+      }
+    }
+
+    return items;
   } catch (error) {
     console.error('Error in getRSSFeeds:', error);
     return [];

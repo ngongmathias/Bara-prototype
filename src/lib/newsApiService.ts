@@ -25,8 +25,46 @@ export interface NewsArticle {
 // ============================================
 // OPTION 1: Google News RSS (FREE, DEFAULT)
 // ============================================
+
+/**
+ * Per-code overrides for feeds that cannot be derived from the country name.
+ *
+ * Two reasons an override is needed:
+ *  1. Several of the site's "countries" are people-groups, not countries
+ *     (ED = HBCU, US-BA, GB-BA, EU-BA, BR-BA). Interpolating those codes
+ *     produces an invalid Google News edition.
+ *  2. Morocco is stored under `MC`, which is Monaco's ISO code, so the
+ *     derived edition would be wrong.
+ *
+ * Every URL produced by this module was verified by live fetch — see
+ * `scripts/verify_rss_urls.mjs`, which counts <item> elements for all 40
+ * active countries. Re-run it before changing this map.
+ */
+const FEED_OVERRIDES: Record<string, { query: string; gl: string; hl: string; ceid: string }> = {
+  'US-BA': { query: 'African American news', gl: 'US', hl: 'en-US', ceid: 'US:en' },
+  'GB-BA': { query: 'Black British news', gl: 'GB', hl: 'en-GB', ceid: 'GB:en' },
+  'EU-BA': { query: 'Black Europeans Africa diaspora', gl: 'GB', hl: 'en-GB', ceid: 'GB:en' },
+  'BR-BA': { query: 'afro-brasileiros', gl: 'BR', hl: 'pt-BR', ceid: 'BR:pt-419' },
+  'ED': { query: 'HBCU', gl: 'US', hl: 'en-US', ceid: 'US:en' },
+  'MC': { query: 'Morocco news', gl: 'MA', hl: 'en-MA', ceid: 'MA:en' },
+};
+
+/**
+ * Build a Google News RSS URL that actually returns articles.
+ *
+ * The previous implementation used `when:24h+allinurl:<name>`, which Google
+ * returns an EMPTY feed for. Because an empty feed still responds 200, every
+ * affected source recorded `last_fetch_status: 'ok'` with zero items — 41 of
+ * 60 sources were dead while reporting healthy, and 32 of 40 country pages
+ * served no news at all.
+ */
 export const generateGoogleNewsURL = (countryName: string, countryCode: string): string => {
-  return `https://news.google.com/rss/search?q=when:24h+allinurl:${countryName.toLowerCase()}&gl=${countryCode}&hl=en-${countryCode}&ceid=${countryCode}:en`;
+  const o = FEED_OVERRIDES[countryCode];
+  if (o) {
+    return `https://news.google.com/rss/search?q=${encodeURIComponent(o.query)}&hl=${o.hl}&gl=${o.gl}&ceid=${encodeURIComponent(o.ceid)}`;
+  }
+  return `https://news.google.com/rss/search?q=${encodeURIComponent(`${countryName} news`)}` +
+    `&hl=en-${countryCode}&gl=${countryCode}&ceid=${encodeURIComponent(`${countryCode}:en`)}`;
 };
 
 // ============================================
