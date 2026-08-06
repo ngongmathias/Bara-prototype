@@ -1,11 +1,10 @@
 # BARA Streams — Master Completion Plan
 
-**STATUS: All 14 phases shipped as PRs (2026-08-03 → 2026-08-06).** See §6 for the
-phase-by-phase PR list and §8 for what's genuinely done vs. what still needs action
-before this can be called launch-ready — in particular, **Phase 13's two security
-migrations and Phase 14's two bugfix migrations are not yet applied to production**, so
-the anon-write vulnerabilities they fix are still live until someone runs them (see
-`STREAMS_MIGRATIONS_TRACKING.md`). Closed out 2026-08-06.
+**STATUS: All 14 phases shipped as PRs and all migrations applied to production
+(2026-08-03 → 2026-08-06).** See §6 for the phase-by-phase PR list and §8 for what's
+genuinely done vs. what still needs action — the migrations are applied, but the manual
+QA checklist that should follow them (`PHASE_13_SECURITY_HARDENING.md` §3 /
+`PHASE_14_LAUNCH_QA.md` §3) has not been run yet. Closed out 2026-08-06.
 
 **Created:** 2026-08-03 (planning session) · **Revised:** 2026-08-03 (admin + signature-features + doc reconciliation) · **Closed out:** 2026-08-06
 **Goal:** Take Streams from "wide skeleton" to a fully functional product where every user scenario is accounted for — Spotify-quality mechanics, adapted to Bara's context: free-first, self-managed by users and artists, deep shareable links into every corner of the platform, and payments deferred until DPO/MoMo approval (Phase 15 Flutterwave in `MASTER_PLAN.md`).
@@ -304,7 +303,7 @@ Ordered for: visible product completeness first (D2), foundations that other pha
 | **10** | Search, discovery & perf | §J — cross-vertical search, pagination, React Query | M | #13 | ✅ Merged |
 | **11** | Admin command center | §L — moderation queue, real dashboard, content health, seed controls, bulk actions, claim queue, role enforcement, audit trail | L | #14 | ✅ Merged |
 | **12** | Signature experiences | §5 — resume rail, data saver, country charts, radio wiring, share/quote cards, recap/Wrapped, offline/PWA, per-vertical delight | L (split into several PRs) | #15 | ✅ Merged — not individually re-verified item-by-item, see §8 |
-| **13** | Security & schema hardening | §K — the pre-launch gate | L | #16 | ✅ Merged — **migrations NOT yet applied to prod**, see §8 |
+| **13** | Security & schema hardening | §K — the pre-launch gate | L | #16 | ✅ Merged and applied to prod (2026-08-06) — QA checklist still pending, see §8 |
 | **14** | Launch QA | Re-run scenario matrix end-to-end, all ✅ or consciously deferred; STREAMS_STANDARD Part B acceptance checks; device-matrix pass (375/768/1440); empty/error-state pass; Lighthouse ≥90 a11y | M | #17 | ✅ Merged — a11y passed (92), perf did not (32, bundle-size issue), device/signed-in checks handed off, see §8 |
 
 Suggested pairing per session: Phases 1–2 together (music feels dramatically more finished), then 3–4 (share + counting = credible public numbers), then 5–6 (creators + safety), then one vertical per session (7, 8, 9), then 10–11 (search + admin), 12 in slices whenever a phase lands early, then 13–14 as the launch gate. Some §5 quick wins (radio wiring, sign-in nudge sheet, SongPage SEO) can ride along inside Phases 1–3.
@@ -315,7 +314,7 @@ Suggested pairing per session: Phases 1–2 together (music feels dramatically m
 - ✅ Nothing user-visible is mock/hardcoded/inert — the last known instance (`MoviesPage.tsx`'s hardcoded fallback catalog) was found and removed in Phase 14.
 - 🟡 A signed-out user always gets a clear sign-in prompt on gated actions — true everywhere checked; Phase 14 unified 3 more call sites onto the shared nudge sheet but did not exhaustively grep every gated action in the codebase for a stray silent no-op.
 - ✅ Play/watch/read progress survives refresh and returns — verified live for music (resume rail), code-verified for movies/podcasts/ebooks.
-- ❌ **Anon REST writes fail against every streams table and bucket — NOT true yet.** Phase 13 wrote the RLS/grant fixes and Phase 14 wrote two more schema fixes, but per standing project policy none of these migrations were applied to the database (`supabase db push` is never run automatically). Until someone runs the migrations listed as "No" in `STREAMS_MIGRATIONS_TRACKING.md` (rows 10–13), the anon-write vulnerabilities documented in `PHASE_13_SECURITY_HARDENING.md` are still live in production. **This is the single most important thing left to do.**
+- 🟡 **Anon REST writes fail against every streams table and bucket — migrations applied 2026-08-06, not yet re-verified.** All 4 Phase 13/14 migrations (plus a discovered prerequisite, `20260415_collaborative_playlists.sql`) ran successfully against production. `node scripts/security_pentest_anon_writes.mjs` has not been re-run since to confirm the fix took — do that before treating this as fully closed.
 - 🟡 Admin can manage every content type end-to-end without touching SQL — true in code; the `music-covers` bucket bug (Phase 14) means admin album-cover uploads were actually broken until that migration is applied too.
 - 🟡 The ⭐ signature features in §5 are shipped or explicitly deferred with reasons logged — Phase 12 shipped as one PR (#15) covering this section, but Phase 14's QA pass scoped to the Scenario Matrix and STREAMS_STANDARD Part B, not an item-by-item re-check of every §5 bullet. Recommend a spot-check before treating this bullet as fully closed.
 
@@ -333,15 +332,14 @@ Suggested pairing per session: Phases 1–2 together (music feels dramatically m
 
 All 14 phases are merged (§6). Before calling this project done, in priority order:
 
-1. **Apply the outstanding migrations.** `STREAMS_MIGRATIONS_TRACKING.md` rows 10–13
-   (`20260806_security_hardening.sql`, `20260806_music_bucket_hardening.sql`,
-   `20260806_songs_boost_columns.sql`, `20260806_music_covers_bucket.sql`) are all
-   written, reviewed, and merged into `main`, but **not applied to the production
-   database** — per standing project policy, migrations are never run automatically.
-   Until they're applied: anon REST writes still succeed against core Streams tables
-   and the `music` bucket (the exact vulnerability Phase 13 was written to close), the
-   Creator Dashboard's "My Songs" tab is empty for every artist, and admin album-cover
-   uploads fail.
+1. ✅ **Done 2026-08-06 — migrations applied.** `STREAMS_MIGRATIONS_TRACKING.md` rows
+   10–13 (`20260806_security_hardening.sql`, `20260806_music_bucket_hardening.sql`,
+   `20260806_songs_boost_columns.sql`, `20260806_music_covers_bucket.sql`) all applied
+   successfully to production, after a discovered prerequisite
+   (`20260415_collaborative_playlists.sql`, also never applied) was run first. **Not yet
+   done:** re-run `node scripts/security_pentest_anon_writes.mjs` to confirm the
+   anon-write fix took, and spot-check the Creator Dashboard "My Songs" tab + admin
+   album-cover upload.
 2. **Run the Phase 14 handoff checklist** (`PHASE_14_LAUNCH_QA.md` §3) against a real
    signed-in Clerk session in staging — likes/saves/follows persistence, playlist
    collaboration, podcast/movie/ebook progress, the full creator publish flow, admin
