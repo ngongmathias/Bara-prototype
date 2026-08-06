@@ -109,6 +109,11 @@ UPDATE public.rss_feed_sources s
        updated_at        = NOW()
   FROM verified v
  WHERE s.country_code = v.country_code
+   -- Only the single surviving active source per code (step 4 guarantees
+   -- there is exactly one). Without this, every duplicate row sharing a code
+   -- would be handed the same URL and trip the UNIQUE constraint on
+   -- rss_feed_sources.url — 8 codes currently have two source rows.
+   AND s.is_active = true
    AND s.url IS DISTINCT FROM v.url;
 
 -- 6. Keep country_name in step with the corrected codes.
@@ -168,6 +173,12 @@ SELECT 'Google News: ' || c.name, v.url, c.code, c.name, true
   FROM public.countries c
   JOIN verified v ON v.country_code = c.code
  WHERE c.is_active = true
+   -- No ACTIVE source for this country (an inactive-only country still needs
+   -- a working one), and the URL isn't already taken by another row.
    AND NOT EXISTS (
-     SELECT 1 FROM public.rss_feed_sources s WHERE s.country_code = c.code
+     SELECT 1 FROM public.rss_feed_sources s
+      WHERE s.country_code = c.code AND s.is_active = true
+   )
+   AND NOT EXISTS (
+     SELECT 1 FROM public.rss_feed_sources s WHERE s.url = v.url
    );
