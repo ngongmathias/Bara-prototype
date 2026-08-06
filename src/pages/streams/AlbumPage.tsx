@@ -5,6 +5,7 @@ import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { supabase } from '@/lib/supabase';
 import { useAudioPlayer, Song } from '@/context/AudioPlayerContext';
 import { useToast } from '@/hooks/use-toast';
+import { useSignInNudge } from '@/context/SignInNudgeContext';
 import { useShare } from '@/context/ShareContext';
 import { SEO } from '@/components/SEO';
 import { Play, Pause, Shuffle, Clock, Heart, ArrowLeft, Music2, Disc3, Check, Plus, Flag, Share2 } from 'lucide-react';
@@ -35,6 +36,7 @@ export default function AlbumPage() {
   const { playAlbum, togglePlay, currentSong, isPlaying, toggleLike, likedSongs } = useAudioPlayer();
   const { user } = useUser();
   const { toast } = useToast();
+  const { requireSignIn } = useSignInNudge();
   const { openShare } = useShare();
 
   const [album, setAlbum] = useState<AlbumInfo | null>(null);
@@ -104,7 +106,7 @@ export default function AlbumPage() {
   const toggleSave = async () => {
     if (!id) return;
     if (!user?.id) {
-      toast({ title: 'Sign in to save albums', description: 'Saved albums live in Your Library.' });
+      requireSignIn('Sign in to save albums to your library.');
       return;
     }
     if (savePending) return;

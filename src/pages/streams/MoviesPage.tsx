@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { StreamsLayout } from '@/components/streams/StreamsLayout';
 import { SEO } from '@/components/SEO';
-import { Play, Star, Clock, Filter, Search, ChevronRight, ChevronDown, TrendingUp, Eye, Share2, Plus, Check } from 'lucide-react';
+import { Play, Star, Clock, Filter, Search, ChevronRight, ChevronDown, TrendingUp, Eye, Share2, Plus, Check, Film } from 'lucide-react';
 import { SkeletonCard } from '@/components/animations/SkeletonCard';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
@@ -40,21 +40,6 @@ interface MovieCategory {
   image_url: string;
 }
 
-const FALLBACK_FEATURED = [
-  { id: '1', title: 'The Woman King', description: 'The story of the Agojie, the all-female unit of warriors who protected the African Kingdom of Dahomey.', genre: 'Action', year: 2022, duration_minutes: 135, rating: 4.5, poster_url: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&h=900&fit=crop', backdrop_url: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&h=600&fit=crop', director: 'Gina Prince-Bythewood', cast_members: ['Viola Davis','Thuso Mbedu'], country: 'USA/Benin', language: 'en', is_featured: true, is_free: true, view_count: 245000 },
-  { id: '2', title: 'Lionheart', description: 'When her father falls ill, Adaeze steps up to manage the family business.', genre: 'Comedy', year: 2018, duration_minutes: 95, rating: 4.2, poster_url: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&h=900&fit=crop', backdrop_url: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1200&h=600&fit=crop', director: 'Genevieve Nnaji', cast_members: ['Genevieve Nnaji'], country: 'Nigeria', language: 'en', is_featured: true, is_free: true, view_count: 189000 },
-  { id: '3', title: 'Rafiki', description: 'Two young women in Nairobi find love in a society that does not accept them.', genre: 'Drama', year: 2018, duration_minutes: 83, rating: 4.3, poster_url: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=600&h=900&fit=crop', backdrop_url: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=1200&h=600&fit=crop', director: 'Wanuri Kahiu', cast_members: ['Samantha Mugatsia'], country: 'Kenya', language: 'sw', is_featured: true, is_free: true, view_count: 67000 },
-];
-
-const FALLBACK_CATEGORIES = [
-  { id: '1', name: 'Nollywood', slug: 'nollywood', description: "Nigeria's vibrant film industry", image_url: 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?w=400&h=250&fit=crop' },
-  { id: '2', name: 'Documentaries', slug: 'documentaries', description: 'Real stories from across Africa', image_url: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=400&h=250&fit=crop' },
-  { id: '3', name: 'Short Films', slug: 'short-films', description: 'Powerful stories told in minutes', image_url: 'https://images.unsplash.com/photo-1518676590747-1e3dcf5a0e32?w=400&h=250&fit=crop' },
-  { id: '4', name: 'Drama', slug: 'drama', description: 'Emotional cinema', image_url: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=250&fit=crop' },
-  { id: '5', name: 'Comedy', slug: 'comedy', description: 'African humor', image_url: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400&h=250&fit=crop' },
-  { id: '6', name: 'Action', slug: 'action', description: 'High-energy films', image_url: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=250&fit=crop' },
-];
-
 const formatDuration = (minutes: number) => {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
@@ -71,7 +56,6 @@ export default function MoviesPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [categories, setCategories] = useState<MovieCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usingFallback, setUsingFallback] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>('popular');
@@ -128,25 +112,22 @@ export default function MoviesPage() {
         .select('*')
         .order('view_count', { ascending: false });
 
-      if (movErr || !moviesData || moviesData.length === 0) {
-        setMovies(FALLBACK_FEATURED as Movie[]);
-        setCategories(FALLBACK_CATEGORIES as MovieCategory[]);
-        setUsingFallback(true);
+      if (movErr || !moviesData) {
+        setMovies([]);
+        setCategories([]);
       } else {
         setMovies(moviesData);
-        setUsingFallback(false);
 
         // Fetch categories
         const { data: catData } = await supabase
           .from('movie_categories')
           .select('*')
           .order('name', { ascending: true });
-        setCategories(catData || FALLBACK_CATEGORIES as MovieCategory[]);
+        setCategories(catData || []);
       }
     } catch {
-      setMovies(FALLBACK_FEATURED as Movie[]);
-      setCategories(FALLBACK_CATEGORIES as MovieCategory[]);
-      setUsingFallback(true);
+      setMovies([]);
+      setCategories([]);
     } finally {
       setLoading(false);
     }
@@ -196,6 +177,14 @@ export default function MoviesPage() {
             <div className="px-6 sm:px-10 pt-8 pb-4">
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">BARA Streams — Movies</h1>
             </div>
+
+            {movies.length === 0 && (
+              <div className="px-6 sm:px-10 py-16 flex flex-col items-center text-center gap-3">
+                <Film className="w-12 h-12 text-gray-300" />
+                <h2 className="text-lg font-bold text-gray-900">No movies yet</h2>
+                <p className="text-sm text-gray-500 max-w-sm">Check back soon — new films are added regularly.</p>
+              </div>
+            )}
 
             {/* Hero / Featured Movie */}
             {featured && (

@@ -122,7 +122,7 @@ export default function StreamsHub() {
                       <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full ${
                         cat.available
                           ? 'bg-gray-900 text-white'
-                          : 'bg-gray-100 text-gray-500'
+                          : 'bg-gray-100 text-gray-700'
                       }`}>
                         {cat.tag}
                       </span>
@@ -134,7 +134,7 @@ export default function StreamsHub() {
                     </h2>
 
                     {/* Description */}
-                    <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                    <p className="text-gray-600 text-sm leading-relaxed mb-6">
                       {cat.description}
                     </p>
 
@@ -145,7 +145,7 @@ export default function StreamsHub() {
                         <ArrowRight className="w-4 h-4" />
                       </div>
                     ) : (
-                      <div className="text-sm text-gray-400 font-medium">
+                      <div className="text-sm text-gray-600 font-medium">
                         Available soon — stay tuned
                       </div>
                     )}

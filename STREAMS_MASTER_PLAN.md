@@ -62,53 +62,57 @@ Cross-cutting themes found everywhere:
 
 Legend: ✅ works · 🟡 partial · ❌ missing/broken. This is the checklist "every little user scenario is accounted for" is measured against.
 
+**Re-audited 2026-08-06 (Phase 14, launch QA)** against current code + 2 live DB checks (anon-key query, `storage.listBuckets()`) — the table below replaces the 2026-08-03 snapshot, which predated Phases 1–13. Guest rows were also spot-verified live against a local dev build (Clerk itself cannot initialize in that sandbox — production keys are domain-locked — so only signed-out flows could be click-tested; Listener/Creator/Admin rows are code-verified only, flagged below where that matters).
+
 ### Guest (not signed in)
 | Scenario | Status | Notes |
 |----------|--------|-------|
-| Browse hub / music home / trending / genres / new releases | ✅ | |
-| Play songs, build queue, full-screen player | ✅ | |
-| Open a shared song/album/artist/playlist link | 🟡 | Opens, but no OG preview anywhere; song opens without queue context |
-| Search music | ✅ | Music only — other verticals unsearchable |
-| Like / save / follow / playlist | ❌ | Silent no-op on most pages (no sign-in prompt) — must become a consistent sign-in CTA |
-| Browse podcasts / movies / ebooks | ✅ | |
-| Play a podcast episode | 🟡 | Plays, but dies on navigation; can overlap music |
-| Watch a movie / read an ebook | ❌ | Dead buttons |
-| Hit a bad URL (song/album/playlist id) | 🟡 | Song/album 404 fine; playlist shows fake data |
+| Browse hub / music home / trending / genres / new releases | ✅ | Verified live — real queries throughout, empty-state fallbacks only trigger on genuinely zero rows |
+| Play songs, build queue, full-screen player | ✅ | Verified live |
+| Open a shared song/album/artist/playlist link | 🟡 | `SongPage.tsx` now builds a real queue on open (§B4 fixed). OG preview middleware covers song/album/artist/playlist/genre/podcast/movie — **ebook was missing, added this phase** |
+| Search music | ✅ | Cross-vertical now (songs/podcasts/movies/ebooks in one search, §J1 done) — verified live. **Gap found:** no typo tolerance (`amapiano` finds results, `amapaino` returns none) — STREAMS_STANDARD F4 not fully met |
+| Like / save / follow / playlist | 🟡 | No more silent no-ops — every gated action shows a prompt (verified live for song-like; rest code-verified). Two different UI patterns still coexist (dedicated nudge sheet vs. plain toast) — partially unified this phase (AlbumPage/PlaylistPage/SongContextMenu moved to the shared sheet), a few call sites may remain |
+| Browse podcasts / movies / ebooks | ✅ | Verified live, real data. **Bug found + fixed this phase:** `MoviesPage.tsx` silently rendered hardcoded fake movies (fake ids, Unsplash images) whenever the real query was empty — indistinguishable from real content, clicking through 404'd. Now shows an honest "No movies yet" empty state instead |
+| Play a podcast episode | ✅ | Unified into the main player (`kind: 'song'\|'episode'`) — survives navigation, no more overlap with music (§G2 fixed) |
+| Watch a movie / read an ebook | ✅ | Verified live — both are real: `MovieWatchPage.tsx` (real `<video>`, resume, playback rate, fullscreen, trailer fallback), `EbookReaderPage.tsx` (real PDF.js + epub.js, both formats, resume) |
+| Hit a bad URL (song/album/playlist id) | ✅ | Verified live — real "Playlist not found" state now, fake-data fallback is gone (§A2 fixed) |
 
-### Listener (signed in)
+### Listener (signed in — code-verified only, not live-tested)
 | Scenario | Status | Notes |
 |----------|--------|-------|
-| Like songs, save albums, liked-songs page, library | 🟡 | Works, but followed artists never appear in Library (table mismatch); playlist "like" is local-only |
-| Create playlists, add/remove songs, collaborative invites | 🟡 | Works via modals; playlist-page action buttons (shuffle/like/more) inert |
-| Resume where I left off (refresh / return later) | ❌ | No player persistence, no listen progress |
-| Listening stats | ✅ | |
-| Follow artist → see their new releases | 🟡 | Release Radar works (`user_follows`); Library reads wrong table |
-| Subscribe to a podcast / resume an episode | ❌ | Tables exist, no UI, never written |
-| Movie watchlist / ebook progress | ❌ | Watchlist table exists, no UI |
-| Report a song/artist for copyright/abuse | ❌ | No mechanism (D4) |
+| Like songs, save albums, liked-songs page, library | ✅ | `user_follows` unified everywhere; playlist like persists to `user_playlist_likes` via the authenticated client, no longer local-only |
+| Create playlists, add/remove songs, collaborative invites | ✅ | Shuffle/Like/More on the playlist page all have real handlers now (§A6 fixed) |
+| Resume where I left off (refresh / return later) | ✅ | Queue/song/position/volume/shuffle persisted to `localStorage` and restored (§B1 fixed) — the guest pass observed a real "Jump back in" resume rail live |
+| Listening stats | ✅ | Unchanged, still real |
+| Follow artist → see their new releases | ✅ | Single `user_follows` table now — Library reads match writes |
+| Subscribe to a podcast / resume an episode | ✅ | Real `podcast_subscriptions` CRUD + episode resume via `podcast_listen_history` (§G3/G4). Still writes via the anon-key client — explicitly deferred in Phase 13, not a new gap |
+| Movie watchlist / ebook progress | ✅ | Real `movie_watchlist` CRUD (§H5) + ebook progress. Same anon-key-client caveat as above |
+| Report a song/artist for copyright/abuse | ✅ | `ReportContentDialog` + `content_report_submit` RPC wired into Album/Artist/Playlist/song-menu (§F1-3 fixed) |
 
-### Artist / Creator
+### Artist / Creator (code-verified only, not live-tested)
 | Scenario | Status | Notes |
 |----------|--------|-------|
-| Become an artist (self-serve, first upload) | ✅ | Auto-creates artist row |
-| Claim an existing (admin-seeded) artist profile | ❌ | Impossible today → duplicate artists (visible live on home page) |
-| Upload song with metadata, featured artists, lyrics | ✅ | Client-side validation only; orphaned files on partial failure |
-| Create/edit albums, order tracks | 🟡 | CRUD works; **no track ordering** (`track_number` never set) |
-| Schedule a release / save a draft | ❌ | Everything is public instantly (release_date ignored) |
-| Delete a song cleanly | 🟡 | DB cascades fine; storage files orphaned forever |
-| See real stats (plays, listeners, followers) | 🟡 | Plays/listeners real; **followers always 0** (wrong table name) |
-| Get verified | 🟡 | Real doc-review flow works; a contradictory mock "$10/mo" page also exists and must die |
-| Publish a podcast / movie / ebook | ❌ | No self-serve for any non-music vertical (CTAs misroute to music dashboard) |
+| Become an artist (self-serve, first upload) | ✅ | Unchanged |
+| Claim an existing (admin-seeded) artist profile | ✅ | `artist_claims` + `artist_claim_review` RPC (Phase 5) |
+| Upload song with metadata, featured artists, lyrics | ✅ | Orphaned-file cleanup now present on partial-failure |
+| Create/edit albums, order tracks | 🟡 | Real drag-reorder writes `track_number` (§E3 fixed) via the direct edit routes. **But:** the Creator Dashboard's own "My Songs" list can't show it — see bug below |
+| Schedule a release / save a draft | ✅ | `status`/`release_date` wired end-to-end, enforced client-side (§E4) |
+| Delete a song cleanly | ✅ | Shared `deleteSongStorageFiles` used by both creator and admin delete paths now (§E2 fixed) |
+| See real stats (plays, listeners, followers) | ✅ | Followers via real `user_follows` count, no longer always-0 |
+| Get verified | ✅ | Mock "$10/mo" page is gone; real verification flow only. Phase 13 also closed a dual-write gap — `is_verified` can now only change via an active admin |
+| Publish a podcast / movie / ebook | 🟡 | Podcasts and ebooks: real self-serve. Movies: admin-only by design (D5) — not a gap |
 
-### Admin
+**🔴 Bug found this phase (fixed):** `ArtistDashboard.tsx` selected `songs.is_premium`/`songs.boosted_until` — neither column existed on the live table (`42703`, confirmed via a direct anon-key query). Every artist's "My Songs" tab in the Creator Dashboard was rendering empty, and the Track Boost feature was dead, silently, since the error was swallowed into `data || []`. Fixed via `20260806_songs_boost_columns.sql` (adds the columns; not yet applied to production — see `STREAMS_MIGRATIONS_TRACKING.md`).
+
+### Admin (code-verified only, not live-tested)
 | Scenario | Status | Notes |
 |----------|--------|-------|
-| CRUD artists/songs/albums, verify artists, promo badges | ✅ | |
-| Add a movie | ❌ | Insert fails — code writes columns the table doesn't have |
-| Upload podcast covers / movie files / album covers | ❌ | `podcasts`, `movies`, `music-covers` buckets don't exist |
-| Manage podcast episodes | ❌ | No episode UI at all |
-| Review content reports / DMCA claims | ❌ | No intake exists (D4) |
-| Takedown with artist notification | ❌ | Delete-only, silent |
+| CRUD artists/songs/albums, verify artists, promo badges | ✅ | Phase 13's ownership triggers don't block the admin path (admin bypass checked first) |
+| Add a movie | ✅ | `stream_url` column added (Phase 8) |
+| Upload podcast covers / movie files / album covers | 🟡 | `podcasts`/`movies` buckets confirmed live. **Bug found + fixed this phase:** `music-covers` bucket never existed (confirmed via `storage.listBuckets()`) — every admin album-cover upload has been failing. Fixed via `20260806_music_covers_bucket.sql` (not yet applied to production) |
+| Manage podcast episodes | ✅ | Full episode CRUD UI |
+| Review content reports / DMCA claims | ✅ | `/admin/content-reports`, routed |
+| Takedown with artist notification | ✅ | `content_report_review` RPC unpublishes rather than hard-deletes (Phase 6) |
 
 ---
 

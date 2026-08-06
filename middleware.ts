@@ -34,6 +34,7 @@ export const config = {
     '/streams/genre/:slug*',
     '/streams/podcast/:id*',
     '/streams/movie/:id*',
+    '/streams/ebook/:id*',
     '/events/:id*',
     '/blog/:slug*',
     '/listings/:slug*',
@@ -238,6 +239,23 @@ async function buildPreview(pathname: string): Promise<PreviewData | null> {
       description: `${row.host ? `Hosted by ${row.host} — ` : ''}${(row.description || '').slice(0, 140) || 'Listen on Bara Streams'}`,
       image: row.cover_url || DEFAULT_IMAGE,
       type: 'music.playlist',
+    };
+  }
+
+  // /streams/ebook/:id
+  const ebookMatch = pathname.match(/^\/streams\/ebook\/([^/?#]+)/);
+  if (ebookMatch) {
+    const id = ebookMatch[1];
+    const row = await fetchFromSupabase(
+      'ebooks',
+      `id=eq.${id}&select=title,author,description,cover_url`
+    );
+    if (!row) return null;
+    return {
+      title: row.title,
+      description: `${row.author ? `By ${row.author} — ` : ''}${(row.description || '').slice(0, 140) || 'Read on Bara Streams'}`,
+      image: row.cover_url || DEFAULT_IMAGE,
+      type: 'book',
     };
   }
 
