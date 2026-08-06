@@ -69,8 +69,15 @@ export const EditListing = () => {
 
       if (listingError) throw listingError;
 
-      // Ensure user owns the listing or is an admin
-      if (listingData.user_id !== user?.id && user?.publicMetadata?.role !== 'admin') {
+      // Ensure user owns the listing or is an admin.
+      //
+      // `marketplace_listings` has no `user_id` column — ownership is
+      // `created_by` (TEXT, holding the Clerk id). Comparing the missing
+      // column meant `undefined !== "user_2..."` was always true, so EVERY
+      // non-admin edit was denied and the seller was bounced to /marketplace
+      // with "You do not have permission". MyAds.tsx has always used
+      // `created_by` correctly, so its Edit button led straight into this.
+      if (listingData.created_by !== user?.id && user?.publicMetadata?.role !== 'admin') {
         toast({ title: "Error", description: "You do not have permission to edit this listing.", variant: "destructive" });
         navigate('/marketplace');
         return;

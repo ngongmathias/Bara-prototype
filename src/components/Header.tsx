@@ -441,7 +441,7 @@ export const Header = () => {
           <div className="flex lg:hidden items-center gap-2">
             {isSignedIn && profile && (
               <Link
-                to="/coins"
+                to="/store"
                 className="flex items-center gap-1.5 bg-yellow-50 hover:bg-yellow-100 px-2 py-1 rounded-lg transition-colors"
               >
                 <Coins className="w-4 h-4 text-yellow-600" />

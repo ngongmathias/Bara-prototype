@@ -263,19 +263,24 @@ export const ListingDetailPage = () => {
       return;
     }
 
-    if (listing?.user_id && user.id === listing.user_id) {
+    // Ownership is `created_by`, not `user_id` — that column does not exist
+    // on marketplace_listings. Reading it meant the guard below always fired
+    // and every buyer got "Seller information missing", so Message Seller has
+    // never once worked. The offer and purchase paths in this same file
+    // already use `created_by` correctly.
+    if (listing?.created_by && user.id === listing.created_by) {
       toast({ title: 'Cannot chat', description: 'This is your own listing.', variant: 'destructive' });
       return;
     }
 
-    if (!listing?.user_id) {
+    if (!listing?.created_by) {
       toast({ title: 'Error', description: 'Seller information missing.', variant: 'destructive' });
       return;
     }
 
     try {
       recordLead('chat');
-      const conversationId = await MessagingService.startConversation(user.id, listing.user_id);
+      const conversationId = await MessagingService.startConversation(user.id, listing.created_by);
       navigate(`/messages/${conversationId}`);
     } catch (error) {
       console.error(error);

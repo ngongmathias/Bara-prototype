@@ -879,33 +879,18 @@ export const PostListing = () => {
 
 
 
-  if (loading) {
-
-    return (
-
-      <div className="min-h-screen bg-gray-50">
-
-        <Header />
-      <TopBannerAd />
-
-        <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-
-          <p className="text-gray-600">Loading...</p>
-
-        </div>
-
-        <Footer />
-
-      </div>
-
-    );
-
-  }
-
-
-
+  // MUST stay above the `if (loading)` early return below.
+  //
+  // This useMemo sat *after* that return, so render 1 (loading === true) ran
+  // N hooks and render 2 ran N+1. React throws "Rendered more hooks than
+  // during the previous render", the ErrorBoundary swallows it, and the user
+  // sees a blank screen with nothing in the console and nothing in the
+  // database. That shipped on 14 Apr 2026 and no listing has been created
+  // since 13 Apr — this one misplaced hook is why.
+  //
+  // Rule: every hook goes above every conditional return. `eslint-plugin-
+  // react-hooks` catches this class of bug; tsc and the build do not, which
+  // is exactly how it survived four months.
   const completeness = useMemo(() => {
     const checks: Array<{ key: string; label: string; done: boolean }> = [
       { key: 'title', label: 'Title', done: !!formData.title.trim() },
@@ -923,6 +908,20 @@ export const PostListing = () => {
     const missing = checks.filter((c) => !c.done).map((c) => c.label);
     return { checks, percent, missing };
   }, [formData, imagePreviews.length, selectedCountries.length]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <TopBannerAd />
+        <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
 

@@ -29,6 +29,23 @@ export default function DbPopupAd() {
     loadAds();
   }, []);
 
+  // Cycle through ads every 30 seconds.
+  //
+  // MUST stay above the early returns below. This hook used to sit after
+  // them, so once ads finished loading the render went from 1 hook to 2 and
+  // React threw "Rendered more hooks than during the previous render" — i.e.
+  // it broke precisely when there WAS an ad to show. Same class of bug that
+  // took the marketplace posting form offline for four months.
+  useEffect(() => {
+    if (ads.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentAdIndex((prev) => (prev + 1) % ads.length);
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [ads.length]);
+
   // Don't render anything if loading, error, or no ads
   if (loading) {
     return null; // Silent loading
@@ -44,17 +61,6 @@ export default function DbPopupAd() {
   }
 
   const currentAd = ads[currentAdIndex];
-
-  // Cycle through ads every 30 seconds
-  useEffect(() => {
-    if (ads.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentAdIndex((prev) => (prev + 1) % ads.length);
-    }, 30000); // 30 seconds
-
-    return () => clearInterval(interval);
-  }, [ads.length]);
 
   return (
     <PopupAd
