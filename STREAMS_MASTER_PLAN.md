@@ -1,6 +1,13 @@
 # BARA Streams — Master Completion Plan
 
-**Created:** 2026-08-03 (planning session) · **Revised:** 2026-08-03 (admin + signature-features + doc reconciliation)
+**STATUS: All 14 phases shipped as PRs (2026-08-03 → 2026-08-06).** See §6 for the
+phase-by-phase PR list and §8 for what's genuinely done vs. what still needs action
+before this can be called launch-ready — in particular, **Phase 13's two security
+migrations and Phase 14's two bugfix migrations are not yet applied to production**, so
+the anon-write vulnerabilities they fix are still live until someone runs them (see
+`STREAMS_MIGRATIONS_TRACKING.md`). Closed out 2026-08-06.
+
+**Created:** 2026-08-03 (planning session) · **Revised:** 2026-08-03 (admin + signature-features + doc reconciliation) · **Closed out:** 2026-08-06
 **Goal:** Take Streams from "wide skeleton" to a fully functional product where every user scenario is accounted for — Spotify-quality mechanics, adapted to Bara's context: free-first, self-managed by users and artists, deep shareable links into every corner of the platform, and payments deferred until DPO/MoMo approval (Phase 15 Flutterwave in `MASTER_PLAN.md`).
 
 **How this doc relates to the others:**
@@ -283,34 +290,34 @@ The gap register makes Streams *work*; this section makes it *delightful*. Bar =
 
 Ordered for: visible product completeness first (D2), foundations that other phases need early, security as the launch gate. Each phase is a shippable PR-sized chunk (some split into multiple PRs).
 
-| Phase | Name | Contents | Size |
-|-------|------|----------|------|
-| **1** | Music: fix everything broken | Gap register §A (10 items) — routes, fake playlist 404, follows-table unification, Library refetch, discography, playlist buttons, queue-building on artist plays, mock sections resolved | M |
-| **2** | Player: persistence + correctness | §B — localStorage persistence/restore, proper shuffle, touch reorder, shared-song queue context, drawer theming | M |
-| **3** | Sharing & deep links | §C — OG edge function for all entities, share buttons everywhere, unified `useShare()` | M (edge fn is the meat) |
-| **4** | Stream counting (D3) | §D — 30s rule, dedupe/rate-limit RPC, aligned definitions | S–M |
-| **5** | Creator completeness | §E — claim flow, uniqueness, storage hygiene, track ordering, drafts/scheduling, verification page cleanup, `song_artists` consolidation | L |
-| **6** | Moderation & guidelines (D4) | §F — reports, DMCA form, admin queue, takedown+notify, guidelines page, legal links | M |
-| **7** | Podcasts to parity | §G — show/episode pages, global-player unification, resume, subscriptions, self-serve upload (D6), buckets, admin episodes | L |
-| **8** | Movies to parity (D5) | §H — schema fix, buckets, video player + progress, watchlist, wired browse | L |
-| **9** | Ebooks to parity (D7) | §I — reader, progress, self-publish, seed catalog | L |
-| **10** | Search, discovery & perf | §J — cross-vertical search, pagination, React Query | M |
-| **11** | Admin command center | §L — moderation queue, real dashboard, content health, seed controls, bulk actions, claim queue, role enforcement, audit trail | L |
-| **12** | Signature experiences | §5 — resume rail, data saver, country charts, radio wiring, share/quote cards, recap/Wrapped, offline/PWA, per-vertical delight | L (split into several PRs) |
-| **13** | Security & schema hardening | §K — the pre-launch gate | L |
-| **14** | Launch QA | Re-run scenario matrix end-to-end, all ✅ or consciously deferred; STREAMS_STANDARD Part B acceptance checks; device-matrix pass (375/768/1440); empty/error-state pass; Lighthouse ≥90 a11y | M |
+| Phase | Name | Contents | Size | PR | Status |
+|-------|------|----------|------|----|--------|
+| **1** | Music: fix everything broken | Gap register §A (10 items) — routes, fake playlist 404, follows-table unification, Library refetch, discography, playlist buttons, queue-building on artist plays, mock sections resolved | M | #3 | ✅ Merged |
+| **2** | Player: persistence + correctness | §B — localStorage persistence/restore, proper shuffle, touch reorder, shared-song queue context, drawer theming | M | #4 | ✅ Merged |
+| **3** | Sharing & deep links | §C — OG edge function for all entities, share buttons everywhere, unified `useShare()` | M (edge fn is the meat) | #5 | ✅ Merged |
+| **4** | Stream counting (D3) | §D — 30s rule, dedupe/rate-limit RPC, aligned definitions | S–M | #6 | ✅ Merged (see §8 — its RPC/grant fix didn't fully take until Phase 14 caught the gap) |
+| **5** | Creator completeness | §E — claim flow, uniqueness, storage hygiene, track ordering, drafts/scheduling, verification page cleanup, `song_artists` consolidation | L | #8 | ✅ Merged |
+| **6** | Moderation & guidelines (D4) | §F — reports, DMCA form, admin queue, takedown+notify, guidelines page, legal links | M | #9 | ✅ Merged |
+| **7** | Podcasts to parity | §G — show/episode pages, global-player unification, resume, subscriptions, self-serve upload (D6), buckets, admin episodes | L | #10 | ✅ Merged |
+| **8** | Movies to parity (D5) | §H — schema fix, buckets, video player + progress, watchlist, wired browse | L | #11 | ✅ Merged |
+| **9** | Ebooks to parity (D7) | §I — reader, progress, self-publish, seed catalog | L | #12 | ✅ Merged |
+| **10** | Search, discovery & perf | §J — cross-vertical search, pagination, React Query | M | #13 | ✅ Merged |
+| **11** | Admin command center | §L — moderation queue, real dashboard, content health, seed controls, bulk actions, claim queue, role enforcement, audit trail | L | #14 | ✅ Merged |
+| **12** | Signature experiences | §5 — resume rail, data saver, country charts, radio wiring, share/quote cards, recap/Wrapped, offline/PWA, per-vertical delight | L (split into several PRs) | #15 | ✅ Merged — not individually re-verified item-by-item, see §8 |
+| **13** | Security & schema hardening | §K — the pre-launch gate | L | #16 | ✅ Merged — **migrations NOT yet applied to prod**, see §8 |
+| **14** | Launch QA | Re-run scenario matrix end-to-end, all ✅ or consciously deferred; STREAMS_STANDARD Part B acceptance checks; device-matrix pass (375/768/1440); empty/error-state pass; Lighthouse ≥90 a11y | M | #17 | ✅ Merged — a11y passed (92), perf did not (32, bundle-size issue), device/signed-in checks handed off, see §8 |
 
 Suggested pairing per session: Phases 1–2 together (music feels dramatically more finished), then 3–4 (share + counting = credible public numbers), then 5–6 (creators + safety), then one vertical per session (7, 8, 9), then 10–11 (search + admin), 12 in slices whenever a phase lands early, then 13–14 as the launch gate. Some §5 quick wins (radio wiring, sign-in nudge sheet, SongPage SEO) can ride along inside Phases 1–3.
 
-### Acceptance criteria (definition of "fully complete")
-- Every row in the Scenario Matrix (§3) is ✅ or explicitly deferred with a reason logged here.
-- Every entity (song, album, artist, playlist, podcast show, episode, movie, ebook) has: a working detail page, a share button producing a deep link with a real OG preview, sane loading/empty/error/404 states, and mobile layout.
-- Nothing user-visible is mock/hardcoded/inert.
-- A signed-out user always gets a clear sign-in prompt (never a silent no-op) on gated actions.
-- Play/watch/read progress survives refresh and returns.
-- Anon REST writes fail against every streams table and bucket (Phase 13).
-- Admin can manage every content type end-to-end (create, edit, takedown, moderate reports) without touching SQL (Phase 11).
-- The ⭐ signature features in §5 are shipped or explicitly deferred with reasons logged.
+### Acceptance criteria (definition of "fully complete") — final status, 2026-08-06
+- ✅ Every row in the Scenario Matrix (§3) is ✅ or explicitly deferred with a reason logged there — re-audited in full during Phase 14.
+- 🟡 Every entity has a working detail page, share button + real OG preview, loading/empty/error/404 states — true for all 8 entity types as of Phase 14 (ebook OG preview was the last gap, closed then). **Mobile layout at 375/768/1440 was not re-verified live** — this sandbox can't render on real devices; see the Phase 14 handoff checklist.
+- ✅ Nothing user-visible is mock/hardcoded/inert — the last known instance (`MoviesPage.tsx`'s hardcoded fallback catalog) was found and removed in Phase 14.
+- 🟡 A signed-out user always gets a clear sign-in prompt on gated actions — true everywhere checked; Phase 14 unified 3 more call sites onto the shared nudge sheet but did not exhaustively grep every gated action in the codebase for a stray silent no-op.
+- ✅ Play/watch/read progress survives refresh and returns — verified live for music (resume rail), code-verified for movies/podcasts/ebooks.
+- ❌ **Anon REST writes fail against every streams table and bucket — NOT true yet.** Phase 13 wrote the RLS/grant fixes and Phase 14 wrote two more schema fixes, but per standing project policy none of these migrations were applied to the database (`supabase db push` is never run automatically). Until someone runs the migrations listed as "No" in `STREAMS_MIGRATIONS_TRACKING.md` (rows 10–13), the anon-write vulnerabilities documented in `PHASE_13_SECURITY_HARDENING.md` are still live in production. **This is the single most important thing left to do.**
+- 🟡 Admin can manage every content type end-to-end without touching SQL — true in code; the `music-covers` bucket bug (Phase 14) means admin album-cover uploads were actually broken until that migration is applied too.
+- 🟡 The ⭐ signature features in §5 are shipped or explicitly deferred with reasons logged — Phase 12 shipped as one PR (#15) covering this section, but Phase 14's QA pass scoped to the Scenario Matrix and STREAMS_STANDARD Part B, not an item-by-item re-check of every §5 bullet. Recommend a spot-check before treating this bullet as fully closed.
 
 ---
 
@@ -318,3 +325,43 @@ Suggested pairing per session: Phases 1–2 together (music feels dramatically m
 - Dev: `npm run dev` wants port 8080 but that collides with other local projects — use `npx vite --port 8090 --strictPort`.
 - Seed catalog audio = external SoundHelix MP3s (can time out); replace or accept for dev only.
 - Two migration folders exist (`supabase/migrations/`, `database/migrations/`) — the latter is hand-run; Phase 5/11 consolidates.
+- Clerk's production keys are domain-locked to `baraafrika.com` and refuse to initialize on `localhost` — no signed-in flow can be tested in this dev sandbox. Every phase from 5 onward that touched authenticated behavior relied on code review + live anon-key/service-role checks instead of a real signed-in browser session.
+
+---
+
+## 8. Closeout (2026-08-06) — what's actually done vs. what's left
+
+All 14 phases are merged (§6). Before calling this project done, in priority order:
+
+1. **Apply the outstanding migrations.** `STREAMS_MIGRATIONS_TRACKING.md` rows 10–13
+   (`20260806_security_hardening.sql`, `20260806_music_bucket_hardening.sql`,
+   `20260806_songs_boost_columns.sql`, `20260806_music_covers_bucket.sql`) are all
+   written, reviewed, and merged into `main`, but **not applied to the production
+   database** — per standing project policy, migrations are never run automatically.
+   Until they're applied: anon REST writes still succeed against core Streams tables
+   and the `music` bucket (the exact vulnerability Phase 13 was written to close), the
+   Creator Dashboard's "My Songs" tab is empty for every artist, and admin album-cover
+   uploads fail.
+2. **Run the Phase 14 handoff checklist** (`PHASE_14_LAUNCH_QA.md` §3) against a real
+   signed-in Clerk session in staging — likes/saves/follows persistence, playlist
+   collaboration, podcast/movie/ebook progress, the full creator publish flow, admin
+   content moderation, OS lock-screen media controls, touch drag-reorder, and the
+   375/768/1440 device matrix. None of it could be exercised in this dev sandbox.
+3. **Re-run Lighthouse against the real Vercel deployment.** The Phase 14 perf score
+   (32, fails the ≥70 bar) was measured against a local static server; the root cause
+   (a 5.5MB main JS bundle from a code-splitting misconfiguration) is real and
+   independent of hosting, but the actual number in production — behind a CDN — may
+   differ enough to change how urgent a dedicated bundle-splitting pass is.
+4. **Known, explicitly-deferred gaps** (not blockers, logged so they don't get
+   silently forgotten): search has no typo tolerance (STREAMS_STANDARD F4); a handful
+   of color-contrast and touch-target a11y findings live in site-wide shared components
+   (`Footer.tsx`, the ad carousel) rather than Streams-specific code; `user_album_saves`/
+   `movie_watch_progress`/`podcast_listen_history`/`podcast_subscriptions`/
+   `movie_watchlist` have the same open-RLS bug Phase 13 fixed elsewhere but their
+   client write paths were never migrated to the authenticated client, so hardening
+   them now would break those features — needs the same two-step treatment Phase 13
+   gave the core tables; §5's signature features (Phase 12, PR #15) weren't
+   individually re-verified during Phase 14's QA pass.
+
+Once item 1 is done and item 2's checklist is clear, this plan can be considered fully
+closed.
