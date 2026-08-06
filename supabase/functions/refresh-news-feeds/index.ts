@@ -40,7 +40,13 @@ interface FeedItem {
 
 const MAX_ITEMS_PER_FEED = 10
 const FETCH_TIMEOUT_MS = 12_000
-const CONCURRENCY = 8
+// Google News throttles bursts from a single datacenter IP. At CONCURRENCY=8
+// with no pacing, 44 of 49 sources came back HTTP 503 even though every URL
+// returns 100+ items when fetched on its own. Keep this low.
+const CONCURRENCY = 3
+const REQUEST_SPACING_MS = 400
+const FETCH_RETRIES = 3
+const RETRY_BACKOFF_MS = 1_500
 // A forced refresh (admin button) still no-ops if one ran in the last 2 minutes,
 // so the public endpoint can't be used to hammer the source sites.
 const FORCE_COOLDOWN_MS = 2 * 60_000
@@ -125,16 +131,41 @@ function parseFeed(xml: string, sourceName: string): FeedItem[] {
   return items.filter((i) => i.title && i.link && i.guid)
 }
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+/**
+ * Fetch one feed, retrying on the throttling responses Google News returns
+ * when it sees a burst from one datacenter IP.
+ *
+ * Verified behaviour: these exact URLs return 100+ items every time when
+ * fetched individually, but running the whole source list at CONCURRENCY=8
+ * with no pacing produced HTTP 503 on 44 of 49 sources. The URLs were never
+ * the problem — the request rate was. Retry with backoff plus the reduced
+ * concurrency and inter-request delay below is what makes a full refresh
+ * actually complete.
+ */
 async function fetchFeed(url: string, sourceName: string): Promise<FeedItem[]> {
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    headers: {
-      'User-Agent': 'BaraAfrika-NewsBot/1.0 (+https://baraafrika.com)',
-      Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*',
-    },
-  })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return parseFeed(await res.text(), sourceName)
+  let lastStatus = 0
+
+  for (let attempt = 0; attempt < FETCH_RETRIES; attempt++) {
+    if (attempt > 0) await sleep(RETRY_BACKOFF_MS * attempt)
+
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      headers: {
+        'User-Agent': 'BaraAfrika-NewsBot/1.0 (+https://baraafrika.com)',
+        Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*',
+      },
+    })
+
+    if (res.ok) return parseFeed(await res.text(), sourceName)
+
+    lastStatus = res.status
+    // Only 429/5xx are worth retrying; a 404 will never become a 200.
+    if (res.status !== 429 && res.status < 500) break
+  }
+
+  throw new Error(`HTTP ${lastStatus}`)
 }
 
 Deno.serve(async (req) => {
@@ -181,7 +212,9 @@ Deno.serve(async (req) => {
     const errors: string[] = []
 
     const queue = [...due]
-    await Promise.all(Array.from({ length: CONCURRENCY }, async () => {
+    await Promise.all(Array.from({ length: CONCURRENCY }, async (_v, worker) => {
+      // Stagger worker start-up so all three don't fire simultaneously.
+      await sleep(worker * REQUEST_SPACING_MS)
       for (let source = queue.shift(); source; source = queue.shift()) {
         try {
           const items = await fetchFeed(source.url, source.name)
@@ -216,6 +249,9 @@ Deno.serve(async (req) => {
             .update({ last_fetch_status: 'error', last_fetch_error: message.substring(0, 500) })
             .eq('id', source.id)
         }
+        // Pace requests within each worker so the three of them together
+        // stay well under Google News' burst threshold.
+        await sleep(REQUEST_SPACING_MS)
       }
     }))
 
