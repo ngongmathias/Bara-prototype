@@ -19,6 +19,9 @@ import {
   Clock
 } from 'lucide-react';
 
+/** Listings per page. Enough to fill a desktop grid without a huge payload. */
+const PAGE_SIZE = 24;
+
 const SEARCH_HISTORY_KEY = 'bara.marketplace.searchHistory';
 const MAX_HISTORY = 10;
 
@@ -84,6 +87,8 @@ export const SearchResults = () => {
   };
   
   const [results, setResults] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState(searchParams.get('q') || '');
   const [showFilters, setShowFilters] = useState(false);
@@ -154,6 +159,12 @@ export const SearchResults = () => {
 
   useEffect(() => {
     performSearch();
+  }, [searchParams, selectedCountryFilter, page]);
+
+  // Any change to the query or filters invalidates the current page — landing
+  // on "page 7" of a brand-new result set shows nothing and reads as broken.
+  useEffect(() => {
+    setPage(1);
   }, [searchParams, selectedCountryFilter]);
 
   const fetchCategories = async () => {
@@ -246,7 +257,7 @@ export const SearchResults = () => {
           marketplace_subcategories(name, slug),
           countries(name, code, flag_url),
           marketplace_listing_images(image_url, is_primary)
-        `)
+        `, { count: 'exact' })
         .eq('status', 'active');
 
       // Search query - search in title, description, location, and seller_name
@@ -387,9 +398,15 @@ export const SearchResults = () => {
           query = query.order('created_at', { ascending: false });
       }
 
-      const { data, error } = await query;
+      // Paginate. This query previously had no limit at all — it fetched
+      // every matching listing and rendered them in one go, which is fine at
+      // 61 listings and fatal at 6,000 (and the `%ilike%` filters can't use
+      // an index, so the database does the same amount of work either way).
+      const from = (page - 1) * PAGE_SIZE;
+      const { data, error, count } = await query.range(from, from + PAGE_SIZE - 1);
 
       if (error) throw error;
+      setTotalCount(count ?? 0);
 
       let transformed = (data || []).map((listing: any) => ({
         ...listing,
@@ -398,9 +415,15 @@ export const SearchResults = () => {
         images: listing.marketplace_listing_images || [],
       }));
 
-      // Also search by store name: find stores matching the query,
-      // then fetch their listings and merge (deduplicated).
-      if (searchQuery) {
+      // Also search by store name: find stores matching the query, then fetch
+      // their listings and merge (deduplicated).
+      //
+      // Page 1 only. This merge happens client-side, after the paginated
+      // query, so running it on every page would surface the same store
+      // listings again and again as the user pages through. Confining it to
+      // the first page keeps results stable and non-repeating; store matches
+      // are a relevance bonus, not the primary result set.
+      if (searchQuery && page === 1) {
         const { data: matchingStores } = await supabase
           .from('marketplace_partners')
           .select('owner_user_id')
@@ -1413,6 +1436,36 @@ export const SearchResults = () => {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {/* Pagination. Previously the query had no limit and every match
+              rendered at once — workable at 61 listings, not at 6,000. */}
+          {!loading && totalCount > PAGE_SIZE && (
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-sm text-gray-500 tabular-nums">
+                Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalCount)} of{' '}
+                {totalCount.toLocaleString()}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  disabled={page <= 1}
+                  onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-gray-600 tabular-nums px-2">
+                  Page {page} of {Math.ceil(totalCount / PAGE_SIZE)}
+                </span>
+                <Button
+                  variant="outline"
+                  disabled={page >= Math.ceil(totalCount / PAGE_SIZE)}
+                  onClick={() => { setPage((p) => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           )}
         </div>

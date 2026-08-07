@@ -19,6 +19,9 @@ import { MonetizationService } from '@/lib/monetizationService';
 import { Search, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { PropertyCard, VehicleCard, JobCard } from '@/components/marketplace/SpecializedCards';
 
+/** Listings per page. Matches the search results page. */
+const PAGE_SIZE = 24;
+
 export const CategoryPage = () => {
   const { categorySlug } = useParams();
   const [searchParams] = useSearchParams();
@@ -27,6 +30,8 @@ export const CategoryPage = () => {
   const [category, setCategory] = useState<MarketplaceCategory | null>(null);
   const [subcategories, setSubcategories] = useState<MarketplaceSubcategory[]>([]);
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [countries, setCountries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,6 +56,12 @@ export const CategoryPage = () => {
     if (category) {
       fetchListings();
     }
+  }, [category, selectedCountry, selectedSubcategory, minPrice, maxPrice, page]);
+
+  // Changing a filter invalidates the current page — staying on page 5 of a
+  // freshly-filtered set shows an empty grid and reads as "no results".
+  useEffect(() => {
+    setPage(1);
   }, [category, selectedCountry, selectedSubcategory, minPrice, maxPrice]);
 
   const fetchInitialData = async () => {
@@ -102,12 +113,11 @@ export const CategoryPage = () => {
           *,
           marketplace_listing_images(image_url, is_primary),
           marketplace_listing_attributes(attribute_key, attribute_value)
-        `)
+        `, { count: 'exact' })
         .eq('category_id', category.id)
         .eq('status', 'active')
         .order('is_premium', { ascending: false })
-        .order('created_at', { ascending: false })
-        .limit(20);
+        .order('created_at', { ascending: false });
 
       if (selectedCountry && selectedCountry !== 'all') {
         query = query.eq('country_id', selectedCountry);
@@ -121,9 +131,14 @@ export const CategoryPage = () => {
         query = query.or(`title.ilike.%${searchQuery.trim()}%,description.ilike.%${searchQuery.trim()}%,seller_name.ilike.%${searchQuery.trim()}%`);
       }
 
-      const { data, error } = await query;
+      // Paginate rather than a hard .limit(20): the old cap silently hid
+      // everything past the twentieth listing with no way to reach it, so a
+      // category with 200 items looked like a category with 20.
+      const from = (page - 1) * PAGE_SIZE;
+      const { data, error, count } = await query.range(from, from + PAGE_SIZE - 1);
 
       if (error) throw error;
+      setTotalCount(count ?? 0);
 
       const transformedListings = (data || []).map((listing: any) => ({
         ...listing,
@@ -275,9 +290,34 @@ export const CategoryPage = () => {
                 ))}
               </div>
             ) : listings.length === 0 ? (
-              <div className="text-center py-16">
-                <p className="text-gray-500 text-lg font-roboto">No listings found</p>
-                <p className="text-gray-400 text-sm font-roboto mt-2">Try adjusting your filters</p>
+              /* An empty category is a supply opportunity, not a dead end.
+                 "No listings found" wasted it — on a marketplace short of
+                 inventory, the visitor looking for a thing is often also
+                 someone who owns one. */
+              <div className="text-center py-16 max-w-md mx-auto">
+                <p className="text-lg font-bold text-gray-900 font-comfortaa">
+                  No {category?.name?.toLowerCase()} listed here yet
+                </p>
+                <p className="text-gray-500 text-sm font-roboto mt-2 mb-6">
+                  {selectedCountry || selectedSubcategory || searchQuery.trim()
+                    ? 'Try removing a filter — or be the first to list one.'
+                    : 'Be the first to list one. It takes about two minutes.'}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button
+                    onClick={() => navigate('/marketplace/post')}
+                    className="bg-gray-900 hover:bg-black text-white font-bold"
+                  >
+                    Sell yours
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/marketplace')}
+                    className="font-bold"
+                  >
+                    Browse everything
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -338,6 +378,34 @@ export const CategoryPage = () => {
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {!loading && totalCount > PAGE_SIZE && (
+              <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-gray-500 font-roboto tabular-nums">
+                  Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalCount)} of{' '}
+                  {totalCount.toLocaleString()}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    disabled={page <= 1}
+                    onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm text-gray-600 font-roboto tabular-nums px-2">
+                    Page {page} of {Math.ceil(totalCount / PAGE_SIZE)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    disabled={page >= Math.ceil(totalCount / PAGE_SIZE)}
+                    onClick={() => { setPage((p) => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  >
+                    Next
+                  </Button>
+                </div>
               </div>
             )}
           </div>
