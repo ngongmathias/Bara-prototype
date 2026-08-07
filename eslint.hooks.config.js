@@ -28,6 +28,11 @@ export default tseslint.config(
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
     plugins: { 'react-hooks': reactHooks },
+    // This config deliberately runs only one rule, so every legitimate
+    // `eslint-disable react-hooks/exhaustive-deps` in the codebase looks
+    // "unused" from here and would warn. That noise is about the narrowness
+    // of this gate, not about the code it is checking.
+    linterOptions: { reportUnusedDisableDirectives: 'off' },
     rules: {
       'react-hooks/rules-of-hooks': 'error',
     },
