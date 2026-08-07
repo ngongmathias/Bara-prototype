@@ -37,7 +37,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { GoogleTranslate } from './GoogleTranslate';
 import { db } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
@@ -269,8 +268,11 @@ export const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Language (Google Translate) */}
-            <GoogleTranslate />
+            {/*
+              Language switching is handled by ConveyThis, which injects its own
+              switcher (bottom-right by default, repositionable from their
+              dashboard). Nothing to mount here.
+            */}
 
             {/* Bara Coins */}
             {isSignedIn && profile && (
@@ -531,10 +533,8 @@ export const Header = () => {
                       <ChevronDown className={`w-3 h-3 transition-transform ${mobileCountriesExpanded ? 'rotate-180' : ''}`} />
                     </button>
                   </div>
-                  <div>
-                    <p className="text-[10px] font-semibold text-gray-400 uppercase mb-1">Language</p>
-                    <GoogleTranslate />
-                  </div>
+                  {/* Language: see the note on the desktop header — ConveyThis
+                      renders its own switcher, so this slot is no longer needed. */}
                 </div>
 
                 {/* Country Expansion */}
