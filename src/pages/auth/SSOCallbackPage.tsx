@@ -1,4 +1,5 @@
 import { AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
+import { safeRedirect } from '@/lib/safeRedirect';
 
 /**
  * Handles OAuth SSO callbacks (Google/GitHub).
@@ -11,7 +12,9 @@ import { AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
  * Existing users sign in normally and land at signInForceRedirectUrl.
  */
 export const SSOCallbackPage = () => {
-  const redirectUrl = sessionStorage.getItem('bara_oauth_redirect') || '/';
+  // sessionStorage is same-origin, but the value originally came from a
+  // ?redirect_url= query parameter, so it gets the same treatment.
+  const redirectUrl = safeRedirect(sessionStorage.getItem('bara_oauth_redirect'));
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

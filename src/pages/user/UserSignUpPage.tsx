@@ -10,6 +10,7 @@ import { UsernameService } from '@/lib/usernameService';
 import { REFERRAL_PROMPT_PENDING_KEY } from '@/components/InviteFriendsPrompt';
 import { COUNTRIES, countryByIso2, formatPhone } from '@/data/countries';
 import { DateOfBirthPicker } from '@/components/DateOfBirthPicker';
+import { safeRedirect } from '@/lib/safeRedirect';
 
 const GENDERS = ['Male', 'Female', 'Rather Not Say'] as const;
 
@@ -21,7 +22,7 @@ export const UserSignUpPage = () => {
   const [oauthLoading, setOauthLoading] = useState(false);
 
   const searchParams = new URLSearchParams(location.search);
-  const redirectUrl = searchParams.get('redirect_url') || '/';
+  const redirectUrl = safeRedirect(searchParams.get('redirect_url'));
   const refCode = searchParams.get('ref');
   const signInUrl = `/user/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`;
   const finishUrl = `/auth/finish?mode=sign_up&redirect_url=${encodeURIComponent(redirectUrl)}`;

@@ -4,6 +4,8 @@ import { SignIn, useSignIn } from '@clerk/clerk-react';
 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
+import { safeRedirect } from '@/lib/safeRedirect';
+
 
 
 export const UserSignInPage = () => {
@@ -20,7 +22,7 @@ export const UserSignInPage = () => {
 
   const searchParams = new URLSearchParams(location.search);
 
-  const redirectUrl = searchParams.get('redirect_url') || '/';
+  const redirectUrl = safeRedirect(searchParams.get('redirect_url'));
 
   const signUpUrl = `/user/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`;
 

@@ -10,6 +10,7 @@ import { UsernameService } from '@/lib/usernameService';
 import { isProfileComplete } from '@/lib/profileCompletion';
 import { SignupProfileStash } from '@/lib/signupProfileStash';
 import { REFERRAL_PROMPT_PENDING_KEY } from '@/components/InviteFriendsPrompt';
+import { safeRedirect } from '@/lib/safeRedirect';
 
 const GENDERS = ['Male', 'Female', 'Rather Not Say'] as const;
 
@@ -21,7 +22,7 @@ export const CompleteProfilePage = () => {
   const navigate = useNavigate();
   const { isLoaded, isSignedIn, user } = useUser();
 
-  const redirectUrl = new URLSearchParams(location.search).get('redirect_url') || '/';
+  const redirectUrl = safeRedirect(new URLSearchParams(location.search).get('redirect_url'));
 
   const sortedCountries = useMemo(
     () => [...COUNTRIES].sort((a, b) => a.name.localeCompare(b.name)),
