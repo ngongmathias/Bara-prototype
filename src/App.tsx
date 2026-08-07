@@ -8,8 +8,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { HelmetProvider } from 'react-helmet-async';
 
-import { BrowserRouter, Routes, Route, Navigate, useLocation, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
+import { RouteFallback } from "@/components/RouteFallback";
 import { SongContextMenuProvider } from "@/components/streams/SongContextMenu";
 
 import { CountrySelectionProvider } from "@/context/CountrySelectionContext";
@@ -26,267 +28,304 @@ import { useTranslation } from "react-i18next";
 
 
 
-// Test Supabase connection early
-
-import "@/lib/testSupabase";
-
 import { LandingPageFinal as LandingPage } from "./pages/LandingPageFinal";
 
-import NewsPage from "./pages/NewsPage";
+// Route code-splitting. Every page below is loaded on demand behind the
+// <Suspense> boundary in AppRoutes, so a first-time visitor downloads only the
+// route they asked for instead of the whole app (including all 41 admin pages).
+// The landing page and NotFound stay statically imported on purpose — see
+// scripts note in the plan; they are on the first-paint path.
+// Site pages
+const NewsPage = lazy(() => import("./pages/NewsPage"));
+const ListingsPage = lazy(() => import("./pages/ListingsPage"));
+const CategoryListingsPage = lazy(() => import("./pages/CategoryListingsPage"));
+const WriteReviewPage = lazy(() => import("./pages/WriteReviewPage").then((m) => ({ default: m.WriteReviewPage })));
+const ClaimListingPage = lazy(() => import("./pages/ClaimListingPage").then((m) => ({ default: m.ClaimListingPage })));
+const AdvertisePage = lazy(() => import("./pages/AdvertisePage"));
+const ContactUsPage = lazy(() => import("./pages/ContactUsPage"));
+const AboutUsPage = lazy(() => import("./pages/AboutUsPage"));
+const BusinessDetailPage = lazy(() => import("./pages/BusinessDetailPage").then((m) => ({ default: m.BusinessDetailPage })));
+const CategoriesPage = lazy(() => import("./pages/CategoriesPage").then((m) => ({ default: m.CategoriesPage })));
+const CityDetailPage = lazy(() => import("./pages/CityDetailPage").then((m) => ({ default: m.CityDetailPage })));
+const CountryDetailPage = lazy(() => import("./pages/CountryDetailPage").then((m) => ({ default: m.CountryDetailPage })));
+const CountryListingsPage = lazy(() => import("./pages/CountryListingsPage").then((m) => ({ default: m.CountryListingsPage })));
+const CountriesPage = lazy(() => import("./pages/CountriesPage").then((m) => ({ default: m.CountriesPage })));
+const AskQuestionPage = lazy(() => import("./pages/AskQuestionPage").then((m) => ({ default: m.AskQuestionPage })));
+const SignInPage = lazy(() => import("./pages/SignInPage").then((m) => ({ default: m.SignInPage })));
+const SignUpPage = lazy(() => import("./pages/SignUpPage").then((m) => ({ default: m.SignUpPage })));
+const FaqPage = lazy(() => import("./pages/FaqPage"));
+const EventsPage = lazy(() => import("./pages/EventsPage").then((m) => ({ default: m.EventsPage })));
+const ToolsPage = lazy(() => import("./pages/ToolsPage").then((m) => ({ default: m.ToolsPage })));
+const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
+const AdvertiseCheckoutPage = lazy(() => import("./pages/AdvertiseCheckoutPage"));
+const SponsorCountryPage = lazy(() => import("./pages/SponsorCountryPage").then((m) => ({ default: m.SponsorCountryPage })));
+const BlogPage = lazy(() => import("./pages/BlogPage"));
+const BlogPostDetail = lazy(() => import("./pages/BlogPostDetail"));
+const BlogContributorGuidelines = lazy(() => import("./pages/BlogContributorGuidelines"));
+const UserBlogEditor = lazy(() => import("./pages/UserBlogEditor"));
+const PricingPage = lazy(() => import("./pages/PricingPage"));
+const CoinStorePage = lazy(() => import("./pages/CoinStorePage"));
+const InvitePage = lazy(() => import("./pages/InvitePage"));
+const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
+const GamificationPage = lazy(() => import("./pages/GamificationPage"));
+const RewardsHowItWorksPage = lazy(() => import("./pages/RewardsHowItWorksPage"));
+const BusinessPremiumPage = lazy(() => import("./pages/BusinessPremiumPage"));
+const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
+const TermsOfServicePage = lazy(() => import("./pages/TermsOfServicePage"));
+const ContentTermsPage = lazy(() => import("./pages/ContentTermsPage"));
+const CoinsAndXpPage = lazy(() => import("./pages/CoinsAndXpPage"));
+const VerifyAccountPage = lazy(() => import("./pages/VerifyAccountPage"));
+const DMCAPage = lazy(() => import("./pages/DMCAPage"));
+const BusinessPackagesPage = lazy(() => import("./pages/BusinessPackagesPage"));
+const RegistrationDisclaimerPage = lazy(() => import("./pages/RegistrationDisclaimerPage"));
+const DefinitionsPage = lazy(() => import("./pages/DefinitionsPage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 
-import ListingsPage from "./pages/ListingsPage";
+// Marketplace
+const CategoryPage = lazy(() => import("./pages/marketplace/CategoryPage"));
+const PropertyPage = lazy(() => import("./pages/marketplace/PropertyPage"));
+const MotorsPage = lazy(() => import("./pages/marketplace/MotorsPage"));
+const ClassifiedsPage = lazy(() => import("./pages/marketplace/ClassifiedsPage"));
+const JobsPage = lazy(() => import("./pages/marketplace/JobsPage"));
+const CategoryDetailRouter = lazy(() => import("./pages/marketplace/CategoryDetailRouter"));
+const PostListing = lazy(() => import("./pages/marketplace/PostListing"));
+const MyAds = lazy(() => import("./pages/marketplace/MyAds"));
+const MyPurchases = lazy(() => import("./pages/marketplace/MyPurchases"));
+const CartPage = lazy(() => import("./pages/marketplace/CartPage"));
+const SearchResults = lazy(() => import("./pages/marketplace/SearchResults"));
+const AllCategoriesPage = lazy(() => import("./pages/marketplace/AllCategoriesPage").then((m) => ({ default: m.AllCategoriesPage })));
+const MyFavorites = lazy(() => import("./pages/marketplace/MyFavorites"));
+const EditListing = lazy(() => import("./pages/marketplace/EditListing"));
+const MarketplaceStorefront = lazy(() => import("./pages/marketplace/MarketplaceStorefront"));
+const StorefrontEditor = lazy(() => import("./pages/marketplace/StorefrontEditor"));
+const StoreAnalyticsPage = lazy(() => import("./pages/marketplace/StoreAnalyticsPage"));
 
-import CategoryListingsPage from "./pages/CategoryListingsPage";
+// User dashboard & account
+const UserSignInPage = lazy(() => import("./pages/user/UserSignInPage"));
+const UserSignUpPage = lazy(() => import("./pages/user/UserSignUpPage"));
+const UserDashboard = lazy(() => import("./pages/users/UserDashboard").then((m) => ({ default: m.UserDashboard })));
+const UserDashboardHome = lazy(() => import("./pages/users/UserDashboard").then((m) => ({ default: m.UserDashboardHome })));
+const UserEventsPage = lazy(() => import("./pages/users/UserEventsPage").then((m) => ({ default: m.UserEventsPage })));
+const UserProfilePage = lazy(() => import("./pages/users/UserProfilePage").then((m) => ({ default: m.UserProfilePage })));
+const UserBannerSubmission = lazy(() => import("./pages/users/UserBannerSubmission").then((m) => ({ default: m.UserBannerSubmission })));
+const UserSettingsPage = lazy(() => import("./pages/users/UserSettingsPage"));
+const ProfileThemesPage = lazy(() => import("./pages/users/ProfileThemesPage"));
+const UserTicketsPage = lazy(() => import("./pages/users/UserTicketsPage").then((m) => ({ default: m.UserTicketsPage })));
+const UserAnalytics = lazy(() => import("./pages/users/UserAnalytics").then((m) => ({ default: m.UserAnalytics })));
+const UserMyMusic = lazy(() => import("./pages/users/UserMyMusic").then((m) => ({ default: m.UserMyMusic })));
+const UserMyPodcasts = lazy(() => import("./pages/users/UserMyPodcasts").then((m) => ({ default: m.UserMyPodcasts })));
+const UserMyEbooks = lazy(() => import("./pages/users/UserMyEbooks").then((m) => ({ default: m.UserMyEbooks })));
+const UserCreatorAnalytics = lazy(() => import("./pages/users/UserCreatorAnalytics").then((m) => ({ default: m.UserCreatorAnalytics })));
+const UserMyBlogPosts = lazy(() => import("./pages/users/UserMyBlogPosts").then((m) => ({ default: m.UserMyBlogPosts })));
+const UserMyPlaylists = lazy(() => import("./pages/users/UserMyPlaylists").then((m) => ({ default: m.UserMyPlaylists })));
+const UserSavedItems = lazy(() => import("./pages/users/UserSavedItems").then((m) => ({ default: m.UserSavedItems })));
+const OrganizerRegistrationsPage = lazy(() => import("./pages/users/OrganizerRegistrationsPage").then((m) => ({ default: m.OrganizerRegistrationsPage })));
+const OrganizerAnalyticsPage = lazy(() => import("./pages/users/OrganizerAnalyticsPage").then((m) => ({ default: m.OrganizerAnalyticsPage })));
+
+// Sports
+const SportsHome = lazy(() => import("./pages/sports/SportsHome"));
+const SportsScores = lazy(() => import("./pages/sports/SportsScores"));
+const MatchCenter = lazy(() => import("./pages/sports/MatchCenter"));
+const TeamPage = lazy(() => import("./pages/sports/TeamPage"));
+const LeagueTablePage = lazy(() => import("./pages/sports/LeagueTablePage"));
+const SportsSchedule = lazy(() => import("./pages/sports/SportsSchedule"));
+const SportsStats = lazy(() => import("./pages/sports/SportsStats"));
+const SportsPredictions = lazy(() => import("./pages/sports/SportsPredictions"));
+const SportsTeams = lazy(() => import("./pages/sports/SportsTeams"));
+const SportsNewsDetail = lazy(() => import("./pages/sports/SportsNewsDetail"));
+const SportsNewsList = lazy(() => import("./pages/sports/SportsNewsList"));
+
+// Communities
+const CommunitiesPage = lazy(() => import("./pages/communities"));
+const CommunityPage = lazy(() => import("./pages/communities/CommunityPage").then((m) => ({ default: m.CommunityPage })));
+
+// Messaging
+const InboxPage = lazy(() => import("./pages/messages/InboxPage").then((m) => ({ default: m.InboxPage })));
+const ChatWindow = lazy(() => import("./pages/messages/ChatWindow").then((m) => ({ default: m.ChatWindow })));
+
+// Auth
+const AuthFinishPage = lazy(() => import("./pages/auth/AuthFinishPage"));
+const CompleteProfilePage = lazy(() => import("./pages/auth/CompleteProfilePage"));
+const SSOCallbackPage = lazy(() => import("./pages/auth/SSOCallbackPage"));
+
+// Admin
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard").then((m) => ({ default: m.AdminDashboard })));
+const AdminCities = lazy(() => import("./pages/admin/AdminCities").then((m) => ({ default: m.AdminCities })));
+const AdminCountries = lazy(() => import("./pages/admin/AdminCountries").then((m) => ({ default: m.AdminCountries })));
+const AdminCountryInfo = lazy(() => import("./pages/admin/AdminCountryInfo").then((m) => ({ default: m.AdminCountryInfo })));
+const AdminCountryGallery = lazy(() => import("./pages/admin/AdminCountryGallery").then((m) => ({ default: m.AdminCountryGallery })));
+const AdminCountryKeyListings = lazy(() => import("./pages/admin/AdminCountryKeyListings").then((m) => ({ default: m.AdminCountryKeyListings })));
+const AdminBusinesses = lazy(() => import("./pages/admin/AdminBusinesses").then((m) => ({ default: m.AdminBusinesses })));
+const AdminEvents = lazy(() => import("./pages/admin/AdminEventsEnhanced").then((m) => ({ default: m.AdminEventsEnhanced })));
+const AdminReviews = lazy(() => import("./pages/admin/AdminReviews").then((m) => ({ default: m.AdminReviews })));
+const AdminSponsoredAds = lazy(() => import("./pages/admin/AdminSponsoredAds").then((m) => ({ default: m.AdminSponsoredAds })));
+const AdminReports = lazy(() => import("./pages/admin/AdminReports").then((m) => ({ default: m.AdminReports })));
+const AdminCategories = lazy(() => import("./pages/admin/AdminCategories").then((m) => ({ default: m.AdminCategories })));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers").then((m) => ({ default: m.AdminUsers })));
+const AdminManagement = lazy(() => import("./pages/admin/AdminManagement").then((m) => ({ default: m.AdminManagement })));
+const AdminRSSFeeds = lazy(() => import("./pages/admin/AdminRSSFeeds").then((m) => ({ default: m.AdminRSSFeeds })));
+const AdminEmailLog = lazy(() => import("./pages/admin/AdminEmailLog").then((m) => ({ default: m.AdminEmailLog })));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings").then((m) => ({ default: m.AdminSettings })));
+const ContactMessagesPage = lazy(() => import("./pages/admin/ContactMessagesPage"));
+const AdminGamification = lazy(() => import("./pages/admin/AdminGamification"));
+const AdminVerifications = lazy(() => import("./pages/admin/AdminVerifications"));
+const AdminContentReports = lazy(() => import("./pages/admin/AdminContentReports"));
+const AdminArtistClaims = lazy(() => import("./pages/admin/AdminArtistClaims"));
+const AdminPackages = lazy(() => import("./pages/admin/AdminPackages"));
+const AdminRevenue = lazy(() => import("./pages/admin/AdminRevenue"));
+const AdminBannerAds = lazy(() => import("./pages/admin/AdminBannerAds").then((m) => ({ default: m.AdminBannerAds })));
+const AdminSponsoredBanners = lazy(() => import("./pages/admin/AdminSponsoredBanners").then((m) => ({ default: m.AdminSponsoredBanners })));
+const AdminSlideshowImages = lazy(() => import("./pages/admin/AdminSlideshowImages").then((m) => ({ default: m.AdminSlideshowImages })));
+const AdminEventsSlideshow = lazy(() => import("./pages/admin/AdminEventsSlideshow"));
+const AdminPopups = lazy(() => import("./pages/admin/AdminPopups"));
+const AdminMarketplace = lazy(() => import("./pages/admin/AdminMarketplace"));
+const AdminMarketplaceCategories = lazy(() => import("./pages/admin/AdminMarketplaceCategories"));
+const AdminStreamsDashboard = lazy(() => import("./pages/admin/streams/AdminStreamsDashboard").then((m) => ({ default: m.AdminStreamsDashboard })));
+const AdminArtists = lazy(() => import("./pages/admin/streams/AdminArtists").then((m) => ({ default: m.AdminArtists })));
+const AdminSongs = lazy(() => import("./pages/admin/streams/AdminSongs").then((m) => ({ default: m.AdminSongs })));
+const AdminAlbums = lazy(() => import("./pages/admin/streams/AdminAlbums").then((m) => ({ default: m.AdminAlbums })));
+const AdminPodcasts = lazy(() => import("./pages/admin/streams/AdminPodcasts").then((m) => ({ default: m.AdminPodcasts })));
+const AdminMovies = lazy(() => import("./pages/admin/streams/AdminMovies").then((m) => ({ default: m.AdminMovies })));
+const AdminEbooks = lazy(() => import("./pages/admin/streams/AdminEbooks").then((m) => ({ default: m.AdminEbooks })));
+const AdminContentHealth = lazy(() => import("./pages/admin/streams/AdminContentHealth").then((m) => ({ default: m.AdminContentHealth })));
+const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog").then((m) => ({ default: m.AdminAuditLog })));
+const AdminSportsDashboard = lazy(() => import("./pages/admin/sports/AdminSportsDashboard").then((m) => ({ default: m.AdminSportsDashboard })));
+const AdminSportsNews = lazy(() => import("./pages/admin/sports/AdminSportsNews"));
+const AdminSportsVideos = lazy(() => import("./pages/admin/sports/AdminSportsVideos"));
+const AdminTeams = lazy(() => import("./pages/admin/sports/AdminTeams").then((m) => ({ default: m.AdminTeams })));
+const AdminLeagues = lazy(() => import("./pages/admin/sports/AdminLeagues").then((m) => ({ default: m.AdminLeagues })));
+const AdminTournaments = lazy(() => import("./pages/admin/sports/AdminTournaments").then((m) => ({ default: m.AdminTournaments })));
+const AdminBlog = lazy(() => import("./pages/admin/AdminBlog"));
+const AdminBlogEditor = lazy(() => import("./pages/admin/AdminBlogEditor"));
+
+
 
 import NotFound from "./pages/NotFound";
 
-import { WriteReviewPage } from "./pages/WriteReviewPage";
 
-import { ClaimListingPage } from "./pages/ClaimListingPage";
 
-import AdvertisePage from "./pages/AdvertisePage";
 
-import ContactUsPage from "./pages/ContactUsPage";
 
-import AboutUsPage from "./pages/AboutUsPage";
 
-import { BusinessDetailPage } from "./pages/BusinessDetailPage";
 
-import { CategoriesPage } from "./pages/CategoriesPage";
 
-import { CityDetailPage } from "./pages/CityDetailPage";
 
-import { CountryDetailPage } from "./pages/CountryDetailPage";
 
-import { CountryListingsPage } from "./pages/CountryListingsPage";
 
-import { CountriesPage } from "./pages/CountriesPage";
 
-import { AskQuestionPage } from "./pages/AskQuestionPage";
 
-import { SignInPage } from "./pages/SignInPage";
 
-import { SignUpPage } from "./pages/SignUpPage";
 
-import { AdminDashboard } from "./pages/admin/AdminDashboard";
 
-import { AdminCities } from "./pages/admin/AdminCities";
 
-import { AdminCountries } from "./pages/admin/AdminCountries";
 
-import { AdminCountryInfo } from "./pages/admin/AdminCountryInfo";
 
-import { AdminCountryGallery } from "./pages/admin/AdminCountryGallery";
 
-import { AdminCountryKeyListings } from "./pages/admin/AdminCountryKeyListings";
 
-import { AdminBusinesses } from "./pages/admin/AdminBusinesses";
 
-import { AdminEventsEnhanced as AdminEvents } from "./pages/admin/AdminEventsEnhanced";
 
-import { AdminReviews } from "./pages/admin/AdminReviews";
 
-import { AdminSponsoredAds } from "./pages/admin/AdminSponsoredAds";
 
-import { AdminReports } from "./pages/admin/AdminReports";
 
-import { AdminCategories } from "./pages/admin/AdminCategories";
 
-import { AdminUsers } from "./pages/admin/AdminUsers";
 
-import { AdminManagement } from "./pages/admin/AdminManagement";
 
-import { AdminRSSFeeds } from "./pages/admin/AdminRSSFeeds";
 
-import { AdminEmailLog } from "./pages/admin/AdminEmailLog";
 
-import { AdminSettings } from "./pages/admin/AdminSettings";
 
-import ContactMessagesPage from "./pages/admin/ContactMessagesPage";
 
-import AdminGamification from "./pages/admin/AdminGamification";
 
-import AdminVerifications from "./pages/admin/AdminVerifications";
-import AdminContentReports from "./pages/admin/AdminContentReports";
-import AdminArtistClaims from "./pages/admin/AdminArtistClaims";
 
-import AdminPackages from "./pages/admin/AdminPackages";
 
-import AdminRevenue from "./pages/admin/AdminRevenue";
 
-import { AdminBannerAds } from "./pages/admin/AdminBannerAds";
 
 import { AdminAuthGuard } from "./components/admin/AdminAuthGuard";
 
 import { UserAuthGuard } from "./components/users/UserAuthGuard";
 
-import FaqPage from "./pages/FaqPage";
 
 // import { SimpleMapTest } from "./pages/SimpleMapTest";
 
-import { UltraSimpleMap } from "./components/UltraSimpleMap";
 
-import { EventsPage } from "./pages/EventsPage";
 
-import { ToolsPage } from "./pages/ToolsPage";
 
-import CommunitiesPage from "./pages/communities";
 
-import MarketplacePage from "./pages/MarketplacePage";
 
-import CategoryPage from "./pages/marketplace/CategoryPage";
 
-import PropertyPage from "./pages/marketplace/PropertyPage";
 
-import MotorsPage from "./pages/marketplace/MotorsPage";
 
-import ClassifiedsPage from "./pages/marketplace/ClassifiedsPage";
 
-import JobsPage from "./pages/marketplace/JobsPage";
 
-import ListingDetailPage from "./pages/marketplace/ListingDetailPage";
 
-import CategoryDetailRouter from "./pages/marketplace/CategoryDetailRouter";
 
-import PostListing from "./pages/marketplace/PostListing";
 
-import CategoryPostForm from "./pages/marketplace/CategoryPostForm";
 
-import MyAds from "./pages/marketplace/MyAds";
-import MyPurchases from "./pages/marketplace/MyPurchases";
-import CartPage from "./pages/marketplace/CartPage";
 
-import SearchResults from "./pages/marketplace/SearchResults";
 
-import { AllCategoriesPage } from "./pages/marketplace/AllCategoriesPage";
 
-import MyFavorites from "./pages/marketplace/MyFavorites";
 
-import EditListing from "./pages/marketplace/EditListing";
 
-import MarketplaceStorefront from "./pages/marketplace/MarketplaceStorefront";
 
-import StorefrontEditor from "./pages/marketplace/StorefrontEditor";
-import StoreAnalyticsPage from "./pages/marketplace/StoreAnalyticsPage";
 
-import { CommunityPage } from "./pages/communities/CommunityPage";
 
-import UserSignInPage from "./pages/user/UserSignInPage";
 
-import UserSignUpPage from "./pages/user/UserSignUpPage";
 
-import { UserDashboard, UserDashboardHome } from "./pages/users/UserDashboard";
 
-import { UserEventsPage } from "./pages/users/UserEventsPage";
 
-import { UserProfilePage } from "./pages/users/UserProfilePage";
 
-import { UserBannerSubmission } from "./pages/users/UserBannerSubmission";
 
-import UserSettingsPage from "./pages/users/UserSettingsPage";
 
-import ProfileThemesPage from "./pages/users/ProfileThemesPage";
 
-import AdvertiseCheckoutPage from "./pages/AdvertiseCheckoutPage";
 
-import { SponsorCountryPage } from "./pages/SponsorCountryPage";
 
-import { AdminSponsoredBanners } from "./pages/admin/AdminSponsoredBanners";
 
-import { AdminSlideshowImages } from "./pages/admin/AdminSlideshowImages";
 
-import AdminEventsSlideshow from "./pages/admin/AdminEventsSlideshow";
 
-import AdminPopups from "./pages/admin/AdminPopups";
 
-import AdminMarketplace from "./pages/admin/AdminMarketplace";
 
-import AdminMarketplaceCategories from "./pages/admin/AdminMarketplaceCategories";
 
-import { AdminStreamsDashboard } from "./pages/admin/streams/AdminStreamsDashboard";
 
-import { AdminArtists } from "./pages/admin/streams/AdminArtists";
 
-import { AdminSongs } from "./pages/admin/streams/AdminSongs";
 
-import { AdminAlbums } from "./pages/admin/streams/AdminAlbums";
 
-import { AdminPodcasts } from "./pages/admin/streams/AdminPodcasts";
 
-import { AdminMovies } from "./pages/admin/streams/AdminMovies";
 
-import { AdminEbooks } from "./pages/admin/streams/AdminEbooks";
 
-import { AdminContentHealth } from "./pages/admin/streams/AdminContentHealth";
 
-import { AdminAuditLog } from "./pages/admin/AdminAuditLog";
 
-import { AdminSportsDashboard } from "./pages/admin/sports/AdminSportsDashboard";
 
-import AdminSportsNews from "./pages/admin/sports/AdminSportsNews";
 
-import AdminSportsVideos from "./pages/admin/sports/AdminSportsVideos";
 
-import { AdminTeams } from "./pages/admin/sports/AdminTeams";
 
-import { AdminLeagues } from "./pages/admin/sports/AdminLeagues";
 
-import { AdminTournaments } from "./pages/admin/sports/AdminTournaments";
 
 import { MainLayout } from "./components/layout/MainLayout";
 
-import BlogPage from "./pages/BlogPage";
 
-import BlogPostDetail from "./pages/BlogPostDetail";
 
-import BlogContributorGuidelines from "./pages/BlogContributorGuidelines";
 
-import UserBlogEditor from "./pages/UserBlogEditor";
 
-import AdminBlog from "./pages/admin/AdminBlog";
 
-import PricingPage from "./pages/PricingPage";
 
-import CoinStorePage from "./pages/CoinStorePage";
 
-import InvitePage from "./pages/InvitePage";
 
-import LeaderboardPage from "./pages/LeaderboardPage";
-import GamificationPage from "./pages/GamificationPage";
 
-import RewardsHowItWorksPage from "./pages/RewardsHowItWorksPage";
 
-import BusinessPremiumPage from "./pages/BusinessPremiumPage";
 
-import AffiliatePage from "./pages/AffiliatePage";
 
-import AdminBlogEditor from "./pages/admin/AdminBlogEditor";
 
-import AuthFinishPage from "./pages/auth/AuthFinishPage";
 
-import CompleteProfilePage from "./pages/auth/CompleteProfilePage";
 
-import SSOCallbackPage from "./pages/auth/SSOCallbackPage";
 
-import SportsHome from "./pages/sports/SportsHome";
 
-import SportsScores from "./pages/sports/SportsScores";
 
-import MatchCenter from "./pages/sports/MatchCenter";
 
-import TeamPage from "./pages/sports/TeamPage";
 
-import LeagueTablePage from "./pages/sports/LeagueTablePage";
 
-import SportsSchedule from "./pages/sports/SportsSchedule";
 
-import SportsStats from "./pages/sports/SportsStats";
 
-import SportsPredictions from "./pages/sports/SportsPredictions";
 
-import SportsTeams from "./pages/sports/SportsTeams";
 
-import SportsNewsDetail from "./pages/sports/SportsNewsDetail";
 
 // /streams pages are route code-split (lazy) to shrink the initial bundle — they
 // load on demand behind the <Suspense> boundary on the /streams route block.
@@ -319,47 +358,25 @@ const EbooksPage = lazy(() => import("./pages/streams/EbooksPage"));
 const EbookDetailPage = lazy(() => import("./pages/streams/EbookDetailPage"));
 const EbookReaderPage = lazy(() => import("./pages/streams/EbookReaderPage"));
 
-import SportsNewsList from "./pages/sports/SportsNewsList";
 
-import SearchPage from "./pages/SearchPage";
 
-import { UserTicketsPage } from "./pages/users/UserTicketsPage";
 
-import { UserAnalytics } from "./pages/users/UserAnalytics";
 
-import { UserMyMusic } from "./pages/users/UserMyMusic";
 
-import { UserMyPodcasts } from "./pages/users/UserMyPodcasts";
 
-import { UserMyEbooks } from "./pages/users/UserMyEbooks";
 
-import { UserCreatorAnalytics } from "./pages/users/UserCreatorAnalytics";
 
-import { UserMyBlogPosts } from "./pages/users/UserMyBlogPosts";
 
-import { UserMyPlaylists } from "./pages/users/UserMyPlaylists";
 
-import { UserSavedItems } from "./pages/users/UserSavedItems";
 
-import { OrganizerRegistrationsPage } from "./pages/users/OrganizerRegistrationsPage";
-import { OrganizerAnalyticsPage } from "./pages/users/OrganizerAnalyticsPage";
 
-import TermsOfServicePage from "./pages/TermsOfServicePage";
 
-import ContentTermsPage from "./pages/ContentTermsPage";
 
-import CoinsAndXpPage from "./pages/CoinsAndXpPage";
 
-import VerifyAccountPage from "./pages/VerifyAccountPage";
-import DMCAPage from "./pages/DMCAPage";
 
-import BusinessPackagesPage from "./pages/BusinessPackagesPage";
 
-import RegistrationDisclaimerPage from "./pages/RegistrationDisclaimerPage";
 
-import DefinitionsPage from "./pages/DefinitionsPage";
 
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 
 import { CookieConsent } from "./components/CookieConsent";
 
@@ -367,9 +384,7 @@ import { InviteFriendsPrompt } from "./components/InviteFriendsPrompt";
 
 import { NotificationsProvider } from "./context/NotificationsContext";
 
-import { InboxPage } from "./pages/messages/InboxPage";
 
-import { ChatWindow } from "./pages/messages/ChatWindow";
 
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
 
@@ -387,24 +402,28 @@ const queryClient = new QueryClient();
 
 import { useWelcomeEmail } from "@/hooks/useWelcomeEmail";
 
-// Minimal monochrome fallback shown while a lazy (code-split) route chunk loads.
-const RouteFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-white">
-    <div className="flex flex-col items-center gap-3">
-      <div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-gray-900 animate-spin" />
-      <span className="sr-only">Loading…</span>
-    </div>
-  </div>
-);
+// RouteFallback (the <Suspense> spinner) and RouteErrorBoundary now live in
+// their own files — both need state/lifecycle to handle slow connections and
+// stale chunks after a deploy. See src/lib/chunkReload.ts for the reasoning.
 
 // Layout route for /streams/*: hoists SongContextMenuProvider above every
 // Streams page so pages can call useSongContextMenu() in their own body
 // (the provider previously lived inside StreamsLayout, i.e. *below* its
 // consumers, which threw and blanked those pages).
 const StreamsRouteLayout = () => (
-  <SongContextMenuProvider>
+  <RouteErrorBoundary section="Streams">
+    <SongContextMenuProvider>
+      <Outlet />
+    </SongContextMenuProvider>
+  </RouteErrorBoundary>
+);
+
+// Same idea for /admin/*: 41 code-split pages behind one guard, so a failure in
+// any single one should leave the rest of the console reachable.
+const AdminRouteLayout = () => (
+  <RouteErrorBoundary section="the admin console">
     <Outlet />
-  </SongContextMenuProvider>
+  </RouteErrorBoundary>
 );
 
 const AppRoutes = () => {
@@ -456,10 +475,12 @@ const AppRoutes = () => {
 
 
 
+      {/* Catches lazy-chunk failures and render errors from any route. Sits
+          INSIDE the top-level <ErrorBoundary> so a broken page shows a contained
+          message instead of blanking the whole app. */}
+      <RouteErrorBoundary>
       <Suspense fallback={<RouteFallback />}>
       <Routes>
-
-        <Route path="/" element={<LandingPage />} />
 
         <Route path="/" element={<LandingPage />} />
 
@@ -896,7 +917,7 @@ const AppRoutes = () => {
 
         {/* Admin Routes - Isolated with wildcard to prevent fall-through */}
 
-        <Route path="/admin/*">
+        <Route path="/admin/*" element={<AdminRouteLayout />}>
 
           <Route index element={<AdminAuthGuard><AdminDashboard /></AdminAuthGuard>} />
 
@@ -1016,6 +1037,7 @@ const AppRoutes = () => {
 
       </Routes>
       </Suspense>
+      </RouteErrorBoundary>
 
     </NotificationsProvider>
 

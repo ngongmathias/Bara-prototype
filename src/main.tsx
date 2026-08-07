@@ -4,9 +4,14 @@ import App from './App.tsx'
 import './index.css'
 import './lib/i18n' // Initialize i18n
 import { initConveyThis } from './lib/conveythis'
+import { registerChunkReloadListener } from './lib/chunkReload'
 
 // Kicked off before React renders so translation starts as early as possible.
 initConveyThis()
+
+// Recover from stale code-split chunks after a deploy. Registered before React
+// mounts so a failed modulepreload is caught even on the very first navigation.
+registerChunkReloadListener()
 
 // Clerk configuration (v5 — see https://clerk.com/docs/upgrade-guides/react-router-v5)
 const clerkConfig = {

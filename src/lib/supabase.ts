@@ -51,8 +51,12 @@ const testConnection = async () => {
   }
 };
 
-// Test connection asynchronously
-testConnection();
+// Dev only. In production this fired a `popup_ads` query on every single page
+// load for every visitor — one extra round-trip before anything useful, and its
+// only output is a console message nobody sees.
+if (import.meta.env.DEV) {
+  testConnection();
+}
 
 // Create an authenticated Supabase client for admin operations
 export const createAuthenticatedSupabaseClient = async (clerkToken: string) => {
