@@ -191,12 +191,16 @@ export default function AdminRevenue() {
       subtitle: '50 coins each',
     },
     {
-      title: 'Estimated Coin Value',
-      value: `$${((stats.totalCoinsPurchased * 0.01)).toFixed(2)}`,
+      // Previously "Estimated Coin Value", shown in dollars as though it were
+      // revenue. Coins cannot be bought — this is earned in-platform activity,
+      // and the $0.01 anchor is an internal planning figure (27.4.1, not yet
+      // ratified), not money the business has taken.
+      title: 'Coins Earned (all time)',
+      value: stats.totalCoinsPurchased.toLocaleString(),
       icon: TrendingUp,
       color: 'text-emerald-600',
       bg: 'bg-emerald-50',
-      subtitle: 'Based on $0.01/coin avg',
+      subtitle: 'No cash value — coins are not purchasable',
     },
   ];
 
@@ -208,8 +212,8 @@ export default function AdminRevenue() {
                     <AdminPageGuide 
                       title="Revenue Analytics"
                       description="Track global financial operations across the entire application."
-                      features={["Stripe webhook logs", "Live Subscription tracking", "Ad revenue estimates"]}
-                      workflow={["Review the dashboard weekly.", "Ensure Stripe logs are active with 0 errors.", "Process any failed payments if required."]}
+                      features={["Coin economy activity", "Banner impressions and CTR", "Marketplace boost usage"]}
+                      workflow={["Review weekly to see how the coin economy is moving.", "Watch banner CTR to judge advertising value before selling it.", "Payment processing is not built yet (Phase 15) — no figure here is money received."]}
                     />
                 </div>
         </div>
@@ -240,6 +244,18 @@ export default function AdminRevenue() {
           <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
+      </div>
+
+      {/* This page previously converted coin activity and subscriber counts into
+          dollar "revenue" that nobody had ever paid. State the position plainly so
+          nobody plans against a number the business has not actually earned. */}
+      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+        <p className="text-sm text-gray-700">
+          <strong className="font-semibold text-gray-900">No payments are processed yet.</strong>{' '}
+          Realised revenue is $0 — every figure below is platform activity (coins
+          earned and spent, banner impressions, boosts used), not money received.
+          Business packages and advertising are currently fulfilled manually.
+        </p>
       </div>
 
       {/* Stat Cards */}
@@ -275,23 +291,29 @@ export default function AdminRevenue() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              {/* Every "revenue" figure here used to be coin activity multiplied by
+                  a notional $0.01, or a subscriber count multiplied by a plan price
+                  that nobody has ever been charged. With no payment processing
+                  (Phase 15), realised revenue is $0 across the board — so these are
+                  labelled as what they are: streams that are built vs. not, and the
+                  activity behind them. */}
               {[
-                { name: 'Banner Advertising', value: stats.bannerRevenue, status: 'active' },
-                { name: 'Premium Marketplace Boosts', value: stats.premiumListings * 50 * 0.01, status: 'active' },
-                { name: 'Bara Pro Subscriptions', value: stats.activeProUsers * 5, status: stats.activeProUsers > 0 ? 'active' : 'pending' },
-                { name: 'Bara Elite Subscriptions', value: stats.activeEliteUsers * 20, status: stats.activeEliteUsers > 0 ? 'active' : 'pending' },
-                { name: 'Event Ticket Commissions', value: 0, status: 'pending' },
-                { name: 'Marketplace Commissions', value: 0, status: 'pending' },
+                { name: 'Banner Advertising', detail: `${stats.bannerImpressions.toLocaleString()} impressions`, status: 'unbilled' },
+                { name: 'Premium Marketplace Boosts', detail: `${stats.premiumListings.toLocaleString()} boosts · paid in coins`, status: 'coins' },
+                { name: 'Bara Pro Subscriptions', detail: 'No billing system', status: 'pending' },
+                { name: 'Bara Elite Subscriptions', detail: 'No billing system', status: 'pending' },
+                { name: 'Event Ticket Commissions', detail: 'Manual payment only', status: 'pending' },
+                { name: 'Marketplace Commissions', detail: 'Manual payment only', status: 'pending' },
               ].map((stream) => (
                 <div key={stream.name} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                   <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${stream.status === 'active' ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <div className={`w-2 h-2 rounded-full ${stream.status === 'pending' ? 'bg-gray-300' : 'bg-green-500'}`} />
                     <span className="text-sm font-medium text-gray-700">{stream.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-gray-900">${stream.value.toFixed(2)}</span>
-                    <Badge variant={stream.status === 'active' ? 'default' : 'secondary'} className="text-[10px]">
-                      {stream.status === 'active' ? 'Active' : 'Pending'}
+                    <span className="text-xs text-gray-500">{stream.detail}</span>
+                    <Badge variant={stream.status === 'pending' ? 'secondary' : 'default'} className="text-[10px]">
+                      {stream.status === 'pending' ? 'Not built' : stream.status === 'coins' ? 'Coins only' : 'Running, unbilled'}
                     </Badge>
                   </div>
                 </div>

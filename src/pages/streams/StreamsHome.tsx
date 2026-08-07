@@ -505,25 +505,15 @@ export default function StreamsHome() {
                                         </div>
                                     ))
                                 ) : (
-                                    [
-                                        { id: '1', title: 'Discover Weekly', desc: 'Personalized for you', cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&h=300&fit=crop' },
-                                        { id: '2', title: 'Daily Mix 1', desc: 'Afrobeats & Highlife', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop' },
-                                        { id: '3', title: 'Daily Mix 2', desc: 'Amapiano Beats', cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop' },
-                                        { id: '4', title: 'Release Radar', desc: 'New from artists you follow', cover: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300&h=300&fit=crop' }
-                                    ].map(mix => (
-                                        <div key={mix.id} className="bg-white border border-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-300 group flex flex-col min-w-[180px] sm:min-w-[200px] snap-start shadow-xl">
-                                            <div className="relative mb-4 aspect-square shadow-2xl">
-                                                <img loading="lazy" src={mix.cover} alt={mix.title} className="w-full h-full object-cover rounded-md shadow-xl" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                                                <button
-                                                    onClick={() => { if (trendingSongs.length > 0) { playAlbum(trendingSongs, 0); } else { toast({ title: 'No songs yet', description: 'Check back soon for personalized mixes.' }); } }}
-                                                    className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center transition-all duration-300 shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 active:scale-95 z-10">
-                                                    <Play size={24} fill="white" className="ml-1" />
-                                                </button>
-                                            </div>
-                                            <h3 className="font-bold truncate text-gray-900 mb-1 text-sm tracking-tight">{mix.title}</h3>
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{mix.desc}</p>
-                                        </div>
-                                    ))
+                                    /* Previously four hardcoded cards ("Discover Weekly", "Daily Mix 1/2",
+                                       "Release Radar") with stock Unsplash covers. None of them existed:
+                                       clicking any one played the trending list instead of what the card
+                                       named. Same class of bug Phase 14 removed from MoviesPage. */
+                                    <div className="min-w-[280px] flex flex-col items-center justify-center py-10 px-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 text-center">
+                                        <Sparkles size={32} className="text-gray-300 mb-3" />
+                                        <p className="text-gray-500 text-sm font-medium">Your daily mixes will appear here</p>
+                                        <p className="text-gray-400 text-xs mt-1">Listen to a few songs and we'll build mixes from what you play</p>
+                                    </div>
                                 )}
                             </Section>
 

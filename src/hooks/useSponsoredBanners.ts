@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db, SUPABASE_URL, supabase } from '@/lib/supabase';
 import { SponsoredBanner, CreateSponsoredBannerData, UpdateSponsoredBannerData } from '@/types/sponsoredBanner.types';
+import { MonetizationService } from '@/lib/monetizationService';
 
 export const useSponsoredBanners = () => {
   const [banners, setBanners] = useState<SponsoredBanner[]>([]);
@@ -269,22 +270,46 @@ export const useSponsoredBanners = () => {
     }
   };
 
-  const incrementBannerClick = async (id: string): Promise<void> => {
+  // Both of these used to only console.log, which meant any banner shown through
+  // this hook recorded nothing at all — advertisers would have been sold
+  // impressions the platform could not evidence. They now write to the same two
+  // places TopBannerAd already uses: `sponsored_banner_analytics` (per-event log)
+  // and `monetization_stats` via the track_interaction RPC (daily rollup, which
+  // is what the creator-facing performance dashboard reads).
+  //
+  // Tracking must never break rendering, so failures are warnings, not throws.
+
+  // Cost stays 0: unlike `banner_ads`, sponsored banners carry no per-click bid
+  // (there is no `bid_per_click` on SponsoredBanner) — they are sold as flat
+  // placements, so there is no per-event spend to attribute.
+  const recordBannerEvent = async (
+    id: string,
+    eventType: 'view' | 'click'
+  ): Promise<void> => {
     try {
-      // For now, just log the click. In a real app, you'd have a separate analytics table
-      console.log(`Banner ${id} clicked`);
+      await supabase.from('sponsored_banner_analytics').insert({
+        banner_id: id,
+        event_type: eventType,
+        user_agent: navigator.userAgent,
+      });
     } catch (err) {
-      console.error('Error incrementing banner click:', err);
+      console.warn(`[useSponsoredBanners] analytics insert failed for ${id}:`, err);
     }
+
+    // 'view' in the legacy table is an 'impression' in the monetization engine.
+    await MonetizationService.trackInteraction(
+      id,
+      'banner',
+      eventType === 'view' ? 'impression' : 'click'
+    );
+  };
+
+  const incrementBannerClick = async (id: string): Promise<void> => {
+    await recordBannerEvent(id, 'click');
   };
 
   const incrementBannerView = async (id: string): Promise<void> => {
-    try {
-      // For now, just log the view. In a real app, you'd have a separate analytics table
-      console.log(`Banner ${id} viewed`);
-    } catch (err) {
-      console.error('Error incrementing banner view:', err);
-    }
+    await recordBannerEvent(id, 'view');
   };
 
   // Ensure we always return a valid public URL for storage objects

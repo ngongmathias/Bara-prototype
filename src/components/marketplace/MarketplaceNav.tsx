@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
+import { MARKETPLACE_CART_ENABLED } from '@/lib/features';
 
 export const MarketplaceNav = () => {
   const navigate = useNavigate();
@@ -34,21 +35,23 @@ export const MarketplaceNav = () => {
               <span className="ml-1 hidden sm:inline">Favorites</span>
             </Button>
             
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/marketplace/cart')}
-              className="relative"
-              title="Shopping Cart"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                  {cartCount}
-                </span>
-              )}
-              <span className="ml-1 hidden sm:inline">Cart</span>
-            </Button>
+            {MARKETPLACE_CART_ENABLED && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/marketplace/cart')}
+                className="relative"
+                title="Shopping Cart"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {cartCount}
+                  </span>
+                )}
+                <span className="ml-1 hidden sm:inline">Cart</span>
+              </Button>
+            )}
           </div>
         </div>
       </div>

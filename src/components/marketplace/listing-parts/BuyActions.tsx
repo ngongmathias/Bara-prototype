@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { VariantSelector, Variant } from './VariantSelector';
 import { BuyNowModal } from './BuyNowModal';
+import { MARKETPLACE_CART_ENABLED } from '@/lib/features';
 
 /**
  * Shared purchase actions block for all marketplace detail pages.
@@ -15,6 +16,11 @@ import { BuyNowModal } from './BuyNowModal';
  * Drop this into any detail page where buyers can purchase or cart an item.
  * For non-cartable categories (Property, Motors, Jobs, Services, Businesses, Pets)
  * pass `cartable={false}` to hide Add to Cart.
+ *
+ * Note that `cartable` is additionally gated on MARKETPLACE_CART_ENABLED — the
+ * cart checkout is hidden platform-wide until payments exist, so Add to Cart and
+ * the quantity stepper (whose value only feeds addToCart) come down together.
+ * Buy Now is unaffected: it writes a real transaction.
  */
 interface BuyActionsProps {
   listing: any;
@@ -24,9 +30,10 @@ interface BuyActionsProps {
 
 export const BuyActions: React.FC<BuyActionsProps> = ({
   listing,
-  cartable = true,
+  cartable: cartableProp = true,
   buyable = true,
 }) => {
+  const cartable = cartableProp && MARKETPLACE_CART_ENABLED;
   const { user } = useUser();
   const navigate = useNavigate();
   const { addToCart } = useCart();

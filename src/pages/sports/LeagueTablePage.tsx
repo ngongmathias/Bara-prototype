@@ -16,16 +16,13 @@ export default function LeagueTablePage() {
         season: 2024
     });
 
-    // Fallback Mock Data for when API limit is reached
-    const mockTeams: any[] = [
-        { rank: 1, team: { name: "Liverpool", logo: "https://media.api-sports.io/football/teams/40.png" }, points: 60, goalsDiff: 40, form: "WWDWW", all: { played: 25, win: 18, draw: 6, lose: 1, goals: { for: 55, against: 15 } } },
-        { rank: 2, team: { name: "Manchester City", logo: "https://media.api-sports.io/football/teams/50.png" }, points: 58, goalsDiff: 35, form: "DWWWW", all: { played: 25, win: 17, draw: 7, lose: 1, goals: { for: 52, against: 17 } } },
-        { rank: 3, team: { name: "Arsenal", logo: "https://media.api-sports.io/football/teams/42.png" }, points: 55, goalsDiff: 30, form: "WWLWW", all: { played: 25, win: 16, draw: 7, lose: 2, goals: { for: 48, against: 18 } } },
-        { rank: 4, team: { name: "Aston Villa", logo: "https://media.api-sports.io/football/teams/66.png" }, points: 49, goalsDiff: 15, form: "LDWWW", all: { played: 25, win: 14, draw: 7, lose: 4, goals: { for: 45, against: 30 } } },
-    ];
-
-    // Use real data if available, otherwise use mock data
-    const teams = (error || !standings || standings.length === 0) ? mockTeams : standings;
+    // There used to be a four-row hardcoded Premier League table here (Liverpool
+    // 60pts, Man City 58, …) rendered whenever the API errored or returned
+    // nothing — indistinguishable from live standings. Since `season` is pinned
+    // to 2024, that fallback was very likely what most visitors actually saw.
+    // Show nothing rather than invented league positions.
+    const teams = standings ?? [];
+    const hasTable = !error && teams.length > 0;
 
     const getLeagueName = (id: number) => {
         switch (id) {
@@ -73,6 +70,16 @@ export default function LeagueTablePage() {
                     <div className="mb-8">
                         <SponsorshipBanner />
                     </div>
+                    {!hasTable ? (
+                        <div className="bg-white rounded-lg shadow-sm border px-6 py-16 text-center">
+                            <h2 className="text-lg font-comfortaa font-semibold text-gray-900 mb-2">
+                                Standings aren't available right now
+                            </h2>
+                            <p className="text-sm text-gray-500 max-w-md mx-auto font-roboto">
+                                We couldn't load the {getLeagueName(leagueId)} table. Please check back shortly.
+                            </p>
+                        </div>
+                    ) : (
                     <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
                         <div className="overflow-x-auto">
                             <div className="min-w-[1000px]">
@@ -160,18 +167,21 @@ export default function LeagueTablePage() {
                             </div>
                         </div>
                     </div>
+                    )}
 
-                    {/* Legend */}
-                    <div className="mt-6 flex gap-6 text-sm">
-                        <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                            <span className="text-gray-600">Champions League</span>
+                    {/* Legend — only meaningful when a table is actually rendered */}
+                    {hasTable && (
+                        <div className="mt-6 flex gap-6 text-sm">
+                            <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                                <span className="text-gray-600">Champions League</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 bg-red-500 rounded"></div>
+                                <span className="text-gray-600">Relegation</span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 bg-red-500 rounded"></div>
-                            <span className="text-gray-600">Relegation</span>
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </MainLayout>

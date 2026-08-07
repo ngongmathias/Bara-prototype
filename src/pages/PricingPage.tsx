@@ -52,7 +52,9 @@ const tiers = [
       { text: 'Business hours display', included: true },
       { text: 'Analytics dashboard', included: true },
       { text: 'Priority support', included: true },
-      { text: '100 bonus Bara Coins/month', included: true },
+      // Monthly coin grants removed: no membership system exists to award them,
+      // so nobody has ever received them. Coins are earned, per the economy
+      // rules in MASTER_PLAN — do not re-add without an RPC that actually pays.
       { text: 'Pro badge', included: true },
       { text: 'Featured placement', included: false },
     ],
@@ -70,7 +72,6 @@ const tiers = [
       { text: 'Everything in Pro', included: true },
       { text: 'Featured placement', included: true },
       { text: 'Verified badge', included: true },
-      { text: '500 bonus Bara Coins/month', included: true },
       { text: 'Unlimited media uploads', included: true },
       { text: 'API access', included: true },
       { text: 'White-label business page', included: true },
@@ -96,12 +97,12 @@ export default function PricingPage() {
       navigate('/user/sign-up');
       return;
     }
-    // All plans are free during launch period
+    // No plan is "activated" here — there is no membership system and no
+    // entitlement is written anywhere. Every feature is simply free during
+    // launch, so say that rather than implying an upgrade just happened.
     toast({
-      title: `${tierName} Plan Activated!`,
-      description: tierName === 'Free'
-        ? 'You\'re on the Free plan. All basic features are available!'
-        : `All ${tierName} features are free during our launch period. Enjoy!`,
+      title: 'Everything is free during launch',
+      description: `No upgrade is needed — ${tierName === 'Free' ? 'all' : `every ${tierName}`} feature is already available on your account.`,
     });
     navigate('/users/dashboard');
   };
@@ -124,6 +125,17 @@ export default function PricingPage() {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto font-roboto">
             Start free. Upgrade when you're ready. No hidden fees.
           </p>
+
+          {/* The tiers below describe the planned paid plans. Nothing is billed
+              yet and no entitlement is granted on selection, so say so up front
+              rather than letting the page imply an active subscription product. */}
+          <div className="mt-6 inline-flex items-start gap-2 text-left max-w-xl mx-auto rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+            <span className="text-sm text-gray-700 font-roboto leading-relaxed">
+              <strong className="font-semibold text-gray-900">Everything is free while we launch.</strong>{' '}
+              The plans below show what each tier will include once paid plans begin.
+              No card is required and nothing is billed today.
+            </span>
+          </div>
 
           {/* Billing toggle */}
           <div className="mt-8 flex items-center justify-center gap-4">
@@ -239,11 +251,15 @@ export default function PricingPage() {
         <div className="mt-20 max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-8 font-comfortaa">Frequently Asked Questions</h2>
           <div className="space-y-6">
+            {/* These answers describe what the platform actually does today.
+                They previously advertised Stripe and Paystack checkout, a 7-day
+                Pro trial and purchasable coins — none of which exist. Update them
+                alongside Phase 15 (payments), not before. */}
             {[
-              { q: 'Can I switch plans anytime?', a: 'Yes! You can upgrade or downgrade at any time. Changes take effect at the start of your next billing cycle.' },
-              { q: 'What payment methods do you accept?', a: 'We accept credit/debit cards via Stripe and mobile money via Paystack. M-Pesa support coming soon.' },
-              { q: 'Is there a free trial for Pro or Elite?', a: 'New users get a 7-day free trial of Bara Pro. No credit card required.' },
-              { q: 'What are Bara Coins?', a: 'Bara Coins are our virtual currency. Earn them by being active on the platform or purchase them to boost listings, promote events, and unlock features.' },
+              { q: 'What does it cost right now?', a: 'Nothing. Every Pro and Elite feature is free while we are in launch. We will announce paid plans well before anyone is charged.' },
+              { q: 'What payment methods do you accept?', a: 'We do not take online payments yet. Mobile money (MTN MoMo and M-Pesa) and card payments are planned. In the meantime, business packages and advertising are arranged directly with our team.' },
+              { q: 'Do I need a card to sign up?', a: 'No. No card, no trial period, no automatic billing — you get the full platform by creating an account.' },
+              { q: 'What are Bara Coins?', a: 'Bara Coins are a free in-platform reward. You earn them through daily missions, streaks and achievements, and spend them on things like ad-free browsing and boosting your ads. They cannot be bought, and they have no cash value.' },
             ].map((faq) => (
               <div key={faq.q} className="border-b border-gray-100 pb-4">
                 <h3 className="font-semibold text-gray-900 mb-2 font-roboto">{faq.q}</h3>

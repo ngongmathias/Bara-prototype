@@ -376,6 +376,7 @@ import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
 import { ShareProvider } from "@/context/ShareContext";
 import { SignInNudgeProvider } from "@/context/SignInNudgeContext";
 import { CartProvider } from "@/context/CartContext";
+import { MARKETPLACE_CART_ENABLED } from "@/lib/features";
 import { GlobalPlayer } from "@/components/streams/GlobalPlayer";
 import { SignInNudgeSheet } from "@/components/SignInNudgeSheet";
 
@@ -694,7 +695,13 @@ const AppRoutes = () => {
 
           <Route path="my-purchases" element={<MyPurchases />} />
 
-          <Route path="cart" element={<CartPage />} />
+          {/* Cart checkout is hidden until payments land (MARKETPLACE_CART_ENABLED).
+              The route stays registered so an old bookmark or a stale tab lands on
+              the marketplace instead of the 404 catch-all. */}
+          <Route
+            path="cart"
+            element={MARKETPLACE_CART_ENABLED ? <CartPage /> : <Navigate to="/marketplace" replace />}
+          />
 
           <Route path="listing/:listingId" element={<CategoryDetailRouter />} />
 
