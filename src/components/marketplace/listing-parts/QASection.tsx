@@ -4,6 +4,7 @@ import { useUser } from '@clerk/clerk-react';
 import { MessageCircle, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { resolveDisplayNames, FALLBACK_DISPLAY_NAME } from '@/lib/displayNames';
 
 interface Comment {
   id: string;
@@ -30,6 +31,9 @@ export const QASection: React.FC<QASectionProps> = ({ listingId, sellerId }) => 
   const [submitting, setSubmitting] = useState(false);
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
+  // Clerk id -> public display name. Questions and answers used to carry no
+  // attribution at all, which reads as an abandoned or automated site.
+  const [names, setNames] = useState<Record<string, string>>({});
 
   const fetchComments = useCallback(async () => {
     const { data } = await supabase
@@ -53,6 +57,10 @@ export const QASection: React.FC<QASectionProps> = ({ listingId, sellerId }) => 
 
     setComments(threaded);
     setLoading(false);
+
+    // Resolved after the thread renders — a name is an enhancement, and
+    // waiting on it would delay the questions themselves.
+    setNames(await resolveDisplayNames(all.map((c) => c.user_id)));
   }, [listingId]);
 
   useEffect(() => {
@@ -170,6 +178,9 @@ export const QASection: React.FC<QASectionProps> = ({ listingId, sellerId }) => 
                 <div className="flex-1">
                   <p className="text-sm text-gray-900">{q.body}</p>
                   <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                    <span className="font-medium text-gray-700">
+                      {names[q.user_id] || FALLBACK_DISPLAY_NAME}
+                    </span>
                     <span>{timeAgo(q.created_at)}</span>
                     {q.is_seller_response && (
                       <span className="flex items-center gap-1 text-indigo-600">
@@ -208,6 +219,9 @@ export const QASection: React.FC<QASectionProps> = ({ listingId, sellerId }) => 
                       <div className="flex-1">
                         <p className="text-sm text-gray-800">{reply.body}</p>
                         <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                          <span className="font-medium text-gray-700">
+                            {names[reply.user_id] || FALLBACK_DISPLAY_NAME}
+                          </span>
                           <span>{timeAgo(reply.created_at)}</span>
                           {reply.is_seller_response && (
                             <span className="flex items-center gap-1 text-indigo-600">

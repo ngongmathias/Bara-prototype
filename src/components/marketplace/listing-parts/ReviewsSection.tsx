@@ -4,6 +4,7 @@ import { useUser } from '@clerk/clerk-react';
 import { Star, ThumbsUp, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { resolveDisplayNames, toInitials, FALLBACK_DISPLAY_NAME } from '@/lib/displayNames';
 
 interface Review {
   id: string;
@@ -34,6 +35,9 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, selle
   const [body, setBody] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [userReview, setUserReview] = useState<Review | null>(null);
+  // Clerk id -> public display name. An unattributed review carries no trust
+  // signal, which is most of what a review is for.
+  const [names, setNames] = useState<Record<string, string>>({});
 
   const fetchReviews = useCallback(async () => {
     const { data } = await supabase
@@ -49,6 +53,8 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, selle
       setUserReview(mine || null);
     }
     setLoading(false);
+
+    setNames(await resolveDisplayNames(items.map((r) => r.reviewer_user_id)));
   }, [listingId, user?.id]);
 
   useEffect(() => {
@@ -275,8 +281,16 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, selle
       <div className="space-y-4">
         {reviews.map((review) => (
           <div key={review.id} className="border-b border-gray-100 pb-4">
-            <div className="flex items-center gap-2 mb-1">
-              <StarDisplay value={review.rating} />
+            <div className="flex items-center gap-2 mb-1.5">
+              <div
+                aria-hidden="true"
+                className="w-7 h-7 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+              >
+                {toInitials(names[review.reviewer_user_id] || FALLBACK_DISPLAY_NAME)}
+              </div>
+              <span className="text-sm font-medium text-gray-900">
+                {names[review.reviewer_user_id] || FALLBACK_DISPLAY_NAME}
+              </span>
               {review.is_verified_purchase && (
                 <span className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
                   <ShieldCheck className="w-3 h-3" />
@@ -284,6 +298,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, selle
                 </span>
               )}
             </div>
+            <StarDisplay value={review.rating} />
             {review.title && (
               <h4 className="font-medium text-gray-900 text-sm">{review.title}</h4>
             )}
