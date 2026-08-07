@@ -19,6 +19,33 @@ const renameForType = (name: string, mimeType: string): string => {
   return `${base}.${ext}`;
 };
 
+const isHeic = (file: File): boolean =>
+  /image\/hei[cf]/i.test(file.type) || /\.hei[cf]$/i.test(file.name);
+
+/**
+ * Convert an iPhone HEIC/HEIF photo to JPEG.
+ *
+ * HEIC is the default camera format on iPhone. Relying on the browser to
+ * decode it does not work: Safari can, but Chrome and Firefox cannot, so a
+ * HEIC shared to an Android phone — or opened on a desktop — would fail to
+ * decode, fall back to the original bytes, and then be rejected by the
+ * storage bucket, which only accepts jpeg/png/gif/webp. Decoding explicitly
+ * makes the behaviour identical everywhere instead of depending on which
+ * device the seller happens to be holding.
+ *
+ * heic2any bundles libheif (~2.7MB), so it is imported dynamically — it is
+ * only fetched when someone actually picks a HEIC, and never lands in the
+ * main bundle.
+ */
+async function heicToJpeg(file: File): Promise<File> {
+  const { default: heic2any } = await import('heic2any');
+  const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+  // heic2any returns Blob | Blob[] — multi-image HEICs yield several frames;
+  // the first is the primary photo.
+  const blob = Array.isArray(converted) ? converted[0] : converted;
+  return new File([blob], renameForType(file.name, 'image/jpeg'), { type: 'image/jpeg' });
+}
+
 /**
  * Compress and resize an image file.
  *
@@ -44,6 +71,19 @@ export const optimizeImage = async (
     maxSizeMB = 1,
     timeoutMs = 20_000,
   } = options;
+
+  // HEIC has to be decoded before the canvas path can touch it — most
+  // browsers cannot draw one to a canvas at all.
+  if (isHeic(file)) {
+    try {
+      file = await heicToJpeg(file);
+    } catch (err) {
+      console.warn('HEIC conversion failed, using original bytes', err);
+      // Falls through: the canvas path will fail too and the original is
+      // returned, which the bucket rejects with a clear message rather than
+      // storing an image nothing can display.
+    }
+  }
 
   const work = new Promise<File>((resolve, reject) => {
     const reader = new FileReader();
