@@ -66,6 +66,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 
 import { uploadImage } from '@/lib/storage';
 import { validateImage } from '@/utils/imageOptimization';
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
 
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { getCategoryConfig } from '@/config/categoryFieldConfigs';
@@ -115,6 +116,9 @@ export const PostListing = () => {
   const [countries, setCountries] = useState<any[]>([]);
 
   const [draftRestored, setDraftRestored] = useState(false);
+  // The RPC reads the seller's identity from the Clerk JWT, so the write must
+  // carry one — the plain anon client would arrive with no `sub` claim.
+  const { getClient } = useAuthedSupabase();
   const [step, setStep] = useState(1);
   const [boostCost, setBoostCost] = useState<number | null>(null);
   const [coinBalance, setCoinBalance] = useState<number | null>(null);
@@ -807,132 +811,64 @@ export const PostListing = () => {
 
 
 
-      // Create listing
+      // Create the listing, its photos, country links and variants in ONE
+      // transaction.
+      //
+      // These used to be four sequential inserts with a throw between each.
+      // If the images insert failed, the listing row was already committed —
+      // so the seller saw an error, retried, and produced a SECOND listing
+      // while the first sat in the marketplace with no photos. Nothing
+      // cleaned either up. Now it either all lands or none of it does, and a
+      // retry is safe.
+      //
+      // The RPC takes created_by from the verified Clerk JWT rather than the
+      // payload, so it also can't be posted on someone else's behalf.
+      const authed = await getClient();
 
-      const { data: listingData, error: listingError } = await supabase
+      const { data: newListingId, error: rpcError } = await authed.rpc(
+        'create_marketplace_listing',
+        {
+          payload: {
+            title: formData.title,
+            description: formData.description,
+            category_id: formData.category_id,
+            subcategory_id: formData.subcategory_id || null,
+            country_id: selectedCountries[0] ?? null,
+            price: parseFloat(formData.price) || 0,
+            currency: formData.currency,
+            price_type: formData.price_type,
+            condition: formData.condition || null,
+            seller_name: formData.seller_name,
+            seller_email: formData.seller_email,
+            seller_phone: formData.seller_phone,
+            seller_whatsapp: formData.seller_whatsapp,
+            seller_type: formData.seller_type,
+            location_details: formData.location_details,
+            attributes,
+            is_premium: formData.is_premium,
+            accepts_coins: formData.accepts_coins && parseInt(formData.coin_price) > 0,
+            coin_price:
+              formData.accepts_coins && parseInt(formData.coin_price) > 0
+                ? parseInt(formData.coin_price)
+                : null,
+            images: uploadedImages,
+            country_ids: selectedCountries,
+            variants:
+              variantsEnabled && variantRows.length > 0
+                ? variantRows.map((v) => ({
+                    label: v.label,
+                    attributes: v.attributes,
+                    price_override: v.price_override || null,
+                    quantity: parseInt(v.quantity) || 1,
+                    image_url: v.image_url || null,
+                  }))
+                : [],
+          },
+        }
+      );
 
-        .from('marketplace_listings')
-
-        .insert({
-
-          title: formData.title,
-
-          description: formData.description,
-
-          category_id: formData.category_id,
-
-          subcategory_id: formData.subcategory_id || null,
-
-          country_id: selectedCountries[0],
-
-          price: parseFloat(formData.price) || 0,
-
-          currency: formData.currency,
-
-          price_type: formData.price_type,
-
-          condition: formData.condition || null,
-
-          seller_name: formData.seller_name,
-
-          seller_email: formData.seller_email,
-
-          seller_phone: formData.seller_phone,
-
-          seller_whatsapp: formData.seller_whatsapp,
-
-          seller_type: formData.seller_type,
-
-          location_details: formData.location_details,
-
-          status: 'active',
-
-          created_by: userId,
-
-          attributes: attributes,
-
-          is_premium: formData.is_premium,
-
-          accepts_coins: formData.accepts_coins && parseInt(formData.coin_price) > 0,
-
-          coin_price: formData.accepts_coins && parseInt(formData.coin_price) > 0 ? parseInt(formData.coin_price) : null,
-
-        })
-
-        .select()
-
-        .single();
-
-
-
-      if (listingError) throw listingError;
-
-
-
-      // Insert images
-
-      const imagesWithListingId = uploadedImages.map(img => ({
-
-        ...img,
-
-        listing_id: listingData.id,
-
-      }));
-
-
-
-      const { error: imagesError } = await supabase
-
-        .from('marketplace_listing_images')
-
-        .insert(imagesWithListingId);
-
-
-
-      if (imagesError) throw imagesError;
-
-
-
-      // Insert country associations
-
-      const countryInserts = selectedCountries.map(countryId => ({
-
-        listing_id: listingData.id,
-
-        country_id: countryId,
-
-      }));
-
-
-
-      const { error: countriesError } = await supabase
-
-        .from('marketplace_listing_countries')
-
-        .insert(countryInserts);
-
-
-
-      if (countriesError) throw countriesError;
-
-      // Insert variants if enabled
-      if (variantsEnabled && variantRows.length > 0) {
-        const variantInserts = variantRows.map((v, idx) => ({
-          listing_id: listingData.id,
-          label: v.label,
-          attributes: v.attributes,
-          price_override: v.price_override ? parseFloat(v.price_override) : null,
-          quantity: parseInt(v.quantity) || 1,
-          quantity_sold: 0,
-          image_url: v.image_url || null,
-          is_available: true,
-          sort_order: idx,
-        }));
-        const { error: variantError } = await supabase
-          .from('marketplace_listing_variants')
-          .insert(variantInserts);
-        if (variantError) console.error('Variant insert error:', variantError);
-      }
+      if (rpcError) throw rpcError;
+      const listingData = { id: newListingId as string };
 
       // Upsert partner profile on first post (fire-and-forget; non-blocking)
 
