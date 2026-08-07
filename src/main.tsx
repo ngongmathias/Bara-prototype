@@ -3,6 +3,10 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import App from './App.tsx'
 import './index.css'
 import './lib/i18n' // Initialize i18n
+import { initConveyThis } from './lib/conveythis'
+
+// Kicked off before React renders so translation starts as early as possible.
+initConveyThis()
 
 // Clerk configuration (v5 — see https://clerk.com/docs/upgrade-guides/react-router-v5)
 const clerkConfig = {
