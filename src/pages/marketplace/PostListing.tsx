@@ -76,6 +76,24 @@ import { VariantBuilder, type VariantRow } from '@/components/marketplace/listin
 /** Where an in-progress listing is parked so a sign-out can't destroy it. */
 const DRAFT_KEY = 'bara:marketplace:post-draft';
 
+/**
+ * The form is split into four steps rather than one ~20-field page.
+ *
+ * Photos come FIRST, with the title and category, because on classifieds
+ * that is the strongest completion lever there is: it front-loads the part
+ * sellers are motivated to do and defers the tedious part until they are
+ * already invested. Previously everything — title, category, up to seven
+ * category-specific attributes, pricing, variants, location and contact —
+ * arrived on a single screen, which on a phone is several thousand pixels
+ * of form before anything feels like progress.
+ */
+const STEPS = [
+  { n: 1, label: 'Your item', hint: 'Photos, title and category' },
+  { n: 2, label: 'Details', hint: 'Specifics buyers look for' },
+  { n: 3, label: 'Price & contact', hint: 'What it costs and how to reach you' },
+  { n: 4, label: 'Review', hint: 'Check it over and publish' },
+] as const;
+
 export const PostListing = () => {
 
   const navigate = useNavigate();
@@ -97,6 +115,11 @@ export const PostListing = () => {
   const [countries, setCountries] = useState<any[]>([]);
 
   const [draftRestored, setDraftRestored] = useState(false);
+  const [step, setStep] = useState(1);
+  const [boostCost, setBoostCost] = useState<number | null>(null);
+  const [coinBalance, setCoinBalance] = useState<number | null>(null);
+  /** Per-photo upload progress, 0–1, keyed by index in selectedImages. */
+  const [uploadProgress, setUploadProgress] = useState<Record<number, number>>({});
 
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
@@ -161,7 +184,10 @@ export const PostListing = () => {
 
   useEffect(() => {
 
-    if (isLoaded) {
+    // In local preview mode Clerk never finishes loading (domain-locked
+    // production keys), so isLoaded stays false and checkAuth would never
+    // run — leaving the page stuck on "Loading…". Call it regardless there.
+    if (isLoaded || (import.meta.env.DEV && import.meta.env.VITE_ADMIN_PREVIEW === 'true')) {
 
       checkAuth();
 
@@ -178,6 +204,23 @@ export const PostListing = () => {
     fetchCountries();
 
   }, []);
+
+  // Live boost price and the seller's balance, so the checkbox states the
+  // real cost and can warn BEFORE submitting rather than failing afterwards.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const cost = await GamificationService.getSetting('cost.listing_boost');
+        if (!cancelled) setBoostCost(cost);
+        if (clerkUser?.id) {
+          const profile = await GamificationService.getProfile(clerkUser.id);
+          if (!cancelled) setCoinBalance(profile?.bara_coins ?? null);
+        }
+      } catch { /* the checkbox degrades to "—" rather than lying */ }
+    })();
+    return () => { cancelled = true; };
+  }, [clerkUser?.id]);
 
   // ---- Draft autosave -------------------------------------------------
   //
@@ -254,6 +297,21 @@ export const PostListing = () => {
 
 
   const checkAuth = async () => {
+
+    // Local-only: render the form without a Clerk session so the layout can
+    // be worked on. Clerk's production keys are domain-locked and refuse to
+    // initialise on localhost, which otherwise leaves this page stuck on
+    // "Loading…" forever and makes the form impossible to see or style.
+    //
+    // Requires BOTH a dev build and VITE_ADMIN_PREVIEW=true from gitignored
+    // .env.local; Vite replaces DEV with false at build time so this branch
+    // is stripped from production bundles. `userId` is deliberately left
+    // empty — handleSubmit refuses to post without one, so this can preview
+    // the form but never create a listing.
+    if (import.meta.env.DEV && import.meta.env.VITE_ADMIN_PREVIEW === 'true') {
+      setLoading(false);
+      return;
+    }
 
     try {
 
@@ -468,6 +526,55 @@ export const PostListing = () => {
 
 
 
+  /**
+   * What still blocks moving on from a given step.
+   *
+   * Returned as messages rather than a boolean so the seller is told what is
+   * missing instead of finding the Next button inert with no explanation.
+   * The final step is validated by the existing validateForm() on submit.
+   */
+  const blockersForStep = (s: number): string[] => {
+    const out: string[] = [];
+    if (s === 1) {
+      if (!formData.title?.trim()) out.push('a title');
+      if (!formData.category_id) out.push('a category');
+      if (selectedImages.length === 0) out.push('at least one photo');
+    }
+    if (s === 3) {
+      if (!formData.price || parseFloat(formData.price) <= 0) out.push('a price');
+      if (!formData.seller_phone?.trim() && !formData.seller_whatsapp?.trim()) {
+        out.push('a phone or WhatsApp number');
+      }
+    }
+    return out;
+  };
+
+  const goToStep = (target: number) => {
+    // Moving backwards is always allowed — never trap someone who wants to
+    // fix something they already entered.
+    if (target < step) {
+      setStep(target);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    // Moving forward: check every step between here and there.
+    for (let s = step; s < target; s++) {
+      const blockers = blockersForStep(s);
+      if (blockers.length > 0) {
+        setStep(s);
+        toast({
+          title: `Still needed: ${blockers.join(', ')}`,
+          description: 'Add these and you can carry on.',
+          variant: 'destructive',
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+    }
+    setStep(target);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const removeImage = (index: number) => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
     setImagePreviews((prev) => {
@@ -644,7 +751,18 @@ export const PostListing = () => {
 
     if (!validateForm()) return;
 
-
+    // Never write a listing with no owner. created_by is TEXT, so an empty
+    // string would be silently accepted and produce a listing its owner can
+    // never find in My Ads — invisible to them, unmanageable by them. Also
+    // the backstop that keeps the local preview above from posting.
+    if (!userId) {
+      toast({
+        title: 'Please sign in again',
+        description: 'We couldn\'t confirm your account. Your details are saved — sign in and try once more.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setSubmitting(true);
 
@@ -654,25 +772,38 @@ export const PostListing = () => {
 
       // Upload images
 
-      const uploadedImages = await Promise.all(
+      // Upload photos sequentially with per-file progress.
+      //
+      // Previously this was a bare Promise.all with no feedback at all: ten
+      // photos on a 3G connection meant a spinner and several minutes of
+      // silence, which is indistinguishable from a hang — and the single
+      // biggest reason a seller gives up and assumes the site is broken.
+      // Sequential also keeps memory sane on low-end phones, where ten
+      // simultaneous canvas encodes can exhaust the tab.
+      setUploadProgress({});
+      const uploadedImages: Array<{ image_url: string; display_order: number; is_primary: boolean }> = [];
 
-        selectedImages.map(async (file, index) => {
-
+      for (let index = 0; index < selectedImages.length; index++) {
+        const file = selectedImages[index];
+        setUploadProgress((p) => ({ ...p, [index]: 0.05 }));
+        try {
           const imageUrl = await uploadImage(file, 'marketplace-listings', 'listings');
-
-          return {
-
+          setUploadProgress((p) => ({ ...p, [index]: 1 }));
+          uploadedImages.push({
             image_url: imageUrl,
-
             display_order: index,
-
             is_primary: index === 0,
-
-          };
-
-        })
-
-      );
+          });
+        } catch (err) {
+          setUploadProgress((p) => ({ ...p, [index]: -1 }));
+          // Name the offending photo — "upload failed" on its own leaves the
+          // seller with ten pictures and no idea which to replace.
+          throw new Error(
+            `Photo ${index + 1}${file.name ? ` (${file.name})` : ''} failed to upload: ` +
+            (err instanceof Error ? err.message : String(err))
+          );
+        }
+      }
 
 
 
@@ -1051,43 +1182,57 @@ export const PostListing = () => {
           </div>
         )}
 
-        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200 mb-6 sticky top-16 z-20">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-bold text-gray-900 font-comfortaa">
-              Ad Completeness
-            </span>
-            <span className={`text-lg font-bold tabular-nums ${
-              completeness.percent >= 80 ? 'text-green-600' : completeness.percent >= 50 ? 'text-amber-600' : 'text-red-600'
-            }`}>
-              {completeness.percent}%
-            </span>
+        {/* Step indicator.
+            Replaces a sticky completeness card that consumed ~110px of an
+            already short mobile viewport for the entire scroll. Progress is
+            now conveyed by which step you're on, which is both smaller and
+            more meaningful than a percentage. */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            {STEPS.map((s) => (
+              <button
+                key={s.n}
+                type="button"
+                onClick={() => goToStep(s.n)}
+                className="flex-1 group text-left"
+                aria-current={step === s.n ? 'step' : undefined}
+                aria-label={`Step ${s.n}: ${s.label}`}
+              >
+                <span
+                  className={`block h-1.5 rounded-full transition-colors ${
+                    s.n < step ? 'bg-gray-900'
+                    : s.n === step ? 'bg-gray-900'
+                    : 'bg-gray-200 group-hover:bg-gray-300'
+                  }`}
+                />
+              </button>
+            ))}
           </div>
-          <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden mb-3">
-            <div
-              className={`h-full transition-all duration-500 ${
-                completeness.percent >= 80 ? 'bg-green-500' : completeness.percent >= 50 ? 'bg-amber-500' : 'bg-red-500'
-              }`}
-              style={{ width: `${completeness.percent}%` }}
-            />
-          </div>
-          {completeness.missing.length > 0 ? (
-            <p className="text-xs text-gray-600">
-              <span className="font-semibold">Still needed:</span> {completeness.missing.slice(0, 3).join(', ')}
-              {completeness.missing.length > 3 && ` +${completeness.missing.length - 3} more`}
-            </p>
-          ) : (
-            <p className="text-xs text-green-600 font-semibold">Your ad looks great — ready to publish!</p>
-          )}
-          {imagePreviews.length === 0 && (
-            <div className="mt-3 p-2.5 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
-              <span className="font-semibold">Tip:</span> Ads with 3+ clear photos get up to 5× more views. Use natural light and show all angles.
+          <div className="flex items-baseline justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 font-comfortaa">
+                {STEPS[step - 1].label}
+              </h2>
+              <p className="text-sm text-gray-500">{STEPS[step - 1].hint}</p>
             </div>
+            <span className="text-sm text-gray-400 tabular-nums shrink-0">
+              Step {step} of {STEPS.length}
+            </span>
+          </div>
+          {step === 1 && imagePreviews.length === 0 && (
+            <p className="mt-3 text-xs text-gray-600 border border-gray-200 rounded-lg px-3 py-2 bg-gray-50">
+              <span className="font-bold text-gray-900">Photos sell.</span> Ads with 3 or more
+              clear pictures get far more views — use natural light and show every angle.
+            </p>
           )}
         </div>
 
 
 
         <form onSubmit={handleSubmit} className="space-y-6">
+
+          {/* ---- STEP 1: photos, title, category ---- */}
+          <div className={step === 1 ? 'contents' : 'hidden'}>
 
           {/* Basic Information */}
 
@@ -1120,68 +1265,6 @@ export const PostListing = () => {
                   maxLength={100}
 
                 />
-
-
-
-                {/* Elite Monetization: Boost Toggle */}
-
-                <div className="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
-
-                  <div className="flex items-start justify-between">
-
-                    <div className="flex gap-3">
-
-                      <div className="mt-1 p-2 bg-yellow-400 rounded-full">
-
-                        <Zap className="text-white w-4 h-4" />
-
-                      </div>
-
-                      <div>
-
-                        <h4 className="font-bold text-gray-900 font-comfortaa">Elite Boost</h4>
-
-                        <p className="text-xs text-gray-600 max-w-sm">Bring your ad to the very top of all search results for 7 days.</p>
-
-                      </div>
-
-                    </div>
-
-                    <div className="flex flex-col items-end gap-2">
-
-                      <div className="flex items-center space-x-2">
-
-                        <input
-
-                          type="checkbox"
-
-                          id="is-premium"
-
-                          className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
-
-                          checked={formData.is_premium}
-
-                          onChange={(e) => setFormData({ ...formData, is_premium: e.target.checked })}
-
-                        />
-
-                        <Label htmlFor="is-premium" className="font-bold text-sm">Boost for 50 Coins</Label>
-
-                      </div>
-
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Bara Elite Model</p>
-
-                      <a href="/store" className="text-[10px] text-yellow-600 hover:text-yellow-700 font-bold underline">
-
-                        Not enough coins? Buy more →
-
-                      </a>
-
-                    </div>
-
-                  </div>
-
-                </div>
 
 
 
@@ -1360,6 +1443,156 @@ export const PostListing = () => {
               </div>
 
 
+
+          {/* Images */}
+
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+
+            <h2 className="text-xl font-bold text-gray-900 mb-4 font-comfortaa">
+
+              Images {getCategoryConfig(selectedCategorySlug)?.imageRequired === false ? '(Optional — Max 10)' : '* (Max 10)'}
+
+            </h2>
+            {getCategoryConfig(selectedCategorySlug)?.imageGuidance && (
+              <p className="text-sm text-gray-500 mb-3">{getCategoryConfig(selectedCategorySlug)?.imageGuidance}</p>
+            )}
+
+
+
+            <div className="space-y-4">
+
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+
+                <input
+
+                  type="file"
+
+                  accept="image/*"
+
+                  multiple
+
+                  onChange={handleImageSelect}
+
+                  className="hidden"
+
+                  id="image-upload"
+
+                  disabled={selectedImages.length >= 10}
+
+                />
+
+                <label
+
+                  htmlFor="image-upload"
+
+                  className={`cursor-pointer ${selectedImages.length >= 10 ? 'opacity-50 cursor-not-allowed' : ''}`}
+
+                >
+
+                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+
+                  <p className="text-gray-600 mb-2">
+
+                    Click to upload images
+
+                  </p>
+
+                  <p className="text-sm text-gray-500">
+
+                    PNG, JPG up to 10MB each ({selectedImages.length}/10)
+
+                  </p>
+
+                </label>
+
+              </div>
+
+
+
+              {imagePreviews.length > 0 && (
+
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+
+                  {imagePreviews.map((preview, index) => (
+
+                    <div key={index} className="relative group">
+
+                      <img
+
+                        loading="lazy" src={preview}
+
+                        alt={`Preview ${index + 1}`}
+
+                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
+
+                      />
+
+                      {/* Per-photo upload state. Always visible on touch —
+                          `opacity-0 group-hover` hides the remove button
+                          entirely on phones, where there is no hover. */}
+                      {submitting && uploadProgress[index] !== undefined && (
+                        <div className="absolute inset-0 rounded-lg bg-white/85 flex flex-col items-center justify-center gap-2 px-2">
+                          {uploadProgress[index] === -1 ? (
+                            <span className="text-xs font-bold text-red-600 text-center">Failed</span>
+                          ) : uploadProgress[index] >= 1 ? (
+                            <>
+                              <CheckCircle className="w-5 h-5 text-gray-900" />
+                              <span className="text-[11px] font-bold text-gray-700">Uploaded</span>
+                            </>
+                          ) : (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin text-gray-900" />
+                              <span className="text-[11px] font-bold text-gray-700">Uploading…</span>
+                            </>
+                          )}
+                        </div>
+                      )}
+
+                      <button
+
+                        type="button"
+
+                        onClick={() => removeImage(index)}
+
+                        disabled={submitting}
+
+                        aria-label={`Remove photo ${index + 1}`}
+
+                        className="absolute top-2 right-2 w-7 h-7 bg-gray-900 text-white rounded-full flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity disabled:hidden"
+
+                      >
+
+                        <X className="w-4 h-4" />
+
+                      </button>
+
+                      {index === 0 && (
+
+                        <div className="absolute bottom-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+
+                          Primary
+
+                        </div>
+
+                      )}
+
+                    </div>
+
+                  ))}
+
+                </div>
+
+              )}
+
+            </div>
+
+          </div>
+
+          </div>
+          {/* ---- end STEP 1 ---- */}
+
+          {/* ---- STEP 2: category-specific details ---- */}
+          <div className={step === 2 ? 'contents' : 'hidden'}>
 
               {/* Category-Specific Fields */}
 
@@ -2485,6 +2718,56 @@ export const PostListing = () => {
 
 
 
+          </div>
+          {/* ---- end STEP 2 ---- */}
+
+          {/* ---- STEP 3: pricing, coins, variants, location, contact ---- */}
+          <div className={step === 3 ? 'contents' : 'hidden'}>
+
+          {/* Elite Boost.
+              Previously rendered INSIDE the Title field's container, between
+              the title input and its own character counter — visually and
+              semantically wrong. It belongs with pricing, since it is a paid
+              upgrade. The cost is read from gamification_settings rather than
+              hardcoded "50 Coins", which could disagree with what is actually
+              charged, and the balance is checked before submit rather than
+              after the listing already exists. */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div className="flex gap-3">
+                <div className="mt-0.5 p-2 bg-gray-900 rounded-full h-fit">
+                  <Zap className="text-white w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 font-comfortaa">Elite Boost</h4>
+                  <p className="text-sm text-gray-600 max-w-sm">
+                    Put your ad at the top of every relevant search for 7 days.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-start sm:items-end gap-1.5">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="is-premium"
+                    className="w-4 h-4 rounded border-gray-300 accent-black"
+                    checked={formData.is_premium}
+                    onChange={(e) => setFormData({ ...formData, is_premium: e.target.checked })}
+                  />
+                  <span className="font-bold text-sm text-gray-900">
+                    Boost for {boostCost ?? '—'} coins
+                  </span>
+                </label>
+                {boostCost != null && coinBalance != null && coinBalance < boostCost && (
+                  <a href="/store" className="text-xs text-gray-600 font-bold underline hover:no-underline">
+                    You have {coinBalance} — get more coins →
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Pricing — category-aware */}
 
           {(() => {
@@ -2723,124 +3006,6 @@ export const PostListing = () => {
             );
           })()}
 
-          {/* Images */}
-
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-
-            <h2 className="text-xl font-bold text-gray-900 mb-4 font-comfortaa">
-
-              Images {getCategoryConfig(selectedCategorySlug)?.imageRequired === false ? '(Optional — Max 10)' : '* (Max 10)'}
-
-            </h2>
-            {getCategoryConfig(selectedCategorySlug)?.imageGuidance && (
-              <p className="text-sm text-gray-500 mb-3">{getCategoryConfig(selectedCategorySlug)?.imageGuidance}</p>
-            )}
-
-
-
-            <div className="space-y-4">
-
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-
-                <input
-
-                  type="file"
-
-                  accept="image/*"
-
-                  multiple
-
-                  onChange={handleImageSelect}
-
-                  className="hidden"
-
-                  id="image-upload"
-
-                  disabled={selectedImages.length >= 10}
-
-                />
-
-                <label
-
-                  htmlFor="image-upload"
-
-                  className={`cursor-pointer ${selectedImages.length >= 10 ? 'opacity-50 cursor-not-allowed' : ''}`}
-
-                >
-
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-
-                  <p className="text-gray-600 mb-2">
-
-                    Click to upload images
-
-                  </p>
-
-                  <p className="text-sm text-gray-500">
-
-                    PNG, JPG up to 10MB each ({selectedImages.length}/10)
-
-                  </p>
-
-                </label>
-
-              </div>
-
-
-
-              {imagePreviews.length > 0 && (
-
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-
-                  {imagePreviews.map((preview, index) => (
-
-                    <div key={index} className="relative group">
-
-                      <img
-
-                        loading="lazy" src={preview}
-
-                        alt={`Preview ${index + 1}`}
-
-                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
-
-                      />
-
-                      <button
-
-                        type="button"
-
-                        onClick={() => removeImage(index)}
-
-                        className="absolute top-2 right-2 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-
-                      >
-
-                        <X className="w-4 h-4" />
-
-                      </button>
-
-                      {index === 0 && (
-
-                        <div className="absolute bottom-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
-
-                          Primary
-
-                        </div>
-
-                      )}
-
-                    </div>
-
-                  ))}
-
-                </div>
-
-              )}
-
-            </div>
-
-          </div>
 
 
 
@@ -3085,6 +3250,66 @@ export const PostListing = () => {
 
 
 
+          </div>
+          {/* ---- end STEP 3 ---- */}
+
+          {/* ---- STEP 4: review and publish ---- */}
+          <div className={step === 4 ? 'contents' : 'hidden'}>
+
+          {/* Review summary — publishing shouldn't be blind after four steps.
+              Anything still missing is listed with a link back to fix it. */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-900 font-comfortaa mb-4">
+              Ready to publish
+            </h3>
+
+            <div className="flex gap-4 mb-5">
+              {imagePreviews[0] ? (
+                <img
+                  src={imagePreviews[0]}
+                  alt=""
+                  className="w-24 h-24 rounded-lg object-cover border border-gray-200 shrink-0"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-lg bg-gray-100 border border-gray-200 shrink-0" />
+              )}
+              <div className="min-w-0">
+                <p className="font-bold text-gray-900 truncate">
+                  {formData.title || 'Untitled ad'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {formData.price
+                    ? `${formData.currency || ''} ${Number(formData.price).toLocaleString()}`.trim()
+                    : 'No price set'}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {imagePreviews.length} photo{imagePreviews.length === 1 ? '' : 's'}
+                  {formData.location_details ? ` · ${formData.location_details}` : ''}
+                </p>
+              </div>
+            </div>
+
+            {completeness.missing.length > 0 ? (
+              <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                <p className="text-sm text-gray-800">
+                  <span className="font-bold">Optional, but they help:</span>{' '}
+                  {completeness.missing.join(', ')}.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => goToStep(1)}
+                  className="mt-1 text-sm font-bold text-gray-900 underline hover:no-underline"
+                >
+                  Go back and add them
+                </button>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-700">
+                Everything's filled in. Publish whenever you're ready.
+              </p>
+            )}
+          </div>
+
           {/* Important Notice */}
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -3145,7 +3370,7 @@ export const PostListing = () => {
 
               type="submit"
 
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              className="flex-1 bg-gray-900 hover:bg-black"
 
               disabled={submitting}
 
@@ -3157,7 +3382,7 @@ export const PostListing = () => {
 
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
 
-                  Submitting...
+                  Publishing…
 
                 </>
 
@@ -3167,7 +3392,7 @@ export const PostListing = () => {
 
                   <CheckCircle className="w-4 h-4 mr-2" />
 
-                  Submit Ad
+                  Publish ad
 
                 </>
 
@@ -3176,6 +3401,45 @@ export const PostListing = () => {
             </Button>
 
           </div>
+
+          </div>
+          {/* ---- end STEP 4 ---- */}
+
+          {/* Step navigation. Only the last step submits; the rest advance,
+              so a stray Enter keypress can't publish a half-finished ad. */}
+          {step < 4 && (
+            <div className="flex gap-3">
+              {step > 1 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => goToStep(step - 1)}
+                  className="flex-1 sm:flex-none sm:px-8"
+                >
+                  Back
+                </Button>
+              )}
+              <Button
+                type="button"
+                onClick={() => goToStep(step + 1)}
+                className="flex-1 bg-gray-900 hover:bg-black font-bold"
+              >
+                Continue
+              </Button>
+            </div>
+          )}
+
+          {step === 4 && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => goToStep(3)}
+              className="w-full sm:w-auto sm:px-8"
+              disabled={submitting}
+            >
+              Back
+            </Button>
+          )}
 
         </form>
 
