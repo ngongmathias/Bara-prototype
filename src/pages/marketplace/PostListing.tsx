@@ -65,12 +65,16 @@ import {
 import { FaWhatsapp } from 'react-icons/fa';
 
 import { uploadImage } from '@/lib/storage';
+import { validateImage } from '@/utils/imageOptimization';
 
 import { useCountrySelection } from '@/context/CountrySelectionContext';
 import { getCategoryConfig } from '@/config/categoryFieldConfigs';
 import { VariantBuilder, type VariantRow } from '@/components/marketplace/listing-parts/VariantBuilder';
 
 
+
+/** Where an in-progress listing is parked so a sign-out can't destroy it. */
+const DRAFT_KEY = 'bara:marketplace:post-draft';
 
 export const PostListing = () => {
 
@@ -91,6 +95,8 @@ export const PostListing = () => {
   const [categories, setCategories] = useState<any[]>([]);
 
   const [countries, setCountries] = useState<any[]>([]);
+
+  const [draftRestored, setDraftRestored] = useState(false);
 
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
@@ -172,6 +178,50 @@ export const PostListing = () => {
     fetchCountries();
 
   }, []);
+
+  // ---- Draft autosave -------------------------------------------------
+  //
+  // checkAuth() hard-navigates to /user/sign-in whenever Clerk reports the
+  // user as signed out, and it re-runs whenever the session state changes. A
+  // brief token refresh mid-form therefore threw away everything the seller
+  // had typed, with no warning and no way back. On a 20-field form that is
+  // the difference between "the site logged me out" and "the site ate my
+  // advert".
+  //
+  // Text fields only: File objects can't be serialised, so photos still have
+  // to be re-picked. The restore notice says so rather than pretending
+  // otherwise.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (!saved) return;
+      const { formData: savedForm, selectedCountries: savedCountries, savedAt } = JSON.parse(saved);
+      // Drafts older than 7 days are more likely to confuse than help.
+      if (!savedAt || Date.now() - savedAt > 7 * 24 * 3600_000) {
+        localStorage.removeItem(DRAFT_KEY);
+        return;
+      }
+      if (savedForm) setFormData((prev) => ({ ...prev, ...savedForm }));
+      if (Array.isArray(savedCountries)) setSelectedCountries(savedCountries);
+      setDraftRestored(true);
+    } catch {
+      localStorage.removeItem(DRAFT_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Don't write an empty draft on first mount.
+    if (!formData.title?.trim() && !formData.description?.trim() && !formData.price) return;
+    const t = setTimeout(() => {
+      try {
+        localStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({ formData, selectedCountries, savedAt: Date.now() })
+        );
+      } catch { /* quota or private mode — drafting is best-effort */ }
+    }, 800);
+    return () => clearTimeout(t);
+  }, [formData, selectedCountries]);
 
 
 
@@ -362,59 +412,71 @@ export const PostListing = () => {
 
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-
     const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-
-
-    if (selectedImages.length + files.length > 10) {
-
+    const room = 10 - selectedImages.length;
+    if (room <= 0) {
       toast({
-
-        title: 'Too Many Images',
-
-        description: 'You can upload maximum 10 images',
-
+        title: 'Photo limit reached',
+        description: 'You can add up to 10 photos.',
         variant: 'destructive',
-
       });
-
       return;
-
     }
 
+    // Validate as each photo is picked, not at submit. Previously a seller
+    // added photos, saw them accepted, filled in the whole form, and only
+    // then discovered one was rejected — by which point the failure looked
+    // like the form being broken.
+    const accepted: File[] = [];
+    const rejected: string[] = [];
 
+    for (const file of files.slice(0, room)) {
+      const result = validateImage(file);
+      if (result === true) accepted.push(file);
+      else rejected.push(`${file.name}: ${result}`);
+    }
 
-    setSelectedImages(prev => [...prev, ...files]);
+    if (files.length > room) {
+      rejected.push(`Only ${room} more photo${room === 1 ? '' : 's'} could be added (limit is 10).`);
+    }
 
+    if (rejected.length > 0) {
+      toast({
+        title: accepted.length ? 'Some photos couldn\'t be added' : 'Photo couldn\'t be added',
+        description: rejected.join(' · '),
+        variant: 'destructive',
+      });
+    }
 
+    if (accepted.length === 0) {
+      e.target.value = '';
+      return;
+    }
 
-    // Create previews
+    // Object URLs are created synchronously, so previews stay index-aligned
+    // with selectedImages. The old code pushed previews from an async
+    // FileReader callback, so they could land out of order and removing
+    // photo 2 could remove the wrong thumbnail.
+    setSelectedImages((prev) => [...prev, ...accepted]);
+    setImagePreviews((prev) => [...prev, ...accepted.map((f) => URL.createObjectURL(f))]);
 
-    files.forEach(file => {
-
-      const reader = new FileReader();
-
-      reader.onloadend = () => {
-
-        setImagePreviews(prev => [...prev, reader.result as string]);
-
-      };
-
-      reader.readAsDataURL(file);
-
-    });
-
+    // Let the same file be re-picked after removal.
+    e.target.value = '';
   };
 
 
 
   const removeImage = (index: number) => {
-
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
-
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
-
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => {
+      // Release the object URL so previews don't leak while a seller shuffles
+      // through photos on a phone.
+      const url = prev[index];
+      if (url?.startsWith('blob:')) URL.revokeObjectURL(url);
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
 
@@ -843,15 +905,18 @@ export const PostListing = () => {
 
 
 
+      // The listing is inserted with status 'active', and the form itself
+      // says it goes live immediately — so don't tell the seller it is "under
+      // review". The page previously gave three different answers to the same
+      // question (live now / submitted for review / currently under review in
+      // the email).
       toast({
-
-        title: 'Success!',
-
-        description: 'Your ad has been submitted for review',
-
+        title: 'Your ad is live',
+        description: 'It\'s now visible in the marketplace. You can edit it any time from My Ads.',
       });
 
-
+      // Posted successfully — the parked draft is no longer wanted.
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* best-effort */ }
 
       navigate(`/marketplace/ad/${listingData.id}`);
 
@@ -859,14 +924,30 @@ export const PostListing = () => {
 
       console.error('Error creating ad:', error);
 
+      // Say what actually went wrong. Every distinct failure — a rejected
+      // photo, a storage error, a denied insert, a network drop — used to
+      // collapse into "Failed to create ad. Please try again.", which told
+      // the seller nothing and told us nothing either. The draft is
+      // deliberately NOT cleared here, so a retry keeps their work.
+      const raw = error instanceof Error ? error.message : String(error);
+      let description = 'Something went wrong creating your ad. Your details have been saved — please try again.';
+
+      if (/mime|content type|not supported|image\//i.test(raw)) {
+        description = 'One of your photos is in a format we can\'t accept. Try removing it and adding a different one.';
+      } else if (/storage|bucket|upload/i.test(raw)) {
+        description = 'Your photos couldn\'t be uploaded. Check your connection and try again — your details are saved.';
+      } else if (/row-level security|permission|denied|JWT|401|403/i.test(raw)) {
+        description = 'Your session expired. Please sign in again — your draft has been saved.';
+      } else if (/network|fetch|timeout|Failed to fetch/i.test(raw)) {
+        description = 'We couldn\'t reach the server. Check your connection and try again — your details are saved.';
+      } else if (/column|schema|violates|constraint/i.test(raw)) {
+        description = `We couldn't save this ad: ${raw.slice(0, 120)}`;
+      }
+
       toast({
-
-        title: 'Error',
-
-        description: 'Failed to create ad. Please try again.',
-
+        title: 'Couldn\'t post your ad',
+        description,
         variant: 'destructive',
-
       });
 
     } finally {
@@ -949,6 +1030,26 @@ export const PostListing = () => {
           </p>
 
         </div>
+
+        {draftRestored && (
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border border-gray-900 bg-gray-50 px-4 py-3">
+            <p className="flex-1 text-sm text-gray-800">
+              <span className="font-bold">We brought back your unfinished ad.</span>{' '}
+              Photos need adding again — everything else is as you left it.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                try { localStorage.removeItem(DRAFT_KEY); } catch { /* best-effort */ }
+                setDraftRestored(false);
+                window.location.reload();
+              }}
+              className="shrink-0 text-sm font-bold text-gray-900 underline hover:no-underline"
+            >
+              Start fresh instead
+            </button>
+          </div>
+        )}
 
         <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200 mb-6 sticky top-16 z-20">
           <div className="flex items-center justify-between mb-2">

@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { optimizeImage, validateImage } from '@/utils/imageOptimization';
+import { optimizeImage, validateImage, extensionForType } from '@/utils/imageOptimization';
 
 export interface UploadResult {
   url: string;
@@ -31,8 +31,15 @@ export const uploadImage = async (
       });
     }
 
-    // Generate unique filename
-    const fileExt = fileToUpload.name.split('.').pop();
+    // Generate unique filename.
+    //
+    // Derive the extension from the file's actual MIME type, not its original
+    // name: optimizeImage re-encodes almost everything to JPEG, so taking the
+    // name's extension stored HEIC-named files containing JPEG bytes (and
+    // .png names for JPEG data). The Content-Type header was already correct,
+    // so this was mostly a CDN/tooling hygiene problem — but it also made
+    // debugging uploads needlessly confusing.
+    const fileExt = extensionForType(fileToUpload.type || '');
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `${folder}/${fileName}`;
 
