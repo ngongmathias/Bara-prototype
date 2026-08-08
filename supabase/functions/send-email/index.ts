@@ -13,6 +13,8 @@ import { ListingApprovedEmail } from "../_shared/emails/ListingApprovedEmail.tsx
 import { ListingRejectedEmail } from "../_shared/emails/ListingRejectedEmail.tsx";
 
 import { TicketPurchasedEmail } from "../_shared/emails/TicketPurchasedEmail.tsx";
+import { OrderPlacedEmail } from "../_shared/emails/OrderPlacedEmail.tsx";
+import { OrderConfirmedEmail } from "../_shared/emails/OrderConfirmedEmail.tsx";
 
 import { EventApprovedEmail } from "../_shared/emails/EventApprovedEmail.tsx";
 
@@ -230,6 +232,21 @@ Deno.serve(async (req) => {
                 case 'ticket_reserved_pending':
 
                     html = await renderAsync(React.createElement(TicketPurchasedEmail, templateData));
+
+                    break;
+
+                // Manual-order flow (pre-Phase 15). The same two templates will be
+                // reused by the payment webhook once Flutterwave lands.
+
+                case 'order_placed':
+
+                    html = await renderAsync(React.createElement(OrderPlacedEmail, templateData));
+
+                    break;
+
+                case 'order_confirmed':
+
+                    html = await renderAsync(React.createElement(OrderConfirmedEmail, templateData));
 
                     break;
 

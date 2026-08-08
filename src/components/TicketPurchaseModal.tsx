@@ -168,6 +168,8 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
 
                 payment_method: 'free',
 
+                total_amount: 0,  // free event — explicit rather than defaulted
+
                 confirmed_by_user: true,
 
             });
@@ -272,6 +274,12 @@ export const TicketPurchaseModal = ({ isOpen, onClose, event }: TicketPurchaseMo
                 payment_status: 'pending',
 
                 payment_method: 'manual',
+
+                // What the buyer actually owes. This was never persisted, so
+                // every paid registration in production carries total_amount = 0
+                // — the organizer could not see what to collect, and no revenue
+                // figure has ever been meaningful.
+                total_amount: totalPrice,
 
                 confirmed_by_user: true,
 

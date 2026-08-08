@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { paymentStatus, isStale, waitingFor } from '@/lib/orderStatus';
 import {
     Table,
     TableBody,
@@ -373,16 +374,16 @@ export const OrganizerRegistrationsPage = () => {
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant={
-                                                reg.payment_status === 'confirmed' ? 'default' : // Greenish handled by default variant? No, default is black.
-                                                    reg.payment_status === 'pending' ? 'outline' :
-                                                        reg.payment_status === 'rejected' ? 'destructive' : 'secondary'
-                                            } className={
-                                                reg.payment_status === 'confirmed' ? 'bg-green-100 text-green-800 hover:bg-green-200 border-none' :
-                                                    reg.payment_status === 'pending' ? 'bg-orange-100 text-orange-800 hover:bg-orange-200 border-orange-200' : ''
-                                            }>
-                                                {reg.payment_status.toUpperCase()}
-                                            </Badge>
+                                            {/* Shared vocabulary + monochrome, matching what the
+                                                attendee sees and the platform design rule. */}
+                                            <span className={`inline-flex text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${paymentStatus(reg.payment_status).badge}`}>
+                                                {paymentStatus(reg.payment_status).label}
+                                            </span>
+                                            {isStale(reg.created_at, reg.payment_status) && (
+                                                <div className="text-[11px] font-medium text-gray-900 mt-1">
+                                                    waiting {waitingFor(reg.created_at)}
+                                                </div>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             {reg.confirmed_by_user ? (

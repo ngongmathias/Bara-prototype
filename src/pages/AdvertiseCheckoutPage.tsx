@@ -42,6 +42,8 @@ import {
 
 import { Link, useNavigate } from 'react-router-dom';
 
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
+
 
 
 // Single source of truth for plan pricing. The plan cards and the order summary
@@ -64,6 +66,8 @@ const AdvertiseCheckoutPage = () => {
 
   const navigate = useNavigate();
 
+  const { getClient } = useAuthedSupabase();
+
   const [submitting, setSubmitting] = useState(false);
 
 
@@ -82,23 +86,48 @@ const AdvertiseCheckoutPage = () => {
 
     try {
 
-      // There is no payment processing yet (Phase 15). This submits an interest
-      // request that the team fulfils manually — the same honest model as
-      // BusinessPackagesPage. Do not claim the account has been upgraded.
+      // There is no payment processing yet (Phase 15). This records an interest
+      // request the team fulfils manually — the same model as BusinessPackagesPage.
+      //
+      // This used to persist NOTHING: a toast, a redirect, and the request was
+      // gone. Nobody was notified and there was no record to follow up on.
+
+      if (!user) {
+        toast({ title: "Please sign in", description: "You need an account so we can contact you.", variant: "destructive" });
+        navigate('/user/sign-in?redirect_url=' + encodeURIComponent('/advertise/checkout'));
+        return;
+      }
+
+      const authed = await getClient();
+      const { data, error } = await authed.rpc('advertising_request_submit', {
+        p_plan: PLANS[plan].label,
+        p_monthly_usd: PLANS[plan].monthly,
+        p_daily_budget: dailyBudget,
+        p_bid_per_click: bid,
+        p_contact_email: user.primaryEmailAddress?.emailAddress || null,
+        p_contact_phone: user.primaryPhoneNumber?.phoneNumber || null,
+        p_note: null,
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Could not submit your request.');
 
       toast({
 
-        title: "Request received",
+        title: data.already_requested ? "You've already requested this" : "Request received",
 
-        description: "No payment has been taken. Our team will contact you to arrange payment and collect your banner assets.",
+        description: data.already_requested
+          ? "We already have your request and will be in touch shortly."
+          : "No payment has been taken. Our team will contact you to arrange payment and collect your banner assets.",
 
       });
 
       setTimeout(() => navigate('/users/dashboard'), 2000);
 
-    } catch (error) {
+    } catch (error: any) {
 
-      toast({ title: "Error", description: "Failed to process request.", variant: "destructive" });
+      console.error('Advertising request error:', error);
+      toast({ title: "Error", description: error?.message || "Failed to submit request.", variant: "destructive" });
 
     } finally {
 

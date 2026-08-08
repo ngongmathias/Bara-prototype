@@ -5,17 +5,13 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { useUser } from '@clerk/clerk-react';
-import { ShoppingBag, Eye, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { ShoppingBag, Eye, XCircle, Loader2, Phone, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { primaryStatus, isStale, waitingFor } from '@/lib/orderStatus';
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
-  pending_seller: { label: 'Awaiting Seller', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  confirmed: { label: 'Confirmed', color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
-  completed: { label: 'Completed', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-  cancelled_buyer: { label: 'Cancelled by You', color: 'bg-gray-100 text-gray-600', icon: XCircle },
-  cancelled_seller: { label: 'Declined by Seller', color: 'bg-red-100 text-red-700', icon: XCircle },
-  expired: { label: 'Expired', color: 'bg-gray-100 text-gray-500', icon: Clock },
-};
+// Status labels/colours now come from src/lib/orderStatus.ts so the buyer and
+// the seller read the same words for the same order. They used to be two
+// separate maps that had drifted apart.
 
 export const MyPurchases = () => {
   const navigate = useNavigate();
@@ -36,7 +32,7 @@ export const MyPurchases = () => {
       .from('marketplace_transactions')
       .select(`
         *,
-        listing:marketplace_listings(id, title, price, currency, marketplace_listing_images(image_url, is_primary)),
+        listing:marketplace_listings(id, title, price, currency, seller_name, seller_phone, seller_whatsapp, marketplace_listing_images(image_url, is_primary)),
         variant:marketplace_listing_variants(id, label)
       `)
       .eq('buyer_user_id', user.id)
@@ -103,8 +99,14 @@ export const MyPurchases = () => {
                 const img = tx.listing?.marketplace_listing_images?.find((i: any) => i.is_primary)?.image_url
                   || tx.listing?.marketplace_listing_images?.[0]?.image_url
                   || '/placeholder.jpg';
-                const statusCfg = STATUS_CONFIG[tx.status] || STATUS_CONFIG.pending_seller;
-                const StatusIcon = statusCfg.icon;
+                const status = primaryStatus(tx.status, tx.payment_status);
+                const stale = isStale(tx.created_at, tx.payment_status);
+                const phone = tx.listing?.seller_whatsapp || tx.listing?.seller_phone;
+                const waLink = phone
+                  ? `https://wa.me/${String(phone).replace(/[^\d]/g, '')}?text=${encodeURIComponent(
+                      `Hi, I reserved "${tx.listing?.title}" on BARA. How would you like to arrange payment?`
+                    )}`
+                  : null;
 
                 return (
                   <div key={tx.id} className="border border-gray-200 rounded-lg p-4 flex gap-4">
@@ -123,18 +125,46 @@ export const MyPurchases = () => {
                             <p className="text-xs text-gray-500">{tx.variant.label}</p>
                           )}
                         </div>
-                        <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${statusCfg.color}`}>
-                          <StatusIcon className="w-3 h-3" /> {statusCfg.label}
+                        <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${status.badge}`}>
+                          {status.label}
                         </span>
                       </div>
-                      <div className="text-blue-600 font-bold mt-1">
+                      <div className="text-gray-900 font-bold mt-1">
                         {tx.currency} {parseFloat(tx.amount).toLocaleString()}
                         {tx.quantity > 1 && <span className="text-sm font-normal text-gray-500"> × {tx.quantity}</span>}
                       </div>
+
+                      {/* What happens next, in a sentence. Without this, "Awaiting
+                          payment" leaves the buyer with no idea whose move it is. */}
+                      <p className="text-xs text-gray-600 mt-2">{status.buyerNextStep}</p>
+                      {stale && (
+                        <p className="text-xs font-medium text-gray-900 mt-1">
+                          Reserved {waitingFor(tx.created_at)} ago. If the seller hasn't replied, try contacting them again or cancel.
+                        </p>
+                      )}
+
                       <div className="text-xs text-gray-400 mt-1">
                         {new Date(tx.created_at).toLocaleDateString()}
                       </div>
-                      <div className="flex gap-2 mt-3">
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {waLink && tx.payment_status === 'pending' && (
+                          <a
+                            href={waLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center h-8 px-3 rounded-md bg-black hover:bg-gray-800 text-white text-xs font-semibold transition-colors"
+                          >
+                            <MessageCircle className="w-3 h-3 mr-1" /> Message seller
+                          </a>
+                        )}
+                        {!waLink && tx.listing?.seller_phone && tx.payment_status === 'pending' && (
+                          <a
+                            href={`tel:${tx.listing.seller_phone}`}
+                            className="inline-flex items-center h-8 px-3 rounded-md border border-gray-300 hover:bg-gray-50 text-gray-800 text-xs font-medium transition-colors"
+                          >
+                            <Phone className="w-3 h-3 mr-1" /> {tx.listing.seller_phone}
+                          </a>
+                        )}
                         <Button
                           size="sm"
                           variant="outline"
