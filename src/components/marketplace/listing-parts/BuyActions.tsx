@@ -117,13 +117,17 @@ export const BuyActions: React.FC<BuyActionsProps> = ({
         )}
 
         <div className="space-y-2">
+          {/* "Reserve", not "Buy Now": no money changes hands on BARA yet, and the
+              modal this opens says as much. Promising a purchase and then asking
+              the buyer to arrange payment themselves is the mismatch that made the
+              old flow feel broken. */}
           {buyable && (
             <Button
               onClick={handleBuyNow}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold h-12"
+              className="w-full bg-black hover:bg-gray-800 text-white font-semibold h-12"
             >
               <CheckCircle className="w-5 h-5 mr-2" />
-              Buy Now
+              Reserve
             </Button>
           )}
           {cartable && (

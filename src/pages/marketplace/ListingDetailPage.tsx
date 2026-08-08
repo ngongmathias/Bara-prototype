@@ -706,10 +706,10 @@ export const ListingDetailPage = () => {
                 {listing.status === 'active' && listing.created_by !== user?.id && (
                   <Button
                     onClick={() => setShowBuyNow(true)}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold h-12"
+                    className="w-full bg-black hover:bg-gray-800 text-white font-semibold h-12"
                   >
                     <CheckCircle className="w-5 h-5 mr-2" />
-                    Buy Now
+                    Reserve
                   </Button>
                 )}
 

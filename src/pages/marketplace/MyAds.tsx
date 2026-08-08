@@ -10,11 +10,14 @@ import { useToast } from '@/hooks/use-toast';
 import { getSoldLabel, getMarkAsSoldLabel } from '@/config/categoryFieldConfigs';
 import { GamificationService } from '@/lib/gamificationService';
 import { VerifyNudge } from '@/components/VerifyNudge';
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
+import { primaryStatus, isStale, waitingFor } from '@/lib/orderStatus';
 
 export const MyAds = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { toast } = useToast();
+  const { getClient } = useAuthedSupabase();
   const [ads, setAds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
@@ -150,6 +153,30 @@ export const MyAds = () => {
         }
       }
     }
+  };
+
+  // Payment is a separate axis from fulfilment: `status` tracks handover,
+  // `payment_status` tracks whether the money arrived. Sellers settle by MoMo or
+  // cash today and confirm it here; when Phase 15 lands, the Flutterwave webhook
+  // calls this same RPC and the seller stops having to.
+  const markPaymentReceived = async (txId: string) => {
+    const authed = await getClient();
+    const { data, error } = await authed.rpc('marketplace_order_set_payment', {
+      p_transaction_id: txId,
+      p_payment_status: 'confirmed',
+      p_reference: null,
+    });
+
+    if (error || !data?.success) {
+      toast({
+        title: 'Could not update',
+        description: error?.message || 'You may not have permission to update this order.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    toast({ title: 'Marked as paid', description: 'The buyer has been notified.' });
+    fetchSellerTransactions();
   };
 
   const markAsSold = async (adId: string) => {
@@ -417,7 +444,7 @@ export const MyAds = () => {
                 <div className="text-center py-16 border border-dashed border-gray-200 rounded-lg">
                   <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500 text-lg">No purchase requests yet</p>
-                  <p className="text-gray-400 text-sm mt-1">When buyers click "Buy Now" on your ads, they'll appear here.</p>
+                  <p className="text-gray-400 text-sm mt-1">When someone reserves one of your ads, it appears here and we email you.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -425,22 +452,12 @@ export const MyAds = () => {
                     const img = tx.listing?.marketplace_listing_images?.find((i: any) => i.is_primary)?.image_url
                       || tx.listing?.marketplace_listing_images?.[0]?.image_url
                       || '/placeholder.jpg';
-                    const statusColors: Record<string, string> = {
-                      pending_seller: 'bg-yellow-100 text-yellow-800',
-                      confirmed: 'bg-blue-100 text-blue-800',
-                      completed: 'bg-green-100 text-green-800',
-                      cancelled_buyer: 'bg-gray-100 text-gray-600',
-                      cancelled_seller: 'bg-red-100 text-red-700',
-                      expired: 'bg-gray-100 text-gray-500',
-                    };
-                    const statusLabels: Record<string, string> = {
-                      pending_seller: 'Awaiting Your Response',
-                      confirmed: 'Confirmed',
-                      completed: 'Completed',
-                      cancelled_buyer: 'Buyer Cancelled',
-                      cancelled_seller: 'You Declined',
-                      expired: 'Expired',
-                    };
+                    // Shared vocabulary — the same words and badges the buyer
+                    // sees in My Purchases. These used to be two divergent maps.
+                    const status = primaryStatus(tx.status, tx.payment_status);
+                    const stale = isStale(tx.created_at, tx.payment_status);
+                    const awaitingPayment = tx.payment_status === 'pending'
+                      && !['completed', 'cancelled_buyer', 'cancelled_seller', 'expired'].includes(tx.status);
 
                     return (
                       <div key={tx.id} className="border border-gray-200 rounded-lg p-4 flex gap-4">
@@ -448,34 +465,44 @@ export const MyAds = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <h3 className="font-semibold text-gray-900 truncate text-sm">{tx.listing?.title}</h3>
-                            <span className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${statusColors[tx.status] || ''}`}>
-                              {statusLabels[tx.status] || tx.status}
+                            <span className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${status.badge}`}>
+                              {status.label}
                             </span>
                           </div>
                           {tx.variant?.label && <p className="text-xs text-gray-500">{tx.variant.label}</p>}
-                          <div className="text-blue-600 font-bold text-sm mt-1">
+                          <div className="text-gray-900 font-bold text-sm mt-1">
                             {tx.currency} {parseFloat(tx.amount).toLocaleString()}
                             {tx.quantity > 1 && <span className="text-gray-500 font-normal"> × {tx.quantity}</span>}
                           </div>
                           {tx.buyer_message && (
                             <p className="text-xs text-gray-600 mt-1 bg-gray-50 rounded p-2">"{tx.buyer_message}"</p>
                           )}
+
+                          {/* What to do now — the part that was missing. A status
+                              alone doesn't tell a seller they're holding someone up. */}
+                          <p className="text-xs text-gray-600 mt-2">{status.ownerNextStep}</p>
+                          {stale && (
+                            <p className="text-xs font-medium text-gray-900 mt-1">
+                              Waiting {waitingFor(tx.created_at)} — the buyer still hasn't heard back.
+                            </p>
+                          )}
+
                           <p className="text-xs text-gray-400 mt-1">{new Date(tx.created_at).toLocaleDateString()}</p>
 
                           {/* Seller action buttons */}
-                          <div className="flex gap-2 mt-3">
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            {awaitingPayment && (
+                              <Button size="sm" className="bg-black hover:bg-gray-800 text-white" onClick={() => markPaymentReceived(tx.id)}>
+                                <CheckCircle className="w-3 h-3 mr-1" /> Mark as paid
+                              </Button>
+                            )}
                             {tx.status === 'pending_seller' && (
-                              <>
-                                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => updateTransaction(tx.id, 'confirmed')}>
-                                  <CheckCircle className="w-3 h-3 mr-1" /> Confirm
-                                </Button>
-                                <Button size="sm" variant="outline" className="text-red-600" onClick={() => updateTransaction(tx.id, 'cancelled_seller')}>
-                                  <XCircle className="w-3 h-3 mr-1" /> Decline
-                                </Button>
-                              </>
+                              <Button size="sm" variant="outline" className="text-gray-700" onClick={() => updateTransaction(tx.id, 'cancelled_seller')}>
+                                <XCircle className="w-3 h-3 mr-1" /> Decline
+                              </Button>
                             )}
                             {tx.status === 'confirmed' && (
-                              <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => updateTransaction(tx.id, 'completed')}>
+                              <Button size="sm" variant="outline" onClick={() => updateTransaction(tx.id, 'completed')}>
                                 <CheckCircle className="w-3 h-3 mr-1" /> Mark Complete
                               </Button>
                             )}
