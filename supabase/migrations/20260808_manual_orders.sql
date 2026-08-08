@@ -440,12 +440,17 @@ GRANT EXECUTE ON FUNCTION public.advertising_request_submit(TEXT, NUMERIC, NUMER
 GRANT EXECUTE ON FUNCTION public.clerk_user_id()  TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.is_active_admin() TO anon, authenticated;
 
--- Deliberately NOT granted to anon: every one of these acts on behalf of a
+-- Deliberately NOT callable by anon: every one of these acts on behalf of a
 -- signed-in person, and identity comes from the JWT. An anon caller has no
 -- 'sub' claim and would only ever get 'not_signed_in' back.
-REVOKE EXECUTE ON FUNCTION public.marketplace_reserve(UUID, UUID, INTEGER, TEXT)  FROM anon;
-REVOKE EXECUTE ON FUNCTION public.marketplace_order_set_payment(UUID, TEXT, TEXT) FROM anon;
-REVOKE EXECUTE ON FUNCTION public.advertising_request_submit(TEXT, NUMERIC, NUMERIC, NUMERIC, TEXT, TEXT, TEXT) FROM anon;
+--
+-- NOTE: revoking FROM PUBLIC is the part that matters. Postgres grants EXECUTE
+-- on every new function to PUBLIC by default and anon inherits it from there,
+-- so "REVOKE ... FROM anon" alone is a silent no-op — verified live against this
+-- very migration. See 20260808_manual_orders_revoke_fix.sql.
+REVOKE EXECUTE ON FUNCTION public.marketplace_reserve(UUID, UUID, INTEGER, TEXT)  FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.marketplace_order_set_payment(UUID, TEXT, TEXT) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.advertising_request_submit(TEXT, NUMERIC, NUMERIC, NUMERIC, TEXT, TEXT, TEXT) FROM PUBLIC, anon;
 
 -- Close the browser-side INSERT path that BuyNowModal used to use; reservations
 -- now only happen through marketplace_reserve above.
