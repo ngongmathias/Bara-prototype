@@ -644,7 +644,9 @@ export const UserDashboard = () => {
 
                 <p className="text-xs text-gray-600 mb-3">
 
-                  No ads, unlimited listings, analytics, and 100 bonus Bara Coins every month.
+                  {/* The "100 bonus Bara Coins every month" line was dropped — no
+                      membership system grants them. See PricingPage. */}
+                  No ads, unlimited listings and analytics. Free while we launch.
 
                 </p>
 

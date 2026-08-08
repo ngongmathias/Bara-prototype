@@ -44,6 +44,18 @@ import { Link, useNavigate } from 'react-router-dom';
 
 
 
+// Single source of truth for plan pricing. The plan cards and the order summary
+// used to carry their own hardcoded numbers and had drifted apart — the cards
+// advertised $5/$20 while the summary charged $19/$79 for the same selection.
+const PLANS = {
+  pro: { label: 'Bara Pro', monthly: 5 },
+  elite: { label: 'Bara Elite', monthly: 20 },
+} as const;
+
+type PlanId = keyof typeof PLANS;
+
+const formatUsd = (amount: number) => amount.toFixed(2);
+
 const AdvertiseCheckoutPage = () => {
 
   const { user } = useUser();
@@ -56,7 +68,7 @@ const AdvertiseCheckoutPage = () => {
 
 
 
-  const [plan, setPlan] = useState<'pro' | 'elite'>('pro');
+  const [plan, setPlan] = useState<PlanId>('pro');
 
   const [bid, setBid] = useState(0.25);
 
@@ -70,15 +82,15 @@ const AdvertiseCheckoutPage = () => {
 
     try {
 
-      // In a real app, this would trigger a payment gateway
-
-      // For the prototype, we simulate a successful onboarding
+      // There is no payment processing yet (Phase 15). This submits an interest
+      // request that the team fulfils manually — the same honest model as
+      // BusinessPackagesPage. Do not claim the account has been upgraded.
 
       toast({
 
-        title: "Welcome to Bara Prime!",
+        title: "Request received",
 
-        description: "Your account is being upgraded. Our team will contact you for banner creative assets.",
+        description: "No payment has been taken. Our team will contact you to arrange payment and collect your banner assets.",
 
       });
 
@@ -150,15 +162,15 @@ const AdvertiseCheckoutPage = () => {
 
                       onClick={() => setPlan('pro')}
 
-                      className={`p-6 rounded-2xl border-2 text-left transition-all ${plan === 'pro' ? 'border-blue-600 bg-blue-50/50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                      className={`p-6 rounded-2xl border-2 text-left transition-all ${plan === 'pro' ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
 
                     >
 
-                      <Crown className={`mb-3 ${plan === 'pro' ? 'text-blue-600' : 'text-gray-400'}`} />
+                      <Crown className={`mb-3 ${plan === 'pro' ? 'text-gray-900' : 'text-gray-400'}`} />
 
                       <div className="font-bold text-lg">Bara Pro</div>
 
-                      <div className="text-xl font-black text-blue-600">$5/mo</div>
+                      <div className="text-xl font-black text-gray-900">${PLANS.pro.monthly}/mo</div>
 
                     </button>
 
@@ -166,15 +178,15 @@ const AdvertiseCheckoutPage = () => {
 
                       onClick={() => setPlan('elite')}
 
-                      className={`p-6 rounded-2xl border-2 text-left transition-all ${plan === 'elite' ? 'border-yellow-500 bg-yellow-50/50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                      className={`p-6 rounded-2xl border-2 text-left transition-all ${plan === 'elite' ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
 
                     >
 
-                      <Zap className={`mb-3 ${plan === 'elite' ? 'text-yellow-500' : 'text-gray-400'}`} />
+                      <Zap className={`mb-3 ${plan === 'elite' ? 'text-gray-900' : 'text-gray-400'}`} />
 
                       <div className="font-bold text-lg">Bara Elite</div>
 
-                      <div className="text-xl font-black text-yellow-600">$20/mo</div>
+                      <div className="text-xl font-black text-gray-900">${PLANS.elite.monthly}/mo</div>
 
                     </button>
 
@@ -192,7 +204,7 @@ const AdvertiseCheckoutPage = () => {
 
                     <Label className="text-xs font-black uppercase tracking-widest text-gray-400">Auction Bidding</Label>
 
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                    <div className="flex items-center gap-1 text-[10px] font-bold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">
 
                       <MousePointer2 size={10} />
 
@@ -292,9 +304,9 @@ const AdvertiseCheckoutPage = () => {
 
                 <div className="flex justify-between items-center">
 
-                  <span className="text-gray-400 text-sm">{plan === 'pro' ? 'Bara Pro' : 'Bara Elite'}</span>
+                  <span className="text-gray-400 text-sm">{PLANS[plan].label}</span>
 
-                  <span className="font-bold">${plan === 'pro' ? '19.00' : '79.00'}</span>
+                  <span className="font-bold">${formatUsd(PLANS[plan].monthly)}/mo</span>
 
                 </div>
 
@@ -310,7 +322,7 @@ const AdvertiseCheckoutPage = () => {
 
                   <span className="font-bold">Total Now</span>
 
-                  <span className="text-3xl font-black text-blue-500">${plan === 'pro' ? '19.00' : '79.00'}</span>
+                  <span className="text-3xl font-black text-white">${formatUsd(PLANS[plan].monthly)}</span>
 
                 </div>
 
@@ -324,21 +336,25 @@ const AdvertiseCheckoutPage = () => {
 
                 disabled={submitting}
 
-                className="w-full h-14 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-lg flex items-center justify-center gap-2"
+                className="w-full h-14 bg-white hover:bg-gray-100 text-black font-bold rounded-xl text-lg flex items-center justify-center gap-2"
 
               >
 
                 {submitting ? <Loader2 className="animate-spin" /> : <CheckCircle size={20} />}
 
-                {submitting ? 'Processing...' : 'Secure Upgrade'}
+                {submitting ? 'Sending…' : 'Request this plan'}
 
               </Button>
 
 
 
-              <p className="mt-4 text-[10px] text-center text-gray-500 uppercase font-bold tracking-widest">
+              {/* Online payment does not exist yet (Phase 15). Say so here rather
+                  than only in the toast after the click — the user should know
+                  before they commit, not after. */}
+              <p className="mt-4 text-xs text-center text-gray-400 leading-relaxed">
 
-                Instant ROI tracking enabled
+                No payment is taken now. Requesting a plan sends your details to our
+                team, who will contact you to arrange payment.
 
               </p>
 
@@ -346,17 +362,21 @@ const AdvertiseCheckoutPage = () => {
 
 
 
+            {/* The "500 Welcome Coins on upgrade" offer that used to sit here was
+                never backed by anything — there is no membership system to trigger
+                it, so nobody has ever received them. Replaced with how coins
+                actually work today, which is by earning them. */}
             <div className="p-6 bg-white rounded-2xl border border-gray-100 space-y-4">
 
               <div className="flex gap-4 items-center">
 
-                <div className="p-2 bg-yellow-50 text-yellow-600 rounded-lg"><Coins size={20} /></div>
+                <div className="p-2 bg-gray-100 text-gray-700 rounded-lg"><Coins size={20} /></div>
 
                 <div>
 
                   <div className="text-sm font-bold">Earn as you go</div>
 
-                  <p className="text-[10px] text-gray-500 uppercase tracking-widest font-black">Bara Points Engine</p>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-widest font-black">Bara Coins</p>
 
                 </div>
 
@@ -364,7 +384,10 @@ const AdvertiseCheckoutPage = () => {
 
               <p className="text-xs text-gray-600 leading-relaxed">
 
-                Get <span className="text-blue-600 font-bold">500 Welcome Coins</span> when you upgrade to Pro today! Use them for marketplace boosts.
+                Bara Coins are earned by using the platform — daily missions, streaks
+                and achievements — and spent on marketplace boosts and perks.{' '}
+
+                <Link to="/rewards" className="font-bold text-gray-900 underline underline-offset-2">See how it works</Link>.
 
               </p>
 
