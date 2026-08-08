@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AdminPageGuide } from '@/components/admin/AdminPageGuide';
+import { AdminWorkQueue } from '@/components/admin/AdminWorkQueue';
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -505,6 +506,12 @@ export const AdminDashboard = () => {
           <RefreshCw className={cn("w-4 h-4 mr-2", refreshing && "animate-spin")} />
           Refresh Data
         </Button>
+      </div>
+
+      {/* What needs a human, first — before the metrics. Counts are interesting;
+          queues are actionable, and previously nothing surfaced them at all. */}
+      <div className="mb-8">
+        <AdminWorkQueue />
       </div>
 
       {/* Main Stats Cards */}

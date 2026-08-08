@@ -3,13 +3,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { AdminSidebar } from "./AdminSidebar";
 import { Button } from "@/components/ui/button";
-import { 
-  Menu, 
+import {
+  Menu,
   User,
   LogOut,
-  Settings
+  Settings,
+  Search
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { AdminCommandPalette } from "./AdminCommandPalette";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -94,6 +96,10 @@ export const AdminLayout = ({ children, title, subtitle }: AdminLayoutProps) => 
 
   return (
     <div className="h-full bg-gray-50 flex w-full">
+      {/* ⌘K from anywhere in the console. Mounted here rather than per-page so
+          every admin route gets it. */}
+      <AdminCommandPalette />
+
       {/* Sidebar */}
       <AdminSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
@@ -125,6 +131,22 @@ export const AdminLayout = ({ children, title, subtitle }: AdminLayoutProps) => 
 
             {/* Header actions */}
             <div className="flex items-center space-x-4">
+              {/* Discoverability for ⌘K — a shortcut nobody knows about isn't a
+                  feature. Clickable too, so it works without the keyboard. */}
+              <button
+                onClick={() => document.dispatchEvent(
+                  new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
+                )}
+                className="hidden md:flex items-center gap-2 px-3 h-9 rounded-md border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+                aria-label="Search admin pages"
+              >
+                <Search className="w-4 h-4" />
+                <span>Search pages</span>
+                <kbd className="ml-1 text-[10px] font-sans font-semibold text-gray-400 border border-gray-200 rounded px-1.5 py-0.5">
+                  ⌘K
+                </kbd>
+              </button>
+
               {/* User menu */}
               <div className="relative group">
                 <Button variant="ghost" size="sm" className="flex items-center space-x-2 hover:bg-gray-100">
