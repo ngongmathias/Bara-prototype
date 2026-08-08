@@ -15,7 +15,7 @@ import { useAdminWorkQueue } from '@/hooks/useAdminWorkQueue';
  * eight "0"s is noise, and the point is that a non-empty queue stands out.
  */
 export const AdminWorkQueue = () => {
-  const { items, loading, actionable, refresh } = useAdminWorkQueue();
+  const { items, loading, actionable, adminIdMismatch, refresh } = useAdminWorkQueue();
 
   if (loading) {
     return <Skeleton className="h-40 w-full rounded-xl" />;
@@ -50,7 +50,29 @@ export const AdminWorkQueue = () => {
       </CardHeader>
 
       <CardContent>
-        {waiting.length === 0 ? (
+        {/* The console's own guard matches on email, but every SQL-side gate
+            matches on user_id. When those disagree the UI looks completely
+            normal while privileged calls silently fail — worth shouting about,
+            because the failure mode is invisible. */}
+        {adminIdMismatch && (
+          <div className="mb-4 rounded-lg border border-gray-300 bg-gray-50 px-4 py-3">
+            <p className="text-sm font-semibold text-gray-900 mb-1">
+              Your admin record doesn't match this sign-in
+            </p>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              You can open the console, but the database doesn't recognise this account
+              as an admin, so moderation queues, economy settings and audit logging will
+              all silently refuse. This usually means the <code>admin_users</code> row
+              still holds a Clerk ID from before the production migration.
+            </p>
+          </div>
+        )}
+
+        {waiting.length === 0 && unreadable.length === items.length ? (
+          <div className="py-4 text-sm text-gray-600">
+            Couldn't check any queue — see above.
+          </div>
+        ) : waiting.length === 0 ? (
           <div className="flex items-center gap-2 py-4 text-sm text-gray-600">
             <Check className="w-4 h-4 text-gray-400" />
             Nothing is waiting on you right now.

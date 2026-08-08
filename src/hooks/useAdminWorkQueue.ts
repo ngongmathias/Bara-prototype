@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
-import { supabase } from '@/lib/supabase';
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
 import { STALE_AFTER_DAYS } from '@/lib/orderStatus';
 
 /**
@@ -12,15 +12,24 @@ import { STALE_AFTER_DAYS } from '@/lib/orderStatus';
  * model needs this to exist at all: "someone will action it" is only true if
  * someone can see it.
  *
- * Each queue is fetched independently and failures are swallowed per-queue: a
- * locked-down table or a missing migration should grey out one row, never blank
- * the dashboard.
+ * Two things this deliberately gets right, because the naive version is worse
+ * than useless:
+ *
+ * 1. **Everything uses the authenticated client.** `artist_claims` is granted to
+ *    `authenticated` only, and `marketplace_transactions` RLS keys on the JWT's
+ *    `sub`. Queried with the plain anon client they return "0" rather than an
+ *    error — a silent false all-clear.
+ * 2. **Admin identity is checked up front.** The `*_admin_list` RPCs return an
+ *    empty set (not an error) when the caller isn't a recognised admin, so a
+ *    denied caller would otherwise read as "nothing pending". If the signed-in
+ *    Clerk id has no `admin_users` row, those queues report as unreadable
+ *    instead of empty.
  */
 
 export interface WorkQueueItem {
   key: string;
   label: string;
-  /** Null means the count couldn't be read (permissions, missing table). */
+  /** Null means the count couldn't be read — never render this as zero. */
   count: number | null;
   href: string;
   /** Waiting on an outside party rather than on us. */
@@ -32,14 +41,18 @@ const staleCutoffIso = () =>
 
 export function useAdminWorkQueue() {
   const { user } = useUser();
+  const { getClient } = useAuthedSupabase();
   const [items, setItems] = useState<WorkQueueItem[]>([]);
   const [loading, setLoading] = useState(true);
+  /**
+   * True when the signed-in Clerk id has no active `admin_users` row. The admin
+   * UI guard matches on email, but every SQL-side gate matches on user_id — so
+   * these can disagree, and when they do the console looks fine while every
+   * privileged call silently fails.
+   */
+  const [adminIdMismatch, setAdminIdMismatch] = useState(false);
 
   const fetchQueue = useCallback(async () => {
-    // No signed-in user means the admin-gated RPCs can't be called. Clear the
-    // loading flag rather than returning early — otherwise the card renders a
-    // skeleton forever, which is what happens on any transient null user (and
-    // in the local VITE_ADMIN_PREVIEW mode, where Clerk never initialises).
     if (!user) {
       setItems([]);
       setLoading(false);
@@ -47,7 +60,23 @@ export function useAdminWorkQueue() {
     }
     setLoading(true);
 
-    // Counting a table directly, returning null rather than throwing.
+    const authed = await getClient();
+
+    // Does the SQL side actually recognise this person as an admin?
+    let isRecognisedAdmin = false;
+    try {
+      const { data } = await authed
+        .from('admin_users')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .maybeSingle();
+      isRecognisedAdmin = !!data;
+    } catch {
+      isRecognisedAdmin = false;
+    }
+    setAdminIdMismatch(!isRecognisedAdmin);
+
     const countWhere = async (
       table: string,
       column: string,
@@ -55,7 +84,7 @@ export function useAdminWorkQueue() {
       olderThan?: string
     ): Promise<number | null> => {
       try {
-        let q = supabase.from(table).select('id', { count: 'exact', head: true }).eq(column, value);
+        let q = authed.from(table).select('id', { count: 'exact', head: true }).eq(column, value);
         if (olderThan) q = q.lt('created_at', olderThan);
         const { count, error } = await q;
         return error ? null : count ?? 0;
@@ -64,18 +93,13 @@ export function useAdminWorkQueue() {
       }
     };
 
-    // verification_requests and content_reports have no direct grants by design
-    // (RPC-only, like the rest of the moderation surface), so they're counted
-    // through their admin RPCs. Both gate on admin_users using the p_admin_id
-    // argument rather than the JWT, so the plain client is enough — and both
-    // accept p_status, so the filtering happens in the database rather than by
-    // pulling every row back to count a subset.
+    // These RPCs gate on admin_users via p_admin_id and RETURN an empty set when
+    // denied, so a zero from them is ambiguous. Only trust it if we know the
+    // caller is a recognised admin.
     const countViaRpc = async (fn: string): Promise<number | null> => {
+      if (!isRecognisedAdmin) return null;
       try {
-        const { data, error } = await supabase.rpc(fn, {
-          p_admin_id: user.id,
-          p_status: 'pending',
-        });
+        const { data, error } = await authed.rpc(fn, { p_admin_id: user.id, p_status: 'pending' });
         if (error || !Array.isArray(data)) return null;
         return data.length;
       } catch {
@@ -112,8 +136,8 @@ export function useAdminWorkQueue() {
       { key: 'contact-messages', label: 'Unread messages', count: contactMessages, href: '/admin/contact-messages' },
       { key: 'packages', label: 'Package requests awaiting payment', count: packageRequests, href: '/admin/packages' },
       { key: 'advertising', label: 'Advertising requests awaiting payment', count: adRequests, href: '/admin/packages' },
-      // These two are waiting on a seller or organizer, not on the team — shown
-      // so nothing rots unnoticed, but not counted as admin to-dos.
+      // Waiting on a seller or organizer, not on the team — shown so nothing
+      // rots unnoticed, but not counted as admin to-dos.
       { key: 'stale-orders', label: `Marketplace orders unpaid over ${STALE_AFTER_DAYS} days`, count: staleOrders, href: '/admin/marketplace', informational: true },
       { key: 'stale-registrations', label: `Event registrations unconfirmed over ${STALE_AFTER_DAYS} days`, count: staleRegistrations, href: '/admin/events', informational: true },
     ]);
@@ -128,5 +152,5 @@ export function useAdminWorkQueue() {
     .filter((i) => !i.informational)
     .reduce((sum, i) => sum + (i.count ?? 0), 0);
 
-  return { items, loading, actionable, refresh: fetchQueue };
+  return { items, loading, actionable, adminIdMismatch, refresh: fetchQueue };
 }
