@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useClerk, useUser } from '@clerk/clerk-react';
 import { ClerkSupabaseBridge } from '@/lib/clerkSupabaseBridge';
 import { supabase } from '@/lib/supabase';
+import { safeRedirect } from '@/lib/safeRedirect';
 
 export const AuthFinishPage = () => {
   const location = useLocation();
@@ -17,7 +18,9 @@ export const AuthFinishPage = () => {
 
     const params = new URLSearchParams(location.search);
     const mode = params.get('mode');
-    const redirectUrl = params.get('redirect_url') || '/';
+    // Sanitised at the point of use: this value ends up in navigate() below,
+    // and it comes from a URL anyone can craft and send to a user.
+    const redirectUrl = safeRedirect(params.get('redirect_url'));
 
     if (!isSignedIn || !user) {
       if (mode === 'sign_up') navigate(`/user/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`);

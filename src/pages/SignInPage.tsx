@@ -1,12 +1,13 @@
 import { SignIn } from '@clerk/clerk-react';
 import { useLocation } from 'react-router-dom';
 import { useMemo } from 'react';
+import { safeRedirect } from '@/lib/safeRedirect';
 
 export const SignInPage = () => {
   const location = useLocation();
   const finishUrl = useMemo(() => {
     const searchParams = new URLSearchParams(location.search);
-    const redirectUrl = searchParams.get('redirect_url') || '/admin';
+    const redirectUrl = safeRedirect(searchParams.get('redirect_url'), '/admin');
     return `/auth/finish?mode=sign_in&redirect_url=${encodeURIComponent(redirectUrl)}`;
   }, [location.search]);
 
