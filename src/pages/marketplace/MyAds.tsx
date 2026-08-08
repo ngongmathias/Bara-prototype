@@ -101,10 +101,15 @@ export const MyAds = () => {
     }
   };
 
+  // marketplace_transactions' RLS matches seller_user_id against the JWT's
+  // `sub` claim, so every query here needs the authenticated client. The plain
+  // anon client carries no `sub`, so the policy matches nothing and a seller
+  // sees an empty Orders tab while real orders sit in the table.
   const fetchSellerTransactions = async () => {
     if (!user) return;
     setTxLoading(true);
-    const { data } = await supabase
+    const authed = await getClient();
+    const { data } = await authed
       .from('marketplace_transactions')
       .select(`
         *,
@@ -126,7 +131,8 @@ export const MyAds = () => {
     if (status === 'confirmed') updates.confirmed_at = new Date().toISOString();
     if (status === 'completed') updates.completed_at = new Date().toISOString();
 
-    const { error } = await supabase
+    const authed = await getClient();
+    const { error } = await authed
       .from('marketplace_transactions')
       .update(updates)
       .eq('id', txId);
@@ -140,7 +146,7 @@ export const MyAds = () => {
       // Top Seller: awarded at 10 completed sales (idempotent)
       if (status === 'completed' && user?.id) {
         try {
-          const { count } = await supabase
+          const { count } = await authed
             .from('marketplace_transactions')
             .select('id', { count: 'exact', head: true })
             .eq('seller_user_id', user.id)

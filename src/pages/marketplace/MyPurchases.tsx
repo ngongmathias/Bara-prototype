@@ -8,6 +8,7 @@ import { useUser } from '@clerk/clerk-react';
 import { ShoppingBag, Eye, XCircle, Loader2, Phone, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { primaryStatus, isStale, waitingFor } from '@/lib/orderStatus';
+import { useAuthedSupabase } from '@/hooks/useAuthedSupabase';
 
 // Status labels/colours now come from src/lib/orderStatus.ts so the buyer and
 // the seller read the same words for the same order. They used to be two
@@ -17,6 +18,7 @@ export const MyPurchases = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { toast } = useToast();
+  const { getClient } = useAuthedSupabase();
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,10 +27,16 @@ export const MyPurchases = () => {
     fetchPurchases();
   }, [user?.id]);
 
+  // marketplace_transactions' RLS matches buyer_user_id against the JWT's `sub`
+  // claim, so these queries MUST use the authenticated client. With the plain
+  // anon client there is no `sub`, the policy matches nothing, and the buyer is
+  // told "No purchases yet" while their order sits in the table. Verified on
+  // production: a real reservation was invisible here until this was fixed.
   const fetchPurchases = async () => {
     if (!user) return;
     setLoading(true);
-    const { data, error } = await supabase
+    const authed = await getClient();
+    const { data, error } = await authed
       .from('marketplace_transactions')
       .select(`
         *,
@@ -44,7 +52,8 @@ export const MyPurchases = () => {
   };
 
   const cancelPurchase = async (txId: string) => {
-    const { error } = await supabase
+    const authed = await getClient();
+    const { error } = await authed
       .from('marketplace_transactions')
       .update({ status: 'cancelled_buyer', updated_at: new Date().toISOString() })
       .eq('id', txId)
